@@ -15,7 +15,7 @@ The input will be either a single FTR file or a folder with multiple FTR files.
 - Keep any constants defined outside test cases and hooks in their original location
 - Remove all non-Scout imports
 - No syntax errors permitted
-- Try to infer the tag that the test suite will need by taking a look at the FTR files. The tag is mandatory. When in doubt, use `tags.ESS_ONLY`
+- Try to infer the tag that the test suite will need by taking a look at the FTR files. The tag is mandatory. When in doubt, use `tags.stateful.all`
 
 ## Context on FTR loadTestFile Pattern
 
@@ -147,7 +147,7 @@ A test is a UI test if it:
 
 import { expect, apiTest, tags } from '@kbn/scout-oblt';
 
-apiTest.describe('AddProjectMonitors', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('AddProjectMonitors', { tag: tags.stateful.all }, () => {
   apiTest.beforeAll(async ({ kbnClient, apiClient }) => {
     // TODO: Implement test setup
     // 1. Clean standard saved objects list

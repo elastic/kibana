@@ -5,43 +5,18 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as evalsBase } from '@kbn/evals';
+import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { AgentBuilderEvaluationChatClient } from './chat_client';
+
+const base = withPhoenixExecutor(evalsBase);
+
 export const evaluate = base.extend<
   {},
   {
     chatClient: AgentBuilderEvaluationChatClient;
-    agentBuilderSetup: void;
   }
 >({
-  agentBuilderSetup: [
-    async ({ fetch, log }, use) => {
-      // Ensure AgentBuilder API is enabled before running the evaluation
-      const currentSettings = (await fetch('/internal/kibana/settings')) as any;
-      const isAgentBuilderEnabled =
-        currentSettings?.settings?.['agentBuilder:enabled']?.userValue === true;
-
-      if (isAgentBuilderEnabled) {
-        log.debug('Agent Builder is already enabled');
-      } else {
-        await fetch('/internal/kibana/settings', {
-          method: 'POST',
-          body: JSON.stringify({
-            changes: {
-              ['agentBuilder:enabled']: true,
-            },
-          }),
-        });
-        log.debug('Agent Builder enabled for the evaluation');
-      }
-
-      await use();
-    },
-    {
-      scope: 'worker',
-      auto: true, // This ensures it runs automatically
-    },
-  ],
   chatClient: [
     async ({ fetch, log, connector }, use) => {
       const chatClient = new AgentBuilderEvaluationChatClient(fetch, log, connector.id);

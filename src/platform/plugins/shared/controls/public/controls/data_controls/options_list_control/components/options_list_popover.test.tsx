@@ -15,12 +15,11 @@ import type { RenderResult } from '@testing-library/react';
 import { act, render as rtlRender, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
-import type { ControlGroupApi } from '../../../../control_group/types';
 import { EuiThemeProvider } from '@elastic/eui';
 
 const render = (ui: React.ReactElement) => {
@@ -302,38 +301,6 @@ describe('Options list popover', () => {
     });
   });
 
-  describe('allow expensive queries warning', () => {
-    test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent(contextMock);
-      const warning = popover.queryByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeNull();
-    });
-
-    test('ensure warning icon shows up when testAllowExpensiveQueries = false', async () => {
-      const contextMock = getOptionsListContextMock();
-      contextMock.testOnlyMethods.setField({
-        name: 'Test keyword field',
-        type: 'keyword',
-      } as DataViewField);
-      const popover = mountComponent({
-        ...contextMock,
-        componentApi: {
-          ...contextMock.componentApi,
-          parentApi: {
-            allowExpensiveQueries$: new BehaviorSubject<boolean>(false),
-          } as unknown as ControlGroupApi,
-        },
-      });
-      const warning = popover.getByTestId('optionsList-allow-expensive-queries-warning');
-      expect(warning).toBeInstanceOf(HTMLDivElement);
-    });
-  });
-
   describe('advanced settings', () => {
     const ensureComponentIsHidden = async ({
       displaySettings,
@@ -351,21 +318,21 @@ describe('Options list popover', () => {
 
     test('can hide exists option', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExists: true },
+        displaySettings: { hide_exists: true },
         testSubject: 'optionsList-control-selection-exists',
       });
     });
 
     test('can hide include/exclude toggle', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideExclude: true },
+        displaySettings: { hide_exclude: true },
         testSubject: 'optionsList__includeExcludeButtonGroup',
       });
     });
 
     test('can hide sorting button', async () => {
       ensureComponentIsHidden({
-        displaySettings: { hideSort: true },
+        displaySettings: { hide_sort: true },
         testSubject: 'optionsListControl__sortingOptionsButton',
       });
     });

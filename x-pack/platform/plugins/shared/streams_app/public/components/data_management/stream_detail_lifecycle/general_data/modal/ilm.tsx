@@ -7,8 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import type { IlmPolicyPhases, IngestStreamLifecycleILM, IlmPolicy } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
@@ -17,12 +16,12 @@ import {
   EuiSelectable,
   EuiText,
   EuiHealth,
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleAll } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { getFormattedError } from '../../../../../util/errors';
+import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
 
 export interface PhaseProps {
   description: string;
@@ -34,7 +33,7 @@ interface IlmOptionData {
 }
 
 interface ModalOptions {
-  getIlmPolicies: () => Promise<PolicyFromES[]>;
+  getIlmPolicies: () => Promise<IlmPolicy[]>;
   initialValue: IngestStreamLifecycleAll;
   setLifecycle: (lifecycle: IngestStreamLifecycleILM) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
@@ -42,7 +41,7 @@ interface ModalOptions {
 }
 
 export function getPhaseDescription(
-  phases: Phases,
+  phases: IlmPolicyPhases,
   phaseToIndicatorColors: { hot: string; warm: string; cold: string; frozen: string }
 ): PhaseProps[] {
   const desc: PhaseProps[] = [];
@@ -104,7 +103,6 @@ export function IlmField({
   setSaveButtonDisabled,
   readOnly,
 }: ModalOptions) {
-  const { euiTheme } = useEuiTheme();
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined
   );
@@ -116,11 +114,13 @@ export function IlmField({
     setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm.policy : undefined);
   }, [initialValue]);
 
+  const { ilmPhases } = useIlmPhasesColorAndDescription();
+
   const phaseToIndicatorColors = {
-    hot: euiTheme.colors.vis.euiColorVis6,
-    warm: euiTheme.colors.vis.euiColorVis9,
-    cold: euiTheme.colors.vis.euiColorVis2,
-    frozen: euiTheme.colors.vis.euiColorVis4,
+    hot: ilmPhases.hot.color,
+    warm: ilmPhases.warm.color,
+    cold: ilmPhases.cold.color,
+    frozen: ilmPhases.frozen.color,
   };
 
   useEffect(() => {
@@ -128,12 +128,12 @@ export function IlmField({
     getIlmPolicies()
       .then((ilmPolicies) => {
         const policyOptions = ilmPolicies.map(
-          ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
+          ({ name, phases }): EuiSelectableOption<IlmOptionData> => ({
             label: `${name}`,
             searchableLabel: name,
             checked: selectedPolicy === name ? 'on' : undefined,
             data: {
-              phases: getPhaseDescription(policy.phases, phaseToIndicatorColors),
+              phases: getPhaseDescription(phases, phaseToIndicatorColors),
             },
             'data-test-subj': `ilmPolicy-${name}`,
           })

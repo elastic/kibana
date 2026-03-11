@@ -254,6 +254,7 @@ export class AccessControlTestPlugin implements Plugin {
               schema.literal(NON_ACCESS_CONTROL_TYPE),
             ]),
             objectId: schema.string(),
+            upsert: schema.boolean({ defaultValue: false }),
           }),
         },
       },
@@ -261,9 +262,13 @@ export class AccessControlTestPlugin implements Plugin {
         const soClient = (await context.core).savedObjects.client;
         try {
           const objectType = request.body.type || ACCESS_CONTROL_TYPE;
-          const result = await soClient.update(objectType, request.body.objectId, {
-            description: 'updated description',
-          });
+          const upsert = request.body.upsert ?? false;
+          const result = await soClient.update(
+            objectType,
+            request.body.objectId,
+            { description: 'updated description' },
+            { upsert: upsert ? { description: 'updated description' } : undefined }
+          );
 
           return response.ok({
             body: result,

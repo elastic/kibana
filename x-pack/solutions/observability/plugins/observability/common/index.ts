@@ -28,6 +28,7 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
+  enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -42,6 +43,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmUseUnifiedTraceWaterfall,
   enableDiagnosticMode,
 } from './ui_settings_keys';
 

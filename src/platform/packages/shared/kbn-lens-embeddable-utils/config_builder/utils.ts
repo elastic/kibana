@@ -348,7 +348,11 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
 }
 
 export function isLensAPIFormat(config: unknown): config is LensApiState {
-  return typeof config === 'object' && config !== null && 'type' in config;
+  // We need to check the type is not lens because embeddable logic sometimes add it for some reason.
+  // See https://github.com/elastic/kibana/issues/250115
+  return (
+    typeof config === 'object' && config !== null && 'type' in config && config.type !== 'lens'
+  );
 }
 
 export function isLensLegacyFormat(config: unknown): config is LensConfig {
@@ -365,4 +369,10 @@ export function isEsqlTableTypeDataset(
   dataset: DatasetType
 ): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
   return dataset.type === 'esql' || dataset.type === 'table';
+}
+
+export function groupIsNotCollapsed(def: {
+  collapse_by?: string;
+}): def is { collapse_by: undefined } {
+  return def.collapse_by == null;
 }

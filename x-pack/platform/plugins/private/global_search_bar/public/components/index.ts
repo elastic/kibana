@@ -8,9 +8,6 @@
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/public';
 
 /* @internal */
-export const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-/* @internal */
 export const blurEvent = new FocusEvent('focusout', {
   bubbles: true,
 });

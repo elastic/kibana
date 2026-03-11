@@ -5,6 +5,53 @@
     "functions": [
       {
         "parentPluginId": "@kbn/content-list-mock-data",
+        "id": "def-public.createMockFavoritesClient",
+        "type": "Function",
+        "tags": [],
+        "label": "createMockFavoritesClient",
+        "description": [
+          "\nCreates a stateful mock favorites client implementing the full\n`FavoritesClientPublic` interface. Add/remove operations mutate\nan in-memory set so Storybook interactions are reflected immediately."
+        ],
+        "signature": [
+          "(initialIds?: string[]) => ",
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<void>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-mock-data",
+            "id": "def-public.createMockFavoritesClient.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "initialIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-mock-data",
         "id": "def-public.createMockFindItems",
         "type": "Function",
         "tags": [],
@@ -21,9 +68,11 @@
             "section": "def-public.MockFindItemsConfig",
             "text": "MockFindItemsConfig"
           },
-          "<T>) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: T[]; total: number; }>"
+          "<T>) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: T[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +94,8 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,7 +114,15 @@
           "\nCreate mock findItems function for dashboard stories.\nSimplified API for examples - just pass optional delay.\n\nThis function uses inline mock data with pre-assigned status values.\n"
         ],
         "signature": [
-          "(delay?: number) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; users?: string[] | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "(delay?: number, favoritesClient?: ",
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<void> | undefined) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -71,9 +130,11 @@
             "section": "def-public.ItemWithStatus",
             "text": "ItemWithStatus"
           },
-          "[]; total: number; }>"
+          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 438,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,12 +145,94 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "- Optional delay in milliseconds to simulate network latency"
+              "- Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 439,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-list-mock-data",
+            "id": "def-public.createSimpleMockFindItems.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "- Optional favorites client. Defaults to the module-level"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 440,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-mock-data",
+        "id": "def-public.extractTagIds",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTagIds",
+        "description": [
+          "\nExtracts tag IDs from a `UserContentCommonSchema` item's `references` array.\n\nMock items store tags as `{ type: 'tag', id: 'tag-id' }` references. This\nhelper converts them into a flat `string[]` suitable for `ContentListItem.tags`."
+        ],
+        "signature": [
+          "(references: ",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-public.SavedObjectsReference",
+            "text": "SavedObjectsReference"
+          },
+          "[]) => string[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-mock-data",
+            "id": "def-public.extractTagIds.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-public.SavedObjectsReference",
+                "text": "SavedObjectsReference"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,7 +251,7 @@
           "\nPre-configured mock findItems for dashboards"
         ],
         "signature": [
-          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -116,9 +259,11 @@
             "section": "def-public.DashboardMockItem",
             "text": "DashboardMockItem"
           },
-          "[]; total: number; }>"
+          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 196,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -131,9 +276,11 @@
             "label": "__0",
             "description": [],
             "signature": [
-              "{ searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
+              "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 83,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -150,7 +297,7 @@
           "\nPre-configured mock findItems for files"
         ],
         "signature": [
-          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -158,9 +305,11 @@
             "section": "def-public.FileMockItem",
             "text": "FileMockItem"
           },
-          "[]; total: number; }>"
+          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 210,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -173,9 +322,11 @@
             "label": "__0",
             "description": [],
             "signature": [
-              "{ searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
+              "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 83,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -192,7 +343,7 @@
           "\nPre-configured mock findItems for maps"
         ],
         "signature": [
-          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -200,9 +351,11 @@
             "section": "def-public.MapMockItem",
             "text": "MapMockItem"
           },
-          "[]; total: number; }>"
+          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 203,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -215,9 +368,11 @@
             "label": "__0",
             "description": [],
             "signature": [
-              "{ searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
+              "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 83,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -234,7 +389,7 @@
           "\nPre-configured mock findItems for visualizations"
         ],
         "signature": [
-          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -242,9 +397,11 @@
             "section": "def-public.VisualizationMockItem",
             "text": "VisualizationMockItem"
           },
-          "[]; total: number; }>"
+          "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 217,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -257,9 +414,11 @@
             "label": "__0",
             "description": [],
             "signature": [
-              "{ searchQuery?: string | undefined; filters: { tags?: { include?: string[] | undefined; exclude?: string[] | undefined; } | undefined; favoritesOnly?: boolean | undefined; }; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
+              "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 83,
+            "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -295,6 +454,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -309,6 +470,8 @@
               "\"dashboard\""
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -323,6 +486,8 @@
               "{ title: string; description?: string | undefined; timeRestore: boolean; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -337,6 +502,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -353,6 +520,8 @@
               "true"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -386,6 +555,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/files.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -400,6 +571,8 @@
               "\"file\""
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/files.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,6 +587,8 @@
               "{ title: string; description?: string | undefined; size: number; extension: string; mimeType: string; fileKind: string; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/files.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -428,6 +603,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/files.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -461,6 +638,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 225,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -475,6 +654,8 @@
               "{ title: string; description?: string | undefined; timeRestore: boolean; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -491,6 +672,8 @@
               "true"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -524,6 +707,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/maps.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -538,6 +723,8 @@
               "\"map\""
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/maps.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -552,6 +739,8 @@
               "{ title: string; description?: string | undefined; layerListJSON?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/maps.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,6 +755,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/maps.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -592,6 +783,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -602,12 +795,14 @@
             "tags": [],
             "label": "items",
             "description": [
-              "The source array of mock items"
+              "The source array of mock items."
             ],
             "signature": [
               "T[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,12 +813,14 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "Optional delay in milliseconds to simulate network latency"
+              "Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,12 +831,14 @@
             "tags": [],
             "label": "statusSortFn",
             "description": [
-              "Optional function to handle status field sorting"
+              "Optional function to handle status field sorting."
             ],
             "signature": [
               "((a: T, b: T, direction: \"asc\" | \"desc\") => number) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -654,6 +853,8 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+                "lineNumber": 58,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -669,6 +870,8 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+                "lineNumber": 58,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -684,12 +887,39 @@
                   "\"asc\" | \"desc\""
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+                "lineNumber": 58,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-mock-data",
+            "id": "def-public.MockFindItemsConfig.favoritesClient",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "\nFavorites client instance used to resolve starred-item filtering.\n\nDefaults to the module-level {@link mockFavoritesClient} singleton.\nPass a story-specific client to ensure the same instance is shared\nbetween the provider (`services.favorites`) and `findItems`, so that\nstarred items are immediately visible when `starredOnly` is toggled."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -702,6 +932,8 @@
         "label": "MockTag",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -713,6 +945,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -724,6 +958,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -735,6 +971,8 @@
             "label": "description",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -746,6 +984,8 @@
             "label": "color",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -757,6 +997,8 @@
             "label": "managed",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -790,6 +1032,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -804,6 +1048,8 @@
               "\"visualization\""
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,6 +1072,8 @@
               "; typeTitle?: string | undefined; icon?: string | undefined; readOnly?: boolean | undefined; error?: string | undefined; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -840,6 +1088,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -854,6 +1104,8 @@
               "{ editUrl?: string | undefined; editApp?: string | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -868,6 +1120,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -897,6 +1151,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -921,6 +1177,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/files.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -945,6 +1203,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/maps.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -969,6 +1229,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1001,6 +1263,8 @@
           ">[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1025,6 +1289,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/visualizations.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1072,6 +1338,8 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1087,6 +1355,8 @@
           "\"u_665722084_cloud\" | \"u_admin_local\" | \"u_jane_doe\" | \"u_john_smith\" | \"u_analyst_1\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1104,6 +1374,8 @@
           "\"no-user\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+        "lineNumber": 375,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1118,9 +1390,11 @@
           "\nVisualization types available in Kibana"
         ],
         "signature": [
-          "\"table\" | \"metric\" | \"line\" | \"area\" | \"lens\" | \"goal\" | \"gauge\" | \"bar\" | \"tagcloud\" | \"pie\" | \"tsvb\" | \"markdown\" | \"vega\" | \"timelion\""
+          "\"line\" | \"metric\" | \"area\" | \"table\" | \"lens\" | \"goal\" | \"markdown\" | \"gauge\" | \"bar\" | \"pie\" | \"tagcloud\" | \"tsvb\" | \"vega\" | \"timelion\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1137,6 +1411,8 @@
           "\nDashboard mock data wrapped in search response format"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+        "lineNumber": 173,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1148,6 +1424,8 @@
             "label": "result",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1159,6 +1437,8 @@
                 "label": "contentTypeId",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+                "lineNumber": 175,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1170,6 +1450,8 @@
                 "label": "result",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+                "lineNumber": 176,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1191,6 +1473,8 @@
                       "[]"
                     ],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+                    "lineNumber": 177,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -1202,6 +1486,8 @@
                     "label": "pagination",
                     "description": [],
                     "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+                    "lineNumber": 178,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1213,6 +1499,8 @@
                         "label": "total",
                         "description": [],
                         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/dashboards.ts",
+                        "lineNumber": 179,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -1254,6 +1542,8 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1271,6 +1561,8 @@
           "readonly [\"u_665722084_cloud\", \"u_admin_local\", \"u_jane_doe\", \"u_john_smith\", \"u_analyst_1\"]"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1282,27 +1574,104 @@
         "tags": [],
         "label": "mockFavoritesClient",
         "description": [
-          "\nMock favorites client for testing favorites filtering in stories.\nReturns a static set of favorited item IDs."
+          "\nPre-built mock favorites client for testing starred filtering in stories.\nStateful — add/remove calls persist within the current session."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<void>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-mock-data",
+        "id": "def-public.mockTagsService",
+        "type": "Object",
+        "tags": [],
+        "label": "mockTagsService",
+        "description": [
+          "\nPre-configured mock tags service backed by {@link MOCK_TAGS}.\n\nProvides `getTagList` and `parseSearchQuery` ready for use as\n`services.tags` on `ContentListProvider`."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/content-list-mock-data",
-            "id": "def-public.mockFavoritesClient.getFavorites",
+            "id": "def-public.mockTagsService.getTagList",
             "type": "Function",
             "tags": [],
-            "label": "getFavorites",
+            "label": "getTagList",
             "description": [],
             "signature": [
-              "() => Promise<{ favoriteIds: string[]; }>"
+              "() => ",
+              {
+                "pluginId": "@kbn/content-list-mock-data",
+                "scope": "public",
+                "docId": "kibKbnContentListMockDataPluginApi",
+                "section": "def-public.MockTag",
+                "text": "MockTag"
+              },
+              "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-mock-data",
+            "id": "def-public.mockTagsService.parseSearchQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "parseSearchQuery",
+            "description": [],
+            "signature": [
+              "(searchQuery: string) => ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.ParsedQuery",
+                "text": "ParsedQuery"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-mock-data",
+                "id": "def-public.mockTagsService.parseSearchQuery.$1",
+                "type": "string",
+                "tags": [],
+                "label": "searchQuery",
+                "description": [],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/services.ts",
+                "lineNumber": 78,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1315,6 +1684,8 @@
         "label": "mockUserProfileServices",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+        "lineNumber": 94,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1345,6 +1716,8 @@
               ">>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1357,6 +1730,8 @@
                 "label": "uid",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+                "lineNumber": 83,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1389,6 +1764,8 @@
               ">[]>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1404,6 +1781,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/user_profiles.ts",
+                "lineNumber": 87,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1422,6 +1801,8 @@
           "\nTag mock data wrapped in search response format"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+        "lineNumber": 83,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1443,6 +1824,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/tags.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1459,6 +1842,8 @@
           "\nVisualization type configuration"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1470,6 +1855,8 @@
             "label": "lens",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1481,6 +1868,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1492,6 +1881,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1505,6 +1896,8 @@
             "label": "area",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1516,6 +1909,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1527,6 +1922,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1540,6 +1937,8 @@
             "label": "line",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1551,6 +1950,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1562,6 +1963,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1575,6 +1978,8 @@
             "label": "bar",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1586,6 +1991,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1597,6 +2004,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1610,6 +2019,8 @@
             "label": "pie",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1621,6 +2032,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1632,6 +2045,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1645,6 +2060,8 @@
             "label": "metric",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1656,6 +2073,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 38,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1667,6 +2086,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 38,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1680,6 +2101,8 @@
             "label": "gauge",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1691,6 +2114,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1702,6 +2127,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1715,6 +2142,8 @@
             "label": "goal",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1726,6 +2155,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1737,6 +2168,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1750,6 +2183,8 @@
             "label": "table",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1761,6 +2196,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1772,6 +2209,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1785,6 +2224,8 @@
             "label": "tagcloud",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1796,6 +2237,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1807,6 +2250,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1820,6 +2265,8 @@
             "label": "markdown",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1831,6 +2278,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1842,6 +2291,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1855,6 +2306,8 @@
             "label": "vega",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1866,6 +2319,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1877,6 +2332,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1890,6 +2347,8 @@
             "label": "timelion",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1901,6 +2360,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1912,6 +2373,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1925,6 +2388,8 @@
             "label": "tsvb",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1936,6 +2401,8 @@
                 "label": "icon",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1947,6 +2414,8 @@
                 "label": "label",
                 "description": [],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }

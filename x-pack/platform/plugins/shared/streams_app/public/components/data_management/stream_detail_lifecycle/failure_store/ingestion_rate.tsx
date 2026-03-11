@@ -5,21 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
-import { FailureStoreChartBarSeries } from '../common/chart_components';
-import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import { FailureStoreChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
+import { IngestionRatePanel } from '../common/ingestion_rate_panel';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export function FailureStoreIngestionRate({
   definition,
@@ -36,41 +28,11 @@ export function FailureStoreIngestionRate({
   aggregations?: StreamAggregations;
   statsError: Error | undefined;
 }) {
+  const { isServerless } = useKibana();
+
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-      <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h5>
-                  {i18n.translate('xpack.streams.failureStoreEnabled.ingestionRatePanel', {
-                    defaultMessage: 'Failure ingestion rate over time',
-                  })}
-                </h5>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              {isLoadingStats && aggregations && <EuiLoadingSpinner size="s" />}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar showDatePicker />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={{ width: '100%', minHeight: '250px' }}
-        direction="column"
-        gutterSize="xs"
-      >
+    <IngestionRatePanel isLoading={isLoadingStats} hasAggregations={Boolean(aggregations)}>
+      {isServerless ? (
         <FailureStoreChartBarSeries
           definition={definition}
           stats={stats}
@@ -79,7 +41,15 @@ export function FailureStoreIngestionRate({
           statsError={statsError}
           aggregations={aggregations}
         />
-      </EuiFlexGroup>
-    </EuiPanel>
+      ) : (
+        <ChartBarPhasesSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+          statsError={statsError}
+        />
+      )}
+    </IngestionRatePanel>
   );
 }

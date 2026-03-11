@@ -12,9 +12,13 @@ import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
 
-import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
-
-import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import {
+  ALL_SPACES_ID,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  FIPS_AGENT_KUERY,
+  inputsFormat,
+} from '../../../common/constants';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
@@ -66,6 +70,7 @@ import type {
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
+  FullAgentPolicy,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
@@ -80,6 +85,14 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
+/**
+ * Builds kuery that matches agents assigned to a policy or any of its version-specific policies.
+ * Wildcard must be outside quotes so KQL treats * as wildcard, not literal.
+ */
+function getPolicyOrVersionSpecificKuery(policyId: string): string {
+  return `(${AGENTS_PREFIX}.policy_id:"${policyId}" or ${AGENTS_PREFIX}.policy_id:${policyId}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+}
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
@@ -87,12 +100,13 @@ export async function populateAssignedAgentsCount(
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) => {
+      const policyKuery = getPolicyOrVersionSpecificKuery(agentPolicy.id);
       const totalAgents = agentClient
         .listAgents({
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
+          kuery: policyKuery,
         })
         .then(({ total }) => (agentPolicy.agents = total));
       const unprivilegedAgents = agentClient
@@ -100,7 +114,7 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${UNPRIVILEGED_AGENT_KUERY}`,
+          kuery: `${policyKuery} and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       const fipsAgents = agentClient
@@ -108,10 +122,35 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${FIPS_AGENT_KUERY}`,
+          kuery: `${policyKuery} and ${FIPS_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.fips_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
+
+      const perVersionAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          aggregations: {
+            versions: {
+              terms: {
+                field: 'agent.version',
+                size: 1000,
+              },
+            },
+          },
+          kuery: policyKuery,
+        })
+        .then(({ aggregations }) => {
+          const versions = (aggregations?.versions as any)?.buckets ?? [];
+          agentPolicy.agents_per_version = versions.map(
+            (version: { key: string; doc_count: number }) => ({
+              version: version.key,
+              count: version.doc_count,
+            })
+          );
+        });
+      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents, perVersionAgents]);
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );
@@ -291,7 +330,9 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const soClient = coreContext.savedObjects.client;
 
-  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+  // Version-specific policy ids (e.g. policy1#9.3) are not saved objects; resolve to base policy
+  const resolvedPolicyId = removeVersionSuffixFromPolicyId(request.params.agentPolicyId);
+  const agentPolicy = await agentPolicyService.get(soClient, resolvedPolicyId);
   if (agentPolicy) {
     if (fleetContext.authz.fleet.readAgents) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
@@ -360,7 +401,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 
   const { has_fleet_server: hasFleetServer, force, ...newPolicy } = request.body;
   const spaceId = fleetContext.spaceId;
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const { space_ids: spaceIds } = request.body;
 
   logger.debug(`Creating agent policy [${newPolicy.name}]`);
@@ -399,7 +439,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       monitoringEnabled,
       spaceId,
       user,
-      authorizationHeader,
+      request,
       force,
     });
 
@@ -709,13 +749,41 @@ export const getFullAgentPolicy: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
+  const { agentPolicyId } = request.params;
+
+  if (request.query.revision && (request.query.kubernetes || request.query.standalone)) {
+    return response.customError({
+      statusCode: 400,
+      body: { message: 'revision cannot be used with kubernetes or standalone flags' },
+    });
+  }
+
+  if (request.query.revision) {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
+      esClient,
+      agentPolicyId,
+      request.query.revision
+    );
+    if (!fleetServerPolicy) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
+    const body: GetFullAgentPolicyResponse = {
+      item: fleetServerPolicy.data as unknown as FullAgentPolicy,
+    };
+    return response.ok({ body });
+  }
 
   if (request.query.kubernetes === true) {
     const agentVersion =
       await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
     const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
       soClient,
-      request.params.agentPolicyId,
+      agentPolicyId,
       agentVersion,
       { standalone: request.query.standalone === true }
     );
@@ -733,13 +801,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
       });
     }
   } else {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      request.params.agentPolicyId,
-      {
-        standalone: request.query.standalone === true,
-      }
-    );
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      standalone: request.query.standalone === true,
+    });
     if (fullAgentPolicy) {
       const body: GetFullAgentPolicyResponse = {
         item: fullAgentPolicy,
@@ -766,51 +830,79 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     params: { agentPolicyId },
   } = request;
 
-  if (request.query.kubernetes === true) {
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
-    const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
-      soClient,
-      request.params.agentPolicyId,
-      agentVersion,
-      { standalone: request.query.standalone === true }
-    );
-    if (fullAgentConfigMap) {
-      const body = fullAgentConfigMap;
-      const headers: ResponseHeaders = {
-        'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
-      };
-      return response.ok({
-        body,
-        headers,
-      });
-    } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent config map not found' },
-      });
-    }
-  } else {
-    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
-      standalone: request.query.standalone === true,
+  if (request.query.revision && (request.query.kubernetes || request.query.standalone)) {
+    return response.customError({
+      statusCode: 400,
+      body: { message: 'revision cannot be used with kubernetes or standalone flags' },
     });
-    if (fullAgentPolicy) {
-      const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
-      const headers: ResponseHeaders = {
-        'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent.yml"`,
-      };
-      return response.ok({
-        body,
-        headers,
-      });
-    } else {
+  }
+
+  if (request.query.revision) {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
+      esClient,
+      agentPolicyId,
+      request.query.revision
+    );
+    if (!fleetServerPolicy) {
       return response.customError({
         statusCode: 404,
         body: { message: 'Agent policy not found' },
       });
     }
+    const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const headers: ResponseHeaders = {
+      'content-type': 'text/x-yaml',
+      'content-disposition': `attachment; filename="elastic-agent.yml"`,
+    };
+    return response.ok({ body, headers });
+  }
+
+  if (request.query.kubernetes === true) {
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableDockerImageVersion();
+    const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+      soClient,
+      agentPolicyId,
+      agentVersion,
+      { standalone: request.query.standalone === true }
+    );
+    if (!fullAgentConfigMap) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent config map not found' },
+      });
+    }
+    const body = fullAgentConfigMap;
+    const headers: ResponseHeaders = {
+      'content-type': 'text/x-yaml',
+      'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
+    };
+    return response.ok({
+      body,
+      headers,
+    });
+  } else {
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      standalone: request.query.standalone === true,
+    });
+    if (!fullAgentPolicy) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const headers: ResponseHeaders = {
+      'content-type': 'text/x-yaml',
+      'content-disposition': `attachment; filename="elastic-agent.yml"`,
+    };
+    return response.ok({
+      body,
+      headers,
+    });
   }
 };
 
@@ -879,7 +971,8 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+  const resolvedPolicyId = removeVersionSuffixFromPolicyId(request.params.agentPolicyId);
+  const agentPolicy = await agentPolicyService.get(soClient, resolvedPolicyId);
 
   if (!agentPolicy) {
     return response.customError({

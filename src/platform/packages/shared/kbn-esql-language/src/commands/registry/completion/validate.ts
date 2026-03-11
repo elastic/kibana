@@ -11,7 +11,7 @@ import type {
   ESQLAstCompletionCommand,
   ESQLAstAllCommands,
   ESQLMessage,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';
@@ -29,7 +29,11 @@ export const validate = (
 
   const { prompt, location, inferenceId } = command as ESQLAstCompletionCommand;
 
-  const promptExpressionType = getExpressionType(prompt, context?.columns);
+  const promptExpressionType = getExpressionType(
+    prompt,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
 
   if (!supportedPromptTypes.includes(promptExpressionType)) {
     messages.push(

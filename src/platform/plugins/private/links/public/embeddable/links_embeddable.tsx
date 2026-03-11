@@ -21,10 +21,10 @@ import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   titleComparators,
+  apiIsPresentationContainer,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-
-import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksState } from '../../server';
 import {
@@ -50,12 +50,12 @@ export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
-
-      const savedObjectId = (initialState.rawState as LinksByReferenceState).savedObjectId;
+      const savedObjectId = (initialState as LinksByReferenceState).savedObjectId;
       const intialLinksState = savedObjectId
         ? await loadFromLibrary(savedObjectId)
-        : (initialState.rawState as LinksState);
+        : (initialState as LinksState);
+
+      const titleManager = initializeTitleManager(initialState);
 
       const isByReference = savedObjectId !== undefined;
 
@@ -73,20 +73,16 @@ export const getLinksEmbeddableFactory = () => {
 
       function serializeByReference(libraryId: string) {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            savedObjectId: libraryId,
-          },
+          ...titleManager.getLatestState(),
+          savedObjectId: libraryId,
         };
       }
 
       function serializeByValue() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            layout: layout$.getValue(),
-            links: serializeResolvedLinks(resolvedLinks$.getValue()),
-          },
+          ...titleManager.getLatestState(),
+          layout: layout$.getValue(),
+          links: serializeResolvedLinks(resolvedLinks$.getValue()),
         };
       }
 
@@ -126,12 +122,10 @@ export const getLinksEmbeddableFactory = () => {
           };
         },
         onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved);
           if (!savedObjectId) {
-            layout$.next((lastSaved?.rawState as LinksByValueState)?.layout);
-            resolvedLinks$.next(
-              await resolveLinks((lastSaved?.rawState as LinksByValueState)?.links ?? [])
-            );
+            layout$.next((lastSaved as LinksByValueState)?.layout);
+            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
           }
         },
       });
@@ -204,7 +198,7 @@ export const getLinksEmbeddableFactory = () => {
                     const serializedState = nextIsByReference
                       ? serializeByReference(nextSavedObjectId)
                       : serializeByValue();
-                    (serializedState.rawState as SerializedTitles).title = newState.title;
+                    (serializedState as SerializedTitles).title = newState.title;
 
                     api.parentApi.replacePanel<LinksEmbeddableState>(api.uuid, {
                       serializedState,
@@ -260,7 +254,7 @@ export const getLinksEmbeddableFactory = () => {
         return (
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
-            paddingSize="xs"
+            paddingSize="none"
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
@@ -288,6 +282,7 @@ export const getLinksEmbeddableFactory = () => {
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    padding: 0,
     '.linksPanelLink': {
       maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
     },

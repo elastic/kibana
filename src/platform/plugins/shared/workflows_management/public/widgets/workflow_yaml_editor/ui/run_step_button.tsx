@@ -34,7 +34,7 @@ export const RunStepButton = React.memo<RunStepButtonProps>(({ onClick }) => {
         iconType="play"
         onClick={onClick}
         color="success"
-        data-test-subj="runStep"
+        data-test-subj="workflowRunStep"
         iconSize="s"
         aria-label={isValidSyntax ? Text.run : Text.invalid}
         disabled={!isValidSyntax}

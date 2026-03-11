@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
-  EuiTextTruncate,
   euiTextTruncate,
   EuiToolTip,
   useEuiTheme,
@@ -21,7 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
@@ -33,6 +32,7 @@ import { StepContextMenu } from '../context_menu';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 import { getStepDescription } from './utils';
+import { DragHandle } from '../../draggable_step_wrapper';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
@@ -57,6 +57,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   if (!isActionBlock(step)) return null;
 
   const stepDescription = getStepDescription(step);
+  const actionDisplayName = step.action.toUpperCase();
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
@@ -74,6 +75,11 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {!readOnly && (
+              <EuiFlexItem grow={false}>
+                <DragHandle />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}
@@ -87,45 +93,68 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 margin-right: ${euiTheme.size.s};
               `}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiToolTip
-                  position="top"
-                  content={
-                    <p>
-                      {i18n.translate(
-                        'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                        {
-                          defaultMessage: 'Edit {stepAction} processor',
-                          values: {
-                            stepAction: step.action,
-                          },
-                        }
-                      )}
-                    </p>
-                  }
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    min-width: 0;
+                    max-width: 100%;
+                  `}
                 >
-                  <EuiButtonEmpty
-                    onClick={handleTitleClick}
-                    color="text"
-                    aria-label={i18n.translate(
-                      'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
-                      { defaultMessage: 'Edit processor' }
-                    )}
-                    size="xs"
-                    data-test-subj="streamsAppProcessorTitleEditButton"
+                  <EuiToolTip
+                    position="top"
+                    content={
+                      <>
+                        <p>
+                          <strong>{actionDisplayName}</strong>
+                        </p>
+                        <p>
+                          {i18n.translate(
+                            'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                            {
+                              defaultMessage: 'Edit {stepAction} processor',
+                              values: {
+                                stepAction: step.action,
+                              },
+                            }
+                          )}
+                        </p>
+                      </>
+                    }
                   >
-                    <EuiText
-                      size="s"
-                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                    <EuiButtonEmpty
+                      onClick={handleTitleClick}
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
+                        { defaultMessage: 'Edit processor' }
+                      )}
+                      size="xs"
+                      data-test-subj="streamsAppProcessorTitleEditButton"
                       css={css`
-                        display: block;
-                        ${euiTextTruncate()}
+                        max-width: 100%;
                       `}
                     >
-                      {step.action.toUpperCase()}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiToolTip>
+                      <EuiText
+                        size="s"
+                        component="span"
+                        style={{ fontWeight: euiTheme.font.weight.bold }}
+                        css={css`
+                          display: block;
+                          ${euiTextTruncate()}
+                        `}
+                      >
+                        {actionDisplayName}
+                      </EuiText>
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
@@ -204,21 +233,20 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 )}
               />
             ) : (
-              <EuiTextTruncate
-                text={stepDescription}
-                truncation="end"
-                children={() => (
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    css={css`
-                      font-family: ${euiTheme.font.familyCode};
-                    `}
-                  >
-                    {stepDescription}
-                  </EuiText>
-                )}
-              />
+              <EuiToolTip content={stepDescription} display="block">
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  tabIndex={0}
+                  data-test-subj="streamsAppProcessorDescription"
+                  css={css`
+                    font-family: ${euiTheme.font.familyCode};
+                    ${euiTextTruncate()}
+                  `}
+                >
+                  {stepDescription}
+                </EuiText>
+              </EuiToolTip>
             )}
           </EuiPanel>
         </EuiFlexItem>

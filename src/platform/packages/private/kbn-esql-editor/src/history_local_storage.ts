@@ -99,22 +99,14 @@ export const addQueriesToCache = (itemToAddOrUpdate: QueryHistoryItem) => {
 
   let allQueries = [...getCachedQueries()];
 
-  // Check storage size and trim if needed
-  const checkAndTrimBySize = (queryList: QueryHistoryItem[]): QueryHistoryItem[] => {
-    const storageString = JSON.stringify(queryList);
-    const storageSizeKB = new Blob([storageString]).size / 1024;
+  const getStorageSizeKB = (queryList: QueryHistoryItem[]) =>
+    new Blob([JSON.stringify(queryList)]).size / 1024;
 
-    if (storageSizeKB > MAX_STORAGE_SIZE_KB && queryList.length > 10) {
-      // Remove oldest queries until under size limit or minimum count
-      const sortedByDate = queryList.sort((a, b) => sortDates(b.timeRan, a.timeRan));
-      return checkAndTrimBySize(sortedByDate.slice(0, -1));
-    }
-
-    return queryList;
-  };
-
-  // Apply storage-based trimming
-  allQueries = checkAndTrimBySize(allQueries);
+  // Apply storage-based trimming (sort once, then trim iteratively)
+  allQueries = allQueries.sort((a, b) => sortDates(b.timeRan, a.timeRan));
+  while (getStorageSizeKB(allQueries) > MAX_STORAGE_SIZE_KB && allQueries.length > 10) {
+    allQueries.pop();
+  }
 
   // Update cache with final query list
   cachedQueries.clear();

@@ -60,7 +60,7 @@ const highlightPropertyStyles = css`
 export const getHighlightStyles = (context: UseEuiTheme) => {
   const { euiTheme } = context;
   const rotatingGradient = `
-    linear-gradient(var(--highlight-rotate), 
+    linear-gradient(var(--highlight-rotate),
     ${euiTheme.colors.borderBaseSuccess} 0%,
     ${euiTheme.colors.borderBaseAccent} 46%,
     ${euiTheme.colors.borderBaseAccentSecondary} 100%
@@ -72,13 +72,16 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
   return css([
     highlightPropertyStyles,
     {
-      '&.dshDashboardGrid__item--highlighted .embPanel': {
+      '&.dshDashboardGrid__item--highlighted': {
         position: 'relative',
+        isolation: 'isolate',
+      },
+      '&.dshDashboardGrid__item--highlighted .embPanel': {
         overflow: 'visible !important',
         backgroundColor: euiTheme.colors.backgroundBasePlain,
         animation: `${getOutlineFadeKeyframes(context)} ${highlightAnimationDuration}ms ease-out`,
       },
-      '&.dshDashboardGrid__item--highlighted .embPanel::before': {
+      '&.dshDashboardGrid__item--highlighted:not(&.dshDashboardGrid__item--focused)::before': {
         content: `""`,
         opacity: 0,
         position: 'absolute',
@@ -92,7 +95,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         borderRadius: euiTheme.border.radius.medium,
         animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
-      '&.dshDashboardGrid__item--highlighted .embPanel::after': {
+      '&.dshDashboardGrid__item--highlighted::after': {
         content: `""`,
         opacity: 0,
         position: 'absolute',

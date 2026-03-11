@@ -31,17 +31,21 @@ export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
+  | 'integration_details_alerting'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_details_language_clients'
   | 'integration_details_api_reference'
   | 'integration_details_configs'
   | 'integration_policy_edit'
+  | 'integration_policy_copy'
   | 'integration_policy_upgrade'
   | 'integration_policy_edit_from_installed'
+  | 'integration_policy_copy_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
   | 'edit_integration'
+  | 'copy_integration'
   | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
@@ -76,6 +80,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  copy_integration: '/policies/:policyId/copy-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
@@ -97,22 +102,26 @@ export const FLEET_ROUTING_PATHS = {
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
+export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integrations_create: '/create',
+  integrations_upload: '/upload',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
   integration_details_assets: '/detail/:pkgkey/assets',
+  integration_details_alerting: '/detail/:pkgkey/alerting',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_configs: '/detail/:pkgkey/configs',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_details_api_reference: '/detail/:pkgkey/api-reference',
   integration_details_language_clients: '/language_clients/:pkgkey/overview',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
@@ -129,11 +138,13 @@ export const pagePathGetters: {
     category,
     subCategory,
     onlyAgentless,
+    showDeprecated,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
     onlyAgentless?: boolean;
+    showDeprecated?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
@@ -147,6 +158,9 @@ export const pagePathGetters: {
     }
     if (onlyAgentless) {
       queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    if (showDeprecated === true) {
+      queryParams.set(INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM, 'true');
     }
     const queryString = queryParams.toString();
     return [
@@ -189,6 +203,10 @@ export const pagePathGetters: {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
   },
+  integration_details_alerting: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/alerting${qs ? `?${qs}` : ''}`];
+  },
   integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
     const qs = stringify({ integration, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
@@ -209,6 +227,10 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  integration_policy_copy: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/copy-integration/${packagePolicyId}`,
+  ],
   // Upgrades happen on the same edit form, just with a flag set. Separate page record here
   // allows us to set different breadcrumbs for upgrades when needed.
   integration_policy_upgrade: ({ packagePolicyId }) => [
@@ -217,6 +239,11 @@ export const pagePathGetters: {
   ],
   // Used for breadcrumbs when editing a policy from the installed integrations tab
   integration_policy_edit_from_installed: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
+  // Used for breadcrumbs when copying a policy from the installed integrations tab
+  integration_policy_copy_from_installed: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
@@ -252,6 +279,10 @@ export const pagePathGetters: {
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
+  ],
+  copy_integration: ({ policyId, packagePolicyId }) => [
+    FLEET_BASE_PATH,
+    `/policies/${policyId}/copy-integration/${packagePolicyId}`,
   ],
   upgrade_package_policy: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,

@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { encode } from '@kbn/rison';
+import type { State } from '../../../common/store';
 
 import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -136,6 +137,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   }) => {
     const dispatch = useDispatch();
     const { startTransaction } = useStartTransaction();
+    const noteIds = useSelector((state: State) => state.notes.ids);
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
       Record<string, JSX.Element>
@@ -390,16 +392,34 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       timelinePrivileges: { crud: canWriteTimelines },
     } = useUserPrivileges();
     useEffect(() => {
+      let cancelled = false;
       const fetchData = async () => {
         if (canWriteTimelines) {
           await installPrepackagedTimelines();
-          refetch();
-        } else {
+        }
+        if (!cancelled) {
           refetch();
         }
       };
       fetchData();
+      return () => {
+        cancelled = true;
+      };
     }, [refetch, installPrepackagedTimelines, canWriteTimelines]);
+
+    useEffect(() => {
+      setItemIdToExpandedNotesRowMap((prev) => {
+        const newNotesMap: Record<string, JSX.Element> = { ...prev };
+        const noteIdsSet = new Set(noteIds);
+        for (const noteId of Object.keys(newNotesMap)) {
+          if (!noteIdsSet.has(noteId)) {
+            delete newNotesMap[noteId];
+          }
+        }
+
+        return newNotesMap;
+      });
+    }, [noteIds]);
 
     return !isModal ? (
       <OpenTimeline

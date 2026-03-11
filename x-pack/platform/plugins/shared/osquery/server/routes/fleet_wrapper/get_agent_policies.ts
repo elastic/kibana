@@ -39,7 +39,6 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
           request
         );
         const space = await osqueryContext.service.getActiveSpace(request);
-
         const agentService = osqueryContext.service.getAgentService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -50,7 +49,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
           page: 1,
         })) ?? { items: [] as PackagePolicy[] };
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
-          satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+          satisfies(packagePolicy.package?.version ?? '', '>=0.6.0', { includePrerelease: true })
         );
         const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);

@@ -14,6 +14,61 @@ interface UnvalidatedMessage {
 }
 
 /**
+ * Merges tool calls from chunks into a single array of tool calls.
+ *
+ * Merge logic:
+ * - `toolCallId` and `function.name` appear in the first chunk and should be set once
+ * - `function.arguments` is streamed across multiple chunks and should be accumulated
+ * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
+ */
+const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
+  // Map to store tool calls by their unique identifier
+  const toolCallsMap = new Map<string, UnvalidatedToolCall>();
+  // Map to track which index corresponds to which toolCallId
+  const indexToToolCallId = new Map<number, string>();
+
+  for (const chunk of chunks) {
+    chunk.tool_calls?.forEach((toolCall) => {
+      // Track toolCallId for continuation chunks
+      if (toolCall.toolCallId) {
+        indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
+      }
+
+      const key = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
+      if (!key) {
+        throw new Error(
+          `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`
+        );
+      }
+
+      const existingToolCall = toolCallsMap.get(key);
+      const updatedToolCall: UnvalidatedToolCall = {
+        function: {
+          name: toolCall.function.name || existingToolCall?.function.name || '',
+          arguments: (existingToolCall?.function.arguments || '') + toolCall.function.arguments,
+        },
+        toolCallId: toolCall.toolCallId || existingToolCall?.toolCallId || '',
+      };
+
+      toolCallsMap.set(key, updatedToolCall);
+    });
+  }
+
+  return Array.from(toolCallsMap.values()).map((call) => {
+    if (call.function.arguments === '') {
+      return {
+        ...call,
+        function: {
+          ...call.function,
+          arguments: '{}',
+        },
+      };
+    }
+    return call;
+  });
+};
+
+/**
  * Merges chunks into a message, concatenating the content and tool calls.
  */
 export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMessage => {
@@ -24,39 +79,12 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
         prev.refusal = chunk.refusal;
       }
 
-      chunk.tool_calls?.forEach((toolCall) => {
-        let prevToolCall = prev.tool_calls[toolCall.index];
-        if (!prevToolCall) {
-          prev.tool_calls[toolCall.index] = {
-            function: {
-              name: '',
-              arguments: '',
-            },
-            toolCallId: '',
-          };
-
-          prevToolCall = prev.tool_calls[toolCall.index];
-        }
-
-        prevToolCall.function.name += toolCall.function.name;
-        prevToolCall.function.arguments += toolCall.function.arguments;
-        prevToolCall.toolCallId += toolCall.toolCallId;
-      });
-
       return prev;
     },
     { content: '', tool_calls: [] }
   );
 
-  // some models (Claude not to name it) can have their toolCall index not start at 0, so we remove the null elements
-  message.tool_calls = message.tool_calls
-    .filter((call) => !!call)
-    .map((call) => {
-      if (call.function.arguments === '') {
-        call.function.arguments = '{}';
-      }
-      return call;
-    });
+  message.tool_calls = mergeToolCalls(chunks);
 
   return message;
 };

@@ -10,6 +10,21 @@
 import type { KibanaRequest } from './router';
 
 /**
+ * Optional overrides for cookie attributes when setting or clearing session cookies.
+ * @public
+ */
+export interface SessionStorageSetOptions {
+  /**
+   * Optional override for the isSecure cookie attribute.
+   */
+  isSecure?: boolean;
+  /**
+   * Optional override for the sameSite cookie attribute.
+   */
+  sameSite?: 'Strict' | 'Lax' | 'None';
+}
+
+/**
  * Provides an interface to store and retrieve data across requests.
  * @public
  */
@@ -22,8 +37,9 @@ export interface SessionStorage<T> {
   /**
    * Puts current session value into the session storage.
    * @param sessionValue - value to put
+   * @param options - optional overrides for cookie attributes
    */
-  set(sessionValue: T): void;
+  set(sessionValue: T, options?: SessionStorageSetOptions): void;
 
   /**
    * Clears current session.

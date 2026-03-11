@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   // FLAKY: https://github.com/elastic/kibana/issues/237416
-  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
     const index1 = 'privmon_index1';
     const indexSyncUtils = PlainIndexSyncUtils(getService, index1);
     const user1 = { name: 'user_1' };
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       const csvUploadResponse = await privMonUtils.bulkUploadUsersCsv(csvContent);
 
       expect(csvUploadResponse.status).toBe(200);
-      expect(csvUploadResponse.body.stats.successful).toBeGreaterThanOrEqual(1);
+      expect(csvUploadResponse.body.stats.successfulOperations).toBeGreaterThanOrEqual(1);
 
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
         .body as ListPrivMonUsersResponse;

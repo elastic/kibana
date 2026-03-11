@@ -16,5 +16,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
     },
+    uiSettings: {
+      ...functionalConfig.get('uiSettings'),
+      globalDefaults: {
+        ...functionalConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: false,
+      },
+    },
   };
 }

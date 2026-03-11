@@ -25,6 +25,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -158,23 +159,44 @@ export function ServiceOverviewThroughputChart({
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-                defaultMessage: 'Throughput',
-              })}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+                    defaultMessage: 'Throughput',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+                  defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
+                })}
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
-              defaultMessage: 'Throughput is measured in transactions per minute (tpm).',
-            })}
-            position="right"
+          <OpenInDiscover
+            dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            variant="link"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

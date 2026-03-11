@@ -108,7 +108,7 @@ describe('runSaveLensVisualization', () => {
               initialInput: {
                 attributes: defaultByValueDoc,
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               },
             },
             { returnToOrigin: true }
@@ -121,7 +121,7 @@ describe('runSaveLensVisualization', () => {
             expect.objectContaining({
               state: expect.objectContaining({
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               }),
             })
           );
@@ -260,12 +260,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: undefined }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                serializedState: expect.objectContaining({ savedObjectId: undefined }),
               }),
             ]),
           })
@@ -295,12 +290,7 @@ describe('runSaveLensVisualization', () => {
             state: expect.arrayContaining([
               expect.objectContaining({
                 type: 'lens',
-                serializedState: expect.objectContaining({
-                  rawState: expect.objectContaining({ savedObjectId: '1234' }),
-                  references: expect.arrayContaining([
-                    expect.objectContaining({ type: 'index-pattern' }),
-                  ]),
-                }),
+                serializedState: expect.objectContaining({ savedObjectId: '1234' }),
               }),
             ]),
           })

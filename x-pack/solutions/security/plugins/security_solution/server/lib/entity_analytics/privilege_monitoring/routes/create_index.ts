@@ -8,13 +8,14 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics';
 import { API_VERSIONS, APP_ID, PRIVMON_INDICES_URL } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -40,7 +41,7 @@ export const createPrivilegeMonitoringIndicesRoute = (
         },
       },
 
-      async (context, request, response): Promise<IKibanaResponse<{}>> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const secSol = await context.securitySolution;
         const siemResponse = buildSiemResponse(response);
         const indexName = request.body.name;
@@ -68,6 +69,6 @@ export const createPrivilegeMonitoringIndicesRoute = (
             body: error.message,
           });
         }
-      }
+      }, 'platinum')
     );
 };

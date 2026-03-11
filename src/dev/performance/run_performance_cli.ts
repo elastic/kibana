@@ -46,8 +46,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
   discover: ['many_fields_discover', 'many_fields_discover_esql'],
   maps: ['ecommerce_dashboard_map_only'],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
-  esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql'],
-  http2: ['data_stress_test_lens_http2', 'ecommerce_dashboard_http2'],
+  esql: ['many_fields_discover_esql', 'web_logs_dashboard_esql', 'many_fields_esql_editor'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {
@@ -158,6 +157,18 @@ async function runFunctionalTest(props: TestRunProps) {
   });
 }
 
+const cleanupAndExit = (procRunner: ProcRunner, eventName: string) => {
+  process.stdout.write(`\n--- Received ${eventName}, cleaning up...\n`);
+  procRunner
+    .stop('es')
+    .catch((e) => {
+      process.stderr.write(`\nError during cleanup: ${e}`);
+    })
+    .finally(() => {
+      process.exit(1);
+    });
+};
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     const skipWarmup = flagsReader.boolean('skip-warmup');
@@ -172,6 +183,10 @@ run(
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
+
+    ['SIGINT', 'SIGTERM', 'SIGHUP', 'unhandledRejection', 'uncaughtException'].forEach((event) => {
+      process.on(event, () => cleanupAndExit(procRunner, event));
+    });
 
     const journeys = getJourneysToRun({ journeyPath, group });
 

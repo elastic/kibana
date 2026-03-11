@@ -50,7 +50,15 @@ interface MockCallToolResult {
 
 interface MockCallToolError {
   isError: true;
-  error: string | { message?: string; code?: number };
+  content: Array<
+    | {
+        type: string;
+        text?: string | null | number | object;
+        [key: string]: unknown;
+      }
+    | null
+    | undefined
+  >;
 }
 
 type MockCallToolResponse = MockCallToolResult | MockCallToolError;
@@ -190,6 +198,25 @@ describe('McpClient', () => {
       );
     });
 
+    it('creates transport with custom fetch when provided', () => {
+      const customFetch = jest.fn();
+      new McpClient(mockLogger, clientDetails, { fetch: customFetch });
+
+      expect(StreamableHTTPClientTransport).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com/mcp' }),
+        expect.objectContaining({
+          fetch: customFetch,
+        })
+      );
+    });
+
+    it('does not include fetch in transport options when not provided', () => {
+      new McpClient(mockLogger, clientDetails);
+
+      const transportCallArgs = (StreamableHTTPClientTransport as jest.Mock).mock.calls[0][1];
+      expect(transportCallArgs).not.toHaveProperty('fetch');
+    });
+
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 
@@ -298,6 +325,17 @@ describe('McpClient', () => {
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error connecting to MCP server test-client, 1.0.0: Generic error'
+      );
+    });
+
+    it('includes error cause in the message when available', async () => {
+      const client = new McpClient(mockLogger, clientDetails);
+      const cause = new Error('unable to get local issuer certificate');
+      const error = new TypeError('fetch failed', { cause });
+      mockClient.connect.mockRejectedValue(error);
+
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 
@@ -704,24 +742,42 @@ describe('McpClient', () => {
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: 'Tool execution failed',
+        content: [{ type: 'text', text: 'Tool execution failed' }],
       });
 
-      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: Tool execution failed'
+      await expect(
+        client.callTool({ name: 'test-tool', arguments: { arg1: 'value1' } })
+      ).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{"arg1":"value1"}': Tool execution failed`
       );
     });
 
-    it('handles error response with non-string error', async () => {
+    it('throws error with multiple text parts joined by newlines', async () => {
       const client = await createConnectedClient();
 
       mockClient.callTool.mockResolvedValue({
         isError: true,
-        error: { message: 'Error message', code: 500 },
+        content: [
+          { type: 'text', text: 'Error line 1' },
+          { type: 'text', text: 'Error line 2' },
+        ],
       });
 
       await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
-        'Error calling tool test-tool with [object Object]: [object Object]'
+        `Error calling tool 'test-tool' with arguments '{}': Error line 1\nError line 2`
+      );
+    });
+
+    it('throws error with empty message when no text content parts', async () => {
+      const client = await createConnectedClient();
+
+      mockClient.callTool.mockResolvedValue({
+        isError: true,
+        content: [{ type: 'image', data: 'base64data' }],
+      });
+
+      await expect(client.callTool({ name: 'test-tool', arguments: {} })).rejects.toThrow(
+        `Error calling tool 'test-tool' with arguments '{}': `
       );
     });
 

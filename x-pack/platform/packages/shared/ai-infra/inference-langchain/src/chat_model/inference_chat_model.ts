@@ -6,6 +6,7 @@
  */
 
 import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
@@ -63,6 +64,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
@@ -72,6 +74,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tool_choice?: ToolChoice;
   temperature?: number;
   model?: string;
+  timeout?: number;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -102,6 +105,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
+  protected timeout?: number;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -113,6 +117,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.timeout = args.timeout;
     this.maxRetries = args.maxRetries;
   }
 
@@ -180,16 +185,26 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
+      timeout: options.timeout ?? this.timeout,
     };
   }
 
@@ -335,7 +350,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
+            parameters:
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as ZodSchema),
           },
         },
       ];

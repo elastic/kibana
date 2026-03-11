@@ -24,7 +24,7 @@ import { WORKFLOW_INSIGHTS_SURVEY_URL } from '../../../../constants';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsIncompatibleAntivirusResult } from './results/incompatible_antivirus';
 import { WorkflowInsightsPolicyResponseFailureResult } from './results/policy_response_failure';
-
+import { useKibana } from '../../../../../../../common/lib/kibana';
 interface WorkflowInsightsResultsProps {
   results?: SecurityWorkflowInsight[];
   scanCompleted: boolean;
@@ -48,8 +48,10 @@ export const WorkflowInsightsResults = ({
   scanCompleted,
   endpointId,
 }: WorkflowInsightsResultsProps) => {
+  const { notifications } = useKibana().services;
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(false);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   useEffect(() => {
     setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
@@ -69,7 +71,7 @@ export const WorkflowInsightsResults = ({
     } else if (results?.length) {
       return results.flatMap((insight, index) => {
         switch (insight.type) {
-          case DefendInsightType.Enum.incompatible_antivirus:
+          case DefendInsightType.enum.incompatible_antivirus:
             return (
               <WorkflowInsightsIncompatibleAntivirusResult
                 insight={insight}
@@ -77,7 +79,7 @@ export const WorkflowInsightsResults = ({
                 endpointId={endpointId}
               />
             );
-          case DefendInsightType.Enum.policy_response_failure:
+          case DefendInsightType.enum.policy_response_failure:
             return <WorkflowInsightsPolicyResponseFailureResult insight={insight} index={index} />;
           default:
             return null;
@@ -88,7 +90,7 @@ export const WorkflowInsightsResults = ({
   }, [endpointId, results, showEmptyResultsCallout]);
 
   const surveyLink = useMemo(() => {
-    if (!results?.length) {
+    if (!results?.length || !isFeedbackEnabled) {
       return null;
     }
 
@@ -112,7 +114,7 @@ export const WorkflowInsightsResults = ({
         </EuiFlexGroup>
       </>
     );
-  }, [results]);
+  }, [results, isFeedbackEnabled]);
 
   const showInsights = !!(showEmptyResultsCallout || results?.length);
 

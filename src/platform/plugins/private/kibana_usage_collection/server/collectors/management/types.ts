@@ -14,6 +14,7 @@ export interface UsageStats {
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:alertTags': string;
+  'securitySolution:alertCloseReasons': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -42,6 +43,7 @@ export interface UsageStats {
   'observability:enableServiceGroups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
+  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logSources': string[];
@@ -49,12 +51,12 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:enabled': boolean;
-  'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
-  'dataConnectors:enabled': boolean;
+  'agentBuilder:experimentalFeatures': boolean;
+  'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
+  'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -71,7 +73,6 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
-  'securitySolution:enableCcsWarning': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
@@ -173,10 +174,12 @@ export interface UsageStats {
   'observability:profilingAzureCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
+  'observability:apmUseUnifiedTraceWaterfall': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
   'aiAssistant:preferredChatExperience': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'cases:incrementalIdDisplay:enabled': boolean;
@@ -185,7 +188,10 @@ export interface UsageStats {
   'observability:streamsEnableSignificantEventsDiscovery': boolean;
   'genAiSettings:defaultAIConnector': string;
   'genAiSettings:defaultAIConnectorOnly': boolean;
-  'observability:streamsEnableGroupStreams': boolean;
+  'agentBuilder:prePromptWorkflowIds': string[];
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'observability:streamsEnableQueryStreams': boolean;
+  'observability:streamsEnableWiredStreamViews': boolean;
+  'securitySolution:entityStoreEnableV2': boolean;
 }

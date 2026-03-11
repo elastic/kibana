@@ -17,7 +17,7 @@ import {
   type EuiTourStepProps,
 } from '@elastic/eui';
 import {
-  EIS_TOUR_DISMISS,
+  TOUR_DISMISS,
   EIS_CLOUD_CONNECT_PROMO_TOUR_CTA,
   EIS_CLOUD_CONNECT_PROMO_DESCRIPTION,
   EIS_CLOUD_CONNECT_PROMO_TOUR_TITLE,
@@ -70,8 +70,9 @@ export const EisCloudConnectPromoTour = ({
 }: EisCloudConnectPromoTourProps) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, uiSettings },
+    services: { application, notifications, uiSettings },
   } = useKibana();
+  const userAllowsTours = notifications?.tours?.isEnabled() ?? true;
   // Setting to enable hiding the tour for FTR tests
   const isEISTourEnabled = uiSettings?.get<boolean>(EIS_TOUR_ENABLED_FEATURE_FLAG_ID, true);
   const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
@@ -89,7 +90,8 @@ export const EisCloudConnectPromoTour = ({
     !isReady ||
     !isSelfManaged ||
     !hasCloudConnectPermission ||
-    !isEISTourEnabled
+    !isEISTourEnabled ||
+    !userAllowsTours
   ) {
     return children;
   }
@@ -116,7 +118,7 @@ export const EisCloudConnectPromoTour = ({
           data-telemetry-id={`${dataId}-dismiss-btn`}
           onClick={onDismissPromo}
         >
-          {EIS_TOUR_DISMISS}
+          {TOUR_DISMISS}
         </EuiButtonEmpty>,
         <EuiButton
           onClick={navigateToApp}

@@ -16,6 +16,7 @@ import { SplunkDataInputStep } from '../../../../../common/types';
 export const DashboardsUploadStep = ({
   dataInputStep = 1, // Default value if not provided
   migrationStats,
+  migrationSource,
   onMigrationCreated,
   onMissingResourcesFetched,
 }: MigrationStepProps) => {
@@ -48,6 +49,7 @@ export const DashboardsUploadStep = ({
           <EuiFlexItem>
             <DashboardsUploadSubSteps
               migrationStats={migrationStats}
+              migrationSource={migrationSource}
               onMigrationCreated={onMigrationCreated}
               onMissingResourcesFetched={onMissingResourcesFetched}
             />

@@ -35,15 +35,36 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
-  // Register callback to receive prop updates from parent.
-  const onPropsUpdate = contextProps.onPropsUpdate;
+  // Register callbacks to allow parent to update props and clear browserApiTools
+  const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
-    if (onPropsUpdate) {
-      onPropsUpdate((newProps) => {
-        setCurrentProps(newProps);
+    if (onRegisterCallbacks) {
+      onRegisterCallbacks({
+        updateProps: (newProps) => setCurrentProps(newProps),
+        resetBrowserApiTools: () =>
+          setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
+        addAttachment: (attachment) =>
+          setCurrentProps((prevProps) => {
+            const existingAttachments = prevProps.attachments ?? [];
+
+            // If the new attachment has an ID, check for duplicates
+            if (attachment.id) {
+              const existingIndex = existingAttachments.findIndex((a) => a.id === attachment.id);
+              if (existingIndex !== -1) {
+                const updatedAttachments = [...existingAttachments];
+                updatedAttachments[existingIndex] = attachment;
+                return { ...prevProps, attachments: updatedAttachments };
+              }
+            }
+
+            return {
+              ...prevProps,
+              attachments: [...existingAttachments, attachment],
+            };
+          }),
       });
     }
-  }, [onPropsUpdate]);
+  }, [onRegisterCallbacks]);
 
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);

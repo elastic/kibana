@@ -15,6 +15,8 @@
 import { uniq } from 'lodash';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EsqlFieldType } from '@kbn/esql-types';
+import { Parser } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type {
   ICommandCallbacks,
   ISuggestionItem,
@@ -34,8 +36,6 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../commands/definitions/all_operators';
-import { Parser } from '../../parser';
-import type { ESQLAstAllCommands } from '../../types';
 import type {
   FunctionParameterType,
   FunctionReturnType,
@@ -46,6 +46,11 @@ import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { timeUnitsToSuggest } from '../../commands/definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../../commands/definitions/utils/ast';
+import { FUNCTIONS_TO_IGNORE } from '../../commands/registry/eval/autocomplete';
+
+export const IGNORED_FUNCTIONS_BY_LOCATION: { [K in Location]?: string[] } = {
+  eval: [...FUNCTIONS_TO_IGNORE.names],
+};
 
 export const DATE_DIFF_TIME_UNITS = (() => {
   const dateDiffDefinition = scalarFunctionDefinitions.find(
@@ -322,9 +327,13 @@ export function getFunctionSignaturesByReturnType(
       }
     )
     .filter(({ name }) => {
-      if (ignored?.length) {
-        return !ignored?.includes(name);
+      const locationIgnored = locations.flatMap((loc) => IGNORED_FUNCTIONS_BY_LOCATION[loc] ?? []);
+      const allIgnored = [...locationIgnored, ...(ignored ?? [])];
+
+      if (allIgnored.length) {
+        return !allIgnored.includes(name);
       }
+
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
@@ -350,8 +359,7 @@ export function getFunctionSignaturesByReturnType(
 export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_duration')) {
-    // return only singular
-    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`);
   }
   return [];
 }

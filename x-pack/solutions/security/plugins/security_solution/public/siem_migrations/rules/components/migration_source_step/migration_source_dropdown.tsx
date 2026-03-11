@@ -9,12 +9,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow, EuiSuperSelect } from '
 import * as i18n from './translations';
 import type { MigrationSourceDropdownProps } from './use_migration_source_step';
 import type { MigrationSource } from '../../../common/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
   ({ migrationSource, setMigrationSource, disabled, migrationSourceOptions }) => {
+    const isQradarEnabled = useIsExperimentalFeatureEnabled('qradarRulesMigration');
     const handleMigrationSourceChange = useCallback(
-      (selected: MigrationSource) => {
-        setMigrationSource(selected);
+      (selectedVendor: MigrationSource) => {
+        setMigrationSource(selectedVendor);
       },
       [setMigrationSource]
     );
@@ -26,7 +28,9 @@ export const MigrationSourceDropdown = React.memo<MigrationSourceDropdownProps>(
             <EuiFormRow
               label={i18n.MIGRATION_SOURCE_DROPDOWN_TITLE}
               fullWidth
-              helpText={disabled ? i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT : undefined}
+              helpText={
+                disabled && isQradarEnabled ? i18n.MIGRATION_SOURCE_DROPDOWN_HELPER_TEXT : undefined
+              }
             >
               <EuiSuperSelect
                 options={migrationSourceOptions}

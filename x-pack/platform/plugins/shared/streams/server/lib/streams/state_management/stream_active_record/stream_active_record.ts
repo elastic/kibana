@@ -133,7 +133,10 @@ export abstract class StreamActiveRecord<
 
       return { isValid: true, errors: [] };
     } catch (error) {
-      return { isValid: false, errors: [error] };
+      return {
+        isValid: false,
+        errors: [error instanceof Error ? error : new Error(String(error))],
+      };
     }
   }
 

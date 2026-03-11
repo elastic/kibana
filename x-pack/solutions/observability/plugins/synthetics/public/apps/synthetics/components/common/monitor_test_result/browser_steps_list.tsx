@@ -324,6 +324,9 @@ export const BrowserStepsList = ({
               defaultMessage: 'No data found',
             })
       }
+      tableCaption={i18n.translate('xpack.synthetics.monitor.browserStepsList.caption', {
+        defaultMessage: 'Step results',
+      })}
       tableLayout="auto"
       itemId="_id"
       itemIdToExpandedRowMap={testNowMode || showExpand ? expandedMap : undefined}

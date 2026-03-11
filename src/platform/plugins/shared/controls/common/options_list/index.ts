@@ -8,16 +8,11 @@
  */
 
 export { isValidSearch } from './is_valid_search';
-export { getSelectionAsFieldType, type OptionsListSelection } from './options_list_selections';
-export type { OptionsListSearchTechnique } from './suggestions_searching';
-export type { OptionsListSortingType } from './suggestions_sorting';
+export { getSelectionAsFieldType } from './options_list_selections';
 export type {
-  OptionsListControlState,
-  OptionsListESQLControlState,
-  OptionsListDSLControlState,
-  OptionsListDisplaySettings,
   OptionsListFailureResponse,
   OptionsListRequest,
   OptionsListSuccessResponse,
   OptionsListSuggestions,
 } from './types';
+export { isOptionsListESQLControlState } from './types';

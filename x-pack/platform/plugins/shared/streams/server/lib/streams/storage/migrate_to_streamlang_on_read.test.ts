@@ -14,6 +14,7 @@ import {
 /**
  * Helper to extract routing from migrated definition
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getRoutingFromMigrated(result: any) {
   return result.ingest.wired.routing;
 }
@@ -34,6 +35,7 @@ describe('migrate_to_streamlang_on_read', () => {
       const result = migrateWhereBlocksToCondition(steps);
 
       expect(result.migrated).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const step: any = result.steps[0];
       expect(step).toHaveProperty('condition');
       expect(step).not.toHaveProperty('where');
@@ -66,6 +68,7 @@ describe('migrate_to_streamlang_on_read', () => {
       expect(result.migrated).toBe(true);
 
       // Check outer where block migrated
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const outerStep: any = result.steps[0];
       expect(outerStep).toHaveProperty('condition');
       expect(outerStep).not.toHaveProperty('where');
@@ -91,6 +94,7 @@ describe('migrate_to_streamlang_on_read', () => {
 
       // Action step where clause should remain unchanged
       expect(result.migrated).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const step: any = result.steps[0];
       expect(step).toHaveProperty('where');
       expect(step).not.toHaveProperty('condition');
@@ -119,12 +123,14 @@ describe('migrate_to_streamlang_on_read', () => {
       expect(result.migrated).toBe(true);
 
       // First step: action with where clause should remain unchanged
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const firstStep: any = result.steps[0];
       expect(firstStep).toHaveProperty('where');
       expect(firstStep).not.toHaveProperty('condition');
       expect(firstStep.action).toBe('set');
 
       // Second step: where block should be migrated to condition
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const secondStep: any = result.steps[1];
       expect(secondStep).toHaveProperty('condition');
       expect(secondStep).not.toHaveProperty('where');
@@ -170,6 +176,7 @@ describe('migrate_to_streamlang_on_read', () => {
       const result = migrateWhereBlocksToCondition(steps);
 
       expect(result.migrated).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const level1: any = result.steps[0];
       expect(level1).toHaveProperty('condition');
 
@@ -199,6 +206,7 @@ describe('migrate_to_streamlang_on_read', () => {
       const result = migrateWhereBlocksToCondition(steps);
 
       expect(result.migrated).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const step: any = result.steps[0];
 
       expect(step.condition).toHaveProperty('and');
@@ -226,6 +234,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       expect(result.ingest.processing).toHaveProperty('steps');
@@ -253,6 +262,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       const steps = result.ingest.processing.steps;
@@ -290,6 +300,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       const steps = result.ingest.processing.steps;
@@ -321,6 +332,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       const steps = result.ingest.processing.steps;
@@ -338,6 +350,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       const steps = result.ingest.processing.steps;
@@ -360,6 +373,7 @@ describe('migrate_to_streamlang_on_read', () => {
         },
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = migrateOldProcessingArrayToStreamlang(definition);
 
       const steps = result.ingest.processing.steps;

@@ -29,6 +29,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",
@@ -48,6 +49,7 @@
       "observabilityAIAssistant",
       "usageCollection",
       "cases",
+      "cps"
     ],
     "requiredBundles": [
       "cases",

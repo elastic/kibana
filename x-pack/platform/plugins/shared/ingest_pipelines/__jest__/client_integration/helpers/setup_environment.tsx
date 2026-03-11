@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
+import type { ComponentType } from 'react';
 import type { LocationDescriptorObject } from 'history';
 import type { HttpSetup } from '@kbn/core/public';
 
 import type { ApplicationStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -46,7 +48,7 @@ const applicationMock = {
       show: true,
     },
   },
-} as any as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const appServices = {
   breadcrumbs: breadcrumbService,
@@ -54,7 +56,7 @@ const appServices = {
   documentation: documentationService,
   api: apiService,
   fileReader: {
-    readFile: jest.fn((file) => file.text()),
+    readFile: jest.fn((file: File) => file.text()),
   },
   notifications: notificationServiceMock.createSetupContract(),
   history,
@@ -82,13 +84,17 @@ export const setupEnvironment = () => {
   return initHttpRequests();
 };
 
-export const WithAppDependencies = (Comp: any, httpSetup: HttpSetup) => (props: any) => {
-  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  apiService.setup(httpSetup, uiMetricService);
+export const WithAppDependencies =
+  <P,>(Comp: ComponentType<P>, httpSetup: HttpSetup) =>
+  (props: P) => {
+    uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+    apiService.setup(httpSetup, uiMetricService);
 
-  return (
-    <KibanaContextProvider services={appServices}>
-      <Comp {...props} />
-    </KibanaContextProvider>
-  );
-};
+    return (
+      <I18nProvider>
+        <KibanaContextProvider services={appServices}>
+          <Comp {...(props as React.JSX.IntrinsicAttributes & P)} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+  };

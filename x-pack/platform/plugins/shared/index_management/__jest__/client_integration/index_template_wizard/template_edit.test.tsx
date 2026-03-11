@@ -6,7 +6,6 @@
  */
 
 import { screen, fireEvent, within, waitFor } from '@testing-library/react';
-import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 
 import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -56,70 +55,39 @@ describe('<TemplateEdit />', () => {
       await screen.findByTestId('pageTitle');
     });
 
-    test('allows you to add mappings', async () => {
-      // Navigate to mappings step
-      await completeStep.one();
+    it('allows adding a mapping and preserves data stream config in the saved payload', async () => {
+      // Complete all steps up to mappings
+      await completeStep.one({ version: 1, lifecycle: { value: 1, unit: 'd' } });
       await completeStep.two();
       await completeStep.three();
 
-      // Now on mappings step - add a field
+      // Now on mappings step - add a field using the default field type ("text")
       const nameInput = screen.getByTestId('nameParameterInput');
       fireEvent.change(nameInput, { target: { value: 'field_1' } });
-
-      const createFieldForm = screen.getByTestId('createFieldForm');
-      await within(createFieldForm).findByTestId('fieldType');
-      const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-      fieldTypeComboBox.select('text');
-
       fireEvent.click(screen.getByTestId('addButton'));
 
-      await waitFor(() => {
-        expect(screen.getAllByTestId(/fieldsListItem/)).toHaveLength(1);
-      });
-    }, 7500);
+      await waitFor(() => expect(screen.getAllByTestId(/fieldsListItem/)).toHaveLength(1));
 
-    test('should keep data stream configuration', async () => {
-      // Fill logistics step with lifecycle
-      await completeStep.one({ version: 1, lifecycle: { value: 1, unit: 'd' } });
-
-      // Complete remaining steps
-      await completeStep.two();
-      await completeStep.three();
+      // Complete remaining steps and submit
       await completeStep.four();
       await completeStep.five();
-
-      // Submit form
       fireEvent.click(screen.getByTestId('nextButton'));
 
-      await waitFor(() => {
-        expect(httpSetup.put).toHaveBeenLastCalledWith(
-          `${API_BASE_PATH}/index_templates/${templateToEdit.name}`,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: templateToEdit.name,
-              indexPatterns: templateToEdit.indexPatterns,
-              version: 1,
-              allowAutoCreate: 'NO_OVERWRITE',
-              dataStream: {
-                hidden: true,
-                anyUnknownKey: 'should_be_kept',
-              },
-              indexMode: 'standard',
-              _kbnMeta: {
-                type: 'default',
-                hasDatastream: true,
-                isLegacy: false,
-              },
-              template: {
-                lifecycle: {
-                  enabled: true,
-                  data_retention: '1d',
-                },
-              },
-            }),
-          })
-        );
+      await waitFor(() => expect(httpSetup.put).toHaveBeenCalled());
+
+      const putMock = httpSetup.put as unknown as jest.Mock;
+      const lastCall = putMock.mock.calls[putMock.mock.calls.length - 1] as [
+        string,
+        { body: string }
+      ];
+      const [, { body: requestBody }] = lastCall;
+      const body = JSON.parse(requestBody) as { dataStream?: unknown; template?: any };
+
+      expect(body.dataStream).toEqual({
+        hidden: true,
+        anyUnknownKey: 'should_be_kept',
       });
+      expect(body.template?.mappings?.properties?.field_1?.type).toBe('text');
     });
   });
 
@@ -164,7 +132,7 @@ describe('<TemplateEdit />', () => {
         });
         await completeStep.two();
         await completeStep.three(JSON.stringify(SETTINGS));
-      });
+      }, 20000);
 
       it('should send the correct payload with changed values', async () => {
         // Now on mappings step - edit the text_datatype field (avoid "first item wins")

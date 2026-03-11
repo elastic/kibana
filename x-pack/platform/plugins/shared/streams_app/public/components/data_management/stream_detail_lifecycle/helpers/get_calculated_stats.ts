@@ -11,6 +11,7 @@ import type { TimeState } from '@kbn/es-query';
 export interface CalculatedStats {
   bytesPerDoc: number;
   bytesPerDay: number;
+  perDayDocs: number;
 }
 
 export const getCalculatedStats = ({
@@ -23,7 +24,7 @@ export const getCalculatedStats = ({
   buckets?: Array<{ key: number; doc_count: number }>;
 }): CalculatedStats => {
   if (!buckets) {
-    return { bytesPerDoc: 0, bytesPerDay: 0 };
+    return { bytesPerDoc: 0, bytesPerDay: 0, perDayDocs: 0 };
   }
 
   const effectiveStart = getEffectiveStart(timeState, stats.creationDate);
@@ -34,7 +35,7 @@ export const getCalculatedStats = ({
   const perDayDocs = countRange ? countRange / rangeInDays : 0;
   const bytesPerDay = bytesPerDoc * perDayDocs;
 
-  return { bytesPerDoc, bytesPerDay };
+  return { bytesPerDoc, bytesPerDay, perDayDocs };
 };
 
 const getEffectiveStart = (timeState: TimeState, creationDate?: number) => {

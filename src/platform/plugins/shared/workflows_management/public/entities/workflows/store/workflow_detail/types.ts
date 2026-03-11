@@ -15,10 +15,17 @@ import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { LoadingStates } from './utils/loading_states';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
+import type { WorkflowsResponse } from '../../model/types';
 
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
+  /**
+   * Whether the YAML editor's internal value is synced with the Redux store.
+   * When false, there are pending debounced changes that haven't been dispatched yet.
+   * The save button should be disabled when this is false to prevent saving stale data.
+   */
+  isYamlSynced: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */
@@ -29,18 +36,34 @@ export interface WorkflowDetailState {
   computedExecution?: ComputedData;
   /** The active tab (workflow or executions) */
   activeTab?: ActiveTab;
+  /** The last known cursor position in the YAML editor (1-based line and column) */
+  cursorPosition?: LineColumnPosition;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
   /** The modal to test the workflow is open */
   isTestModalOpen: boolean;
+  /** When set, open test modal in "From historical" mode with this execution pre-selected */
+  replayExecutionId: string | null;
   /** The connectors data */
   connectors?: ConnectorsResponse;
+  /** The workflows data for lookup by ID (always present, empty if not loaded yet) */
+  workflows: WorkflowsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
   loading: LoadingStates;
+  /** Whether the editor has validation errors (strict schema + custom validations) */
+  hasYamlSchemaValidationErrors: boolean;
+  /** Connector flyout state */
+  connectorFlyout: {
+    isOpen: boolean;
+    connectorType?: string;
+    connectorIdToEdit?: string;
+    /** Position in Monaco editor where the flyout was opened from (for inserting connector ID) */
+    insertPosition?: LineColumnPosition;
+  };
 }
 
 export type ActiveTab = 'workflow' | 'executions';
@@ -51,4 +74,12 @@ export interface ComputedData {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   workflowDefinition?: WorkflowYaml | null;
+}
+
+/**
+ * Position in a text document (1-based line and column, matching Monaco editor).
+ */
+export interface LineColumnPosition {
+  lineNumber: number;
+  column: number;
 }

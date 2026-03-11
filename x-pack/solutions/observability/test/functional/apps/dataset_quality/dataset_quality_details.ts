@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import originalExpect from 'expect';
 import moment from 'moment';
 import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
@@ -51,15 +50,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-  const bitbucketAuditDataStreamName = `logs-${bitbucketDatasetName}-${defaultNamespace}`;
-  const bitbucketPkg = {
-    name: 'atlassian_bitbucket',
-    version: '1.14.0',
+  const fleetServerDatasetName = 'fleet_server.output_health';
+  const fleetServerOutputHealthDataStreamName = `logs-${fleetServerDatasetName}-${defaultNamespace}`;
+  const fleetServerPkg = {
+    name: 'fleet_server',
+    version: '1.6.0',
   };
 
   const regularDatasetName = datasetNames[0];
-  const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
+  const regularDataStreamName = `logs-${regularDatasetName}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
   const failedDatasetName = datasetNames[1];
@@ -73,8 +72,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
 
-      // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
-      await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+      // Install fleet server Integration (package which does not has Dashboards) and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(fleetServerPkg);
 
       await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
       await synthtrace.createComponentTemplate({
@@ -112,7 +111,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           isMalformed: true,
         }),
         // Index logs for Bitbucket integration
-        getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+        getLogsForDataset({ to, count: 10, dataset: fleetServerDatasetName }),
         createFailedLogRecord({
           to: new Date().toISOString(),
           count: 2,
@@ -133,7 +132,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     after(async () => {
       await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
-      await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(fleetServerPkg);
       await synthtrace.clean();
       await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
       await synthtrace.deleteComponentTemplate('synth.2@custom');
@@ -261,7 +260,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
       });
 
-      it('should go to discover for failed docs when the button next to breakdown selector is clicked', async () => {
+      it('should go to discover in ES|QL mode for failed docs when the button next to breakdown selector is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: failedDataStreamName,
         });
@@ -278,10 +277,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in discover
+        // Confirm URL contains ES|QL query for failure store
         await retry.tryForTime(5000, async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${failedDataStreamName}::failures`);
         });
       });
 
@@ -374,7 +377,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
 
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
@@ -388,7 +391,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('should navigate to integration overview page on clicking integration overview action', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: bitbucketAuditDataStreamName,
+          dataStream: fleetServerOutputHealthDataStreamName,
         });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
@@ -402,7 +405,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
 
-          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/fleet_server');
         });
       });
 
@@ -467,10 +470,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await discoverButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        await retry.try(async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        // Confirm URL contains ES|QL query for the data stream
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${regularDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
 
@@ -489,10 +498,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
         );
 
-        // Confirm dataset selector text in observability logs explorer
-        await retry.try(async () => {
-          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        // Confirm URL contains ES|QL query for degraded docs
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const decodedUrl = decodeURIComponent(currentUrl);
+
+          expect(currentUrl).to.contain('/app/discover');
+          expect(decodedUrl).to.contain('esql');
+          expect(decodedUrl).to.contain(`FROM ${apacheAccessDataStreamName}`);
+          expect(decodedUrl).to.contain('_ignored');
+          expect(decodedUrl).to.contain('IS NOT NULL');
         });
       });
     });

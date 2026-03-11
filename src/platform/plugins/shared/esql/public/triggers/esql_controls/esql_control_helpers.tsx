@@ -14,10 +14,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
   type ESQLControlVariable,
-  type ESQLControlState,
   type ESQLVariableType,
   type ControlTriggerSource,
 } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from '../../kibana_services';
@@ -30,10 +30,13 @@ interface Context {
   timefilter: TimefilterContract;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onSaveControl?: (
+    controlState: OptionsListESQLControlState,
+    updatedQuery: string
+  ) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   closeFlyout?: () => void;
   ariaLabelledBy: string;
   currentApp?: string;

@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmPolicy } from '@kbn/streams-schema';
 import { EditLifecycleModal } from './modal';
 
 jest.mock('../../../../../hooks/use_kibana');
@@ -24,7 +24,9 @@ describe('EditLifecycleModal', () => {
   const mockGetIlmPolicies = jest.fn();
 
   const createMockDefinition = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     effectiveLifecycle: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ingestLifecycle: any = { inherit: {} },
     streamName: string = 'logs-test',
     isWired: boolean = false
@@ -44,6 +46,7 @@ describe('EditLifecycleModal', () => {
       },
       effective_lifecycle: effectiveLifecycle,
       effective_settings: {},
+      data_stream_exists: true,
       inherited_fields: {},
       dashboards: [],
       rules: [],
@@ -57,6 +60,7 @@ describe('EditLifecycleModal', () => {
         read_failure_store: true,
         manage_failure_store: true,
         view_index_metadata: true,
+        create_snapshot_repository: true,
       },
       effective_failure_store: {
         lifecycle: { enabled: { is_default_retention: true } },
@@ -67,6 +71,7 @@ describe('EditLifecycleModal', () => {
     if (isWired) {
       // Wired effective lifecycle must include a `from` field to satisfy schema
       if ((effectiveLifecycle.dsl || effectiveLifecycle.ilm) && !effectiveLifecycle.from) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (definition as any).effective_lifecycle = {
           ...effectiveLifecycle,
           from: streamName,
@@ -88,11 +93,9 @@ describe('EditLifecycleModal', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       isServerless: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    mockGetIlmPolicies.mockResolvedValue([
-      { name: 'policy1' },
-      { name: 'policy2' },
-    ] as PolicyFromES[]);
+    mockGetIlmPolicies.mockResolvedValue([{ name: 'policy1' }, { name: 'policy2' }] as IlmPolicy[]);
   });
 
   describe('Modal Structure', () => {
@@ -278,6 +281,42 @@ describe('EditLifecycleModal', () => {
 
       expect(saveButton).toBeDisabled();
       expect(cancelButton).toBeDisabled();
+    });
+
+    describe('Lifecyle disabled', () => {
+      it('should default to indefinite retention when lifecycle is disabled', async () => {
+        const definition = createMockDefinition({ disabled: {} }, { inherit: {} });
+
+        render(<EditLifecycleModal {...defaultProps} definition={definition} />);
+
+        expect(screen.getByTestId('indefiniteRetentionButton')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(screen.getByTestId('streamsAppModalFooterButton')).toBeDisabled();
+      });
+      it('should call updateLifecycle with dsl when disabling inheritance from disabled lifecycle', async () => {
+        const definition = createMockDefinition({ disabled: {} }, { inherit: {} });
+
+        render(<EditLifecycleModal {...defaultProps} definition={definition} />);
+
+        // Initially save button is disabled
+        const saveButton = screen.getByTestId('streamsAppModalFooterButton');
+        expect(saveButton).toBeDisabled();
+
+        // Disable inheritance
+        const inheritSwitch = screen.getByTestId('inheritDataRetentionSwitch');
+        await userEvent.click(inheritSwitch);
+
+        // Save button should now be enabled
+        expect(saveButton).not.toBeDisabled();
+
+        // Click save
+        await userEvent.click(saveButton);
+
+        // Should save as DSL without data_retention (indefinite)
+        expect(mockUpdateLifecycle).toHaveBeenCalledWith({ dsl: {} });
+      });
     });
   });
 });

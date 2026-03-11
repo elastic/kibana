@@ -60,6 +60,10 @@ Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more inf
 `xpack.fleet.agents.elasticsearch.ca_sha256`
 :   Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
 
+::::{note}
+The `xpack.fleet.agents.elasticsearch.*` settings are intended for a quickstart setup. For more advanced use cases, use the `xpack.fleet.outputs` setting to preconfigure outputs.
+::::
+
 
 ## Preconfiguration settings (for advanced use cases) [_preconfiguration_settings_for_advanced_use_cases]
 
@@ -238,6 +242,9 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
         `certificate`
         :   The SSL certificate that {{agents}} use to authenticate with the output. Include the full contents of the certificate here.
 
+        `certificate_authorities`
+        :   Certificate authority (CA) used to issue the certificate.
+
     `secrets`
     :   Include here any values for preconfigured outputs that should be stored as secrets. A secret value is replaced in the `kibana.yml` settings file with a reference, with the original value stored externally as a secure hash. Note that this type of secret storage requires all configured {{fleet-server}}s to be on version 8.12.0 or later.
 
@@ -355,3 +362,12 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 
 `xpack.fleet.integrationRollbackTTL` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.3`
 :   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.1`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.

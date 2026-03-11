@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +28,9 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode,
   patternCount,
   dataView,
+  hitCounterLabel,
+  hitCounterPluralLabel,
+  hitsTotalToDisplay,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
@@ -35,7 +39,10 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
-}) => {
+} & Pick<
+  ComponentProps<typeof HitsCounter>,
+  'hitCounterLabel' | 'hitCounterPluralLabel' | 'hitsTotalToDisplay'
+>) => {
   const { euiTheme } = useEuiTheme();
   const {
     uiSettings,
@@ -129,7 +136,13 @@ export const DocumentViewModeToggle = ({
       )}
       <EuiFlexItem grow={false}>
         {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
-          <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+          <HitsCounter
+            mode={HitsCounterMode.standalone}
+            stateContainer={stateContainer}
+            hitCounterLabel={hitCounterLabel}
+            hitCounterPluralLabel={hitCounterPluralLabel}
+            hitsTotalToDisplay={hitsTotalToDisplay}
+          />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
             <EuiTab
@@ -145,7 +158,13 @@ export const DocumentViewModeToggle = ({
                   defaultMessage="Documents"
                 />
               )}
-              <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
+              <HitsCounter
+                mode={HitsCounterMode.appended}
+                stateContainer={stateContainer}
+                hitCounterLabel={hitCounterLabel}
+                hitCounterPluralLabel={hitCounterPluralLabel}
+                hitsTotalToDisplay={hitsTotalToDisplay}
+              />
             </EuiTab>
 
             {showPatternAnalysisTab ? (

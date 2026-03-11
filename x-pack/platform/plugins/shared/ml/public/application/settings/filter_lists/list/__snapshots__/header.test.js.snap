@@ -3,7 +3,7 @@
 exports[`Filter Lists Header renders header 1`] = `
 <div>
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-baseline-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-baseline-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -46,7 +46,7 @@ exports[`Filter Lists Header renders header 1`] = `
                 data-euiicon-type="refresh"
               />
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
               >
                 Refresh
               </span>

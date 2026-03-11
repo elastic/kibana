@@ -74,7 +74,11 @@ jest.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
-    <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+    <MigrationDataInputContextProvider
+      openFlyout={jest.fn()}
+      closeFlyout={jest.fn()}
+      isFlyoutOpen={false}
+    >
       {children}
     </MigrationDataInputContextProvider>
   </TestProviders>
@@ -131,13 +135,13 @@ describe('MigrationReadyPanel', () => {
 
   it('should show missing resources button and text when resources are missing', async () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };
     });
-    mockGetMissingResources.mockReturnValue(mockMissingResources);
 
     renderTestComponent();
 
@@ -152,20 +156,30 @@ describe('MigrationReadyPanel', () => {
   });
 
   it('should show loading spinner when fetching missing resources', () => {
-    mockUseGetMissingResources.mockReturnValue({
-      getMissingResources: mockGetMissingResources,
-      isLoading: true,
-      error: null,
+    mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
+      return {
+        getMissingResources: mockGetMissingResources,
+        isLoading: true,
+        error: null,
+      };
     });
 
-    renderTestComponent();
-    expect(screen.getByTestId('centeredLoadingSpinner')).toBeInTheDocument();
+    const { container } = renderTestComponent();
+    expect(
+      container.querySelector(
+        '[data-test-subj="dashboardMigrationMissingResourcesButton"] [role="progressbar"]'
+      )
+    ).toBeVisible();
   });
 
   it('should show start translation button', () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() =>
+        setMissingResources(mockEmptyMissingResources)
+      );
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockEmptyMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };

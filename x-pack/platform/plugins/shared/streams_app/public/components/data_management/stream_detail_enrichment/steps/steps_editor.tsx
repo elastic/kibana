@@ -6,7 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiAccordion, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -17,9 +26,9 @@ import { validationErrorTypeLabels } from '@kbn/streamlang';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
+import { AdditionalChargesCallout } from '../../shared/additional_charges_callout';
 import { NoStepsEmptyPrompt } from '../empty_prompts';
 import { PipelineSuggestion } from '../pipeline_suggestions/pipeline_suggestion';
-import { SuggestPipelinePanel } from '../pipeline_suggestions/suggest_pipeline_panel';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -248,6 +257,9 @@ export const StepsEditor = React.memo(() => {
   const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
   );
+  const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
+  );
 
   // Pipeline suggestion events
   const { suggestPipeline, clearSuggestedSteps, cancelSuggestion, acceptSuggestion } =
@@ -283,6 +295,53 @@ export const StepsEditor = React.memo(() => {
       );
     }
 
+    if (isNoSuggestionsFound) {
+      return (
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
+          <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsTitle',
+                { defaultMessage: 'Could not generate suggestions' }
+              )}
+              color="primary"
+              size="s"
+              onDismiss={() => clearSuggestedSteps()}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsDescription',
+                  {
+                    defaultMessage:
+                      'The AI assistant was unable to generate pipeline suggestions for your data. You can try again.',
+                  }
+                )}
+              </p>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <GenerateSuggestionButton
+                    aiFeatures={aiFeatures}
+                    iconType="refresh"
+                    size="s"
+                    onClick={(connectorId) =>
+                      suggestPipeline({ connectorId, streamName: stream.name })
+                    }
+                    isLoading={false}
+                  >
+                    {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
+                      defaultMessage: 'Try again',
+                    })}
+                  </GenerateSuggestionButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiCallOut>
+          </div>
+        </NoStepsEmptyPrompt>
+      );
+    }
+
     if (suggestedPipeline && isViewingSuggestion) {
       return (
         <PipelineSuggestion
@@ -311,9 +370,9 @@ export const StepsEditor = React.memo(() => {
         <RootSteps stepRefs={stepRefs} />
       ) : // hold off rendering empty prompt while there is a chance we will show the pipeline suggestion prompt
       !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
-        <NoStepsEmptyPrompt>
+        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
           {canUsePipelineSuggestions && (
-            <SuggestPipelinePanel>
+            <>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
                 isLoading={isLoadingSuggestion}
@@ -323,7 +382,13 @@ export const StepsEditor = React.memo(() => {
                   defaultMessage: 'Suggest a pipeline',
                 })}
               </GenerateSuggestionButton>
-            </SuggestPipelinePanel>
+              {aiFeatures.isManagedAIConnector && !aiFeatures.hasAcknowledgedAdditionalCharges && (
+                <>
+                  <EuiSpacer size="s" />
+                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
+                </>
+              )}
+            </>
           )}
         </NoStepsEmptyPrompt>
       )}

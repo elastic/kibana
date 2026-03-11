@@ -25,26 +25,30 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
-    hideActionBar: true,
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
     persist: true,
-    hideExists: true,
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
   },
   {
     title: 'Severity',
-    fieldName: 'kibana.alert.severity',
-    selectedOptions: [],
-    hideActionBar: true,
-    hideExists: true,
+    field_name: 'kibana.alert.severity',
+    selected_options: [],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
   },
   {
     title: 'User',
-    fieldName: 'user.name',
+    field_name: 'user.name',
   },
   {
     title: 'Host',
-    fieldName: 'host.name',
+    field_name: 'host.name',
   },
 ];
 
@@ -70,7 +74,7 @@ describe(
           return {
             ...filter,
             selectedOptions:
-              filter.title === 'Status' ? ['open', 'acknowledged'] : filter.selectedOptions,
+              filter.title === 'Status' ? ['open', 'acknowledged'] : filter.selected_options,
           };
         }
       );
@@ -89,8 +93,8 @@ describe(
       const CUSTOM_URL_FILTER = [
         {
           title: 'Process',
-          fieldName: 'process.name',
-          selectedOptions: ['testing123'],
+          field_name: 'process.name',
+          selected_options: ['testing123'],
         },
       ];
 
@@ -122,9 +126,11 @@ describe(
 
       const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
         return {
-          hideActionBar: false,
+          display_settings: {
+            hide_action_bar: false,
+          },
           ...filter,
-          selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
+          selected_options: filter.title === 'Severity' ? ['high'] : filter.selected_options,
         };
       });
       const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));

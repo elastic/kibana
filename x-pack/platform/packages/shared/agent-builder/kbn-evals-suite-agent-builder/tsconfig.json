@@ -8,9 +8,11 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
+    "@kbn/evals-phoenix-executor",
     "@kbn/agent-builder-common",
     "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/scout",
+    "@kbn/inference-common",
   ]
 }

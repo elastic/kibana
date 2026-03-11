@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,13 +17,20 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
+import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import {
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
   AZURE_PROVIDER,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../constants';
-import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
+import {
+  getCloudCredentialVarsConfig,
+  getTemplateUrlFromPackageInfo,
+  updatePolicyWithInputs,
+} from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
   getAgentlessCredentialsType,
@@ -36,7 +43,6 @@ import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { AzureCredentialTypeSelector } from './azure_credential_type_selector';
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -77,6 +83,7 @@ export const AzureCredentialsFormAgentless = ({
   const { azureOverviewPath, azurePolicyType, isAzureCloudConnectorEnabled, templateName } =
     useCloudSetup();
 
+  const accountType = input?.streams?.[0].vars?.['azure.account_type']?.value ?? SINGLE_ACCOUNT;
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
   const credentialSelectionDisabled =
     isEditPage &&
@@ -146,17 +153,24 @@ export const AzureCredentialsFormAgentless = ({
         </>
       )}
       {azureCredentialsType === 'cloud_connectors' && isAzureCloudConnectorEnabled ? (
-        <CloudConnectorSetup
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          cloud={cloud}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloudProvider="azure"
-          templateName={templateName}
-          isEditPage={isEditPage}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCloudConnectorSetup
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            cloud={cloud}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            cloudProvider="azure"
+            templateName={templateName}
+            isEditPage={isEditPage}
+            accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.ARM_TEMPLATE_CLOUD_CONNECTORS
+            )}
+          />
+        </Suspense>
       ) : (
         <AzureInputVarFields
           packageInfo={packageInfo}

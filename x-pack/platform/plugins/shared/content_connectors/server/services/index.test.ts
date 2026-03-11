@@ -16,10 +16,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   createPackagePolicyServiceMock,
   createMockAgentService,
-  createMockAgentPolicyService,
+  createMockAgentlessPoliciesService,
 } from '@kbn/fleet-plugin/server/mocks';
 import type {
-  AgentPolicyServiceInterface,
+  AgentlessPoliciesService,
   AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
@@ -72,7 +72,7 @@ describe('AgentlessConnectorsInfraService', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: ElasticsearchClientMock;
   let packagePolicyService: jest.Mocked<PackagePolicyClient>;
-  let agentPolicyInterface: jest.Mocked<AgentPolicyServiceInterface>;
+  let agentlessPoliciesService: jest.Mocked<AgentlessPoliciesService>;
   let agentService: jest.Mocked<AgentService>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
@@ -81,7 +81,7 @@ describe('AgentlessConnectorsInfraService', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     packagePolicyService = createPackagePolicyServiceMock();
-    agentPolicyInterface = createMockAgentPolicyService();
+    agentlessPoliciesService = createMockAgentlessPoliciesService();
     agentService = createMockAgentService();
     logger = loggerMock.create();
 
@@ -89,7 +89,7 @@ describe('AgentlessConnectorsInfraService', () => {
       soClient,
       esClient,
       packagePolicyService,
-      agentPolicyInterface,
+      agentlessPoliciesService,
       agentService,
       logger
     );
@@ -447,7 +447,7 @@ describe('AgentlessConnectorsInfraService', () => {
       };
       const errorMessage = 'Failed to create an agent policy hehe';
 
-      agentPolicyInterface.createWithPackagePolicies.mockImplementationOnce(() => {
+      agentlessPoliciesService.createAgentlessPolicy.mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
 
@@ -467,13 +467,13 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      agentPolicyInterface.createWithPackagePolicies.mockResolvedValue(agentPolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentPolicy);
 
       const result = await service.deployConnector(connector);
       expect(result).toBe(agentPolicy);
     });
 
-    test('passes supports_agentless flag and global tags correctly to agent policy creation and package policy creation', async () => {
+    test('call agentlessPoliciesService.createAgentlessPolicy with correct params', async () => {
       const testConnector = {
         id: '000000005',
         name: 'Test Agentless Connector',
@@ -482,23 +482,28 @@ describe('AgentlessConnectorsInfraService', () => {
       };
 
       const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentPolicy;
-      agentPolicyInterface.createWithPackagePolicies.mockResolvedValue(fakeAgentPolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
       const result = await service.deployConnector(testConnector);
 
-      expect(agentPolicyInterface.createWithPackagePolicies).toHaveBeenCalledWith(
+      expect(agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          soClient,
-          esClient,
-          agentPolicy: expect.objectContaining({
-            supports_agentless: true,
-          }),
-          packagePolicies: expect.arrayContaining([
-            expect.objectContaining({
-              supports_agentless: true,
-            }),
-          ]),
-          options: expect.objectContaining({ forcePackagePolicyCreation: true }),
+          description: '',
+          enabled: true,
+          inputs: {
+            'github-connectors-py': {
+              enabled: true,
+              streams: {},
+              vars: {
+                connector_id: '000000005',
+                connector_name: 'Test Agentless Connector',
+              },
+            },
+          },
+          policy_template: 'github',
+          name: 'github connector 000000005',
+          namespace: '',
+          package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.5' },
         })
       );
 
@@ -531,7 +536,7 @@ describe('AgentlessConnectorsInfraService', () => {
 
       await service.removeDeployment(packagePolicyId);
 
-      expect(agentPolicyInterface.delete).toBeCalledWith(soClient, esClient, agentPolicyId);
+      expect(agentlessPoliciesService.deleteAgentlessPolicy).toBeCalledWith(agentPolicyId);
       expect(packagePolicyService.delete).toBeCalledWith(soClient, esClient, [packagePolicyId]);
     });
 
@@ -540,7 +545,7 @@ describe('AgentlessConnectorsInfraService', () => {
 
       const errorMessage = 'Failed to create a package policy hehe';
 
-      agentPolicyInterface.delete.mockImplementation(() => {
+      agentlessPoliciesService.deleteAgentlessPolicy.mockImplementation(() => {
         throw new Error(errorMessage);
       });
 

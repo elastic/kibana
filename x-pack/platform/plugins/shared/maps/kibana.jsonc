@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
+      "kql",
       "lens",
       "licensing",
       "features",
@@ -39,7 +40,6 @@
       "cloud",
       "cps",
       "customIntegrations",
-      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",

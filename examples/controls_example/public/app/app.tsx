@@ -7,48 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiPageTemplate,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import type { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
-import { ReactControlExample } from './react_control_example/react_control_example';
-
-const CONTROLS_AS_A_BUILDING_BLOCK = 'controls_as_a_building_block';
-const CONTROLS_REFACTOR_TEST = 'controls_refactor_test';
 
 const App = ({
   core,
   data,
   navigation,
-}: { core: CoreStart } & Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
-  const [selectedTabId, setSelectedTabId] = useState(CONTROLS_REFACTOR_TEST); // TODO: Make this the first tab
-
-  function onSelectedTabChanged(tabId: string) {
-    setSelectedTabId(tabId);
-  }
-
-  function renderTabContent() {
-    if (selectedTabId === CONTROLS_REFACTOR_TEST) {
-      return <ReactControlExample dataViews={data.dataViews} core={core} />;
-    }
-
-    return <ControlGroupRendererExamples data={data} navigation={navigation} />;
-  }
-
-  return (
-    <KibanaRenderContextProvider {...core}>
+  uiActions,
+}: { core: CoreStart } & ControlsExampleStartDeps) => {
+  return core.rendering.addContext(
+    <KibanaContextProvider services={{ ...core, data, navigation, uiActions }}>
       <EuiPage>
         <EuiPageBody>
           <EuiPageSection>
@@ -56,38 +30,21 @@ const App = ({
           </EuiPageSection>
           <EuiPageTemplate.Section>
             <EuiPageSection>
-              <EuiTabs>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
-                  isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
-                >
-                  Register a new React control
-                </EuiTab>
-                <EuiTab
-                  onClick={() => onSelectedTabChanged(CONTROLS_AS_A_BUILDING_BLOCK)}
-                  isSelected={CONTROLS_AS_A_BUILDING_BLOCK === selectedTabId}
-                >
-                  Controls as a building block
-                </EuiTab>
-              </EuiTabs>
-
-              <EuiSpacer />
-
-              {renderTabContent()}
+              <ControlGroupRendererExamples data={data} navigation={navigation} />
             </EuiPageSection>
           </EuiPageTemplate.Section>
         </EuiPageBody>
       </EuiPage>
-    </KibanaRenderContextProvider>
+    </KibanaContextProvider>
   );
 };
 
 export const renderApp = (
   core: CoreStart,
-  { data, navigation }: Pick<ControlsExampleStartDeps, 'data' | 'navigation'>,
+  deps: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<App core={core} data={data} navigation={navigation} />, element);
+  ReactDOM.render(<App core={core} {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

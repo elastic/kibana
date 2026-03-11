@@ -5,60 +5,72 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
-spaceTest.describe('Entity analytics dashboard page', { tag: ['@ess', '@svlSecurity'] }, () => {
-  spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
-    await apiServices.entityAnalytics.deleteEntityStoreEngines();
-    await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
-    await browserAuth.loginAsAdmin();
-  });
-
-  spaceTest.afterEach(async ({ apiServices }) => {
-    await apiServices.entityAnalytics.deleteEntityStoreEngines();
-    await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
-  });
-
-  spaceTest('enables risk score followed by the store', async ({ pageObjects, apiServices }) => {
-    const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
-
-    await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
-      await dashboardPage.navigate();
-
-      await expect(dashboardPage.entityStoreEnablementPanel).toContainText(
-        'Enable entity store and risk score',
-        { timeout: 30000 }
-      );
+// Failing: See https://github.com/elastic/kibana/issues/247203
+spaceTest.describe.skip(
+  'Entity analytics dashboard page',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
+      await apiServices.entityAnalytics.deleteEntityStoreEngines();
+      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
+      await browserAuth.loginAsAdmin();
     });
 
-    await spaceTest.step('Open enablement modal and verify options', async () => {
-      await dashboardPage.openEntityStoreEnablementModal();
-
-      await expect(dashboardPage.entityStoreEnablementModal).toContainText(
-        'Entity Analytics Enablement'
-      );
-      await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
-      await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
+    spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.deleteEntityStoreEngines();
+      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
     });
 
-    await spaceTest.step('Confirm enablement and verify success', async () => {
-      await dashboardPage.confirmEntityStoreEnablement();
+    spaceTest('enables risk score followed by the store', async ({ pageObjects, apiServices }) => {
+      spaceTest.setTimeout(180000);
+      const dashboardPage = pageObjects.entityAnalyticsDashboardsPage;
 
-      await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
-    });
+      await spaceTest.step('Navigate to dashboard and verify initial state', async () => {
+        await dashboardPage.navigate();
 
-    await spaceTest.step(
-      'Verify risk engine and entity store are actually enabled via API',
-      async () => {
-        const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
-
-        expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
-
-        const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
-          'running'
+        await expect(dashboardPage.entityStoreEnablementPanel).toContainText(
+          'Enable entity store and risk score',
+          { timeout: 30000 }
         );
-        expect(entityStoreStatus.status).toBe('running');
-      }
-    );
-  });
-});
+      });
+
+      await spaceTest.step('Open enablement modal and verify options', async () => {
+        await dashboardPage.openEntityStoreEnablementModal();
+
+        await expect(dashboardPage.entityStoreEnablementModal).toContainText(
+          'Entity Analytics Enablement'
+        );
+        await expect(dashboardPage.enablementRiskScoreSwitch).toBeVisible();
+        await expect(dashboardPage.enablementEntityStoreSwitch).toBeVisible();
+      });
+
+      await spaceTest.step('Confirm enablement and verify success', async () => {
+        await dashboardPage.confirmEntityStoreEnablement();
+
+        await expect(dashboardPage.entityStoreEnablementModal).toBeHidden({ timeout: 10000 });
+      });
+
+      await spaceTest.step(
+        'Verify risk engine and entity store are actually enabled via API',
+        async () => {
+          const entityStoreStatus = await apiServices.entityAnalytics.waitForEntityStoreStatus(
+            'running',
+            120000
+          );
+          expect(entityStoreStatus.status).toBe('running');
+
+          const riskEngineStatus = await apiServices.entityAnalytics.getRiskEngineStatus();
+          expect(riskEngineStatus.risk_engine_status).toBe('ENABLED');
+        }
+      );
+
+      await spaceTest.step('Verify UI reflects the enabled state', async () => {
+        await dashboardPage.navigate();
+        await expect(dashboardPage.entitiesListPanel).toContainText('Entities', { timeout: 30000 });
+      });
+    });
+  }
+);

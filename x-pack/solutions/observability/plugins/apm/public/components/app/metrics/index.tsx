@@ -22,7 +22,7 @@ export function Metrics() {
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
-  const { dataView } = useAdHocApmDataView();
+  const { dataView, apmIndices } = useAdHocApmDataView();
 
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
@@ -52,6 +52,7 @@ export function Metrics() {
         runtimeName={runtimeName}
         serverlessType={serverlessType}
         dataView={dataView}
+        apmIndices={apmIndices}
       />
     );
   }

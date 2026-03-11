@@ -21,8 +21,10 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/zod-helpers'
   - '@kbn/i18n'
-  - '@kbn/esql-language'
   - '@kbn/tinymath'
+  - '@kbn/datemath'
+  - '@kbn/tinymath'
+  - '@kbn/grok-ui'
 tags:
   - shared-common
   - package

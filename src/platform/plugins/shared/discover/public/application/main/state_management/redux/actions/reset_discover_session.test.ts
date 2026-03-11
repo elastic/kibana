@@ -8,43 +8,16 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
-import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
-import type { DiscoverServices } from '../../../../../build_services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
-import type { DiscoverAppState } from '../types';
-
-const createPersistedTab = ({
-  tabId,
-  appState,
-  dataView,
-  services,
-}: {
-  tabId: string;
-  appState?: DiscoverAppState;
-  dataView: DataView;
-  services: DiscoverServices;
-}) =>
-  fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: tabId,
-      initialInternalState: {
-        serializedSearchSource: { index: dataView.id },
-      },
-      ...(appState ? { appState } : {}),
-    }),
-    timeRestore: false,
-    services,
-  });
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -54,26 +27,26 @@ const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
     })
   );
 
-const setup = async () => {
+export const setup = async () => {
   const services = createDiscoverServicesMock();
   const { internalState, runtimeStateManager, initializeTabs, initializeSingleTab, switchToTab } =
     getDiscoverInternalStateMock({
       services,
       persistedDataViews: [dataViewWithTimefieldMock, dataViewWithNoTimefieldMock],
     });
-  const persistedTab1 = createPersistedTab({
+  const persistedTab1 = getPersistedTabMock({
     tabId: 'tab-1',
-    appState: { columns: ['tab-1-column'] },
     dataView: dataViewWithTimefieldMock,
+    appStateOverrides: { columns: ['tab-1-column'] },
     services,
   });
-  const persistedTab2 = createPersistedTab({
+  const persistedTab2 = getPersistedTabMock({
     tabId: 'tab-2',
-    appState: { columns: ['tab-2-column'] },
     dataView: dataViewWithNoTimefieldMock,
+    appStateOverrides: { columns: ['tab-2-column'] },
     services,
   });
-  const persistedTab3 = createPersistedTab({
+  const persistedTab3 = getPersistedTabMock({
     tabId: 'tab-3',
     dataView: dataViewWithTimefieldMock,
     services,
@@ -128,13 +101,7 @@ describe('resetDiscoverSession', () => {
     jest.mocked(services.data.search.searchSource.create).mockClear();
 
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
-    const tab1StateContainer = tab1RuntimeState.stateContainer$.getValue()!;
-    const tab1SavedSearchSetSpy = jest.spyOn(tab1StateContainer.savedSearchState, 'set');
-
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
-    const tab2StateContainer = tab2RuntimeState.stateContainer$.getValue()!;
-    const tab2SavedSearchSetSpy = jest.spyOn(tab2StateContainer.savedSearchState, 'set');
-
     const tab3RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab3.id);
 
     expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
@@ -156,19 +123,14 @@ describe('resetDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab2.id });
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab3.id });
 
-    expect(tab1SavedSearchSetSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({ columns: persistedTab1.columns })
-    );
-
-    expect(tab2SavedSearchSetSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({ columns: persistedTab2.columns })
-    );
-
     expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
 
     const tab1 = selectTab(internalState.getState(), persistedTab1.id);
     const tab2 = selectTab(internalState.getState(), persistedTab2.id);
     const tab3 = selectTab(internalState.getState(), persistedTab3.id);
+
+    expect(tab1.appState.columns).toEqual(persistedTab1.columns);
+    expect(tab2.appState.columns).toEqual(persistedTab2.columns);
 
     expect(tab1.forceFetchOnSelect).toBe(false);
     expect(tab2.forceFetchOnSelect).toBe(true);

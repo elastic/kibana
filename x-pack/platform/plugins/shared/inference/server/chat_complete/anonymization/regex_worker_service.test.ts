@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
@@ -16,10 +16,10 @@ const regexEmailRule: AnonymizationRule = {
   entityClass: 'EMAIL',
   pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
 };
-const backTrackingRule: AnonymizationRule = {
+const backTrackingRule: RegexAnonymizationRule = {
   type: 'RegExp',
   enabled: true,
-  entityClass: 'TEST',
+  entityClass: 'MISC',
   pattern: '(a+)+$',
 };
 const taskPayload = {
@@ -33,6 +33,7 @@ function createTestConfig(
     enabled: true,
     minThreads: 1,
     maxThreads: 3,
+    maxQueue: 20,
     idleTimeout: { asMilliseconds: () => 30000 },
     taskTimeout: { asMilliseconds: () => 15000 },
     ...overrides,

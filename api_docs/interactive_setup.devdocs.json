@@ -28,6 +28,8 @@
         "label": "Certificate",
         "description": [],
         "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "{ C?: string | undefined; ST?: string | undefined; L?: string | undefined; O?: string | undefined; OU?: string | undefined; CN?: string | undefined; }"
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,6 +57,8 @@
             "label": "valid_from",
             "description": [],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -64,6 +70,8 @@
             "label": "valid_to",
             "description": [],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,6 +86,8 @@
               "{ C?: string | undefined; ST?: string | undefined; L?: string | undefined; O?: string | undefined; OU?: string | undefined; CN?: string | undefined; }"
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,6 +99,8 @@
             "label": "fingerprint256",
             "description": [],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,6 +112,8 @@
             "label": "raw",
             "description": [],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -116,6 +130,8 @@
           "\nThe token that allows one to configure Kibana instance to communicate with an existing Elasticsearch cluster that\nhas security features enabled."
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +145,8 @@
               "\nThe version of the Elasticsearch node that generated this enrollment token."
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +163,8 @@
               "readonly string[]"
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -158,6 +178,8 @@
               "\nThe SHA-256 fingerprint of the CA certificate that is used to sign the certificate that the Elasticsearch node presents for HTTP over TLS connections."
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -171,6 +193,8 @@
               "\nAn Elasticsearch API key (not encoded) that can be used as credentials authorized to call the enrollment related APIs in Elasticsearch."
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -185,6 +209,8 @@
         "label": "PingResult",
         "description": [],
         "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,6 +224,8 @@
               "\nIndicates whether the cluster requires authentication."
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -221,6 +249,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -235,6 +265,8 @@
         "label": "StatusResult",
         "description": [],
         "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -257,6 +289,8 @@
               }
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -270,6 +304,8 @@
               "\nIndicates whether Kibana is currently on hold and cannot proceed to `setup` yet."
             ],
             "path": "src/platform/plugins/private/interactive_setup/common/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -288,6 +324,8 @@
           "\nDescribes current status of the Elasticsearch connection."
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/elasticsearch_connection_status.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -305,6 +343,8 @@
           "\"compatibility_failure\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -320,6 +360,8 @@
           "\"configure_failure\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -335,6 +377,8 @@
           "\"elasticsearch_connection_configured\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -350,6 +394,8 @@
           "\"enroll_failure\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -365,6 +411,8 @@
           "\"kibana_config_failure\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -380,6 +428,8 @@
           "\"kibana_config_not_writable\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -395,6 +445,8 @@
           "\"outside_preboot_stage\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -410,6 +462,8 @@
           "\"ping_failure\""
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -425,6 +479,8 @@
           "6"
         ],
         "path": "src/platform/plugins/private/interactive_setup/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

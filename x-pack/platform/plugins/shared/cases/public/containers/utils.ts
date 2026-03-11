@@ -246,7 +246,7 @@ export const getIncrementalIdSearchOverrides = (search: string) => {
     // search only in `incremental_id` since types with `title`
     // and `description` don't overlap
     overrides = {
-      searchFields: ['incremental_id.text'],
+      searchFields: ['cases.incremental_id.text'],
       search: trimmedSearch,
     };
   }

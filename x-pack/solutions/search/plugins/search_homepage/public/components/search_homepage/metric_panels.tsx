@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiImage,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApplicationStart } from '@kbn/core/public';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ENABLED_ID } from '../../../common';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
@@ -28,6 +29,7 @@ const PANEL_TYPES = [
   'discover',
   'dashboards',
   'agentBuilder',
+  'dataSources',
   'workflows',
   'machineLearning',
   'dataManagement',
@@ -100,6 +102,21 @@ export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     dataTestSubj: 'searchHomepageNavLinks-agentBuilder',
   },
 
+  {
+    type: 'dataSources' as const,
+    getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_connect_visibility.svg`,
+    metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataSources.desc', {
+      defaultMessage:
+        'Connect and manage external data sources like GitHub, Notion, and SharePoint to use directly in Agent Builder.',
+    }),
+    metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dataSources.title', {
+      defaultMessage: 'Data Sources',
+    }),
+    onPanelClick: ({ application }) => {
+      application.navigateToApp('data_sources');
+    },
+    dataTestSubj: 'searchHomepageNavLinks-dataSources',
+  },
   {
     type: 'workflows' as const,
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_relevance.svg`,
@@ -177,44 +194,20 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
       onClick={() => onPanelClick && onPanelClick({ share, application })}
       data-test-subj={dataTestSubj}
     >
-      <EuiSplitPanel.Inner
-        grow
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          minHeight: `${euiTheme.base * 7}px`,
-        })}
-      >
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          gutterSize="s"
-          css={css({ height: '100%' })}
-        >
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner color="subdued" paddingSize="l">
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
+          <EuiImage size={euiTheme.size.xxxxl} src={getImageUrl(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        css={css({
-          minHeight: `${euiTheme.base * 8}px`,
-        })}
-      >
+      <EuiSplitPanel.Inner css={css({ height: '100%' })}>
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{metricTitle}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <p>{metricDescription}</p>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{metricTitle}</h4>
+          </EuiTitle>
+          <EuiText color="subdued" size="s">
+            <p>{metricDescription}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -223,21 +216,30 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
 
 export const MetricPanels = () => {
   const { services } = useKibana();
-  const isWorkflowsUiEnabled = services.uiSettings.get<boolean>(
-    WORKFLOWS_UI_SETTING_ENABLED_ID,
-    false
-  );
+  const { chrome, uiSettings } = services;
 
-  const panels = isWorkflowsUiEnabled
-    ? METRIC_PANEL_ITEMS
-    : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
+  const isWorkflowsUiEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ENABLED_ID, false);
+  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
+
+  const panels = useMemo(() => {
+    const capabilityChecks: Record<MetricPanelType, boolean> = {
+      discover: chrome.navLinks.get('discover') !== undefined,
+      dashboards: chrome.navLinks.get('dashboards') !== undefined,
+      agentBuilder: chrome.navLinks.get('agent_builder') !== undefined,
+      dataSources: isDataSourcesEnabled && chrome.navLinks.get('data_sources') !== undefined,
+      workflows: isWorkflowsUiEnabled && chrome.navLinks.get('workflows') !== undefined,
+      machineLearning:
+        chrome.navLinks.get('ml:overview') !== undefined || chrome.navLinks.get('ml') !== undefined,
+      dataManagement: chrome.navLinks.get('management:index_management') !== undefined,
+    };
+
+    return METRIC_PANEL_ITEMS.filter((panel) => capabilityChecks[panel.type]);
+  }, [chrome.navLinks, isWorkflowsUiEnabled, isDataSourcesEnabled]);
 
   return (
     <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
       {panels.map((panel, index) => (
-        <EuiFlexItem key={panel.type + '-' + index}>
-          <MetricPanelEmpty panel={panel} />
-        </EuiFlexItem>
+        <MetricPanelEmpty panel={panel} key={panel.type + '-' + index} />
       ))}
     </EuiFlexGrid>
   );

@@ -78,7 +78,9 @@ export class MaintenanceWindowClientFactory {
   }
 
   public createInternal(request: KibanaRequest) {
-    const savedObjectsInternalClient = this.savedObjectsService.createInternalRepository();
+    const savedObjectsInternalClient = this.savedObjectsService.createInternalRepository([
+      MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    ]);
     return this.createMaintenanceWindowClient(request, savedObjectsInternalClient);
   }
 }

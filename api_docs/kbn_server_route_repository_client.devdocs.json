@@ -24,6 +24,8 @@
           "<TRepository, TClientOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
             "label": "core",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 9,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,6 +55,8 @@
                   "; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -71,6 +77,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,6 +93,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_http_fetch_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -104,6 +114,8 @@
           "(error: unknown) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -118,6 +130,8 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/is_request_aborted_error.ts",
+            "lineNumber": 12,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -146,6 +160,8 @@
           "<TServerRouteRepository, TAdditionalClientOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,6 +194,8 @@
               "<TServerRouteRepository, TEndpoint>>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 263,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -192,6 +210,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 264,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -217,6 +237,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 265,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,6 +279,8 @@
               "<TReturnType> : never : never"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -271,6 +295,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -296,6 +322,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 273,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -325,15 +353,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, ",
+          "<any, infer TRouteParamsRT extends unknown, any, any, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -341,17 +361,11 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          " | undefined> ? TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
+          " | undefined> ? TRouteParamsRT extends any ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 238,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -367,6 +381,8 @@
           "HttpFetchOptions"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 291,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

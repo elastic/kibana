@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/doc-links'
   - '@kbn/core-deprecations-common'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

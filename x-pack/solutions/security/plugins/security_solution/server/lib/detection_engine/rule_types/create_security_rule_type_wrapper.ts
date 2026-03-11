@@ -20,10 +20,8 @@ import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
-  checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
-  hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
@@ -182,13 +180,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const {
             savedObjectsClient,
             scopedClusterClient,
-            uiSettingsClient,
             ruleMonitoringService,
             ruleResultService,
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
-          const esClient = scopedClusterClient.asCurrentUser;
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
@@ -217,7 +212,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
+          ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatusEnum.running,
@@ -279,13 +274,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data View not found ${exc}`,
+                  message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed ${exc}`,
+                  message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
 
@@ -304,55 +299,48 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           if (!isMachineLearningParams(params)) {
             try {
-              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
-              const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
+              const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
+              const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
+                inputIndex
+              );
 
-              if (existingIndices.length > 0) {
-                const privileges = await checkPrivilegesFromEsClient(esClient, existingIndices);
-                const readIndexWarningMessage = await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                  docLinks,
-                });
-
-                if (readIndexWarningMessage != null) {
-                  wrapperWarnings.push(readIndexWarningMessage);
-                }
+              if (indexPatternsWithMatches.length === 0) {
+                const warningMessage = `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`;
+                wrapperWarnings.push(warningMessage);
+                skipExecution = true;
               }
             } catch (exc) {
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
             }
 
-            try {
-              const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                services.scopedClusterClient.asCurrentUser.fieldCaps(
-                  {
-                    index: inputIndex,
-                    fields: secondaryTimestamp
-                      ? [primaryTimestamp, secondaryTimestamp]
-                      : [primaryTimestamp],
-                    include_unmapped: true,
-                    runtime_mappings: runtimeMappings,
-                    ignore_unavailable: true,
-                  },
-                  { meta: true }
-                )
-              );
+            if (!skipExecution) {
+              try {
+                const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
+                  services.scopedClusterClient.asCurrentUser.fieldCaps(
+                    {
+                      index: inputIndex,
+                      fields: secondaryTimestamp
+                        ? [primaryTimestamp, secondaryTimestamp]
+                        : [primaryTimestamp],
+                      include_unmapped: true,
+                      runtime_mappings: runtimeMappings,
+                      ignore_unavailable: true,
+                    },
+                    { meta: true }
+                  )
+                );
 
-              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
-                await hasTimestampFields({
+                const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
                   timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
-                  inputIndices: inputIndex,
+                  timestampFieldCapsResponse: fieldCapsResponse,
                   ruleExecutionLogger,
                 });
-              if (warningMissingTimestampFieldsMessage != null) {
-                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
+                if (missingTimestampWarning) {
+                  wrapperWarnings.push(missingTimestampWarning);
+                }
+              } catch (exc) {
+                wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
               }
-              skipExecution = foundNoIndices;
-            } catch (exc) {
-              wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
 
             if (!isServerless) {
@@ -513,6 +501,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
+                  totalEventsFound:
+                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
@@ -544,7 +534,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            if (result.totalEventsFound != null) {
+              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
+            }
+            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
+            if (suppressedAlertsCount > 0) {
+              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
+            }
+
             const createdSignalsCount = result.createdSignals.length;
+
+            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
+              const unaccountedEvents =
+                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
+              if (unaccountedEvents > 0) {
+                ruleExecutionLogger.info(
+                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
+                );
+              }
+            }
+
+            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -590,11 +600,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
+                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )} ${
+                )}".${
                   !isEmpty(tuples)
-                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
                     : ''
                 }`
               );
@@ -614,7 +624,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              message: `An error occurred during rule execution. ${errorMessage}`,
               userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,

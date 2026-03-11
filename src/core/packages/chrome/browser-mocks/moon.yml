@@ -22,7 +22,9 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-internal'
+  - '@kbn/core-chrome-browser-components'
   - '@kbn/lazy-object'
+  - '@kbn/core-chrome-sidebar-mocks'
 tags:
   - shared-browser
   - package

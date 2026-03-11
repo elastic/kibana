@@ -12,6 +12,7 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { withLicenseCheck } from '../lib/with_license_check';
 
 export function registerGetWorkflowExecutionByIdRoute({
   router,
@@ -28,13 +29,21 @@ export function registerGetWorkflowExecutionByIdRoute({
         params: schema.object({
           workflowExecutionId: schema.string(),
         }),
+        query: schema.object({
+          includeInput: schema.boolean({ defaultValue: false }),
+          includeOutput: schema.boolean({ defaultValue: false }),
+        }),
       },
     },
-    async (context, request, response) => {
+    withLicenseCheck(async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
+        const { includeInput, includeOutput } = request.query;
         const spaceId = spaces.getSpaceId(request);
-        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId);
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId, {
+          includeInput,
+          includeOutput,
+        });
         if (!workflowExecution) {
           return response.notFound();
         }
@@ -44,6 +53,6 @@ export function registerGetWorkflowExecutionByIdRoute({
       } catch (error) {
         return handleRouteError(response, error);
       }
-    }
+    })
   );
 }

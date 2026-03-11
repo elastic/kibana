@@ -38,6 +38,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -67,6 +71,8 @@
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,6 +101,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -110,6 +118,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 27,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -131,6 +141,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+                "lineNumber": 27,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -149,6 +161,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -165,6 +179,8 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/plugin.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -184,6 +200,8 @@
         "label": "MaintenanceWindowsPublicSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,6 +222,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -218,6 +238,8 @@
         "label": "MaintenanceWindowsPublicStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,6 +260,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -258,6 +282,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -279,6 +305,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,6 +327,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +349,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -342,6 +374,8 @@
         "label": "MaintenanceWindowsServerSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -362,6 +396,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -382,6 +418,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -402,6 +440,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -416,6 +456,8 @@
         "label": "MaintenanceWindowsServerStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -444,6 +486,8 @@
               " | undefined) => void; }"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -461,7 +505,7 @@
         "label": "MaintenanceWindowClient",
         "description": [],
         "signature": [
-          "{ create: (params: Readonly<{} & { data: Readonly<{ enabled?: boolean | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ create: (params: Readonly<{} & { data: Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -469,7 +513,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { title: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; enabled?: boolean | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -477,7 +521,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; update: (params: Readonly<{} & { id: string; data: Readonly<{ enabled?: boolean | undefined; title?: string | undefined; duration?: number | undefined; rRule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; }>) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -485,7 +529,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & {}>; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -493,7 +537,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; get: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; update: (params: Readonly<{} & { id: string; data: Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -501,7 +545,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; enabled?: boolean | undefined; title?: string | undefined; schedule?: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }> | undefined; duration?: number | undefined; rRule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -509,7 +553,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; perPage: number; total: number; }>>; bulkGet: (params: Readonly<{} & { ids: string[]; }>) => Promise<Readonly<{} & { errors: Readonly<{} & { id: string; error: string; message: string; statusCode: number; }>[]; maintenanceWindows: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & {}>; }>) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -517,7 +561,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; }>>; archive: (params: Readonly<{} & { id: string; archive: boolean; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -525,7 +569,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; finish: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; get: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -533,7 +577,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; getActiveMaintenanceWindows: (cacheIntervalMs?: number | undefined) => Promise<Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -541,9 +585,91 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]>; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; find: (params?: Readonly<{ search?: string | undefined; page?: number | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; searchFields?: string[] | undefined; status?: (\"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\")[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { page: number; data: Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; perPage: number; total: number; }>>; bulkGet: (params: Readonly<{} & { ids: string[]; }>) => Promise<Readonly<{} & { errors: Readonly<{} & { id: string; error: string; message: string; statusCode: number; }>[]; maintenanceWindows: Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; }>>; archive: (params: Readonly<{} & { id: string; archive: boolean; }>) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; finish: (params: Readonly<{} & { id: string; }>) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>>; getActiveMaintenanceWindows: (cacheIntervalMs?: number | undefined) => Promise<Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -559,6 +685,8 @@
           "{ readonly enabled: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/config.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -576,6 +704,8 @@
           "{ readonly OBSERVABILITY: \"observability\"; readonly SECURITY_SOLUTION: \"securitySolution\"; readonly MANAGEMENT: \"management\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -589,6 +719,8 @@
       "label": "MaintenanceWindowsServerStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+      "lineNumber": 40,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -606,6 +738,8 @@
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -621,6 +755,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 41,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -642,6 +778,8 @@
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 42,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -657,6 +795,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 42,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -678,6 +818,8 @@
             "MaintenanceWindowClientApi"
           ],
           "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -693,6 +835,8 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/maintenance_windows/server/types.ts",
+              "lineNumber": 43,
+              "columnNumber": 41,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -719,6 +863,8 @@
           "(errorMessage: string) => string"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -733,6 +879,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+            "lineNumber": 10,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -752,6 +900,8 @@
           "(errorMessage: string) => boolean"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -766,6 +916,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/maintenance_window_scoped_query_error_message.ts",
+            "lineNumber": 14,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -784,6 +936,8 @@
         "label": "DateRange",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -795,6 +949,8 @@
             "label": "gte",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -806,6 +962,8 @@
             "label": "lte",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -820,6 +978,8 @@
         "label": "MaintenanceWindowAttributes",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -831,6 +991,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,6 +1004,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -853,6 +1017,8 @@
             "label": "duration",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -864,6 +1030,8 @@
             "label": "expirationDate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -879,6 +1047,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -893,6 +1063,8 @@
               "RRuleAttributes"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -907,6 +1079,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -921,6 +1095,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,6 +1108,8 @@
             "label": "createdAt",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -943,6 +1121,8 @@
             "label": "updatedAt",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -958,6 +1138,8 @@
               "[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -973,6 +1155,42 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.schedule",
+            "type": "Object",
+            "tags": [],
+            "label": "schedule",
+            "description": [],
+            "signature": [
+              "{ custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "maintenanceWindows",
+            "id": "def-common.MaintenanceWindowAttributes.scope",
+            "type": "Object",
+            "tags": [],
+            "label": "scope",
+            "description": [],
+            "signature": [
+              "{ alerting: ",
+              "AlertsFilterQueryAttributes",
+              " | null; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/maintenance_windows/server/data/types/maintenance_window_attributes.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -987,6 +1205,8 @@
         "label": "MaintenanceWindowClientContext",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1001,6 +1221,8 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1023,6 +1245,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1039,6 +1263,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1059,6 +1285,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1073,6 +1301,8 @@
         "label": "MaintenanceWindowModificationMetadata",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1087,6 +1317,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1101,6 +1333,8 @@
               "string | null"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1112,6 +1346,8 @@
             "label": "createdAt",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1123,6 +1359,8 @@
             "label": "updatedAt",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1139,6 +1377,8 @@
         "label": "MaintenanceWindowSOProperties",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -1151,6 +1391,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1162,6 +1404,8 @@
             "label": "enabled",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1173,6 +1417,8 @@
             "label": "duration",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1184,6 +1430,8 @@
             "label": "expirationDate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1205,6 +1453,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1223,6 +1473,8 @@
               ", \"dtstart\" | \"tzid\">"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1237,6 +1489,8 @@
               "string[] | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1258,6 +1512,8 @@
               " | null | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1272,6 +1528,8 @@
         "label": "ScopedQueryAttributes",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1283,6 +1541,8 @@
             "label": "kql",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1298,6 +1558,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,6 +1574,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1328,6 +1592,8 @@
         "label": "MaintenanceWindowStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1342,6 +1608,8 @@
         "label": "ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1357,6 +1625,8 @@
           "\"/api/alerting\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1372,6 +1642,8 @@
           "\"/api/maintenance_window\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1387,6 +1659,8 @@
           "\"/api/maintenance_window\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1399,7 +1673,7 @@
         "label": "CreateMaintenanceWindowRequestBody",
         "description": [],
         "signature": [
-          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1407,9 +1681,11 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly title: string; readonly duration: number; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; readonly title: string; readonly duration: number; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/create/types/v1.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1422,6 +1698,8 @@
         "label": "DELETE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1434,6 +1712,8 @@
         "label": "FIND_MAINTENANCE_WINDOWS_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 70,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1446,7 +1726,7 @@
         "label": "FindMaintenanceWindowsResponse",
         "description": [],
         "signature": [
-          "{ readonly per_page: number; readonly page: number; readonly data: Readonly<{ category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly per_page: number; readonly page: number; readonly data: Readonly<{ category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scoped_query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1454,9 +1734,11 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; duration: number; events: Readonly<{} & { gte: string; lte: string; }>[]; created_at: string; created_by: string | null; updated_at: string; updated_by: string | null; expiration_date: string; r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; event_start_time: string | null; event_end_time: string | null; }>[]; readonly total: number; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; events: Readonly<{} & { gte: string; lte: string; }>[]; created_at: string; created_by: string | null; updated_at: string; updated_by: string | null; expiration_date: string; r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; event_start_time: string | null; event_end_time: string | null; }>[]; readonly total: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/find/types/v1.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1469,7 +1751,7 @@
         "label": "FindMaintenanceWindowsResult",
         "description": [],
         "signature": [
-          "{ readonly page: number; readonly data: Readonly<{ categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly page: number; readonly data: Readonly<{ scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1477,9 +1759,19 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; } & { id: string; enabled: boolean; title: string; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; readonly perPage: number; readonly total: number; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; } & { id: string; enabled: boolean; title: string; schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; duration: number; status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; events: Readonly<{} & { gte: string; lte: string; }>[]; expirationDate: string; eventStartTime: string | null; eventEndTime: string | null; }>[]; readonly perPage: number; readonly total: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/methods/find/types/find_maintenance_window_result.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1492,6 +1784,8 @@
         "label": "GET_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1507,6 +1801,8 @@
           "\"/internal/alerting/rules/maintenance_window/_active\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1522,6 +1818,8 @@
           "\"/internal/alerting/rules/maintenance_window\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1537,6 +1835,8 @@
           "\"/internal/alerting\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1552,6 +1852,8 @@
           "\"MM/DD/YY hh:mm A\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1567,6 +1869,8 @@
           "10"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1582,6 +1886,8 @@
           "1"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1597,6 +1903,8 @@
           "\"maintenanceWindow\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1612,6 +1920,8 @@
           "\"maintenance-window\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1627,6 +1937,8 @@
           "\"maintenanceWindows\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1639,7 +1951,7 @@
         "label": "MaintenanceWindow",
         "description": [],
         "signature": [
-          "{ readonly categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scopedQuery?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly scope?: Readonly<{} & { alerting: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1647,9 +1959,19 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null; }> | undefined; readonly categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly schedule: Readonly<{} & { custom: Readonly<{ timezone?: string | undefined; recurring?: Readonly<{ end?: string | undefined; every?: string | undefined; occurrences?: number | undefined; onWeekDay?: string[] | undefined; onMonthDay?: number[] | undefined; onMonth?: number[] | undefined; } & {}> | undefined; } & { start: string; duration: string; }>; }>; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/application/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1665,6 +1987,8 @@
           "(\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/shared/types/v1.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1690,6 +2014,8 @@
           " | null | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1705,6 +2031,8 @@
           "string"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1717,7 +2045,7 @@
         "label": "MaintenanceWindowResponse",
         "description": [],
         "signature": [
-          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1725,9 +2053,11 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly duration: number; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly created_at: string; readonly created_by: string | null; readonly updated_at: string; readonly updated_by: string | null; readonly expiration_date: string; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly event_start_time: string | null; readonly event_end_time: string | null; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; readonly id: string; readonly enabled: boolean; readonly title: string; readonly duration: number; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly created_at: string; readonly created_by: string | null; readonly updated_at: string; readonly updated_by: string | null; readonly expiration_date: string; readonly r_rule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly event_start_time: string | null; readonly event_end_time: string | null; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/response/types/v1.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1759,9 +2089,36 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maintenanceWindows",
+        "id": "def-common.MaintenanceWindowUI",
+        "type": "Type",
+        "tags": [],
+        "label": "MaintenanceWindowUI",
+        "description": [],
+        "signature": [
+          "{ readonly id: string; readonly enabled: boolean; readonly title: string; readonly createdBy: string | null; readonly updatedBy: string | null; readonly createdAt: string; readonly updatedAt: string; readonly duration: number; readonly status: \"disabled\" | \"running\" | \"upcoming\" | \"finished\" | \"archived\"; readonly rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 6 | 5 | 4 | 3 | undefined; until?: string | undefined; wkst?: \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | undefined; byweekday?: (string | number)[] | null | undefined; bymonth?: number[] | null | undefined; bysetpos?: number[] | null | undefined; bymonthday?: number[] | null | undefined; byyearday?: number[] | null | undefined; byweekno?: number[] | null | undefined; byhour?: number[] | null | undefined; byminute?: number[] | null | undefined; bysecond?: number[] | null | undefined; } & { dtstart: string; tzid: string; }>; readonly events: Readonly<{} & { gte: string; lte: string; }>[]; readonly categoryIds?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scopedQuery?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          {
+            "pluginId": "@kbn/es-query-constants",
+            "scope": "common",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
+            "section": "def-common.FilterStateStore",
+            "text": "FilterStateStore"
+          },
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; readonly expirationDate: string; readonly eventStartTime: string | null; readonly eventEndTime: string | null; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1775,6 +2132,8 @@
           "\"management\""
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1787,6 +2146,8 @@
         "label": "UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1799,6 +2160,8 @@
         "label": "UPDATE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/index.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1811,7 +2174,7 @@
         "label": "UpdateMaintenanceWindowRequestBody",
         "description": [],
         "signature": [
-          "{ readonly enabled?: boolean | undefined; readonly title?: string | undefined; readonly duration?: number | undefined; readonly r_rule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "{ readonly enabled?: boolean | undefined; readonly title?: string | undefined; readonly duration?: number | undefined; readonly r_rule?: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 1 | 4 | 3 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonth?: number[] | undefined; bymonthday?: number[] | undefined; } & { dtstart: string; tzid: string; }> | undefined; readonly category_ids?: (\"observability\" | \"securitySolution\" | \"management\")[] | null | undefined; readonly scoped_query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1819,9 +2182,11 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | null | undefined; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | null | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/server/routes/schemas/maintenance_window/internal/request/update/types/v1.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1836,6 +2201,8 @@
         "label": "MAINTENANCE_WINDOW_API_PRIVILEGES",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1847,6 +2214,8 @@
             "label": "READ_MAINTENANCE_WINDOW",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1858,6 +2227,8 @@
             "label": "WRITE_MAINTENANCE_WINDOW",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1872,6 +2243,8 @@
         "label": "MAINTENANCE_WINDOW_DEEP_LINK_IDS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1883,6 +2256,8 @@
             "label": "maintenanceWindows",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1894,6 +2269,8 @@
             "label": "maintenanceWindowsCreate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1905,6 +2282,8 @@
             "label": "maintenanceWindowsEdit",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1919,6 +2298,8 @@
         "label": "MAINTENANCE_WINDOW_PATHS",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1930,6 +2311,8 @@
             "label": "maintenanceWindows",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1941,6 +2324,8 @@
             "label": "maintenanceWindowsCreate",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1952,6 +2337,8 @@
             "label": "maintenanceWindowsEdit",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maintenance_windows/common/constants.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -68,9 +68,21 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'lookup_join',
   },
+  metrics_info: {
+    type: 'command',
+    name: 'metrics_info',
+  },
+  mmr: {
+    type: 'command',
+    name: 'mmr',
+  },
   mv_expand: {
     type: 'command',
     name: 'mv_expand',
+  },
+  registered_domain: {
+    type: 'command',
+    name: 'registered_domain',
   },
   rename: {
     type: 'command',
@@ -92,8 +104,45 @@ export const commandsMetadata: Record<string, unknown> = {
     type: 'command',
     name: 'stats',
   },
+  ts_info: {
+    type: 'command',
+    name: 'ts_info',
+  },
+  uri_parts: {
+    type: 'command',
+    name: 'uri_parts',
+  },
   where: {
     type: 'command',
     name: 'where',
   },
 };
+
+export enum EsqlCommandNames {
+  CHANGE_POINT = 'change_point',
+  DISSECT = 'dissect',
+  DROP = 'drop',
+  ENRICH = 'enrich',
+  EVAL = 'eval',
+  EXPLAIN = 'explain',
+  FORK = 'fork',
+  GROK = 'grok',
+  INLINE_STATS = 'inline_stats',
+  INSIST = 'insist',
+  KEEP = 'keep',
+  LIMIT = 'limit',
+  LOOKUP = 'lookup',
+  LOOKUP_JOIN = 'lookup_join',
+  METRICS_INFO = 'metrics_info',
+  MMR = 'mmr',
+  MV_EXPAND = 'mv_expand',
+  REGISTERED_DOMAIN = 'registered_domain',
+  RENAME = 'rename',
+  RERANK = 'rerank',
+  SAMPLE = 'sample',
+  SORT = 'sort',
+  STATS = 'stats',
+  TS_INFO = 'ts_info',
+  URI_PARTS = 'uri_parts',
+  WHERE = 'where',
+}

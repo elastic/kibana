@@ -40,6 +40,7 @@ describe('EnterIfNodeImpl', () => {
       contextManager: mockContextManager,
       startStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn(),
+      setCurrentStepState: jest.fn(),
     } as any;
 
     node = {
@@ -100,7 +101,37 @@ describe('EnterIfNodeImpl', () => {
       'event.type: alert'
     );
     expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
+      rawCondition: 'event.type: alert',
       condition: 'event.type: foo',
+      conditionResult: false,
+    });
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      conditionResult: false,
+    });
+  });
+
+  it('should store true conditionResult in step state when condition matches', async () => {
+    await impl.run();
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+      conditionResult: true,
+    });
+  });
+
+  it('should store false conditionResult in step state when condition does not match', async () => {
+    workflowGraph.getDirectSuccessors = jest.fn().mockReturnValueOnce([
+      {
+        id: 'thenNode',
+        type: 'enter-then-branch',
+        condition: 'event.type:rule',
+      } as EnterConditionBranchNode,
+      {
+        id: 'elseNode',
+        type: 'enter-else-branch',
+      } as EnterConditionBranchNode,
+    ]);
+
+    await impl.run();
+    expect(mockStepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
       conditionResult: false,
     });
   });

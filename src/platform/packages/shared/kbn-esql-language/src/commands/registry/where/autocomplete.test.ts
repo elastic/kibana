@@ -27,7 +27,7 @@ import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -168,6 +168,27 @@ describe('WHERE Autocomplete', () => {
         );
       }
     });
+
+    test('after chained logical operators', async () => {
+      await whereExpectSuggestions(
+        `from a | where doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
+        [
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+        ]
+      );
+    });
+
+    test('after chained logical operator inside function', async () => {
+      await whereExpectSuggestions(
+        `from a | where CASE(doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
+        [
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+        ]
+      );
+    });
+
     test('after a logical operator numeric', async () => {
       const expectedFieldsNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
       mockFieldsWithTypes(mockCallbacks, expectedFieldsNumeric);

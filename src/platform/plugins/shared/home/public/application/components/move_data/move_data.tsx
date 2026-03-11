@@ -65,6 +65,7 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
           <EuiSpacer size="m" />
           <EuiButton
             data-test-subj="migrate_data_to_cloud__migrate_data_docs_link"
+            fill={true}
             color="primary"
             href={migrateDataUrl}
             target="_blank"

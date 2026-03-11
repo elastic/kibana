@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
@@ -18,7 +19,7 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 
 const ICON = 'warning';
 const EXPAND_PROPERTIES = {
@@ -111,6 +112,12 @@ export const RelatedCases: React.FC<RelatedCasesProps> = ({ eventId }) => {
         items={data}
         columns={columns}
         pagination={true}
+        tableCaption={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.correlations.relatedCasesCaption',
+          {
+            defaultMessage: 'Related cases',
+          }
+        )}
         noItemsMessage={
           <FormattedMessage
             id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"

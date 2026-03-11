@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isArray } from 'lodash/fp';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
 import {
@@ -257,7 +257,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   const { from, to } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
 
-  const { data } = useQueryAlerts<{}, AlertsByStatusAgg>({
+  const { data, setQuery: setAlertsQuery } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
       from,
       to,
@@ -266,6 +266,15 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
+  useEffect(() => {
+    setAlertsQuery(
+      getAlertsByStatusQuery({
+        from,
+        to,
+        entityFilter: { field: 'user.name', value: userName },
+      })
+    );
+  }, [setAlertsQuery, from, to, userName]);
   const { navigateTo } = useNavigation();
 
   if (!data) return <EuiLoadingSpinner size="m" />;
@@ -288,13 +297,13 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   const filters = [
     {
       title: OPEN_IN_ALERTS_TITLE_USERNAME,
-      selectedOptions: [userName],
-      fieldName: 'user.name',
+      selected_options: [userName],
+      field_name: 'user.name',
     },
     {
       title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selectedOptions: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
-      fieldName: 'kibana.alert.workflow_status',
+      selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
+      field_name: 'kibana.alert.workflow_status',
     },
   ];
 

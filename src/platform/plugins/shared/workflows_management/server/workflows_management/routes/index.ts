@@ -22,13 +22,16 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
+import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
+import { registerPostResumeWorkflowExecutionRoute } from './post_resume_workflow_execution';
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import { registerPostTestStepRoute } from './post_test_step';
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
+import { registerPostValidateWorkflowRoute } from './post_validate_workflow';
 import { registerPutUpdateWorkflowRoute } from './put_update_workflow';
 import type { RouteDependencies } from './types';
 import type { WorkflowsRouter } from '../../types';
@@ -49,6 +52,7 @@ export function defineRoutes(
   registerGetConnectorsRoute(deps);
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
+  registerPostBulkCreateWorkflowsRoute(deps);
   registerPutUpdateWorkflowRoute(deps);
   registerDeleteWorkflowByIdRoute(deps);
   registerDeleteWorkflowsBulkRoute(deps);
@@ -59,7 +63,9 @@ export function defineRoutes(
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowExecutionByIdRoute(deps);
   registerPostCancelWorkflowExecutionRoute(deps);
+  registerPostResumeWorkflowExecutionRoute(deps);
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);
+  registerPostValidateWorkflowRoute(deps);
 }

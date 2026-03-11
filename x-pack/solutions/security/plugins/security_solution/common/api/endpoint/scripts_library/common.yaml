@@ -11,6 +11,22 @@ components:
         - linux
         - macos
         - windows
+
+    EndpointScriptTags:
+      type: string
+      enum:
+        - remediationAction
+        - dataCollection
+        - networkDiagnostics
+        - networkAction
+        - systemInventory
+        - forensicCollection
+        - threatHunting
+        - discovery
+        - systemManagement
+        - userManagement
+        - troubleshooting
+
     EndpointScript:
       type: object
       properties:
@@ -25,6 +41,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EndpointScriptPlatform'
+        tags:
+          type: array
+          description: Tags that categorize the script
+          items:
+            $ref: '#/components/schemas/EndpointScriptTags'
         fileName:
           type: string
           description: Name of the script file that was uploaded
@@ -91,3 +112,16 @@ components:
           description: Collects host data for investigation
           instructions: Collects host data for investigation
           example: ./collect_host_data.sh --help
+
+    EndpointScriptFileType:
+      type: string
+      description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
+      enum: [script, archive]
+
+    ArchivePathToExecutableSchema:
+      type: string
+      description:
+        Used only for when the uploaded script is an archive (.zip file for example).
+        This property defines the relative path to the file included in the archive that should be executed
+        once its contents are extracted. The path should be relative to the root of the archive.
+      example: ./bin/script.sh

@@ -101,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
-
     await exports.clickExportTopNavButton();
     await retry.waitFor('the popover to be opened', async () => {
       return await exports.isExportPopoverOpen();
@@ -112,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
-    await exports.clickExportTopNavButton();
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
@@ -142,7 +140,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return clipboardValue;
   };
 
-  describe('Discover CSV Export', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/229445
+  describe.skip('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
@@ -164,7 +163,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -175,7 +173,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
     });
 

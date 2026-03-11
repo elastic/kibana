@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasEditCapabilities,
@@ -17,7 +17,6 @@ import type {
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { Observable } from 'rxjs';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { ILayer } from '../classes/layers/layer';
@@ -29,7 +28,7 @@ import type {
 } from '../../common/embeddable/types';
 
 export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
-  HasDynamicActions &
+  HasDrilldowns &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &

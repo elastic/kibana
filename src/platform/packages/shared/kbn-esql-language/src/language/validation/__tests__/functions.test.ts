@@ -804,6 +804,12 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | STATS AGG_FUNCTION(TS_FUNCTION())', [
         'Function TS_FUNCTION not allowed in STATS',
       ]);
+
+      // TIME_SERIES_AGG functions are also allowed at the top level of STATS with TS source
+      await expectErrors('TS a_index | STATS TS_FUNCTION()', []);
+      await expectErrors('FROM a_index | STATS TS_FUNCTION()', [
+        'Function TS_FUNCTION not allowed in STATS',
+      ]);
     });
   });
 

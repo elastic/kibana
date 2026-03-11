@@ -43,7 +43,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
       rangeFrom?: string;
       rangeTo?: string;
       kuery?: string;
-      controlConfigs?: RuleDetailsControlConfigs;
+      controlConfigs?: FilterControlConfig[];
     } = {};
 
     appState.rangeFrom = rangeFrom || 'now-15m';

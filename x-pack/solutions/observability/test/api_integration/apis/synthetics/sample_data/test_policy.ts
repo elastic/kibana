@@ -7,6 +7,7 @@
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
 
@@ -21,7 +22,8 @@ interface PolicyProps {
   proxyUrl?: string;
   params?: Record<string, any>;
   isBrowser?: boolean;
-  spaceIds?: string[];
+  spaceId?: string;
+  mws?: MaintenanceWindow[];
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
@@ -133,6 +135,8 @@ export const getHttpInput = ({
   isTLSEnabled,
   isBrowser,
   spaceIds,
+  namespace,
+  mws,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -172,7 +176,9 @@ export const getHttpInput = ({
     location_id: { value: 'fleet_managed', type: 'text' },
     location_name: { value: 'Fleet managed', type: 'text' },
     max_attempts: { type: 'integer', value: 2 },
-    maintenance_windows: { type: 'yaml' },
+    maintenance_windows: {
+      type: 'yaml',
+    },
     id: { type: 'text' },
     origin: { type: 'text' },
     ipv4: { type: 'bool', value: true },
@@ -249,7 +255,7 @@ export const getHttpInput = ({
       value: JSON.stringify(location.name) ?? '"Test private location 0"',
       type: 'text',
     },
-    ...commonVars,
+    ...commonVars(mws),
     id: { value: JSON.stringify(id), type: 'text' },
     origin: { value: projectId ? 'project' : 'ui', type: 'text' },
     ipv4: { type: 'bool', value: true },

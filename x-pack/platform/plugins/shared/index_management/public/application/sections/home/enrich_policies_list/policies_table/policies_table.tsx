@@ -187,6 +187,9 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       pagination={pagination}
       sorting={sorting}
       onTableChange={onTableChange}
+      tableCaption={i18n.translate('xpack.idxMgmt.enrichPolicies.table.caption', {
+        defaultMessage: 'Enrich policies',
+      })}
     />
   );
 };

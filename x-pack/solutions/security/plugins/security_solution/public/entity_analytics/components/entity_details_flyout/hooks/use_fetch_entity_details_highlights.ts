@@ -67,6 +67,7 @@ export const useFetchEntityDetailsHighlights = ({
   const { from, to } = useGlobalTime();
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [assistantResult, setAssistantResult] = useState<{
     response: EntityHighlightsResponse | null;
     replacements: Replacements;
@@ -82,6 +83,9 @@ export const useFetchEntityDetailsHighlights = ({
       }
     );
 
+    // Clear any previously shown error while a new generation attempt is in progress
+    setError(null);
+
     const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
       entityType,
       entityIdentifier,
@@ -89,10 +93,12 @@ export const useFetchEntityDetailsHighlights = ({
       from: new Date(from).getTime(),
       to: new Date(to).getTime(),
       connectorId,
-    }).catch((error) => {
-      addError(error, {
+    }).catch((e: Error) => {
+      const caughtError = e instanceof Error ? e : new Error(String(e));
+      addError(caughtError, {
         title: errorTitle,
       });
+      setError(caughtError);
       return { summary: null, replacements: null, prompt: null };
     });
 
@@ -126,13 +132,15 @@ export const useFetchEntityDetailsHighlights = ({
         replacements,
         generatedAt: Date.now(),
       });
-    } catch (error) {
-      if (isInferenceRequestAbortedError(error)) {
+    } catch (e) {
+      if (isInferenceRequestAbortedError(e)) {
         return;
       }
-      addError(error instanceof Error ? error : new Error(String(error)), {
+      const caughtError = e instanceof Error ? e : new Error(String(e));
+      addError(caughtError, {
         title: errorTitle,
       });
+      setError(caughtError);
     } finally {
       setIsChatLoading(false);
       setAbortController(null);
@@ -162,5 +170,6 @@ export const useFetchEntityDetailsHighlights = ({
     isChatLoading,
     abortStream,
     result: assistantResult,
+    error,
   };
 };

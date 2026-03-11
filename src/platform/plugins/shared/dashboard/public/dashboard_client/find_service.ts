@@ -20,7 +20,6 @@ export const findService = {
         id,
         status: 'success',
         attributes: result.data,
-        references: result.data.references ?? [],
       };
     } catch (error) {
       return { id, status: 'error', notFound: error instanceof SavedObjectNotFound, error };

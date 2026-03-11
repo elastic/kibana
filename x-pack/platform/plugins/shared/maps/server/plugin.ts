@@ -262,10 +262,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     contentManagement.register({
       id: CONTENT_ID,
-      storage: new MapsStorage({
-        throwOnResultValidationError: this._initializerContext.env.mode.dev,
-        logger: this._logger.get('storage'),
-      }),
+      storage: new MapsStorage(),
       version: {
         latest: LATEST_VERSION,
       },
@@ -273,13 +270,9 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
-    plugins.embeddable.registerTransforms(
-      MAP_SAVED_OBJECT_TYPE,
-      getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerTransforms(MAP_SAVED_OBJECT_TYPE, {
+      getTransforms,
+    });
 
     return {
       config: config$,

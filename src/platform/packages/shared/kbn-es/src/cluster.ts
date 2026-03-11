@@ -22,13 +22,15 @@ import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
-import type { DockerOptions, ServerlessOptions } from './utils';
+import type { DockerOptions, DockerSnapshotOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
   log as defaultLog,
   NativeRealm,
   parseEsLog,
   runDockerContainer,
+  runDockerSnapshotContainer,
+  stopDockerSnapshotContainer,
   runServerlessCluster,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -44,6 +46,49 @@ import type {
   InstallSourceOptions,
 } from './install/types';
 import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
+
+type EsStdoutLogLevel = NonNullable<EsClusterExecOptions['esStdoutLogLevel']>;
+
+// ES logs include more granular levels than our CLI threshold; use numeric ranks to compare severity.
+function shouldForwardEsStdoutLine(esLevel: string | undefined, threshold: EsStdoutLogLevel) {
+  if (threshold === 'silent') return false;
+
+  const normalized = (esLevel || 'info').toLowerCase();
+  const rank = (lvl: string) => {
+    switch (lvl) {
+      case 'fatal':
+        return 50;
+      case 'error':
+        return 40;
+      case 'warn':
+        return 30;
+      case 'info':
+        return 20;
+      case 'debug':
+        return 10;
+      case 'trace':
+        return 0;
+      default:
+        // Unknown levels are treated as "info-ish"
+        return 20;
+    }
+  };
+
+  const minRank = (() => {
+    switch (threshold) {
+      case 'all':
+        return 0;
+      case 'info':
+        return 20;
+      case 'warn':
+        return 30;
+      case 'error':
+        return 40;
+    }
+  })();
+
+  return rank(normalized) >= minRank;
+}
 
 // listen to data on stream until map returns anything but undefined
 const firstResult = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
@@ -68,6 +113,7 @@ export class Cluster {
   private process: execa.ExecaChildProcess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
+  private dockerSnapshotContainerName: string | null;
   private setupPromise: Promise<unknown> | null;
   private stdioTarget: NodeJS.WritableStream | null;
 
@@ -77,6 +123,8 @@ export class Cluster {
     this.stopCalled = false;
     // Serverless Elasticsearch node names, started via Docker
     this.serverlessNodes = [];
+    // Docker snapshot container name, if running via Docker
+    this.dockerSnapshotContainerName = null;
     // properties used exclusively for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
@@ -274,6 +322,11 @@ export class Cluster {
       return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
+    // Stop Docker snapshot container
+    if (this.dockerSnapshotContainerName) {
+      return await stopDockerSnapshotContainer(this.log, this.dockerSnapshotContainerName);
+    }
+
     // Stop local ES process
     if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
@@ -444,11 +497,11 @@ export class Cluster {
       if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
-          elasticPassword: options.password,
+          elasticPassword: options.password ?? 'changeme',
           client,
         });
 
-        await nativeRealm.setPasswords(options);
+        await nativeRealm.setPasswords(options as Record<string, unknown>);
 
         const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
         if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
@@ -459,24 +512,51 @@ export class Cluster {
     });
 
     let reportSent = false;
+    const stdoutThreshold = opts.esStdoutLogLevel ?? 'warn';
+
     // parse and forward es stdout to the log
     this.process.stdout!.on('data', (data) => {
       const chunk = data.toString();
       const lines = parseEsLog(chunk);
-      lines.forEach((line) => {
-        if (!reportSent && line.message.includes('publish_address')) {
-          reportSent = true;
-          reportTime(startTime, 'ready', {
-            success: true,
-          });
-        }
 
-        if (this.stdioTarget) {
-          this.stdioTarget.write(chunk);
-        } else {
-          this.log.info(line.formattedMessage);
+      // Check for readiness regardless of log destination
+      if (!reportSent) {
+        for (const line of lines) {
+          if (line.message.includes('publish_address')) {
+            reportSent = true;
+            reportTime(startTime, 'ready', {
+              success: true,
+            });
+            break;
+          }
         }
-      });
+      }
+
+      // When writing to a file, write the raw chunk and skip log forwarding
+      if (this.stdioTarget) {
+        this.stdioTarget.write(chunk);
+        return;
+      }
+
+      for (const line of lines) {
+        if (!shouldForwardEsStdoutLine(line.level, stdoutThreshold)) continue;
+
+        switch (line.level) {
+          case 'fatal':
+          case 'error':
+            this.log.error(line.formattedMessage);
+            break;
+          case 'warn':
+            this.log.warning(line.formattedMessage);
+            break;
+          case 'debug':
+          case 'trace':
+            this.log.debug(line.formattedMessage);
+            break;
+          default:
+            this.log.info(line.formattedMessage);
+        }
+      }
     });
 
     // forward es stderr to the log
@@ -571,5 +651,17 @@ export class Cluster {
     }
 
     await runDockerContainer(this.log, options);
+  }
+
+  /**
+   * Run an Elasticsearch Docker container with snapshot-equivalent semantics.
+   * Same defaults and native realm setup as the local snapshot flow.
+   */
+  async runDockerSnapshot(options: DockerSnapshotOptions) {
+    if (this.process || this.outcome) {
+      throw new Error('ES stateful cluster has already been started');
+    }
+
+    this.dockerSnapshotContainerName = await runDockerSnapshotContainer(this.log, options);
   }
 }

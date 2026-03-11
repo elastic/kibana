@@ -29,7 +29,7 @@ export class ESQLService extends FtrService {
 
   public async isQueryPresentInTable(query: string, items: string[][]) {
     const queryAdded = items.some((item) => {
-      return item[2] === query;
+      return item.some((cell) => cell === query);
     });
 
     expect(queryAdded).to.be(true);
@@ -41,7 +41,7 @@ export class ESQLService extends FtrService {
 
   public async toggleHistoryPanel() {
     const isHistoryOpen = await this.isHistoryPanelOpen();
-    await this.testSubjects.click('ESQLEditor-toggle-query-history-button');
+    await this.testSubjects.click('ESQLEditor-toggle-query-history-icon');
     await this.retry.waitFor('history queries to toggle', async () => {
       const isHistoryOpenAfterToggle = await this.isHistoryPanelOpen();
       return isHistoryOpen !== isHistoryOpenAfterToggle;
@@ -122,7 +122,7 @@ export class ESQLService extends FtrService {
   }
 
   public async openHelpMenu() {
-    await this.testSubjects.click('esql-menu-button');
+    await this.testSubjects.click('esql-help-popover-button');
     await this.retry.waitFor('popover to appear', async () => {
       return await this.testSubjects.exists('esql-quick-reference');
     });
@@ -200,35 +200,52 @@ export class ESQLService extends FtrService {
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
-    const editor = await this.testSubjects.find(editorSubjId);
-    const textarea = await editor.findByCssSelector('textarea');
-    await textarea.type([Key.CONTROL, Key.SPACE]);
+    await this.retry.try(async () => {
+      const editor = await this.testSubjects.find(editorSubjId);
+      const textarea = await editor.findByCssSelector('textarea');
+      await textarea.type([Key.CONTROL, Key.SPACE]);
+      const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+      expect(await suggestionWidget.isDisplayed()).to.be(true);
+    });
   }
 
   public async selectEsqlSuggestionByLabel(label: string, editorSubjId = 'ESQLEditor') {
-    await this.retry.try(async () => {
-      await this.triggerSuggestions(editorSubjId);
+    await this.retry.try(
+      async () => {
+        await this.triggerSuggestions(editorSubjId);
 
-      const suggestions = await this.findService.allByCssSelector(
-        '.monaco-editor .suggest-widget .monaco-list-row'
-      );
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        const suggestions = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
 
-      let suggestionToSelect;
-      for (const suggestion of suggestions) {
-        if ((await suggestion.getVisibleText()).includes(label)) {
-          suggestionToSelect = suggestion;
-          break;
+        if (!suggestions.length) {
+          throw new Error('No suggestions found');
         }
+
+        let suggestionToSelect;
+        for (const suggestion of suggestions) {
+          if ((await suggestion.getVisibleText()).includes(label)) {
+            suggestionToSelect = suggestion;
+            break;
+          }
+        }
+
+        if (!suggestionToSelect) {
+          throw new Error(`Suggestion with label "${label}" not found.`);
+        }
+
+        await suggestionToSelect.click();
+
+        await this.testSubjects.waitForDeleted(suggestionToSelect);
+      },
+      // we need to hit escape to close the widget before we try again.
+      async () => {
+        const editor = await this.testSubjects.find(editorSubjId);
+        const textarea = await editor.findByCssSelector('textarea');
+        await textarea.type([Key.ESCAPE]);
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        expect(await suggestionWidget.isDisplayed()).to.be(false);
       }
-
-      if (!suggestionToSelect) {
-        throw new Error(`Suggestion with label "${label}" not found.`);
-      }
-
-      await suggestionToSelect.click();
-
-      await this.testSubjects.waitForDeleted(suggestionToSelect);
-    });
+    );
   }
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
@@ -263,7 +280,17 @@ export class ESQLService extends FtrService {
 
   public async toggleDatasourceDropdown(open: boolean) {
     if (open) {
-      await this.testSubjects.click('visorSourcesDropdownButton');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.click('visorSourcesDropdownButton');
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
+            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
+            await this.browser.pressKeys(Key.ESCAPE);
+          }
+          throw error;
+        }
+      });
     } else {
       await this.browser.pressKeys(Key.ESCAPE);
     }

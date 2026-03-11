@@ -9,6 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { PublishingSubject } from '../publishing_subject';
+import type { SnakeToCamelCase } from '../utils/types';
 
 export type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
 
@@ -36,11 +37,13 @@ export type CustomComparators<StateType> = {
 };
 
 export type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
+  [KeyType in keyof Required<T> as `${SnakeToCamelCase<string & KeyType>}$`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
 export type SettersOf<T extends object> = {
-  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
+  [KeyType in keyof Required<T> as `set${Capitalize<SnakeToCamelCase<string & KeyType>>}`]: (
     value: T[KeyType]
   ) => void;
 };

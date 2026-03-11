@@ -9,7 +9,7 @@ import { Streams } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
-import { GroupStreamDetailManagement } from './group';
+import { QueryStreamDetailManagement } from './query';
 
 export function StreamDetailManagement() {
   const { definition, refresh } = useStreamDetail();
@@ -18,8 +18,8 @@ export function StreamDetailManagement() {
     return <WiredStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
   }
 
-  if (Streams.GroupStream.GetResponse.is(definition)) {
-    return <GroupStreamDetailManagement definition={definition} />;
+  if (Streams.QueryStream.GetResponse.is(definition)) {
+    return <QueryStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
   }
 
   return <ClassicStreamDetailManagement definition={definition} refreshDefinition={refresh} />;

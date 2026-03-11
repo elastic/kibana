@@ -18,9 +18,9 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -205,9 +205,11 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.timeShift) return;
-    return `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`;
+    return {
+      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
+    };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(

@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Assign } from '@kbn/utility-types';
 import type { Spec } from 'vega';
 import type { EsQueryParser } from './es_query_parser';
+import type { EsqlQueryParser } from './esql_query_parser';
 import type { EmsFileParser } from './ems_file_parser';
 import type { UrlParser } from './url_parser';
 
@@ -167,6 +168,13 @@ export interface UrlObject {
   timeout?: string;
 }
 
+export interface EsqlUrlObject extends UrlObject {
+  query: string;
+  filter?: unknown;
+  dropNullColumns?: boolean;
+  params?: Array<Record<string, unknown>>;
+}
+
 export interface Data {
   [index: string]: any;
   url?: UrlObject;
@@ -186,6 +194,7 @@ interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<
 }
 
 export type EsQueryRequest = Requests;
+export type EsqlQueryRequest = Requests<EsqlUrlObject, RequestDataObject<EsqlUrlObject>>;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
@@ -231,6 +240,7 @@ export interface VegaConfig extends DstObj {
 export interface UrlParserConfig {
   [index: string]: any;
   elasticsearch: EsQueryParser;
+  esql: EsqlQueryParser;
   emsfile: EmsFileParser;
   url: UrlParser;
 }

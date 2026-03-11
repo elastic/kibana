@@ -5,76 +5,55 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const ATTACHMENT_TYPE = 'attachment';
 
 describe('Processor: Attachment', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    const { component, actions } = testBed;
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: ATTACHMENT_TYPE },
+    });
 
-    component.update();
-
-    // Open flyout to add new processor
-    actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await actions.addProcessorType(ATTACHMENT_TYPE);
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual([
-      'A field value is required.', // "Field" input
-    ]);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
   });
 
   test('saves with default parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value
-    form.setInputValue('fieldNameField.input', 'test_attachment_processor');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'test_attachment_processor' },
+    });
 
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, ATTACHMENT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][ATTACHMENT_TYPE]).toEqual({
       field: 'test_attachment_processor',
@@ -82,33 +61,32 @@ describe('Processor: Attachment', () => {
   });
 
   test('saves with optional parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      find,
-      component,
-    } = testBed;
-
     // Add required fields
-    form.setInputValue('fieldNameField.input', 'test_attachment_processor');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'test_attachment_processor' },
+    });
 
     // Add optional fields
-    form.setInputValue('targetField.input', 'test_target');
-    form.setInputValue('indexedCharsField.input', '123456');
-    form.setInputValue('indexedCharsFieldField.input', 'indexed_chars_field');
-    form.toggleEuiSwitch('removeBinaryField.input');
-    form.setInputValue('resourceNameField.input', 'resource_name_field');
-
-    // Add "networkDirectionField" value (required)
-    await act(async () => {
-      find('propertiesField').simulate('change', [{ label: 'content' }]);
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'test_target' },
     });
-    component.update();
+    fireEvent.change(within(screen.getByTestId('indexedCharsField')).getByTestId('input'), {
+      target: { value: '123456' },
+    });
+    fireEvent.change(within(screen.getByTestId('indexedCharsFieldField')).getByTestId('input'), {
+      target: { value: 'indexed_chars_field' },
+    });
+    fireEvent.click(within(screen.getByTestId('removeBinaryField')).getByTestId('input'));
+    fireEvent.change(within(screen.getByTestId('resourceNameField')).getByTestId('input'), {
+      target: { value: 'resource_name_field' },
+    });
 
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.change(screen.getByTestId('propertiesField'), { target: { value: 'content' } });
 
-    const processors = getProcessorValue(onUpdate, ATTACHMENT_TYPE);
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][ATTACHMENT_TYPE]).toEqual({
       field: 'test_attachment_processor',

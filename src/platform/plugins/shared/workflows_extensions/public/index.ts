@@ -19,5 +19,13 @@ export type {
   WorkflowsExtensionsPublicPluginStart,
 } from './types';
 
-export type { PublicStepDefinition, StepDocumentation } from './step_registry/types';
-export { ActionsMenuGroup } from './step_registry/types';
+export type { PublicStepDefinition } from './step_registry/types';
+export type { StepDocumentation } from '@kbn/workflows';
+
+export { createPublicStepDefinition } from './step_registry/types';
+
+export type {
+  PublicTriggerDefinition,
+  TriggerDocumentation,
+  TriggerSnippets,
+} from './trigger_registry/types';

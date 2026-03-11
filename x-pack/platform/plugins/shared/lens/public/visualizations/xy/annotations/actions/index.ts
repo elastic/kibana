@@ -9,8 +9,9 @@ import type { CoreStart } from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { VISUALIZE_APP_NAME } from '@kbn/visualizations-common';
-import { ANNOTATIONS_LISTING_VIEW_ID } from '@kbn/event-annotation-plugin/common';
+// Avoid importing Dashboard public constants here to prevent lens -> dashboard cycles.
+const DASHBOARDS_APP_ID = 'dashboards';
+const DASHBOARDS_PAGE_PATH = '#/list';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
@@ -52,7 +53,9 @@ export const createAnnotationActions = ({
     core.application.capabilities.visualize_v2.save && isSaveable
   );
 
-  if (savingToLibraryPermitted) {
+  // Linked annotations are auto-saved to library on Apply/Save, so the
+  // explicit "Save to library" action is only offered for by-value layers.
+  if (savingToLibraryPermitted && !isByReferenceAnnotationsLayer(layer)) {
     actions.push(
       getSaveLayerAction({
         state,
@@ -64,8 +67,8 @@ export const createAnnotationActions = ({
         savedObjectsTagging,
         dataViews,
         goToAnnotationLibrary: () =>
-          core.application.navigateToApp(VISUALIZE_APP_NAME, {
-            path: `#/${ANNOTATIONS_LISTING_VIEW_ID}`,
+          core.application.navigateToApp(DASHBOARDS_APP_ID, {
+            path: `${DASHBOARDS_PAGE_PATH}/annotations`,
           }),
         startServices,
       })

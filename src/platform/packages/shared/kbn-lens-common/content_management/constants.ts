@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LENS_ITEM_VERSION_V1 } from './v1/constants';
+import { LENS_ITEM_VERSION_V2 } from './v2/constants';
 
 export { LENS_ITEM_VERSION_V1 } from './v1/constants';
+export { LENS_ITEM_VERSION_V2 } from './v2/constants';
 
 /**
  * Latest Lens CM Item Version
  */
-export const LENS_ITEM_LATEST_VERSION = LENS_ITEM_VERSION_V1;
+export const LENS_ITEM_LATEST_VERSION = LENS_ITEM_VERSION_V2;
 export type LENS_ITEM_LATEST_VERSION = typeof LENS_ITEM_LATEST_VERSION;
 
 /**

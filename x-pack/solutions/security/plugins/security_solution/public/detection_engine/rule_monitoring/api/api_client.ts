@@ -13,8 +13,14 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
+  GetRuleHealthRequestBody,
+  GetRuleHealthResponse,
+  GetSpaceHealthRequestBody,
+  GetSpaceHealthResponse,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 import {
+  GET_RULE_HEALTH_URL,
+  GET_SPACE_HEALTH_URL,
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
   SETUP_HEALTH_URL,
@@ -111,6 +117,28 @@ export const api: IRuleMonitoringApiClient = {
       signal,
     });
   },
+
+  fetchSpaceRulesHealth: async (
+    params: GetSpaceHealthRequestBody,
+    signal?: AbortSignal
+  ): Promise<GetSpaceHealthResponse> =>
+    KibanaServices.get().http.fetch<GetSpaceHealthResponse>(GET_SPACE_HEALTH_URL, {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(params),
+      signal,
+    }),
+
+  fetchRuleHealth: async (
+    params: GetRuleHealthRequestBody,
+    signal?: AbortSignal
+  ): Promise<GetRuleHealthResponse> =>
+    KibanaServices.get().http.fetch<GetRuleHealthResponse>(GET_RULE_HEALTH_URL, {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(params),
+      signal,
+    }),
 };
 
 const http = () => KibanaServices.get().http;

@@ -323,10 +323,13 @@ describe('SiemMigrationsServiceBase', () => {
         await Promise.resolve();
 
         // Expect that the migration was resumed
-        expect(mockStartMigrationFromStats).toHaveBeenCalledWith('connector-last', {
-          id: 'mig-1',
-          last_execution: { connector_id: 'connector-last', skip_prebuilt_rules_matching: true },
-          status: 'interrupted',
+        expect(mockStartMigrationFromStats).toHaveBeenCalledWith({
+          connectorId: 'connector-last',
+          taskStats: {
+            id: 'mig-1',
+            last_execution: { connector_id: 'connector-last', skip_prebuilt_rules_matching: true },
+            status: 'interrupted',
+          },
         });
 
         // Restore real timers.

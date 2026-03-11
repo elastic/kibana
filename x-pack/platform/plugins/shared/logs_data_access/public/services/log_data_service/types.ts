@@ -8,5 +8,7 @@
 export type LogDataStatus = 'available' | 'empty' | 'missing' | 'unknown';
 
 export interface LogDataService {
-  getStatus(): Promise<{ status: LogDataStatus; hasData: boolean }>;
+  getStatus(opts?: {
+    excludeIndices?: string[];
+  }): Promise<{ status: LogDataStatus; hasData: boolean }>;
 }

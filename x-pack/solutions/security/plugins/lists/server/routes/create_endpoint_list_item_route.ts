@@ -7,8 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   CreateEndpointListItemRequestBody,
   CreateEndpointListItemResponse,
@@ -102,7 +105,7 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
           } else {
             const listSizeError = await validateExceptionListSize(
               exceptionLists,
-              ENDPOINT_LIST_ID,
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
               'agnostic'
             );
             if (listSizeError != null) {

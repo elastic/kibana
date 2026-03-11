@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID } from '../../common';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
 const GET_ERROR_DETAILS_TOOL_ID = 'get_error_details';
 
-const errorDataSchema = z.object({
+const errorDataSchema = observabilityAttachmentDataSchema.extend({
   errorId: z.string(),
   serviceName: z.string().optional(),
   environment: z.string().nullable().optional(),
@@ -31,14 +28,9 @@ const errorDataSchema = z.object({
 export type ErrorAttachmentData = z.infer<typeof errorDataSchema>;
 
 export function createErrorAttachmentType({
-  core,
   logger,
   dataRegistry,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID, ErrorAttachmentData> {
@@ -75,6 +67,19 @@ export function createErrorAttachmentType({
                   end,
                   serviceEnvironment: environment ?? '',
                 });
+
+                if (!errorDetails) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Error details not found for ${errorId}`,
+                        },
+                      },
+                    ],
+                  };
+                }
 
                 return {
                   results: [

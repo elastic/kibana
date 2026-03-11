@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID } from '../../common';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const aiInsightAttachmentDataSchema = z.object({
-  context: z.string(),
+const aiInsightAttachmentDataSchema = observabilityAttachmentDataSchema.extend({
   summary: z.string(),
-  attachmentLabel: z.string().optional(),
+  context: z.string(),
 });
 
 type AiInsightAttachmentData = z.infer<typeof aiInsightAttachmentDataSchema>;
@@ -59,7 +59,7 @@ export const createAiInsightAttachmentType = (): AttachmentTypeDefinition => {
     },
     getAgentDescription: () => {
       return dedent(`
-        The AI Insight attachment carries a concise natural-language summary (aiSummary) and contextual data (contextData) relevant to observability investigations.
+        The AI Insight attachment carries a concise natural-language summary and contextual data relevant to observability investigations.
       `);
     },
   };

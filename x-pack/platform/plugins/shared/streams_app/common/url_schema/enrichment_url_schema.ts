@@ -8,7 +8,7 @@
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SampleDocument } from '@kbn/streams-schema/src/shared/record_types';
 import { sampleDocument } from '@kbn/streams-schema/src/shared/record_types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Base interface for all data source types with common properties
@@ -33,9 +33,24 @@ export interface LatestSamplesDataSource extends BaseDataSource {
   type: 'latest-samples';
 }
 
+export interface FailureStoreDataSource extends BaseDataSource {
+  type: 'failure-store';
+  timeRange?: TimeRange;
+}
+
 const latestSamplesDataSourceSchema = baseDataSourceSchema.extend({
   type: z.literal('latest-samples'),
 }) satisfies z.Schema<LatestSamplesDataSource>;
+
+const failureStoreDataSourceSchema = baseDataSourceSchema.extend({
+  type: z.literal('failure-store'),
+  timeRange: z
+    .object({
+      from: z.string(),
+      to: z.string(),
+    })
+    .optional(),
+}) satisfies z.Schema<FailureStoreDataSource>;
 
 /**
  * KQL samples data source that retrieves data based on KQL query
@@ -91,7 +106,8 @@ export const customSamplesDataSourceSchema = baseDataSourceSchema.extend({
 export type EnrichmentDataSource =
   | LatestSamplesDataSource
   | KqlSamplesDataSource
-  | CustomSamplesDataSource;
+  | CustomSamplesDataSource
+  | FailureStoreDataSource;
 
 /**
  * Schema for validating enrichment data sources
@@ -100,6 +116,7 @@ const enrichmentDataSourceSchema = z.union([
   latestSamplesDataSourceSchema,
   kqlSamplesDataSourceSchema,
   customSamplesDataSourceSchema,
+  failureStoreDataSourceSchema,
 ]) satisfies z.Schema<EnrichmentDataSource>;
 
 /**

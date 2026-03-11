@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { History } from 'history';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
+import {
+  CELL_VALUE_TRIGGER,
+  SECURITY_CELL_ACTIONS_ALERTS_COUNT,
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import {
@@ -31,7 +37,6 @@ import {
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
-import { SecurityCellActionsTrigger } from './constants';
 import type {
   DiscoverCellActionName,
   DiscoverCellActions,
@@ -124,10 +129,9 @@ const registerCellActions = (
   };
 
   const registerCellActionsTrigger = (
-    triggerId: SecurityCellActionsTrigger,
+    triggerId: string,
     actionsOrder: SecurityCellActionName[]
   ) => {
-    uiActions.registerTrigger({ id: triggerId });
     actionsOrder.forEach((actionName, order) => {
       const actionFactory = cellActionsFactories[actionName];
       if (actionFactory) {
@@ -138,7 +142,7 @@ const registerCellActions = (
     });
   };
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.DEFAULT, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_DEFAULT, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -146,7 +150,7 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.DETAILS_FLYOUT, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -156,9 +160,9 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.ALERTS_COUNT, ['investigateInNewTimeline']);
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_ALERTS_COUNT, ['investigateInNewTimeline']);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.CASE_EVENTS, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_CASE_EVENTS, [
     'addToTimeline',
     'copyToClipboard',
   ]);

@@ -27,11 +27,10 @@
       "dataViews",
       "fieldFormats",
       "unifiedSearch",
-      "embeddable"
+      "embeddable",
+      "licensing"
     ],
-    "optionalPlugins": [
-      "alerting",
-      "serverless"
-    ]
+    "optionalPlugins": ["alerting", "serverless"],
+    "runtimePluginDependencies": ["agentBuilder"]
   }
 }

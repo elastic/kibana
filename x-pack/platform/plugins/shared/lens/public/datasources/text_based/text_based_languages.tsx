@@ -11,16 +11,15 @@ import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
-import { isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -36,7 +35,6 @@ import type {
   Datasource,
   DatasourceSuggestion,
 } from '@kbn/lens-common';
-import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
@@ -473,18 +471,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -498,13 +485,15 @@ export function getTextBasedDatasource({
     },
 
     getRenderEventCounters(state: TextBasedPrivateState): string[] {
-      const context = state?.initialContext;
-      if (context && 'query' in context && context.query && isOfAggregateQueryType(context.query)) {
-        const language = getAggregateQueryMode(context.query);
-        // it will eventually log render_lens_esql_chart
-        return [`${language}_chart`];
-      }
-      return [];
+      const counters = flatten(
+        Object.values(state?.layers ?? {}).map((layer) => {
+          if (isOfAggregateQueryType(layer.query)) {
+            return ['esql_chart'];
+          }
+          return [];
+        })
+      );
+      return counters;
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
@@ -525,7 +514,7 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.label ?? column.fieldName);
         });
       });
 
@@ -538,12 +527,14 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

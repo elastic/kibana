@@ -16,9 +16,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getSortArray,
 } from '@kbn/discover-utils';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -26,15 +25,18 @@ import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  DISCOVER_CELL_ACTIONS_TRIGGER_ID,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
+import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
 import { replaceColumnsWithVariableDriven } from '../utils/replace_columns_with_variable_driven';
@@ -47,6 +49,7 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   enableDocumentViewer: boolean;
+  inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -57,11 +60,14 @@ export function SearchEmbeddableGridComponent({
   dataView,
   onAddFilter,
   enableDocumentViewer,
+  inlineEditing,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
-  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
-    ? api.parentApi.esqlVariables$
+  const parentApi = api.parentApi;
+
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
@@ -223,6 +229,7 @@ export function SearchEmbeddableGridComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
+      onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
@@ -238,7 +245,7 @@ export function SearchEmbeddableGridComponent({
       cellActionsTriggerId={
         isInSecuritySolution
           ? SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID
-          : DISCOVER_CELL_ACTIONS_TRIGGER.id
+          : DISCOVER_CELL_ACTIONS_TRIGGER_ID
       }
       cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
       cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
@@ -258,6 +265,7 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
+      inlineEditing={inlineEditing}
     />
   );
 }

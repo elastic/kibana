@@ -27,6 +27,14 @@ export const CreateAgentlessPolicyRequestSchema = {
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
+    policy_template: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The policy template to use for the agentless package policy. If not provided, the default policy template will be used.',
+        },
+      })
+    ),
     // Cloud connector configuration - all connector settings go here
     cloud_connector: schema.maybe(
       schema.object({
@@ -49,6 +57,14 @@ export const CreateAgentlessPolicyRequestSchema = {
             meta: {
               description:
                 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
+            },
+          })
+        ),
+        target_csp: schema.maybe(
+          schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
+            meta: {
+              description:
+                'Target cloud service provider. If not provided, will be auto-detected from inputs.',
             },
           })
         ),

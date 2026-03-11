@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ListToolsResponse } from '@kbn/mcp-client';
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
@@ -38,7 +39,7 @@ export async function listMcpTools({
   });
 
   if (result.status === 'error') {
-    throw new Error(result.message || 'Failed to list MCP tools');
+    throw new Error(result.serviceMessage ?? result.message ?? 'Failed to list MCP tools');
   }
 
   return result.data as ListToolsResponse;
@@ -66,6 +67,34 @@ async function getMcpToolInputSchema({
   } catch (error) {
     // Connector not found or other error - return undefined so getSchema will throw
     return undefined;
+  }
+}
+
+/**
+ * Retrieves a specific MCP tool by name by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+export async function getNamedMcpTools({
+  actions,
+  request,
+  connectorId,
+  toolNames,
+  logger,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolNames: string[];
+  logger: Logger;
+}): Promise<Array<{ name: string; description?: string }>> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    return tools
+      .filter((t) => toolNames.includes(t.name))
+      .map((tool) => ({ name: tool.name, description: tool.description }));
+  } catch (error) {
+    logger.error('Error getting named MCP tools: ', error.message ? error.message : String(error));
+    throw error;
   }
 }
 
@@ -214,8 +243,8 @@ export const getMcpToolType = ({
           });
 
           if (inputSchema) {
-            const zodSchema = jsonSchemaToZod(inputSchema);
-            return zodSchema as z.ZodObject<any>;
+            const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
+            return (zodSchema ?? z.object({})) as z.ZodObject<any>;
           }
 
           return z.object({});

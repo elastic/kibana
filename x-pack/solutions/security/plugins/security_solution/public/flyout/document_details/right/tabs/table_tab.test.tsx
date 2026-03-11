@@ -21,6 +21,7 @@ import {
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
 } from '../components/test_ids';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -33,6 +34,7 @@ jest.mock('react-redux', () => {
 });
 const mockGet = jest.fn();
 const mockSet = jest.fn();
+const mockNotifications = notificationServiceMock.createStartContract();
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
@@ -44,6 +46,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           get: mockGet,
           set: mockSet,
         },
+        notifications: mockNotifications,
       },
     }),
   };

@@ -63,9 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
@@ -74,9 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
@@ -105,9 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('elastic-api-version', '1')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest

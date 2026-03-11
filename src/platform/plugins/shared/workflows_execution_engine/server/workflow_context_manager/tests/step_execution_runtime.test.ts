@@ -10,7 +10,7 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { ExecutionError } from '../../utils';
+import { ExecutionError } from '@kbn/workflows/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
@@ -266,6 +266,24 @@ describe('StepExecutionRuntime', () => {
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           stepType: 'fakeStepType1',
+        })
+      );
+    });
+
+    it('should preserve startedAt when step execution already exists (e.g. poll resume)', () => {
+      const originalStartedAt = '2025-08-05T00:00:00.000Z';
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        id: 'fake_step_execution_id',
+        stepId: 'fakeStepId1',
+        startedAt: originalStartedAt,
+      } as Partial<EsWorkflowStepExecution>);
+      mockDateNow = new Date('2025-08-06T00:00:00.000Z');
+
+      underTest.startStep();
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startedAt: originalStartedAt,
         })
       );
     });

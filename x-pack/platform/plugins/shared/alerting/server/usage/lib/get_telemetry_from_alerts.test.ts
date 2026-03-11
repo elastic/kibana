@@ -81,7 +81,7 @@ describe('kibana index telemetry', () => {
     const debugLogs = loggingSystemMock.collect(logger).debug;
     expect(debugLogs).toHaveLength(2);
     expect(debugLogs[0][0]).toEqual(
-      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":33},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":33}}}}}}`
+      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":39},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":39}}}}}}`
     );
     expect(debugLogs[1][0]).toEqual(
       `results for getTotalAlertsCountAggregations query - {\"took\":4,\"timed_out\":false,\"_shards\":{\"total\":1,\"successful\":1,\"skipped\":0,\"failed\":0},\"hits\":{\"total\":{\"value\":6,\"relation\":\"eq\"},\"max_score\":null,\"hits\":[]},\"aggregations\":{\"by_rule_type_id\":{\"doc_count_error_upper_bound\":0,\"sum_other_doc_count\":0,\"buckets\":[{\"key\":\".index-threshold\",\"doc_count\":1,\"ignored_field\":{\"doc_count_error_upper_bound\":0,\"sum_other_doc_count\":0,\"buckets\":[]}},{\"key\":\"logs.alert.document.count\",\"doc_count\":2,\"ignored_field\":{\"doc_count_error_upper_bound\":0,\"sum_other_doc_count\":0,\"buckets\":[{\"key\":\"kibana.alert.grouping.container.id\",\"doc_count\":2},{\"key\":\"kibana.alert.grouping.container.name\",\"doc_count\":2}]}},{\"key\":\"document.test.\",\"doc_count\":3,\"ignored_field\":{\"doc_count_error_upper_bound\":0,\"sum_other_doc_count\":0,\"buckets\":[]}}]}}}`
@@ -134,7 +134,7 @@ describe('kibana index telemetry', () => {
     const loggerCalls = loggingSystemMock.collect(logger);
     expect(loggerCalls.debug).toHaveLength(1);
     expect(loggerCalls.debug[0][0]).toEqual(
-      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":33},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":33}}}}}}`
+      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":39},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":39}}}}}}`
     );
     expect(loggerCalls.warn).toHaveLength(1);
     expect(loggerCalls.warn[0][0]).toEqual(
@@ -185,7 +185,7 @@ describe('kibana index telemetry', () => {
     const loggerCalls = loggingSystemMock.collect(logger);
     expect(loggerCalls.debug).toHaveLength(2);
     expect(loggerCalls.debug[0][0]).toEqual(
-      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":33},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":33}}}}}}`
+      `query for getTotalAlertsCountAggregations - {\"index\":\".alerts-*\",\"size\":0,\"query\":{\"match_all\":{}},\"aggs\":{\"by_rule_type_id\":{\"terms\":{\"field\":\"kibana.alert.rule.rule_type_id\",\"size\":39},\"aggs\":{\"ignored_field\":{\"terms\":{\"field\":\"_ignored\",\"size\":39}}}}}}`
     );
     expect(loggerCalls.debug[1][0]).toMatchInlineSnapshot(`
       "Error executing alerting telemetry task: getTotalAlertsCountAggregations - ResponseError: search_phase_execution_exception

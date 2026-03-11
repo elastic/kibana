@@ -119,8 +119,11 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-      telemetry.reportSetupLookupNameCopied({ migrationId: migrationStats.id });
-    }, [telemetry, migrationStats.id]);
+      telemetry.reportSetupLookupNameCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+      });
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
 
     const copyStep = useMissingLookupsListStep({
       status: getEuiStepStatus(1, subStep),

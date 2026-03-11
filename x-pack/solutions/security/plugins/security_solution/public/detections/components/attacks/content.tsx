@@ -22,7 +22,9 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
@@ -40,9 +42,11 @@ import { ConnectorFilter } from '../../../attack_discovery/pages/results/history
 
 import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
+import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+const FILTERS_SECTION_WIDTH = 480;
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -51,6 +55,11 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
 `;
 
 export interface AttacksPageContentProps {
@@ -69,7 +78,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const { globalFullScreen } = useGlobalFullScreen();
   const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
   const {
-    services: { settings },
+    services: { settings, telemetry },
   } = useKibana();
 
   const { http, inferenceEnabled } = useAssistantContext();
@@ -78,16 +87,24 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     inferenceEnabled,
     settings,
   });
-
-  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true });
+  const { from } = useGlobalTime();
+  const { data } = useFindAttackDiscoveries({
+    http,
+    isAssistantEnabled: true,
+    start: from,
+    scheduled: true,
+  });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  // showing / hiding the flyout:
-  const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => {
-    setShowFlyout(true);
-  }, []);
-  const onClose = useCallback(() => setShowFlyout(false), []);
+  // showing / hiding the schedules flyout:
+  const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
+  const openSchedulesFlyout = useCallback(() => {
+    setShowSchedulesFlyout(true);
+    telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
+      source: 'attacks_page_header',
+    });
+  }, [telemetry]);
+  const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
   const onAssigneesSelectionChange = useCallback(
@@ -127,38 +144,66 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <HeaderPage title={PAGE_TITLE}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <FilterByAssigneesPopover
-                  selectedUserIds={assignees}
-                  onSelectionChange={onAssigneesSelectionChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorFilter
-                  aiConnectors={aiConnectors}
-                  connectorNames={aiConnectorNames}
-                  selectedConnectorNames={selectedConnectorNames}
-                  setSelectedConnectorNames={setSelectedConnectorNames}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Schedule openFlyout={openFlyout} />
+                <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
-          <FiltersSection
-            dataView={dataView}
-            setStatusFilter={setStatusFilter}
-            setPageFilters={setPageFilters}
-            setPageFilterHandler={setPageFilterHandler}
-          />
+          <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+            <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
+              <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexItem grow={1}>
+                  <FilterByAssigneesPopover
+                    selectedUserIds={assignees}
+                    onSelectionChange={onAssigneesSelectionChange}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <ConnectorFilter
+                    aiConnectors={aiConnectors}
+                    connectorNames={aiConnectorNames}
+                    selectedConnectorNames={selectedConnectorNames}
+                    setSelectedConnectorNames={setSelectedConnectorNames}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <VerticalDivider grow={false} aria-hidden={true} />
+            <EuiFlexItem grow={1} style={{ minWidth: FILTERS_SECTION_WIDTH }}>
+              <FiltersSection
+                dataView={dataView}
+                pageFilters={pageFilters}
+                setStatusFilter={setStatusFilter}
+                setPageFilters={setPageFilters}
+                setPageFilterHandler={setPageFilterHandler}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
         </Display>
 
-        <TableSection dataView={dataView} statusFilter={statusFilter} pageFilters={pageFilters} />
+        <EuiSpacer />
+        <KPIsSection
+          pageFilters={pageFilters}
+          assignees={assignees}
+          selectedConnectorNames={selectedConnectorNames}
+          dataView={dataView}
+        />
 
-        {showFlyout && <SchedulesFlyout onClose={onClose} />}
+        <EuiSpacer />
+        <TableSection
+          dataView={dataView}
+          statusFilter={statusFilter}
+          pageFilters={pageFilters}
+          assignees={assignees}
+          selectedConnectorNames={selectedConnectorNames}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
+
+        {showSchedulesFlyout && <SchedulesFlyout onClose={onCloseSchedulesFlyout} />}
       </SecuritySolutionPageWrapper>
     </StyledFullHeightContainer>
   );

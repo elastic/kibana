@@ -87,24 +87,6 @@ export const Default: StoryObj<PropsAndArgs> = {
   render: (args) => <ControlledNavigation {...args} />,
 };
 
-export const Collapsed: StoryObj<PropsAndArgs> = {
-  name: 'Collapsed Navigation',
-  decorators: [
-    (Story) => {
-      return (
-        <>
-          <Global styles={styles} />
-          <Story />
-        </>
-      );
-    },
-  ],
-  args: {
-    isCollapsed: true,
-  },
-  render: (args) => <ControlledNavigation {...args} />,
-};
-
 export const WithMinimalItems: StoryObj<PropsAndArgs> = {
   name: 'Navigation with Minimal Items',
   decorators: [
@@ -174,12 +156,15 @@ export const WithinLayout: StoryObj<PropsAndArgs> = {
 
 const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
   const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   return (
     <Navigation
       {...props}
+      isCollapsed={isCollapsed}
       activeItemId={activeItemId}
       onItemClick={(item) => setActiveItemId(item.id)}
+      onToggleCollapsed={setIsCollapsed}
     />
   );
 };
@@ -187,6 +172,8 @@ const ControlledNavigation = ({ ...props }: PropsAndArgs) => {
 const Layout = ({ ...props }: PropsAndArgs) => {
   const { euiTheme } = useEuiTheme();
   const [navigationWidth, setNavigationWidth] = useState(0);
+  const [activeItemId, setActiveItemId] = useState(props.activeItemId || PRIMARY_MENU_ITEMS[0].id);
+  const [isCollapsed, setIsCollapsed] = useState(props.isCollapsed ?? false);
 
   const headerHeight = 48;
 
@@ -226,7 +213,16 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               backgroundColor={euiTheme.colors.backgroundFilledText}
             />
           }
-          navigation={<ControlledNavigation {...props} setWidth={setNavigationWidth} />}
+          navigation={
+            <Navigation
+              {...props}
+              setWidth={setNavigationWidth}
+              isCollapsed={isCollapsed}
+              activeItemId={activeItemId}
+              onItemClick={(item) => setActiveItemId(item.id)}
+              onToggleCollapsed={setIsCollapsed}
+            />
+          }
           sidebar={
             <Box
               label="Global Sidebar"

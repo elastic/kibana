@@ -37,10 +37,13 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath } from '@kbn/core/server';
+import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
+import type { ExecutionContextRunner } from './lib/execution_context';
+import { getExecutionContextRunner } from './lib/execution_context';
 
 import type {
   ConcreteTaskInstance,
@@ -63,6 +66,7 @@ import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { BulkUpdateError, MsearchError } from './lib/errors';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import type { ApiKeyAndUserScope } from './lib/api_key_utils';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
 import { bulkMarkApiKeysForInvalidation } from './lib/bulk_mark_api_keys_for_invalidation';
@@ -84,6 +88,7 @@ export interface StoreOpts {
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
   basePath: IBasePath;
+  executionContext: ExecutionContextStart;
 }
 
 export interface SearchOpts {
@@ -157,6 +162,7 @@ export class TaskStore {
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
   private basePath: IBasePath;
+  private executionContextRunner: ExecutionContextRunner;
 
   /**
    * Constructs a new TaskStore.
@@ -188,6 +194,10 @@ export class TaskStore {
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
     this.basePath = opts.basePath;
+    this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
+      name: 'taskStore',
+      // individual executions can be specialized with an `id` property ...
+    });
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -219,8 +229,44 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
+    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const apiKeyIdsToRemoveMap = new Map<string, string>();
+    let apiKeyAndUserScopeMap: Map<string, ApiKeyAndUserScope> | null = null;
+
+    // If a task with an API key is updated with a request
+    if (hasEncryptedFields && options?.request && options?.regenerateApiKey) {
+      const docsWithApiKeys: ConcreteTaskInstance[] = [];
+
+      docs.forEach((taskInstance) => {
+        const { apiKey, userScope } = taskInstance;
+        if (apiKey && userScope) {
+          docsWithApiKeys.push(taskInstance);
+          if (!userScope.apiKeyCreatedByUser) {
+            apiKeyIdsToRemoveMap.set(taskInstance.id, userScope.apiKeyId);
+          }
+        }
+      });
+
+      // and create new API keys using the new request
+      if (docsWithApiKeys.length) {
+        apiKeyAndUserScopeMap = await this.getApiKeyFromRequest(docsWithApiKeys, options.request);
+      }
+    }
+
+    return { apiKeyAndUserScopeMap, apiKeyIdsToRemoveMap };
+  }
+
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
     const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+
+    // If a task with an API key is updated without a request, throw an error.
+    if (hasEncryptedFields && !options?.request) {
+      throw new Error(
+        'Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks.'
+      );
+    }
+
     if (options?.request && !hasEncryptedFields) {
       this.logger.debug(
         'Request is defined but none of the tasks have API key or user scope. Using regular saved objects repository to bulk update tasks.'
@@ -263,18 +309,54 @@ export class TaskStore {
     return userScopeAndApiKey;
   }
 
-  private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
-    const result = new Map<string, string | undefined>();
-    if (!this.canEncryptSo() || !ids.length) {
+  private async bulkGetDecryptedTaskApiKeys(
+    taskIds: string[]
+  ): Promise<Map<string, string | undefined>> {
+    if (!this.canEncryptSo() || !taskIds.length) {
+      return new Map<string, string | undefined>();
+    }
+
+    const result = await this.getApiKeys(taskIds);
+
+    // the search doesn't wait for refresh, so may miss a newly created key
+    const idsOfMissingKeys = taskIds.filter((id) => result.get(id) === undefined);
+
+    if (idsOfMissingKeys.length === 0) return result;
+
+    // do a refresh, and get the remaining keys
+    this.logger.warn('Refreshing index to get recently created API keys for tasks');
+
+    // refresh; if that fails, return what we currently have
+    try {
+      await this.esClient.indices.refresh({ index: this.index });
+    } catch (e) {
+      this.logger.error(`Error refreshing index ${this.index}: ${e.message}`);
       return result;
     }
 
+    // get the missing keys, a log an error if they continue to be missing
+    const missingResult = await this.getApiKeys(idsOfMissingKeys);
+
+    for (const id of idsOfMissingKeys) {
+      const foundKey = missingResult.get(id);
+      if (foundKey === undefined) {
+        this.logger.error(`Unable to obtain API key for task ${id} after retry`);
+      } else {
+        result.set(id, foundKey);
+      }
+    }
+
+    return result;
+  }
+
+  private async getApiKeys(taskIds: string[]) {
     const kueryNode = nodeBuilder.or(
-      ids.map((id) => {
+      taskIds.map((id) => {
         return nodeBuilder.is(`${TASK_SO_NAME}.id`, `${TASK_SO_NAME}:${id}`);
       })
     );
 
+    const result = new Map<string, string | undefined>();
     const finder =
       await this.esoClient!.createPointInTimeFinderDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
         {
@@ -288,8 +370,8 @@ export class TaskStore {
         result.set(savedObject.id, savedObject.attributes.apiKey);
       });
     }
-    await finder.close();
 
+    await finder.close();
     return result;
   }
 
@@ -335,6 +417,14 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(
+    taskInstance: TaskInstance,
+    options?: ApiKeyOptions
+  ): Promise<ConcreteTaskInstance> {
+    return this.executionContextRunner.run(() => this._schedule(taskInstance, options), {
+      id: 'schedule',
+    });
+  }
+  private async _schedule(
     taskInstance: TaskInstance,
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance> {
@@ -396,6 +486,15 @@ export class TaskStore {
    * @param tasks - The tasks being scheduled.
    */
   public async bulkSchedule(
+    taskInstances: TaskInstance[],
+    options?: ApiKeyOptions
+  ): Promise<ConcreteTaskInstance[]> {
+    return this.executionContextRunner.run(() => this._bulkSchedule(taskInstances, options), {
+      id: 'bulk-schedule',
+    });
+  }
+
+  private async _bulkSchedule(
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
@@ -497,6 +596,15 @@ export class TaskStore {
     doc: ConcreteTaskInstance,
     options: { validate: boolean }
   ): Promise<ConcreteTaskInstance> {
+    return this.executionContextRunner.run(() => this._update(doc, options), {
+      id: 'update',
+    });
+  }
+
+  private async _update(
+    doc: ConcreteTaskInstance,
+    options: { validate: boolean }
+  ): Promise<ConcreteTaskInstance> {
     let updatedSavedObject;
     let attributes;
     try {
@@ -539,9 +647,21 @@ export class TaskStore {
    */
   public async bulkUpdate(
     docs: ConcreteTaskInstance[],
+    options: BulkUpdateOpts
+  ): Promise<BulkUpdateResult[]> {
+    return this.executionContextRunner.run(() => this._bulkUpdate(docs, options), {
+      id: 'bulk-update',
+    });
+  }
+
+  private async _bulkUpdate(
+    docs: ConcreteTaskInstance[],
     { validate, mergeAttributes = true, options }: BulkUpdateOpts
   ): Promise<BulkUpdateResult[]> {
     const soClientToUpdate = this.getSoClientForUpdate(docs, options);
+    const regenerateResult = await this.regenerateApiKeyFromRequest(docs, options);
+    const apiKeyAndUserScopeMap = regenerateResult.apiKeyAndUserScopeMap || new Map();
+    const apiKeyIdsToRemoveMap = regenerateResult.apiKeyIdsToRemoveMap;
 
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
@@ -549,14 +669,19 @@ export class TaskStore {
           const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
             validate,
           });
+          const { apiKey: updatedApiKey, userScope: updatedUserScope } =
+            apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+          const apiKey = updatedApiKey || doc?.apiKey;
+          const userScope = updatedUserScope || doc?.userScope;
+
           acc.set(doc.id, {
             type: 'task',
             id: doc.id,
             version: doc.version,
             attributes: {
               ...taskInstanceToAttributes(taskInstance, doc.id),
-              ...(doc?.apiKey ? { apiKey: doc.apiKey } : {}),
-              ...(doc?.userScope ? { userScope: doc.userScope } : {}),
+              ...(apiKey ? { apiKey } : {}),
+              ...(userScope ? { userScope } : {}),
             },
             mergeAttributes,
           });
@@ -584,7 +709,8 @@ export class TaskStore {
       throw e;
     }
 
-    return updatedSavedObjects.map((updatedSavedObject) => {
+    const apiKeyIdsToRemove: string[] = [];
+    const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
           type: 'task',
@@ -603,11 +729,34 @@ export class TaskStore {
       const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate,
       });
+      const oldApiKey = apiKeyIdsToRemoveMap.get(updatedSavedObject.id);
+      if (oldApiKey) {
+        apiKeyIdsToRemove.push(oldApiKey);
+      }
       return asOk(result);
     });
+
+    // after successful updates we should invalidate the old API keys
+    if (apiKeyIdsToRemove.length) {
+      await bulkMarkApiKeysForInvalidation({
+        apiKeyIds: apiKeyIdsToRemove,
+        logger: this.logger,
+        savedObjectsClient: this.savedObjectsRepository,
+      });
+    }
+
+    return updates;
   }
 
   public async bulkPartialUpdate(
+    docs: PartialConcreteTaskInstance[]
+  ): Promise<PartialBulkUpdateResult[]> {
+    return this.executionContextRunner.run(() => this._bulkPartialUpdate(docs), {
+      id: 'bulk-partial-update',
+    });
+  }
+
+  private async _bulkPartialUpdate(
     docs: PartialConcreteTaskInstance[]
   ): Promise<PartialBulkUpdateResult[]> {
     if (docs.length === 0) {
@@ -696,7 +845,13 @@ export class TaskStore {
    * @returns {Promise<void>}
    */
   public async remove(id: string): Promise<void> {
-    const taskInstance = await this.get(id);
+    return this.executionContextRunner.run(() => this._remove(id), {
+      id: 'remove',
+    });
+  }
+
+  private async _remove(id: string): Promise<void> {
+    const taskInstance = await this._get(id);
     const { apiKey, userScope } = taskInstance;
 
     if (apiKey && userScope) {
@@ -724,7 +879,13 @@ export class TaskStore {
    * @returns {Promise<SavedObjectsBulkDeleteResponse>}
    */
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
-    const taskInstances = await this.bulkGet(taskIds);
+    return this.executionContextRunner.run(() => this._bulkRemove(taskIds), {
+      id: 'bulk-remove',
+    });
+  }
+
+  private async _bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
+    const taskInstances = await this._bulkGet(taskIds);
     const apiKeyIdsToRemove: string[] = [];
 
     taskInstances.forEach((taskInstance) => {
@@ -758,9 +919,15 @@ export class TaskStore {
    * Gets a task by id
    *
    * @param {string} id
-   * @returns {Promise<void>}
+   * @returns {Promise<ConcreteTaskInstance>}
    */
   public async get(id: string): Promise<ConcreteTaskInstance> {
+    return this.executionContextRunner.run(() => this._get(id), {
+      id: 'get',
+    });
+  }
+
+  private async _get(id: string): Promise<ConcreteTaskInstance> {
     let result;
     try {
       result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
@@ -779,9 +946,15 @@ export class TaskStore {
    * Gets tasks by ids
    *
    * @param {Array<string>} ids
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @returns {Promise<BulkGetResult>}
    */
   public async bulkGet(ids: string[]): Promise<BulkGetResult> {
+    return this.executionContextRunner.run(() => this._bulkGet(ids), {
+      id: 'bulk-get',
+    });
+  }
+
+  private async _bulkGet(ids: string[]): Promise<BulkGetResult> {
     let result;
     try {
       result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
@@ -815,9 +988,15 @@ export class TaskStore {
    * Gets task version info by ids
    *
    * @param {Array<string>} esIds
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @returns {Promise<ConcreteTaskInstanceVersion[]>}
    */
   public async bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
+    return this.executionContextRunner.run(() => this._bulkGetVersions(ids), {
+      id: 'bulk-get-versions',
+    });
+  }
+
+  private async _bulkGetVersions(ids: string[]): Promise<ConcreteTaskInstanceVersion[]> {
     let taskVersions: estypes.MgetResponse<never>;
     try {
       taskVersions = await this.esClient.mget<never>(
@@ -881,6 +1060,12 @@ export class TaskStore {
 
   // like search(), only runs multiple searches in parallel returning the combined results
   async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+    return this.executionContextRunner.run(() => this._msearch(opts), {
+      id: 'msearch',
+    });
+  }
+
+  private async _msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
     const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
       ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
     );
@@ -919,7 +1104,13 @@ export class TaskStore {
     return { docs: tasksWithDecryptedApiKeys, versionMap };
   }
 
-  private async search(
+  public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
+    return this.executionContextRunner.run(() => this._search(opts, limitResponse), {
+      id: 'search',
+    });
+  }
+
+  private async _search(
     opts: SearchOpts = {},
     limitResponse: boolean = false
   ): Promise<FetchResult> {
@@ -1002,6 +1193,18 @@ export class TaskStore {
     runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
+    return this.executionContextRunner.run(
+      () => this._aggregate({ aggs, query, runtime_mappings, size }),
+      { id: 'aggregate' }
+    );
+  }
+
+  private async _aggregate<TSearchRequest extends AggregationOpts>({
+    aggs,
+    query,
+    runtime_mappings,
+    size = 0,
+  }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
     const body = await this.esClient.search<
       ConcreteTaskInstance,
       Record<string, estypes.AggregationsAggregate>
@@ -1020,6 +1223,15 @@ export class TaskStore {
   }
 
   public async updateByQuery(
+    opts: UpdateByQuerySearchOpts = {},
+    updateByQueryOpts: UpdateByQueryOpts = {}
+  ): Promise<UpdateByQueryResult> {
+    return this.executionContextRunner.run(() => this._updateByQuery(opts, updateByQueryOpts), {
+      id: 'update-by-query',
+    });
+  }
+
+  private async _updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
@@ -1060,7 +1272,15 @@ export class TaskStore {
   }
 
   public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {
-    const versions = await this.bulkGetVersions(esIds);
+    return this.executionContextRunner.run(() => this._getDocVersions(esIds), {
+      id: 'get-doc-versions',
+    });
+  }
+
+  private async _getDocVersions(
+    esIds: string[]
+  ): Promise<Map<string, ConcreteTaskInstanceVersion>> {
+    const versions = await this._bulkGetVersions(esIds);
     const result = new Map<string, ConcreteTaskInstanceVersion>();
     for (const version of versions) {
       result.set(version.esId, version);

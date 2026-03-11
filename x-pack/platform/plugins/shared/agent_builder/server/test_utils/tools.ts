@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type {
   BuiltinToolDefinition,
@@ -14,9 +14,9 @@ import type {
   ToolHandlerFn,
   ToolProvider,
   InternalToolDefinition,
+  ToolRegistry,
 } from '@kbn/agent-builder-server';
 import type { ToolsServiceStart } from '../services/tools/types';
-import type { ToolRegistry } from '../services/tools/tool_registry';
 
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ToolRegistryMock = jest.Mocked<ToolRegistry>;

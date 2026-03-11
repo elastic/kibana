@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type {
   CreateExceptionListItemOptions,
@@ -38,7 +38,7 @@ const EventFilterDataSchema = schema.object(
 
 export class EventFilterValidator extends BaseValidator {
   static isEventFilter(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_EVENT_FILTERS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {

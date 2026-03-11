@@ -6,7 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnectorFieldsProps,
+  ConnectorFormSchema,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FilePickerField,
@@ -34,6 +37,7 @@ import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import * as i18n from './translations';
+import type { Config, Secrets } from './types';
 import {
   azureAiConfig,
   azureAiSecrets,
@@ -45,12 +49,19 @@ import {
 } from './constants';
 import { CRT_REQUIRED, KEY_REQUIRED } from '../../common/auth/translations';
 
+interface OpenAIConnectorFormData extends ConnectorFormSchema<Config, Secrets> {
+  __internal__?: {
+    hasHeaders?: boolean;
+    hasPKI?: boolean;
+  };
+}
+
 const { emptyField } = fieldValidators;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__, id, name }] = useFormData({
+  const [{ config, __internal__, id, name }] = useFormData<OpenAIConnectorFormData>({
     watch: ['config.apiProvider', '__internal__.hasHeaders', '__internal__.hasPKI'],
   });
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
@@ -65,7 +76,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
   );
-
   const verificationModeOptions = [
     { value: 'full', text: i18n.VERIFICATION_MODE_FULL },
     { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
@@ -278,7 +288,15 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
+                          euiFieldProps: {
+                            readOnly,
+                            ['data-test-subj']: 'openAIHeadersKeyInput',
+                            inputRef: (input: HTMLInputElement | null) => {
+                              if (!readOnly && item.isNew && input) {
+                                input.focus();
+                              }
+                            },
+                          },
                         }}
                       />
                     </EuiFlexItem>
@@ -321,7 +339,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           }}
         </UseArray>
       )}
-      {isEdit && (
+      {isEdit && id && name && (
         <DashboardLink
           connectorId={id}
           connectorName={name}

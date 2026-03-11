@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import { isLiteral } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { listCompleteItem } from '../../../../../registry/complete_items';
-import type { ESQLAstItem, ESQLFunction } from '../../../../../../types';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
 import { SignatureAnalyzer } from '../signature_analyzer';
 import { getExpressionType, getMatchingSignatures } from '../../../expressions';
-import { getRightmostNonVariadicOperator } from '../utils';
 import { getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
-import { isLiteral } from '../../../../../../ast/is';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
+import { normalizePreferredExpressionTypes } from '../utils';
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)
@@ -35,15 +35,18 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
     return [];
   }
 
-  const specialSuggestions = await dispatchOperators(ctx);
+  const rightmostOperator = getRightmostOperatorInFunctionTree(expressionRoot as ESQLFunction);
+  // If we don't pass rightmostOperator, for "field IN (x) AND field NOT IN (y"
+  // dispatchOperators sees AND (no handler) instead of NOT IN, failing to suggest comma.
+  const ctxWithRightmostOperator = { ...ctx, expressionRoot: rightmostOperator };
+
+  const specialSuggestions = await dispatchOperators(ctxWithRightmostOperator);
 
   if (specialSuggestions) {
     return specialSuggestions;
   }
-
-  const fn = expressionRoot as ESQLFunction;
-  const rightmostOperator = getRightmostNonVariadicOperator(fn) as ESQLFunction;
-  const getExprType = (expression: ESQLAstItem) => getExpressionType(expression, context?.columns);
+  const getExprType = (expression: ESQLAstItem) =>
+    getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
 
   const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
 
@@ -243,23 +246,23 @@ async function handleIncompleteOperator(
           })
           .addFunctions({
             types: typeToUse,
-            ignoredFunctions: [],
             addSpaceAfterFunction: options.addSpaceAfterOperator ?? false,
-            openSuggestions: options.openSuggestions ?? false,
           })
       );
   }
 
   if (reason === 'wrongTypes') {
-    if (leftArgType && options.preferredExpressionType) {
+    const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
+
+    if (leftArgType && preferredTypes.length) {
       if (
-        leftArgType !== options.preferredExpressionType &&
+        !preferredTypes.includes(leftArgType) &&
         leftArgType !== 'unknown' &&
         leftArgType !== 'unsupported'
       ) {
         builder.addOperators({
           leftParamType: leftArgType,
-          returnTypes: [options.preferredExpressionType],
+          returnTypes: preferredTypes,
         });
       }
     }
@@ -273,4 +276,26 @@ async function handleIncompleteOperator(
       rangeToReplace: overlap,
     };
   });
+}
+
+/**
+ * Finds the deepest binary operator in the right branch of an expression tree.
+ *
+ * Uses structural right-first traversal instead of position-based detection
+ * to avoid ANTLR error recovery issues where incomplete expressions get
+ * positions that corrupt location.min values.
+ */
+function getRightmostOperatorInFunctionTree(fn: ESQLFunction): ESQLFunction {
+  const rightArg = fn.args[1];
+
+  if (
+    fn.subtype === 'binary-expression' &&
+    rightArg &&
+    !Array.isArray(rightArg) &&
+    rightArg.type === 'function'
+  ) {
+    return getRightmostOperatorInFunctionTree(rightArg as ESQLFunction);
+  }
+
+  return fn;
 }

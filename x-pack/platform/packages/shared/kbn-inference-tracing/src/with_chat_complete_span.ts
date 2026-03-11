@@ -82,6 +82,15 @@ function setTokens(
   } satisfies GenAISemConvAttributes);
 }
 
+function setResponseModel(span: Span, { modelName }: { modelName?: string }) {
+  if (!span.isRecording()) {
+    return;
+  }
+  span.setAttributes({
+    [GenAISemanticConventions.GenAIResponseModel]: modelName ?? 'unknown',
+  } satisfies GenAISemConvAttributes);
+}
+
 interface InferenceGenerationOptions {
   model?: Model;
   system?: string;
@@ -165,14 +174,18 @@ export function withChatCompleteSpan(
 ): ChatCompleteCompositeResponse {
   const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
+  const modelProvider = model?.provider ?? 'unknown';
+  const modelId = model?.id ?? model?.family ?? 'unknown';
+
   const next = withActiveInferenceSpan(
     'ChatComplete',
     {
       attributes: {
         ...attributes,
         [GenAISemanticConventions.GenAIOperationName]: 'chat',
-        [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
-        [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
+        [GenAISemanticConventions.GenAIRequestModel]: modelId,
+        [GenAISemanticConventions.GenAISystem]: modelProvider,
+        [GenAISemanticConventions.GenAIProviderName]: modelProvider,
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
         [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
@@ -223,6 +236,7 @@ export function withChatCompleteSpan(
                 });
               } else if (isChatCompletionTokenCountEvent(value)) {
                 setTokens(span, value.tokens);
+                setResponseModel(span, { modelName: value.model });
               }
             },
           })
@@ -238,6 +252,7 @@ export function withChatCompleteSpan(
           if (value.tokens) {
             setTokens(span, value.tokens);
           }
+
           return value;
         });
       }

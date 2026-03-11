@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod

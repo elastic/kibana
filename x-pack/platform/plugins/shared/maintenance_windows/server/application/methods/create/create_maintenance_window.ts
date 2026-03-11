@@ -29,7 +29,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
+  const { title, schedule, scope, rRule, categoryIds, duration, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -38,21 +38,21 @@ export async function createMaintenanceWindow(
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }
 
-  let scopedQueryWithGeneratedValue = scopedQuery;
+  let scopedQueryWithGeneratedValue = scope?.alerting;
 
   try {
-    if (scopedQuery) {
+    if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
           undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
+          [{ query: scope.alerting.kql, language: 'kuery' }],
+          scope.alerting.filters as Filter[],
           esQueryConfig
         )
       );
 
       scopedQueryWithGeneratedValue = {
-        ...scopedQuery,
+        ...scope.alerting,
         dsl,
       };
     }
@@ -67,22 +67,28 @@ export async function createMaintenanceWindow(
   const id = SavedObjectsUtils.generateId();
 
   const expirationDate = getMaintenanceWindowExpirationDate({
-    rRule,
-    duration,
+    schedule: schedule.custom,
   });
 
   const modificationMetadata = await getModificationMetadata();
 
-  const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
+  const events = generateMaintenanceWindowEvents({
+    schedule: schedule.custom,
+    expirationDate,
+  });
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
     enabled,
     expirationDate,
     categoryIds,
     scopedQuery: scopedQueryWithGeneratedValue,
-    rRule: rRule as MaintenanceWindow['rRule'],
+    rRule,
     duration,
     events,
+    schedule,
+    ...(scopedQueryWithGeneratedValue
+      ? { scope: { alerting: scopedQueryWithGeneratedValue } }
+      : {}),
     ...modificationMetadata,
   });
 

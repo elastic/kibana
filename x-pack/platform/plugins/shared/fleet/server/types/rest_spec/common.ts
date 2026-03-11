@@ -26,6 +26,7 @@ export const BulkRequestBodySchema = schema.object({
   ids: schema.arrayOf(schema.string(), {
     // minSize: 1, // TODO, called with 0 ids sometimes
     meta: { description: 'list of package policy ids' },
+    maxSize: 1000,
   }),
   ignoreMissing: schema.maybe(schema.boolean()),
 });

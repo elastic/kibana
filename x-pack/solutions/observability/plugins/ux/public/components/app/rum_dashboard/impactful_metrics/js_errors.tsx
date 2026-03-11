@@ -130,6 +130,9 @@ export function JSErrors() {
           ...pagination,
           totalItemCount: data?.totalErrorGroups ?? 0,
         }}
+        tableCaption={i18n.translate('xpack.ux.jsErrors.tableCaption', {
+          defaultMessage: 'JS errors',
+        })}
       />
     </>
   );

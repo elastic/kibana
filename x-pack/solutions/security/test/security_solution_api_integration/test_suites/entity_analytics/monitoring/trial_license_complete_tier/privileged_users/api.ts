@@ -140,8 +140,24 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
-        expect(res.body.stats.total).to.be(3);
+        log.info(`Uploaded users successfully, response: ${JSON.stringify(res.body)}`);
+        log.info(`Upload response: ${JSON.stringify(res.body.stats.successfulOperations)}`);
+        expect(res.body.stats.successfulOperations).to.be(3);
+        expect(res.body.stats.totalOperations).to.be(3);
+      });
+
+      it('should upload large volume of users without deleting any non-duplicate users via a csv file', async () => {
+        log.info(`Uploading multiple users via CSV`);
+        const users = Array.from({ length: 999 }).map((_, i) => `csv_user_${i + 1}`);
+        const csv = users.join('\n');
+        const res = await privmonUtils.bulkUploadUsersCsv(csv);
+        if (res.status !== 200) {
+          log.error(`Failed to upload users via CSV`);
+          log.error(JSON.stringify(res.body));
+        }
+        expect(res.status).eql(200);
+        expect(res.body.stats.successfulOperations).to.be(999);
+        expect(res.body.stats.totalOperations).to.be(999);
       });
 
       it('should add source labels and `is_privileged` field to the uploaded users', async () => {
@@ -154,8 +170,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(3);
-        expect(res.body.stats.total).to.be(3);
+        expect(res.body.stats.successfulOperations).to.be(3);
+        expect(res.body.stats.totalOperations).to.be(3);
 
         log.info('Verifying uploaded users');
 
@@ -342,8 +358,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.stats.successful).to.be(1);
-        expect(res.body.stats.total).to.be(1);
+        expect(res.body.stats.successfulOperations).to.be(1);
+        expect(res.body.stats.totalOperations).to.be(1);
 
         const {
           body: [userBefore],
@@ -359,8 +375,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res2.status).eql(200);
-        expect(res2.body.stats.successful).to.be(1);
-        expect(res2.body.stats.total).to.be(1);
+        expect(res2.body.stats.successfulOperations).to.be(1);
+        expect(res2.body.stats.totalOperations).to.be(1);
 
         const {
           body: [userAfter],

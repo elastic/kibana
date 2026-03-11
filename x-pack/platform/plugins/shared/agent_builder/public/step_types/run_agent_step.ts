@@ -5,41 +5,30 @@
  * 2.0.
  */
 
-import { ActionsMenuGroup, type PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { i18n } from '@kbn/i18n';
-import { RunAgentStepTypeId, runAgentStepCommonDefinition } from '../../common/step_types';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
+import { runAgentStepCommonDefinition, RunAgentOutputSchema } from '../../common/step_types';
 
-export const runAgentStepDefinition: PublicStepDefinition = {
+export const runAgentStepDefinition = createPublicStepDefinition({
   ...runAgentStepCommonDefinition,
-  label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
-    defaultMessage: 'Run Agent',
-  }),
-  description: i18n.translate('xpack.agentBuilder.runAgentStep.description', {
-    defaultMessage: 'Execute an AgentBuilder AI agent to process input and generate responses',
-  }),
-  actionsMenuGroup: ActionsMenuGroup.ai,
-  documentation: {
-    details: i18n.translate('xpack.agentBuilder.runAgentStep.documentation.details', {
-      defaultMessage:
-        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
-    }),
-    examples: [
-      `## Basic agent invocation
-\`\`\`yaml
-- name: run_agent
-  type: ${RunAgentStepTypeId}
-  with:
-    message: "Analyze the following data and provide insights"
-\`\`\``,
-
-      `## Use a specific agent
-\`\`\`yaml
-- name: custom_agent
-  type: ${RunAgentStepTypeId}
-  agent_id: "my-custom-agent"
-  with:
-    message: "{{ workflow.input.message }}"
-\`\`\``,
-    ],
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (!input.schema) {
+          return RunAgentOutputSchema;
+        }
+        return RunAgentOutputSchema.extend({
+          structured_output: fromJSONSchema(input.schema),
+        });
+      },
+    },
   },
-};
+});

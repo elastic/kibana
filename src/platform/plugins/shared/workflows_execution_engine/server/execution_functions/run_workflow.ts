@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowsMeteringService } from '../metering';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -21,6 +24,8 @@ export async function runWorkflow({
   config,
   fakeRequest,
   dependencies,
+  workflowsExecutionEngine,
+  meteringService,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -29,7 +34,11 @@ export async function runWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
+  // Span for setup/initialization phase
+  const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -40,22 +49,78 @@ export async function runWorkflow({
     workflowTaskManager,
     workflowExecutionRepository,
     esClient,
-  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
-
-  await workflowRuntime.start();
-
-  await workflowExecutionLoop({
-    workflowRuntime,
-    stepExecutionRuntimeFactory,
-    workflowExecutionState,
-    workflowExecutionRepository,
-    workflowLogger,
-    nodesFactory,
-    workflowExecutionGraph,
-    esClient,
+  } = await setupDependencies(
+    workflowRunId,
+    spaceId,
+    logger,
+    config,
+    dependencies,
     fakeRequest,
-    coreStart: dependencies.coreStart,
-    taskAbortController,
-    workflowTaskManager,
-  });
+    workflowsExecutionEngine
+  );
+  setupSpan?.end();
+
+  // Span for runtime initialization (graph building, topsort, etc.)
+  const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
+  try {
+    await workflowRuntime.start();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(
+      `Workflow execution ${workflowRunId} failed during runtime start: ${errorMessage}`
+    );
+    if (errorStack) {
+      logger.error(`Workflow execution ${workflowRunId} runtime start error stack: ${errorStack}`);
+    }
+    throw error;
+  } finally {
+    startSpan?.end();
+  }
+
+  // Span for the main execution loop
+  const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');
+  try {
+    await workflowExecutionLoop({
+      workflowRuntime,
+      stepExecutionRuntimeFactory,
+      workflowExecutionState,
+      workflowExecutionRepository,
+      workflowLogger,
+      nodesFactory,
+      workflowExecutionGraph,
+      esClient,
+      fakeRequest,
+      coreStart: dependencies.coreStart,
+      taskAbortController,
+      workflowTaskManager,
+    });
+    loopSpan?.setOutcome('success');
+  } catch (error) {
+    loopSpan?.setOutcome('failure');
+    throw error;
+  } finally {
+    loopSpan?.end();
+  }
+
+  // Report metering after execution completes and state is flushed.
+  // This is fire-and-forget: the metering service handles retries and
+  // will no-op for non-terminal states (e.g., WAITING for resume).
+  if (meteringService) {
+    try {
+      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        spaceId
+      );
+      if (finalExecution) {
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      }
+    } catch (err) {
+      logger.warn(
+        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
 }

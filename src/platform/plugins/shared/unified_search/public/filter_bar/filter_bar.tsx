@@ -14,10 +14,10 @@ import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
-import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export interface Props {
   filters: Filter[];

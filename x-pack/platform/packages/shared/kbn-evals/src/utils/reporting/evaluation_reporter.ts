@@ -6,42 +6,58 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import chalk from 'chalk';
+import type { Model } from '@kbn/inference-common';
 import type { EvaluationScoreRepository } from '../score_repository';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
-import { formatReportData } from '../report_model_score';
+
 export type EvaluationReporter = (
   scoreRepository: EvaluationScoreRepository,
   runId: string,
-  log: SomeDevLog
+  log: SomeDevLog,
+  options?: { taskModelId?: string; suiteId?: string }
 ) => Promise<void>;
 
-function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
-  return [
-    `Model: ${model.id} (${model.family}/${model.provider})`,
-    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`,
-  ];
+function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
+  const lines = [`Model: ${taskModel.id} (${taskModel.family}/${taskModel.provider})`];
+  lines.push(
+    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
+  );
+  return lines;
 }
 
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
-    const docs = await scoreRepository.getScoresByRunId(runId);
+  return async (
+    scoreRepository: EvaluationScoreRepository,
+    runId: string,
+    log: SomeDevLog,
+    filter
+  ) => {
+    const runStats = await scoreRepository.getStatsByRunId(runId, filter);
 
-    if (docs.length === 0) {
-      log.error(`No evaluation results found for run ID: ${runId}`);
+    if (!runStats || runStats.stats.length === 0) {
+      const filterSuffix = [
+        filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
+        filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+
+      log.error(
+        `No evaluation results found for run ID: ${runId}${
+          filterSuffix ? ` (${filterSuffix})` : ''
+        }`
+      );
       return;
     }
 
-    const report = formatReportData(docs);
-
-    const header = buildReportHeader(report.model, report.evaluatorModel);
+    const header = buildReportHeader(runStats.taskModel, runStats.evaluatorModel);
     const summaryTable = createTable(
-      report.datasetScoresWithStats,
-      report.repetitions,
+      runStats.stats,
+      runStats.totalRepetitions,
       options.reportDisplayOptions
     );
 

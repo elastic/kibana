@@ -28,7 +28,10 @@ const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
   `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
 
 export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
-  protected abstract startMigrationFromStats(connectorId: string, taskStats: T): Promise<void>;
+  protected abstract startMigrationFromStats(params: {
+    connectorId: string;
+    taskStats: T;
+  }): Promise<void>;
   protected abstract fetchMigrationStats(params: GetMigrationStatsParams): Promise<T>;
   protected abstract fetchMigrationsStatsAll(params: GetMigrationsStatsAllParams): Promise<T[]>;
   protected abstract sendFinishedMigrationNotification(taskStats: T): void;
@@ -175,7 +178,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
         ) {
           const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
           if (connectorId && !this.hasMissingCapabilities('minimum')) {
-            await this.startMigrationFromStats(connectorId, result);
+            await this.startMigrationFromStats({ connectorId, taskStats: result });
             pendingMigrationIds.push(result.id);
           }
         }

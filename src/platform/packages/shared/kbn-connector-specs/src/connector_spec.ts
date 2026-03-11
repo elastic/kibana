@@ -106,7 +106,6 @@ export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 // ============================================================================
 // - OAuth2 (clientId, clientSecret, token refresh)
 // - SSL/mTLS (certificate-based authentication)
-// - AWS SigV4 (AWS service authentication)
 // - Custom (connector-specific auth flows)
 
 // ============================================================================
@@ -257,7 +256,8 @@ export interface ConnectorSpec {
 
   policies?: ConnectorPolicies;
 
-  actions: Record<string, ActionDefinition>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
+  actions: Record<string, ActionDefinition<any, any, any>>;
 
   test?: ConnectorTest;
 

@@ -33,13 +33,13 @@ import {
   getMockCustomizationWithCustomSetFunction,
 } from '../utils/test_utils';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { mockApplyFilterTrigger, mockPreventDefault, mockUIActionsGetTrigger } from '../mocks';
+import { mockPreventDefault } from '../mocks';
+import { SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const mockDataService = dataPluginMock.createStartContract();
 
 const mockUIActions = {
   ...uiActionsPluginMock.createStartContract(),
-  getTrigger: mockUIActionsGetTrigger,
 } as UiActionsStart;
 
 jest.mock('../../../../../../common/lib/kibana');
@@ -125,9 +125,12 @@ describe('useHistogramCustomization', () => {
 
       expect(mockPreventDefault).toHaveBeenCalledTimes(1);
 
-      expect(mockApplyFilterTrigger.exec).toHaveBeenCalledWith({
-        filters: ['some_filter'],
-      });
+      expect(mockUIActions.executeTriggerActions).toHaveBeenCalledWith(
+        SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER,
+        {
+          filters: ['some_filter'],
+        }
+      );
     });
 
     it('should apply filter correctly, in case of multi value click Trigger', async () => {
@@ -157,9 +160,12 @@ describe('useHistogramCustomization', () => {
       ).toHaveBeenNthCalledWith(1, mockOnMultiValueFilterCallbackEventData);
       expect(mockPreventDefault).toHaveBeenCalledTimes(1);
 
-      expect(mockApplyFilterTrigger.exec).toHaveBeenCalledWith({
-        filters: ['some_filter'],
-      });
+      expect(mockUIActions.executeTriggerActions).toHaveBeenCalledWith(
+        SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER,
+        {
+          filters: ['some_filter'],
+        }
+      );
     });
   });
 

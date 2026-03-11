@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -21,7 +22,7 @@ function getTransformPreviewConfig(): PostTransformsPreviewRequestSchema {
   return { source, pivot };
 }
 
-apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/transforms/_preview', { tag: tags.stateful.all }, () => {
   apiTest('should return a transform preview', async ({ apiClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asTransformManager();
 

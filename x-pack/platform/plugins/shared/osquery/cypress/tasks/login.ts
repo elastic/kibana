@@ -26,8 +26,7 @@ export const initializeDataViews = () => {
   cy.visit('/app/security/alerts', {
     onBeforeLoad: (win) => disableNewFeaturesTours(win),
   });
-  cy.getBySel('globalLoadingIndicator').should('exist');
-  // In serverless the app sometimes takes a long time to load with this check causing flakiness.
+  // Wait for loading to complete - don't require it to appear first (page may load quickly)
   cy.getBySel('globalLoadingIndicator', { timeout: 1.5 * 60 * 1000 }).should('not.exist');
   cy.getBySel('alerts-page-manage-alert-detection-rules').should('exist');
 };

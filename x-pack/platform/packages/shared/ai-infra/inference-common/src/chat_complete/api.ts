@@ -12,6 +12,7 @@ import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
 import type { ToolCallOfToolOptions } from './tools_of';
+import type { AnonymizationResponseMetadata } from './anonymization';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -139,6 +140,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -209,6 +214,14 @@ export interface ChatCompleteResponse<
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
+  /**
+   * Optional metadata attached by inference runtime.
+   */
+  metadata?: AnonymizationResponseMetadata;
 }
 
 /**

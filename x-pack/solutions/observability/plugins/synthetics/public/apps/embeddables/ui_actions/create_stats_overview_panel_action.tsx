@@ -11,7 +11,7 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { CoreStart } from '@kbn/core/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
@@ -43,7 +43,7 @@ export function createStatusOverviewPanelAction(
         });
         embeddable.addNewPanel({
           panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-          serializedState: { rawState: initialState },
+          serializedState: initialState,
         });
       } catch (e) {
         return Promise.reject();

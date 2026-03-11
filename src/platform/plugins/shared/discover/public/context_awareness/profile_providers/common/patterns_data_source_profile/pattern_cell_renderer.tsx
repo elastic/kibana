@@ -10,9 +10,8 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCode, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { extractCategorizeTokens } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -24,10 +23,14 @@ interface Props {
 }
 
 export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
+  const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
 
   const keywords = useMemo(() => extractCategorizeTokens(pattern), [pattern]);
-  const containerStyle = useMemo(() => getContainerStyle(defaultRowHeight), [defaultRowHeight]);
+  const containerStyle = useMemo(
+    () => getContainerStyle(euiTheme, defaultRowHeight),
+    [euiTheme, defaultRowHeight]
+  );
 
   const formattedTokens = useMemo(
     () =>
@@ -87,19 +90,17 @@ const componentStyles = {
       color: euiTheme.colors.textPrimary,
       fontSize: euiTheme.size.m,
     }),
-  detailsContainer: ({ euiTheme }: UseEuiTheme) =>
+  detailsContainer: () =>
     css({
       maxWidth: '600px',
     }),
 };
 
 export function getPatternCellRenderer(
-  row: DataTableRecord,
-  columnId: string,
+  pattern: unknown,
   isDetails: boolean,
   defaultRowHeight?: number
 ) {
-  const pattern = row.flattened[columnId];
   if (pattern === undefined) {
     return '-';
   }
@@ -112,7 +113,7 @@ export function getPatternCellRenderer(
   );
 }
 
-function getContainerStyle(defaultRowHeight?: number) {
+function getContainerStyle(euiTheme: UseEuiTheme['euiTheme'], defaultRowHeight?: number) {
   // the keywords are slightly larger than the default text height,
   // so they need to be adjusted to fit within the row height while
   // not truncating the bottom of the text
@@ -131,5 +132,6 @@ function getContainerStyle(defaultRowHeight?: number) {
     WebkitLineClamp: rowHeight,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    transform: `translateY(calc(${euiTheme.size.m} / 4))`, // we apply this transform so that the component appears vertically centered
   };
 }

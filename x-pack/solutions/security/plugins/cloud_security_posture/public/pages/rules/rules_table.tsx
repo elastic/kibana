@@ -152,6 +152,9 @@ export const RulesTable = ({
         itemId={(v) => v.metadata.id}
         rowProps={rowProps}
         sorting={sorting}
+        tableCaption={i18n.translate('xpack.csp.rules.rulesTable.tableCaption', {
+          defaultMessage: 'CSP benchmark rules list',
+        })}
       />
     </>
   );

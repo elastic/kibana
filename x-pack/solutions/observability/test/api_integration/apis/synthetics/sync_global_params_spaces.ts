@@ -106,7 +106,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('added an integration for previously added monitor', async () => {
       const packagePolicy = await testPrivateLocations.getPackagePolicy({
-        spaceId,
         monitorId: newBrowserMonitorId,
         locId: locWithSpace.id,
       });
@@ -155,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
         packagePolicy = await testPrivateLocations.getPackagePolicy({
           monitorId: newBrowserMonitorId,
           locId: locWithSpace.id,
-          spaceId,
         });
         const enabledInput = packagePolicy.inputs.find(
           (input: { enabled: boolean }) => input.enabled === true
@@ -205,7 +203,6 @@ export default function ({ getService }: FtrProviderContext) {
       const packagePolicy = await testPrivateLocations.getPackagePolicy({
         monitorId: newBrowserMonitorId,
         locId: locWithSpace.id,
-        spaceId,
       });
 
       expect(packagePolicy.policy_id).eql(locWithSpace.agentPolicyId);
@@ -228,7 +225,6 @@ export default function ({ getService }: FtrProviderContext) {
         packagePolicy = await testPrivateLocations.getPackagePolicy({
           monitorId: newBrowserMonitorId,
           locId: locWithSpace.id,
-          spaceId,
         });
         const enabledInput = packagePolicy.inputs.find(
           (input: { enabled: boolean }) => input.enabled === true

@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
+import { reportPerformanceMetricEvent, type PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { QuerySource } from '@kbn/esql-types';
 import type {
   TelemetryQuerySubmittedProps,
   ESQLVariableType,
   ControlTriggerSource,
+  TelemetryLatencyProps,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
 } from '@kbn/esql-utils/src/utils/query_parsing_helpers';
+import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   ESQL_CONTROL_CANCELLED,
   ESQL_CONTROL_FLYOUT_OPENED,
@@ -26,12 +29,23 @@ import {
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_QUERY_SUBMITTED,
+  ESQL_RESOURCE_BROWSER_OPENED,
+  ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RECOMMENDED_QUERY_CLICKED,
   ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
+
+export enum ResourceBrowserType {
+  DATA_SOURCES = 'data_sources',
+  FIELDS = 'fields',
+}
+export enum ResourceBrowserOpenedFrom {
+  AUTOCOMPLETE = 'autocomplete',
+  BADGE = 'badge',
+}
 
 export class ESQLEditorTelemetryService {
   constructor(private readonly _analytics: AnalyticsServiceStart) {}
@@ -43,6 +57,35 @@ export class ESQLEditorTelemetryService {
       // eslint-disable-next-line no-console
       console.log('Failed to report telemetry event', error);
     }
+  }
+
+  private _reportPerformanceEvent(eventData: PerformanceMetricEvent) {
+    try {
+      reportPerformanceMetricEvent(this._analytics, eventData);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Failed to report performance metric event', error);
+    }
+  }
+
+  private _buildBaseLatencyEvent(eventName: string, payload: TelemetryLatencyProps) {
+    return {
+      eventName,
+      duration: Math.round(payload.duration),
+      key1: 'query_length' as const,
+      value1: payload.queryLength,
+      key2: 'query_lines' as const,
+      value2: payload.queryLines,
+
+      ...(payload.callbacksDuration !== undefined
+        ? { key3: 'callbacks_duration' as const, value3: Math.round(payload.callbacksDuration) }
+        : {}),
+
+      meta: {
+        ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
+        ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
+      },
+    };
   }
 
   /**
@@ -181,5 +224,52 @@ export class ESQLEditorTelemetryService {
       control_kind: controlType,
       reason,
     });
+  }
+
+  public trackResourceBrowserOpened(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_OPENED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+    });
+  }
+
+  public trackResourceBrowserItemToggled(payload: {
+    browserType: ResourceBrowserType;
+    openedFrom: ResourceBrowserOpenedFrom;
+    action: DataSourceSelectionChange;
+  }) {
+    this._reportEvent(ESQL_RESOURCE_BROWSER_ITEM_TOGGLED, {
+      browser_type: payload.browserType,
+      opened_from: payload.openedFrom,
+      action: payload.action,
+    });
+  }
+
+  public trackInitLatency(duration: number, sessionId?: string) {
+    this._reportPerformanceEvent({
+      eventName: 'esql_editor_init_latency',
+      duration: Math.round(duration),
+      meta: {
+        ...(sessionId ? { session_id: sessionId } : {}),
+      },
+    });
+  }
+
+  public trackInputLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(this._buildBaseLatencyEvent('esql_editor_input_latency', payload));
+  }
+
+  public trackSuggestionsLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_suggestions_latency', payload)
+    );
+  }
+  public trackValidationLatency(payload: TelemetryLatencyProps) {
+    this._reportPerformanceEvent(
+      this._buildBaseLatencyEvent('esql_editor_validation_latency', payload)
+    );
   }
 }

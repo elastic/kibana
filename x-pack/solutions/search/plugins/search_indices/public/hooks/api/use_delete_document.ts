@@ -11,7 +11,8 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { MutationKeys, QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 import type { IndexDocuments } from './use_document_search';
-import { INDEX_SEARCH_POLLING } from './use_document_search';
+
+const INDEX_SEARCH_POLLING = 30000;
 
 interface DeleteDocumentParams {
   id: string;

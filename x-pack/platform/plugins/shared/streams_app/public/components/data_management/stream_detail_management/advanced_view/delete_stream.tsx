@@ -14,7 +14,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { Row } from './row';
 
-export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+export function DeleteStreamPanel({ definition }: { definition: Streams.all.GetResponse }) {
   const {
     core: {
       application: { navigateToApp },
@@ -82,7 +82,12 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.a
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButton color="danger" fill onClick={() => setShowModal((prev) => !prev)}>
+                  <EuiButton
+                    color="danger"
+                    fill
+                    data-test-subj="deleteQueryStreamButton"
+                    onClick={() => setShowModal((prev) => !prev)}
+                  >
                     {i18n.translate('xpack.streams.streamDeleteModal.deleteStreamButton', {
                       defaultMessage: 'Delete stream',
                     })}

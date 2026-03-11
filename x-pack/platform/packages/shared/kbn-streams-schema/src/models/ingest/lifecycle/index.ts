@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    downsample?: DownsampleStep[];
   };
 }
 
@@ -59,13 +60,29 @@ export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
   | ClassicIngestStreamEffectiveLifecycle;
 
-const dslLifecycleSchema = z.object({
-  dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
+const downsampleStepSchema = z.object({
+  after: NonEmptyString,
+  fixed_interval: NonEmptyString,
 });
-const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
+
+const dslLifecycleSchema = z.object({
+  dsl: z.object({
+    data_retention: z.optional(NonEmptyString),
+    downsample: z.optional(z.array(downsampleStepSchema)),
+  }),
+});
+const ilmLifecycleSchema = z.object({
+  ilm: z.object({
+    policy: NonEmptyString,
+  }),
+});
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
-const errorLifecycleSchema = z.object({ error: z.strictObject({ message: NonEmptyString }) });
+const errorLifecycleSchema = z.object({
+  error: z.strictObject({
+    message: NonEmptyString,
+  }),
+});
 
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
   dslLifecycleSchema,
@@ -77,7 +94,10 @@ export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngest
   z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  z.union([dslLifecycleSchema, ilmLifecycleSchema]).and(z.object({ from: NonEmptyString }));
+  z.union([
+    dslLifecycleSchema.extend({ from: NonEmptyString }),
+    ilmLifecycleSchema.extend({ from: NonEmptyString }),
+  ]);
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
   z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
@@ -109,10 +129,18 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
+export interface DownsampleStep {
+  after: string;
+  fixed_interval: string;
+}
+
 export interface IlmPolicyPhase {
   name: PhaseName;
   size_in_bytes: number;
   min_age?: string;
+  downsample?: DownsampleStep;
+  readonly?: boolean;
+  searchable_snapshot?: string;
 }
 
 export interface IlmPolicyHotPhase extends IlmPolicyPhase {
@@ -129,6 +157,7 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhase {
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
+  delete_searchable_snapshot?: boolean;
 }
 
 export interface IlmPolicyPhases {
@@ -138,3 +167,18 @@ export interface IlmPolicyPhases {
   frozen?: IlmPolicyPhase;
   delete?: IlmPolicyDeletePhase;
 }
+
+export interface IlmPolicy {
+  name: string;
+  phases: IlmPolicyPhases;
+  meta?: Record<string, unknown>;
+  deprecated?: boolean;
+}
+
+export interface IlmPolicyUsage {
+  in_use_by: {
+    data_streams: string[];
+    indices: string[];
+  };
+}
+export type IlmPolicyWithUsage = IlmPolicy & IlmPolicyUsage;

@@ -37,7 +37,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
 
-  describe('Conversation History', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/252238
+  describe.skip('Conversation History', function () {
     let llmProxy: LlmProxy;
     const conversationIds: string[] = [];
 

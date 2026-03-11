@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
-import { and, assign, forwardTo, sendTo, setup } from 'xstate5';
+import type { ActorRefFrom, SnapshotFrom } from 'xstate';
+import { and, assign, forwardTo, sendTo, setup } from 'xstate';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangConditionBlockWithUIAttributes,
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
-import type { ProcessorResources, StepContext, StepEvent, StepInput } from './types';
+import type { StepContext, StepEvent, StepInput } from './types';
 
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
 export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
@@ -29,7 +29,6 @@ export const stepMachine = setup({
         { context },
         params: {
           step: StreamlangProcessorDefinition;
-          resources?: ProcessorResources;
         }
       ) => {
         const nextStep: StreamlangStepWithUIAttributes = {
@@ -40,7 +39,6 @@ export const stepMachine = setup({
 
         return {
           step: nextStep,
-          resources: params.resources,
         };
       }
     ),
@@ -76,6 +74,18 @@ export const stepMachine = setup({
         isUpdated: true,
       };
     }),
+    changeParent: assign(({ context }, { parentId }: { parentId: string | null }) => {
+      const updatedStep = {
+        ...context.step,
+        parentId,
+      };
+
+      return {
+        step: updatedStep,
+        previousStep: updatedStep,
+        isUpdated: true,
+      };
+    }),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),
@@ -84,10 +94,38 @@ export const stepMachine = setup({
       isUpdated: true,
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
+    notifyStepSave: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.save',
+        id: context.step.customIdentifier,
+      })
+    ),
+    notifyStepCancel: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.cancel',
+        id: context.step.customIdentifier,
+      })
+    ),
+    notifyStepEdit: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.edit',
+        id: context.step.customIdentifier,
+      })
+    ),
     forwardChangeEventToParent: sendTo(
       ({ context }) => context.parentRef,
       ({ context }) => ({
         type: 'step.change',
+        id: context.step.customIdentifier,
+      })
+    ),
+    forwardParentChangeEventToParent: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context }) => ({
+        type: 'step.parentChanged',
         id: context.step.customIdentifier,
       })
     ),
@@ -98,6 +136,24 @@ export const stepMachine = setup({
         id: context.step.customIdentifier,
       })
     ),
+    updateGrokPatternDefinitions: ({ context }) => {
+      const step = context.step;
+      // Only update if it's a grok processor with pattern definitions
+      if (
+        isActionBlock(step) &&
+        step.action === 'grok' &&
+        step.pattern_definitions &&
+        typeof step.pattern_definitions === 'object'
+      ) {
+        context.grokCollection.setCustomPatterns(step.pattern_definitions);
+      } else {
+        // Clear custom patterns if it's not a grok processor or has no definitions
+        context.grokCollection.setCustomPatterns({});
+      }
+    },
+    clearGrokPatternDefinitions: ({ context }) => {
+      context.grokCollection.setCustomPatterns({});
+    },
   },
   guards: {
     isDraft: ({ context }) => context.isNew && !context.isUpdated,
@@ -112,6 +168,7 @@ export const stepMachine = setup({
     step: input.step,
     isNew: input.isNew ?? false,
     isUpdated: input.isUpdated ?? false,
+    grokCollection: input.grokCollection,
   }),
   initial: 'unresolved',
   states: {
@@ -126,15 +183,21 @@ export const stepMachine = setup({
       ],
     },
     draft: {
+      entry: ['updateGrokPatternDefinitions'],
+      exit: ['clearGrokPatternDefinitions'],
       on: {
         'step.save': {
           target: '#configured',
-          actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+          actions: [{ type: 'markAsUpdated' }, { type: 'notifyStepSave' }],
         },
-        'step.cancel': '#deleted',
+        'step.cancel': {
+          target: '#deleted',
+          actions: [{ type: 'notifyStepCancel' }],
+        },
         'step.changeProcessor': {
           actions: [
             { type: 'changeProcessor', params: ({ event }) => event },
+            { type: 'updateGrokPatternDefinitions' },
             { type: 'forwardChangeEventToParent' },
           ],
         },
@@ -160,7 +223,7 @@ export const stepMachine = setup({
           on: {
             'step.edit': {
               target: 'editing',
-              actions: [{ type: 'forwardEventToParent' }],
+              actions: [{ type: 'notifyStepEdit' }],
             },
             'step.changeDescription': {
               actions: [
@@ -168,22 +231,31 @@ export const stepMachine = setup({
                 { type: 'forwardChangeEventToParent' },
               ],
             },
+            'step.changeParent': {
+              actions: [
+                { type: 'changeParent', params: ({ event }) => event },
+                { type: 'forwardParentChangeEventToParent' },
+              ],
+            },
             'step.delete': '#deleted',
           },
         },
         editing: {
+          entry: ['updateGrokPatternDefinitions'],
+          exit: ['clearGrokPatternDefinitions'],
           on: {
             'step.save': {
               target: 'idle',
-              actions: [{ type: 'markAsUpdated' }, { type: 'forwardEventToParent' }],
+              actions: [{ type: 'markAsUpdated' }, { type: 'notifyStepSave' }],
             },
             'step.cancel': {
               target: 'idle',
-              actions: [{ type: 'resetToPrevious' }, { type: 'forwardEventToParent' }],
+              actions: [{ type: 'resetToPrevious' }, { type: 'notifyStepCancel' }],
             },
             'step.changeProcessor': {
               actions: [
                 { type: 'changeProcessor', params: ({ event }) => event },
+                { type: 'updateGrokPatternDefinitions' },
                 { type: 'forwardChangeEventToParent' },
               ],
             },

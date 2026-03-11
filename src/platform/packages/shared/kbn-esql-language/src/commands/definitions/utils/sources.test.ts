@@ -15,7 +15,10 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
+  getLookupJoinSource,
 } from './sources';
+import { EsqlQuery, synth, Walker } from '@elastic/esql';
+import type { ESQLAstJoinCommand } from '@elastic/esql/types';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -166,11 +169,38 @@ describe('buildSourcesDefinitions with timeseries', () => {
 
     // Timeseries suggestion should have TS prefix and range replacement
     expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+    expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
     expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
     expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
 
     // Regular suggestion should not have TS prefix or range replacement
     expect(regularSuggestion?.text).toBe('regular_index');
     expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+  });
+});
+
+describe('getSourceOfJoinTarget', () => {
+  it('returns target index fields', () => {
+    const joinCommand = synth.cmd`LOOKUP JOIN join_index1 ON join_field1`;
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+
+    expect(joinTarget).toBe('join_index1');
+  });
+
+  it('returns target index with alias', () => {
+    const joinCommand = synth.cmd`LOOKUP JOIN join_index2 AS j ON join_field2`;
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+    expect(joinTarget).toBe('join_index2');
+  });
+
+  it('returns target index of an incomplete command', () => {
+    const query = EsqlQuery.fromSrc('FROM index | LOOKUP JOIN lookup_index ON');
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+
+    expect(joinTarget).toBe('lookup_index');
   });
 });

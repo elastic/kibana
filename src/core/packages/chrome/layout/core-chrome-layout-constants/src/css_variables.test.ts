@@ -31,6 +31,22 @@ describe('CSS Variables', () => {
       expect(layoutVarName('application.topBar.height')).not.toContain('topBar');
       expect(layoutVarName('application.topBar.height')).toContain('top-bar-height');
     });
+
+    it('should convert camelCase properties to kebab-case', () => {
+      expect(layoutVarName('application.marginBottom')).toBe(
+        '--kbn-layout--application-margin-bottom'
+      );
+      expect(layoutVarName('application.marginRight')).toBe(
+        '--kbn-layout--application-margin-right'
+      );
+      expect(layoutVarName('header.marginBottom')).toBe('--kbn-layout--header-margin-bottom');
+    });
+
+    it('should convert camelCase properties in application variables', () => {
+      expect(layoutVarName('application.topBar.marginBottom')).toBe(
+        '--kbn-application--top-bar-margin-bottom'
+      );
+    });
   });
 
   describe('layoutVar', () => {

@@ -25,6 +25,42 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
     'xpack.securitySolution.endpointExceptions.pageAddButtonTitle',
     { defaultMessage: 'Add endpoint exception' }
   ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import endpoint exception list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export endpoint exception list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Endpoint exception list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.exportErrorToastTitle',
+    {
+      defaultMessage: 'Endpoint exception list export failed',
+    }
+  ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportSuccessToastTitle',
+    {
+      defaultMessage: 'Endpoint exception list imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportErrorToastTitle',
+    {
+      defaultMessage: 'Endpoint exception list import failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.endpointExceptions.showingTotal', {
       defaultMessage:
@@ -102,6 +138,10 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.endpointExceptions.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add endpoint exception' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import endpoint exception list' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.endpointExceptions.searchPlaceholderInfo',

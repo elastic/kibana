@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       `);
     });
 
-    it('find a user who only has read privilege for cases', async () => {
+    it(`find users with name that includes 'read'`, async () => {
       const profiles = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
@@ -75,6 +75,14 @@ export default function ({ getService }: FtrProviderContext) {
               "email": "sec_only_read@elastic.co",
               "full_name": "sec only_read",
               "username": "sec_only_read",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "sec_only_read_create_comment@elastic.co",
+              "full_name": "sec only_read_create_comment",
+              "username": "sec_only_read_create_comment",
             },
           },
         ]
@@ -114,6 +122,22 @@ export default function ({ getService }: FtrProviderContext) {
               "email": "sec_only_read@elastic.co",
               "full_name": "sec only_read",
               "username": "sec_only_read",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "sec_only_no_create_comment@elastic.co",
+              "full_name": "sec only_no_create_comment",
+              "username": "sec_only_no_create_comment",
+            },
+          },
+          Object {
+            "data": Object {},
+            "user": Object {
+              "email": "sec_only_read_create_comment@elastic.co",
+              "full_name": "sec only_read_create_comment",
+              "username": "sec_only_read_create_comment",
             },
           },
           Object {
@@ -260,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         await deleteUsersAndRoles(getService, users, roles);
       });
 
-      it('finds 4 profiles when searching for the name sec when a user has both security and observability privileges', async () => {
+      it(`finds 6 profiles when searching for the name 'sec' when a user has both security and observability privileges`, async () => {
         const profiles = await suggestUserProfiles({
           supertest: supertestWithoutAuth,
           req: {
@@ -278,6 +302,22 @@ export default function ({ getService }: FtrProviderContext) {
                 "email": "sec_only_read@elastic.co",
                 "full_name": "sec only_read",
                 "username": "sec_only_read",
+              },
+            },
+            Object {
+              "data": Object {},
+              "user": Object {
+                "email": "sec_only_no_create_comment@elastic.co",
+                "full_name": "sec only_no_create_comment",
+                "username": "sec_only_no_create_comment",
+              },
+            },
+            Object {
+              "data": Object {},
+              "user": Object {
+                "email": "sec_only_read_create_comment@elastic.co",
+                "full_name": "sec only_read_create_comment",
+                "username": "sec_only_read_create_comment",
               },
             },
             Object {

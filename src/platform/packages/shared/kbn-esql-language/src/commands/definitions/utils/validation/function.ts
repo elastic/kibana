@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { errors, getFunctionDefinition } from '..';
-import { FunctionDefinitionTypes } from '../../../../..';
 import {
   isColumn,
   isFunctionExpression,
@@ -16,17 +14,28 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../../ast/is';
-import { getLocationInfo } from '../../../registry/location';
-import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
+} from '@elastic/esql';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLFunction,
   ESQLMessage,
-} from '../../../../types';
-import type { FunctionDefinition, SupportedDataType } from '../../types';
+} from '@elastic/esql/types';
+import type { PromQLFunction } from '@elastic/esql';
+import { errors, getFunctionDefinition } from '..';
+import { FunctionDefinitionTypes } from '../../../../..';
+import { getLocationInfo } from '../../../registry/location';
+import { isTimeseriesSourceCommand } from '../timeseries_check';
+import { Location } from '../../../registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
+import type {
+  FunctionDefinition,
+  PromQLFunctionDefinition,
+  PromQLFunctionParamType,
+  PromQLSignature,
+  SupportedDataType,
+} from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
 
@@ -68,7 +77,9 @@ class FunctionValidator {
     for (const _arg of this.fn.args) {
       const arg = Array.isArray(_arg) ? _arg[0] : _arg; // for some reason, some args are wrapped in an array, for example named params
 
-      this.argTypes.push(getExpressionType(arg, this.context.columns));
+      this.argTypes.push(
+        getExpressionType(arg, this.context.columns, this.context.unmappedFieldsStrategy)
+      );
       this.argLiteralsMask.push(isLiteral(arg));
     }
   }
@@ -224,7 +235,23 @@ class FunctionValidator {
    * Checks if the function is available in the current context
    */
   private get allowedHere(): boolean {
-    return this.definition?.locationsAvailable.includes(this.location.id) ?? false;
+    const locationId = this.location.id;
+
+    if (this.definition?.locationsAvailable.includes(locationId)) {
+      return true;
+    }
+
+    // TIME_SERIES_AGG functions are also allowed at the top level of STATS
+    // (not just nested inside agg functions) when the source command is TS
+    if (
+      this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
+      locationId === Location.STATS &&
+      isTimeseriesSourceCommand(this.ast)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -268,4 +295,96 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
     return removeInlineCasts(arg.value);
   }
   return arg;
+}
+
+// ----------------------------------------------------------------------------
+// PromQL
+// ----------------------------------------------------------------------------
+
+/* Checks if the argument count is within the allowed min..max range. */
+export function getPromqlFunctionArityCheck(
+  fn: PromQLFunction,
+  definition: PromQLFunctionDefinition
+): { expected: string; actual: number } | null {
+  if (fn.incomplete) {
+    return null;
+  }
+
+  const minArgs = Math.min(
+    ...definition.signatures.map(
+      (sig) => sig.minParams ?? sig.params.filter(({ optional }) => !optional).length
+    )
+  );
+  const maxArgs = Math.max(...definition.signatures.map(({ params }) => params.length));
+
+  if (fn.args.length < minArgs || fn.args.length > maxArgs) {
+    const expected = minArgs === maxArgs ? `${minArgs}` : `${minArgs}..${maxArgs}`;
+
+    return { expected, actual: fn.args.length };
+  }
+
+  return null;
+}
+
+/* Treats instant_vector as compatible with range_vector (implicit range selector). */
+function isPromqlParamTypeCompatible(
+  expected: PromQLFunctionParamType,
+  actual: PromQLFunctionParamType
+): boolean {
+  return expected === actual || (expected === 'range_vector' && actual === 'instant_vector');
+}
+
+/* Filters signatures compatible by arity and argument types. */
+export function getPromqlMatchingSignatures(
+  signatures: PromQLSignature[],
+  argTypes: (PromQLFunctionParamType | undefined)[]
+): PromQLSignature[] {
+  if (argTypes.some((argType) => argType === undefined)) {
+    return signatures;
+  }
+
+  const matchingArity = filterByMatchingArity(signatures, argTypes.length);
+
+  return matchingArity.filter(({ params }) =>
+    argTypes.every(
+      (argType, idx) =>
+        params[idx]?.type && argType && isPromqlParamTypeCompatible(params[idx]!.type, argType)
+    )
+  );
+}
+
+/* Finds the first argument position where the type does not match the signature. */
+export function getPromqlSignatureMismatch(
+  signatures: PromQLSignature[],
+  argTypes: (PromQLFunctionParamType | undefined)[],
+  argCount: number
+): { required: string; mismatchIdx: number } | null {
+  const matchingArity = filterByMatchingArity(signatures, argCount);
+
+  if (matchingArity.length === 0) {
+    return null;
+  }
+
+  const { params: refParams } = matchingArity[0];
+  const required = refParams
+    .slice(0, argCount)
+    .map(({ name, type }) => `${name}=${type}`)
+    .join(', ');
+  const mismatchIdx = argTypes.findIndex(
+    (argType, idx) =>
+      !refParams[idx]?.type ||
+      !argType ||
+      !isPromqlParamTypeCompatible(refParams[idx]!.type, argType)
+  );
+
+  return mismatchIdx >= 0 ? { required, mismatchIdx } : null;
+}
+
+/* Filters signatures whose required/max param count includes argCount. */
+function filterByMatchingArity(signatures: PromQLSignature[], argCount: number): PromQLSignature[] {
+  return signatures.filter(
+    (sig) =>
+      argCount >= (sig.minParams ?? sig.params.filter(({ optional }) => !optional).length) &&
+      argCount <= sig.params.length
+  );
 }

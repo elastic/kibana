@@ -22,6 +22,8 @@
           "\nParameters for {@link RetrieveDocumentationAPI}"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
               "\nThe search term to perform semantic text with.\nE.g. \"What is Kibana Lens?\""
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -51,6 +55,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,6 +73,8 @@
               "(\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\")[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -90,6 +98,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,6 +116,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,6 +134,8 @@
               "\"highlight\" | \"truncate\" | \"summarize\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -139,6 +153,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,6 +168,8 @@
               "\nId of the LLM connector to use for the task."
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +193,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,6 +208,8 @@
               "\nInferece ID to route the request to the right index to perform the search."
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -204,6 +226,8 @@
           "\nResponse type for {@link RetrieveDocumentationAPI}"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +241,8 @@
               "whether the call was successful or not"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +266,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -256,6 +284,8 @@
           "\nIndividual result item in a {@link RetrieveDocumentationResult}"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,6 +299,8 @@
               "title of the document"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -282,6 +314,8 @@
               "full url to the online documentation"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +329,8 @@
               "full content of the doc article"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -308,6 +344,8 @@
               "true if content exceeded max token length and had to go through token reduction"
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -346,6 +384,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -367,6 +407,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -385,6 +427,8 @@
         "\nDescribes public llmTasks plugin contract returned at the `setup` stage."
       ],
       "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -401,6 +445,8 @@
         "\nDescribes public llmTasks plugin contract returned at the `start` stage."
       ],
       "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -425,6 +471,8 @@
             " | undefined; }) => Promise<boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+          "lineNumber": 31,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -436,6 +484,8 @@
               "label": "options",
               "description": [],
               "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+              "lineNumber": 36,
+              "columnNumber": 45,
               "deprecated": false,
               "trackAdoption": false,
               "children": [
@@ -447,6 +497,8 @@
                   "label": "inferenceId",
                   "description": [],
                   "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+                  "lineNumber": 37,
+                  "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
                 },
@@ -468,6 +520,8 @@
                     " | undefined"
                   ],
                   "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+                  "lineNumber": 38,
+                  "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
                 }
@@ -507,6 +561,8 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/types.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -528,6 +584,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+              "lineNumber": 100,
+              "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
             }

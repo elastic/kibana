@@ -27,7 +27,7 @@ export const getUserInfo = async ({
   }
 
   try {
-    const userProfile = await security.userProfiles.getCurrent({
+    const userProfile = await security.userProfiles?.getCurrent({
       request,
     });
 

@@ -5,6 +5,7 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
+    "test:jest": "node ../../../../../scripts/jest --config jest.config.js",
     "cypress:burn": "yarn cypress:run --env burn=2 --headed",
     "cypress:changed-specs-only": "yarn cypress:run --changed-specs-only --env burn=2",
     "cypress": "node ../../../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../../../x-pack/platform/plugins/shared/osquery/cypress/cypress.config.ts --ftr-config-file ../../../../../x-pack/solutions/security/test/osquery_cypress/cli_config",

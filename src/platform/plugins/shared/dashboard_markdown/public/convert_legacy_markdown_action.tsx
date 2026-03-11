@@ -8,18 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-  PublishesDescription,
-  PublishesTitle,
-} from '@kbn/presentation-publishing';
 import {
+  type PresentationContainer,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasUniqueId,
+  type PublishesDescription,
+  type PublishesTitle,
   apiCanAccessViewMode,
+  apiIsPresentationContainer,
   apiHasParentApi,
   apiHasUniqueId,
   getInheritedViewMode,
@@ -66,9 +64,7 @@ export const getConvertLegacyMarkdownAction = () => ({
     await embeddable.parentApi.replacePanel(embeddable.uuid, {
       panelType: MARKDOWN_EMBEDDABLE_TYPE,
       serializedState: {
-        rawState: {
-          content: legacyContent,
-        },
+        content: legacyContent,
       },
     });
   },

@@ -12,14 +12,19 @@ import type { DashboardState } from '../../types';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
+  hidePanelBorders: 'hide_panel_borders',
   useMargins: 'use_margins',
   syncColors: 'sync_colors',
   syncTooltips: 'sync_tooltips',
   syncCursor: 'sync_cursor',
+  autoApplyFilters: 'auto_apply_filters',
 } as const;
 type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKeys]: boolean };
 
-export function transformOptionsOut(optionsJSON: string): Required<DashboardState>['options'] {
+export function transformOptionsOut(
+  optionsJSON: string,
+  controlGroupShowApplyButtonSetting?: boolean
+): Required<DashboardState>['options'] {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Required<DashboardState>['options']> = {};
   Object.keys(options).forEach((key) => {
@@ -27,5 +32,12 @@ export function transformOptionsOut(optionsJSON: string): Required<DashboardStat
     const apiKey = savedObjectToAPIOptionsKeys[savedObjectKey];
     if (apiKey) apiOptions[apiKey] = options[savedObjectKey];
   });
-  return apiOptions;
+
+  return {
+    ...apiOptions,
+    ...(apiOptions.auto_apply_filters === undefined &&
+      controlGroupShowApplyButtonSetting !== undefined && {
+        auto_apply_filters: !controlGroupShowApplyButtonSetting,
+      }),
+  };
 }

@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
-  getRuleDetailsRoute,
+  getRulesAppDetailsRoute,
+  rulesAppRoute,
   triggersActionsRoute,
 } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
@@ -253,7 +254,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
 
+  // Detect current app to determine the correct path format
+
   const ruleRowCss = css`
+    min-width: ${euiTheme.breakpoint.xl}px;
+
     .actRulesList__tableRowDisabled {
       background-color: ${euiTheme.colors.lightestShade};
 
@@ -419,7 +424,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+          const pathToRuleDetails = `${
+            getIsExperimentalFeatureEnabled('unifiedRulesPage')
+              ? rulesAppRoute
+              : triggersActionsRoute
+          }${getRulesAppDetailsRoute(rule.id)}`;
 
           const linkProps = getRouterLinkProps({
             href: pathToRuleDetails,
@@ -1005,8 +1014,19 @@ export const RulesListTable = (props: RulesListTableProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          overflow-x: auto;
+        `}
+      >
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
+            {
+              defaultMessage: 'Displays rule list data',
+            }
+          )}
           loading={isLoading}
           /* Don't display rules until we have the rule types initialized */
           items={items}

@@ -17,6 +17,8 @@ import {
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
+jest.mock('../lib/with_license_check');
+
 describe('POST /api/workflows/search', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
@@ -108,6 +110,56 @@ describe('POST /api/workflows/search', () => {
           query: 'test',
           enabled: [true, false],
           createdBy: ['user1@example.com', 'user2@example.com'],
+        },
+        'default'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockSearchResults });
+    });
+
+    it('should filter workflows by tags', async () => {
+      const mockSearchResults = {
+        page: 1,
+        size: 10,
+        total: 1,
+        results: [
+          {
+            id: 'workflow-1',
+            name: 'Tagged Workflow',
+            description: 'Workflow with tags',
+            enabled: true,
+            createdAt: new Date('2024-01-15T10:00:00Z'),
+            createdBy: 'user1@example.com',
+            lastUpdatedAt: new Date('2024-01-15T10:30:00Z'),
+            lastUpdatedBy: 'user1@example.com',
+            definition: null,
+            yaml: '',
+            valid: true,
+            history: [],
+          },
+        ],
+      };
+
+      workflowsApi.getWorkflows = jest.fn().mockResolvedValue(mockSearchResults);
+
+      const mockContext = {};
+      const mockRequest = {
+        body: {
+          size: 10,
+          page: 1,
+          tags: ['production', 'critical'],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/search' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
+        {
+          size: 10,
+          page: 1,
+          tags: ['production', 'critical'],
         },
         'default'
       );

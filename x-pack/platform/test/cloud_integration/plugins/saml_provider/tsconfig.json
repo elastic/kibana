@@ -13,5 +13,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/dev-utils",
+    "@kbn/mock-idp-utils",
   ]
 }

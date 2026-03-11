@@ -40,6 +40,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,6 +62,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,6 +106,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "lineNumber": 189,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +128,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,6 +145,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -149,6 +159,8 @@
             "label": "_compiled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 192,
+            "columnNumber": 15,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -170,6 +182,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+                "lineNumber": 192,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -208,6 +222,8 @@
           " | null; }"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/object_transform.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -224,6 +240,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/object_transform.ts",
+            "lineNumber": 100,
+            "columnNumber": 74,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -244,6 +262,8 @@
         "label": "ObjectMigrationDefinition",
         "description": [],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,6 +286,8 @@
               "<any, any, any, any>"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -290,6 +312,8 @@
           "<UpIn, UpOut, DownIn, DownOut>"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -312,6 +336,8 @@
               "<O>"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -326,6 +352,8 @@
                   "I"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -341,6 +369,8 @@
                   "number | \"latest\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 49,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -353,6 +383,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -369,6 +401,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                    "lineNumber": 51,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -396,6 +430,8 @@
               "<O>"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -410,6 +446,8 @@
                   "I"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -425,6 +463,8 @@
                   "number | \"latest\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -437,6 +477,8 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -453,6 +495,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                    "lineNumber": 59,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -480,6 +524,8 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -494,6 +540,8 @@
                   "any"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -509,6 +557,8 @@
                   "number | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+                "lineNumber": 63,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -527,6 +577,8 @@
         "label": "ServiceDefinitionVersioned",
         "description": [],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -548,6 +600,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -562,6 +616,8 @@
         "label": "ServicesDefinition",
         "description": [],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -592,6 +648,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -622,6 +680,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -660,6 +720,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -698,6 +760,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,6 +792,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -758,6 +824,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,6 +848,8 @@
               "<any, any, any, any> | undefined; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -794,6 +864,8 @@
         "label": "ServiceTransforms",
         "description": [],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,6 +896,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -854,6 +928,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -892,6 +968,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -930,6 +1008,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -960,6 +1040,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -990,6 +1072,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1012,6 +1096,8 @@
               "<any, any, any, any>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1036,6 +1122,8 @@
           "<UpIn, UpOut, DownIn, DownOut>"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1057,6 +1145,8 @@
               "<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1078,6 +1168,8 @@
               "<DownIn, DownOut> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1099,6 +1191,8 @@
               "<UpIn, UpOut> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1142,6 +1236,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+        "lineNumber": 208,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1163,6 +1259,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1174,6 +1272,8 @@
             "label": "requestVersion",
             "description": [],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1196,6 +1296,8 @@
               "; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/content_management_services_versioning.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1213,6 +1315,8 @@
           "(input: I) => O"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1228,6 +1332,8 @@
               "I"
             ],
             "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1253,6 +1359,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1268,6 +1376,8 @@
           "number"
         ],
         "path": "src/platform/packages/shared/kbn-object-versioning/lib/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

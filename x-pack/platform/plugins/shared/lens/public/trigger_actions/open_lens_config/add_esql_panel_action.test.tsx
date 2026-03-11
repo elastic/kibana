@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { AddESQLPanelAction } from './add_esql_panel_action';
 
 describe('create Lens panel action', () => {

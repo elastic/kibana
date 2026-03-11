@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
   GetAdditionalLinksParams,
@@ -26,7 +26,6 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
-import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
@@ -190,7 +189,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, mlFeaturesDisabled]
   );
-  const { euiTheme } = useEuiTheme();
+
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
@@ -209,9 +208,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                 <>
                   <EuiFlexItem grow={false}>
                     <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-                    <TechnicalPreviewBadge />
                   </EuiFlexItem>
                 </>
               ) : null}

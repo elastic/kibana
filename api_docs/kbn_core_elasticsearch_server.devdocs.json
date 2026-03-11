@@ -14,6 +14,81 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.AllProjectsRouting",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllProjectsRouting",
+        "description": [
+          "\n{@link AsScopedOptions} variant that broadcasts requests to all CPS-connected Elasticsearch\ninstances. Use when the intent is to search or aggregate data across all available projects."
+        ],
+        "signature": [
+          "AllProjectsRouting",
+          " extends ",
+          "AsScopedOptions"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.AllProjectsRouting.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "\"all\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.AsScopedOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "AsScopedOptions",
+        "description": [
+          "\nOptions for the `asScoped` method.\n"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.AsScopedOptions.projectRouting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [
+              "\nControls how `project_routing` is automatically injected into Elasticsearch requests made\nthrough the scoped client.\n\n**Background**: Cross-Project Search (CPS) is a Serverless feature that allows Kibana to\ntransparently orchestrate searches across multiple Elastic projects. Kibana itself does not\nexecute the cross-project logic - it forwards requests with the appropriate `project_routing`\nheader and Elasticsearch handles execution, security enforcement, and result aggregation.\n\n**Options**:\n- `'origin-only'`: Requests are routed exclusively to the \"origin\" Elasticsearch instance\n  (i.e., the project that Kibana is directly connected to). Use this for administrative or\n  internal operations that must not fan out across other projects.\n- `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured for\n  the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`\n  so that the space can be extracted from the URL pathname. Use this when the scope of the\n  query should match the data boundaries of the active space.\n- `'all'`: Requests are broadcast to all CPS-connected Elasticsearch instances. This is the\n  broadest option and is appropriate when the intent is to search or aggregate data across\n  all connected projects.\n\n**Important**: This option only takes effect in CPS-enabled Serverless environments. In all\nother environments (stateful, non-CPS Serverless), any `project_routing` params are\nstripped from requests to avoid Elasticsearch rejections and to preserve traditional\nsingle-cluster routing behavior."
+            ],
+            "signature": [
+              "\"space\" | \"all\" | \"origin-only\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-server.ElasticsearchApiToRedactInLogs",
         "type": "Interface",
         "tags": [],
@@ -22,6 +97,8 @@
           "\nDefinition of an API that should redact the requested body in the logs"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,6 +115,8 @@
               "string | RegExp"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -54,6 +133,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -70,6 +151,8 @@
           "\nRepresent the capabilities supported by a given ES cluster.\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+        "lineNumber": 149,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,6 +166,8 @@
               "\nIndicates whether we're connected to a serverless version of elasticsearch.\nRequired because some options aren't working for serverless and code needs to have the info to react accordingly."
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -99,6 +184,8 @@
           "\nConfiguration options to be used to create a {@link IClusterClient | cluster client}\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -113,6 +200,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -127,6 +216,8 @@
               "string[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,6 +229,8 @@
             "label": "maxSockets",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +242,8 @@
             "label": "maxIdleSockets",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,6 +265,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,6 +281,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -195,6 +294,8 @@
             "label": "compression",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -206,6 +307,8 @@
             "label": "sniffOnStart",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,6 +320,8 @@
             "label": "sniffOnConnectionFault",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +336,8 @@
               "false | moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +352,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,6 +368,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,6 +384,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,6 +400,8 @@
               "string[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,6 +416,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,6 +432,8 @@
               "number | moment.Duration | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -329,6 +448,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +465,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -359,6 +482,8 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,6 +498,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -387,6 +514,8 @@
         "label": "ElasticsearchClientSslConfig",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,6 +530,8 @@
               "\"none\" | \"full\" | \"certificate\" | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -415,6 +546,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,6 +562,8 @@
               "string[] | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -443,6 +578,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,6 +594,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -471,6 +610,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -487,6 +628,8 @@
           "\nA limited set of Elasticsearch configuration entries exposed to the `preboot` plugins at `setup`.\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -503,6 +646,8 @@
               "string[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,6 +661,8 @@
               "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -532,6 +679,8 @@
           "\nCore's `elasticsearch` request handler context."
         ],
         "path": "src/core/packages/elasticsearch/server/src/request_handler_context.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -546,6 +695,8 @@
               "IScopedClusterClient"
             ],
             "path": "src/core/packages/elasticsearch/server/src/request_handler_context.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -562,6 +713,8 @@
           "\nOptions for configuring per-request logging.\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/client.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -575,6 +728,8 @@
               "\nThe logger name to use for logging requests. It results in the logger name `elasticsearch.query.<loggerName>`.\nThis allows grouping logs by the logger name, and using different configurations for each logger."
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/client.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -589,6 +744,8 @@
         "label": "ElasticsearchServicePreboot",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -605,6 +762,8 @@
               "{ readonly hosts: string[]; readonly credentialsSpecified: boolean; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,6 +783,8 @@
               "ICustomClusterClient"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -640,6 +801,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -651,7 +814,7 @@
                 "tags": [],
                 "label": "clientConfig",
                 "description": [
-                  "A config consists of Elasticsearch JS client options and\nvalid sub-set of Elasticsearch service config.\nWe fill all the missing properties in the `clientConfig` using the default\nElasticsearch config so that we don't depend on default values set and\ncontrolled by underlying Elasticsearch JS client.\nWe don't run validation against the passed config and expect it to be valid."
+                  "A config consists of Elasticsearch JS client options and"
                 ],
                 "signature": [
                   "Partial<",
@@ -659,6 +822,8 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -677,6 +842,8 @@
         "label": "ElasticsearchServiceSetup",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -695,6 +862,8 @@
               ") => void"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -709,6 +878,8 @@
                   "UnauthorizedErrorHandler"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "lineNumber": 81,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -733,6 +904,8 @@
               ">; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": true,
             "trackAdoption": false,
             "references": [
@@ -779,42 +952,10 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchServiceSetup.setCpsFeatureFlag",
-            "type": "Function",
-            "tags": [],
-            "label": "setCpsFeatureFlag",
-            "description": [
-              "\nSets the CPS feature flag in the Elasticsearch service.\nThis should only be called from the CPS plugin.\n"
-            ],
-            "signature": [
-              "(enabled: boolean) => void"
-            ],
-            "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-elasticsearch-server",
-                "id": "def-server.ElasticsearchServiceSetup.setCpsFeatureFlag.$1",
-                "type": "boolean",
-                "tags": [],
-                "label": "enabled",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -827,6 +968,8 @@
         "label": "ElasticsearchServiceStart",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -843,6 +986,8 @@
               "IClusterClient"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -862,6 +1007,8 @@
               "ICustomClusterClient"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -878,6 +1025,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -889,7 +1038,7 @@
                 "tags": [],
                 "label": "clientConfig",
                 "description": [
-                  "A config consists of Elasticsearch JS client options and\nvalid sub-set of Elasticsearch service config.\nWe fill all the missing properties in the `clientConfig` using the default\nElasticsearch config so that we don't depend on default values set and\ncontrolled by underlying Elasticsearch JS client.\nWe don't run validation against the passed config and expect it to be valid."
+                  "A config consists of Elasticsearch JS client options and"
                 ],
                 "signature": [
                   "Partial<",
@@ -897,6 +1046,8 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "lineNumber": 134,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -918,6 +1069,8 @@
               "ElasticsearchCapabilities"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -936,6 +1089,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -950,6 +1105,8 @@
         "label": "ElasticsearchSslConfig",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+        "lineNumber": 166,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -964,6 +1121,8 @@
               "\"none\" | \"full\" | \"certificate\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -978,6 +1137,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -992,6 +1153,8 @@
               "string[] | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1006,6 +1169,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1020,6 +1185,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1031,6 +1198,8 @@
             "label": "alwaysPresentCertificate",
             "description": [],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1046,7 +1215,9 @@
         "description": [
           "\nFake request object created manually by Kibana plugins."
         ],
-        "path": "src/core/packages/elasticsearch/server/src/client/scopeable_request.ts",
+        "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1060,9 +1231,11 @@
               "Headers used for authentication against Elasticsearch"
             ],
             "signature": [
-              "{ date?: string | string[] | undefined; from?: string | string[] | undefined; origin?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; range?: string | string[] | undefined; authorization?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ range?: string | string[] | undefined; date?: string | string[] | undefined; origin?: string | string[] | undefined; allow?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; authorization?: string | string[] | undefined; from?: string | string[] | undefined; host?: string | string[] | undefined; etag?: string | string[] | undefined; expires?: string | string[] | undefined; accept?: string | string[] | undefined; \"accept-encoding\"?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; expect?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-fetch-site\"?: string | string[] | undefined; \"sec-fetch-mode\"?: string | string[] | undefined; \"sec-fetch-user\"?: string | string[] | undefined; \"sec-fetch-dest\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
-            "path": "src/core/packages/elasticsearch/server/src/client/scopeable_request.ts",
+            "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1079,6 +1252,8 @@
           "\nRepresents an Elasticsearch cluster API client created by the platform.\nIt allows to call API on behalf of the internal Kibana user and\nthe actual user that is derived from the request headers (via `asScoped(...)`).\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1089,7 +1264,7 @@
             "tags": [],
             "label": "asInternalUser",
             "description": [
-              "\nA {@link ElasticsearchClient | client} to be used to query the ES cluster on behalf of the Kibana internal user"
+              "\nA {@link ElasticsearchClient | client} used to query the Elasticsearch cluster on behalf of\nthe Kibana internal user. Intended primarily for administrative and infrastructure-level\noperations (e.g., index management, bootstrapping, health checks) rather than user-facing\ndata queries.\n\nIn CPS-enabled Serverless environments, requests made through this client are always bound\nto `'origin-only'` routing - they will never fan out to other CPS-connected projects."
             ],
             "signature": [
               "{ create: { <TDocument = unknown>(this: That, params: ",
@@ -1172,7 +1347,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -1205,25 +1380,25 @@
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -1576,27 +1751,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
-              ">; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
-              ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -1735,6 +1910,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -2081,6 +2258,8 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2091,15 +2270,28 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to given {@link ScopeableRequest | request}"
+              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch.\n\nIn CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`\nis injected into outgoing requests. See {@link AsScopedOptions} for details.\n"
             ],
             "signature": [
-              "(request: ",
+              "{ (request: ",
+              "ScopeableUrlRequest",
+              ", opts: ",
+              "SpaceNPRERouting",
+              "): ",
+              "IScopedClusterClient",
+              "; (request: ",
               "ScopeableRequest",
-              ") => ",
-              "IScopedClusterClient"
+              ", opts?: ",
+              "OriginOnlyRouting",
+              " | ",
+              "AllProjectsRouting",
+              " | undefined): ",
+              "IScopedClusterClient",
+              "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2109,14 +2301,113 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "request",
-                "description": [],
+                "description": [
+                  "- A {@link ScopeableUrlRequest} whose URL is used to extract the active space"
+                ],
+                "signature": [
+                  "ScopeableUrlRequest"
+                ],
+                "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+                "lineNumber": 107,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server",
+                "id": "def-server.IClusterClient.asScoped.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- {@link SpaceNPRERouting} options with `projectRouting` set to `'space'`."
+                ],
+                "signature": [
+                  "SpaceNPRERouting"
+                ],
+                "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+                "lineNumber": 107,
+                "columnNumber": 42,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IClusterClient.asScoped",
+            "type": "Function",
+            "tags": [],
+            "label": "asScoped",
+            "description": [
+              "\nCreates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,\nforwarding the request's authentication headers to Elasticsearch.\n\nIn CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`\nis injected into outgoing requests. See {@link AsScopedOptions} for details.\n"
+            ],
+            "signature": [
+              "{ (request: ",
+              "ScopeableUrlRequest",
+              ", opts: ",
+              "SpaceNPRERouting",
+              "): ",
+              "IScopedClusterClient",
+              "; (request: ",
+              "ScopeableRequest",
+              ", opts?: ",
+              "OriginOnlyRouting",
+              " | ",
+              "AllProjectsRouting",
+              " | undefined): ",
+              "IScopedClusterClient",
+              "; }"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server",
+                "id": "def-server.IClusterClient.asScoped.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "- The incoming {@link ScopeableRequest | request} whose credentials are used"
+                ],
                 "signature": [
                   "ScopeableRequest"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+                "lineNumber": 121,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server",
+                "id": "def-server.IClusterClient.asScoped.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "- Optional {@link AsScopedOptions | options} to configure CPS routing behavior."
+                ],
+                "signature": [
+                  "OriginOnlyRouting",
+                  " | ",
+                  "AllProjectsRouting",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2139,6 +2430,8 @@
           "IClusterClient"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2155,6 +2448,8 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2171,6 +2466,8 @@
         "label": "IElasticsearchConfig",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2187,6 +2484,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2203,6 +2502,26 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.healthCheckFailureInterval",
+            "type": "Object",
+            "tags": [],
+            "label": "healthCheckFailureInterval",
+            "description": [
+              "\nThe interval between health check requests Kibana sends to the Elasticsearch during failure."
+            ],
+            "signature": [
+              "moment.Duration | undefined"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2216,6 +2535,8 @@
               "\nThe number of times to retry the health check request"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2229,6 +2550,8 @@
               "\nWhether to allow kibana to connect to a non-compatible elasticsearch node."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2242,6 +2565,8 @@
               "\nVersion of the Elasticsearch (6.7, 7.1 or `master`) client will be connecting to."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2255,6 +2580,8 @@
               "\nThe maximum number of sockets that can be used for communications with elasticsearch."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,6 +2595,8 @@
               "\nThe maximum number of idle sockets to keep open between Kibana and Elasticsearch. If more sockets become idle, they will be closed."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2284,6 +2613,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2297,6 +2628,8 @@
               "\nWhether to use compression for communications with elasticsearch."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2313,6 +2646,8 @@
               "string[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2329,6 +2664,8 @@
               "string[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2345,6 +2682,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2361,6 +2700,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2374,6 +2715,8 @@
               "\nSpecifies whether the client should attempt to detect the rest of the cluster\nwhen it is first instantiated."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2390,6 +2733,8 @@
               "false | moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2403,6 +2748,8 @@
               "\nSpecifies whether the client should immediately sniff for a more current list\nof nodes when a connection dies."
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2419,6 +2766,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2435,6 +2784,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2451,6 +2802,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2467,6 +2820,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2483,6 +2838,8 @@
               "ElasticsearchSslConfig"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2500,6 +2857,8 @@
               "[]"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2516,6 +2875,8 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2532,6 +2893,8 @@
           "\nServes the same purpose as the normal {@link IClusterClient | cluster client} but exposes\nan additional `asCurrentUser` method that doesn't use credentials of the Kibana internal\nuser (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers\nextracted from the current user request to the API instead.\n"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2625,7 +2988,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -2658,25 +3021,25 @@
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -3029,27 +3392,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
-              ">; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
-              ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -3188,6 +3551,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -3534,6 +3899,8 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3627,7 +3994,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -3660,25 +4027,25 @@
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -4031,27 +4398,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
-              ">; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
-              ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -4190,6 +4557,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -4536,6 +4905,8 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4629,7 +5000,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -4662,25 +5033,25 @@
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -5033,27 +5404,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
-              ">; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
-              ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | undefined, options?: ",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -5192,6 +5563,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -5538,6 +5911,86 @@
               "; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/scoped_cluster_client.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.OriginOnlyRouting",
+        "type": "Interface",
+        "tags": [],
+        "label": "OriginOnlyRouting",
+        "description": [
+          "\n{@link AsScopedOptions} variant that locks routing to the origin Elasticsearch instance.\nUse for administrative or internal operations that must not fan out across CPS-connected projects."
+        ],
+        "signature": [
+          "OriginOnlyRouting",
+          " extends ",
+          "AsScopedOptions"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.OriginOnlyRouting.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "\"origin-only\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.SpaceNPRERouting",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpaceNPRERouting",
+        "description": [
+          "\n{@link AsScopedOptions} variant that routes requests to the NPRE configured for the current\nKibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped` so the space\ncan be extracted from the URL pathname."
+        ],
+        "signature": [
+          "SpaceNPRERouting",
+          " extends ",
+          "AsScopedOptions"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.SpaceNPRERouting.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "\"space\""
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/cluster_client.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5552,6 +6005,8 @@
         "label": "UnauthorizedErrorHandlerNotHandledResult",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5566,6 +6021,8 @@
               "\"notHandled\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5580,6 +6037,8 @@
         "label": "UnauthorizedErrorHandlerOptions",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5595,6 +6054,8 @@
               " & { statusCode: 401; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5610,6 +6071,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5624,6 +6087,8 @@
         "label": "UnauthorizedErrorHandlerResultRetryParams",
         "description": [],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5638,6 +6103,8 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5657,6 +6124,8 @@
           "UnauthorizedErrorHandlerResultRetryParams"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5671,6 +6140,8 @@
               "\"retry\""
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5687,6 +6158,8 @@
           "\nToolkit passed to a {@link UnauthorizedErrorHandler} used to generate responses from the handler"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5704,6 +6177,8 @@
               "UnauthorizedErrorHandlerNotHandledResult"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5725,6 +6200,8 @@
               "UnauthorizedErrorHandlerRetryResult"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5739,12 +6216,55 @@
                   "UnauthorizedErrorHandlerResultRetryParams"
                 ],
                 "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+                "lineNumber": 63,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.UrlRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "UrlRequest",
+        "description": [
+          "\nA minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in\nnon-HTTP contexts - for example, background tasks or scheduled jobs - where no real\n{@link KibanaRequest} is available. The space is derived from the URL pathname\n(e.g. `/s/<spaceId>/...`).\n\nIn route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies\n{@link ScopeableUrlRequest} without needing this type."
+        ],
+        "signature": [
+          "UrlRequest",
+          " extends ",
+          "FakeRequest"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.UrlRequest.url",
+            "type": "Object",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "The URL of the request, used to extract the current space for CPS routing."
+            ],
+            "signature": [
+              "URL"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5842,7 +6362,7 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "WriteResponseBase",
-          ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+          ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
           "default",
           "; helpers: ",
           "default",
@@ -5875,25 +6395,25 @@
           " | undefined): Promise<",
           "BulkResponse",
           ">; }; capabilities: { (this: That, params?: ",
-          "TODO",
+          "CapabilitiesRequest",
           " | undefined, options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "TODO",
+          "CapabilitiesResponse",
           ">; (this: That, params?: ",
-          "TODO",
+          "CapabilitiesRequest",
           " | undefined, options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "TODO",
+          "CapabilitiesResponse",
           ", unknown>>; (this: That, params?: ",
-          "TODO",
+          "CapabilitiesRequest",
           " | undefined, options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "TODO",
+          "CapabilitiesResponse",
           ">; }; cat: ",
           "default",
           "; ccr: ",
@@ -6246,27 +6766,27 @@
           "InfoResponse",
           ">; }; ingest: ",
           "default",
-          "; knnSearch: { (this: That, params?: ",
-          "TODO",
-          " | undefined, options?: ",
+          "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+          "KnnSearchRequest",
+          ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "TODO",
-          ">; (this: That, params?: ",
-          "TODO",
-          " | undefined, options?: ",
+          "KnnSearchResponse",
+          "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+          "KnnSearchRequest",
+          ", options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "TODO",
-          ", unknown>>; (this: That, params?: ",
-          "TODO",
-          " | undefined, options?: ",
+          "KnnSearchResponse",
+          "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+          "KnnSearchRequest",
+          ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "TODO",
-          ">; }; license: ",
+          "KnnSearchResponse",
+          "<TDocument>>; }; license: ",
           "default",
           "; logstash: ",
           "default",
@@ -6405,6 +6925,8 @@
           " | undefined, options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<boolean>; }; profiling: ",
+          "default",
+          "; project: ",
           "default",
           "; putScript: { (this: That, params: ",
           "PutScriptRequest",
@@ -6751,6 +7273,8 @@
           "; }"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/client.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6762,14 +7286,37 @@
         "tags": [],
         "label": "ScopeableRequest",
         "description": [
-          "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
+          "\nUnion of all request types accepted by `asScoped`. Carries the credentials used to\nauthenticate Elasticsearch calls on behalf of the current user.\n"
         ],
         "signature": [
           "KibanaRequest",
           "<unknown, unknown, unknown, any> | ",
           "FakeRequest"
         ],
-        "path": "src/core/packages/elasticsearch/server/src/client/scopeable_request.ts",
+        "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-server.ScopeableUrlRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "ScopeableUrlRequest",
+        "description": [
+          "\nA request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.\n\nCovers both {@link KibanaRequest} (the typical caller from route handlers, whose URL is set by\nthe HTTP layer) and {@link UrlRequest} (a lightweight synthetic alternative for programmatic\nuse). In both cases the space is extracted from the URL pathname (e.g. `/s/<spaceId>/...`).\n"
+        ],
+        "signature": [
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any> | ",
+          "UrlRequest"
+        ],
+        "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6801,6 +7348,8 @@
           ">"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -6816,6 +7365,8 @@
               "UnauthorizedErrorHandlerOptions"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6830,6 +7381,8 @@
               "UnauthorizedErrorHandlerToolkit"
             ],
             "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6849,6 +7402,8 @@
           "UnauthorizedErrorHandlerNotHandledResult"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/unauthorized_error_handler.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

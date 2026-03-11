@@ -12,7 +12,7 @@ import type {
   ESQLMessage,
   ESQLAst,
   ESQLAstRerankCommand,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';
@@ -29,7 +29,11 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   const { query, location, inferenceId } = command as ESQLAstRerankCommand;
-  const rerankExpressionType = getExpressionType(query, context?.columns);
+  const rerankExpressionType = getExpressionType(
+    query,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
 
   // check for supported query types
   if (!supportedQueryTypes.includes(rerankExpressionType)) {

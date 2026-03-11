@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   ScheduleNowTransformsRequestSchema,
   ScheduleNowTransformsResponseSchema,
@@ -14,7 +15,7 @@ import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/schedule_now_transforms', { tag: tags.stateful.all }, () => {
   const transformId = 'transform-test-schedule-now';
 
   apiTest.beforeEach(async ({ esClient, apiServices }) => {

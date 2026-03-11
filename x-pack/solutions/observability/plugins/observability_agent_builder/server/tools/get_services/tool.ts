@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -25,38 +25,42 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServicesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  environment: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Optionally filter the services by the environments that they are running in.'),
   healthStatus: z
     .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
     .optional()
-    .describe('Optionally filter the services by their health status.'),
+    .describe('Filter by health status. Example: ["warning", "critical"].'),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
+    ),
 });
 
 export function createGetServicesTool({
   core,
+  plugins,
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getServicesSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves a list of monitored APM services with health status, alert counts, and performance metrics (latency, error rate, throughput).
+    description: `Retrieves a list of services from APM, logs, and metrics data sources.
+    
+For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
+For services found only in logs or metrics, basic information like service name and environment is returned.
 
 When to use:
 - Getting a high-level overview of system health from a service perspective
 - Identifying key metrics for services like latency, error rate, throughput, anomalies and alert counts
-- Answering "which services are having problems?"`,
+- Answering "which services are having problems?"
+- Discovering services that may not be instrumented with APM but appear in logs or metrics`,
     schema: getServicesSchema,
     tags: ['observability', 'services'],
     availability: {
@@ -66,22 +70,21 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        environment,
-        healthStatus,
-      } = toolParams;
-      const { request } = context;
+      const { start, end, healthStatus, kqlFilter } = toolParams;
+      const { request, esClient } = context;
 
       try {
         const { services, maxCountExceeded, serviceOverflowCount } = await getToolHandler({
+          core,
+          plugins,
           request,
+          esClient,
           dataRegistry,
+          logger,
           start,
           end,
-          environment,
           healthStatus,
+          kqlFilter,
         });
 
         return {

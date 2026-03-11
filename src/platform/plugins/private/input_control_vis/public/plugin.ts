@@ -14,10 +14,11 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginSetup, KqlPluginStart } from '@kbn/kql/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
@@ -34,6 +35,7 @@ export interface InputControlVisDependencies {
   core: InputControlVisCoreSetup;
   data: DataPublicPluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
+  kql: KqlPluginSetup;
   getSettings: () => Promise<InputControlSettings>;
 }
 
@@ -43,6 +45,7 @@ export interface InputControlVisPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
+  kql: KqlPluginSetup;
 }
 
 /** @internal */
@@ -51,6 +54,7 @@ export interface InputControlVisPluginStartDependencies {
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -60,13 +64,20 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
   public setup(
     core: InputControlVisCoreSetup,
-    { expressions, visualizations, unifiedSearch, data }: InputControlVisPluginSetupDependencies
+    {
+      expressions,
+      visualizations,
+      unifiedSearch,
+      data,
+      kql,
+    }: InputControlVisPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<InputControlVisDependencies> = {
       core,
       unifiedSearch,
+      kql,
       getSettings: async () => {
-        const { timeout, terminateAfter } = unifiedSearch.autocomplete.getAutocompleteSettings();
+        const { timeout, terminateAfter } = kql.autocomplete.getAutocompleteSettings();
         return { autocompleteTimeout: timeout, autocompleteTerminateAfter: terminateAfter };
       },
       data,

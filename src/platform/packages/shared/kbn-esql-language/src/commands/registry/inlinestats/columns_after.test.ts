@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { Parser } from '../../../..';
-import type { ESQLColumnData } from '../types';
+import { Parser } from '@elastic/esql';
+import { UnmappedFieldsStrategy, type ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
+import { additionalFieldsMock } from '../../../__tests__/language/helpers';
 
 describe('INLINESTATS', () => {
   it('gets the columns after the query', () => {
@@ -29,7 +30,13 @@ describe('INLINESTATS', () => {
       },
     } = Parser.parseQuery(queryString);
 
-    const result = columnsAfter(command, previousCommandFields, queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      UnmappedFieldsStrategy.FAIL
+    );
 
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'AVG(field1)', type: 'double', userDefined: true, location: { min: 21, max: 31 } },

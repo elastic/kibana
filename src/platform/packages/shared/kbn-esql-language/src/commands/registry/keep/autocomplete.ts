@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
@@ -16,7 +17,6 @@ import {
   getLastNonWhitespaceChar,
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
@@ -38,7 +38,6 @@ export async function autocomplete(
     .filter(isColumn)
     .map((arg) => arg.parts.join('.'));
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
-
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment, context),

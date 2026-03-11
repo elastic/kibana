@@ -13,7 +13,9 @@ import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { DocLinksService } from './doc_links';
 import type { ToolsService } from './tools';
+import type { SkillsService } from './skills/skills_service';
 import type { NavigationService } from './navigation';
+import type { EventsService } from './events';
 
 export interface AgentBuilderInternalService {
   agentService: AgentService;
@@ -23,6 +25,8 @@ export interface AgentBuilderInternalService {
   docLinksService: DocLinksService;
   navigationService: NavigationService;
   toolsService: ToolsService;
+  skillsService: SkillsService;
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
+  eventsService: EventsService;
 }

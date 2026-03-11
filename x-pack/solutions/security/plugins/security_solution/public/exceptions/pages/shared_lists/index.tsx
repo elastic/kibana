@@ -86,7 +86,8 @@ const ExceptionsTable = styled(EuiFlexGroup)`
 `;
 
 export const SharedLists = React.memo(() => {
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { edit: canEditExceptions, read: canReadExceptions } =
+    useUserPrivileges().rulesPrivileges.exceptions;
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = listsConfigLoading;
@@ -113,14 +114,14 @@ export const SharedLists = React.memo(() => {
 
   const exceptionListTypes = useMemo(() => {
     const lists = [];
-    if (canReadRules) {
+    if (canReadExceptions) {
       lists.push(ExceptionListTypeEnum.DETECTION);
     }
     if (canAccessEndpointExceptions) {
       lists.push(ExceptionListTypeEnum.ENDPOINT);
     }
     return lists;
-  }, [canAccessEndpointExceptions, canReadRules]);
+  }, [canAccessEndpointExceptions, canReadExceptions]);
   const [
     loadingExceptions,
     exceptions,
@@ -160,12 +161,12 @@ export const SharedLists = React.memo(() => {
   const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -335,7 +336,10 @@ export const SharedLists = React.memo(() => {
   const handleReferenceDelete = useCallback(async (): Promise<void> => {
     const exceptionListId = referenceModalState.listId;
     const exceptionListNamespaceType = referenceModalState.listNamespaceType;
-    const relevantRules = exceptionsListsRef[exceptionListId].rules;
+    const exceptionList = exceptionsListsRef[exceptionListId];
+
+    const relevantRules = exceptionList?.rules ?? [];
+    const listName = exceptionList?.name ?? '';
 
     try {
       await Promise.all(
@@ -359,7 +363,7 @@ export const SharedLists = React.memo(() => {
         id: exceptionListId,
         namespaceType: exceptionListNamespaceType,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess(),
+        onSuccess: handleDeleteSuccess(listName),
       });
     } catch (err) {
       handleDeleteError(err);
@@ -448,7 +452,7 @@ export const SharedLists = React.memo(() => {
   };
   const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
 
-  const isReadOnly = canReadRules && !canEditRules;
+  const isReadOnly = canReadExceptions && !canEditExceptions;
 
   useEffect(() => {
     if (isSearchingExceptions && hasNoExceptions) {
@@ -498,7 +502,7 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              canEditRules && (
+              canEditExceptions && (
                 <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
                   {i18n.CREATE_BUTTON}
                 </EuiButton>
@@ -532,7 +536,7 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          (canEditRules || canWriteEndpointExceptions) && (
+          (canEditExceptions || canWriteEndpointExceptions) && (
             <EuiButton
               data-test-subj="importSharedExceptionList"
               iconType={'importAction'}

@@ -15,29 +15,31 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  ANALYZER_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
+import { ANALYZER_PREVIEW_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree';
 import { TestProviders } from '../../../../common/mock';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
-jest.mock('../hooks/use_expand_section');
-jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
+jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
+  useExpandSection: jest.fn(),
+}));
+jest.mock('../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
@@ -56,9 +58,7 @@ jest.mock('react-redux', () => {
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
-);
+jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 
 const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -103,6 +103,8 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
   );
 
 describe('<VisualizationsSection />', () => {
+  const mockUseExpandSection = jest.mocked(useExpandSection);
+
   beforeEach(() => {
     mockUseUiSetting.mockImplementation(() => [false]);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
@@ -131,13 +133,12 @@ describe('<VisualizationsSection />', () => {
   it('should render visualizations component', () => {
     const { getByTestId } = renderVisualizationsSection();
 
-    expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(VISUALIZATIONS_SECTION_HEADER_TEST_ID)).toHaveTextContent('Visualizations');
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render the component collapsed if value is false in local storage', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseExpandSection.mockReturnValue(false);
 
     const { getByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).not.toBeVisible();
@@ -147,8 +148,8 @@ describe('<VisualizationsSection />', () => {
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
     mockUseUiSetting.mockImplementation((key, defaultValue) => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
 
@@ -168,7 +169,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the graph preview component if the feature is enabled', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
     mockUseUiSetting.mockImplementation((key, defaultValue) => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
 
@@ -195,7 +196,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should not render the graph preview component if the graph feature is disabled', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
     mockUseUiSetting.mockImplementation((key, defaultValue) => {
       const useUiSetting$Mock = createUseUiSetting$Mock();
 

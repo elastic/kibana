@@ -34,14 +34,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.status).toBe(200);
         expect(response2.status).toBe(200);
         const sources = await api.listEntitySources({ query: {} });
-        const names = sources.body.map((s: any) => s.name);
+        const names = sources.body.sources.map((s: any) => s.name);
         // confirm sources have been created
         expect(names).toEqual(expect.arrayContaining(['PrivilegedUsers', 'PrivilegedUsers2']));
         // Try to create the same entity sources again
         await api.createEntitySource({ body: entitySource });
         await api.createEntitySource({ body: entitySource2 });
         const nonDuplicateSources = await api.listEntitySources({ query: {} });
-        const nonDuplicateNames = nonDuplicateSources.body.map((s: any) => s.name);
+        const nonDuplicateNames = nonDuplicateSources.body.sources.map((s: any) => s.name);
         // confirm duplicates have not been created
         expect(names.length).toBe(nonDuplicateNames.length);
       });

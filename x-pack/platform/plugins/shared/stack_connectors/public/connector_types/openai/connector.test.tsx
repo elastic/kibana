@@ -92,6 +92,7 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('optional-label')).toHaveLength(4);
   });
 
   test('azure ai connector fields are rendered', async () => {
@@ -231,6 +232,42 @@ describe('ConnectorFields renders', () => {
       expect(await screen.findByTestId('openAIHeadersValueInput')).toBeInTheDocument();
       expect(await screen.findByTestId('openAIAddHeaderButton')).toBeInTheDocument();
     });
+    it('focuses the newly added header key input when clicking add header', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+
+      await userEvent.click(headersToggle);
+
+      const addHeaderButton = await screen.findByTestId('openAIAddHeaderButton');
+      await userEvent.click(addHeaderButton);
+
+      await waitFor(() => {
+        const keyInputs = screen.getAllByTestId('openAIHeadersKeyInput');
+        expect(keyInputs[keyInputs.length - 1]).toHaveFocus();
+      });
+    });
     it('succeeds without headers', async () => {
       const testFormData = {
         actionTypeId: '.gen-ai',
@@ -347,7 +384,7 @@ describe('ConnectorFields renders', () => {
       expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Does not render if isEdit is true and dashboardUrl is null', async () => {
-      mockDashboard.mockImplementation((id: string) => ({
+      mockDashboard.mockImplementation(() => ({
         dashboardUrl: null,
       }));
       const { queryByTestId } = render(

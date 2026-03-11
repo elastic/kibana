@@ -15,14 +15,18 @@ import type {
 import type { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
 import type {
   DetectionRuleApiService,
+  DetectionAlertsApiService,
   EntityAnalyticsApiService,
   CloudConnectorApiService,
+  TimelineApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;
+  detectionAlerts: DetectionAlertsApiService;
   entityAnalytics: EntityAnalyticsApiService;
   cloudConnectorApi: CloudConnectorApiService;
+  timeline: TimelineApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

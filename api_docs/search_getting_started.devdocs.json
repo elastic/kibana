@@ -30,6 +30,8 @@
         "label": "AnalyticsEvents",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -45,6 +47,8 @@
           "\"searchGettingStarted\""
         ],
         "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -57,6 +61,8 @@
         "label": "PLUGIN_NAME",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -72,6 +78,8 @@
           "\"/app/elasticsearch/getting_started\""
         ],
         "path": "x-pack/solutions/search/plugins/search_getting_started/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

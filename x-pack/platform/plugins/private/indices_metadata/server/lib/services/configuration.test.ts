@@ -13,6 +13,7 @@ import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CdnConfig } from './artifact.types';
+import { createMockTelemetryConfigProvider } from '../__mocks__';
 
 jest.mock('./artifact');
 
@@ -20,6 +21,7 @@ describe('ConfigurationService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let configurationService: ConfigurationService;
   let artifactService: jest.Mocked<ArtifactService>;
+  const telemetryConfigProvider = createMockTelemetryConfigProvider();
 
   const defaultConfiguration: IndicesMetadataConfiguration = {
     indices_threshold: 100,
@@ -71,21 +73,39 @@ describe('ConfigurationService', () => {
   });
 
   describe('initialization', () => {
-    it('should throw an error when trying to use the service before starting it', () => {
-      expect(() => configurationService.getIndicesMetadataConfiguration$()).toThrow(
-        'Configuration service not started'
-      );
-    });
+    const initializationCases = [
+      {
+        name: 'should throw an error when trying to use the service before starting it',
+        startService: false,
+        expectThrow: true,
+        expectedError: 'Configuration service not started',
+      },
+      {
+        name: 'should initialize with default configuration',
+        startService: true,
+        expectThrow: false,
+        expectedError: undefined,
+      },
+    ];
 
-    it('should initialize with default configuration', () => {
-      configurationService.start(artifactService, defaultConfiguration);
-      expect(() => configurationService.getIndicesMetadataConfiguration$()).not.toThrow();
+    it.each(initializationCases)('$name', ({ startService, expectThrow, expectedError }) => {
+      if (startService) {
+        configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
+      }
+
+      if (expectThrow) {
+        expect(() => configurationService.getIndicesMetadataConfiguration$()).toThrow(
+          expectedError
+        );
+      } else {
+        expect(() => configurationService.getIndicesMetadataConfiguration$()).not.toThrow();
+      }
     });
   });
 
   describe('getIndicesMetadataConfiguration$', () => {
     it('should return an observable with the default configuration initially', async () => {
-      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
       const config$ = configurationService.getIndicesMetadataConfiguration$();
       const config = await firstValueFrom(config$);
       expect(config).toEqual(defaultConfiguration);
@@ -116,7 +136,7 @@ describe('ConfigurationService', () => {
           modified: true,
         });
 
-      configurationService.start(artifactService, defaultConfiguration);
+      configurationService.start(artifactService, defaultConfiguration, telemetryConfigProvider);
 
       let config: IndicesMetadataConfiguration | undefined;
       configurationService.getIndicesMetadataConfiguration$().subscribe((c) => {
@@ -136,46 +156,172 @@ describe('ConfigurationService', () => {
     });
   });
 
+  describe('telemetry opt-out', () => {
+    it('should skip configuration retrieval when telemetry is opted out', async () => {
+      const optedOutProvider = createMockTelemetryConfigProvider(false);
+
+      jest.spyOn(artifactService, 'getArtifact').mockResolvedValue({
+        data: { ...defaultConfiguration, indices_threshold: 200 },
+        modified: true,
+      });
+
+      configurationService.start(artifactService, defaultConfiguration, optedOutProvider);
+
+      let config: IndicesMetadataConfiguration | undefined;
+      configurationService.getIndicesMetadataConfiguration$().subscribe((c) => {
+        config = c;
+      });
+
+      expect(config).toEqual(defaultConfiguration);
+
+      await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+      expect(config).toEqual(defaultConfiguration);
+      expect(artifactService.getArtifact).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Skipping configuration retrieval, telemetry opted out'
+      );
+    });
+  });
+
   describe('error handling during configuration refresh', () => {
+    const createAggregateCauseError = () =>
+      new Error('request failed', {
+        cause: new AggregateError([new Error('connection refused')], 'aggregate error'),
+      });
+
     const errorCases = [
-      { name: 'ManifestNotFoundError', error: new ManifestNotFoundError('test-manifest') },
-      { name: 'ArtifactNotFoundError', error: new ArtifactNotFoundError('test-artifact') },
-      { name: 'UnexpectedError', error: new Error('unexpected error during artifact retrieval') },
+      {
+        name: 'ManifestNotFoundError',
+        createError: () => new ManifestNotFoundError('test-manifest'),
+      },
+      {
+        name: 'ArtifactNotFoundError',
+        createError: () => new ArtifactNotFoundError('test-artifact'),
+      },
+      {
+        name: 'AggregateError (as cause)',
+        createError: createAggregateCauseError,
+      },
+      {
+        name: 'UnexpectedError',
+        createError: () => new Error('unexpected error during artifact retrieval'),
+      },
     ];
 
-    errorCases.forEach(({ name, error }) => {
-      it(`should maintain last valid configuration when ${name} occurs`, async () => {
-        jest
-          .spyOn(artifactService, 'getArtifact')
-          .mockResolvedValueOnce({
-            data: defaultConfiguration,
-            modified: true,
-          })
-          .mockRejectedValue(error);
+    describe('configuration resilience', () => {
+      it.each(errorCases)(
+        'should maintain last valid configuration when $name occurs',
+        async ({ createError }) => {
+          const error = createError();
 
-        configurationService.start(artifactService, defaultConfiguration);
-        const config$ = configurationService.getIndicesMetadataConfiguration$();
+          jest
+            .spyOn(artifactService, 'getArtifact')
+            .mockResolvedValueOnce({
+              data: defaultConfiguration,
+              modified: true,
+            })
+            .mockRejectedValue(error);
 
-        let config: IndicesMetadataConfiguration | undefined;
-        let updatedCount = 0;
-        config$.subscribe((c) => {
-          updatedCount++;
-          config = c;
-        });
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
+          const config$ = configurationService.getIndicesMetadataConfiguration$();
 
-        expect(config).toEqual(defaultConfiguration);
+          let config: IndicesMetadataConfiguration | undefined;
+          let updatedCount = 0;
+          config$.subscribe((c) => {
+            updatedCount++;
+            config = c;
+          });
 
-        for (let i = 0; i < 10; i++) {
-          await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
           expect(config).toEqual(defaultConfiguration);
-        }
 
-        // Verify the observable emitted exactly twice:
-        // 1. Initial emission with default configuration (from startWith)
-        // 2. First successful artifact retrieval
-        // After errors occur, no new emissions should happen as the configuration remains unchanged
-        expect(updatedCount).toBe(2);
-      });
+          for (let i = 0; i < 10; i++) {
+            await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+            expect(config).toEqual(defaultConfiguration);
+          }
+
+          // Verify the observable emitted exactly twice:
+          // 1. Initial emission with default configuration (from startWith)
+          // 2. First successful artifact retrieval
+          // After errors occur, no new emissions should happen as the configuration remains unchanged
+          expect(updatedCount).toBe(2);
+        }
+      );
+    });
+
+    describe('error logging', () => {
+      const loggingCases = [
+        {
+          name: 'ManifestNotFoundError',
+          createError: () => new ManifestNotFoundError('test-manifest'),
+          expectedLogLevel: 'warn' as const,
+          expectedMessage: 'Indices metadata configuration manifest not found',
+          getExpectedMeta: (error: Error) => ({ error }),
+        },
+        {
+          name: 'ArtifactNotFoundError',
+          createError: () => new ArtifactNotFoundError('test-artifact'),
+          expectedLogLevel: 'warn' as const,
+          expectedMessage: 'Indices metadata configuration artifact not found',
+          getExpectedMeta: (error: Error) => ({ error }),
+        },
+        {
+          name: 'AggregateError cause',
+          createError: () => {
+            const cause = new AggregateError([new Error('connection refused')], 'aggregate error');
+            return new Error('request failed', { cause });
+          },
+          expectedLogLevel: 'error' as const,
+          expectedMessage: (error: Error) =>
+            `AggregateError while getting indices metadata configuration: ${error.cause}`,
+          getExpectedMeta: (error: Error) => ({
+            error,
+            code: (error as NodeJS.ErrnoException).code,
+            message: error.message,
+            cause: error.cause,
+          }),
+        },
+        {
+          name: 'unexpected error',
+          createError: () => new Error('unexpected error during artifact retrieval'),
+          expectedLogLevel: 'error' as const,
+          expectedMessage: (error: Error) =>
+            `Unexpected error while getting indices metadata configuration: ${error}`,
+          getExpectedMeta: (error: Error) => ({
+            error,
+            code: undefined,
+            message: error.message,
+            cause: undefined,
+          }),
+        },
+      ];
+
+      it.each(loggingCases)(
+        'should log appropriately when $name occurs',
+        async ({ createError, expectedLogLevel, expectedMessage, getExpectedMeta }) => {
+          const error = createError();
+
+          jest.spyOn(artifactService, 'getArtifact').mockRejectedValue(error);
+
+          configurationService.start(
+            artifactService,
+            defaultConfiguration,
+            telemetryConfigProvider
+          );
+          configurationService.getIndicesMetadataConfiguration$().subscribe();
+
+          await jest.advanceTimersByTimeAsync(REFRESH_CONFIG_INTERVAL_MS * 1.1);
+
+          const message =
+            typeof expectedMessage === 'function' ? expectedMessage(error) : expectedMessage;
+
+          expect(logger[expectedLogLevel]).toHaveBeenCalledWith(message, getExpectedMeta(error));
+        }
+      );
     });
   });
 });

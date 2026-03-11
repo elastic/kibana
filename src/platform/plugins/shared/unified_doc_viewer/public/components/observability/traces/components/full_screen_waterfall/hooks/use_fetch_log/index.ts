@@ -15,9 +15,10 @@ import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface UseFetchLogParams {
   id: string;
+  index?: string;
 }
 
-export function useFetchLog({ id }: UseFetchLogParams) {
+export function useFetchLog({ id, index }: UseFetchLogParams) {
   const { discoverShared, core } = getUnifiedDocViewerServices();
 
   const fetchLogDocumentByIdFeature = discoverShared.features.registry.getById(
@@ -33,11 +34,12 @@ export function useFetchLog({ id }: UseFetchLogParams) {
       return fetchLogDocumentByIdFeature.fetchLogDocumentById(
         {
           id,
+          ...(index ? { index } : {}),
         },
         signal
       );
     },
-    [fetchLogDocumentByIdFeature, id]
+    [fetchLogDocumentByIdFeature, id, index]
   );
 
   useEffect(() => {

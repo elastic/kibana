@@ -59,6 +59,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
       },
+      globalDefaults: {
+        // Disable tours globally for all tests
+        hideAnnouncements: true,
+      },
     },
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.

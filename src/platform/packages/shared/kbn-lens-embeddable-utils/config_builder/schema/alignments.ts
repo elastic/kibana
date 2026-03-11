@@ -12,12 +12,14 @@ import { schema } from '@kbn/config-schema';
 const HORIZONTAL_ALIGN = ['left', 'center', 'right'] as const;
 const VERTICAL_ALIGN = ['top', 'bottom'] as const;
 const LR_ALIGN = ['left', 'right'] as const;
+const BEFORE_AFTER_ALIGN = ['before', 'after'] as const;
 
 type Position = 'top' | 'bottom' | 'left' | 'right';
 
 type HorizontalAlignment = (typeof HORIZONTAL_ALIGN)[number];
 type VerticalAlignment = (typeof VERTICAL_ALIGN)[number];
 type LeftRightAlignment = (typeof LR_ALIGN)[number];
+type BeforeAfterAlignment = (typeof BEFORE_AFTER_ALIGN)[number];
 
 interface Options<T extends string> {
   defaultValue?: T;
@@ -43,3 +45,6 @@ export const positionSchema = (opts?: Options<Position>) =>
     ],
     opts
   );
+
+export const beforeAfterAlignmentSchema = (opts?: Options<BeforeAfterAlignment>) =>
+  schema.oneOf([schema.literal('before'), schema.literal('after')], opts);

@@ -57,7 +57,7 @@ in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lis
 
 ### Making sure the tool's namespace is registered as being internal
 
-Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools. 
+Platform tools should all be namespaced under protected namespaces, to avoid id collisions with user-created tools.
 When introducing a new protected namespace (e.g. when adding a new category of tools), it must be added
 to the `protectedNamespaces` array in `x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts`
 
@@ -165,13 +165,13 @@ For our framework to understand what kind of data is being returned by a tool, a
 must return a list of results following a specific format.
 
 - resource
-- tabular_data
+- esql_results
 - query
 - other
 - error
 
 This is useful to allow the framework to perform specific processing on the results. For example,
-this is how we perform visualization rendering for the `tabular_data` type, by recognizing that
+this is how we perform visualization rendering for the `esql_results` type, by recognizing that
 a tool returned some result which can be rendered as a visualization if we want to.
 
 This is also how we render specific type of results differently in the UI, e.g we inline `query` results
@@ -193,7 +193,7 @@ agentBuilder.tools.register({
     return {
       results: [
         { type: ToolResultType.query, data: { esql: esqlQuery } },
-        { type: ToolResultType.tabular_data, data },
+        { type: ToolResultType.esqlResults, data },
       ],
     };
   },
@@ -273,7 +273,6 @@ agentBuilder.agents.register({
 });
 ```
 
-
 ### Specific research and answer instructions
 
 It is possible to specify specific research and answer instructions for an agent, to avoid
@@ -288,10 +287,12 @@ agentBuilder.agents.register({
   avatar_icon: 'dashboardApp',
   configuration: {
     research: {
-      instructions: 'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...'
+      instructions:
+        'You are a dashboard builder specialist assistant. Always uses the XXX tool when the user wants to YYY...',
     },
     answer: {
-      instructions: 'When answering, if a dashboard configuration is present in the results, always render it using [...]',
+      instructions:
+        'When answering, if a dashboard configuration is present in the results, always render it using [...]',
     },
     tools: [
       {
@@ -325,6 +326,7 @@ class MyPlugin {
 ```
 
 There are two main categories of attachment types:
+
 - `inline`: attachment is self-contained, with the data attached to it.
   `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
   - (Not implemented yet)
@@ -354,7 +356,7 @@ const textArrachmentType: InlineAttachmentTypeDefinition = {
   format: (input) => {
     return { type: 'text', value: input.content };
   },
-}
+};
 ```
 
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
@@ -362,4 +364,286 @@ for the full list of available configuration options.
 
 ### Browser-side registration
 
-Not implemented yet 
+Register a UI definition for your attachment type using the `attachments.addAttachmentType` API from the `agentBuilder` plugin's start contract:
+
+```ts
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    agentBuilder.attachments.addAttachmentType('my_type', myAttachmentDefinition);
+  }
+}
+```
+
+#### Complete example
+
+```ts
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCodeBlock } from '@elastic/eui';
+import {
+  ActionButtonType,
+  type AttachmentUIDefinition,
+} from '@kbn/agent-builder-browser/attachments';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+
+type MyAttachment = Attachment<'my_type'>;
+
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: () => 'My attachment',
+  getIcon: () => 'document',
+
+  // Compact view rendered inline in the conversation
+  renderInlineContent: ({ attachment, isSidebar }) => {
+    if (isSidebar) {
+      // For example: render a condensed view in the sidebar only
+    }
+
+    return (
+      <EuiCodeBlock fontSize="s">{attachment.data.content}</EuiCodeBlock>
+    );
+  },
+
+  // Expanded view rendered in the canvas flyout
+  renderCanvasContent: ({ attachment }) => (
+    <EuiCodeBlock fontSize="m" lineNumbers isCopyable>
+      {attachment.data.content}
+    </EuiCodeBlock>
+  ),
+
+  // Customize buttons based on viewport context
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+    const buttons = [];
+
+    if (isSidebar) {
+      // add sidebar only buttons
+    }
+
+    if (isCanvas) {
+      // add canvas only buttons
+    }
+
+    buttons.push({
+      label: 'Copy',
+      icon: 'copy',
+      type: ActionButtonType.SECONDARY,
+      handler: async () => navigator.clipboard.writeText(attachment.data.content),
+    });
+
+    // openCanvas is {undefined} when already in canvas mode
+    if (openCanvas) {
+      buttons.push({
+        label: 'Open Canvas',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: openCanvas,
+      });
+    }
+
+    return buttons;
+  },
+};
+```
+
+#### Viewport
+
+The `getActionButtons` params include flags to customize behavior per viewport:
+
+- **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
+- **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
+- **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+
+#### Dynamic canvas buttons with registerActionButtons
+
+For canvas content that needs to register buttons dynamically (e.g., a "Save" button that depends on runtime state like an API being available), use the `registerActionButtons` callback passed as the second argument to `renderCanvasContent`.
+
+The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
+
+```tsx
+import React, { useEffect, useState } from 'react';
+import {
+  ActionButtonType,
+  type ActionButton,
+  type AttachmentRenderProps,
+  type CanvasRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+
+interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
+  callbacks: CanvasRenderCallbacks;
+}
+
+const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
+  attachment,
+  callbacks: { registerActionButtons, updateOrigin },
+}) => {
+  const [api, setApi] = useState<MyApi | undefined>();
+
+  // Register buttons once the API is available
+  useEffect(() => {
+    if (!registerActionButtons || !api) {
+      return;
+    }
+
+    registerActionButtons([
+      {
+        label: 'Save',
+        icon: 'save',
+        type: ActionButtonType.PRIMARY,
+        handler: async () => {
+          const savedObjectId = await api.save();
+          // Link the attachment to the saved object
+          await updateOrigin({ saved_object_id: savedObjectId });
+        },
+      },
+    ]);
+  }, [api, registerActionButtons, updateOrigin]);
+
+  return (
+    <MyEditor onApiReady={setApi} />
+  );
+};
+
+// In the attachment definition:
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  renderCanvasContent: (props, callbacks) => (
+    <MyCanvasContent {...props} callbacks={callbacks} />
+  ),
+};
+```
+
+#### Linking by-value attachments to persistent storage with updateOrigin
+
+The `updateOrigin` callback allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
+
+This callback is available in two places:
+- **`getActionButtons` params** - for static action buttons defined at registration time
+- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Registering action buttons dynamically](#registering-action-buttons-dynamically) above)
+
+**When to use `updateOrigin`:**
+
+- When your attachment type supports a "Save" workflow where the user can persist a by-value attachment to external storage (e.g., saving a visualization to the library, saving a dashboard)
+- After successfully saving the attachment to persistent storage, call `updateOrigin` to record the reference back to the attachment
+
+**Why this matters:**
+
+- Enables "Open in [App]" functionality by storing the saved object reference
+- Allows the UI to show that an attachment is linked to a persistent resource
+- Maintains the connection between the conversation attachment and its source
+
+**Example: Save button that links to a saved object**
+
+```tsx
+getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
+  const buttons = [];
+
+  // Only show save button if not already linked to a saved object
+  if (!attachment.origin && isCanvas) {
+    buttons.push({
+      label: 'Save to library',
+      icon: 'save',
+      type: ActionButtonType.PRIMARY,
+      handler: async () => {
+        // 1. Save to your persistent storage (e.g., saved objects)
+        const savedObjectId = await myApi.saveToLibrary(attachment.data);
+
+        // 2. Link the attachment to the saved object
+        await updateOrigin({ saved_object_id: savedObjectId });
+      },
+    });
+  }
+
+  // Show "Open in App" if already linked
+  if (attachment.origin?.saved_object_id) {
+    buttons.push({
+      label: 'Open in App',
+      icon: 'popout',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        window.open(`/app/myApp/${attachment.origin.saved_object_id}`, '_blank');
+      },
+    });
+  }
+
+  return buttons;
+},
+```
+
+**Origin shape:**
+
+The `origin` parameter accepts any shape - it will be validated by the attachment type's `validateOrigin` function on the server. For saved object references, the common pattern is:
+
+```ts
+{
+  saved_object_id: string;
+  title?: string;
+  description?: string;
+}
+```
+
+## Registering skills
+
+**Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
+
+Skills for Agent Builder are very close to the same concept is being used in Cursor or Claude for example.
+They are markdown files the agent can access via the filestore, providing specific instructions to complete a task.
+Skills can also expose tools when enabled, similar to how that works for attachments: when the agent reads the skill from the filestore,
+the tools attached to it will be automatically enabled.
+
+You can register a skill by using the `skills.register` API of the `agentBuilder` plugin's setup contract.
+
+```ts
+class MyPlugin {
+  setup(core: CoreSetup, { agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) {
+    agentBuilder.skills.register(mySkillDefinition);
+  }
+}
+```
+
+### Basic example
+
+```ts
+agentBuilder.skills.register({
+  // unique identifier of the skill
+  id: 'my-skill',
+  // represents the name, which will be used as the filepath inside the skill directory
+  name: 'my-skill',
+  // the directory where the skill will be stored on the filesystem
+  basePath: 'skills/platform',
+  // short description of the skill, which will be exposed to the LLM for skill selection
+  description: 'Just an example of skill',
+  // full text content of the skill, which can be accessed via the filesystem
+  content: 'full text content of the skill, in markdown format',
+  // list of tools (from the tool registry) which will be enabled when the skill is read
+  getRegistryTools: () => ['platform.core.generate_esql'],
+  // list of inline tools which will be enabled when the skill is read
+  getInlineTools: () => [myInlineToolDefinition],
+});
+```
+
+### Defining new base paths for your skills
+
+Base paths are enforced to a specific list of values using the `DirectoryPath` type.
+
+To create new base paths to use for your skills, you need to add them to the [`SkillsDirectoryStructure`](x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/type_definition.ts)
+
+### Defining sub-content for the skill
+
+You can define sub-content for the skill, using the `referencedContent` property of the skill definition.
+Those files will be exposed on the filesystem in the skill's directory, in the specified subfolder.
+
+```ts
+agentBuilder.skills.register({
+  id: 'bake-me-something',
+  name: 'bake-me-something',
+  basePath: 'skills/platform',
+  description: 'Pick and bake a tasty dessert',
+  content: `
+  1. select a recipe from the available list of recipes. Recipes can be found in the [recipes folder](./recipes).
+  2. follow the instructions in the recipe to bake the dessert.
+  3. enjoy your dessert!`,
+  referencedContent: [
+    { name: 'pie-recipe', relativePath: './recipes', content: '[some pie recipe]' },
+    { name: 'brownie-recipe', relativePath: './recipes', content: '[some brownie recipe]' },
+  ],
+});
+```

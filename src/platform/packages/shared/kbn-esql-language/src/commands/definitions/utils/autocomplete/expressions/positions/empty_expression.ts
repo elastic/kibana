@@ -9,7 +9,7 @@
 
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
-import { matchesSpecialFunction } from '../utils';
+import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
@@ -29,9 +29,12 @@ import {
   allStarConstant,
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
+  buildAddValuePlaceholder,
+  findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
+// functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
 
 /** Handles suggestions when starting a new expression (empty position) */
@@ -237,8 +240,8 @@ async function buildFieldAndFunctionSuggestions(
   if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
-      ignoredFunctions: functionParamContext.functionsToIgnore || [],
       addComma: config.shouldAddComma,
+      excludeParentFunctions: true,
     });
   }
 
@@ -253,9 +256,16 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
   const suggestFields = options.suggestFields ?? true;
   const suggestFunctions = options.suggestFunctions ?? true;
   const controlType = options.controlType ?? ESQLVariableType.FIELDS;
+  const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
 
   const suggestions: ISuggestionItem[] = [];
-  const acceptedTypes: FunctionParameterType[] = ['any'];
+  // Keep boolean/any contexts permissive at expression start:
+  // boolean expressions are often built from non-boolean operands (e.g. field > 10).
+  const isStrictPreferredType =
+    preferredTypes.length > 0 &&
+    !preferredTypes.includes('boolean') &&
+    !preferredTypes.includes('any');
+  const acceptedTypes: FunctionParameterType[] = isStrictPreferredType ? preferredTypes : ['any'];
 
   // Suggest fields/columns and functions using SuggestionBuilder
   if (suggestFields || suggestFunctions) {
@@ -274,8 +284,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
     if (suggestFunctions) {
       builder.addFunctions({
         types: acceptedTypes,
-        ignoredFunctions: [],
-        ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }
 
@@ -429,5 +437,18 @@ function buildConstantOnlyLiteralSuggestions(
     constantGeneratingOnly: true,
   });
 
-  return builder.build();
+  const suggestions = builder.build();
+
+  // Add placeholder hint ONLY for explicit constantOnly parameters
+  const hasExplicitConstantOnly = paramDefinitions.some(({ constantOnly }) => constantOnly);
+
+  if (hasExplicitConstantOnly) {
+    const placeholderType = findConstantPlaceholderType(types);
+
+    if (placeholderType) {
+      suggestions.push(buildAddValuePlaceholder(placeholderType));
+    }
+  }
+
+  return suggestions;
 }

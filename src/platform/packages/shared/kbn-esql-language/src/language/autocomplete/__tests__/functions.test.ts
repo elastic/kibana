@@ -2011,3 +2011,21 @@ describe('functions arg suggestions', () => {
     });
   });
 });
+
+describe('function renaming respects existing parentheses', () => {
+  it('suggests the function name if the user is only changing the name of the function', async () => {
+    const { suggest } = await setup();
+    const suggestions = await suggest('FROM index | EVAL result = TO_/(');
+    const texts = suggestions.map(({ text }) => text);
+
+    expect(texts).toEqual(expect.arrayContaining(['TO_STRING']));
+  });
+
+  it('suggests the function name with parens if writting the function from scratch', async () => {
+    const { suggest } = await setup();
+    const suggestions = await suggest('FROM index | EVAL result = TO_/');
+    const texts = suggestions.map(({ text }) => text);
+
+    expect(texts).toEqual(expect.arrayContaining(['TO_STRING($0)']));
+  });
+});

@@ -80,6 +80,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             iconType="arrowDown"
             iconSide="right"
             panelPaddingSize="none"
+            ariaLabel={i18n.LINKED_RULES_ARIA_LABEL}
           />
         ) : (
           <EuiTextColor data-test-subj="noLinkedRules" css={noLinkedRulesCss} color="subdued">
@@ -133,8 +134,9 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               disabled: !canUserEditList,
             },
           ]}
-          disableActions={isReadonly}
+          disableActions={false}
           anchorPosition="downCenter"
+          ariaLabel={i18n.EXCEPTION_LIST_ACTIONS_ARIA_LABEL}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

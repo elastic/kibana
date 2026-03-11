@@ -111,18 +111,27 @@ export const useSavedVisInstance = (
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
 
         if (savedVis.id) {
+          const breadcrumbs = getEditBreadcrumbs(
+            { originatingAppName, redirectToOrigin },
+            savedVis.title
+          );
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(
               getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
             );
           } else {
-            chrome.setBreadcrumbs(
-              getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-            );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           chrome.docTitle.change(savedVis.title);
         } else {
+          const createBreadcrumbs = getCreateBreadcrumbs({
+            byValue: Boolean(originatingApp),
+            originatingAppName,
+            redirectToOrigin,
+          });
           if (serverless?.setBreadcrumbs) {
             serverless.setBreadcrumbs(
               getCreateServerlessBreadcrumbs({
@@ -132,13 +141,9 @@ export const useSavedVisInstance = (
               })
             );
           } else {
-            chrome.setBreadcrumbs(
-              getCreateBreadcrumbs({
-                byValue: Boolean(originatingApp),
-                originatingAppName,
-                redirectToOrigin,
-              })
-            );
+            chrome.setBreadcrumbs(createBreadcrumbs, {
+              project: { value: createBreadcrumbs, absolute: true },
+            });
           }
         }
 

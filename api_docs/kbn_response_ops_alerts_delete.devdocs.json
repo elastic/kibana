@@ -13,7 +13,9 @@
         "signature": [
           "({ services: { http, notifications }, categoryIds, isDisabled, }: AlertDeleteDescriptiveFormGroupProps) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +29,9 @@
             "signature": [
               "AlertDeleteDescriptiveFormGroupProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/components/descriptive_form_group.tsx",
+            "lineNumber": 24,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -48,7 +52,9 @@
           "AlertDeleteProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+        "lineNumber": 138,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +68,9 @@
             "signature": [
               "AlertDeleteProps"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/components/modal.tsx",
+            "lineNumber": 138,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,7 +97,9 @@
           },
           ") => Promise<string | undefined>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,7 +119,9 @@
                 "text": "CreateAlertDeleteScheduleParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 16,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,7 +156,9 @@
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,7 +178,9 @@
                 "text": "GetAlertDeleteLastRunParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "lineNumber": 18,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -199,7 +215,9 @@
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,7 +237,9 @@
                 "text": "GetAlertDeletePreviewParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 19,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -256,7 +276,9 @@
           },
           ", unknown>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,7 +298,9 @@
                 "text": "UseAlertDeleteLastRunParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 18,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -313,7 +337,9 @@
           },
           ", unknown>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,7 +359,9 @@
                 "text": "UseAlertDeletePreviewParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 21,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -374,7 +402,9 @@
           },
           ", unknown>"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -394,7 +424,9 @@
                 "text": "UseAlertDeleteScheduleParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 19,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -412,7 +444,9 @@
         "tags": [],
         "label": "CreateAlertDeleteScheduleParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,7 +462,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -448,7 +484,9 @@
                 "text": "AlertDeleteParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/create_alert_delete_schedule.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -462,7 +500,9 @@
         "tags": [],
         "label": "GetAlertDeleteLastRunParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -478,7 +518,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/get_alert_delete_last_run.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -492,7 +534,9 @@
         "tags": [],
         "label": "GetAlertDeletePreviewParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -508,7 +552,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -528,7 +574,9 @@
                 "text": "AlertDeleteParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -542,7 +590,9 @@
         "tags": [],
         "label": "UseAlertDeleteLastRunParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -553,7 +603,9 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -564,7 +616,9 @@
             "tags": [],
             "label": "isOpen",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,7 +634,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/last_run/use_alert_delete_last_run.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -594,7 +650,9 @@
         "tags": [],
         "label": "UseAlertDeletePreviewParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -605,7 +663,9 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,7 +681,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -641,7 +703,9 @@
                 "text": "AlertDeleteParams"
               }
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -655,7 +719,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/use_alert_delete_preview.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -669,7 +735,9 @@
         "tags": [],
         "label": "UseAlertDeleteScheduleParams",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -685,7 +753,9 @@
               "HttpSetup",
               "; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -699,7 +769,9 @@
             "signature": [
               "(message?: string | undefined) => void"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -713,7 +785,9 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "lineNumber": 16,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -735,7 +809,9 @@
               "ResponseErrorBody",
               ">) => void"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -752,7 +828,9 @@
                   "ResponseErrorBody",
                   ">"
                 ],
-                "path": "src/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/schedule/use_alert_delete_schedule.ts",
+                "lineNumber": 17,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -782,7 +860,9 @@
             "text": "AlertDeletePreview"
           }
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-delete/api/preview/get_alert_delete_preview.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

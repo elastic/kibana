@@ -14,6 +14,7 @@ import type {
   OnPreResponseToolkit,
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
+  OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPreResponseInfo,
 } from '@kbn/core-http-server';
@@ -23,6 +24,7 @@ import {
   createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
   createDeprecationWarningHeaderPreResponseHandler,
+  createExcludeRoutesPreAuthHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
   createXsrfPostAuthHandler,
@@ -34,6 +36,7 @@ import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+type PreAuthToolkitMock = jest.Mocked<OnPreAuthToolkit>;
 
 const createConfig = (partial: Partial<HttpConfig>): HttpConfig => partial as HttpConfig;
 
@@ -43,6 +46,12 @@ const createToolkit = (): ToolkitMock => {
     next: jest.fn(),
     rewriteUrl: jest.fn(),
     authzResultNext: jest.fn(),
+  };
+};
+
+const createPreAuthToolkit = (): PreAuthToolkitMock => {
+  return {
+    next: jest.fn(),
   };
 };
 
@@ -203,6 +212,47 @@ describe('xsrf post-auth handler', () => {
       expect(toolkit.next).toHaveBeenCalledTimes(1);
       expect(result).toEqual('next');
     });
+  });
+});
+
+describe('excludeRoutes pre-auth handler', () => {
+  let toolkit: PreAuthToolkitMock;
+  let responseFactory: ReturnType<typeof mockRouter.createResponseFactory>;
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    toolkit = createPreAuthToolkit();
+    responseFactory = mockRouter.createResponseFactory();
+    logger = loggerMock.create();
+  });
+
+  it('forwards when no excluded routes are configured', () => {
+    const handler = createExcludeRoutesPreAuthHandler(createConfig({ excludeRoutes: [] }), logger);
+    const request = forgeRequest({ path: '/api/status' });
+
+    toolkit.next.mockReturnValue('next' as any);
+
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(responseFactory.notFound).not.toHaveBeenCalled();
+    expect(result).toBe('next');
+  });
+
+  it('returns notFound when a route is excluded', () => {
+    const handler = createExcludeRoutesPreAuthHandler(
+      createConfig({ excludeRoutes: ['/api/status'] }),
+      logger
+    );
+    const request = forgeRequest({ path: '/api/status' });
+
+    responseFactory.notFound.mockReturnValue('notFound' as any);
+
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).not.toHaveBeenCalled();
+    expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
+    expect(result).toBe('notFound');
   });
 });
 

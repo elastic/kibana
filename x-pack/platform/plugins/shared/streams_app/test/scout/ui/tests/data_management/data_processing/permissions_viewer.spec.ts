@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Streams data processing permissions - viewer role (no simulate, no manage)',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -42,9 +43,11 @@ test.describe(
     test('should NOT allow viewer to add processors (requires simulate privilege)', async ({
       page,
     }) => {
-      // Verify the "Create step" button is not visible (requires simulate)
-      const createStepButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-      await expect(createStepButton).toBeHidden();
+      // Verify the "Create processor" button is not visible (requires simulate)
+      const createProcessorButton = page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
+      );
+      await expect(createProcessorButton).toBeHidden();
     });
 
     test('should NOT allow viewer to edit existing processors (requires simulate privilege)', async ({
@@ -89,9 +92,11 @@ test.describe(
     test('should NOT allow viewer to add conditions (requires simulate privilege)', async ({
       page,
     }) => {
-      // Verify the create step button is not visible (requires simulate)
-      const createStepButton = page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton');
-      await expect(createStepButton).toBeHidden();
+      // Verify the create condition button is not visible (requires simulate)
+      const createConditionButton = page.getByTestId(
+        'streamsAppStreamDetailEnrichmentCreateConditionButton'
+      );
+      await expect(createConditionButton).toBeHidden();
     });
 
     test('should NOT show save changes button for viewer (requires manage privilege)', async ({

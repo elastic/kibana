@@ -14,6 +14,8 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
 } from '@kbn/management-settings-ids';
+import { snakeCase } from 'lodash';
+import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
   DEFAULT_ALERT_TAGS_KEY,
@@ -29,18 +31,19 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  ENABLE_DE_HEALTH_UI_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
-  ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -49,10 +52,12 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+  DEFAULT_ALERT_CLOSE_REASONS_KEY,
+  DEFAULT_ALERT_CLOSE_REASONS_VALUE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
-
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
 /**
@@ -226,13 +231,37 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: true,
+      value: false,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
+      [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentLabel',
+          {
+            defaultMessage: 'Enable alerts and attacks alignment',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentDescription',
+          {
+            defaultMessage:
+              'Enabling this setting will reveal a new Attacks page under the Detections navigation item. Similarly, the Alerts page will be part of the Detections navigation item.',
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -314,6 +343,26 @@ export const initUiSettings = (
       }),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.deHealthUIEnabled && {
+      [ENABLE_DE_HEALTH_UI_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.deHealthUIEnabledLabel', {
+          defaultMessage: 'Enable Detection Engine Health UI',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.deHealthUIEnabledDescription',
+          {
+            defaultMessage: `Enable the Detection Engine Health UI within Security Solution. When enabled, you can access the new Detection Engine Health page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
@@ -351,21 +400,6 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
-      solutionViews: ['classic', 'security'],
-    },
-    [ENABLE_CCS_READ_WARNING_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
-        defaultMessage: 'CCS Rule Privileges Warning',
-      }),
-      value: true,
-      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
-        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
-        values: { p: (chunks) => `<p>${chunks}</p>` },
-      }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: false,
-      schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
     [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
@@ -443,6 +477,52 @@ export const initUiSettings = (
       schema: schema.arrayOf(schema.string()),
       solutionViews: ['classic', 'security'],
     },
+    [DEFAULT_ALERT_CLOSE_REASONS_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertCloseReasonsLabel', {
+        defaultMessage: 'Alert close reasons',
+      }),
+      sensitive: true,
+      value: DEFAULT_ALERT_CLOSE_REASONS_VALUE,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultAlertCloseReasonsDescription',
+        {
+          defaultMessage:
+            '<p>List of additional close reason options for use with alerts generated by Security Solution rules.</p><p>Predefined options include: Duplicate, False positive, True positive, Benign positive, and Other.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.arrayOf(
+        schema.string({
+          validate: (value) => {
+            // default reasons are stored as snake case
+            const asSnakeCase = snakeCase(value);
+            if (asSnakeCase in DefaultClosingReasonSchema.enum) {
+              return i18n.translate(
+                'xpack.securitySolution.uiSettings.closingReasonValidationError',
+                {
+                  defaultMessage: '"{reason}" is an invalid closing reason.',
+                  values: { reason: value },
+                }
+              );
+            }
+          },
+          minLength: 1,
+        }),
+        {
+          validate: (values) => {
+            const uniqueCount = new Set(values).size;
+            if (uniqueCount !== values.length) {
+              return i18n.translate('xpack.securitySolution.uiSettings.duplicateClosingReason', {
+                defaultMessage: 'No duplicate values.',
+              });
+            }
+          },
+        }
+      ),
+      solutionViews: ['classic', 'security'],
+    },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
       name: i18n.translate(
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
@@ -468,31 +548,30 @@ export const initUiSettings = (
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
     },
+    [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionLabel',
+        {
+          defaultMessage: 'Include data stream namespaces in rule execution',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
+        {
+          defaultMessage:
+            'When configured, only events from the specified data stream namespaces are searched during rule execution. Provide an array of namespace strings, e.g. "namespace1","namespace2"',
+        }
+      ),
+      type: 'array',
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
+      value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+      category: [APP_ID],
+      requiresPageReload: false,
+      solutionViews: ['classic', 'security'],
+    },
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
-              {
-                defaultMessage: 'Extended rule execution logging',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
-              {
-                defaultMessage:
-                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            value: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            solutionViews: ['classic', 'security'],
-          },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
               'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
@@ -517,7 +596,7 @@ export const initUiSettings = (
               schema.literal(LogLevelSetting.debug),
               schema.literal(LogLevelSetting.trace),
             ]),
-            value: LogLevelSetting.error,
+            value: LogLevelSetting.info,
             options: [
               LogLevelSetting.off,
               LogLevelSetting.error,

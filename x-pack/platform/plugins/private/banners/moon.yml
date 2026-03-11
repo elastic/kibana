@@ -24,8 +24,8 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/i18n'
   - '@kbn/shared-ux-markdown'
-  - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -37,6 +37,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:

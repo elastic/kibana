@@ -14,6 +14,7 @@
   "kbn_references": [
     "@kbn/core-mount-utils-browser",
     "@kbn/core-application-common",
+    "@kbn/core-chrome-app-menu-components",
     "@kbn/deeplinks-devtools",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-ml",
@@ -28,7 +29,9 @@
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/deeplinks-data-connectors"
+    "@kbn/deeplinks-data-sources",
+    "@kbn/core-chrome-navigation",
+    "@kbn/core-chrome-sidebar"
   ],
   "exclude": [
     "target/**/*",

@@ -12,14 +12,12 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { LayerAction, Visualization } from '@kbn/lens-common';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import { UnifiedTabs } from '@kbn/unified-tabs';
 
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   cloneLayer,
   registerLibraryAnnotationGroup,

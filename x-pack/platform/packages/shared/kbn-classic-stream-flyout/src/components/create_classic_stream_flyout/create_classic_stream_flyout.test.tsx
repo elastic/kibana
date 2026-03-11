@@ -80,16 +80,13 @@ const renderFlyout = (props = {}) => {
 };
 
 // Helper to select a template and navigate to second step
+// Selecting a template automatically navigates to the next step
 const selectTemplateAndGoToStep2 = (
   getByTestId: (id: string) => HTMLElement,
   templateName: string
 ) => {
-  // Click on a template option
   const templateOption = getByTestId(`template-option-${templateName}`);
   fireEvent.click(templateOption);
-
-  // Navigate to second step
-  fireEvent.click(getByTestId('nextButton'));
 };
 
 describe('CreateClassicStreamFlyout', () => {
@@ -116,11 +113,8 @@ describe('CreateClassicStreamFlyout', () => {
   });
 
   describe('navigation', () => {
-    it('navigates to second step when clicking Next button with selected template', () => {
+    it('auto-advances to second step when selecting a template', () => {
       const { getByTestId, queryByTestId } = renderFlyout();
-
-      // Select a template first
-      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Check that the first step content is rendered
       expect(getByTestId('selectTemplateStep')).toBeInTheDocument();
@@ -128,12 +122,11 @@ describe('CreateClassicStreamFlyout', () => {
 
       // Verify that correct buttons are visible
       expect(getByTestId('cancelButton')).toBeInTheDocument();
-      expect(getByTestId('nextButton')).toBeInTheDocument();
       expect(queryByTestId('backButton')).not.toBeInTheDocument();
       expect(queryByTestId('createButton')).not.toBeInTheDocument();
 
-      // Click Next button
-      fireEvent.click(getByTestId('nextButton'));
+      // Select a template
+      fireEvent.click(getByTestId('template-option-template-1'));
 
       // Verify that the second step content is rendered
       expect(queryByTestId('selectTemplateStep')).not.toBeInTheDocument();
@@ -143,13 +136,12 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('backButton')).toBeInTheDocument();
       expect(getByTestId('createButton')).toBeInTheDocument();
       expect(queryByTestId('cancelButton')).not.toBeInTheDocument();
-      expect(queryByTestId('nextButton')).not.toBeInTheDocument();
     });
 
-    it('navigates back to first step when clicking Back button', () => {
+    it('navigates back to first step when clicking Back button and clears template selection', () => {
       const { getByTestId, queryByTestId } = renderFlyout();
 
-      // Select template and navigate to second step
+      // Select template
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
 
       // Verify that the second step content is rendered
@@ -160,7 +152,6 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByTestId('backButton')).toBeInTheDocument();
       expect(getByTestId('createButton')).toBeInTheDocument();
       expect(queryByTestId('cancelButton')).not.toBeInTheDocument();
-      expect(queryByTestId('nextButton')).not.toBeInTheDocument();
 
       // Navigate back
       fireEvent.click(getByTestId('backButton'));
@@ -171,9 +162,12 @@ describe('CreateClassicStreamFlyout', () => {
 
       // Verify that correct buttons are visible
       expect(getByTestId('cancelButton')).toBeInTheDocument();
-      expect(getByTestId('nextButton')).toBeInTheDocument();
       expect(queryByTestId('backButton')).not.toBeInTheDocument();
       expect(queryByTestId('createButton')).not.toBeInTheDocument();
+
+      // Verify that template selection was cleared (step 2 is disabled)
+      const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
+      expect(nextStep).toBeDisabled();
     });
   });
 
@@ -238,8 +232,6 @@ describe('CreateClassicStreamFlyout', () => {
       // Select template
       fireEvent.click(getByTestId('template-option-template-1'));
 
-      // Navigate forward
-      fireEvent.click(getByTestId('nextButton'));
       expect(onCreate).not.toHaveBeenCalled();
       expect(onClose).not.toHaveBeenCalled();
 
@@ -313,46 +305,11 @@ describe('CreateClassicStreamFlyout', () => {
       });
     });
     describe('template selection', () => {
-      it('disables next step and Next button when no template is selected', () => {
+      it('disables next step in horizontal steps when no template is selected', () => {
         const { getByTestId } = renderFlyout();
 
         const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
         expect(nextStep).toBeDisabled();
-
-        const nextButton = getByTestId('nextButton');
-        expect(nextButton).toBeDisabled();
-      });
-
-      it('enables next step and Next button when a template is selected', () => {
-        const { getByTestId } = renderFlyout();
-
-        // Select a template
-        fireEvent.click(getByTestId('template-option-template-1'));
-
-        const nextStep = getByTestId('createClassicStreamStep-nameAndConfirm');
-        expect(nextStep).toBeEnabled();
-
-        const nextButton = getByTestId('nextButton');
-        expect(nextButton).toBeEnabled();
-      });
-
-      it('displays ILM badge for templates with ILM policy', () => {
-        const { getAllByText, getByText } = renderFlyout();
-
-        // template-1 has ilmPolicy: { name: '30d' }, template-2 has ilmPolicy: { name: '90d' }
-        // Both should display ILM badge
-        const ilmBadges = getAllByText('ILM');
-        expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
-        expect(getByText('90d')).toBeInTheDocument();
-      });
-
-      it('displays lifecycle data retention for templates without ILM policy', () => {
-        const { getByTestId } = renderFlyout();
-
-        // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } but no ILM
-        // Should display the retention period in the template option
-        const templateOption = getByTestId('template-option-template-3');
-        expect(templateOption).toBeInTheDocument();
       });
 
       it('renders all template options including managed templates', () => {
@@ -367,8 +324,26 @@ describe('CreateClassicStreamFlyout', () => {
   });
 
   describe('name and confirm step', () => {
-    it('renders the name and confirm step with template details', () => {
-      const { getByTestId, getByText } = renderFlyout();
+    // Helper to create a mock simulated template response
+    const createMockSimulatedTemplate = (overrides: Record<string, unknown> = {}) => ({
+      template: {
+        settings: {
+          index: {
+            mode: 'standard',
+            lifecycle: { name: '30d' },
+            ...((overrides.settings as Record<string, unknown>)?.index || {}),
+          },
+        },
+        ...overrides,
+      },
+    });
+
+    it('renders the name and confirm step with template details', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue(createMockSimulatedTemplate());
+
+      const { getByTestId, getByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
 
       // Select template and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -382,8 +357,12 @@ describe('CreateClassicStreamFlyout', () => {
 
       // Check template details are displayed
       expect(getByTestId('templateDetails')).toBeInTheDocument();
-      expect(getByText('Index mode')).toBeInTheDocument();
-      expect(getByText('Standard')).toBeInTheDocument();
+
+      // Wait for simulated template to load
+      await waitFor(() => {
+        expect(getByText('Index mode')).toBeInTheDocument();
+        expect(getByText('Standard')).toBeInTheDocument();
+      });
       expect(getByText('Component templates')).toBeInTheDocument();
     });
 
@@ -429,14 +408,28 @@ describe('CreateClassicStreamFlyout', () => {
       expect(getByText('logs@settings')).toBeInTheDocument();
     });
 
-    it('displays correct index mode for different templates', () => {
-      const { getByTestId, getByText } = renderFlyout();
+    it('displays correct index mode for different templates', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue({
+        template: {
+          settings: {
+            index: {
+              mode: 'logsdb',
+            },
+          },
+        },
+      });
+
+      const { getByTestId, getByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
 
       // Select template-2 and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'template-2');
 
-      // template-2 has indexMode: 'logsdb'
-      expect(getByText('LogsDB')).toBeInTheDocument();
+      // Wait for simulated template to load
+      await waitFor(() => {
+        expect(getByText('LogsDB')).toBeInTheDocument();
+      });
     });
 
     it('displays version when available', () => {
@@ -512,9 +505,6 @@ describe('CreateClassicStreamFlyout', () => {
 
         // Select a different template
         fireEvent.click(getByTestId('template-option-template-2'));
-
-        // Navigate to second step again
-        fireEvent.click(getByTestId('nextButton'));
 
         // The input should be reset (empty)
         const newInput = getByTestId('streamNameInput-wildcard-0');
@@ -733,7 +723,6 @@ describe('CreateClassicStreamFlyout', () => {
         // Go back and change template
         fireEvent.click(getByTestId('backButton'));
         fireEvent.click(getByTestId('template-option-template-2'));
-        fireEvent.click(getByTestId('nextButton'));
 
         // Validation error should be cleared (stream name reset is tested in existing test above)
         await waitFor(() => {
@@ -894,102 +883,21 @@ describe('CreateClassicStreamFlyout', () => {
     });
   });
 
-  describe('showDataRetention prop', () => {
-    describe('select template step', () => {
-      it('hides ILM badge and policy name when showDataRetention is false', () => {
-        const { queryAllByText, queryByText, getByTestId } = renderFlyout({
-          showDataRetention: false,
-        });
-
-        // template-1 and template-2 have ILM policies, but badges should be hidden
-        expect(queryAllByText('ILM')).toHaveLength(0);
-
-        // ILM policy names should also be hidden
-        expect(queryByText('30d')).not.toBeInTheDocument();
-        expect(queryByText('90d')).not.toBeInTheDocument();
-
-        // Template options should still be visible
-        expect(getByTestId('template-option-template-1')).toBeInTheDocument();
-        expect(getByTestId('template-option-template-2')).toBeInTheDocument();
-      });
-
-      it('hides data retention text when showDataRetention is false', () => {
-        const { queryByText } = renderFlyout({ showDataRetention: false });
-
-        // template-3 has lifecycle: { enabled: true, value: 30, unit: 'd' } - retention text should be hidden
-        // ILM policy names should also be hidden
-        expect(queryByText('30d')).not.toBeInTheDocument();
-        expect(queryByText('90d')).not.toBeInTheDocument();
-      });
-
-      it('shows ILM badge when showDataRetention is true (default)', () => {
-        const { getAllByText } = renderFlyout();
-
-        // template-1 and template-2 have ILM policies - badges should be visible
-        const ilmBadges = getAllByText('ILM');
-        expect(ilmBadges.length).toBeGreaterThanOrEqual(2);
-      });
-    });
-
-    describe('name and confirm step', () => {
-      it('hides retention section when showDataRetention is false', () => {
-        const { getByTestId, queryByText } = renderFlyout({ showDataRetention: false });
-
-        // Select template with ILM policy and navigate to second step
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        // Retention should be hidden
-        expect(queryByText('Retention')).not.toBeInTheDocument();
-        expect(queryByText('30d')).not.toBeInTheDocument();
-        expect(queryByText('ILM')).not.toBeInTheDocument();
-
-        // Other template details should still be visible
-        expect(queryByText('Index mode')).toBeInTheDocument();
-        expect(queryByText('Component templates')).toBeInTheDocument();
-      });
-
-      it('does not call getIlmPolicy when showDataRetention is false', () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
-        const { getByTestId } = renderFlyout({
-          showDataRetention: false,
-          getIlmPolicy: mockGetIlmPolicy,
-        });
-
-        // Select template with ILM policy and navigate to second step
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        // Verify we're on the second step
-        expect(getByTestId('nameAndConfirmStep')).toBeInTheDocument();
-
-        // getIlmPolicy should not be called
-        expect(mockGetIlmPolicy).not.toHaveBeenCalled();
-      });
-
-      it('shows retention section and calls getIlmPolicy when showDataRetention is true', async () => {
-        const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
-        const { getByTestId, getByText } = renderFlyout({
-          showDataRetention: true,
-          getIlmPolicy: mockGetIlmPolicy,
-        });
-
-        // Select template with ILM policy and navigate to second step
-        selectTemplateAndGoToStep2(getByTestId, 'template-1');
-
-        // Retention should be visible
-        expect(getByText('Retention')).toBeInTheDocument();
-
-        // getIlmPolicy should be called
-        await waitFor(() => {
-          expect(mockGetIlmPolicy).toHaveBeenCalledWith('30d', expect.any(AbortSignal));
-        });
-      });
-    });
-  });
-
   describe('ILM policy fetching integration', () => {
     // Note: Basic ILM policy fetching, loading states, error handling, and abort signal tests
     // are covered in confirm_template_details_section.test.tsx.
     // These tests focus on navigation-specific integration behavior.
+
+    const createMockSimulatedTemplateWithIlm = (ilmPolicyName: string) => ({
+      template: {
+        settings: {
+          index: {
+            mode: 'standard',
+            lifecycle: { name: ilmPolicyName },
+          },
+        },
+      },
+    });
 
     it('should abort ILM policy fetch when going back to template selection', async () => {
       let capturedSignal: AbortSignal | undefined;
@@ -999,8 +907,14 @@ describe('CreateClassicStreamFlyout', () => {
           setTimeout(() => resolve(null), 10000);
         });
       });
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplateWithIlm('30d'));
 
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+      const { getByTestId } = renderFlyout({
+        getIlmPolicy: mockGetIlmPolicy,
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
 
       // Select template with ILM policy and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -1021,21 +935,27 @@ describe('CreateClassicStreamFlyout', () => {
     it('should abort previous ILM policy fetch when switching templates via navigation', async () => {
       let firstSignal: AbortSignal | undefined;
       let secondSignal: AbortSignal | undefined;
-      let callCount = 0;
+      let ilmCallCount = 0;
 
       const mockGetIlmPolicy = jest.fn().mockImplementation((policyName, signal) => {
-        callCount++;
-        if (callCount === 1) {
+        ilmCallCount++;
+        if (ilmCallCount === 1) {
           firstSignal = signal;
-        } else if (callCount === 2) {
+        } else if (ilmCallCount === 2) {
           secondSignal = signal;
         }
         return new Promise((resolve) => {
           setTimeout(() => resolve(null), 10000);
         });
       });
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplateWithIlm('30d'));
 
-      const { getByTestId } = renderFlyout({ getIlmPolicy: mockGetIlmPolicy });
+      const { getByTestId } = renderFlyout({
+        getIlmPolicy: mockGetIlmPolicy,
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
 
       // Select template-1 and navigate to second step
       selectTemplateAndGoToStep2(getByTestId, 'template-1');
@@ -1048,12 +968,207 @@ describe('CreateClassicStreamFlyout', () => {
       // Go back and select template-2
       fireEvent.click(getByTestId('backButton'));
       fireEvent.click(getByTestId('template-option-template-2'));
-      fireEvent.click(getByTestId('nextButton'));
 
       await waitFor(() => {
         expect(mockGetIlmPolicy).toHaveBeenCalledTimes(2);
         expect(firstSignal?.aborted).toBe(true);
         expect(secondSignal).toBeDefined();
+      });
+    });
+  });
+
+  describe('Simulated template fetching integration', () => {
+    // Tests for getSimulatedTemplate integration behavior.
+
+    const createMockSimulatedTemplate = (mode: string = 'standard', ilmPolicyName?: string) => ({
+      template: {
+        settings: {
+          index: {
+            mode,
+            ...(ilmPolicyName ? { lifecycle: { name: ilmPolicyName } } : {}),
+          },
+        },
+      },
+    });
+
+    it('calls getSimulatedTemplate when navigating to second step', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockResolvedValue(createMockSimulatedTemplate());
+
+      const { getByTestId } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalledWith(
+          'template-1',
+          expect.any(AbortSignal)
+        );
+      });
+    });
+
+    it('displays index mode from simulated template', async () => {
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('logsdb'));
+
+      const { getByTestId, getByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(getByText('Index mode')).toBeInTheDocument();
+        expect(getByText('LogsDB')).toBeInTheDocument();
+      });
+    });
+
+    it('displays retention from simulated template when ILM policy is present', async () => {
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard', 'my-ilm-policy'));
+      const mockGetIlmPolicy = jest.fn().mockResolvedValue(null);
+
+      const { getByTestId, getByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+        getIlmPolicy: mockGetIlmPolicy,
+      });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(getByText('Retention')).toBeInTheDocument();
+        expect(getByText('my-ilm-policy')).toBeInTheDocument();
+      });
+
+      // Verify getIlmPolicy is called with the policy name from simulated template
+      await waitFor(() => {
+        expect(mockGetIlmPolicy).toHaveBeenCalledWith('my-ilm-policy', expect.any(AbortSignal));
+      });
+    });
+
+    it('should abort simulated template fetch when going back to template selection', async () => {
+      let capturedSignal: AbortSignal | undefined;
+      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+        capturedSignal = signal;
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(createMockSimulatedTemplate()), 10000);
+        });
+      });
+
+      const { getByTestId } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalled();
+        expect(capturedSignal).toBeDefined();
+      });
+
+      // Go back - should abort the fetch
+      fireEvent.click(getByTestId('backButton'));
+
+      await waitFor(() => {
+        expect(capturedSignal?.aborted).toBe(true);
+      });
+    });
+
+    it('should abort previous simulated template fetch when switching templates', async () => {
+      let firstSignal: AbortSignal | undefined;
+      let secondSignal: AbortSignal | undefined;
+      let callCount = 0;
+
+      const mockGetSimulatedTemplate = jest.fn().mockImplementation((templateName, signal) => {
+        callCount++;
+        if (callCount === 1) {
+          firstSignal = signal;
+        } else if (callCount === 2) {
+          secondSignal = signal;
+        }
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(createMockSimulatedTemplate()), 10000);
+        });
+      });
+
+      const { getByTestId } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
+
+      // Select template-1 and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalledTimes(1);
+        expect(firstSignal).toBeDefined();
+      });
+
+      // Go back and select template-2
+      fireEvent.click(getByTestId('backButton'));
+      fireEvent.click(getByTestId('template-option-template-2'));
+
+      await waitFor(() => {
+        expect(mockGetSimulatedTemplate).toHaveBeenCalledTimes(2);
+        expect(firstSignal?.aborted).toBe(true);
+        expect(secondSignal).toBeDefined();
+      });
+    });
+
+    it('shows error message when simulated template fetch fails', async () => {
+      const mockGetSimulatedTemplate = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      const { getByTestId, getByText, queryByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+      });
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      await waitFor(() => {
+        expect(
+          getByText(/There was an error while loading index mode and data retention info/i)
+        ).toBeInTheDocument();
+      });
+
+      // Index mode should not be shown when simulated template fails
+      expect(queryByText('Index mode')).not.toBeInTheDocument();
+    });
+
+    it('does not show index mode or retention when getSimulatedTemplate is not provided', () => {
+      const { getByTestId, queryByText } = renderFlyout();
+
+      // Select template and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-1');
+
+      // Index mode and retention require simulated template
+      expect(queryByText('Index mode')).not.toBeInTheDocument();
+    });
+
+    it('falls back to template lifecycle when simulated template has no ILM policy', async () => {
+      // Simulated template with no ILM policy
+      const mockGetSimulatedTemplate = jest
+        .fn()
+        .mockResolvedValue(createMockSimulatedTemplate('standard'));
+
+      const { getByTestId, getByText } = renderFlyout({
+        getSimulatedTemplate: mockGetSimulatedTemplate,
+        // Use template-3 which has lifecycle: { enabled: true, value: 30, unit: 'd' }
+      });
+
+      // Select template-3 with data retention and navigate to second step
+      selectTemplateAndGoToStep2(getByTestId, 'template-3');
+
+      await waitFor(() => {
+        // Should show the fallback data retention from template
+        expect(getByText('Retention')).toBeInTheDocument();
+        expect(getByText('30d')).toBeInTheDocument();
       });
     });
   });

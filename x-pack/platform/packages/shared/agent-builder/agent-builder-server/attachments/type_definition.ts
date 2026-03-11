@@ -8,12 +8,17 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
 
 /**
  * Server-side definition of an attachment type.
  */
-export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
+export interface AttachmentTypeDefinition<
+  TType extends string = string,
+  TContent = unknown,
+  TOrigin = unknown
+> {
   /**
    * Unique identifier for the attachment type to register.
    */
@@ -30,6 +35,23 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     context: AttachmentFormatContext
   ) => MaybePromise<AgentFormattedAttachment>;
   /**
+   * Receives origin data and returns resolved content.
+   * Only called once at add time — not on every read.
+   *
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin info → optionally validated by `validateOrigin()` →
+   * `resolve()` called → content stored as `data`.
+   */
+  resolve?: (
+    origin: TOrigin,
+    context: AttachmentResolveContext
+  ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional validation for origin/reference data.
+   * Called when an attachment is created with `origin` but no `data`.
+   */
+  validateOrigin?: (input: unknown) => MaybePromise<AttachmentValidationResult<TOrigin>>;
+  /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.
    *
@@ -44,6 +66,10 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * are present in the conversation.
    */
   getAgentDescription?: () => string;
+  /**
+   * Whether attachments of this type are read-only. Defaults to false.
+   */
+  isReadonly?: boolean;
 }
 
 /**
@@ -52,6 +78,17 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
 export interface AttachmentFormatContext {
   request: KibanaRequest;
   spaceId: string;
+}
+
+/**
+ * Context passed to the {@link AttachmentTypeDefinition.resolve} hook.
+ */
+export interface AttachmentResolveContext extends AttachmentFormatContext {
+  /**
+   * Saved objects client scoped to the current user.
+   * Optional to keep the core attachment contract generic and allow non-Kibana environments.
+   */
+  savedObjectsClient?: SavedObjectsClientContract;
 }
 
 /**
@@ -90,7 +127,12 @@ export interface AgentFormattedAttachment {
   /**
    * Should return the representation of the attachment, which will be presented to the agent.
    */
-  getRepresentation: () => MaybePromise<AttachmentRepresentation>;
+  /**
+   * @deprecated Representation can be inferred from attachment data; prefer returning
+   * the raw data and let the formatter decide. If omitted, we will fall back to
+   * stringifying the attachment data.
+   */
+  getRepresentation?: () => MaybePromise<AttachmentRepresentation>;
   /**
    * Can be used to expose tools which are specific to the attachment instance.
    *

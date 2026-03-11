@@ -20,6 +20,7 @@
     "@kbn/core-user-profile-browser-internal",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-di-internal",
+    "@kbn/core-chrome-browser-internal",
   ],
   "exclude": [
     "target/**/*",

@@ -201,18 +201,12 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it('should fail when at least one package policy does not have a previous revision', async () => {
+      it('should succeed when not all package policies were not upgraded to the current package version', async () => {
         await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, policyIds, false);
-        const res = await supertest
+        await supertest
           .post(`/api/fleet/epm/packages/${pkgName}/rollback`)
           .set('kbn-xsrf', 'xxxx')
-          .expect(400);
-        // Cannot predict order of SO creation.
-        const re = new RegExp(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3], ${pkgName}(-all-spaces)?-[1-2-3]`,
-          'g'
-        );
-        expect(res.body.message).to.match(re);
+          .expect(200);
       });
 
       it('should fail when at least one package policy has a previous revision with a different version', async () => {
@@ -223,9 +217,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
         // Cannot predict order of SO creation.
-        const errorMsg = String.raw`${pkgName}(-all-spaces)?-[1-2-3] \(version: ${oldPkgVersion}, expected: ${newPkgVersion}\)`;
         const re = new RegExp(
-          `Failed to roll back package ${pkgName}: Wrong previous version for package policies: ${errorMsg}, ${errorMsg}`,
+          `Failed to roll back package ${pkgName}: Rollback not available because not all integration policies were upgraded from the same previous version ${newPkgVersion}`,
           'g'
         );
         expect(res.body.message).to.match(re);
@@ -373,7 +366,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should return rollback not available when some package policies not upgraded', async () => {
+      it('should return rollback available when some package policies not upgraded', async () => {
         await createPackagePolicies([policyIds[0]], pkgName, oldPkgVersion);
         await upgradePackage(pkgName, oldPkgVersion, newPkgVersion, [policyIds[0]], true);
         await createPackagePolicies([policyIds[1]], pkgName, oldPkgVersion);
@@ -385,9 +378,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(res.body).to.eql({
-          isAvailable: false,
-          reason:
-            'Rollback not available because some integration policies are not upgraded to version 0.2.0',
+          isAvailable: true,
         });
       });
 

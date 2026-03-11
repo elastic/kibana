@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
+import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
 import { UserAssetTableType } from '../../../../explore/users/store/model';
 import { usersActions, usersSelectors } from '../../../../explore/users/store';
 import { fieldHasCellActions } from '../../utils';
@@ -14,7 +14,7 @@ import type { SecurityAppStore } from '../../../../common/store';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
 
-const ICON = 'listAdd';
+const ICON = 'indexOpen';
 const TOGGLE_FIELD = i18n.translate(
   'xpack.securitySolution.actions.toggleFieldToAssetTable.label',
   {

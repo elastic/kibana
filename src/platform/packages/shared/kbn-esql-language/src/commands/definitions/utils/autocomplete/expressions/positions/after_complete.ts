@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isLiteral, isFunctionExpression } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { isParameterType } from '../../../../types';
 import { getTimeUnitLiterals } from '../../../literals';
 import type { ExpressionContext } from '../types';
-import { isLiteral, isFunctionExpression } from '../../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../registry/complete_items';
 import { getExpressionType } from '../../../expressions';
@@ -70,7 +70,11 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   }
 
   // Enrich context with expression type and signature analysis
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const signatureAnalysis = functionParameterContext
     ? SignatureAnalyzer.from(functionParameterContext)
     : null;

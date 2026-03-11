@@ -18,6 +18,7 @@ import {
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
+import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -36,16 +37,33 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-export type MonacoMessage = monaco.editor.IMarkerData & { code: string };
+export type MonacoMessage = monaco.editor.IMarkerData & {
+  code: string;
+
+  // By default warnings are not underlined, use this flag to indicate it should be
+  underlinedWarning?: boolean;
+};
 
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    /**
+     * Optional resolver to provide model-specific dependencies.
+     *
+     * Monaco language providers are global per language, but Kibana can render multiple ES|QL
+     * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
+     * pick the correct callbacks for the specific editor model requesting suggestions.
+     */
+    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLCallbacks | undefined;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
+    // PromQL can be embedded in ES|QL querys.
+    // We need to manually trigger its language loading for it to work.
+    await PromQLLang.onLanguage?.();
+
     const language = monarch.create({
       ...monarchDefinitions,
       functions: esqlFunctionNames,
@@ -152,16 +170,34 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
+        const resolvedDeps = resolvedCallbacks
+          ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
+          : deps;
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
-        const suggestions = await suggest(fullText, offset, deps);
+
+        const computeStart = performance.now();
+        const suggestions = await suggest(fullText, offset, resolvedDeps);
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
-          deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
+          resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
+            suggestionsWithCustomCommands
+          );
         }
 
-        return wrapAsMonacoSuggestions(suggestions, fullText);
+        const result = wrapAsMonacoSuggestions(suggestions, fullText);
+        const computeEnd = performance.now();
+
+        resolvedDeps?.telemetry?.onSuggestionsReady?.(
+          computeStart,
+          computeEnd,
+          model.getValueLength(),
+          model.getLineCount()
+        );
+
+        return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
         if (!deps?.getFieldsMetadata) return item;

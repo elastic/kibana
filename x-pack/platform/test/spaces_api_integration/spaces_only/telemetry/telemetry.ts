@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(stats.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
         actions: 0,
+        anonymization: 0,
         observabilityAIAssistant: 0,
         savedObjectsTagging: 0,
         graph: 0,
@@ -99,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         siemV4: 0,
         siemV5: 0,
         securitySolutionRulesV1: 0,
+        securitySolutionRulesV2: 0,
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,
         securitySolutionCasesV3: 0,

@@ -17,6 +17,7 @@ import {
 import type TestAgent from 'supertest/lib/agent';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
@@ -235,11 +236,20 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('@skipInServerless and user has authorization to read event filters', function () {
+    describe('and user has authorization to read event filters', function () {
       let hunterSupertest: TestAgent;
+
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
       });
+
+      after(async () => {
+        await utils.cleanUpCustomRoles();
+      });
+
       for (const eventFilterApiCall of [...eventFilterCalls, ...needsWritePrivilege]) {
         it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await hunterSupertest[eventFilterApiCall.method](eventFilterApiCall.path)
