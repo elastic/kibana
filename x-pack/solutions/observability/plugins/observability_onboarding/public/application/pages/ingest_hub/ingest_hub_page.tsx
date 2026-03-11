@@ -2266,7 +2266,7 @@ export const IngestHubPage: React.FC = () => {
           hideCloseButton={isStopFillVersion}
           aria-labelledby="getStartedFlyoutTitle"
           css={css`
-            inline-size: 77vw !important;
+            inline-size: 65vw !important;
             animation-duration: 0s !important;
             transition-duration: 0s !important;
             [class*="euiFlyoutMenu__container"] {
