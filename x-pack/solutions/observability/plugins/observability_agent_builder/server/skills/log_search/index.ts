@@ -55,22 +55,23 @@ function buildLogSearchSkillContent(): string {
 
     Decision:
     - categories has fewer than 20 patterns → skip to Answer (focused enough to review samples directly)
-    - Spike in histogram → note the time, then Phase 2
-    - totalCount > 10,000 → Phase 2
+    - Spike or dip in histogram → note the time, then Phase 2
+    - totalCount > 10,000 (even with a flat histogram) → Phase 2
     - Otherwise → Phase 3 (moderate volume, start filtering directly)
 
-    ### Phase 2: Analyze at Scale
-    Only use this phase when the histogram shows a clear spike or dip.
+    ### Phase 2: Analyze with log rate analysis
+    Call \`run_log_rate_analysis\` to find field values and message patterns correlated with a change.
+    It tests all keyword and text fields in the index, so it can detect per-dimension shifts invisible in the aggregate histogram.
 
-    Call \`run_log_rate_analysis\`:
-    - baseline: a normal period BEFORE the spike
-    - deviation: the period DURING the spike
-    - The result shows which field values (services, error types, hosts) are correlated with the change.
+    Choose baseline and deviation windows:
+    - **Spike/dip visible**: baseline = before the spike, deviation = during the spike.
+    - **User provides incident context** (e.g., "errors started 20 minutes ago"): use that as the boundary.
+    - **No spike, no context, high volume**: use a prior period as baseline (e.g., baseline = "now-2h to now-1h", deviation = "now-1h to now").
 
-    Use insights from this phase to make informed filters in Phase 3.
-    If there is no spike, skip this phase — categories from Phase 1 already provide pattern analysis.
+    This is a change detection tool — if the issue is steady-state across both windows, it returns nothing. Continue with Phase 3.
+    Skip this phase only if totalCount < 10,000 and there is no spike.
 
-    ### Phase 3: Noise Reduction (The Funnel)
+    ### Phase 3: Reduce noise (The Funnel)
     The dataset is too large to review manually. Call \`get_logs\` repeatedly to narrow it down using two strategies:
 
     **Strategy A — Exclude noise** (use first): Add NOT clauses to remove obvious noise.
@@ -144,7 +145,7 @@ function buildLogSearchSkillContent(): string {
     **Phase 1**: get_logs(start="now-1h", end="now")
     → totalCount: 42,000. Categories: 28 patterns (too many — noisy). topValues shows service.name: ["checkout", "payment", "load-balancer", ...], log.level: ["info", "error", "warn"]. Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
 
-    **Phase 2**: run_log_rate_analysis(start="2026-02-25T13:50:00Z", end="2026-02-25T14:15:00Z")
+    **Phase 2**: run_log_rate_analysis(baseline={start: "2026-02-25T13:50:00Z", end: "2026-02-25T14:04:00Z"}, deviation={start: "2026-02-25T14:04:00Z", end: "2026-02-25T14:15:00Z"})
     → Significant items: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003). Checkout is correlated with the spike.
 
     **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z")
