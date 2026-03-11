@@ -42,6 +42,7 @@ Use this skill when the user wants to:
 - Create a new workflow YAML definition (no \`workflow.yaml\` attachment present)
 - Understand advanced step types, triggers, or connector integrations
 - Learn workflow YAML syntax, Liquid templating, or best practices
+- Fix complex validation errors that require understanding step schemas
 
 ## Available Tools
 

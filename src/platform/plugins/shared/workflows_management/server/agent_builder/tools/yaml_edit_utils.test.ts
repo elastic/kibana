@@ -233,18 +233,13 @@ steps:
     with:
       message: "{{ steps.prev.output.value }}"`;
 
-      const result = modifyStepProperty(
-        yamlNoTrailing,
-        'my_step',
-        'condition',
-        'steps.prev.output.ok'
-      );
+      const result = modifyStepProperty(yamlNoTrailing, 'my_step', 'if', 'steps.prev.output.ok');
 
       expect(result.success).toBe(true);
-      expect(result.yaml).toContain('condition:');
+      expect(result.yaml).toContain('if:');
       const lines = result.yaml.split('\n');
       const msgLine = lines.findIndex((l) => l.includes('{{ steps.prev.output.value }}'));
-      expect(lines[msgLine]).not.toContain('condition');
+      expect(lines[msgLine]).not.toContain('if:');
     });
 
     it('returns error for non-existent step', () => {

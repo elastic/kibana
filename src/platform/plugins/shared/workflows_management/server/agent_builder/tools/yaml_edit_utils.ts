@@ -24,7 +24,7 @@ interface StepDefinition {
   name: string;
   type: string;
   'connector-id'?: string;
-  condition?: string;
+  if?: string;
   foreach?: string;
   with?: Record<string, unknown>;
   output?: Record<string, unknown>;

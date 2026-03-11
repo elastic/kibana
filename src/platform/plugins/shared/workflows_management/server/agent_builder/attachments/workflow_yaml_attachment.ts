@@ -148,13 +148,29 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- Use get_examples to find working workflow patterns\n\n` +
     `## Workflow YAML Structure\n\n` +
     `\`\`\`yaml\nversion: '1'\nname: Workflow Name\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: step_name\n    type: step_type\n    with:\n      param1: value1\n\`\`\`\n\n` +
+    `## Common Step Properties\n\n` +
+    `Every step supports these properties regardless of type:\n\n` +
+    `\`\`\`yaml\n` +
+    `- name: unique_step_name       # required, unique within the workflow\n` +
+    `  type: step_type              # required\n` +
+    `  with:                        # input parameters (specific to step type)\n` +
+    `    param1: value1\n` +
+    `  connector-id: my-connector   # only for connector-based steps\n` +
+    `  if: "steps.prev.output.ok"   # optional, skip step when condition is falsy\n` +
+    `  timeout: "30s"               # optional, step-level timeout\n` +
+    `  on-failure:                  # optional, error handling\n` +
+    `    retry:\n` +
+    `      max-attempts: 3\n` +
+    `\`\`\`\n\n` +
+    `**IMPORTANT**: The step-level conditional property is \`if\`, NOT \`condition\`.\n` +
+    `\`condition\` is a config param specific to the \`if\` step type (alongside \`steps\`/\`else\`).\n\n` +
     `## Common Fixes\n\n` +
     `- Liquid expressions must be quoted in YAML: \`"{{ steps.name.output.field }}"\`\n` +
     `- ES|QL params must be an array of positional values (\`?\` placeholder), not a named map\n` +
     `- All workflows need \`version: '1'\` at the root\n` +
     `- Each step needs a unique \`name\` and valid \`type\`\n` +
     `- Step input parameters go in the \`with\` block\n` +
-    `- Config params (condition, foreach, steps, else) are step-level fields outside \`with\`\n` +
+    `- Config params are step-level fields outside \`with\` (e.g. \`condition\`/\`steps\`/\`else\` for the \`if\` step type, \`foreach\`/\`steps\` for \`foreach\`)\n` +
     `- Connector-based steps require a \`connector-id\` field`,
 });
 

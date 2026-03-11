@@ -46,7 +46,7 @@ const stepDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
   'connector-id': z.string().optional(),
-  condition: z.string().optional(),
+  if: z.string().optional(),
   foreach: z.string().optional(),
   with: z.record(z.string(), z.unknown()).optional(),
   output: z.record(z.string(), z.unknown()).optional(),
