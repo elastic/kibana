@@ -24,9 +24,35 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
     const pipeline = [
       getAgentImageConfig({ returnYaml: true }),
       `steps:
+  - label: 'Prepare Jest Run Order Repro'
+    key: prepare-jest-run-order-repro
+    command: |-
+      set -euo pipefail
+      .buildkite/scripts/bootstrap.sh
+
+      cp .buildkite/scripts/pipelines/pull_request/jest_run_order.repro.json jest_run_order.json
+      cat jest_run_order.json
+      buildkite-agent artifact upload jest_run_order.json
+    agents:
+      machineType: n2d-standard-4
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
+    timeout_in_minutes: 20
+
   - label: 'Jest Checkpoint Retry Repro'
     key: jest-checkpoint-repro
-    command: .buildkite/scripts/pipelines/pull_request/jest_checkpoint_repro.sh
+    depends_on: prepare-jest-run-order-repro
+    command: |-
+      set -euo pipefail
+      .buildkite/scripts/bootstrap.sh
+
+      .buildkite/scripts/steps/test/jest_parallel.sh jest.config.js
+
+      if [ "\${BUILDKITE_RETRY_COUNT:-0}" = "0" ]; then
+        echo "[jest-checkpoint-repro] forcing first attempt to fail to verify retry resume"
+        exit 1
+      fi
     agents:
       machineType: n2d-standard-4
       preemptible: true

@@ -1,0 +1,24 @@
+{
+  "unit": {
+    "type": "Jest Unit Tests",
+    "count": 1,
+    "groups": [
+      {
+        "durationMin": 29.4,
+        "names": [
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=1/6",
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=2/6",
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=3/6",
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=4/6",
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=5/6",
+          "x-pack/platform/plugins/shared/alerting/jest.config.js||shard=6/6"
+        ]
+      }
+    ]
+  },
+  "integration": {
+    "type": "Jest Integration Tests",
+    "count": 0,
+    "groups": []
+  }
+}
