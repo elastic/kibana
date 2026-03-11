@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import type { ReactNode } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiTitle,
@@ -19,38 +19,39 @@ import {
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 
-export interface EditableFieldWrapperProps<T> {
+export interface EditableFieldWrapperProps {
   title: string;
-  value: T;
   isLoading: boolean;
   displayContent: ReactNode;
-  children: (editValue: T, setEditValue: Dispatch<SetStateAction<T>>) => ReactNode;
-  onSubmit: (value: T) => void;
+  children: ReactNode;
+  onSubmit: () => void | Promise<void>;
+  onEnterEdit?: () => void;
   'data-test-subj'?: string;
 }
 
-export const EditableFieldWrapper = <T,>({
+export const EditableFieldWrapper: React.FC<EditableFieldWrapperProps> = ({
   title,
-  value,
   isLoading,
   displayContent,
   children,
   onSubmit,
+  onEnterEdit,
   'data-test-subj': dataTestSubj = 'editable-field',
-}: EditableFieldWrapperProps<T>) => {
+}) => {
   const { permissions } = useCasesContext();
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState<T>(value);
 
   const onClickEdit = useCallback(() => {
-    setEditValue(value);
+    if (onEnterEdit) {
+      onEnterEdit();
+    }
     setIsEditing(true);
-  }, [value]);
+  }, [onEnterEdit]);
 
-  const onClickSave = useCallback(() => {
-    onSubmit(editValue);
+  const onClickSave = useCallback(async () => {
+    await onSubmit();
     setIsEditing(false);
-  }, [editValue, onSubmit]);
+  }, [onSubmit]);
 
   const onClickCancel = useCallback(() => {
     setIsEditing(false);
@@ -85,7 +86,7 @@ export const EditableFieldWrapper = <T,>({
       {!isEditing && displayContent}
       {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>{children(editValue, setEditValue)}</EuiFlexItem>
+          <EuiFlexItem>{children}</EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>

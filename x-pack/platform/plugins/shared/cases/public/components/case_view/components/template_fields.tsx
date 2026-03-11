@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { camelCase, snakeCase } from 'lodash';
 import type { CaseUI } from '../../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { FieldType } from '../../templates_v2/field_types/constants';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
-import { EditTextField } from './edit_text_field';
-import { EditTextareaField } from './edit_textarea_field';
-import { EditNumberField } from './edit_number_field';
-import { EditComboboxField } from './edit_combobox_field';
+import { controlRegistry } from '../../templates_v2/field_types/field_types_registry';
+import { EditFieldAdapter } from './edit_field_adapter';
 import type { OnUpdateFields } from '../types';
 
 interface TemplateFieldsProps {
@@ -24,13 +22,38 @@ interface TemplateFieldsProps {
   loadingKey: string | null;
 }
 
+const prepareFieldValue = (fieldControl: FieldType, extendedFieldValue: string) => {
+  return fieldControl === FieldType.SELECT_BASIC
+    ? extendedFieldValue
+      ? [String(extendedFieldValue)]
+      : []
+    : String(extendedFieldValue);
+};
+
+const processFieldValue = (fieldControl: FieldType, value: unknown) => {
+  return fieldControl === FieldType.SELECT_BASIC && Array.isArray(value) ? value[0] ?? '' : value;
+};
+
 export const TemplateFields = React.memo<TemplateFieldsProps>(
   ({ caseData, onUpdateField, isLoading, loadingKey }) => {
     const { data: templateData, isLoading: isLoadingTemplate } = useGetTemplate(
       caseData.template?.id,
       caseData.template?.version
     );
+
     const templateFields = templateData?.definition?.fields ?? [];
+
+    const handleFieldSubmit = useCallback(
+      (fieldKey: string, fieldControl: FieldType) => (value: unknown) => {
+        const processedValue = processFieldValue(fieldControl, value);
+
+        onUpdateField({
+          key: CASE_EXTENDED_FIELDS,
+          value: { [snakeCase(fieldKey)]: processedValue },
+        });
+      },
+      [onUpdateField]
+    );
 
     return (
       <>
@@ -38,63 +61,27 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(
           const fieldKey = `${field.name}_as_${field.type}`;
           const fieldIsLoading =
             isLoadingTemplate || (isLoading && loadingKey === CASE_EXTENDED_FIELDS);
-          const onSubmit = (value: unknown) =>
-            onUpdateField({
-              key: CASE_EXTENDED_FIELDS,
-              value: { [snakeCase(fieldKey)]: value },
-            });
           const extendedFieldValue = caseData.extendedFields?.[camelCase(fieldKey)] ?? '';
 
-          switch (field.control) {
-            case FieldType.INPUT_TEXT:
-              return (
-                <EditTextField
-                  key={field.name}
-                  title={field.label ?? field.name}
-                  value={String(extendedFieldValue)}
-                  onSubmit={onSubmit}
-                  isLoading={fieldIsLoading}
-                  data-test-subj={`template-field-${field.name}`}
-                />
-              );
-            case FieldType.INPUT_NUMBER:
-              return (
-                <EditNumberField
-                  key={field.name}
-                  title={field.label ?? field.name}
-                  value={String(extendedFieldValue)}
-                  onSubmit={onSubmit}
-                  isLoading={fieldIsLoading}
-                  data-test-subj={`template-field-${field.name}`}
-                />
-              );
-            case FieldType.TEXTAREA:
-              return (
-                <EditTextareaField
-                  key={field.name}
-                  title={field.label ?? field.name}
-                  value={String(extendedFieldValue)}
-                  onSubmit={onSubmit}
-                  isLoading={fieldIsLoading}
-                  data-test-subj={`template-field-${field.name}`}
-                />
-              );
-            case FieldType.SELECT_BASIC:
-              return (
-                <EditComboboxField
-                  key={field.name}
-                  title={field.label ?? field.name}
-                  value={extendedFieldValue ? [String(extendedFieldValue)] : []}
-                  options={field.metadata?.options ?? []}
-                  onSubmit={onSubmit}
-                  isLoading={fieldIsLoading}
-                  singleSelection
-                  data-test-subj={`template-field-${field.name}`}
-                />
-              );
-            default:
-              return null;
+          const FieldComponent = controlRegistry[field.control];
+
+          if (!FieldComponent) {
+            return null;
           }
+
+          const fieldValue = prepareFieldValue(field.control, extendedFieldValue);
+
+          return (
+            <EditFieldAdapter
+              key={field.name}
+              value={fieldValue}
+              onSubmit={handleFieldSubmit(fieldKey, field.control)}
+              isLoading={fieldIsLoading}
+              data-test-subj={`template-field-${field.name}`}
+              FieldComponent={FieldComponent}
+              componentProps={field}
+            />
+          );
         })}
       </>
     );

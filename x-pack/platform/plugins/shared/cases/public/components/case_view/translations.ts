@@ -282,3 +282,7 @@ export const UPDATED_OBSERVABLES = (totalObservables: number): string =>
     defaultMessage:
       'updated {totalObservables, plural, =1 {an} other {{totalObservables}}} {totalObservables, plural, =1 {observable} other {observables}}',
   });
+
+export const FIELD_SUBMISSION_ERROR = i18n.translate('xpack.cases.caseView.fieldSubmissionError', {
+  defaultMessage: 'Error submitting field',
+});
