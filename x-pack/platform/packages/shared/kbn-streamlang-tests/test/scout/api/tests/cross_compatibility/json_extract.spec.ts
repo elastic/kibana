@@ -195,6 +195,35 @@ apiTest.describe(
       );
     });
 
+    // *** JSON path validation tests ***
+    [
+      { selector: 'a..b', error: 'consecutive dots' },
+      { selector: 'a.', error: 'path cannot end with a dot' },
+      { selector: '.a', error: 'path cannot start with a dot' },
+      { selector: 'a[]', error: 'empty brackets' },
+      { selector: '$.....xyz', error: 'path cannot start with a dot' },
+      { selector: "$['unclosed", error: 'unterminated quoted key' },
+      { selector: 'a[01]', error: 'leading zeros are not allowed' },
+    ].forEach(({ selector, error }) => {
+      apiTest(
+        `should consistently reject invalid selector "${selector}" in both transpilers`,
+        async () => {
+          const streamlangDSL: StreamlangDSL = {
+            steps: [
+              {
+                action: 'json_extract',
+                field: 'message',
+                extractions: [{ selector, target_field: 'extracted' }],
+              } as JsonExtractProcessor,
+            ],
+          };
+
+          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(error);
+          expect(() => transpileEsql(streamlangDSL)).toThrow(error);
+        }
+      );
+    });
+
     // *** Type Casting Tests ***
 
     apiTest('should correctly cast extracted values to integer type', async ({ testBed, esql }) => {

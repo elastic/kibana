@@ -12,77 +12,7 @@ import type {
   JsonExtractType,
 } from '../../../../types/processors';
 import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../types/utils';
-
-/**
- * Normalizes a JSONPath-like selector to a format suitable for Painless traversal.
- * Supports:
- * - Dot notation: user.address.city
- * - Bracket notation: ['user']['address']['city']
- * - Array indices: items[0]
- * - Optional $ root selector (ignored)
- *
- * @example
- * "$.user.address" -> ["user", "address"]
- * "user.address.city" -> ["user", "address", "city"]
- * "items[0].name" -> ["items", "0", "name"]
- * "['user']['name']" -> ["user", "name"]
- */
-function parseSelector(selector: string): string[] {
-  let s = selector.trim();
-
-  // Remove leading $ if present
-  if (s.startsWith('$.')) {
-    s = s.slice(2);
-  } else if (s.startsWith('$')) {
-    s = s.slice(1);
-  }
-
-  const parts: string[] = [];
-  let current = '';
-  let i = 0;
-
-  while (i < s.length) {
-    const char = s[i];
-
-    if (char === '.') {
-      if (current) {
-        parts.push(current);
-        current = '';
-      }
-      i++;
-    } else if (char === '[') {
-      if (current) {
-        parts.push(current);
-        current = '';
-      }
-      i++;
-      // Find closing bracket
-      const start = i;
-      while (i < s.length && s[i] !== ']') {
-        i++;
-      }
-      let key = s.slice(start, i);
-      // Remove quotes if present (bracket notation like ['key'])
-      if (
-        (key.startsWith("'") && key.endsWith("'")) ||
-        (key.startsWith('"') && key.endsWith('"'))
-      ) {
-        key = key.slice(1, -1);
-      }
-      parts.push(key);
-      i++; // Skip closing bracket
-    } else {
-      current += char;
-      i++;
-    }
-  }
-
-  if (current) {
-    parts.push(current);
-  }
-
-  return parts;
-}
+import { parseJsonPath, segmentsToStrings } from '../../shared/json_path_parser';
 
 /**
  * Generates Painless code to traverse a parsed JSON object and extract a value.
@@ -168,7 +98,7 @@ function generateJsonExtractScript(
 
   // Generate extraction for each selector
   for (const extraction of extractions) {
-    const parts = parseSelector(extraction.selector);
+    const parts = segmentsToStrings(parseJsonPath(extraction.selector).segments);
     const traversalExpr = generateTraversalExpression('parsed', parts);
     const targetAssignment = painlessFieldAssignment(extraction.target_field);
     const varName = `extracted_${parts.join('_').replace(/[^a-zA-Z0-9_]/g, '_')}`;

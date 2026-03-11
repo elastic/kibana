@@ -14,6 +14,7 @@ import type {
 } from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 import { conditionToESQLAst } from '../condition_to_esql';
+import { validateJsonPath } from '../../shared/json_path_parser';
 
 /**
  * Resolves the ES|QL type conversion function name for a given JsonExtractType.
@@ -58,15 +59,18 @@ function applyTypeConversion(
 
 /**
  * Builds the extraction expression for a single extraction configuration.
+ * Validates the selector syntax before building the expression.
  *
  * @param fromColumn - The source column containing the JSON string
  * @param extraction - The extraction specification
  * @returns The expression for extracting and optionally casting the value
+ * @throws {JsonPathParseError} If the selector has invalid syntax
  */
 function buildExtractionExpression(
   fromColumn: ESQLAstExpression,
   extraction: JsonExtraction
 ): ESQLAstExpression {
+  validateJsonPath(extraction.selector);
   const selectorLiteral = Builder.expression.literal.string(extraction.selector);
   const jsonExtractFunction = Builder.expression.func.call('JSON_EXTRACT', [
     fromColumn,
