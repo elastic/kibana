@@ -58,7 +58,8 @@ Use operations[] to:
 1. set metadata
 2. upsert markdown
 3. add panels from attachments
-4. remove panels
+4. add / remove sections
+5. remove panels
 
 The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while operations run, and always returns the latest dashboard attachment state.`,
     schema: manageDashboardSchema,
@@ -97,9 +98,9 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
           operations,
           logger,
-          resolvePanelsFromAttachments: (attachmentIds) =>
+          resolvePanelsFromAttachments: (attachmentInputs) =>
             resolvePanelsFromAttachments({
-              attachmentIds,
+              attachmentInputs,
               attachments,
               logger,
             }),
@@ -135,7 +136,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
 
         logger.info(
           `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${
-            updatedDashboardData.panels.length
+            updatedDashboardData.panels.length +
+            (updatedDashboardData.sections ?? []).reduce(
+              (count, section) => count + section.panels.length,
+              0
+            )
           } panels`
         );
 
@@ -152,12 +157,31 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
                   content: {
                     ...updatedDashboardData,
                     panels: updatedDashboardData.panels.map(
-                      ({ type, panelId, title: panelTitle }) => ({
+                      ({ type, panelId, title: panelTitle, grid }) => ({
                         type,
                         panelId,
                         title: panelTitle ?? '',
+                        grid,
                       })
                     ),
+                    ...(updatedDashboardData.sections
+                      ? {
+                          sections: updatedDashboardData.sections.map((section) => ({
+                            sectionId: section.sectionId,
+                            title: section.title,
+                            collapsed: section.collapsed,
+                            grid: section.grid,
+                            panels: section.panels.map(
+                              ({ type, panelId, title: panelTitle, grid }) => ({
+                                type,
+                                panelId,
+                                title: panelTitle ?? '',
+                                grid,
+                              })
+                            ),
+                          })),
+                        }
+                      : {}),
                   },
                 },
               },
