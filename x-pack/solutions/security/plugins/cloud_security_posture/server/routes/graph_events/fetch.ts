@@ -21,7 +21,7 @@ import {
   buildEntityFieldHints,
   buildSourceMetadataEvals,
   buildEntityEnrichment,
-  checkEnrichmentAvailability,
+  checkIfEntitiesIndexLookupMode,
 } from '../graph/utils';
 import type { EventRecord } from './types';
 
@@ -37,7 +37,7 @@ interface FetchEventsParams {
 
 /**
  * Fetches enriched event/alert details.
- * Queries events by document ID (_id) and enriches with entity store data via LOOKUP JOIN or ENRICH.
+ * Queries events by document ID (_id) and enriches with entity store data via LOOKUP JOIN.
  */
 export const fetchEvents = async ({
   esClient,
@@ -50,18 +50,12 @@ export const fetchEvents = async ({
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
   const limit = GRAPH_DOCUMENT_DETAILS_LIMIT;
 
-  // Check enrichment availability
-  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
-    esClient,
-    logger,
-    spaceId
-  );
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
     indexPatterns,
     eventCount: eventIds.length,
     isLookupIndexAvailable,
-    isEnrichPolicyExists,
     spaceId,
     limit,
   });
@@ -103,7 +97,6 @@ interface BuildEventsQueryParams {
   indexPatterns: string[];
   eventCount: number;
   isLookupIndexAvailable: boolean;
-  isEnrichPolicyExists: boolean;
   spaceId: string;
   limit: number;
 }
@@ -112,7 +105,6 @@ const buildEventsEsqlQuery = ({
   indexPatterns,
   eventCount,
   isLookupIndexAvailable,
-  isEnrichPolicyExists,
   spaceId,
   limit,
 }: BuildEventsQueryParams): string => {
@@ -121,7 +113,7 @@ const buildEventsEsqlQuery = ({
     ', '
   );
 
-  const query = `FROM ${indexPatterns
+  return `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE _id IN (${documentIdParams})
@@ -131,16 +123,15 @@ ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND targetEntityId
 ${buildEntityFieldHints(GRAPH_ACTOR_ENTITY_FIELDS, GRAPH_TARGET_ENTITY_FIELDS)}
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
-${buildEntityEnrichment(isLookupIndexAvailable, isEnrichPolicyExists, spaceId)}
+${buildEntityEnrichment(isLookupIndexAvailable, false, spaceId)}
 | EVAL docId = _id
 | EVAL eventId = event.id
 | EVAL index = _index
 | EVAL action = event.action
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 ${buildSourceMetadataEvals()}
-// Aggregate by document ID to ensure each document appears only once
-| STATS eventId = MIN(eventId),
-  index = MIN(index),
+// Aggregate by document identity to keep event/index pairs stable across expanded rows
+| STATS
   timestamp = MAX(timestamp),
   action = MIN(action),
   isAlert = MAX(isAlert),
@@ -152,8 +143,6 @@ ${buildSourceMetadataEvals()}
   targetEntityName = MIN(targetEntityName),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes))
-    BY docId
+    BY docId, eventId, index
 | LIMIT ${limit}`;
-
-  return query;
 };

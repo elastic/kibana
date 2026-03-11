@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INDEX_PATTERN_REGEX, REACHED_NODES_LIMIT } from '../graph/v1';
+import { INDEX_PATTERN_REGEX } from '../graph/v1';
 
 // ============================================
 // SHARED AUXILIARY SCHEMAS (not exported)
@@ -37,10 +37,10 @@ export const eventOrAlertItemSchema = schema.object({
 export const eventsRequestSchema = schema.object({
   page: schema.object({
     index: schema.number({ min: 0 }),
-    size: schema.number({ min: 1, max: 50 }),
+    size: schema.number({ min: 1, max: 100 }),
   }),
   query: schema.object({
-    eventIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+    eventIds: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 5000 }),
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
     indexPatterns: schema.maybe(
@@ -63,5 +63,4 @@ export const eventsResponseSchema = () =>
   schema.object({
     events: schema.arrayOf(eventOrAlertItemSchema),
     totalRecords: schema.number(),
-    messages: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))),
   });

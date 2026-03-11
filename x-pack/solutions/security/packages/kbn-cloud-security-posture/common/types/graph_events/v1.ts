@@ -11,20 +11,11 @@ import type {
   eventsResponseSchema,
   eventOrAlertItemSchema,
 } from '../../schema/graph_events/v1';
-import { REACHED_NODES_LIMIT } from '../../schema/graph/v1';
 
 export type EventsRequest = TypeOf<typeof eventsRequestSchema>;
-export type EventsResponse = Omit<TypeOf<typeof eventsResponseSchema>, 'messages'> & {
-  messages?: ApiMessageCode[];
-};
+export type EventsResponse = TypeOf<ReturnType<typeof eventsResponseSchema>>;
 export type EventOrAlertItem = TypeOf<typeof eventOrAlertItemSchema>;
 
 // Specific event/alert types (discriminated by isAlert)
 export type EventItem = EventOrAlertItem & { isAlert: false };
 export type AlertItem = EventOrAlertItem & { isAlert: true };
-
-// Use const object instead of enum to avoid isolatedModules issues with computed values
-export const ApiMessageCode = {
-  ReachedNodesLimit: REACHED_NODES_LIMIT,
-} as const;
-export type ApiMessageCode = (typeof ApiMessageCode)[keyof typeof ApiMessageCode];

@@ -24,7 +24,7 @@ export const defineGraphEntitiesRoute = (router: CspRouter) =>
       path: GRAPH_ENTITIES_ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: ['cloud-security-posture-read'],
+          requiredPrivileges: ['securitySolution'],
         },
       },
     })

@@ -24,7 +24,7 @@ export const defineGraphEventsRoute = (router: CspRouter) =>
       path: GRAPH_EVENTS_ROUTE_PATH,
       security: {
         authz: {
-          requiredPrivileges: ['cloud-security-posture-read'],
+          requiredPrivileges: ['securitySolution'],
         },
       },
     })

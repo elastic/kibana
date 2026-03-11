@@ -6,10 +6,7 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import {
-  getEntitiesLatestIndexName,
-  getEnrichPolicyId,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
@@ -19,7 +16,7 @@ import {
   GRAPH_DOCUMENT_DETAILS_LIMIT,
   SECURITY_ALERTS_PARTIAL_IDENTIFIER,
 } from '../../../common/constants';
-import { generateFieldHintCases, checkEnrichmentAvailability } from '../graph/utils';
+import { generateFieldHintCases, checkIfEntitiesIndexLookupMode } from '../graph/utils';
 import type { EntityRecord } from './types';
 
 interface FetchEntitiesParams {
@@ -53,18 +50,12 @@ export const fetchEntities = async ({
     'logs-*',
   ];
 
-  const { isLookupIndexAvailable, isEnrichPolicyExists } = await checkEnrichmentAvailability(
-    esClient,
-    logger,
-    spaceId
-  );
+  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
   const query = buildEntitiesEsqlQuery({
     indexPatterns: resolvedIndexPatterns,
     lookupIndexName,
     isLookupIndexAvailable,
-    isEnrichPolicyExists,
-    spaceId,
     entityCount: entityIds.length,
     limit,
   });
@@ -114,8 +105,6 @@ interface BuildEntitiesQueryParams {
   indexPatterns: string[];
   lookupIndexName: string;
   isLookupIndexAvailable: boolean;
-  isEnrichPolicyExists: boolean;
-  spaceId: string;
   entityCount: number;
   limit: number;
 }
@@ -124,8 +113,6 @@ const buildEntitiesEsqlQuery = ({
   indexPatterns,
   lookupIndexName,
   isLookupIndexAvailable,
-  isEnrichPolicyExists,
-  spaceId,
   entityCount,
   limit,
 }: BuildEntitiesQueryParams): string => {
@@ -151,12 +138,7 @@ ${entityFieldHintCases},
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
-${buildSingleEntityEnrichment(
-  isLookupIndexAvailable,
-  isEnrichPolicyExists,
-  lookupIndexName,
-  spaceId
-)}
+${buildSingleEntityEnrichment(isLookupIndexAvailable, lookupIndexName)}
 | STATS ecsParentField = MIN(ecsParentField),
   entityName = MIN(entityName),
   entityType = MIN(entityType),
@@ -177,9 +159,7 @@ ${buildSingleEntityEnrichment(
  */
 const buildSingleEntityEnrichment = (
   isLookupIndexAvailable: boolean,
-  isEnrichPolicyExists: boolean,
-  lookupIndexName: string,
-  spaceId: string
+  lookupIndexName: string
 ): string => {
   if (isLookupIndexAvailable) {
     return `// Drop existing entity.id from source docs before LOOKUP JOIN to avoid conflicts
@@ -195,17 +175,6 @@ const buildSingleEntityEnrichment = (
 | EVAL entityType = entity.type
 | EVAL entitySubType = entity.sub_type
 | EVAL hostIp = TO_STRING(host.ip)`;
-  }
-
-  if (isEnrichPolicyExists) {
-    const enrichPolicyName = getEnrichPolicyId(spaceId);
-    return `// Use ENRICH policy for entity enrichment (deprecated fallback)
-| ENRICH ${enrichPolicyName} ON entityId WITH entityName = entity.name, entityType = entity.type, entitySubType = entity.sub_type, hostIp = host.ip
-| EVAL availableInEntityStore = CASE(
-    entityName IS NOT NULL OR entityType IS NOT NULL,
-    true,
-    false
-  )`;
   }
 
   return `// No enrichment available - use null values

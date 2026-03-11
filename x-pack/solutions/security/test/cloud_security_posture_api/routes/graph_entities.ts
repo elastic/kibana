@@ -128,14 +128,14 @@ export default function (providerContext: FtrProviderContext) {
         }).expect(result(400, logger));
       });
 
-      it('should return 400 when page.size exceeds 50', async () => {
+      it('should return 400 when page.size exceeds 100', async () => {
         await postGraphEntities(supertest, {
           query: {
             entityIds: ['partial-host-instance-1'],
             start: 'now-1d/d',
             end: 'now/d',
           },
-          page: { index: 0, size: 51 },
+          page: { index: 0, size: 101 },
         }).expect(result(400, logger));
       });
     });
@@ -251,6 +251,24 @@ export default function (providerContext: FtrProviderContext) {
             ecsParentField: 'user',
           })
         );
+        expect(response.body).not.to.have.property('messages');
+      });
+
+      it('should return an empty response when an entity is not found', async () => {
+        const response = await postGraphEntities(supertest, {
+          query: {
+            entityIds: ['missing-entity-id'],
+            start: '2024-09-01T00:00:00.000Z',
+            end: '2024-09-02T00:00:00.000Z',
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+          },
+          page: { index: 0, size: 10 },
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('entities');
+        expect(response.body).to.have.property('totalRecords');
+        expect(response.body.totalRecords).to.equal(0);
+        expect(response.body.entities).to.have.length(0);
         expect(response.body).not.to.have.property('messages');
       });
 

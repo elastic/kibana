@@ -138,14 +138,14 @@ export default function (providerContext: FtrProviderContext) {
         }).expect(result(400, logger));
       });
 
-      it('should return 400 when page.size exceeds 50', async () => {
+      it('should return 400 when page.size exceeds 100', async () => {
         await postGraphEvents(supertest, {
           query: {
             eventIds: ['589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'],
             start: 'now-1d/d',
             end: 'now/d',
           },
-          page: { index: 0, size: 51 },
+          page: { index: 0, size: 101 },
         }).expect(result(400, logger));
       });
     });
@@ -211,6 +211,24 @@ export default function (providerContext: FtrProviderContext) {
             isAlert: false,
           })
         );
+        expect(response.body).not.to.have.property('messages');
+      });
+
+      it('should return an empty response when an event is not found', async () => {
+        const response = await postGraphEvents(supertest, {
+          query: {
+            eventIds: ['missing-event-id'],
+            start: '2024-09-01T12:30:00.000Z||-30m',
+            end: '2024-09-01T12:30:00.000Z||+30m',
+            indexPatterns: ['.alerts-security.alerts-*', 'logs-*'],
+          },
+          page: { index: 0, size: 10 },
+        }).expect(result(200, logger));
+
+        expect(response.body).to.have.property('events');
+        expect(response.body).to.have.property('totalRecords');
+        expect(response.body.totalRecords).to.equal(0);
+        expect(response.body.events).to.have.length(0);
         expect(response.body).not.to.have.property('messages');
       });
 

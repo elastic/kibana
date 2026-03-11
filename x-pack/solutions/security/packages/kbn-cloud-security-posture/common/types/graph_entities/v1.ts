@@ -11,16 +11,7 @@ import type {
   entitiesResponseSchema,
   entityItemSchema,
 } from '../../schema/graph_entities/v1';
-import { REACHED_NODES_LIMIT } from '../../schema/graph/v1';
 
 export type EntitiesRequest = TypeOf<typeof entitiesRequestSchema>;
-export type EntitiesResponse = Omit<TypeOf<typeof entitiesResponseSchema>, 'messages'> & {
-  messages?: ApiMessageCode[];
-};
+export type EntitiesResponse = TypeOf<ReturnType<typeof entitiesResponseSchema>>;
 export type EntityItem = TypeOf<typeof entityItemSchema>;
-
-// Use const object instead of enum to avoid isolatedModules issues with computed values
-export const ApiMessageCode = {
-  ReachedNodesLimit: REACHED_NODES_LIMIT,
-} as const;
-export type ApiMessageCode = (typeof ApiMessageCode)[keyof typeof ApiMessageCode];

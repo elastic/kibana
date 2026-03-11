@@ -268,25 +268,8 @@ export const buildSourceMetadataEvals = (): string => {
 };
 
 /**
- * Chooses entity enrichment method based on availability.
- * Prefers LOOKUP JOIN (fastest), falls back to ENRICH policy (deprecated), then null values.
- *
- * @param isLookupIndexAvailable - Whether the entities lookup index is available
- * @param isEnrichPolicyExists - Whether the enrich policy exists
- * @param spaceId - The Kibana space ID
- * @returns ESQL statements for the chosen enrichment method
- *
- * @example
- * ```typescript
- * buildEntityEnrichment(true, false, 'default')
- * // Returns LOOKUP JOIN ESQL
- *
- * buildEntityEnrichment(false, true, 'default')
- * // Returns ENRICH policy ESQL
- *
- * buildEntityEnrichment(false, false, 'default')
- * // Returns null value EVALs (no enrichment)
- * ```
+ * Builds ESQL enrichment pipeline based on availability.
+ * Prefers LOOKUP JOIN over ENRICH policy when both are available.
  */
 export const buildEntityEnrichment = (
   isLookupIndexAvailable: boolean,
@@ -294,13 +277,11 @@ export const buildEntityEnrichment = (
   spaceId: string
 ): string => {
   if (isLookupIndexAvailable) {
-    const lookupIndexName = getEntitiesLatestIndexName(spaceId);
-    return buildLookupJoinEsql(lookupIndexName);
+    return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
   }
 
   if (isEnrichPolicyExists) {
-    const enrichPolicyName = getEnrichPolicyId(spaceId);
-    return buildEnrichPolicyEsql(enrichPolicyName);
+    return buildEnrichPolicyEsql(getEnrichPolicyId(spaceId));
   }
 
   return `// No enrichment available - use null values
