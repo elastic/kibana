@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "typings/**/*",
-    "public/**/*.json"
+    "public/**/*.json",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -50,6 +51,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/server-route-repository-utils",
+    "@kbn/scout-oblt",
     "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]

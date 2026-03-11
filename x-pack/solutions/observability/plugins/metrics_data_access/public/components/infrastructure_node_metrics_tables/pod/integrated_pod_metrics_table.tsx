@@ -15,9 +15,21 @@ function HookedPodMetricsTable({
   timerange,
   filterClauseDsl,
   metricsClient,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
-  const podMetricsTableProps = usePodMetricsTable({ timerange, filterClauseDsl, metricsClient });
-  return <PodMetricsTable {...podMetricsTableProps} />;
+  const podMetricsTableProps = usePodMetricsTable({
+    timerange,
+    filterClauseDsl,
+    metricsClient,
+    isOtel,
+  });
+  return (
+    <PodMetricsTable
+      {...podMetricsTableProps}
+      isOtel={isOtel}
+      metricIndices={podMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function PodMetricsTableWithProviders({
@@ -25,6 +37,7 @@ function PodMetricsTableWithProviders({
   filterClauseDsl,
   sourceId,
   metricsClient,
+  isOtel,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
@@ -33,6 +46,7 @@ function PodMetricsTableWithProviders({
         timerange={timerange}
         filterClauseDsl={filterClauseDsl}
         metricsClient={metricsClient}
+        isOtel={isOtel}
       />
     </CoreProviders>
   );

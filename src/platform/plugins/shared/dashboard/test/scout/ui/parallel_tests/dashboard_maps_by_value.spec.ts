@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { LENS_BASIC_KIBANA_ARCHIVE } from '../constants';
 
 const MAPS_LAYER_GROUP_TITLE = 'Layer group';
 const MAPS_LIBRARY_NAME_PREFIX = 'my map';
 
-spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Maps by-value panels (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   let mapCounter = 0;
   let dashboardUrl = '';
 

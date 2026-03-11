@@ -49,12 +49,6 @@ export default function ({ getService }: FtrProviderContext) {
     const canReadSecuritySolutionApiList: ApiCallsInterface[] = [
       {
         method: 'get',
-        path: ACTION_DETAILS_ROUTE,
-        body: undefined,
-        version: '2023-10-31',
-      },
-      {
-        method: 'get',
         path: `${ACTION_STATUS_ROUTE}?agent_ids=1,2`,
         version: '2023-10-31',
         body: undefined,
@@ -83,6 +77,12 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     const canReadActionsLogManagementApiList: ApiCallsInterface[] = [
+      {
+        method: 'get',
+        path: ACTION_DETAILS_ROUTE,
+        body: undefined,
+        version: '2023-10-31',
+      },
       {
         method: 'get',
         path: BASE_ENDPOINT_ACTION_ROUTE,
@@ -165,14 +165,14 @@ export default function ({ getService }: FtrProviderContext) {
     let adminSupertest: TestAgent;
     let t1AnalystSupertest: TestAgent;
     let endpointOperationsAnalystSupertest: TestAgent;
-    let platformEnginnerSupertest: TestAgent;
+    let platformEngineerSupertest: TestAgent;
     before(async () => {
       adminSupertest = await utils.createSuperTest();
       t1AnalystSupertest = await utils.createSuperTest(ROLE.t1_analyst);
       endpointOperationsAnalystSupertest = await utils.createSuperTest(
         ROLE.endpoint_operations_analyst
       );
-      platformEnginnerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
+      platformEngineerSupertest = await utils.createSuperTest(ROLE.platform_engineer);
 
       indexedData = await endpointTestResources.loadEndpointData();
       agentId = indexedData.hosts[0].agent.id;
@@ -232,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 403 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
+          await platformEngineerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .send(getBodyPayload(apiListItem))
             .expect(403, {
@@ -251,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
         it(`should return 200 when [${apiListItem.method.toUpperCase()} ${
           apiListItem.path
         }]`, async () => {
-          await platformEnginnerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
+          await platformEngineerSupertest[apiListItem.method](replacePathIds(apiListItem.path))
             .set('kbn-xsrf', 'xxx')
             .set(
               apiListItem.version ? 'Elastic-Api-Version' : 'foo',

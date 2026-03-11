@@ -7,17 +7,34 @@
 
 import React from 'react';
 import { CoreProviders } from '../../../apps/common_providers';
-import type { IntegratedNodeMetricsTableProps, UseNodeMetricsTableOptions } from '../shared';
 import { HostMetricsTable } from './host_metrics_table';
 import { useHostMetricsTable } from './use_host_metrics_table';
+import type { IntegratedNodeMetricsTableProps } from '../shared';
+
+type HookedHostMetricsTableProps = Pick<
+  IntegratedNodeMetricsTableProps,
+  'timerange' | 'filterClauseDsl' | 'isOtel' | 'metricsClient'
+>;
 
 function HookedHostMetricsTable({
   timerange,
   filterClauseDsl,
   metricsClient,
-}: UseNodeMetricsTableOptions) {
-  const hostMetricsTableProps = useHostMetricsTable({ timerange, filterClauseDsl, metricsClient });
-  return <HostMetricsTable {...hostMetricsTableProps} />;
+  isOtel,
+}: HookedHostMetricsTableProps) {
+  const hostMetricsTableProps = useHostMetricsTable({
+    timerange,
+    filterClauseDsl,
+    metricsClient,
+    isOtel,
+  });
+  return (
+    <HostMetricsTable
+      {...hostMetricsTableProps}
+      isOtel={isOtel}
+      metricIndices={hostMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function HostMetricsTableWithProviders({
@@ -25,6 +42,7 @@ function HostMetricsTableWithProviders({
   filterClauseDsl,
   sourceId,
   metricsClient,
+  isOtel,
   ...coreProvidersProps
 }: IntegratedNodeMetricsTableProps) {
   return (
@@ -33,6 +51,7 @@ function HostMetricsTableWithProviders({
         timerange={timerange}
         filterClauseDsl={filterClauseDsl}
         metricsClient={metricsClient}
+        isOtel={isOtel}
       />
     </CoreProviders>
   );

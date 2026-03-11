@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
+import { ADD_TO_TIMELINE_ANNOUNCEMENT } from '../../query_bar/components/translations';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
@@ -39,6 +40,12 @@ export interface AddToTimelineProps {
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
+
+  onAnnounce?: (announcement: string) => void;
+  /**
+   * Optional callback when the context menu item is clicked (e.g. to close the popover).
+   */
+  showPopover?: (show: boolean) => void;
 }
 
 export interface AddToTimelineCellActionProps extends AddToTimelineProps {
@@ -151,6 +158,8 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
 export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
   data,
   field,
+  onAnnounce,
+  showPopover,
   'data-test-subj': dataTestSubj,
 }) => {
   const styles = useStyles();
@@ -170,6 +179,8 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
   }
 
   const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
+  const valueToAnnounce = typeof data === 'string' ? data : '';
+  const announcement = ADD_TO_TIMELINE_ANNOUNCEMENT(valueToAnnounce);
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
@@ -190,7 +201,14 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
         key="addToTimeline"
         icon={ICON_TYPE}
         size="s"
-        onClick={() => contextMenuRef.current?.click()}
+        onClick={() => {
+          contextMenuRef.current?.click();
+          if (onAnnounce) {
+            showPopover?.(false);
+            // setTimeout necessary so that this announcement isn't instantly overridden
+            setTimeout(() => onAnnounce(announcement), 0);
+          }
+        }}
         data-test-subj={dataTestSubj}
       >
         {TITLE}

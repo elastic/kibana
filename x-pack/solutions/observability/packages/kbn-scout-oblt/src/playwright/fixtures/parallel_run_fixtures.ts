@@ -16,7 +16,7 @@ import {
   ObltParallelWorkerFixtures,
 } from './types';
 
-export const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
+const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,

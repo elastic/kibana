@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.12>>
 * <<release-notes-8.19.11>>
 * <<release-notes-8.19.10>>
 * <<release-notes-8.19.9>>
@@ -117,6 +118,27 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.12]]
+== {kib} 8.19.12
+
+The 8.19.12 release includes the following enhancements and fixes.
+
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[enhancement-v8.19.12]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.19.12 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.19.12]]
+=== Fixes
+Elastic Observability solution::
+* Fixes SLO filters that contain spaces and wildcard characters ({kibana-pull}251033[#251033]).
+Elastic Security solution::
+For the Elastic Security 8.19.12 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 [[release-notes-8.19.11]]
 == {kib} 8.19.11

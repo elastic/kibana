@@ -49,8 +49,6 @@ export class DashboardApp {
   private readonly addEmbeddableSuccess;
 
   // Markdown panel
-  private readonly markdownEditorApplyButton;
-  private readonly markdownRenderer;
 
   // Customize panel flyout
   private readonly customizePanelFlyout;
@@ -89,10 +87,6 @@ export class DashboardApp {
     );
     this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
-
-    // Markdown panel
-    this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
-    this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
 
     // Customize panel flyout
     this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
@@ -323,12 +317,27 @@ export class DashboardApp {
     await this.panelSelectionSearchInput.fill('Markdown text');
     await this.page.testSubj.click('create-action-Markdown text');
 
-    const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
-    await expect(editorInput).toBeVisible();
-    await editorInput.fill(content);
-    await this.markdownEditorApplyButton.click();
+    // The "Markdown text" action navigates to Visualize editor.
+    const markdownTextarea = this.page.testSubj.locator('markdownTextarea');
+    await expect(markdownTextarea).toBeVisible();
+    await markdownTextarea.fill(content);
 
-    await expect(this.markdownRenderer).toBeVisible();
+    // Apply changes so "Save and return" becomes enabled.
+    const updateButton = this.page.testSubj.locator('visualizeEditorRenderButton');
+    await expect.poll(async () => await updateButton.isEnabled()).toBe(true);
+    await updateButton.click();
+
+    // Ensure the preview is rendered before returning.
+    await expect(this.page.testSubj.locator('markdownBody')).toBeVisible();
+
+    // Return to the originating dashboard with a by-value panel.
+    const saveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
+    await expect(saveAndReturnButton).toBeVisible();
+    await expect.poll(async () => await saveAndReturnButton.isEnabled()).toBe(true);
+    await saveAndReturnButton.click();
+
+    await expect(this.dashboardViewport).toBeVisible();
+    await expect(this.page.testSubj.locator('markdownBody')).toBeVisible();
   }
 
   async addMapPanel() {

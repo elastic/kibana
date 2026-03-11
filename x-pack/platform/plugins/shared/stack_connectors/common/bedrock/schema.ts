@@ -16,6 +16,7 @@ export const TelemtryMetadataSchema = schema.object({
 // Connector schema
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
+  region: schema.maybe(schema.string()),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
 });
 

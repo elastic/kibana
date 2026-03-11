@@ -1,17 +1,18 @@
 {
-  "lastModified": "2025-12-11T11:36:53.527Z",
-  "sha1": "a03be9a04d5f6fadca3986c1ce6c67ae6ebc18ce",
+  "lastModified": "2026-02-12T18:08:06.155Z",
+  "sha1": "2b23fe284643e3f8cc2a909eaf576f0600d65aec",
   "tests": [
     {
       "id": "84b12615210c7cc-bbe9cf3613a4443",
       "title": "Painless Lab validate painless lab editor and request",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/ui/tests/painless_lab.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 7
       }
     }

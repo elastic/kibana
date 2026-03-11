@@ -34,8 +34,12 @@ export const validateAvailableCommands = () => {
     config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
 
   const enabledActions = [
-    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.filter((command) => {
+      return !(
+        !automatedProcessActionsEnabled &&
+        (command === 'kill-process' || command === 'suspend-process')
+      );
+    }),
   ];
 
   cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);

@@ -1,6 +1,6 @@
 {
-  "lastModified": "2025-12-11T11:36:55.632Z",
-  "sha1": "e3eef55afb9aff7120f57047f887ed182c1c6081",
+  "lastModified": "2026-02-12T22:59:53.118Z",
+  "sha1": "2663c2ed42375a421add847931cbb5d5df02e487",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -18,13 +18,15 @@
       "title": "Classic Streams full flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/classic.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 57,
+        "column": 9
       }
     },
     {
@@ -32,13 +34,15 @@
       "title": "Wired Streams full flow",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/wired.spec.ts",
-        "line": 24,
-        "column": 7
+        "line": 28,
+        "column": 9
       }
     }
   ]

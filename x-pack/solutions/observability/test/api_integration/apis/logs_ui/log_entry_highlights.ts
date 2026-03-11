@@ -43,7 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('log highlight apis', () => {
+  describe('log highlight apis', function () {
+    this.onlyEsVersion('8.19');
+
     before(() =>
       esArchiver.load('x-pack/solutions/observability/test/fixtures/es_archives/infra/simple_logs')
     );

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   SAMPLE_DATA_SET_ID,
@@ -17,7 +18,7 @@ import {
   SAMPLE_DATA_RANGE,
 } from '../constants';
 
-spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
@@ -80,9 +81,12 @@ spaceTest.describe('Flights dashboard (sample data)', { tag: tags.DEPLOYMENT_AGN
         .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
         .toBeGreaterThan(10);
 
-      // Checking tag clouds rendered
-      const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
-      const legendTexts = await legendLabels.allInnerTexts();
+      // Checking legends rendered (elastic-charts)
+      const legendLabels = page.locator(
+        '.echLegendItem__label, [data-testid="echLegendItemLabel"]'
+      );
+      await expect.poll(async () => await legendLabels.count()).toBeGreaterThan(0);
+      const legendTexts = (await legendLabels.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
       ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
         expect(legendTexts).toContain(value);
       });
