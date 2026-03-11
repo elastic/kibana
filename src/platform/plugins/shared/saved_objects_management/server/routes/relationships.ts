@@ -34,7 +34,10 @@ export const registerRelationshipsRoute = (
         }),
         query: schema.object({
           size: schema.number({ defaultValue: 10000 }),
-          savedObjectTypes: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+          savedObjectTypes: schema.oneOf([
+            schema.string(),
+            schema.arrayOf(schema.string(), { maxSize: 100 }),
+          ]),
         }),
       },
     },

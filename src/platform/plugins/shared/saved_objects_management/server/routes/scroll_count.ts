@@ -25,14 +25,15 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          typesToInclude: schema.arrayOf(schema.string()),
+          typesToInclude: schema.arrayOf(schema.string(), { maxSize: 100 }),
           searchString: schema.maybe(schema.string()),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
                 type: schema.string(),
                 id: schema.string(),
-              })
+              }),
+              { maxSize: 100 }
             )
           ),
         }),
