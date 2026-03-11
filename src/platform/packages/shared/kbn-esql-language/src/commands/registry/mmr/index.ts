@@ -33,6 +33,5 @@ export const mmrCommand: ICommand = {
       'FROM movies | LIMIT 10 | MMR [0.5, 0.4, 0.3, 0.2]::dense_vector ON genre LIMIT 10 WITH { "lambda": 0.7 }',
     ],
     preview: true,
-    hidden: false,
   },
 };
