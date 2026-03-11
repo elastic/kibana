@@ -9,7 +9,7 @@
 
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
-import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credentials_helpers';
+import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credential_helpers';
 import type {
   AmazonS3BucketObjectListing,
   AmazonS3Bucket,

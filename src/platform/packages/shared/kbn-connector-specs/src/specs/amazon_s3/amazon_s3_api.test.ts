@@ -171,7 +171,6 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.head).toBeCalledTimes(1);
   });
 
-  // TODO ---
   it('should generate a Amazon S3 bucket object presigned url', async () => {
     const nodeCrypto = await import('crypto');
     Object.defineProperty(global, 'crypto', {
@@ -228,6 +227,7 @@ describe('amazon_s3_api exports', () => {
       etag: 'test-etag',
       content: responseDownloadBucketObjectDataBase64,
       encoding: 'base64',
+      hasContent: true,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
@@ -252,6 +252,7 @@ describe('amazon_s3_api exports', () => {
       etag: 'test-etag',
       content: responseDownloadBucketObjectDataBase64,
       encoding: 'base64',
+      hasContent: true,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });

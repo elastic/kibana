@@ -324,6 +324,7 @@ describe('AmazonS3', () => {
       lastModified: 'ISO_Timestamp',
       etag: 'testetag',
       contentUrl: 'https://presigned-url',
+      hasContent: false,
       message: `File size (987654 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.`,
     });
   });
