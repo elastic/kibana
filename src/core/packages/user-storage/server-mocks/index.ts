@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserStorageServiceSetup, UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import type {
+  UserStorageServiceSetup,
+  UserStorageServiceStart,
+} from '@kbn/core-user-storage-server';
 import { lazyObject } from '@kbn/lazy-object';
 
 export const userStorageServiceMock = {
