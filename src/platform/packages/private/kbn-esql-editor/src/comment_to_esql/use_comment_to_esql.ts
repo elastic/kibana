@@ -86,6 +86,10 @@ export const useCommentToEsql = ({
   }, []);
 
   const acceptChange = useCallback(() => {
+    cleanup();
+  }, [cleanup]);
+
+  const acceptAndRemoveComment = useCallback(() => {
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
@@ -155,6 +159,7 @@ export const useCommentToEsql = ({
 
       widgetRef.current = new ReviewActionsWidget(euiTheme, editor, state.generatedLineEnd, {
         onAccept: acceptChange,
+        onAcceptAndRemoveComment: acceptAndRemoveComment,
         onReject: rejectChange,
       });
 
@@ -180,9 +185,19 @@ export const useCommentToEsql = ({
           precondition: 'esqlCommentReviewActive',
           run: () => acceptChange(),
         }),
+        editor.addAction({
+          id: 'esql.commentReview.acceptAndClean',
+          label: 'Accept and remove comment',
+          keybindings: [
+            // eslint-disable-next-line no-bitwise
+            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.Enter,
+          ],
+          precondition: 'esqlCommentReviewActive',
+          run: () => acceptAndRemoveComment(),
+        }),
       ];
     },
-    [editorRef, euiTheme, acceptChange, rejectChange]
+    [editorRef, euiTheme, acceptChange, acceptAndRemoveComment, rejectChange]
   );
 
   const generateESQL = useCallback(

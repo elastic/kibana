@@ -59,7 +59,11 @@ Generated code is always **inserted** on a new line below the comment. The syste
 
 When generated code is shown:
 
-- **Comment line**: red background with strikethrough (to be removed on accept)
-- **Generated code**: green background (to be kept on accept)
-- **Accept** (⌘⇧↵ / Ctrl+Shift+Enter): removes the comment, keeps the generated code
-- **Reject** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code, restores the original state
+- **Comment line**: red background with strikethrough
+- **Generated code**: green background
+
+Three actions are available:
+
+- **Accept** (⌘⇧↵ / Ctrl+Shift+Enter): keeps both the generated code **and** the comment. The comment stays in place so the user can evaluate the result, tweak the instruction, and press ⌘+J again to regenerate — ideal for iterating.
+- **Accept & Remove Comment**: keeps the generated code and deletes the comment. This is the "I'm done" action for a clean final state with no leftover prompts.
+- **Reject** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code and restores the original state.

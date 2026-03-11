@@ -17,17 +17,19 @@ const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
 
 interface ReviewActionsCallbacks {
   onAccept: () => void;
+  onAcceptAndRemoveComment: () => void;
   onReject: () => void;
 }
 
 /**
  * A widget that displays the review actions for the generated code
  * when a comment is added to the editor.
- * The widget displays two buttons:
- * - Accept: Accept the generated code
- * - Reject: Reject the generated code
- * The widget is positioned below the comment.
- * The widget is disposed when the comment is removed or the editor is disposed.
+ * The widget displays three buttons:
+ * - Accept: Keep generated code and the comment (for iteration)
+ * - Accept & Remove Comment: Keep generated code, delete the comment (final state)
+ * - Reject: Remove the generated code
+ * The widget is positioned below the generated code.
+ * The widget is disposed when the review is resolved or the editor is disposed.
  */
 export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   private domNode: HTMLElement | undefined;
@@ -81,10 +83,13 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     container.className = css`
       display: flex;
       flex-direction: row;
-      gap: ${this.euiTheme.size.xs};
       padding: ${this.euiTheme.size.xs} 0;
       white-space: nowrap;
       width: max-content;
+
+      & > button + button {
+        margin-left: ${this.euiTheme.size.xs};
+      }
     `;
 
     container.appendChild(
@@ -95,6 +100,17 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
         }),
         'success',
         this.callbacks.onAccept
+      )
+    );
+
+    container.appendChild(
+      this.createButton(
+        i18n.translate('esqlEditor.commentReview.acceptAndRemoveComment', {
+          defaultMessage: 'Accept & Clean ({shortcut})',
+          values: { shortcut: isMac ? '⌘⇧⌥↵' : 'Ctrl+Shift+Alt+Enter' },
+        }),
+        'successDark',
+        this.callbacks.onAcceptAndRemoveComment
       )
     );
 
@@ -114,7 +130,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
   private createButton(
     label: string,
-    variant: 'success' | 'danger',
+    variant: 'success' | 'successDark' | 'danger',
     onClick: () => void
   ): HTMLButtonElement {
     const colors: Record<
@@ -124,6 +140,12 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       success: {
         bg: this.euiTheme.colors.backgroundLightSuccess,
         text: this.euiTheme.colors.textSuccess,
+        hoverBg: this.euiTheme.colors.backgroundFilledSuccess,
+        hoverText: this.euiTheme.colors.textInverse,
+      },
+      successDark: {
+        bg: `color-mix(in srgb, ${this.euiTheme.colors.backgroundFilledSuccess} 60%, ${this.euiTheme.colors.backgroundLightSuccess})`,
+        text: this.euiTheme.colors.textInverse,
         hoverBg: this.euiTheme.colors.backgroundFilledSuccess,
         hoverText: this.euiTheme.colors.textInverse,
       },
