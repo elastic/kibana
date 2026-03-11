@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
