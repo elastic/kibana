@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import {
-  embeddableInputToExpression,
-  inputToExpressionTypeMap,
-} from './embeddable_input_to_expression';
+import { embeddableInputToExpression } from './embeddable_input_to_expression';
 
 const input = {
   id: 'embeddableId',
@@ -17,18 +13,18 @@ const input = {
   hideFilterActions: true as true,
 };
 
-describe('input to expression', () => {
-  it('converts to expression if method is available', () => {
-    const newType = 'newType';
-    const mockReturn = 'expression';
-    inputToExpressionTypeMap[newType] = jest.fn().mockReturnValue(mockReturn);
+describe('embeddableInputToExpression', () => {
+  it('converts input to a generic embeddable expression', () => {
+    const expression = embeddableInputToExpression(input, 'lens');
+    expect(expression).toMatch(/^embeddable config=".*" type="lens" \| render$/);
 
-    const expression = embeddableInputToExpression(
-      input,
-      newType,
-      chartPluginMock.createPaletteRegistry()
-    );
+    const expression = embeddableInputToExpression(input, 'visualization');
+    expect(expression).toMatch(/^embeddable config=".*" type="visualization" \| render$/);
 
-    expect(expression).toBe(mockReturn);
+    const expression = embeddableInputToExpression(input, 'map');
+    expect(expression).toMatch(/^embeddable config=".*" type="map" \| render$/);
+
+    const expression = embeddableInputToExpression(input, 'search');
+    expect(expression).toMatch(/^embeddable config=".*" type="search" \| render$/);
   });
 });

@@ -34,16 +34,10 @@ const strings = {
 export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
-  availableEmbeddables: string[];
   isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-  isByValueEnabled,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, onClose, isByValueEnabled }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const libraryTypes = useAddFromLibraryTypes();
