@@ -15,9 +15,20 @@ import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
+const sortFieldSchema = schema.oneOf([
+  schema.literal('name'),
+  schema.literal('createdAt'),
+  schema.literal('createdBy'),
+]);
+
 const listNotificationPoliciesQuerySchema = schema.object({
   page: schema.maybe(schema.number({ min: 1 })),
   perPage: schema.maybe(schema.number({ min: 1, max: 100 })),
+  search: schema.maybe(schema.string()),
+  destinationType: schema.maybe(schema.string()),
+  createdBy: schema.maybe(schema.string()),
+  sortField: schema.maybe(sortFieldSchema),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
 
 @injectable()
@@ -50,9 +61,16 @@ export class ListNotificationPoliciesRoute {
 
   async handle() {
     try {
+      const { page, perPage, search, destinationType, createdBy, sortField, sortOrder } =
+        this.request.query ?? {};
       const result = await this.notificationPolicyClient.findNotificationPolicies({
-        page: this.request.query?.page,
-        perPage: this.request.query?.perPage,
+        page,
+        perPage,
+        search,
+        destinationType,
+        createdBy,
+        sortField,
+        sortOrder,
       });
       return this.response.ok({ body: result });
     } catch (e) {

@@ -36,10 +36,16 @@ export interface BulkActionNotificationPoliciesResponse {
   total: number;
   errors: Array<{ id: string; message: string }>;
 }
+export type FindNotificationPoliciesSortField = 'name' | 'createdAt' | 'createdBy';
 
 export interface FindNotificationPoliciesParams {
   page?: number;
   perPage?: number;
+  search?: string;
+  destinationType?: string;
+  createdBy?: string;
+  sortField?: FindNotificationPoliciesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface FindNotificationPoliciesResponse {

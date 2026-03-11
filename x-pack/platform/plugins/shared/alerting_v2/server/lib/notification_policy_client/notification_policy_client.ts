@@ -15,9 +15,12 @@ import {
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
@@ -206,7 +209,17 @@ export class NotificationPolicyClient {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
 
-    const res = await this.notificationPolicySavedObjectService.find({ page, perPage });
+    const filter = this.buildFindFilter(params);
+    const sortField = this.mapSortField(params.sortField);
+
+    const res = await this.notificationPolicySavedObjectService.find({
+      page,
+      perPage,
+      search: params.search,
+      filter,
+      sortField,
+      sortOrder: params.sortOrder,
+    });
 
     return {
       items: res.saved_objects.map((so) => ({
@@ -272,6 +285,39 @@ export class NotificationPolicyClient {
     }
 
     return { processed, total: actions.length, errors };
+  }
+
+  private buildFindFilter(params: FindNotificationPoliciesParams): KueryNode | undefined {
+    const conditions: KueryNode[] = [];
+    const attrPrefix = `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
+
+    if (params.destinationType) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
+    }
+
+    if (params.createdBy) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
+    }
+
+    if (conditions.length === 0) {
+      return undefined;
+    }
+
+    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
+  }
+
+  private mapSortField(sortField?: string): string | undefined {
+    if (!sortField) {
+      return undefined;
+    }
+
+    const sortFieldMap: Record<string, string> = {
+      name: 'name.keyword',
+      createdAt: 'createdAt',
+      createdBy: 'createdBy',
+    };
+
+    return sortFieldMap[sortField];
   }
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {

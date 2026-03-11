@@ -12,12 +12,13 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
+import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
 export type NotificationPolicySavedObjectBulkGetItem =
@@ -61,7 +62,14 @@ export interface NotificationPolicySavedObjectServiceContract {
     }>;
   }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
   delete(params: { id: string }): Promise<void>;
-  find(params: { page: number; perPage: number }): Promise<{
+  find(params: {
+    page: number;
+    perPage: number;
+    search?: string;
+    filter?: KueryNode;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{
     saved_objects: Array<{
       id: string;
       attributes: NotificationPolicySavedObjectAttributes;
@@ -228,13 +236,30 @@ export class NotificationPolicySavedObjectService
     await this.client.delete(NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id);
   }
 
-  public async find({ page, perPage }: { page: number; perPage: number }) {
+  public async find({
+    page,
+    perPage,
+    search,
+    filter,
+    sortField = 'updatedAt',
+    sortOrder = 'desc',
+  }: {
+    page: number;
+    perPage: number;
+    search?: string;
+    filter?: KueryNode;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
     return this.client.find<NotificationPolicySavedObjectAttributes>({
       type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      sortField: 'updatedAt',
-      sortOrder: 'desc',
+      search,
+      searchFields: search ? ['name', 'description', 'destinations.id'] : undefined,
+      filter,
+      sortField,
+      sortOrder,
     });
   }
 }

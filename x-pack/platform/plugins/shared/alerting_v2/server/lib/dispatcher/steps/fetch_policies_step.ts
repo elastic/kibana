@@ -9,11 +9,11 @@ import { inject, injectable } from 'inversify';
 import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 import type {
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
   NotificationPolicy,
   NotificationPolicyId,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
 } from '../types';
 
 @injectable()
