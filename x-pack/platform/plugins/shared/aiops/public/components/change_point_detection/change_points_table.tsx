@@ -196,16 +196,6 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     ...(fieldConfig.splitField
       ? [
           {
-            id: 'groupName',
-            'data-test-subj': 'aiopsChangePointGroupName',
-            field: 'group.name',
-            name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
-              defaultMessage: 'Field name',
-            }),
-            width: '10%',
-            truncateText: false,
-          },
-          {
             id: 'groupValue',
             'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
@@ -306,6 +296,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   return (
     <EuiInMemoryTable<ChangePointAnnotation>
+      tableLayout="auto"
       tableCaption={i18n.translate('xpack.aiops.changePointDetection.resultsTableCaption', {
         defaultMessage: 'Change point detection results',
       })}
