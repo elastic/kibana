@@ -62,14 +62,14 @@ describe('ScanHistoryList', () => {
 
   it('shows loading spinner when loading with no data', () => {
     mockUseListHealthScans.mockReturnValue({
-      data: { scans: [] },
+      data: undefined,
       isLoading: true,
       isError: false,
     });
 
-    const { container } = render(<ScanHistoryList onSelectScanId={mockOnSelectScanId} />);
+    render(<ScanHistoryList onSelectScanId={mockOnSelectScanId} />);
 
-    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('shows empty prompt when no scans exist', () => {
