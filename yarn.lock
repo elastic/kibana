@@ -2436,10 +2436,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.9.0.tgz#0901bb3c98b4a1006473d2d4e54b6e49cd537095"
   integrity sha512-aIW2iGyeL36w8nXK3huGKBd68sskSr0NdrvXh7Ldx02jz/ASnyZ0PlK7LireueNa8hjd7pG+VWa5b3YHdgQb3w==
 
-"@elastic/esql@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.1.0.tgz#704dbfe5f314f4669e7fb672463ba9cad1d77679"
-  integrity sha512-7uxePub21pVUVjhR+N09FpHeSP/9/p6eyib9mEQqOFSKVRRadfEhtks2LwTs1unn52NC/G6U4o06x1RtVtg8nw==
+"@elastic/esql@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-1.3.0.tgz#91cbf200ce123ded7eaca260857f4334237d93f5"
+  integrity sha512-ZOZjlII7+vL2fH8RR0R0cF5jWu+zWX0Jt8tEoCC0lTjMQ6Z3DjgzbdaRCpbnpt9Cmik9y1HFzGArL9EeSiOpmQ==
   dependencies:
     antlr4 "4.13.2"
     tree-dump "1.1.0"
@@ -2527,10 +2527,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.21":
-  version "3.1.21"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.21.tgz#abeec7bcd84405b618ad03aab522943c87007717"
-  integrity sha512-1GQY8L34DLrOdZKcHdURBy0Ao7NWc5HSot8roikXyhWY8i0dWB09sJdJF5dyZ9Tgu6lbLXVAFtlLkp83BYxM2w==
+"@elastic/monaco-esql@3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.2.0.tgz#328d4ca591ae1fd29b6c48d89622158b25617d70"
+  integrity sha512-ZFopjEoNU87wIFtHKT75kqvtSFtb3ye4X9foyJccABOIEQXR20dJkUJR74nDW09xDPr0AywrKwP2zTNXfr6n4g==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4687,6 +4687,10 @@
   uid ""
 
 "@kbn/anonymization-plugin@link:x-pack/platform/plugins/shared/anonymization":
+  version "0.0.0"
+  uid ""
+
+"@kbn/anonymization-ui@link:x-pack/platform/packages/shared/ai-infra/anonymization-ui":
   version "0.0.0"
   uid ""
 
