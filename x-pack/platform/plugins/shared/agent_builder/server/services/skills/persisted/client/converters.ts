@@ -23,6 +23,7 @@ export const fromEs = (document: SkillDocument): SkillPersistedDefinition => {
     content: document._source.content,
     referenced_content: document._source.referenced_content,
     tool_ids: document._source.tool_ids ?? [],
+    plugin_id: document._source.plugin_id,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
   };
@@ -45,6 +46,7 @@ export const createAttributes = ({
     content: createRequest.content,
     referenced_content: createRequest.referenced_content,
     tool_ids: createRequest.tool_ids ?? [],
+    plugin_id: createRequest.plugin_id,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
   };

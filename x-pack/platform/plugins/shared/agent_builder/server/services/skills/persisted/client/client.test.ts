@@ -6,7 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isSkillNotFoundError, isBadRequestError } from '@kbn/agent-builder-common';
+import {
+  isSkillNotFoundError,
+  isBadRequestError,
+  type PersistedSkillCreateRequest,
+} from '@kbn/agent-builder-common';
 import { createClient, type SkillClient } from './client';
 
 const testSpace = 'default';
@@ -39,12 +43,14 @@ interface MockEsClient {
   search: jest.Mock;
   index: jest.Mock;
   delete: jest.Mock;
+  bulk: jest.Mock;
 }
 
 const mockEsClient: MockEsClient = {
   search: jest.fn(),
   index: jest.fn(),
   delete: jest.fn(),
+  bulk: jest.fn(),
 };
 
 jest.mock('./storage', () => ({
@@ -232,6 +238,73 @@ describe('SkillClient', () => {
 
       expect(isBadRequestError(error)).toBe(true);
       expect(error.message).toContain('already exists');
+    });
+  });
+
+  describe('bulkCreate', () => {
+    const createRequest = (id: string): PersistedSkillCreateRequest => ({
+      id,
+      name: `Skill ${id}`,
+      description: `Description for ${id}`,
+      content: `Content for ${id}`,
+      referenced_content: [],
+      tool_ids: [],
+      plugin_id: 'my-plugin',
+    });
+
+    it('indexes all skills in a single bulk request', async () => {
+      mockEsClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      const requests = [createRequest('skill-a'), createRequest('skill-b')];
+      const results = await client.bulkCreate(requests);
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      expect(bulkCall.throwOnFail).toBe(true);
+      expect(bulkCall.operations).toHaveLength(2);
+
+      expect(bulkCall.operations[0]).toEqual({
+        index: {
+          document: expect.objectContaining({ id: 'skill-a', space: testSpace }),
+        },
+      });
+      expect(bulkCall.operations[1]).toEqual({
+        index: {
+          document: expect.objectContaining({ id: 'skill-b', space: testSpace }),
+        },
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results[0].id).toBe('skill-a');
+      expect(results[0].name).toBe('Skill skill-a');
+      expect(results[0].plugin_id).toBe('my-plugin');
+      expect(results[1].id).toBe('skill-b');
+    });
+
+    it('returns empty array for empty input', async () => {
+      const results = await client.bulkCreate([]);
+
+      expect(results).toEqual([]);
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('uses the same creation timestamp for all skills', async () => {
+      mockEsClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      const requests = [createRequest('skill-a'), createRequest('skill-b')];
+      const results = await client.bulkCreate(requests);
+
+      expect(results[0].created_at).toBe(results[1].created_at);
+      expect(results[0].updated_at).toBe(results[1].updated_at);
+      expect(results[0].created_at).toBe(results[0].updated_at);
+    });
+
+    it('propagates bulk operation errors', async () => {
+      mockEsClient.bulk.mockRejectedValue(new Error('Bulk operation failed'));
+
+      await expect(client.bulkCreate([createRequest('skill-a')])).rejects.toThrow(
+        'Bulk operation failed'
+      );
     });
   });
 

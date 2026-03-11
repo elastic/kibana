@@ -110,5 +110,6 @@
     "@kbn/evals-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/es-query",
+    "@kbn/fs",
   ]
 }
