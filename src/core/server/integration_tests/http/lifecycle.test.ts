@@ -369,56 +369,6 @@ describe('OnPreRouting', () => {
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
-
-  it('rejects requests with fully encoded path traversal segments', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get(
-      { path: '/target', validate: false, security: { authz: { enabled: false, reason: '' } } },
-      (context, req, res) => res.ok({ body: 'ok' })
-    );
-
-    await server.start();
-
-    await supertest(innerServer.listener).get('/source/%2E%2E%2Ftarget').expect(400, {
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'Path traversal is not allowed.',
-    });
-  });
-
-  it('rejects requests with encoded path traversal segments', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get(
-      { path: '/target', validate: false, security: { authz: { enabled: false, reason: '' } } },
-      (context, req, res) => res.ok({ body: 'ok' })
-    );
-
-    await server.start();
-
-    await supertest(innerServer.listener).get('/source/..%2Ftarget').expect(400, {
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'Path traversal is not allowed.',
-    });
-  });
-
-  it('ignores traversal-like strings in the query string', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get(
-      { path: '/target', validate: false, security: { authz: { enabled: false, reason: '' } } },
-      (context, req, res) => res.ok({ body: 'ok' })
-    );
-
-    await server.start();
-
-    await supertest(innerServer.listener).get('/target?next=..%2Fadmin').expect(200, 'ok');
-  });
 });
 
 describe('OnPreAuth', () => {

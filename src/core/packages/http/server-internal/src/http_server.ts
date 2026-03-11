@@ -46,7 +46,7 @@ import type {
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
-import Boom, { isBoom } from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Env } from '@kbn/config';
@@ -123,22 +123,6 @@ function startEluMeasurement<T>(
       );
     }
   };
-}
-
-const PATH_TRAVERSAL_SEGMENT_REGEX = /(?:^|[\\/])\.\.(?=[\\/]|$)/;
-
-function hasPathTraversal(rawUrl?: string) {
-  const rawPath = rawUrl?.split('?')[0] ?? '';
-
-  if (rawPath === '') {
-    return false;
-  }
-
-  try {
-    return PATH_TRAVERSAL_SEGMENT_REGEX.test(decodeURIComponent(rawPath));
-  } catch {
-    return PATH_TRAVERSAL_SEGMENT_REGEX.test(rawPath);
-  }
 }
 
 /** @internal */
@@ -308,7 +292,6 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, executionContext, userActivity);
-    this.setupPathTraversalProtection();
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
@@ -503,23 +486,6 @@ export class HttpServer {
         return toolkit.rewriteUrl(newURL);
       }
       return response.notFound();
-    });
-  }
-
-  private setupPathTraversalProtection() {
-    if (this.server === undefined) {
-      throw new Error('Server is not created yet');
-    }
-    if (this.stopping || this.stopped) {
-      this.log.warn(`setupPathTraversalProtection called after stop`);
-    }
-
-    this.server.ext('onRequest', (request, responseToolkit) => {
-      if (hasPathTraversal(request.raw.req.url)) {
-        return Boom.badRequest('Path traversal is not allowed.');
-      }
-
-      return responseToolkit.continue;
     });
   }
 
