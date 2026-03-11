@@ -20,6 +20,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         type: 'number' as DatatableColumnType,
       },
       isNull: false,
+      isComputedColumn: true,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result).toEqual(
@@ -30,6 +31,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         searchable: true,
         aggregatable: false,
         isNull: false,
+        isComputedColumn: true,
         timeSeriesMetric: 'counter',
       })
     );
@@ -44,6 +46,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         type: 'string' as DatatableColumnType,
       },
       isNull: false,
+      isComputedColumn: false,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result.timeSeriesMetric).toBeUndefined();
@@ -55,7 +58,52 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         searchable: true,
         aggregatable: false,
         isNull: false,
+        isComputedColumn: false,
       })
     );
+  });
+
+  it('should set isComputedColumn to true when column is a computed column', () => {
+    const column = {
+      id: 'computed_col',
+      name: 'computed_col',
+      meta: {
+        esType: 'long',
+        type: 'number' as DatatableColumnType,
+      },
+      isNull: false,
+      isComputedColumn: true,
+    };
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.isComputedColumn).toBe(true);
+  });
+
+  it('should set isComputedColumn to false when column is from the index', () => {
+    const column = {
+      id: 'index_field',
+      name: 'index_field',
+      meta: {
+        esType: 'keyword',
+        type: 'string' as DatatableColumnType,
+      },
+      isNull: false,
+      isComputedColumn: false,
+    };
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.isComputedColumn).toBe(false);
+  });
+
+  it('should default isComputedColumn to false when not specified', () => {
+    const column = {
+      id: 'legacy_col',
+      name: 'legacy_col',
+      meta: {
+        esType: 'keyword',
+        type: 'string' as DatatableColumnType,
+      },
+      isNull: false,
+    };
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.isComputedColumn).toBe(false);
   });
 });

@@ -887,7 +887,7 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders custom ES|QL fields correctly', () => {
-    jest.spyOn(dataViewMock.fields, 'create');
+    const createSpy = jest.spyOn(dataViewMock.fields, 'create');
 
     const rows: EsHitRecord[] = [
       {
@@ -898,8 +898,30 @@ describe('Unified data table cell rendering', function () {
         fields: { bytes: 100, var0: 350, extension: 'gif' },
       },
     ];
+
+    // Create an enriched DataView with var0 field (simulating ES|QL enriched DataView)
+    const enrichedDataView = {
+      ...dataViewMock,
+      fields: {
+        ...dataViewMock.fields,
+        getByName: (name: string) => {
+          if (name === 'var0') {
+            return {
+              name: 'var0',
+              type: 'number',
+              esTypes: ['long'],
+              searchable: true,
+              aggregatable: true,
+              isComputedColumn: true,
+            };
+          }
+          return dataViewMock.fields.getByName(name);
+        },
+      },
+    };
+
     const DataTableCellValue = getRenderCellValueFn({
-      dataView: dataViewMock,
+      dataView: enrichedDataView as any,
       rows: rows.map(build),
       shouldShowFieldHandler: () => true,
       closePopover: jest.fn(),
@@ -949,53 +971,12 @@ describe('Unified data table cell rendering', function () {
       />
     `);
 
-    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
-    expect(dataViewMock.fields.create).toHaveBeenCalledWith({
-      name: 'var0',
-      type: 'number',
-      esTypes: ['long'],
-      isComputedColumn: true,
-      searchable: true,
-      aggregatable: false,
-      isNull: false,
-    });
-
-    const componentWithCustomESQLFieldOverride = shallow(
-      <DataTableCellValue
-        rowIndex={0}
-        colIndex={0}
-        columnId="bytes"
-        isDetails={false}
-        isExpanded={false}
-        isExpandable={true}
-        setCellProps={jest.fn()}
-      />
-    );
-    expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
-      <span
-        className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 100,
-          }
-        }
-      />
-    `);
-
-    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);
-    expect(dataViewMock.fields.create).toHaveBeenLastCalledWith({
-      name: 'bytes',
-      type: 'string',
-      esTypes: ['keyword'],
-      isComputedColumn: true,
-      searchable: true,
-      aggregatable: false,
-      isNull: false,
-    });
+    // With enriched DataView, fields.create should NOT be called since var0 is already in the DataView
+    expect(createSpy).toHaveBeenCalledTimes(0);
   });
 
-  describe('columnsMeta handling for _source column', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('enriched DataView handling for _source column', () => {
+    it('should use data view field type', () => {
       const formatFieldValueSpy = createFormatFieldValueSpy();
       const testDataView = createDataViewWithBytesField();
 

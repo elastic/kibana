@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilTabIsLoaded();
 
         // Query with EVAL to create computed columns
-        // This tests that columnsMeta is properly used for formatting
+        // This tests that enriched DataView is properly used for formatting
         const testQuery =
           'FROM logs-* | SORT @timestamp DESC | LIMIT 1 | eval custom_bytes = network.bytes * 2 | drop message';
         await monacoEditor.setCodeEditorValue(testQuery);

@@ -130,10 +130,15 @@ describe('createEsqlDataViewWithColumns', () => {
     expect(computedField?.esTypes).toBeUndefined();
   });
 
-  it('should mark fields as computed columns', () => {
+  it('should mark fields as computed columns when isComputedColumn is true', () => {
     const baseDataView = createBaseDataView();
     const esqlQueryColumns: DatatableColumn[] = [
-      { id: 'field1', name: 'field1', meta: { type: 'string' } },
+      {
+        id: 'computed_field',
+        name: 'computed_field',
+        meta: { type: 'string' },
+        isComputedColumn: true,
+      },
     ];
 
     const enrichedDataView = createEsqlDataViewWithColumns(baseDataView, esqlQueryColumns, {
@@ -142,7 +147,23 @@ describe('createEsqlDataViewWithColumns', () => {
       metaFields: ['_source', '_id'],
     });
 
-    const field = enrichedDataView.fields.getByName('field1');
+    const field = enrichedDataView.fields.getByName('computed_field');
     expect(field?.spec.isComputedColumn).toBe(true);
+  });
+
+  it('should mark fields as non-computed when isComputedColumn is false', () => {
+    const baseDataView = createBaseDataView();
+    const esqlQueryColumns: DatatableColumn[] = [
+      { id: 'index_field', name: 'index_field', meta: { type: 'string' }, isComputedColumn: false },
+    ];
+
+    const enrichedDataView = createEsqlDataViewWithColumns(baseDataView, esqlQueryColumns, {
+      fieldFormats: mockFieldFormats,
+      shortDotsEnable: false,
+      metaFields: ['_source', '_id'],
+    });
+
+    const field = enrichedDataView.fields.getByName('index_field');
+    expect(field?.spec.isComputedColumn).toBe(false);
   });
 });

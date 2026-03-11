@@ -9,7 +9,6 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
@@ -46,11 +45,7 @@ export const convertValueToString = ({
   }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumnMeta({
-    fieldName: columnId,
-    dataView,
-    columnMeta: undefined,
-  });
+  const field = dataView.getFieldByName(columnId);
 
   return commonConvertValueToString({
     dataView,

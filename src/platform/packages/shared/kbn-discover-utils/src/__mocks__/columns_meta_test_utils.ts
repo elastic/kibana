@@ -9,12 +9,11 @@
 
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from './data_view';
-import type { DataTableColumnsMeta } from '../types';
 import * as formatValueModule from '../utils/format_value';
 
 /**
  * Creates a data view with a bytes field typed as number.
- * Used for testing columnsMeta override scenarios where the data view
+ * Used for testing enriched DataView scenarios where the data view
  * has a field but ES|QL returns it with a different type.
  */
 export const createDataViewWithBytesField = () =>
@@ -85,28 +84,6 @@ export const createDataViewWithoutCustomField = () =>
       },
     ]),
   });
-
-/**
- * columnsMeta that overrides bytes from number to string/keyword.
- * Used for testing when ES|QL query returns a field with a different
- * type than defined in the data view.
- */
-export const columnsMetaOverridingBytesType: DataTableColumnsMeta = {
-  bytes: {
-    type: 'string',
-    esType: 'keyword',
-  },
-};
-
-/**
- * columnsMeta for a custom ES|QL field not in the data view.
- */
-export const columnsMetaWithCustomField: DataTableColumnsMeta = {
-  custom_esql_field: {
-    type: 'number',
-    esType: 'long',
-  },
-};
 
 /**
  * Creates a spy on formatFieldValue that returns 'formatted'.

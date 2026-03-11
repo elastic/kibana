@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    describe('ES|QL results formatting with columnsMeta', () => {
+    describe('ES|QL results formatting with enriched DataView', () => {
       it('should have access to kibana_sample_data_flights via ES|QL as prerequesite for next test', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataGrid.closeFlyout();
       });
 
-      it('should format ES|QL columns using columnsMeta when type differs from data view field', async function () {
+      it('should format ES|QL columns using enriched DataView when type differs from data view field', async function () {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
 

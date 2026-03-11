@@ -15,9 +15,6 @@ import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_vie
  * Creates fields from ES|QL query columns or DatatableColumns.
  * Returns a map of field names to field specs that can be used to enrich a DataView.
  *
- * This utility is used to avoid passing `columnsMeta` separately - instead, the DataView itself
- * contains the field information from the query results.
- *
  * @param columns - The columns returned from the ES|QL query response (DatatableColumn[])
  * @returns A map of field names to field specs
  */

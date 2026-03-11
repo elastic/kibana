@@ -77,11 +77,28 @@ describe('DataTableColumnHeader', function () {
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
+    // Create a mock DataView where bytes field is enriched as keyword (simulating ES|QL)
+    const enrichedDataView = {
+      ...stubLogstashDataView,
+      getFieldByName: (name: string) => {
+        if (name === 'bytes') {
+          return {
+            name: 'bytes',
+            type: 'string',
+            esTypes: ['keyword'],
+            searchable: true,
+            aggregatable: true,
+          };
+        }
+        return stubLogstashDataView.getFieldByName(name);
+      },
+    };
+
     const component = await mountComponent(
       <DataTableColumnHeader
         columnName="bytes"
         columnDisplayName="bytesDisplayName"
-        dataView={stubLogstashDataView}
+        dataView={enrichedDataView as any}
         showColumnTokens
       />
     );

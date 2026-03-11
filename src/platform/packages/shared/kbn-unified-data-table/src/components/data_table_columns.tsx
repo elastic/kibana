@@ -18,7 +18,6 @@ import {
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -154,11 +153,7 @@ function buildEuiGridColumn({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
 }) {
-  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
-    dataView,
-    fieldName: columnName,
-    columnMeta: undefined, // TODO: remove getDataViewFieldOrCreateFromColumnMeta call
-  });
+  const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
     editField &&
     dataViewField &&

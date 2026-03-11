@@ -18,7 +18,6 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -113,11 +112,7 @@ function getTopLevelObjectPairs(
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
-    const subField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: undefined,
-    });
+    const subField = dataView.getFieldByName(key);
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;

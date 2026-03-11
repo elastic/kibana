@@ -13,7 +13,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
@@ -57,11 +56,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: columnId,
-      columnMeta: undefined,
-    });
+    const field = dataView.getFieldByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {

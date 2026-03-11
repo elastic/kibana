@@ -81,22 +81,6 @@ describe('convertValueToString', () => {
     expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(0);
   });
 
-  it('should convert a number value as keyword override to text', () => {
-    const result = convertValueToString({
-      rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
-      fieldFormats: servicesMock.fieldFormats,
-      columnId: 'number_price',
-      rowIndex: 0,
-      options: {
-        compatibleWithCSV: true,
-      },
-    });
-
-    expect(result.formattedString).toBe('10.99');
-    expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(1);
-  });
-
   it('should convert a date value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,

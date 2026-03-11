@@ -10,7 +10,6 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
@@ -49,11 +48,7 @@ export const useSorting = ({
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName: id,
-          columnMeta: undefined,
-        });
+        const field = dataView.getFieldByName(id);
 
         if (!field) {
           return acc;

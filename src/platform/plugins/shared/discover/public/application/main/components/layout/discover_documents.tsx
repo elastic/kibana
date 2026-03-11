@@ -296,8 +296,6 @@ function DiscoverDocumentsComponent({
   );
 
   // Use enriched ES|QL DataView with fields from query columns when available.
-  // This allows the grid and doc viewer to use dataView.fields directly
-  // instead of relying on columnsMeta for field information.
   const gridDataView = useMemo(
     () => documentState.esqlDataView ?? dataView,
     [documentState.esqlDataView, dataView]

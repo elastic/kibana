@@ -67,7 +67,6 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import type {
   UnifiedDataTableSettings,
@@ -147,15 +146,6 @@ interface InternalUnifiedDataTableProps {
    * Determines ids of the columns which are displayed
    */
   columns: string[];
-  // TODO: remove
-  /**
-   * If not provided, types will be derived by default from the dataView field types.
-   * For ES|QL mode, pass an enriched DataView that contains the field information from the query.
-   *
-   * @deprecated No longer needed. Use enriched DataView with ES|QL fields instead.
-   * This prop is ignored and will be removed in a future version.
-   */
-  columnsMeta?: never;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -908,11 +898,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       return visibleColumns.map((columnName) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName: columnName,
-          columnMeta: undefined, // TODO: remove getDataViewFieldOrCreateFromColumnMeta calls
-        });
+        const field = dataView.getFieldByName(columnName);
         return (
           field?.toSpec() ?? {
             name: '',

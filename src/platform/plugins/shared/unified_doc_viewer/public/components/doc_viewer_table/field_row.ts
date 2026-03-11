@@ -18,7 +18,6 @@ import {
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType } from '@kbn/field-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
   readonly name: string;
@@ -65,11 +64,7 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: name,
-      columnMeta: undefined, // TODO: remove getDataViewFieldOrCreateFromColumnMeta call,
-    });
+    this.dataViewField = dataView.getFieldByName(name);
     this.isPinned = isPinned;
   }
 
