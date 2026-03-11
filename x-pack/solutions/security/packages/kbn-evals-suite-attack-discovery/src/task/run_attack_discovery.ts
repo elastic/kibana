@@ -9,8 +9,8 @@ import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolChoice, BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import attackDiscoveryDefaultPrompt from '../prompts/attack_discovery_default_prompt.text';
-import attackDiscoveryContinuePrompt from '../prompts/attack_discovery_continue_prompt.text';
+import Fs from 'fs/promises';
+import Path from 'path';
 import type { AttackDiscoveryClient } from '../clients/attack_discovery_client';
 import type {
   AttackDiscoveryTaskInput,
@@ -18,6 +18,27 @@ import type {
   AnonymizedAlert,
 } from '../types';
 import { AttackDiscoveryGenerationPrompt } from '../prompts/attack_discovery_generation_prompt';
+
+let cachedDefaultPrompt: string | undefined;
+let cachedContinuePrompt: string | undefined;
+
+const loadDefaultPrompt = async (): Promise<string> => {
+  if (cachedDefaultPrompt) return cachedDefaultPrompt;
+  cachedDefaultPrompt = await Fs.readFile(
+    Path.resolve(__dirname, '../prompts/attack_discovery_default_prompt.text'),
+    'utf-8'
+  );
+  return cachedDefaultPrompt;
+};
+
+const loadContinuePrompt = async (): Promise<string> => {
+  if (cachedContinuePrompt) return cachedContinuePrompt;
+  cachedContinuePrompt = await Fs.readFile(
+    Path.resolve(__dirname, '../prompts/attack_discovery_continue_prompt.text'),
+    'utf-8'
+  );
+  return cachedContinuePrompt;
+};
 
 const toAlertStrings = (alerts: ReadonlyArray<AnonymizedAlert>): string[] => {
   return alerts.map((a) => a.pageContent);
@@ -79,10 +100,11 @@ export const runAttackDiscovery = async ({
 }): Promise<AttackDiscoveryTaskOutput> => {
   try {
     if (input.mode === 'bundledAlerts') {
+      const prompt = await loadDefaultPrompt();
       const res = await generateInsights({
         inferenceClient,
         log,
-        prompt: attackDiscoveryDefaultPrompt,
+        prompt,
         alerts: toAlertStrings(input.anonymizedAlerts),
       });
       return { insights: res.insights };
@@ -97,18 +119,19 @@ export const runAttackDiscovery = async ({
         filter: input.filter,
       });
 
+      const prompt = await loadDefaultPrompt();
       const res = await generateInsights({
         inferenceClient,
         log,
-        prompt: attackDiscoveryDefaultPrompt,
+        prompt,
         alerts: toAlertStrings(alerts),
       });
 
       return { insights: res.insights, raw: { fetchedAlerts: alerts.length } };
     }
 
-    const prompt = input.prompt ?? attackDiscoveryDefaultPrompt;
-    const continuePrompt = input.continuePrompt ?? attackDiscoveryContinuePrompt;
+    const prompt = input.prompt ?? (await loadDefaultPrompt());
+    const continuePrompt = input.continuePrompt ?? (await loadContinuePrompt());
     const combinedMaybePartialResults = input.combinedMaybePartialResults ?? '';
     const alerts = toAlertStrings(input.anonymizedAlerts ?? []);
 
