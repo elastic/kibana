@@ -80,12 +80,16 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
- * Options used to call the {@link ChatCompleteAPI}
+ * Options used to call the {@link ChatCompleteAPI}.
+ *
+ * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
+ * and Elasticsearch inference endpoint IDs. The system automatically resolves which
+ * pipeline to use based on the provided identifier.
  */
 export type ChatCompleteOptions = {
   /**
-   * The ID of the connector to use.
-   * Must be an inference connector, or an error will be thrown.
+   * The ID of the connector or inference endpoint to use.
+   * Accepts both Kibana stack connector IDs and Elasticsearch inference endpoint IDs.
    */
   connectorId: string;
   /**
