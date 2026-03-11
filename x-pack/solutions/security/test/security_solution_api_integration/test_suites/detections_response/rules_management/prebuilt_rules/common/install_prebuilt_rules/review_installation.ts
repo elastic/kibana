@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Expected number, received string',
+            message: '[request body]: page: Invalid input: expected number, received string',
           });
 
           expect(
@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Number must be greater than or equal to 1',
+            message: '[request body]: page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -241,7 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Number must be greater than or equal to 1',
+            message: '[request body]: page: Too small: expected number to be >=1',
           });
         });
 
@@ -255,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Expected number, received string',
+            message: '[request body]: per_page: Invalid input: expected number, received string',
           });
 
           expect(
@@ -267,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be greater than or equal to 1',
+            message: '[request body]: per_page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be greater than or equal to 1',
+            message: '[request body]: per_page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -291,7 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be less than or equal to 10000',
+            message: '[request body]: per_page: Too big: expected number to be <=10000',
           });
         });
       });
