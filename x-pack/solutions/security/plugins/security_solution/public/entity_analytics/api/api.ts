@@ -507,6 +507,7 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'POST',
         body: JSON.stringify(params),
       });
+    
     const updateWatchlist = async (params: { id: string; body: UpdateWatchlistRequestBodyInput }) =>
       http.fetch<UpdateWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
         version: API_VERSIONS.public.v1,
