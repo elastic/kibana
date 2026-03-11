@@ -12,7 +12,7 @@ import { EmbeddablePublicPlugin } from './plugin';
 
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 
-export { useAddFromLibraryTypes } from './add_from_library/registry';
+export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
