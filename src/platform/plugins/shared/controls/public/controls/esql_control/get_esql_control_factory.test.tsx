@@ -25,7 +25,7 @@ jest.mock('@kbn/presentation-publishing', () => ({
 }));
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
+  const getESQLSingleColumnValues = async () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
     getESQLSingleColumnValues,
@@ -39,7 +39,7 @@ describe('ESQLControlApi', () => {
 
   const uuid = 'myESQLControl';
 
-  const dashboardApi = {};
+  const dashboardApi = { panelIsPinned: () => true };
   const factory = getESQLControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, dashboardApi);
 
@@ -53,6 +53,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
     } as OptionsListESQLControlState;
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -78,6 +79,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
     } as OptionsListESQLControlState;
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState,
       finalizeApi,
       uuid,
@@ -88,7 +90,7 @@ describe('ESQLControlApi', () => {
       control_type: 'STATIC_VALUES',
       esql_query: 'FROM foo | WHERE column = ?variable1',
       selected_options: ['option1'],
-      title: '',
+      title: undefined,
       variable_name: 'variable1',
       variable_type: 'values',
       single_select: true,
@@ -106,6 +108,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       } as OptionsListESQLControlState;
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -127,6 +130,7 @@ describe('ESQLControlApi', () => {
         control_type: EsqlControlType.VALUES_FROM_QUERY,
       } as OptionsListESQLControlState;
       await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,
@@ -165,6 +169,7 @@ describe('ESQLControlApi', () => {
         control_type: 'STATIC_VALUES',
       } as OptionsListESQLControlState;
       const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState,
         finalizeApi,
         uuid,

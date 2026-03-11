@@ -22,7 +22,11 @@
     "@kbn/presentation-publishing",
     "@kbn/analytics",
     "@kbn/content-management-utils",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
+    "@kbn/presentation-util",
   ],
   "exclude": ["target/**/*"]
 }

@@ -43,6 +43,13 @@ const mockExponentialHistogramMetric: MetricField = {
   instrument: 'histogram',
 };
 
+const mockLegacyHistogramMetric: MetricField = {
+  ...mockMetric,
+  name: 'histogram.legacy',
+  type: ES_FIELD_TYPES.HISTOGRAM,
+  instrument: 'histogram',
+};
+
 describe('createESQLQuery', () => {
   it('should generate a basic AVG query for a metric field', () => {
     const query = createESQLQuery({ metric: mockMetric });
@@ -86,6 +93,31 @@ TS metrics-*
       `
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should generate a PERCENTILE query for legacy histogram', () => {
+    const query = createESQLQuery({
+      metric: mockLegacyHistogramMetric,
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should generate a PERCENTILE query for legacy histogram with multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockLegacyHistogramMetric,
+      splitAccessors: ['service.name', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
 `.trim()
     );
   });

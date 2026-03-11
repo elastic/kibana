@@ -54,11 +54,11 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
   });
 
-  describe('getAllowedTools', () => {
+  describe('getRegistryTools', () => {
     it('returns the correct platform core tools', () => {
       const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
 
-      const allowedTools = skill.getAllowedTools?.();
+      const allowedTools = skill.getRegistryTools?.();
 
       expect(allowedTools).toBeDefined();
       expect(allowedTools).toHaveLength(3);

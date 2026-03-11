@@ -57,6 +57,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should set timeslice to undefined when state does not provide percentage of timeRange', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {},
       finalizeApi,
       uuid,
@@ -67,6 +68,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should set timeslice to values within time range when state provides percentage of timeRange', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -87,6 +89,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Should update timeslice when time range changes', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -115,6 +118,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking previous button should advance timeslice backward', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -141,6 +145,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking previous button should wrap when time range start is reached', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -168,6 +173,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking next button should advance timeslice forward', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -194,6 +200,7 @@ describe('TimeSliderControlApi', () => {
 
   test('Clicking next button should wrap when time range end is reached', async () => {
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         start_percentage_of_time_range: 0.25,
         end_percentage_of_time_range: 0.5,
@@ -227,6 +234,7 @@ describe('TimeSliderControlApi', () => {
     };
     dashboardApi.getLastSavedStateForChild.mockReturnValueOnce(controlState);
     const { api } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: controlState,
       finalizeApi,
       uuid,

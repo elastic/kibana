@@ -10,7 +10,9 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
-export { useAddFromLibraryTypes } from './add_from_library/registry';
+export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
+
+export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
@@ -34,6 +36,10 @@ export {
   type DefaultEmbeddableApi,
   type EmbeddableFactory,
 } from './react_embeddable_system';
+
+export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
+
+export type { SerializedDrilldowns } from '../server';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

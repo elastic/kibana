@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/screenshot-mode-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-publishing-schemas'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/presentation-util'
   - '@kbn/config-schema'
   - '@kbn/content-management-utils'

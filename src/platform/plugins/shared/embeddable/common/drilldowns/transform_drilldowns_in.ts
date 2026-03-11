@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownsState, DrilldownState } from '../../server';
+import type { SerializedDrilldowns, DrilldownState } from '../../server';
 
 export function getTransformDrilldownsIn(
   getTranformIn: (type: string) =>
@@ -18,7 +18,7 @@ export function getTransformDrilldownsIn(
       })
     | undefined
 ) {
-  function transformDrilldownsIn<State extends DrilldownsState>(state: State) {
+  function transformDrilldownsIn<State extends SerializedDrilldowns>(state: State) {
     const { drilldowns, ...restOfState } = state;
     if (!drilldowns) {
       return {

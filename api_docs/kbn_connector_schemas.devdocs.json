@@ -149,6 +149,23 @@
         "label": "CONNECTOR_ID",
         "description": [],
         "signature": [
+          "\".http\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-schemas/http/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-schemas",
+        "id": "def-common.CONNECTOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "CONNECTOR_ID",
+        "description": [],
+        "signature": [
           "\".inference\""
         ],
         "path": "src/platform/packages/shared/kbn-connector-schemas/inference/constants.ts",

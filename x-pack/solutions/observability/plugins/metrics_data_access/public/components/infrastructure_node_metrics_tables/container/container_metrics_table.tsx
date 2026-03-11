@@ -23,6 +23,7 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -35,12 +36,28 @@ export interface ContainerMetricsTableProps {
     from: string;
     to: string;
   };
+  isOtel?: boolean;
+  metricsIndices?: string;
+  isK8sContainer?: boolean;
 }
 
 export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    isOtel,
+    metricsIndices,
+    isK8sContainer,
+  } = props;
 
-  const columns = useMemo(() => containerNodeColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => containerNodeColumns({ timerange, isOtel, metricsIndices, isK8sContainer }),
+    [timerange, isOtel, metricsIndices, isK8sContainer]
+  );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
     enableAllColumns: true,
@@ -112,9 +129,16 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   }
 };
 
-function containerNodeColumns(
-  timerange: ContainerMetricsTableProps['timerange']
-): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+function containerNodeColumns({
+  timerange,
+  isOtel,
+  metricsIndices,
+  isK8sContainer,
+}: Pick<
+  ContainerMetricsTableProps,
+  'timerange' | 'isOtel' | 'metricsIndices' | 'isK8sContainer'
+>): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+  const memoryUnit = isOtel ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
@@ -125,34 +149,51 @@ function containerNodeColumns(
       textOnly: true,
       render: (id: string) => {
         return (
-          <MetricsNodeDetailsLink id={id} label={id} nodeType={'container'} timerange={timerange} />
+          <MetricsNodeDetailsLink
+            id={id}
+            label={id}
+            nodeType={'container'}
+            timerange={timerange}
+            isOtel={isOtel}
+            metricsIndices={metricsIndices}
+          />
         );
       },
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
+              {
+                defaultMessage: 'CPU usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
-      field: 'averageCpuUsagePercent',
+      field: 'averageCpuUsage',
       align: 'right',
-      render: (averageCpuUsagePercent: number) => (
-        <NumberCell value={averageCpuUsagePercent} unit="%" />
-      ),
+      render: (averageCpuUsage: number) => <NumberCell value={averageCpuUsage} unit="%" />,
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
-        {
-          defaultMessage: 'Memory usage(avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageMemoryUsageColumnHeader',
+              {
+                defaultMessage: 'Memory usage(avg.)',
+              }
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
-      field: 'averageMemoryUsageMegabytes',
+      field: 'averageMemoryUsage',
       align: 'right',
-      render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit=" MB" />
+      render: (averageMemoryUsage: number) => (
+        <NumberCell value={averageMemoryUsage} unit={memoryUnit} />
       ),
     },
   ];

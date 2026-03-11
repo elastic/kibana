@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -26,23 +27,17 @@ import { removeMultilines } from '../../common/utils/build_query/remove_multilin
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from '../packs/use_packs';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
-  isHistoryEnabled: boolean;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
-  actionId,
-  isHistoryEnabled,
-}) => {
-  const navProps = useRouterNavigate(
-    isHistoryEnabled ? `history/${actionId}` : `live_queries/${actionId}`
-  );
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
+  const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -62,10 +57,11 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
+
+  const kuery = 'user_id: *';
 
   const { data: packsData } = usePacks({});
 
@@ -76,22 +72,28 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    kuery,
   });
 
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
+  const actionItems = useMemo(
+    () => actionsData?.data?.items ?? EMPTY_ARRAY,
+    [actionsData?.data?.items]
+  );
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
+  );
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -125,16 +127,11 @@ const ActionsTableComponent = () => {
   );
 
   const renderActionsColumn = useCallback(
-    (item: any) => (
-      <ActionTableResultsButton
-        actionId={item.fields.action_id[0]}
-        isHistoryEnabled={isHistoryEnabled}
-      />
-    ),
-    [isHistoryEnabled]
+    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
+    []
   );
 
-  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
+  const newQueryPath = '/live_queries/new';
 
   const handlePlayClick = useCallback(
     (item: any) => () => {
@@ -175,8 +172,9 @@ const ActionsTableComponent = () => {
         ),
       });
     },
-    [push, newQueryPath]
+    [push]
   );
+
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
@@ -253,7 +251,6 @@ const ActionsTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
-        ...(isHistoryEnabled ? { width: '120px' } : {}),
         actions: [
           {
             available: isPlayButtonAvailable,
@@ -266,7 +263,6 @@ const ActionsTableComponent = () => {
       },
     ],
     [
-      isHistoryEnabled,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
@@ -282,7 +278,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );
@@ -300,7 +296,7 @@ const ActionsTableComponent = () => {
 
   return (
     <EuiBasicTable
-      items={actionsData?.data?.items ?? EMPTY_ARRAY}
+      items={actionItems}
       loading={isFetching && !isLoading}
       // @ts-expect-error update types
       columns={columns}

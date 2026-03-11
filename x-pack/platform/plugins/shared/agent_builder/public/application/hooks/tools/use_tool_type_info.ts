@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ToolType } from '@kbn/agent-builder-common';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useKibana } from '../use_kibana';
@@ -24,7 +25,7 @@ export const useToolTypes = () => {
   });
 
   const workflowsEnabled = useMemo(
-    () => settings.client.get('workflows:ui:enabled', false),
+    () => settings.client.get(WORKFLOWS_UI_SETTING_ID, false),
     [settings]
   );
 

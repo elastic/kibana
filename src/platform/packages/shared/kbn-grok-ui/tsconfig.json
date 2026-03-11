@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom",
-      "@emotion/react/types/css-prop"
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -24,6 +24,6 @@
     "@kbn/code-editor",
     "@kbn/i18n",
     "@kbn/object-utils",
-    "@kbn/react-hooks",
+    "@kbn/react-hooks"
   ]
 }

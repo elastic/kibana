@@ -58,7 +58,6 @@ describe('DashboardPlugin', () => {
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
       expect(await mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
-        getDashboard: expect.any(Function),
         scanDashboards: expect.any(Function),
         client: expect.any(Object),
       });
@@ -126,10 +125,8 @@ describe('DashboardPlugin', () => {
       mockCoreContext.savedObjects.client.create = jest.fn().mockResolvedValue(mockSavedObject);
 
       const createBody: DashboardCreateRequestBody = {
-        data: {
-          title: 'Test Dashboard',
-          description: 'Test Description',
-        },
+        title: 'Test Dashboard',
+        description: 'Test Description',
       };
 
       await pluginStart.client.create(mockRequestHandlerContext, createBody);
@@ -175,10 +172,8 @@ describe('DashboardPlugin', () => {
       mockCoreContext.savedObjects.client.update = jest.fn().mockResolvedValue(mockUpdatedObject);
 
       const updateBody: DashboardUpdateRequestBody = {
-        data: {
-          title: 'Updated Dashboard',
-          description: 'Updated Description',
-        },
+        title: 'Updated Dashboard',
+        description: 'Updated Description',
       };
 
       await pluginStart.client.update(mockRequestHandlerContext, 'test-id', updateBody);

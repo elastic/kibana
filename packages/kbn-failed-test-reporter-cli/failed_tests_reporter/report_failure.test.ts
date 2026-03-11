@@ -203,7 +203,7 @@ describe('updateFailureIssue()', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-123',
-        target: 'serverless=es',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -216,7 +216,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             5678,
-            "New failure for \\"serverless=es\\" target: [kibana-on-merge - main](https://build-url)",
+            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)",
           ],
         ],
         "results": Array [
@@ -227,6 +227,147 @@ describe('updateFailureIssue()', () => {
         ],
       }
     `);
+  });
+
+  it('does not include new error message when error.message is missing', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/9101',
+          number: 9101,
+          nodeId: 'ijkl',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            Previous error message
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":5}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'new error stack trace',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-456',
+        target: 'local-serverless-observability_complete',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
+    expect(comment).not.toContain('New error message');
+  });
+
+  it('does not include new error message when error.message matches issue body', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1112',
+          number: 1112,
+          nodeId: 'mnop',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            TimeoutError: locator.click: Timeout 10000ms exceeded.
+              at /path/to/test.ts:42:10
+              at async Runner.run (/node_modules/runner.js:100:5)
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure:
+          'TimeoutError: locator.click: Timeout 10000ms exceeded.\n  at /path/to/test.ts:42:10',
+        errorMessage: 'TimeoutError: locator.click: Timeout 10000ms exceeded.',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-1112',
+        target: 'local-serverless-observability_complete',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
+    expect(comment).not.toContain('New error message');
+  });
+
+  it('includes new error message when error.message changed', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1213',
+          number: 1213,
+          nodeId: 'qrst',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            Previous error message
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":3}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'new error stack trace',
+        errorMessage: 'TimeoutError: locator.click: Timeout 10000ms exceeded.',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-1213',
+        target: 'local-serverless-observability_complete',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
+    expect(comment).toContain('New error message');
+    expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
   });
 });
 
@@ -243,7 +384,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-123',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 5000,
         owners: 'team:test',
@@ -266,7 +407,7 @@ describe('createFailureIssue() - Scout failures', () => {
       | Field | Value |
       |-------|-------|
       | Test ID | test-id-123 |
-      | Target | stateful |
+      | Target | local-serverless-observability_complete |
       | Location | /path/to/test.ts |
       | Duration | 5.00s |
       | Module | N/A |
@@ -344,7 +485,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-789',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 2000,
         owners: 'team:test',
@@ -379,7 +520,7 @@ describe('createFailureIssue() - Scout failures', () => {
         time: '2018-01-01T01:00:00Z',
         likelyIrrelevant: false,
         id: 'test-id-789',
-        target: 'stateful',
+        target: 'local-serverless-observability_complete',
         location: '/path/to/test.ts',
         duration: 2000,
         owners: 'team:test',

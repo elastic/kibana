@@ -8,8 +8,8 @@
  */
 
 import type { Dispatch } from 'react';
+import type { ActiveFilters, FilterCounts } from '../datasource';
 import type { ContentListItem } from '../item';
-import type { ActiveFilters } from '../datasource';
 
 /**
  * Action type constants for state reducer.
@@ -19,12 +19,16 @@ export const CONTENT_LIST_ACTIONS = {
   SET_SEARCH: 'SET_SEARCH',
   /** Clear all filters and reset query text. */
   CLEAR_FILTERS: 'CLEAR_FILTERS',
+  /** Toggle a value's include/exclude state for any filter dimension, updating filters and query text atomically. */
+  TOGGLE_FILTER: 'TOGGLE_FILTER',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
   SET_PAGE_INDEX: 'SET_PAGE_INDEX',
   /** Set page size. */
   SET_PAGE_SIZE: 'SET_PAGE_SIZE',
+  SET_SELECTION: 'SET_SELECTION',
+  CLEAR_SELECTION: 'CLEAR_SELECTION',
 } as const;
 
 /**
@@ -52,10 +56,10 @@ export interface ContentListClientState {
   /**
    * Parsed filter state used to drive data fetching.
    *
-   * Updated atomically with `search.queryText` via `SET_SEARCH`.
+   * Always updated atomically with `search.queryText` via `SET_SEARCH`.
    * When no tag service is configured, `filters.search` equals `search.queryText`.
    * When tag parsing is available, `filters.search` contains only the free-text
-   * portion and `filters.tags` holds the structured tag filters.
+   * portion and `filters.tag`, `filters.type`, etc. hold structured filters.
    */
   filters: ActiveFilters;
   /** Sort state. */
@@ -72,6 +76,11 @@ export interface ContentListClientState {
     /** Current number of items per page. */
     size: number;
   };
+  /** Selection state - IDs of currently selected items. */
+  selection: {
+    /** IDs of selected items. */
+    selectedIds: string[];
+  };
 }
 
 /**
@@ -84,6 +93,10 @@ export interface ContentListQueryData {
   items: ContentListItem[];
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
+  /**
+   * Per-filter counts from the full result set. See {@link FindItemsResult.counts}.
+   */
+  counts?: Record<string, FilterCounts>;
   /**
    * Whether the initial data load is in progress (no data available yet).
    *
@@ -114,7 +127,7 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
-/** Atomically update both the query text and the parsed filters. */
+/** Atomically update both the query text and parsed filters. */
 interface SetSearchAction {
   type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH;
   payload: { queryText: string; filters: ActiveFilters };
@@ -123,6 +136,20 @@ interface SetSearchAction {
 /** Clear all filters and search text. */
 interface ClearFiltersAction {
   type: typeof CONTENT_LIST_ACTIONS.CLEAR_FILTERS;
+}
+
+/**
+ * Toggle a value's include/exclude state for any filter dimension.
+ *
+ * Regular call (`withModifierKey: false`): toggles `valueId` in the **include** list.
+ * Modifier call (`withModifierKey: true`): toggles `valueId` in the **exclude** list.
+ * In both cases the opposite list drops `valueId` if present.
+ * The reducer updates `filters` and `search.queryText` atomically
+ * using `valueName` as the EUI `Query` field value (the display label in query text).
+ */
+interface ToggleFilterAction {
+  type: typeof CONTENT_LIST_ACTIONS.TOGGLE_FILTER;
+  payload: { filterId: string; valueId: string; valueName: string; withModifierKey: boolean };
 }
 
 /** Set sort field and direction. */
@@ -139,9 +166,12 @@ interface SetSortAction {
 export type ContentListAction =
   | SetSearchAction
   | ClearFiltersAction
+  | ToggleFilterAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
-  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } };
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }
+  | { type: typeof CONTENT_LIST_ACTIONS.SET_SELECTION; payload: { ids: string[] } }
+  | { type: typeof CONTENT_LIST_ACTIONS.CLEAR_SELECTION };
 
 /**
  * Context value provided by `ContentListStateProvider`.

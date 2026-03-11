@@ -16,6 +16,7 @@ import type {
   AttachmentAttributes,
   ConnectorMappings,
   EventAttachmentPayload,
+  UnifiedAttachmentAttributes,
   UserActionAttributes,
   UserCommentAttachmentPayload,
 } from '../common/types/domain';
@@ -568,6 +569,28 @@ export const mockCaseComments: Array<SavedObject<AttachmentAttributes>> = [
     ],
     updated_at: '2019-11-25T22:32:30.608Z',
     version: 'WzE1NjM2ODQsMTFd',
+  },
+];
+
+export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttributes>> = [
+  {
+    type: 'cases-attachments',
+    id: 'mock-attachment-1',
+    attributes: {
+      type: 'comment',
+      data: { content: 'test' },
+      created_at: '2019-11-25T21:55:00.177Z',
+      created_by: {
+        full_name: 'elastic',
+        email: 'testemail@elastic.co',
+        username: 'elastic',
+      },
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+    },
+    references: [],
   },
 ];
 

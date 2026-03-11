@@ -1,0 +1,951 @@
+{
+  "id": "@kbn/api-contracts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.BumpServiceError",
+        "type": "Class",
+        "tags": [],
+        "label": "BumpServiceError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BumpServiceError",
+            "text": "BumpServiceError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-api-contracts/src/diff/errors.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpServiceError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/errors.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/api-contracts",
+                "id": "def-common.BumpServiceError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-api-contracts/src/diff/errors.ts",
+                "lineNumber": 24,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.applyAllowlist",
+        "type": "Function",
+        "tags": [],
+        "label": "applyAllowlist",
+        "description": [],
+        "signature": [
+          "(allBreakingChanges: ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BreakingChange",
+            "text": "BreakingChange"
+          },
+          "[], allowlist: ",
+          "Allowlist",
+          ") => ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.FilterResult",
+            "text": "FilterResult"
+          }
+        ],
+        "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.applyAllowlist.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "allBreakingChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BreakingChange",
+                "text": "BreakingChange"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.applyAllowlist.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "allowlist",
+            "description": [],
+            "signature": [
+              "Allowlist"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.checkTerraformImpact",
+        "type": "Function",
+        "tags": [],
+        "label": "checkTerraformImpact",
+        "description": [],
+        "signature": [
+          "(breakingChanges: ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BreakingChange",
+            "text": "BreakingChange"
+          },
+          "[], terraformApisPath?: string | undefined) => ",
+          "TerraformImpactResult"
+        ],
+        "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.checkTerraformImpact.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "breakingChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BreakingChange",
+                "text": "BreakingChange"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.checkTerraformImpact.$2",
+            "type": "string",
+            "tags": [],
+            "label": "terraformApisPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/terraform/check_terraform_impact.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.formatFailure",
+        "type": "Function",
+        "tags": [],
+        "label": "formatFailure",
+        "description": [],
+        "signature": [
+          "(breakingChanges: ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BreakingChange",
+            "text": "BreakingChange"
+          },
+          "[], terraformImpact: ",
+          "TerraformImpactResult",
+          " | undefined) => string"
+        ],
+        "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
+        "lineNumber": 66,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.formatFailure.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "breakingChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BreakingChange",
+                "text": "BreakingChange"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.formatFailure.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "terraformImpact",
+            "description": [],
+            "signature": [
+              "TerraformImpactResult",
+              " | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/report/format_failure.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.loadAllowlist",
+        "type": "Function",
+        "tags": [],
+        "label": "loadAllowlist",
+        "description": [],
+        "signature": [
+          "(allowlistPath?: string | undefined) => ",
+          "Allowlist"
+        ],
+        "path": "packages/kbn-api-contracts/src/allowlist/load_allowlist.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.loadAllowlist.$1",
+            "type": "string",
+            "tags": [],
+            "label": "allowlistPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/allowlist/load_allowlist.ts",
+            "lineNumber": 29,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.loadOas",
+        "type": "Function",
+        "tags": [],
+        "label": "loadOas",
+        "description": [],
+        "signature": [
+          "(filePath: string) => Promise<",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.OpenAPISpec",
+            "text": "OpenAPISpec"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.loadOas.$1",
+            "type": "string",
+            "tags": [],
+            "label": "filePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 21,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.parseBumpDiff",
+        "type": "Function",
+        "tags": [],
+        "label": "parseBumpDiff",
+        "description": [],
+        "signature": [
+          "(json: ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BumpDiffEntry",
+            "text": "BumpDiffEntry"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BreakingChange",
+            "text": "BreakingChange"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+        "lineNumber": 92,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.parseBumpDiff.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "json",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BumpDiffEntry",
+                "text": "BumpDiffEntry"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 92,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.runBumpDiff",
+        "type": "Function",
+        "tags": [],
+        "label": "runBumpDiff",
+        "description": [],
+        "signature": [
+          "(basePath: string, currentPath: string) => ",
+          {
+            "pluginId": "@kbn/api-contracts",
+            "scope": "common",
+            "docId": "kibKbnApiContractsPluginApi",
+            "section": "def-common.BumpDiffEntry",
+            "text": "BumpDiffEntry"
+          },
+          "[]"
+        ],
+        "path": "packages/kbn-api-contracts/src/diff/run_bump_diff.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.runBumpDiff.$1",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/run_bump_diff.ts",
+            "lineNumber": 29,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.runBumpDiff.$2",
+            "type": "string",
+            "tags": [],
+            "label": "currentPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/run_bump_diff.ts",
+            "lineNumber": 29,
+            "columnNumber": 47,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.BreakingChange",
+        "type": "Interface",
+        "tags": [],
+        "label": "BreakingChange",
+        "description": [],
+        "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"path_removed\" | \"method_removed\" | \"operation_breaking\""
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.method",
+            "type": "string",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BreakingChange.details",
+            "type": "Unknown",
+            "tags": [],
+            "label": "details",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.BumpDiffEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "BumpDiffEntry",
+        "description": [],
+        "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.breaking",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "breaking",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.breaking_details",
+            "type": "Object",
+            "tags": [],
+            "label": "breaking_details",
+            "description": [],
+            "signature": [
+              "{ message_key?: string | undefined; breaking_attributes?: string[] | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BumpDiffEntry",
+                "text": "BumpDiffEntry"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.current",
+            "type": "Object",
+            "tags": [],
+            "label": "current",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.previous",
+            "type": "Object",
+            "tags": [],
+            "label": "previous",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.BumpDiffEntry.subtype",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "subtype",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/parse_bump_diff.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.FilterResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterResult",
+        "description": [],
+        "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.FilterResult.breakingChanges",
+            "type": "Array",
+            "tags": [],
+            "label": "breakingChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BreakingChange",
+                "text": "BreakingChange"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.FilterResult.allowlistedChanges",
+            "type": "Array",
+            "tags": [],
+            "label": "allowlistedChanges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/api-contracts",
+                "scope": "common",
+                "docId": "kibKbnApiContractsPluginApi",
+                "section": "def-common.BreakingChange",
+                "text": "BreakingChange"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-api-contracts/src/diff/breaking_rules.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.OpenAPISpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "OpenAPISpec",
+        "description": [],
+        "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.OpenAPISpec.openapi",
+            "type": "string",
+            "tags": [],
+            "label": "openapi",
+            "description": [],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.OpenAPISpec.info",
+            "type": "Object",
+            "tags": [],
+            "label": "info",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.OpenAPISpec.paths",
+            "type": "Object",
+            "tags": [],
+            "label": "paths",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.OpenAPISpec.components",
+            "type": "Object",
+            "tags": [],
+            "label": "components",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/api-contracts",
+            "id": "def-common.OpenAPISpec.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "packages/kbn-api-contracts/src/input/load_oas.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/api-contracts",
+        "id": "def-common.ESCALATION_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "ESCALATION_LINK",
+        "description": [],
+        "signature": [
+          "\"https://github.com/elastic/kibana/issues/new\""
+        ],
+        "path": "packages/kbn-api-contracts/src/report/links.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

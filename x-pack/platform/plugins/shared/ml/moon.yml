@@ -145,6 +145,9 @@ dependsOn:
   - '@kbn/file-upload'
   - '@kbn/file-upload-common'
   - '@kbn/kql'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

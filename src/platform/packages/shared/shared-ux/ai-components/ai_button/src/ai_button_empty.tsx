@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import type { DistributiveOmit } from '@elastic/eui';
+
+import { AiButtonBase } from './ai_button_base';
+import type { AiButtonProps } from './types';
+
+/** Props for the `AiButtonEmpty` component. */
+export type AiButtonEmptyProps = DistributiveOmit<
+  Extract<AiButtonProps, { iconOnly?: false; variant: 'empty' | 'outlined' }>,
+  'variant'
+>;
+
+/**
+ * Renders the empty AI button variant.
+ * @param props - Props accepted by the empty AI button variant.
+ */
+export const AiButtonEmpty = (props: AiButtonEmptyProps) => {
+  return <AiButtonBase {...props} variant="empty" />;
+};

@@ -39,6 +39,11 @@ import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';
 import { getSessionStatus } from './status/get_session_status';
 import { updateSessionStatus } from './status/update_session_status';
 import type { SessionStatus } from './types';
+import {
+  registerSearchSessionEBTManagerAnalytics,
+  SearchSessionEBTManager,
+  type ISearchSessionEBTManager,
+} from './ebt_manager';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -72,6 +77,7 @@ interface TrackIdQueueEntry {
 export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
   private setupCompleted = false;
+  private searchSessionEBTManager?: ISearchSessionEBTManager;
 
   constructor(
     private readonly logger: Logger,
@@ -83,6 +89,11 @@ export class SearchSessionService implements ISearchSessionService {
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     this.setupCompleted = true;
+    registerSearchSessionEBTManagerAnalytics(core);
+    this.searchSessionEBTManager = new SearchSessionEBTManager(
+      core.analytics.reportEvent,
+      this.logger
+    );
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
@@ -395,6 +406,7 @@ export class SearchSessionService implements ISearchSessionService {
           {
             esClient: deps.asCurrentUserElasticsearchClient,
             savedObjectsClient: deps.savedObjectsClient,
+            searchSessionEBTManager: this.searchSessionEBTManager,
           },
           so
         );
@@ -402,7 +414,17 @@ export class SearchSessionService implements ISearchSessionService {
       })
     );
 
-    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses) };
+    const sessionsData: SearchSessionStatusesResponse['sessions'] = {};
+    sessions.forEach((session) => {
+      sessionsData[session.id] = {
+        name: session.attributes.name,
+        restoreState: session.attributes.restoreState,
+        locatorId: session.attributes.locatorId,
+        appId: session.attributes.appId,
+      };
+    });
+
+    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses), sessions: sessionsData };
   }
 
   private bulkGet = async (

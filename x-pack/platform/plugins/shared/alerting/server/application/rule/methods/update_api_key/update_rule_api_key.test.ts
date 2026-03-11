@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -71,6 +72,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -171,6 +174,66 @@ describe('updateRuleApiKey()', () => {
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
+      expect.any(Object),
+      expect.any(Object)
+    );
+  });
+
+  test('updates the UIAM API key for the alert', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        uiamApiKey: 'old-uiam-234:essu_abc',
+      },
+    });
+
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+      uiamResult: { id: 'uiam-234', name: 'uiam-123', api_key: 'essu_abc' },
+    });
+    await rulesClient.updateRuleApiKey({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        schedule: { interval: '10s' },
+        name: ruleName,
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        uiamApiKey: 'dWlhbS0yMzQ6ZXNzdV9hYmM=',
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+        revision: 0,
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        meta: {
+          versionApiKeyLastmodified: kibanaVersion,
+        },
+      },
+      { version: '123' }
+    );
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['MTIzOmFiYw==', 'old-uiam-234:essu_abc'],
+      },
       expect.any(Object),
       expect.any(Object)
     );

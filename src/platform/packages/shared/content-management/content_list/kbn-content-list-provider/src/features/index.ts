@@ -22,3 +22,29 @@ export { useContentListPagination } from './pagination';
 // Search feature.
 export type { SearchConfig, UseContentListSearchReturn } from './search';
 export { useContentListSearch } from './search';
+
+// Selection feature.
+export type { UseContentListSelectionReturn } from './selection';
+export { useContentListSelection } from './selection';
+
+// Filtering feature.
+export type { FilterDisplayState, UseContentListFiltersReturn } from './filtering';
+export {
+  useFilterDisplay,
+  useContentListFilters,
+  useTagFilterToggle,
+  TAG_FILTER_ID,
+} from './filtering';
+
+// Delete feature.
+export type {
+  DeleteConfirmationModalProps,
+  DeleteConfirmationComponentProps,
+  UseDeleteConfirmationOptions,
+  UseDeleteConfirmationReturn,
+} from '../components/delete';
+export {
+  DeleteConfirmationModal,
+  DeleteConfirmationComponent,
+  useDeleteConfirmation,
+} from '../components/delete';

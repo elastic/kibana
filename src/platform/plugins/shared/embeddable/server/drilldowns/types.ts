@@ -12,7 +12,7 @@ import type { Reference } from '@kbn/content-management-utils';
 
 export type DrilldownState = { label: string; trigger: string; type: string };
 
-export type DrilldownsState = {
+export type SerializedDrilldowns = {
   drilldowns?: DrilldownState[];
 };
 

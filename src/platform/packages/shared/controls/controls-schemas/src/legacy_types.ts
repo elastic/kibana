@@ -44,13 +44,13 @@ export type LegacyStoredOptionsListExplicitInput = LegacyStoredDataControlState 
     hideExists?: boolean;
     hideSort?: boolean;
   };
-  exclude?: boolean;
-  existsSelected?: boolean;
-  runPastTimeout?: boolean;
-  searchTechnique?: string;
-  selectedOptions?: Array<string | number>;
-  singleSelect?: boolean;
-  sort?: { by: string; direction: string };
+  exclude?: boolean | null;
+  existsSelected?: boolean | null;
+  runPastTimeout?: boolean | null;
+  searchTechnique?: string | null;
+  selectedOptions?: Array<string | number> | null;
+  singleSelect?: boolean | null;
+  sort?: { by: string; direction: string } | null;
 };
 
 export type LegacyStoredRangeSliderExplicitInput = LegacyStoredDataControlState & {

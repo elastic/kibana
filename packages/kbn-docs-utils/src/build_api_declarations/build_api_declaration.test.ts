@@ -23,6 +23,7 @@ import { getSignature, normalizeVerboseSignatures } from './get_signature';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildVariableDec } from './build_variable_dec';
 import { buildCallSignatureDec } from './build_call_signature_dec';
+import { buildMultipleCallSignaturesDec } from './build_multiple_call_signatures_dec';
 import { getReferences } from './get_references';
 
 const log = new ToolingLog({
@@ -48,7 +49,13 @@ beforeAll(() => {
 
   plugins = [getKibanaPlatformPlugin('pluginA')];
 
-  nodes = getDeclarationNodesForPluginScope(project, plugins[0], ApiScope.CLIENT, log);
+  const { nodes: decNodes } = getDeclarationNodesForPluginScope(
+    project,
+    plugins[0],
+    ApiScope.CLIENT,
+    log
+  );
+  nodes = decNodes;
 });
 
 it('Test number primitive doc def', () => {
@@ -494,7 +501,7 @@ describe('buildBasicApiDeclaration edge cases', () => {
 });
 
 describe('buildVariableDec edge cases', () => {
-  it('logs warning when variable has multiple call signatures', () => {
+  it('handles variable with multiple call signatures (function overloads)', () => {
     const project = new Project({
       useInMemoryFileSystem: true,
     });
@@ -515,7 +522,7 @@ describe('buildVariableDec edge cases', () => {
 
     const warnSpy = jest.spyOn(log, 'warning').mockImplementation();
 
-    buildVariableDec(varDecl!, {
+    const result = buildVariableDec(varDecl!, {
       name: 'test',
       id: 'test-id',
       currentPluginId: 'test-plugin',
@@ -525,9 +532,13 @@ describe('buildVariableDec edge cases', () => {
       scope: ApiScope.CLIENT,
     });
 
-    expect(warnSpy).toHaveBeenCalledWith(
+    // Should NOT log a warning - we now handle multiple signatures.
+    expect(warnSpy).not.toHaveBeenCalledWith(
       expect.stringContaining('Not handling more than one call signature')
     );
+
+    // Should return a FunctionKind declaration.
+    expect(result.type).toBe(TypeKind.FunctionKind);
 
     warnSpy.mockRestore();
   });
@@ -585,6 +596,130 @@ describe('buildCallSignatureDec edge cases', () => {
 
       warnSpy.mockRestore();
     }
+  });
+});
+
+describe('buildMultipleCallSignaturesDec', () => {
+  it('extracts parameters from the first signature for overloaded functions', () => {
+    const project = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * An overloaded function type.
+       * @param x A number or string parameter.
+       * @returns The processed value.
+       */
+      type OverloadedFn = {
+        (x: number): number;
+        (x: string): string;
+        (x: number, y: number): number;
+      };
+      const overloaded: OverloadedFn = ((x: any) => x) as any;
+      `
+    );
+
+    const varDecl = sourceFile.getVariableDeclaration('overloaded');
+    expect(varDecl).toBeDefined();
+
+    const callSignatures = varDecl!.getType().getCallSignatures();
+    expect(callSignatures.length).toBe(3);
+
+    const result = buildMultipleCallSignaturesDec(varDecl!, callSignatures, {
+      name: 'overloaded',
+      id: 'test-id',
+      currentPluginId: 'test-plugin',
+      plugins: [],
+      log,
+      captureReferences: false,
+      scope: ApiScope.CLIENT,
+    });
+
+    expect(result.type).toBe(TypeKind.FunctionKind);
+    expect(result.label).toBe('overloaded');
+    // Children are extracted from the first signature (x: number): number
+    expect(result.children).toBeDefined();
+    expect(result.children!.length).toBe(1);
+    expect(result.children![0].label).toBe('x');
+  });
+
+  it('includes returnComment from JSDoc', () => {
+    const project = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Function with return comment.
+       * @returns The result value.
+       */
+      type FnWithReturn = {
+        (): string;
+        (x: number): number;
+      };
+      const fn: FnWithReturn = (() => '') as any;
+      `
+    );
+
+    const varDecl = sourceFile.getVariableDeclaration('fn');
+    expect(varDecl).toBeDefined();
+
+    const callSignatures = varDecl!.getType().getCallSignatures();
+
+    const result = buildMultipleCallSignaturesDec(varDecl!, callSignatures, {
+      name: 'fn',
+      id: 'test-id',
+      currentPluginId: 'test-plugin',
+      plugins: [],
+      log,
+      captureReferences: false,
+      scope: ApiScope.CLIENT,
+    });
+
+    expect(result.returnComment).toBeDefined();
+  });
+
+  it('handles parameters with multiple declarations by using the first', () => {
+    const project = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `
+      type MultiDeclFn = {
+        (x: string): void;
+        (x: number): void;
+      };
+      const fn: MultiDeclFn = () => {};
+      `
+    );
+
+    const varDecl = sourceFile.getVariableDeclaration('fn');
+    expect(varDecl).toBeDefined();
+
+    const callSignatures = varDecl!.getType().getCallSignatures();
+
+    const result = buildMultipleCallSignaturesDec(varDecl!, callSignatures, {
+      name: 'fn',
+      id: 'test-id',
+      currentPluginId: 'test-plugin',
+      plugins: [],
+      log,
+      captureReferences: false,
+      scope: ApiScope.CLIENT,
+    });
+
+    expect(result.type).toBe(TypeKind.FunctionKind);
+    expect(result.children).toBeDefined();
+    // First signature has one parameter 'x'.
+    expect(result.children!.length).toBe(1);
+    expect(result.children![0].label).toBe('x');
   });
 });
 

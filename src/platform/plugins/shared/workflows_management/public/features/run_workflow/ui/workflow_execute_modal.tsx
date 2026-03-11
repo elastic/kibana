@@ -22,23 +22,22 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import { capitalize } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { ENABLED_TRIGGER_TABS } from './constants';
+import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
+import type { WorkflowTriggerTab } from './types';
 import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
-import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
-import type { WorkflowTriggerTab } from '../../../common/lib/telemetry/events/workflows/execution/types';
 
-type TriggerType = 'manual' | 'index' | 'alert';
-
-function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
+function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
   }
@@ -55,20 +54,23 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   return 'alert';
 }
 
-interface WorkflowExecuteModalProps {
+export interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
   workflowId?: string;
   isTestRun: boolean;
   onClose: () => void;
-  onSubmit: (data: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => void;
+  onSubmit: (data: Record<string, unknown>, triggerTab: WorkflowTriggerTab) => void;
   yamlString?: string;
+  /** When set, open with Historical tab and this execution pre-selected */
+  initialExecutionId?: string;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString }) => {
+  ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString, initialExecutionId }) => {
     const modalTitleId = useGeneratedHtmlId();
-    const enabledTriggers = ['alert', 'index', 'manual'];
-    const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
-    const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
+
+    const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
+      initialExecutionId ? 'historical' : getDefaultTrigger(definition)
+    );
 
     const { executionInput, setExecutionInput } = useExecutionInput({
       workflowName: definition?.name || '',
@@ -82,14 +84,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const handleSubmit = useCallback(() => {
       onSubmit(JSON.parse(executionInput), selectedTrigger);
       onClose();
-    }, [onSubmit, onClose, executionInput, selectedTrigger]);
+    }, [selectedTrigger, onSubmit, onClose, executionInput]);
 
     const handleChangeTrigger = useCallback(
-      (trigger: TriggerType): void => {
+      (trigger: WorkflowTriggerTab): void => {
         setExecutionInput('');
+        setExecutionInputErrors(null);
         setSelectedTrigger(trigger);
       },
-      [setExecutionInput, setSelectedTrigger]
+      [setExecutionInput]
     );
 
     // Extract inputs from yamlString if definition.inputs is undefined
@@ -128,11 +131,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     useEffect(() => {
       if (shouldAutoRun) {
-        onSubmit({}, 'manual'); // Auto-run defaults to manual trigger
+        onSubmit({}, 'manual');
         onClose();
         return;
       }
-      // Default trigger selection
+      if (initialExecutionId) {
+        return;
+      }
+      // Default trigger selection when no initialExecutionId
       if (definition?.triggers?.some((trigger) => trigger.type === 'alert')) {
         setSelectedTrigger('alert');
         return;
@@ -144,7 +150,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       if (hasInputs) {
         setSelectedTrigger('manual');
       }
-    }, [shouldAutoRun, onSubmit, onClose, definition, inputs]);
+    }, [shouldAutoRun, onSubmit, onClose, definition, inputs, initialExecutionId]);
 
     if (shouldAutoRun) {
       // Not rendered if the workflow should auto run, will close the modal automatically
@@ -202,86 +208,102 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiFlexGroup direction="row" gutterSize="l">
-              {enabledTriggers.map((trigger) => (
-                <EuiFlexItem key={trigger}>
-                  <EuiButton
-                    color={selectedTrigger === trigger ? 'primary' : 'text'}
-                    onClick={() => handleChangeTrigger(trigger as TriggerType)}
-                    iconSide="right"
-                    contentProps={{
-                      style: {
-                        justifyContent: 'flex-start',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        padding: selectedTrigger === trigger ? '10px' : '9px',
-                        textAlign: 'left',
-                      },
-                    }}
-                    css={css`
-                      width: 100%;
-                      height: fit-content;
-                      min-height: 100%;
-                      svg,
-                      img {
-                        margin-left: auto;
-                      }
-                    `}
-                  >
-                    <EuiRadio
-                      name={capitalize(trigger)}
-                      label={capitalize(trigger)}
-                      id={trigger}
-                      checked={selectedTrigger === trigger}
-                      onChange={() => {}}
-                    />
-                    <EuiText
-                      size="s"
-                      css={css`
-                        text-wrap: auto;
-                        margin-left: ${euiTheme.size.l};
-                      `}
-                    >
-                      {MANUAL_TRIGGERS_DESCRIPTIONS[trigger]}
-                    </EuiText>
-                  </EuiButton>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiFlexGroup direction="row" gutterSize="s">
+                  {ENABLED_TRIGGER_TABS.map((trigger) => (
+                    <EuiFlexItem key={trigger}>
+                      <EuiButton
+                        color={selectedTrigger === trigger ? 'primary' : 'text'}
+                        onClick={() => handleChangeTrigger(trigger)}
+                        iconSide="right"
+                        contentProps={{
+                          style: {
+                            justifyContent: 'flex-start',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            padding: selectedTrigger === trigger ? '10px' : '9px',
+                            textAlign: 'left',
+                          },
+                        }}
+                        css={css`
+                          width: 100%;
+                          height: fit-content;
+                          min-height: 100%;
+                          svg,
+                          img {
+                            margin-left: auto;
+                          }
+                        `}
+                      >
+                        <EuiRadio
+                          name={TRIGGER_TABS_LABELS[trigger]}
+                          label={TRIGGER_TABS_LABELS[trigger]}
+                          id={trigger}
+                          checked={selectedTrigger === trigger}
+                          onChange={() => {}}
+                        />
+                        <EuiText
+                          size="s"
+                          css={css`
+                            text-wrap: auto;
+                            margin-left: ${euiTheme.size.l};
+                          `}
+                        >
+                          {TRIGGER_TABS_DESCRIPTIONS[trigger]}
+                        </EuiText>
+                      </EuiButton>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            {selectedTrigger === 'alert' && (
-              <WorkflowExecuteEventForm
-                value={executionInput}
-                setValue={setExecutionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-              />
-            )}
-            {selectedTrigger === 'manual' && (
-              <WorkflowExecuteManualForm
-                definition={
-                  definition
-                    ? {
-                        ...definition,
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        inputs: inputs as any,
-                      }
-                    : null
-                }
-                value={executionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-                setValue={setExecutionInput}
-              />
-            )}
-            {selectedTrigger === 'index' && (
-              <WorkflowExecuteIndexForm
-                value={executionInput}
-                setValue={setExecutionInput}
-                errors={executionInputErrors}
-                setErrors={setExecutionInputErrors}
-              />
-            )}
+              <EuiFlexItem>
+                {selectedTrigger === 'alert' && (
+                  <WorkflowExecuteEventForm
+                    value={executionInput}
+                    setValue={setExecutionInput}
+                    errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
+                  />
+                )}
+                {selectedTrigger === 'manual' && (
+                  <WorkflowExecuteManualForm
+                    definition={
+                      definition
+                        ? {
+                            ...definition,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            inputs: inputs as any,
+                          }
+                        : null
+                    }
+                    value={executionInput}
+                    errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
+                    setValue={setExecutionInput}
+                  />
+                )}
+                {selectedTrigger === 'index' && (
+                  <WorkflowExecuteIndexForm
+                    value={executionInput}
+                    setValue={setExecutionInput}
+                    errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
+                  />
+                )}
+                {selectedTrigger === 'historical' && (
+                  <WorkflowExecuteHistoricalForm
+                    workflowId={workflowId}
+                    initialExecutionId={initialExecutionId}
+                    value={executionInput}
+                    setValue={setExecutionInput}
+                    errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButton

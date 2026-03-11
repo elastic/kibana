@@ -14,7 +14,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
-
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -651,7 +650,6 @@ export const createDefinition = (
   id: 'oblt',
   title,
   icon: 'logoObservability',
-  homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
@@ -664,5 +662,4 @@ export const createDefinition = (
       })
     )
   ),
-  dataTestSubj: 'observabilitySideNav',
 });

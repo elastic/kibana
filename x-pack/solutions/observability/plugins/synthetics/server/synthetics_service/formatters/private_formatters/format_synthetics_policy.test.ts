@@ -434,7 +434,11 @@ describe('formatSyntheticsPolicy', () => {
                 'source.inline.script': {
                   type: 'yaml',
                   value:
-                    '"step(\\"Visit /users api route\\", async () => {\\\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\\\n  expect(response.status()).toEqual(200);\\\\n});"',
+                    'c3RlcCgiVmlzaXQgL3VzZXJzIGFwaSByb3V0ZSIsIGFzeW5jICgpID0+IHtcbiAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBwYWdlLmdvdG8oJ2h0dHBzOi8vbmV4dGpzLXRlc3Qtc3ludGhldGljcy52ZXJjZWwuYXBwL2FwaS91c2VycycpO1xuICBleHBlY3QocmVzcG9uc2Uuc3RhdHVzKCkpLnRvRXF1YWwoMjAwKTtcbn0pOw==',
+                },
+                'source.inline.encoding': {
+                  type: 'text',
+                  value: 'base64',
                 },
                 'source.project.content': {
                   type: 'text',
@@ -915,6 +919,9 @@ describe('formatSyntheticsPolicy', () => {
                 'source.inline.script': {
                   type: 'yaml',
                 },
+                'source.inline.encoding': {
+                  type: 'text',
+                },
                 'source.project.content': {
                   type: 'text',
                 },
@@ -942,14 +949,14 @@ describe('formatSyntheticsPolicy', () => {
                 dataset: 'browser.network',
                 type: 'synthetics',
               },
-              enabled: true,
+              enabled: false,
             },
             {
               data_stream: {
                 dataset: 'browser.screenshot',
                 type: 'synthetics',
               },
-              enabled: true,
+              enabled: false,
             },
           ],
           type: 'synthetics/browser',
@@ -1119,6 +1126,7 @@ const testNewPolicy = {
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
             'source.inline.script': { type: 'yaml' },
+            'source.inline.encoding': { type: 'text' },
             'source.project.content': { type: 'text' },
             params: { type: 'yaml' },
             playwright_options: { type: 'yaml' },
@@ -1138,8 +1146,8 @@ const testNewPolicy = {
             maintenance_windows: { type: 'yaml' },
           },
         },
-        { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
-        { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.screenshot' } },
+        { enabled: false, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
+        { enabled: false, data_stream: { type: 'synthetics', dataset: 'browser.screenshot' } },
       ],
     },
   ],
@@ -1180,6 +1188,7 @@ const browserConfig: any = {
   'url.port': null,
   'source.inline.script':
     'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
+  'source.inline.encoding': 'base64',
   'source.project.content': '',
   playwright_text_assertion: '',
   urls: '',

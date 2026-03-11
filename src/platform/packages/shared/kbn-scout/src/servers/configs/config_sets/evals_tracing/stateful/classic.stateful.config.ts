@@ -13,6 +13,52 @@ import { join } from 'path';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
+const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+
+interface AvailableConnector {
+  name: string;
+  actionTypeId: string;
+  exposeConfig?: boolean;
+  config: Record<string, unknown>;
+  secrets?: Record<string, unknown>;
+}
+
+function getPreconfiguredEisConnectorsArg(): string | undefined {
+  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS;
+  if (!raw) return;
+
+  let connectors: Record<string, AvailableConnector>;
+  try {
+    connectors = JSON.parse(Buffer.from(raw, 'base64').toString('utf8')) as Record<
+      string,
+      AvailableConnector
+    >;
+  } catch (e) {
+    throw new Error(
+      `Failed to parse base64 JSON from KIBANA_TESTING_AI_CONNECTORS: ${
+        e instanceof Error ? e.message : String(e)
+      }`
+    );
+  }
+
+  const eisConnectors: Record<string, AvailableConnector> = {};
+  for (const [id, connector] of Object.entries(connectors)) {
+    if (!connector || typeof connector !== 'object') continue;
+    if (connector.actionTypeId !== '.inference') continue;
+    if (connector.config?.provider !== 'elastic') continue;
+    // Preconfigured connectors do not expose `config` unless `exposeConfig: true` is set.
+    // The inference plugin relies on `.inference` connector config (taskType, inferenceId, ...)
+    // to validate compatibility.
+    eisConnectors[id] = { ...connector, exposeConfig: true };
+  }
+
+  if (Object.keys(eisConnectors).length === 0) return;
+
+  return `--xpack.actions.preconfigured=${JSON.stringify(eisConnectors)}`;
+}
+
+const preconfiguredEisConnectorsArg = getPreconfiguredEisConnectorsArg();
+
 const gcsCredentials = process.env.GCS_CREDENTIALS;
 let gcsSecureFile: string | undefined;
 
@@ -51,6 +97,8 @@ const { TRACING_EXPORTERS: tracingExporters } = process.env;
 if (tracingExporters) {
   JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
 }
+const isCi = Boolean(process.env.CI);
+const shouldEnableTracing = Boolean(tracingExporters) || !isCi;
 const exporters = tracingExporters ?? defaultExporters;
 
 /**
@@ -65,20 +113,28 @@ export const servers: ScoutServerConfig = {
   esTestCluster: {
     ...defaultConfig.esTestCluster,
     secureFiles: [...(gcsSecureFile ? [gcsSecureFile] : [])],
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      `xpack.inference.elastic.url=${EIS_QA_URL}`,
+    ],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     env: {
       ...defaultConfig.kbnTestServer.env,
-      KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true',
+      ...(shouldEnableTracing ? { KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true' } : {}),
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-
-      '--telemetry.enabled=true',
-      '--telemetry.tracing.enabled=true',
-      '--telemetry.tracing.sample_rate=1',
-      `--telemetry.tracing.exporters=${exporters}`,
+      ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
+      ...(shouldEnableTracing
+        ? [
+            '--telemetry.enabled=true',
+            '--telemetry.tracing.enabled=true',
+            '--telemetry.tracing.sample_rate=1',
+            `--telemetry.tracing.exporters=${exporters}`,
+          ]
+        : []),
     ],
   },
 };

@@ -10,8 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import type { Filter } from '@kbn/es-query';
-import { buildPhraseFilter } from '@kbn/es-query';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -50,13 +49,21 @@ export const StaticByReferenceExample = ({
           savedObjectId={dashboardId}
           getCreationOptions={async () => {
             const field = dataView.getFieldByName('machine.os.keyword');
-            let filter: Filter;
+            let filter: AsCodeFilter;
             let creationOptions: DashboardCreationOptions = {
               getInitialInput: () => ({ viewMode: 'view' }),
             };
             if (field) {
-              filter = buildPhraseFilter(field, 'win xp', dataView);
-              filter.meta.negate = true;
+              filter = {
+                negate: true,
+                type: 'condition',
+                data_view_id: dataView.id,
+                condition: {
+                  field: 'machine.os.keyword',
+                  operator: 'is',
+                  value: 'win xp',
+                },
+              };
               creationOptions = {
                 ...creationOptions,
                 getInitialInput: () => ({ filters: [filter] }),

@@ -27,6 +27,37 @@ describe('OpenAI Schema', () => {
       ).not.toThrow();
     });
 
+    it('validates Azure AI config with optional defaultModel', () => {
+      expect(() =>
+        ConfigSchema.parse({
+          apiProvider: 'Azure OpenAI',
+          apiUrl: 'https://my-resource.openai.azure.com',
+          defaultModel: 'gpt-4o',
+        })
+      ).not.toThrow();
+    });
+
+    it('validates Azure AI config without defaultModel', () => {
+      const result = ConfigSchema.parse({
+        apiProvider: 'Azure OpenAI',
+        apiUrl: 'https://my-resource.openai.azure.com',
+      });
+      expect(result.defaultModel).toBeUndefined();
+    });
+
+    it('validates Azure AI config with all optional fields including defaultModel', () => {
+      expect(() =>
+        ConfigSchema.parse({
+          apiProvider: 'Azure OpenAI',
+          apiUrl: 'https://my-resource.openai.azure.com',
+          defaultModel: 'gpt-4o',
+          headers: { 'X-Custom': 'value' },
+          contextWindowLength: 128000,
+          temperature: 0.7,
+        })
+      ).not.toThrow();
+    });
+
     it('validates OpenAI config', () => {
       expect(() =>
         ConfigSchema.parse({

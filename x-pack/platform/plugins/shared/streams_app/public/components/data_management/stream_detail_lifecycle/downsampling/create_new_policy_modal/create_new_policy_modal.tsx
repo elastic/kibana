@@ -213,6 +213,7 @@ export function CreatePolicyModal({
               data-test-subj="createPolicyModal-backButton"
               onClick={onBack}
               disabled={isLoading}
+              flush="both"
             >
               {i18n.translate('xpack.streams.createPolicyModal.backButton', {
                 defaultMessage: 'Back',

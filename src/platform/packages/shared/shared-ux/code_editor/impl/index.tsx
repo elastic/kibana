@@ -15,6 +15,7 @@ import {
   EuiErrorBoundary,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
 export { monaco } from '@kbn/monaco';
@@ -75,6 +76,11 @@ export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props)
         <EuiFormControlLayout
           append={<div hidden />}
           style={style}
+          css={css({
+            '.euiFormControlLayout__append::before': {
+              display: 'none',
+            },
+          })}
           readOnly={options?.readOnly}
           fullWidth={fullWidth}
         >

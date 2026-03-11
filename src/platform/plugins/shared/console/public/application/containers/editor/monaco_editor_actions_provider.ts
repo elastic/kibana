@@ -19,6 +19,7 @@ import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/cons
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
+import { normalizeUrl } from '../../../lib/utils';
 import { sendRequest } from '../../hooks';
 import type { Actions } from '../../stores/request';
 
@@ -296,7 +297,15 @@ export class MonacoEditorActionsProvider {
 
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
-      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      services: {
+        notifications,
+        trackUiMetric,
+        http,
+        settings,
+        history,
+        autocompleteInfo,
+        esHostService,
+      },
       ...startServices
     } = context;
     const { toasts } = notifications;
@@ -357,10 +366,27 @@ export class MonacoEditorActionsProvider {
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
       const selectedHost = settings.getSelectedHost();
+
+      // Ensure the host list is available before validating.
+      await esHostService.waitForInitialization();
+      const availableHosts = esHostService.getAllHosts();
+
+      let hostToUse: string | undefined;
+      if (selectedHost) {
+        const normalizedSelected = normalizeUrl(selectedHost);
+        const isValid = availableHosts.some((h) => normalizeUrl(h) === normalizedSelected);
+        if (isValid) {
+          hostToUse = selectedHost;
+        } else {
+          // Stale host in localStorage: clear it and fall back to the server default.
+          settings.setSelectedHost(null);
+        }
+      }
+
       const results = await sendRequest({
         http,
         requests,
-        host: selectedHost || undefined,
+        host: hostToUse,
         isPackagedEnvironment: context.config.isPackagedEnvironment,
       });
 

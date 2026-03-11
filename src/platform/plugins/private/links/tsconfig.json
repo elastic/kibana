@@ -8,8 +8,7 @@
     "public/**/*",
     "common/**/*",
     "server/**/*",
-    "public/**/*.json",
-    "../../../../../typings/emotion.d.ts"
+    "public/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -26,7 +25,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/logging",
     "@kbn/core-plugins-server",
@@ -38,7 +36,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/share-plugin",
     "@kbn/es-query",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }

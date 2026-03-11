@@ -72,7 +72,6 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-table-list-view",
     "@kbn/serverless",
-    "@kbn/logging",
     "@kbn/chart-expressions-common",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
@@ -88,7 +87,6 @@
     "@kbn/apm-data-view",
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/field-utils",
     "@kbn/react-hooks",
     "@kbn/scout",
@@ -102,7 +100,8 @@
     "@kbn/lens-common",
     "@kbn/crypto-browser",
     "@kbn/cps",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

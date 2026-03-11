@@ -14,9 +14,9 @@ import {
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from '@emotion/styled';
 import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
@@ -28,37 +28,38 @@ import { asDuration, asInteger } from '../../../../../common/utils/formatters';
 import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
 import { POPOVER_WIDTH } from './constants';
 
-const HealthStatusTitle = styled(EuiTitle)`
-  display: inline;
-  text-transform: uppercase;
-`;
-
-const VerticallyCentered = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const SubduedText = styled.span`
-  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
-`;
-
-const EnableText = styled.section`
-  color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
-  line-height: 1.4;
-  font-size: ${() => useEuiFontSize('s').fontSize};
-  width: ${POPOVER_WIDTH}px;
-`;
-
-export const ContentLine = styled.section`
-  line-height: 2;
-`;
-
 interface Props {
   serviceName: string;
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const { euiTheme } = useEuiTheme();
+  const { fontSize: fontSizeS } = useEuiFontSize('s');
+
+  const healthStatusTitleStyles = css`
+    display: inline;
+    text-transform: uppercase;
+  `;
+
+  const verticallyCenteredStyles = css`
+    display: flex;
+    align-items: center;
+  `;
+
+  const subduedTextStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+  `;
+
+  const enableTextStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+    line-height: 1.4;
+    font-size: ${fontSizeS};
+    width: ${POPOVER_WIDTH}px;
+  `;
+
+  const contentLineStyles = css`
+    line-height: 2;
+  `;
 
   const anomalyScore = serviceAnomalyStats?.anomalyScore;
   const severity = getSeverity(anomalyScore);
@@ -72,36 +73,38 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   return (
     <>
       <section>
-        <HealthStatusTitle size="xxs">
+        <EuiTitle size="xxs" css={healthStatusTitleStyles}>
           <h3>{ANOMALY_DETECTION_TITLE}</h3>
-        </HealthStatusTitle>
+        </EuiTitle>
         &nbsp;
         <EuiIconTip type="info" content={ANOMALY_DETECTION_TOOLTIP} />
-        {!mlJobId && <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>}
+        {!mlJobId && <section css={enableTextStyles}>{ANOMALY_DETECTION_DISABLED_TEXT}</section>}
       </section>
       {hasAnomalyDetectionScore && (
-        <ContentLine>
+        <section css={contentLineStyles}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <VerticallyCentered>
+              <div css={verticallyCenteredStyles}>
                 <EuiHealth color={getServiceHealthStatusColor(euiTheme, healthStatus)} />
-                <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
-              </VerticallyCentered>
+                <span css={subduedTextStyles}>{ANOMALY_DETECTION_SCORE_METRIC}</span>
+              </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <div>
                 {getDisplayedAnomalyScore(anomalyScore as number)}
-                {actualValue && <SubduedText>&nbsp;({asDuration(actualValue)})</SubduedText>}
+                {actualValue && (
+                  <span css={subduedTextStyles}>&nbsp;({asDuration(actualValue)})</span>
+                )}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </ContentLine>
+        </section>
       )}
       {mlJobId && !hasAnomalyDetectionScore && (
-        <EnableText>{ANOMALY_DETECTION_NO_DATA_TEXT}</EnableText>
+        <section css={enableTextStyles}>{ANOMALY_DETECTION_NO_DATA_TEXT}</section>
       )}
       {mlJobId && (
-        <ContentLine>
+        <section css={contentLineStyles}>
           <MLSingleMetricLink
             external
             jobId={mlJobId}
@@ -110,7 +113,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           >
             {ANOMALY_DETECTION_LINK}
           </MLSingleMetricLink>
-        </ContentLine>
+        </section>
       )}
     </>
   );

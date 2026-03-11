@@ -45,7 +45,7 @@ export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
 
-export const RuleAttributesToEncrypt = ['apiKey'];
+export const RuleAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
 
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
@@ -156,6 +156,9 @@ export function setupSavedObjects(
         },
         createdAt: {
           type: 'date',
+        },
+        uiamApiKey: {
+          type: 'binary',
         },
       },
     },
@@ -280,7 +283,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: API_KEY_PENDING_INVALIDATION_TYPE,
-    attributesToEncrypt: new Set(['apiKeyId']),
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
     attributesToIncludeInAAD: new Set(['createdAt']),
   });
 

@@ -50,6 +50,10 @@ export const AgentPolicySummaryLine = memo<{
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
 
+    if (agent?.type === 'OPAMP') {
+      return <EuiText>-</EuiText>;
+    }
+
     return (
       <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
         <EuiFlexItem grow={true} css={MIN_WIDTH}>
@@ -148,7 +152,7 @@ export const AgentPolicySummaryLine = memo<{
             >
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiIcon size="m" type="warning" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="xs">

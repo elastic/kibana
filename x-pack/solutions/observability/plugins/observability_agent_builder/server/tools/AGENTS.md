@@ -19,7 +19,7 @@
 | **Detection**   | `get_alerts`, `get_services`                                 |
 | **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
 | **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
-| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`         |
+| **Correlation** | `get_traces`, `get_service_topology`                         |
 | **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
@@ -279,6 +279,21 @@ All new tools **must** be added to the Agent Builder allow list:
 x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts
 ```
 
+### Cleaning Observability Data
+
+Delete all observability data streams (APM, OTel, logs, infrastructure metrics, synthetics) to avoid stale data polluting results:
+
+```bash
+curl -s -X DELETE "http://elastic:changeme@localhost:9200/_data_stream/traces-apm*,metrics-apm*,logs-apm*,metrics-*.otel*,traces-*.otel*,logs-*.otel*,logs-*-*,metrics-system*,metrics-kubernetes*,metrics-docker*,metrics-aws*,synthetics-*-*" | jq .
+```
+
+Verify that all data streams are gone:
+
+```bash
+curl -s "http://elastic:changeme@localhost:9200/_data_stream/*apm*,*otel*,logs-*,metrics-*,synthetics-*" | jq '[.data_streams[] | .name]'
+# Expected: []
+```
+
 ---
 
 ## 8. Testing with OpenTelemetry Demo
@@ -332,19 +347,7 @@ Full list of available feature flags: https://opentelemetry.io/docs/demo/feature
 
 ### Cleaning Data Between Test Runs
 
-Between test runs, delete all APM data streams to avoid data from previous scenarios polluting results:
-
-```bash
-for ds in traces-apm-default \
-           logs-apm.error-default \
-           metrics-apm.internal-default \
-           metrics-apm.transaction.1m-default \
-           metrics-apm.service_destination.1m-default \
-           metrics-apm.service_transaction.1m-default \
-           metrics-apm.service_summary.1m-default; do
-  curl -s -X DELETE "http://elastic:changeme@localhost:9200/_data_stream/$ds" | jq -r '.acknowledged // .error.type'
-done
-```
+Between test runs, clean all observability data streams — see [Cleaning Observability Data](#cleaning-observability-data) in section 7.
 
 ### Wait for Data Accumulation
 
@@ -359,12 +362,10 @@ curl -s --max-time 600 -X POST http://localhost:5601/api/agent_builder/tools/_ex
   -H 'x-elastic-internal-origin: kibana' \
   -H 'Content-Type: application/json' \
   -d '{
-    "tool_id": "observability.run_investigation",
+    "tool_id": "observability.get_log_groups",
     "tool_params": { "start": "now-10m", "end": "now" }
   }'
 ```
-
-Note: the `run_investigation` tool makes multiple internal LLM calls and may take 60–120 seconds to complete. Use `--max-time 600` to avoid curl timeouts.
 
 ### Full Test Workflow
 
@@ -373,7 +374,7 @@ Note: the `run_investigation` tool makes multiple internal LLM calls and may tak
 2. Clean APM data:           (delete data streams — see above)
 3. Enable feature flag(s):   Edit demo.flagd.json
 4. Wait 30 minutes:          sleep 600
-5. Run investigation:        curl ... run_investigation with start=now-30m
+5. Run investigation:        curl ... get_log_groups with start=now-30m
 6. Review results
 7. Disable feature flag(s):  Reset defaultVariant to "off"
 8. Repeat from step 2 for next scenario

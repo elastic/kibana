@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
 import { Controls as ControlsComponent, type ControlsProps } from './controls';
@@ -17,20 +17,18 @@ export default {
   title: 'Components/Graph Components/Additional Components',
   render: (props) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <ReactFlowProvider>
-          <ControlsComponent
-            css={css`
-              width: 42px;
-            `}
-            onZoomIn={action('zoomIn')}
-            onZoomOut={action('zoomOut')}
-            onFitView={action('fitView')}
-            onCenter={action('center')}
-            {...props}
-          />
-        </ReactFlowProvider>
-      </ThemeProvider>
+      <ReactFlowProvider>
+        <ControlsComponent
+          css={css`
+            width: 42px;
+          `}
+          onZoomIn={action('zoomIn')}
+          onZoomOut={action('zoomOut')}
+          onFitView={action('fitView')}
+          onCenter={action('center')}
+          {...props}
+        />
+      </ReactFlowProvider>
     );
   },
   argTypes: {

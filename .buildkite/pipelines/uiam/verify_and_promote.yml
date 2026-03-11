@@ -36,9 +36,6 @@ steps:
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-4
       diskSizeGb: 115
     key: build_scout_tests
@@ -57,7 +54,7 @@ steps:
   - wait: ~
 
   - label: ':arrow_up::key::arrow_up: Promote UIAM docker image'
-    command: .buildkite/scripts/steps/uiam/promote_uiam_image.sh $UIAM_IMAGE
+    command: .buildkite/scripts/steps/uiam/promote_image.sh $UIAM_IMAGE
     key: promote-uiam-image
     if: "build.branch == 'main' || build.env('FORCE_PROMOTE') == 'true'"
     retry:

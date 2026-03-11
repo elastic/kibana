@@ -120,6 +120,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
+    initializeDrilldownsManager: jest.fn(),
     initialState: state,
     finalizeApi: (api) => {
       return {
@@ -140,6 +141,7 @@ describe('getLinksEmbeddableFactory', () => {
       title: 'my links',
       description: 'just a few links',
       hide_title: false,
+      hide_border: false,
       savedObjectId: '123',
     };
 
@@ -159,6 +161,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: false,
+        hide_border: false,
         savedObjectId: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
@@ -172,6 +175,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: false,
+        hide_border: false,
         links: getLinks(),
         layout: 'vertical',
       });
@@ -183,6 +187,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       hide_title: true,
+      hide_border: true,
       links: getLinks(),
       layout: 'horizontal',
     };
@@ -204,6 +209,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: true,
+        hide_border: true,
         links: getLinks(),
         layout: 'horizontal',
       });
@@ -226,6 +232,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: true,
+        hide_border: true,
         savedObjectId: '333',
       });
     });

@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
@@ -76,7 +77,13 @@ export const EPMHomePage: React.FC = () => {
     enabled: isAuthorizedToFetchSettings,
   });
 
-  const prereleaseIntegrationsEnabled = settings?.item.prerelease_integrations_enabled ?? false;
+  const { search } = useLocation();
+  const queryParams = useMemo(() => new URLSearchParams(search), [search]);
+  const prereleaseQueryParam = queryParams.get('prerelease') === 'true';
+
+  const prereleaseIntegrationsEnabled =
+    prereleaseQueryParam || (settings?.item.prerelease_integrations_enabled ?? false);
+
   const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
   // loading packages to find installed ones
   const { data: allPackages } = useGetPackagesQuery(
