@@ -189,6 +189,46 @@ describe('InternalStateStore', () => {
     });
   });
 
+  it('should only apply changed app state fields to previousStateSnapshotsByProfileId', async () => {
+    const { store, runtimeStateManager } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+      .scopedProfilesManager$.getValue()
+      .getContexts().dataSourceContext.profileId;
+
+    await store.dispatch(
+      internalStateActions.setAppState({
+        tabId,
+        appState: {
+          columns: ['field1'],
+          rowHeight: 3,
+          breakdownField: 'extension',
+        },
+      })
+    );
+
+    await store.dispatch(
+      internalStateActions.setAppState({
+        tabId,
+        appState: {
+          columns: ['field2'],
+          rowHeight: 3,
+          breakdownField: 'extension',
+        },
+      })
+    );
+
+    expect(
+      selectTab(store.getState(), tabId).resetDefaultProfileState.previousStateSnapshotsByProfileId
+    ).toEqual({
+      [profileId]: {
+        columns: ['field2'],
+        rowHeight: 3,
+        breakdownField: 'extension',
+      },
+    });
+  });
+
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
     const { store } = await createTestStore();
     const initialTabId = store.getState().tabs.unsafeCurrentId;

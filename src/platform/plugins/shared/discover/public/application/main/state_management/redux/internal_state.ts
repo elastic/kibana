@@ -9,7 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { pick, throttle } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
   type PayloadAction,
@@ -40,7 +40,9 @@ import {
 import {
   DEFAULT_PROFILE_STATE_FIELDS,
   TabsBarVisibility,
+  type DefaultProfileStateField,
   type DiscoverInternalState,
+  type PreviousStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -92,6 +94,14 @@ const withTab = <TPayload extends TabActionPayload>(
   if (tab) {
     fn(tab);
   }
+};
+
+const setPreviousStateSnapshotField = <TField extends DefaultProfileStateField>(
+  snapshot: PreviousStateSnapshot,
+  field: TField,
+  value: TabState['appState'][TField]
+) => {
+  snapshot[field] = value;
 };
 
 export const internalStateSlice = createSlice({
@@ -247,8 +257,18 @@ export const internalStateSlice = createSlice({
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
-        tab.resetDefaultProfileState.previousStateSnapshotsByProfileId[action.payload.profileId] =
-          pick(appState, DEFAULT_PROFILE_STATE_FIELDS);
+
+        const previousStateSnapshots =
+          tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
+        const previousStateSnapshot = previousStateSnapshots[action.payload.profileId] ?? {};
+
+        for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+          if (!isEqual(tab.previousAppState[field], tab.appState[field])) {
+            setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+          }
+        }
+
+        previousStateSnapshots[action.payload.profileId] = previousStateSnapshot;
       }),
 
     /**
