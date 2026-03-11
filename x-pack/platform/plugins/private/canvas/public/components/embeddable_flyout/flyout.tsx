@@ -9,8 +9,6 @@ import React, { useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { Props as ComponentProps } from './flyout.component';
 import { AddEmbeddableFlyout as Component } from './flyout.component';
-// @ts-expect-error untyped local
-import { addElement } from '../../state/actions/elements';
 import { useCanvasApi } from '../hooks/use_canvas_api';
 
 type FlyoutProps = Pick<ComponentProps, 'onClose'>;
@@ -35,21 +33,11 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
     return null;
   }
 
-  return createPortal(
-    <Component {...props} />,
-    el
-  );
+  return createPortal(<Component {...props} />, el);
 };
 
-export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
-  onClose
-}) => {
+export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({ onClose }) => {
   const canvasApi = useCanvasApi();
-  
-  return (
-    <EmbeddableFlyoutPortal
-      onClose={onClose}
-      container={canvasApi}
-    />
-  );
+
+  return <EmbeddableFlyoutPortal onClose={onClose} container={canvasApi} />;
 };

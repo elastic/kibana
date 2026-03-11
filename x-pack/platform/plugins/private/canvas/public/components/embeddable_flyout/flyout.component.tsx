@@ -19,9 +19,9 @@ import React, { useCallback, useMemo } from 'react';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { contentManagementService, coreServices } from '../../services/kibana_services';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { contentManagementService, coreServices } from '../../services/kibana_services';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 
 const strings = {
@@ -40,10 +40,7 @@ export interface Props {
   container: CanAddNewPanel;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  container,
-  onClose,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const libraryTypes = useAddFromLibraryTypes();
