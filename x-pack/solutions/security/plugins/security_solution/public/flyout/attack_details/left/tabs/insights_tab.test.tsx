@@ -18,10 +18,23 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 jest.mock('../../hooks/use_attack_details', () => ({
   useAttackDetails: jest.fn().mockReturnValue({
     loading: false,
+    attack: {
+      id: 'test-alert-1',
+      alertIds: ['alert-1'],
+      detectionEngineRuleId: 'rule-1',
+      ruleStatus: 'enabled',
+      ruleVersion: 1,
+      timestamp: '2024-01-01T00:00:00Z',
+      entities: { users: [], hosts: [] },
+      summaryMarkdown: '# Test Alert Summary',
+      mitreTactics: [],
+      mitreTechniques: [],
+    },
     browserFields: {},
     dataFormattedForFieldBrowser: [],
     searchHit: { _index: 'test', _id: 'test-id' },
     getFieldsData: jest.fn(),
+    refetch: jest.fn(),
   }),
 }));
 
