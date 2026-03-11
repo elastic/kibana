@@ -228,7 +228,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('events');
         expect(response.body).to.have.property('totalRecords');
         expect(response.body.totalRecords).to.equal(0);
-        expect(response.body.events).to.have.length(0);
+        expect(response.body.events).to.eql([]);
         expect(response.body).not.to.have.property('messages');
       });
 

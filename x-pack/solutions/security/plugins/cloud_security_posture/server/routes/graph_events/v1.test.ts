@@ -52,7 +52,7 @@ describe('getEvents', () => {
       indexPatterns: [`${SECURITY_ALERTS_PARTIAL_IDENTIFIER}custom-space`, 'logs-*'],
       spaceId: 'custom-space',
     });
-    expect(mockedParseEventRecords).toHaveBeenCalledWith(logger, [{ docId: 'doc-2' }]);
+    expect(mockedParseEventRecords).toHaveBeenCalledWith(logger, [{ docId: 'doc-2' }], ['doc-2']);
     expect(result).toEqual({
       events: [{ id: 'doc-2' }],
       totalRecords: 3,
@@ -74,7 +74,28 @@ describe('getEvents', () => {
     });
 
     expect(mockedFetchEvents).toHaveBeenCalledWith(expect.objectContaining({ eventIds: [] }));
-    expect(mockedParseEventRecords).toHaveBeenCalledWith(logger, []);
+    expect(mockedParseEventRecords).toHaveBeenCalledWith(logger, [], []);
     expect(result).toEqual({ events: [], totalRecords: 1 });
+  });
+
+  it('returns zero totalRecords when requested events are not found', async () => {
+    mockedFetchEvents.mockResolvedValue({ records: [] } as any);
+    mockedParseEventRecords.mockReturnValue({ events: [] } as any);
+
+    const result = await getEvents({
+      services: { esClient, logger },
+      query: {
+        eventIds: ['missing-event-id'],
+        start: 'now-1d',
+        end: 'now',
+      },
+      page: { index: 0, size: 10 },
+    });
+
+    expect(mockedFetchEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ eventIds: ['missing-event-id'] })
+    );
+    expect(mockedParseEventRecords).toHaveBeenCalledWith(logger, [], ['missing-event-id']);
+    expect(result).toEqual({ events: [], totalRecords: 0 });
   });
 });

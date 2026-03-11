@@ -254,7 +254,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
       });
 
-      it('should return an empty response when an entity is not found', async () => {
+      it('should return a fallback entity when an entity is not found', async () => {
         const response = await postGraphEntities(supertest, {
           query: {
             entityIds: ['missing-entity-id'],
@@ -267,8 +267,13 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(response.body).to.have.property('entities');
         expect(response.body).to.have.property('totalRecords');
-        expect(response.body.totalRecords).to.equal(0);
-        expect(response.body.entities).to.have.length(0);
+        expect(response.body.totalRecords).to.equal(1);
+        expect(response.body.entities).to.have.length(1);
+        expect(response.body.entities[0]).to.eql({
+          id: 'missing-entity-id',
+          name: 'missing-entity-id',
+          availableInEntityStore: false,
+        });
         expect(response.body).not.to.have.property('messages');
       });
 

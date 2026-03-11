@@ -9,26 +9,30 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { parseEventRecords } from './parse';
 
 describe('parseEventRecords', () => {
-  it('normalizes metadata and falls back actor names to the entity id', () => {
+  it('normalizes metadata, falls back actor names to the entity id, and keeps requested ids order', () => {
     const logger = loggingSystemMock.createLogger();
 
-    const result = parseEventRecords(logger, [
-      {
-        docId: 'doc-1',
-        index: 'logs-custom-default',
-        timestamp: '2024-01-01T00:00:00.000Z',
-        action: 'user-login',
-        isAlert: false,
-        actorEntityId: 'actor-1',
-        actorEcsParentField: 'user',
-        actorEntityName: null,
-        targetEntityId: 'target-1',
-        targetEcsParentField: 'host',
-        targetEntityName: 'Target Host',
-        sourceIps: '1.1.1.1',
-        sourceCountryCodes: ['US'],
-      },
-    ]);
+    const result = parseEventRecords(
+      logger,
+      [
+        {
+          docId: 'doc-1',
+          index: 'logs-custom-default',
+          timestamp: '2024-01-01T00:00:00.000Z',
+          action: 'user-login',
+          isAlert: false,
+          actorEntityId: 'actor-1',
+          actorEcsParentField: 'user',
+          actorEntityName: null,
+          targetEntityId: 'target-1',
+          targetEcsParentField: 'host',
+          targetEntityName: 'Target Host',
+          sourceIps: '1.1.1.1',
+          sourceCountryCodes: ['US'],
+        },
+      ],
+      ['doc-1']
+    );
 
     expect(result.events).toEqual([
       {
@@ -56,14 +60,18 @@ describe('parseEventRecords', () => {
   it('omits actor and target when entity ids are missing', () => {
     const logger = loggingSystemMock.createLogger();
 
-    const result = parseEventRecords(logger, [
-      {
-        docId: 'doc-2',
-        isAlert: true,
-        sourceIps: ['1.1.1.1', '2.2.2.2'],
-        sourceCountryCodes: null,
-      },
-    ]);
+    const result = parseEventRecords(
+      logger,
+      [
+        {
+          docId: 'doc-2',
+          isAlert: true,
+          sourceIps: ['1.1.1.1', '2.2.2.2'],
+          sourceCountryCodes: null,
+        },
+      ],
+      ['doc-2']
+    );
 
     expect(result.events).toEqual([
       {
@@ -75,5 +83,13 @@ describe('parseEventRecords', () => {
         countryCodes: undefined,
       },
     ]);
+  });
+
+  it('returns no events when a requested event is not found', () => {
+    const logger = loggingSystemMock.createLogger();
+
+    const result = parseEventRecords(logger, [], ['missing-event-id']);
+
+    expect(result.events).toEqual([]);
   });
 });

@@ -66,10 +66,12 @@ export const getEvents = async ({
     spaceId,
   });
 
-  const response = parseEventRecords(logger, results.records);
+  const response = parseEventRecords(logger, results.records, pageEventIds);
+  const totalRecords =
+    results.records.length === 0 && pageEventIds.length > 0 ? 0 : eventIds.length;
 
   return {
     ...response,
-    totalRecords: eventIds.length,
+    totalRecords,
   };
 };
