@@ -50,7 +50,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 
       if (logsDataView) {
         const isScheduled = !!scheduleId && executionCount != null;
-        const defaultFrom = isScheduled ? 'now-1y' : 'now-1d';
+        const defaultFrom = isScheduled ? 'now-7d' : 'now-1d';
         lensService?.navigateToPrefilledEditor(
           {
             id: '',
@@ -60,8 +60,8 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
             attributes: isScheduled
-              ? getLensAttributes(logsDataView, undefined, undefined, scheduleId, executionCount)
-              : getLensAttributes(logsDataView, actionId),
+              ? getLensAttributes(logsDataView, { scheduleId, executionCount })
+              : getLensAttributes(logsDataView, { actionId }),
           },
           {
             openInNewTab: true,
@@ -100,13 +100,18 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   );
 };
 
+interface LensAttributesOptions {
+  actionId?: string;
+  agentIds?: string[];
+  scheduleId?: string;
+  executionCount?: number;
+}
+
 function getLensAttributes(
   logsDataView: LogsDataView,
-  actionId?: string,
-  agentIds?: string[],
-  scheduleId?: string,
-  executionCount?: number
+  options: LensAttributesOptions = {}
 ): TypedLensByValueInput['attributes'] {
+  const { actionId, agentIds, scheduleId, executionCount } = options;
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['8690befd-fd69-4246-af4a-dd485d2a3b38', 'ed999e9d-204c-465b-897f-fe1a125b39ed'],
     columns: {

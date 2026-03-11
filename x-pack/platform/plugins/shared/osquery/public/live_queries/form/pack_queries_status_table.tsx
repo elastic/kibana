@@ -226,16 +226,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
+        timestamp={scheduleId ? startDate : undefined}
       />
     ),
-    [scheduleId, executionCount]
+    [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
     (item: any) => (
-      <PackViewInLensAction item={item} scheduleId={scheduleId} executionCount={executionCount} />
+      <PackViewInLensAction
+        item={item}
+        scheduleId={scheduleId}
+        executionCount={executionCount}
+        timestamp={scheduleId ? startDate : undefined}
+      />
     ),
-    [scheduleId, executionCount]
+    [scheduleId, executionCount, startDate]
   );
 
   const getHandleErrorsToggle = useCallback(

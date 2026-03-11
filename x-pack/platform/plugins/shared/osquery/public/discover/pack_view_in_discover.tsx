@@ -21,11 +21,13 @@ interface PackViewInActionProps {
   actionId?: string;
   scheduleId?: string;
   executionCount?: number;
+  timestamp?: string;
 }
 const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   item,
   scheduleId,
   executionCount,
+  timestamp,
 }) => {
   const isScheduled = !!scheduleId;
   const { action_id: actionId, interval } = item;
@@ -36,12 +38,16 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
   });
 
   const startDate = isScheduled
-    ? undefined
+    ? timestamp
+      ? moment(timestamp).subtract(1, 'hour').toISOString()
+      : undefined
     : lastResultsData?.lastResultTime
     ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
   const endDate = isScheduled
-    ? undefined
+    ? timestamp
+      ? moment(timestamp).add(1, 'hour').toISOString()
+      : undefined
     : lastResultsData?.lastResultTime
     ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
@@ -52,7 +58,7 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={isScheduled ? undefined : lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
+      mode={isScheduled ? (timestamp ? 'absolute' : undefined) : lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
       scheduleId={scheduleId}
       executionCount={executionCount}
     />

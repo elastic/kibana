@@ -92,9 +92,9 @@ export const useActionResults = ({
     () => {
       if (isScheduled) {
         return http.get<ActionResultsResponse>(
-          `/internal/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
           {
-            version: API_VERSIONS.internal.v1,
+            version: API_VERSIONS.public.v1,
             query: {
               page: activePage,
               pageSize: limit,

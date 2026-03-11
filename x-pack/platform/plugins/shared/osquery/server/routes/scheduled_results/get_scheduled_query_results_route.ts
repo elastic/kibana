@@ -27,8 +27,8 @@ export const getScheduledQueryResultsRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'internal',
-      path: '/internal/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
+      access: 'public',
+      path: '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
       security: {
         authz: {
           requiredPrivileges: [`${PLUGIN_ID}-read`],
@@ -37,7 +37,7 @@ export const getScheduledQueryResultsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object({

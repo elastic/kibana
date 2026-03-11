@@ -51,7 +51,10 @@ export const PackQueriesAttachmentWrapper = ({
   }, [liveData?.status, isScheduled]);
 
   const scheduledQueryData = useMemo(
-    () => (scheduledData ? mapScheduledDetailsToQueryData(scheduledData, scheduleId!) : undefined),
+    () =>
+      scheduledData && scheduleId
+        ? mapScheduledDetailsToQueryData(scheduledData, scheduleId)
+        : undefined,
     [scheduledData, scheduleId]
   );
 
@@ -59,8 +62,9 @@ export const PackQueriesAttachmentWrapper = ({
     return (
       <CasesAttachmentWrapperContext.Provider value={true}>
         <PackQueriesStatusTable
-          actionId={scheduleId!}
+          actionId={scheduleId || ''}
           data={scheduledQueryData}
+          startDate={scheduledData?.timestamp}
           scheduleId={scheduleId}
           executionCount={executionCount}
         />

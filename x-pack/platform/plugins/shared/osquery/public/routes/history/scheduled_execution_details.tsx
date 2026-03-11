@@ -118,7 +118,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         )}
       </EuiFlexGroup>
     ),
-    [historyNavProps, data, formattedTimestamp, executionLabelValues, packNavProps]
+    [historyNavProps, data, formattedTimestamp, packNavProps]
   );
 
   if (!isValid) {
@@ -140,6 +140,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         <PackQueriesStatusTable
           actionId={scheduleId}
           data={queryData}
+          startDate={data?.timestamp}
           showResultsHeader
           scheduleId={scheduleId}
           executionCount={executionCount}

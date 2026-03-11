@@ -21,14 +21,25 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
+interface ScheduledActionResultsAggregations {
+  aggs: {
+    responses_by_schedule: {
+      rows_count: { value: number };
+      responses: {
+        buckets: Array<{ key: string; doc_count: number }>;
+      };
+    };
+  };
+}
+
 export const getScheduledActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
   osqueryContext: OsqueryAppContext
 ) => {
   router.versioned
     .get({
-      access: 'internal',
-      path: '/internal/osquery/scheduled_results/{scheduleId}/{executionCount}',
+      access: 'public',
+      path: '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
       security: {
         authz: {
           requiredPrivileges: [`${PLUGIN_ID}-read`],
@@ -37,7 +48,7 @@ export const getScheduledActionResultsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object({
@@ -88,16 +99,11 @@ export const getScheduledActionResultsRoute = (
             )
           );
 
-          const aggs = (res.rawResponse?.aggregations as Record<string, unknown>)?.aggs as
-            | Record<string, unknown>
-            | undefined;
-          const responsesBySchedule = aggs?.responses_by_schedule as Record<string, unknown>;
-          const rowsCount = (responsesBySchedule?.rows_count as { value?: number })?.value ?? 0;
-          const responsesBuckets = (
-            responsesBySchedule?.responses as {
-              buckets?: Array<{ key: string; doc_count: number }>;
-            }
-          )?.buckets;
+          const aggs = res.rawResponse
+            ?.aggregations as ScheduledActionResultsAggregations | undefined;
+          const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
+          const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
+          const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
           const successful = responsesBuckets?.find((b) => b.key === 'success')?.doc_count ?? 0;
           const failed = responsesBuckets?.find((b) => b.key === 'error')?.doc_count ?? 0;
