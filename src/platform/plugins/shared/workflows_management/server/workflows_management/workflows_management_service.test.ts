@@ -231,7 +231,7 @@ describe('WorkflowsService', () => {
             },
           },
           size: 1000,
-          sort: [{ updated_at: { order: 'desc' } }, { _id: { order: 'desc' } }],
+          sort: [{ updated_at: { order: 'desc' } }, '_shard_doc'],
         })
       );
       expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });
@@ -251,19 +251,20 @@ describe('WorkflowsService', () => {
     });
 
     it('should page with search_after when results exceed page size', async () => {
-      const createHit = (id: string, updatedAt: string) => ({
+      // sort is [updated_at, _shard_doc]; _shard_doc is a numeric tie-breaker (we use index for mock)
+      const createHit = (id: string, updatedAt: string, shardDoc: number) => ({
         _id: id,
         _source: {
           ...mockWorkflowDocument._source,
           triggerTypes: ['cases.updated'],
           updated_at: updatedAt,
         },
-        sort: [updatedAt, id],
+        sort: [updatedAt, shardDoc],
       });
       const page1Hits = Array.from({ length: 1000 }, (_, i) =>
-        createHit(`wf-${i}`, '2025-01-02T00:00:00.000Z')
+        createHit(`wf-${i}`, '2025-01-02T00:00:00.000Z', i)
       );
-      const page2Hits = [createHit('wf-1000', '2025-01-01T00:00:00.000Z')];
+      const page2Hits = [createHit('wf-1000', '2025-01-01T00:00:00.000Z', 1000)];
 
       mockEsClient.search
         .mockResolvedValueOnce({
@@ -286,7 +287,7 @@ describe('WorkflowsService', () => {
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          search_after: ['2025-01-02T00:00:00.000Z', 'wf-999'],
+          search_after: ['2025-01-02T00:00:00.000Z', 999],
         })
       );
       expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });

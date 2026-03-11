@@ -744,7 +744,7 @@ export class WorkflowsService {
     const pageSize = 1000;
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
-    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, { _id: { order: 'desc' } }];
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
     const query = {
       bool: {
         must: [
