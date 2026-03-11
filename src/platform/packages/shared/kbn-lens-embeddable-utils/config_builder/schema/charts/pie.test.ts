@@ -185,7 +185,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['success'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 6,
                     },
@@ -193,7 +193,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['info'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 9,
                     },
@@ -201,7 +201,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['security'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 4,
                     },
@@ -209,7 +209,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['__other__'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 5,
                     },
@@ -788,7 +788,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['success'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 6,
                     },
@@ -796,7 +796,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['info'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 9,
                     },
@@ -804,7 +804,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['security'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 4,
                     },
@@ -812,7 +812,7 @@ describe('Pie/Donut Schema', () => {
                   {
                     values: ['__other__'],
                     color: {
-                      type: 'from_palette',
+                      type: 'color_from_palette',
                       palette: 'default',
                       index: 5,
                     },

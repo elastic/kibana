@@ -268,7 +268,7 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'from_palette', palette: 'default', index: 0 },
+            color: { type: 'color_from_palette', palette: 'default', index: 0 },
           },
         ],
         unassigned_color: { type: 'color_code', value: 'green' },
@@ -285,7 +285,7 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'from_palette', palette: 'default', index: 0 },
+            color: { type: 'color_from_palette', palette: 'default', index: 0 },
           },
         ],
       };
@@ -301,7 +301,7 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'from_palette', palette: 'default', index: 0 },
+            color: { type: 'color_from_palette', palette: 'default', index: 0 },
           },
           {
             values: ['value4', 'value5', 'value6'],
@@ -321,12 +321,12 @@ describe('Color Schema', () => {
         mapping: [{ values: ['low', 'medium', 'high'] }],
         gradient: [
           {
-            type: 'from_palette',
+            type: 'color_from_palette',
             index: 0,
             palette: 'default',
           },
           {
-            type: 'from_palette',
+            type: 'color_from_palette',
             index: 2,
             palette: 'default',
           },
@@ -344,12 +344,12 @@ describe('Color Schema', () => {
         mapping: [{ values: ['low', 'medium', 'high'] }],
         gradient: [
           {
-            type: 'from_palette',
+            type: 'color_from_palette',
             index: 0,
             palette: 'default',
           },
           {
-            type: 'from_palette',
+            type: 'color_from_palette',
             index: 2,
             palette: 'default',
           },

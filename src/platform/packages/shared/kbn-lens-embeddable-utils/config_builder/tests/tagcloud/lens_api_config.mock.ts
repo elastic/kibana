@@ -117,7 +117,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
         {
           values: ['CN'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 0,
           },
@@ -125,7 +125,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
         {
           values: ['IN'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 1,
           },
@@ -133,7 +133,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
         {
           values: ['ID'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 2,
           },
@@ -180,7 +180,7 @@ export const comprehensiveTagcloudWithDataView = {
         {
           values: ['CN'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 0,
           },
@@ -188,7 +188,7 @@ export const comprehensiveTagcloudWithDataView = {
         {
           values: ['IN'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 1,
           },
@@ -196,7 +196,7 @@ export const comprehensiveTagcloudWithDataView = {
         {
           values: ['ID'],
           color: {
-            type: 'from_palette',
+            type: 'color_from_palette',
             palette: 'default',
             index: 2,
           },

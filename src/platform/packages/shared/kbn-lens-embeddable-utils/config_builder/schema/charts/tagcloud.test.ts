@@ -87,7 +87,7 @@ describe('Tagcloud Schema', () => {
             mapping: [
               {
                 values: ['value1', 'value2', 'value3'],
-                color: { type: 'from_palette', palette: 'default', index: 0 },
+                color: { type: 'color_from_palette', palette: 'default', index: 0 },
               },
             ],
             unassigned_color: { type: 'color_code', value: '#cccccc' },

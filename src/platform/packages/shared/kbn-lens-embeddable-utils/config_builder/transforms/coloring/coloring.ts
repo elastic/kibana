@@ -228,7 +228,7 @@ function fromColorLensStateToAPI(
     };
   }
   return {
-    type: 'from_palette',
+    type: 'color_from_palette',
     palette: color.paletteId,
     index: color.colorIndex,
   };
