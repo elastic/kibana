@@ -29,6 +29,14 @@ export type RulesSavedObjectsBulkGetResultItem =
       error: SavedObjectError;
     };
 
+export type BulkDeleteResult = Array<
+  { id: string; success: true } | { id: string; success: false; error: SavedObjectError }
+>;
+
+export type BulkUpdateResultItem =
+  | { id: string; success: true }
+  | { id: string; success: false; error: SavedObjectError };
+
 export interface RulesSavedObjectServiceContract {
   create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
   get(
@@ -37,7 +45,11 @@ export interface RulesSavedObjectServiceContract {
   ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
+  bulkUpdate(
+    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+  ): Promise<BulkUpdateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
+  bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
   find(params: { page: number; perPage: number }): Promise<{
     saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
     total: number;
@@ -120,8 +132,53 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
+  public async bulkUpdate(
+    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+  ): Promise<BulkUpdateResultItem[]> {
+    if (items.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkUpdate<RuleSavedObjectAttributes>(
+      items.map((item) => ({
+        type: RULE_SAVED_OBJECT_TYPE,
+        id: item.id,
+        attributes: item.attrs,
+        ...(item.version ? { version: item.version } : {}),
+      }))
+    );
+
+    return result.saved_objects.map((doc) => {
+      if ('error' in doc && doc.error) {
+        return { id: doc.id, success: false as const, error: doc.error };
+      }
+      return { id: doc.id, success: true as const };
+    });
+  }
+
   public async delete({ id }: { id: string }): Promise<void> {
     await this.client.delete(RULE_SAVED_OBJECT_TYPE, id);
+  }
+
+  public async bulkDelete(ids: string[]): Promise<BulkDeleteResult> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkDelete(
+      ids.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id }))
+    );
+
+    return result.statuses.map((status) => {
+      if (status.success) {
+        return { id: status.id, success: true as const };
+      }
+      return {
+        id: status.id,
+        success: false as const,
+        error: status.error ?? { error: 'Unknown', message: 'Unknown error', statusCode: 500 },
+      };
+    });
   }
 
   public async find({ page, perPage }: { page: number; perPage: number }) {
