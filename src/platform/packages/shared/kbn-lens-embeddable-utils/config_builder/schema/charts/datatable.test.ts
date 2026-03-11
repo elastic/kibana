@@ -723,7 +723,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
@@ -819,7 +819,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
@@ -864,7 +864,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
