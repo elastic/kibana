@@ -17,7 +17,6 @@ interface UseCursorPaginationReturn {
   currentCursor: string | undefined;
   pageIndex: number;
   goToNextPage: (nextCursor: string) => void;
-  goToPreviousPage: () => void;
   goToPage: (targetIndex: number) => void;
   resetPagination: () => void;
 }
@@ -37,22 +36,6 @@ export const useCursorPagination = (): UseCursorPaginationReturn => {
       currentCursor: nextCursor,
       pageIndex: prev.pageIndex + 1,
     }));
-  }, []);
-
-  const goToPreviousPage = useCallback(() => {
-    setState((prev) => {
-      if (prev.cursorStack.length <= 1) {
-        return INITIAL_STATE;
-      }
-
-      const newStack = prev.cursorStack.slice(0, -1);
-
-      return {
-        cursorStack: newStack,
-        currentCursor: newStack[newStack.length - 1],
-        pageIndex: prev.pageIndex - 1,
-      };
-    });
   }, []);
 
   const goToPage = useCallback((targetIndex: number) => {
@@ -78,7 +61,6 @@ export const useCursorPagination = (): UseCursorPaginationReturn => {
     currentCursor: state.currentCursor,
     pageIndex: state.pageIndex,
     goToNextPage,
-    goToPreviousPage,
     goToPage,
     resetPagination,
   };

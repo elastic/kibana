@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFilterButton, EuiFilterSelectItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SourceFilter } from '../../../common/api/unified_history/types';
 
@@ -37,6 +38,7 @@ const SOURCE_OPTIONS: SourceOption[] = [
 ];
 
 const PANEL_PROPS = { 'data-test-subj': 'history-source-filter-popover' };
+const POPOVER_CONTENT_STYLE = { width: 200 };
 
 interface SourceFilterPopoverProps {
   selectedSources: SourceFilter[];
@@ -48,16 +50,28 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
   onSelectedSourcesChanged,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedSet = useMemo(() => new Set(selectedSources), [selectedSources]);
 
-  const handleToggle = useCallback(
-    (key: SourceFilter) => {
-      const updated = selectedSet.has(key)
+  const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
+    const selectedSet = new Set(selectedSources);
+
+    return SOURCE_OPTIONS.map(({ key, label }) => ({
+      label,
+      key,
+      checked: selectedSet.has(key) ? 'on' : undefined,
+      'data-test-subj': `history-source-filter-${key}`,
+    }));
+  }, [selectedSources]);
+
+  const handleChange = useCallback(
+    (_: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
+      const key = changedOption.key as SourceFilter;
+      const isRemoving = selectedSources.includes(key);
+      const updated = isRemoving
         ? selectedSources.filter((s) => s !== key)
         : [...selectedSources, key];
       onSelectedSourcesChanged(updated);
     },
-    [selectedSources, selectedSet, onSelectedSourcesChanged]
+    [selectedSources, onSelectedSourcesChanged]
   );
 
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -90,18 +104,9 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
       repositionOnScroll
       panelProps={PANEL_PROPS}
     >
-      <EuiPopoverTitle paddingSize="s">{SOURCE_LABEL}</EuiPopoverTitle>
-      {SOURCE_OPTIONS.map(({ key, label }) => (
-        <EuiFilterSelectItem
-          key={key}
-          checked={selectedSet.has(key) ? 'on' : undefined}
-          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-          onClick={() => handleToggle(key)}
-          data-test-subj={`history-source-filter-${key}`}
-        >
-          {label}
-        </EuiFilterSelectItem>
-      ))}
+      <EuiSelectable aria-label={SOURCE_LABEL} options={selectableOptions} onChange={handleChange}>
+        {(list) => <div style={POPOVER_CONTENT_STYLE}>{list}</div>}
+      </EuiSelectable>
     </EuiPopover>
   );
 };

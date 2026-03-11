@@ -36,36 +36,6 @@ describe('useCursorPagination', () => {
     expect(result.current.currentCursor).toBe('cursor-3');
   });
 
-  it('goToPreviousPage goes back one page', () => {
-    const { result } = renderHook(() => useCursorPagination());
-
-    act(() => result.current.goToNextPage('cursor-1'));
-    act(() => result.current.goToNextPage('cursor-2'));
-    act(() => result.current.goToPreviousPage());
-
-    expect(result.current.pageIndex).toBe(1);
-    expect(result.current.currentCursor).toBe('cursor-1');
-  });
-
-  it('goToPreviousPage from page 1 resets to initial state', () => {
-    const { result } = renderHook(() => useCursorPagination());
-
-    act(() => result.current.goToNextPage('cursor-1'));
-    act(() => result.current.goToPreviousPage());
-
-    expect(result.current.pageIndex).toBe(0);
-    expect(result.current.currentCursor).toBeUndefined();
-  });
-
-  it('goToPreviousPage from page 0 stays at initial state', () => {
-    const { result } = renderHook(() => useCursorPagination());
-
-    act(() => result.current.goToPreviousPage());
-
-    expect(result.current.pageIndex).toBe(0);
-    expect(result.current.currentCursor).toBeUndefined();
-  });
-
   it('goToPage navigates backward to a specific page', () => {
     const { result } = renderHook(() => useCursorPagination());
 

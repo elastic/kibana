@@ -11,6 +11,7 @@ import { EuiEmptyPrompt, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
+import { pagePathGetters } from '../../common/page_paths';
 
 const ScheduledExecutionDetailsPageComponent = () => {
   const { scheduleId, executionCount } = useParams<{
@@ -25,10 +26,11 @@ const ScheduledExecutionDetailsPageComponent = () => {
     executionCount: executionCount ?? '',
   });
 
-  const historyNavProps = useRouterNavigate('/history');
+  const historyPath = pagePathGetters.history();
+  const historyNavProps = useRouterNavigate(historyPath);
 
   if (!isValid) {
-    return <Redirect to="/history" />;
+    return <Redirect to={historyPath} />;
   }
 
   return (

@@ -18,6 +18,7 @@ import {
   createMockLiveRow,
   createMockPackLiveRow,
   createMockRuleRow,
+  createMockScheduledRow,
   defaultPermissions,
   noRunPermissions,
   resetMockCounter,
@@ -322,5 +323,95 @@ describe('UnifiedHistoryTable', () => {
     const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
+  });
+
+  describe('scheduled rows', () => {
+    it('renders scheduled row in the table', () => {
+      const rows = [createMockScheduledRow()];
+      mockHistory({ data: rows });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByTestId('unifiedHistoryTable')).toBeInTheDocument();
+      expect(screen.getAllByRole('row')).toHaveLength(rows.length + 1);
+    });
+
+    it('source column shows Scheduled for scheduled row', () => {
+      const row = createMockScheduledRow();
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('Scheduled')).toBeInTheDocument();
+    });
+
+    it('query column shows query name with pack badge for scheduled row', () => {
+      const row = createMockScheduledRow({
+        queryName: 'os_version_query',
+        packName: 'Monitoring Pack',
+        packId: 'pack-m1',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('os_version_query')).toBeInTheDocument();
+      expect(screen.getByText('Monitoring Pack')).toBeInTheDocument();
+    });
+
+    it('results column shows totalRows for scheduled row', () => {
+      const row = createMockScheduledRow({ totalRows: 20 });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('20')).toBeInTheDocument();
+    });
+
+    it('run by column shows em dash for scheduled row', () => {
+      const row = createMockScheduledRow();
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('\u2014')).toBeInTheDocument();
+    });
+
+    it('play button is not available for scheduled rows', () => {
+      const row = createMockScheduledRow();
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
+    });
+
+    it('details button navigates to scheduled execution route', () => {
+      const row = createMockScheduledRow({
+        scheduleId: 'sched-1',
+        executionCount: 3,
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      const detailsButtons = screen.getAllByLabelText('Details');
+      expect(detailsButtons[0].closest('a')).toHaveAttribute(
+        'href',
+        '/history/scheduled/sched-1/3'
+      );
+    });
+
+    it('renders mixed live and scheduled rows together', () => {
+      const rows = [createMockLiveRow(), createMockScheduledRow(), createMockRuleRow()];
+      mockHistory({ data: rows });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getAllByRole('row')).toHaveLength(rows.length + 1);
+      expect(screen.getByText('Live')).toBeInTheDocument();
+      expect(screen.getByText('Scheduled')).toBeInTheDocument();
+      expect(screen.getByText('Rule')).toBeInTheDocument();
+    });
   });
 });
