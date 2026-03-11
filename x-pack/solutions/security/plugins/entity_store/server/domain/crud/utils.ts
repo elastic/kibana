@@ -22,7 +22,6 @@ const GENERIC_TYPE = 'generic' as EntityType;
 
 export function hashEuid(id: string): string {
   // EUID generation uses MD5. It is not a security-related feature.
-  // eslint-disable-next-line @kbn/eslint/no_unsafe_hash
   return createHash('md5').update(id).digest('hex');
 }
 
