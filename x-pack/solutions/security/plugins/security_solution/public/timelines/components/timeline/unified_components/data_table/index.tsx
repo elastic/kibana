@@ -144,6 +144,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       theme,
       data: dataPluginContract,
       overlays,
+      uiActions,
     } = services;
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
@@ -329,6 +330,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         uiSettings,
         dataViewFieldEditor,
         data: dataPluginContract,
+        uiActions,
       };
     }, [
       theme,
@@ -338,6 +340,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       uiSettings,
       dataViewFieldEditor,
       dataPluginContract,
+      uiActions,
     ]);
 
     const enabledRowRenderers = useMemo(() => {

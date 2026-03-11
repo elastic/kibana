@@ -270,6 +270,7 @@ export const CloudSecurityDataTable = ({
     toastNotifications,
     storage,
     data,
+    uiActions,
   };
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {

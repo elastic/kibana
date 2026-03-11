@@ -140,6 +140,7 @@ export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
                     toastNotifications: services.notifications.toasts,
                     storage: services.storage,
                     data: services.data,
+                    uiActions: services.uiActions,
                   }}
                   ariaLabelledBy={i18n.translate('xpack.slo.edit.documentsTableAriaLabel', {
                     defaultMessage: 'Documents table',
