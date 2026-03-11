@@ -76,6 +76,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
       } else {
         updated.push(tag);
       }
+
       onSelectedTagsChanged(updated);
     },
     [selectedTags, onSelectedTagsChanged]

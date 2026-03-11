@@ -331,10 +331,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           )}
           {isHistoryEnabled && (
             <EuiFlexItem>
-              <TagsEditor
-                tags={watchedValues.tags ?? []}
-                onChange={handleTagsChange}
-              />
+              <TagsEditor tags={watchedValues.tags ?? []} onChange={handleTagsChange} />
             </EuiFlexItem>
           )}
           {queryType === 'pack' ? (

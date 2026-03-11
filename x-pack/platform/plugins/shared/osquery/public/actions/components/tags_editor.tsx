@@ -50,9 +50,7 @@ const TagsEditorComponent: React.FC<TagsEditorProps> = ({
   const options: EuiComboBoxOptionOption[] = useMemo(() => {
     const tagSet = new Set(tags);
 
-    return availableTags
-      .filter((tag) => !tagSet.has(tag))
-      .map((tag) => ({ label: tag, key: tag }));
+    return availableTags.filter((tag) => !tagSet.has(tag)).map((tag) => ({ label: tag, key: tag }));
   }, [availableTags, tags]);
 
   const handleChange = useCallback(
