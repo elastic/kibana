@@ -200,6 +200,10 @@ export const useDiscoverHistogram = (
 
   const dataView = useCurrentDataView();
 
+  // Use enriched DataView for ES|QL mode when available
+  const esqlDataView = documentsState?.esqlDataView;
+  const effectiveDataView = isEsqlMode && esqlDataView ? esqlDataView : dataView;
+
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const query = useAppStateSelector((state) => state.query);
@@ -221,7 +225,7 @@ export const useDiscoverHistogram = (
     return {
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
-      dataView,
+      dataView: effectiveDataView,
       query,
       filters,
       timeRange,
@@ -238,7 +242,7 @@ export const useDiscoverHistogram = (
     breakdownField,
     timeInterval,
     currentTabControlState,
-    dataView,
+    effectiveDataView,
     esqlVariables,
     filters,
     inspectorAdapters.requests,
