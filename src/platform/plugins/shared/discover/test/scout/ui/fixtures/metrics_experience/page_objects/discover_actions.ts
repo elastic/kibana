@@ -28,7 +28,7 @@ export class DiscoverActions {
       name: queryLabel,
     });
 
-    await expect(queryOption).toBeVisible({ timeout: 30_000 });
+    await expect(queryOption).toBeVisible();
     await queryOption.click();
     await this.discover.waitUntilSearchingHasFinished();
   }
@@ -57,17 +57,12 @@ export class DiscoverActions {
       await sidebarToggleButton.click();
     }
 
+    await this.discover.waitUntilFieldListHasCountOfFields();
     await expect(this.page.testSubj.locator(`field-${field}`)).toBeVisible();
-
-    // The sidebar can re-render after the field popover opens, dismissing it.
-    // Retry the click + popover check as a unit until both succeed.
-    await expect(async () => {
-      await this.page.testSubj.locator(`field-${field}`).click();
-      await expect(
-        this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`)
-      ).toBeVisible({ timeout: 3_000 });
-    }).toPass({ timeout: 30_000 });
-
+    await this.page.testSubj.locator(`field-${field}`).click();
+    await expect(
+      this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`)
+    ).toBeVisible();
     await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
     await this.discover.waitUntilSearchingHasFinished();
   }
