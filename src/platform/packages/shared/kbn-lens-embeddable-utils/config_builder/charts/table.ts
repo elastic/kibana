@@ -75,7 +75,7 @@ function getValueColumns(layer: LensTableConfig) {
     throw new Error('breakdown must be a field name when not using index source');
   }
   if (layer.splitBy && layer.splitBy.filter((s) => typeof s !== 'string').length) {
-    throw new Error('xAxis must be a field name when not using index source');
+    throw new Error('x_axis must be a field name when not using index source');
   }
   return [
     ...(layer.breakdown

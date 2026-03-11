@@ -87,10 +87,10 @@ describe('Tagcloud Schema', () => {
             mapping: [
               {
                 values: ['value1', 'value2', 'value3'],
-                color: { type: 'from_palette', palette: 'default', index: 0 },
+                color: { type: 'color_from_palette', palette: 'default', index: 0 },
               },
             ],
-            unassignedColor: { type: 'colorCode', value: '#cccccc' },
+            unassigned_color: { type: 'color_code', value: '#cccccc' },
           },
         },
       };
@@ -386,8 +386,8 @@ describe('Tagcloud Schema', () => {
               mode: 'gradient',
               palette: 'kibana_palette',
               gradient: [
-                { type: 'colorCode', value: '#ff0000' },
-                { type: 'colorCode', value: '#00ff00' },
+                { type: 'color_code', value: '#ff0000' },
+                { type: 'color_code', value: '#00ff00' },
               ],
             },
           },

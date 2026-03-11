@@ -228,7 +228,7 @@ function fromColorLensStateToAPI(
     };
   }
   return {
-    type: 'from_palette',
+    type: 'color_from_palette',
     palette: color.paletteId,
     index: color.colorIndex,
   };
@@ -253,7 +253,7 @@ function fromUnassignedColorLensStateToAPI(
     return {};
   }
   const unassignedColor = fromColorLensStateToAPI(color);
-  if (unassignedColor.type === 'from_palette') {
+  if (unassignedColor.type === 'color_from_palette') {
     return {};
   }
   return { unassignedColor };

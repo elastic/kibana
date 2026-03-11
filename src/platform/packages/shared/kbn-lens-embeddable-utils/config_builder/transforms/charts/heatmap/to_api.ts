@@ -116,8 +116,8 @@ function reverseBuildVisualizationState(
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
       },
-      xAxis: getValueApiColumn(visualization.xAccessor, layer),
-      ...(visualization.yAccessor && { yAxis: getValueApiColumn(visualization.yAccessor, layer) }),
+      x_axis: getValueApiColumn(visualization.xAccessor, layer),
+      ...(visualization.yAccessor && { y_axis: getValueApiColumn(visualization.yAccessor, layer) }),
     } satisfies HeatmapStateESQL;
   }
 
@@ -136,8 +136,8 @@ function reverseBuildVisualizationState(
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,
     } as LensApiAllMetricOperations,
-    xAxis: operationFromColumn(visualization.xAccessor!, layer),
-    yAxis: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
+    x_axis: operationFromColumn(visualization.xAccessor!, layer),
+    y_axis: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
   } as HeatmapStateNoESQL;
 }
 

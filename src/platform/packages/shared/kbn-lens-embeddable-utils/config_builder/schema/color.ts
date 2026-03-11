@@ -214,19 +214,19 @@ export const staticColorSchema = schema.object(
 
 const colorFromPaletteSchema = schema.object(
   {
-    type: schema.literal('from_palette'),
+    type: schema.literal('color_from_palette'),
     index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
     palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
   },
-  { meta: { id: 'colorFromPalette', title: 'Color From Palette' } }
+  { meta: { id: 'color_from_palette', title: 'Color From Palette' } }
 );
 
 const colorCodeSchema = schema.object(
   {
-    type: schema.literal('colorCode'),
+    type: schema.literal('color_code'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'colorCode', title: 'Color Code' } }
+  { meta: { id: 'color_code', title: 'Color Code' } }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
@@ -244,9 +244,9 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassigned_color: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
+  { meta: { id: 'categorical_color_mapping', title: 'Categorical Color Mapping' } }
 );
 
 const gradientColorMappingSchema = schema.object(
@@ -264,9 +264,9 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassigned_color: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
+  { meta: { id: 'gradient_color_mapping', title: 'Gradient Color Mapping' } }
 );
 
 export const colorMappingSchema = schema.oneOf(
@@ -280,7 +280,7 @@ export const colorMappingSchema = schema.oneOf(
      */
     gradientColorMappingSchema,
   ],
-  { meta: { id: 'colorMapping', title: 'Color Mapping' } }
+  { meta: { id: 'color_mapping', title: 'Color Mapping' } }
 );
 
 export const allColoringTypeSchema = schema.oneOf([

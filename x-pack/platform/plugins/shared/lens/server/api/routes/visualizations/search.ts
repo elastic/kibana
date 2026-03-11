@@ -100,7 +100,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
             }),
             meta: {
               page,
-              perPage,
+              per_page: perPage,
               total: pagination.total,
             },
           },

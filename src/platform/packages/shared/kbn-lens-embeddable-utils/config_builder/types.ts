@@ -85,7 +85,7 @@ export interface LensBaseLayer {
 
 export interface LensBaseXYLayer {
   dataset?: LensDataset;
-  yAxis: LensBaseLayer[];
+  y_axis: LensBaseLayer[];
 }
 
 export type LensConfig =
@@ -243,7 +243,7 @@ export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** field name to apply breakdown based on field type or full breakdown configuration */
   breakdown?: LensBreakdownConfig;
-  xAxis: LensBreakdownConfig;
+  x_axis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
 }
 
@@ -251,7 +251,7 @@ export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHe
 
 export interface LensReferenceLineLayerBase {
   type: 'reference';
-  yAxis: Array<
+  y_axis: Array<
     LensBaseLayer & {
       lineThickness?: number;
       color?: string;

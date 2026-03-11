@@ -28,7 +28,7 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
     layerType: 'data',
     shape: 'heatmap',
     valueAccessor: ACCESSOR,
-    ...(layer.xAxis
+    ...(layer.x_axis
       ? {
           xAccessor: getAccessorName('x'),
         }
@@ -64,10 +64,10 @@ function buildFormulaLayer(
     ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
   };
 
-  if (layer.xAxis) {
+  if (layer.x_axis) {
     const columnName = getAccessorName('x');
     const breakdownColumn = getBreakdownColumn({
-      options: layer.xAxis,
+      options: layer.x_axis,
       dataView,
     });
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
@@ -89,12 +89,12 @@ function getValueColumns(layer: LensHeatmapConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
-  if (typeof layer.xAxis !== 'string') {
-    throw new Error('xAxis must be a field name when not using index source');
+  if (typeof layer.x_axis !== 'string') {
+    throw new Error('x_axis must be a field name when not using index source');
   }
   return [
     ...(layer.breakdown ? [getValueColumn(getAccessorName('y'), layer.breakdown as string)] : []),
-    getValueColumn(getAccessorName('x'), layer.xAxis as string),
+    getValueColumn(getAccessorName('x'), layer.x_axis as string),
     getValueColumn(ACCESSOR, layer.value),
   ];
 }
