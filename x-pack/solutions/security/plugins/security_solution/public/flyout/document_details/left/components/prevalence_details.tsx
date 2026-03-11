@@ -66,6 +66,10 @@ const DEFAULT_TO = 'now';
 
 // This variable is used to track if the cold/frozen tier callout has been dismissed in the current tab session.
 let isColdFrozenTierCalloutDismissedInTab = false;
+// This function is used in tests to reset the callout dismissed state between tests, as the variable is shared across the entire tab session.
+export const resetColdFrozenTierCalloutDismissedStateForTests = () => {
+  isColdFrozenTierCalloutDismissedInTab = false;
+};
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data

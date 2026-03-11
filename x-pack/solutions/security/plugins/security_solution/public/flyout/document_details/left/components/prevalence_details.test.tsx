@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { PrevalenceDetails } from './prevalence_details';
 import {
+  PrevalenceDetails,
+  resetColdFrozenTierCalloutDismissedStateForTests,
+} from './prevalence_details';
+import {
+  PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
@@ -144,6 +148,7 @@ describe('PrevalenceDetails', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetColdFrozenTierCalloutDismissedStateForTests();
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
@@ -447,6 +452,53 @@ describe('PrevalenceDetails', () => {
     expect(
       queryByTestId(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
     ).not.toBeInTheDocument();
+  });
+
+  it('should keep callout hidden in same tab session after dismissing and opening another alert flyout', () => {
+    const { getByTestId, queryByTestId, unmount } = renderPrevalenceDetails();
+
+    fireEvent.click(
+      getByTestId(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID)
+    );
+    expect(
+      queryByTestId(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+    ).not.toBeInTheDocument();
+
+    unmount();
+
+    const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider
+          value={
+            { ...panelContextValue, eventId: 'event id 2' } as unknown as DocumentDetailsContext
+          }
+        >
+          <PrevalenceDetails />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(
+      queryByTestIdAfterOpeningAnotherFlyout(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
+
+  it('should show callout again after page refresh', () => {
+    const { getByTestId, queryByTestId } = renderPrevalenceDetails();
+
+    fireEvent.click(
+      getByTestId(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID)
+    );
+    expect(
+      queryByTestId(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+    ).not.toBeInTheDocument();
+
+    resetColdFrozenTierCalloutDismissedStateForTests();
+    const { getByTestId: getByTestIdAfterRefresh } = renderPrevalenceDetails();
+
+    expect(
+      getByTestIdAfterRefresh(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+    ).toBeInTheDocument();
   });
 
   it('should use default interval values to fetch prevalence data', () => {
