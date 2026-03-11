@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // Blocked by https://github.com/elastic/kibana/issues/184621
+    // FLAKY: https://github.com/elastic/kibana/issues/239363
     it.skip('Access with valid user role', async () => {
       await cspSecurity.logout();
       await cspSecurity.login('csp_read_user');
