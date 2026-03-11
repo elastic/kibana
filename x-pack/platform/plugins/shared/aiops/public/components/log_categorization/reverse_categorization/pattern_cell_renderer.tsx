@@ -45,7 +45,7 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
         <EuiText size="s">
           <strong>
             <FormattedMessage
-              id="discover.contextAwareness.patternCellRenderer.tokensLabel"
+              id="aiops.logCategorization.reverseCategorization.patternCellRenderer.tokensLabel"
               defaultMessage="Tokens"
             />
           </strong>
@@ -58,7 +58,7 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
         <EuiText size="s">
           <strong>
             <FormattedMessage
-              id="discover.contextAwareness.patternCellRenderer.regexLabel"
+              id="aiops.logCategorization.reverseCategorization.patternCellRenderer.regexLabel"
               defaultMessage="Regex"
             />
           </strong>
