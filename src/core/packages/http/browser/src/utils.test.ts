@@ -18,6 +18,15 @@ describe('buildPath', () => {
     ).toBe('/api/myapi/..%2F..%2Ftest');
   });
 
+  it('encodes two required path parameters', () => {
+    expect(
+      buildPath('/api/myapi/{id}/{name}', {
+        id: 'hello//',
+        name: '//world',
+      })
+    ).toBe('/api/myapi/hello%2F%2F/%2F%2Fworld');
+  });
+
   it('removes optional path segments when the parameter is present', () => {
     expect(buildPath('/api/myapi/{section}/{id?}', { section: 'test', id: 'tada' })).toBe(
       '/api/myapi/test/tada'
