@@ -177,22 +177,22 @@ const PageContentComponent: React.FC<PageContentProps> = ({
     [ruleTypeIdsByFeatureId]
   );
 
-  const hasObservabilityAccess = useMemo(() => {
-    const { capabilities } = application;
-    const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
-    const logs = capabilities.logs?.show;
-    return [apm, metrics, uptime, synthetics, slo, logs].some(Boolean);
-  }, [application]);
+  const { capabilities } = application;
+  const hasObservabilityAccess = [
+    capabilities.navLinks.apm,
+    capabilities.navLinks.metrics,
+    capabilities.navLinks.uptime,
+    capabilities.navLinks.synthetics,
+    capabilities.navLinks.slo,
+    capabilities.logs?.show,
+  ].some(Boolean);
 
-  const alertDetailsNavigation = useMemo<AlertDetailsNavigation | undefined>(() => {
-    if (hasObservabilityAccess) {
-      return {
+  const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
+    ? {
         appId: 'observability',
         getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
-      };
-    }
-    return undefined;
-  }, [hasObservabilityAccess]);
+      }
+    : undefined;
 
   const quickFilters = useMemo(() => {
     const filters: QuickFiltersMenuItem[] = [];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
@@ -43,13 +43,10 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
   const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
-  const alertDetailsNavigation = useMemo<AlertDetailsNavigation>(
-    () => ({
-      appId: 'observability',
-      getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
-    }),
-    []
-  );
+  const alertDetailsNavigation: AlertDetailsNavigation = {
+    appId: 'observability',
+    getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+  };
 
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
