@@ -3167,6 +3167,291 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/plugins:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listPluginsResponseExample:
+                  description: Example response that returns one installed plugin
+                  value:
+                    results:
+                      - created_at: '2025-01-01T00:00:00.000Z'
+                        description: Financial analysis tools and skills for Claude
+                        id: financial-analysis
+                        manifest:
+                          author:
+                            name: Anthropic
+                            url: https://www.anthropic.com
+                          keywords:
+                            - finance
+                            - analysis
+                          repository: https://github.com/anthropics/financial-services-plugins
+                        name: financial-analysis
+                        skill_ids:
+                          - financial-analysis-analyze-portfolio
+                        source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                        unmanaged_assets:
+                          agents: []
+                          commands: []
+                          hooks: []
+                          lsp_servers: []
+                          mcp_servers: []
+                          output_styles: []
+                        updated_at: '2025-01-01T00:00:00.000Z'
+                        version: 1.0.0
+          description: Indicates a successful response
+      summary: List plugins
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/plugins" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/agent_builder/plugins/{pluginId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an installed plugin by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-plugins-pluginid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deletePluginResponseExample:
+                  description: Example response showing that deletion of the plugin has been successful
+                  value:
+                    success: true
+          description: Indicates a successful response
+      summary: Delete a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a specific plugin by ID.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins-pluginid
+      parameters:
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPluginByIdResponseExample:
+                  description: Example response returning a single installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Get a plugin by id
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/agent_builder/plugins/install:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/install</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: post-agent-builder-plugins-install
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              installPluginFromGithubExample:
+                description: Example request for installing a plugin from a GitHub URL
+                value:
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+              installPluginFromZipExample:
+                description: Example request for installing a plugin from a direct zip URL
+                value:
+                  url: https://my-server.example.com/my-plugin.zip
+              installPluginWithNameOverrideExample:
+                description: Example request for installing a plugin with a custom name
+                value:
+                  plugin_name: my-custom-plugin-name
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                plugin_name:
+                  description: Optional name override for the plugin. Defaults to the manifest name.
+                  type: string
+                url:
+                  description: URL to install the plugin from (GitHub URL or direct zip URL).
+                  type: string
+              required:
+                - url
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                installPluginResponseExample:
+                  description: Example response returning the definition of the installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Install a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/plugins/install" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/plugins/install
+            {
+              "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/skills:
     get:
       description: |-
@@ -43215,6 +43500,103 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/epm/packages/{pkgName}/review_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/review_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-review-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name to review upgrade for
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              acceptUpgrade:
+                value:
+                  action: accept
+                  target_version: 2.0.0
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - accept
+                    - decline
+                    - pending
+                  type: string
+                target_version:
+                  type: string
+              required:
+                - action
+                - target_version
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Review a pending policy upgrade for a package with deprecations
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/rollback:
     post:
       description: |-
@@ -67015,6 +67397,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -67044,6 +67428,18 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
+                                              format:
+                                                not: {}
+                                              type:
+                                                not: {}
+                                            required:
+                                              - description
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -67251,6 +67647,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -67280,6 +67678,8 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
