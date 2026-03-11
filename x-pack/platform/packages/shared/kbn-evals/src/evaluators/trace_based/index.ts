@@ -13,3 +13,4 @@ export {
 } from './tokens';
 export { createLatencyEvaluator, createSpanLatencyEvaluator } from './latency';
 export { createToolCallsEvaluator } from './tool_calls';
+export { createSkillInvocationEvaluator } from './skill_invocation';
