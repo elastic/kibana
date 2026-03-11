@@ -25,6 +25,7 @@ import type { IdentityFields } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -46,6 +47,7 @@ interface UserPanelContentProps {
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
   /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
   skipRiskAndCriticality?: boolean;
+  entityStoreEntityId?: string;
 }
 
 export const UserPanelContent = ({
@@ -62,6 +64,7 @@ export const UserPanelContent = ({
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
   skipRiskAndCriticality = false,
+  entityStoreEntityId,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -101,6 +104,16 @@ export const UserPanelContent = ({
           criticalityFromEntityStore={criticalityFromEntityStore}
           onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
         />
+      )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+          />
+          <EuiHorizontalRule />
+        </>
       )}
       <EntityInsight
         identityFields={identityFields}
