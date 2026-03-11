@@ -9,7 +9,6 @@
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
-import type { GradientColorMode } from '@kbn/coloring/src/shared_components/color_mapping/config/types';
 import type {
   AllColoringTypes,
   ColorByValueAbsolute,
@@ -301,7 +300,7 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
-    sort: (colorMapping.colorMode as GradientColorMode).sort,
+    sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...unassignedColor,
   };
@@ -358,11 +357,10 @@ function fromAPIMappingToAssignments(
       };
     });
   }
-  return colorMapping.mapping.map((assignment, index) => {
-    const step = colorMapping.gradient?.[index];
+  return colorMapping.mapping.map((assignment) => {
     return {
       rules: fromRulesAPIToLensState(assignment.values),
-      color: fromColorDefAPIToLensState(step!),
+      color: { type: 'gradient' },
       touched: false,
     };
   });
@@ -388,16 +386,7 @@ export function fromColorMappingAPIToLensState(
         },
       ],
       color: colorMapping.unassignedColor
-        ? colorMapping.unassignedColor.type === 'from_palette'
-          ? {
-              type: 'categorical',
-              paletteId: colorMapping.unassignedColor.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
-              colorIndex: colorMapping.unassignedColor.index,
-            }
-          : {
-              type: 'colorCode',
-              colorCode: colorMapping.unassignedColor.value,
-            }
+        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
         : { type: 'loop' },
       touched: false,
     },
