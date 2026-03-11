@@ -118,6 +118,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
+      it('bumps Fleet policy revision after bulk reset', async () => {
+        const mon1 = await saveMonitor(httpMonitorJson as MonitorFields);
+        const mon2 = await saveMonitor(httpMonitorJson as MonitorFields);
+        try {
+          const policy1Before = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
+          const policy2Before = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
+          expect(policy1Before).to.not.be(undefined);
+          expect(policy2Before).to.not.be(undefined);
+
+          await bulkResetMonitors([mon1.id, mon2.id]);
+
+          const policy1After = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
+          const policy2After = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
+          expect(policy1After!.revision).to.be.greaterThan(policy1Before!.revision);
+          expect(policy2After!.revision).to.be.greaterThan(policy2Before!.revision);
+        } finally {
+          await monitorTestService.deleteMonitor(editorUser, mon1.id, 200, 'default');
+          await monitorTestService.deleteMonitor(editorUser, mon2.id, 200, 'default');
+        }
+      });
+
       it('recreates missing policy for one of multiple monitors', async () => {
         const mon1 = await saveMonitor(httpMonitorJson as MonitorFields);
         const mon2 = await saveMonitor(httpMonitorJson as MonitorFields);
