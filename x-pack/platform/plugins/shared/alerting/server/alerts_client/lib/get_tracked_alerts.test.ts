@@ -29,7 +29,7 @@ import type { RawAlertInstance } from '../../types';
 
 const logger = loggingSystemMock.create().get();
 const ruleId = 'test-rule-id';
-const ruleInfoMessage = 'for test.rule-type:test-rule-id \'test-rule\'';
+const ruleInfoMessage = "for test.rule-type:test-rule-id 'test-rule'";
 const logTags = { tags: ['test.rule-type', ruleId, 'alerts-client'] };
 
 const makeRawAlertInstance = (uuid: string): RawAlertInstance => ({
@@ -353,7 +353,9 @@ describe('get_tracked_alerts', () => {
       expect(result.primaryTerm['uuid-2']).toBe(2);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Found 1 alerts in task state not returned by tracked alerts query'),
+        expect.stringContaining(
+          'Found 1 alerts in task state not returned by tracked alerts query'
+        ),
         logTags
       );
     });
