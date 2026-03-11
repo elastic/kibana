@@ -7,6 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const path = require('path');
+const findKibanaRoot = require('../helpers/find_kibana_root');
+
+const KIBANA_ROOT = findKibanaRoot();
+
+// Allowlist (most temporary) of files permitted to use non-FIPS algorithms.
+const ALLOWED_UNSAFE_HASHES = [
+  { path: 'packages/kbn-optimizer/src/common/dll_manifest.ts', algorithms: ['sha1'] },
+  {
+    path: 'src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts',
+    algorithms: ['sha1'],
+  },
+  {
+    path: 'x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts',
+    algorithms: ['sha1'],
+  },
+  {
+    path: 'src/platform/packages/shared/kbn-babel-register/cache/lmdb_cache.js',
+    algorithms: ['sha1'],
+  },
+  {
+    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/report_failures_to_file.ts',
+    algorithms: ['md5'],
+  },
+  {
+    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/generate_scout_test_failure_artifacts.ts',
+    algorithms: ['md5'],
+  },
+];
+
 const allowedAlgorithms = ['sha256', 'sha3-256', 'sha512'];
 
 module.exports = {
@@ -33,8 +63,17 @@ module.exports = {
 
     const disallowedAlgorithmNodes = new Set();
 
+    const filename = context.getFilename();
+    const relativeFilename = path.relative(KIBANA_ROOT, filename);
+    const fileAllowlistEntry = ALLOWED_UNSAFE_HASHES.find(
+      (entry) => entry.path === relativeFilename
+    );
+    const fileScopedAllowedAlgorithms = fileAllowlistEntry
+      ? [...allowedAlgorithms, ...fileAllowlistEntry.algorithms]
+      : allowedAlgorithms;
+
     function isAllowedAlgorithm(algorithm) {
-      return allowedAlgorithms.includes(algorithm);
+      return fileScopedAllowedAlgorithms.includes(algorithm);
     }
 
     function isHashOrCreateHash(value) {
