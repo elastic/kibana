@@ -745,9 +745,7 @@ describe('createSmlCrawler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('failed to load crawler state')
       );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('skipping crawl cycle')
-      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('skipping crawl cycle'));
       expect(mockStateClient.bulk).not.toHaveBeenCalled();
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
     });
