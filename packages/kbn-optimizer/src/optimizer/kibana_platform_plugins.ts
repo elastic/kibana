@@ -8,9 +8,14 @@
  */
 
 import Path from 'path';
-import { type PluginPackage, getPluginPackagesFilter } from '@kbn/repo-packages';
+import { getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 
-const isDefaultPlugin = getPluginPackagesFilter();
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
+
+const defaultPluginFilter = getPluginPackagesFilter();
+const isDefaultPlugin = (pkg: RepoPackage): pkg is RepoPluginPackage => defaultPluginFilter(pkg);
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
@@ -25,7 +30,10 @@ export interface KibanaPlatformPlugin {
 /**
  * Helper to find the new platform plugins.
  */
-export function toKibanaPlatformPlugin(repoRoot: string, pkg: PluginPackage): KibanaPlatformPlugin {
+export function toKibanaPlatformPlugin(
+  repoRoot: string,
+  pkg: RepoPluginPackage
+): KibanaPlatformPlugin {
   const directory = Path.resolve(repoRoot, pkg.normalizedRepoRelativeDir);
   return {
     directory,

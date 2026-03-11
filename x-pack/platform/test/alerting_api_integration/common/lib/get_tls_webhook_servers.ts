@@ -10,7 +10,7 @@ import https from 'https';
 import getPort from 'get-port';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
-interface TlsWebhookURLs {
+export interface TlsWebhookURLs {
   noCustom: string;
   rejectUnauthorizedFalse: string;
   rejectUnauthorizedTrue: string;

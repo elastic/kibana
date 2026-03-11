@@ -13,9 +13,7 @@ import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
-export const createResolve = (
-  baseIndexPattern: string
-): LogsDataSourceProfileProvider['resolve'] => {
+export function createResolve(baseIndexPattern: string): LogsDataSourceProfileProvider['resolve'] {
   const testIndexPattern = testPatternAgainstAllowedList([
     createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
@@ -39,4 +37,4 @@ export const createResolve = (
       },
     };
   };
-};
+}

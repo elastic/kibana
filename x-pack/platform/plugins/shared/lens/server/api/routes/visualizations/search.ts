@@ -6,13 +6,12 @@
  */
 
 import { isBoom, boomify } from '@hapi/boom';
-
-import type { TypeOf } from '@kbn/config-schema';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 import type { LensSearchIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
+import type { LensSearchRequestQuery, LensSearchResponseBody } from './types';
 import { getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
@@ -67,12 +66,13 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestQuery = req.query as LensSearchRequestQuery;
       // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { query: q, page, per_page: perPage, ...reqOptions } = req.query;
+      const { query: q, page = 1, per_page: perPage = 20, ...reqOptions } = requestQuery;
 
       try {
         // Note: these types are to enforce loose param typings of client methods
@@ -93,7 +93,7 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
           throw error;
         }
 
-        return res.ok<TypeOf<typeof lensSearchResponseBodySchema>>({
+        return res.ok<LensSearchResponseBody>({
           body: {
             data: hits.map((item) => {
               return getLensResponseItem(builder, item);

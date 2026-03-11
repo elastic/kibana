@@ -8,7 +8,7 @@ import type { Position } from 'css-box-model';
 import { range } from 'd3-array';
 import { interpolate } from 'd3-interpolate';
 import { useCallback } from 'react';
-import type { DraggableId, FluidDragActions, SensorAPI } from '@hello-pangea/dnd';
+import type { DraggableId, SensorAPI } from '@hello-pangea/dnd';
 
 import {
   EMPTY_PROVIDERS_GROUP_CLASS_NAME,
@@ -17,6 +17,18 @@ import {
 } from '@kbn/securitysolution-t-grid';
 
 let _sensorApiSingleton: SensorAPI;
+
+interface StopDragOptions {
+  shouldBlockNextClick: boolean;
+}
+
+export interface DragActions {
+  drop(args?: StopDragOptions): void;
+  cancel(args?: StopDragOptions): void;
+  isActive(): boolean;
+  shouldRespectForcePress(): boolean;
+  move(position: Position): void;
+}
 
 /**
  * This hook is passed (in an array) to the `sensors` prop of the
@@ -98,7 +110,7 @@ export const animate = ({
   fieldName,
   values,
 }: {
-  drag: FluidDragActions;
+  drag: DragActions;
   dropWhenComplete?: boolean;
   fieldName: string;
   values: Position[];
@@ -124,16 +136,16 @@ export const animate = ({
 };
 
 export interface UseAddToTimeline {
-  beginDrag: () => FluidDragActions | null;
-  cancelDrag: (dragActions: FluidDragActions | null) => void;
+  beginDrag: () => DragActions | null;
+  cancelDrag: (dragActions: DragActions | null) => void;
   dragToLocation: ({
     dragActions,
     position,
   }: {
-    dragActions: FluidDragActions | null;
+    dragActions: DragActions | null;
     position: Position;
   }) => void;
-  endDrag: (dragActions: FluidDragActions | null) => void;
+  endDrag: (dragActions: DragActions | null) => void;
   hasDraggableLock: () => boolean;
   startDragToTimeline: () => void;
 }
@@ -208,7 +220,7 @@ export const useAddToTimeline = ({
   }, [draggableId]);
 
   const dragToLocation = useCallback(
-    ({ dragActions, position }: { dragActions: FluidDragActions | null; position: Position }) => {
+    ({ dragActions, position }: { dragActions: DragActions | null; position: Position }) => {
       if (dragActions == null || draggableId == null) {
         return;
       }
@@ -224,13 +236,13 @@ export const useAddToTimeline = ({
     [draggableId]
   );
 
-  const endDrag = useCallback((dragActions: FluidDragActions | null) => {
+  const endDrag = useCallback((dragActions: DragActions | null) => {
     if (dragActions !== null) {
       dragActions.drop();
     }
   }, []);
 
-  const cancelDrag = useCallback((dragActions: FluidDragActions | null) => {
+  const cancelDrag = useCallback((dragActions: DragActions | null) => {
     if (dragActions !== null) {
       dragActions.cancel();
     }

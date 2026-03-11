@@ -38,7 +38,8 @@ export const initFindFieldsMetadataRoute = ({
         },
       },
       async (_requestContext, request, response) => {
-        const { attributes, fieldNames, integration, dataset, source } = request.query;
+        const { attributes, fieldNames, integration, dataset, source } =
+          request.query as fieldsMetadataV1.FindFieldsMetadataRequestQuery;
         const [_core, _startDeps, startContract] = await getStartServices();
 
         const fieldsMetadataClient = await startContract.getClient(request);

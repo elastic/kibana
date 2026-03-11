@@ -10,6 +10,14 @@ import thunk from 'redux-thunk';
 
 import { licenseManagement } from './reducers';
 
+/** @typedef {import('redux').AnyAction} AnyAction */
+/** @typedef {import('redux').Store<any, AnyAction> & { dispatch: import('redux-thunk').ThunkDispatch<any, any, AnyAction> }} LicenseManagementStore */
+
+/**
+ * @param {object} [initialState={}]
+ * @param {object} [services={}]
+ * @returns {LicenseManagementStore}
+ */
 export const licenseManagementStore = (initialState = {}, services = {}) => {
   const enhancers = [applyMiddleware(thunk.withExtraArgument(services))];
 

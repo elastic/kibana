@@ -10,6 +10,7 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 import type { ThemeTag, ThemeTags } from '@kbn/core-ui-settings-common';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
@@ -22,6 +23,9 @@ import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';
 import { readLimits } from '../limits';
+
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
 
 export interface Limits {
   pageLoadAssetSize?: {
@@ -242,8 +246,11 @@ export class OptimizerConfig {
   static create(inputOptions: Options) {
     const limits = inputOptions.limitsPath ? readLimits(inputOptions.limitsPath) : {};
     const options = OptimizerConfig.parseOptions(inputOptions);
+    const pluginPackagesFilter = getPluginPackagesFilter(options.pluginSelector);
+    const isPluginPackage = (pkg: RepoPackage): pkg is RepoPluginPackage =>
+      pluginPackagesFilter(pkg);
     const plugins = getPackages(options.repoRoot)
-      .filter(getPluginPackagesFilter(options.pluginSelector))
+      .filter(isPluginPackage)
       .map((pkg) => toKibanaPlatformPlugin(options.repoRoot, pkg));
 
     const bundles = [

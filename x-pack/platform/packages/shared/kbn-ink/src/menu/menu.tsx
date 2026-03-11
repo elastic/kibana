@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, type Key } from 'ink';
 
 export interface MenuItemProps {
   id?: string;
@@ -29,7 +29,7 @@ interface MenuProps {
 export function Menu({ label, items, onSelect, onBack }: MenuProps) {
   const [selectedItem, setSelectedItem] = useState<MenuItemProps | undefined>(items[0]);
 
-  useInput((input, key) => {
+  useInput((input: string, key: Key) => {
     if (key.upArrow || key.downArrow) {
       setSelectedItem((prevItem) => {
         const indexOfPreviousItem = prevItem ? items.indexOf(prevItem) : -1;

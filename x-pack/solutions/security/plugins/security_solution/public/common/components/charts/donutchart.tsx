@@ -36,7 +36,7 @@ const donutTheme: PartialTheme = {
   },
 };
 
-interface DonutChartData {
+export interface DonutChartData {
   key: string;
   value: number;
   group?: string;
@@ -75,6 +75,7 @@ export interface DonutChartWrapperProps {
 
 const getStyles = (
   dataExists: boolean,
+  zIndex: number,
   isChartEmbeddablesEnabled?: boolean,
   donutTextWrapperStyles?: SerializedStyles,
   className?: string
@@ -85,7 +86,7 @@ const getStyles = (
       width: 100%;
       max-width: 75%;
       position: absolute; // Make this position absolute in order to overlap the text onto the donut
-      z-index: 1;
+      z-index: ${zIndex};
 
       ${className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
     `,
@@ -108,6 +109,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   const { euiTheme } = useEuiTheme();
   const styles = getStyles(
     dataExists,
+    Number(euiTheme.levels.menu),
     isChartEmbeddablesEnabled,
     donutTextWrapperStyles,
     donutTextWrapperClassName

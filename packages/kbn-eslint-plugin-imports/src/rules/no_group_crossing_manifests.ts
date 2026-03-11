@@ -12,6 +12,7 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import { getSourcePath } from '../helpers/source';
@@ -28,6 +29,9 @@ interface PluginInfo {
   group: ModuleGroup;
   visibility: ModuleVisibility;
 }
+
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
 
 export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
   meta: {
@@ -58,7 +62,10 @@ export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
         visibility: moduleId.visibility,
       };
 
-      const allPlugins = getPackages(REPO_ROOT).filter(getPluginPackagesFilter());
+      const pluginPackagesFilter = getPluginPackagesFilter();
+      const isPluginPackage = (pkg: RepoPackage): pkg is RepoPluginPackage =>
+        pluginPackagesFilter(pkg);
+      const allPlugins = getPackages(REPO_ROOT).filter(isPluginPackage);
       const currentPluginInfo = moduleId.manifest!.plugin;
       // check all the dependencies in the manifest, looking for plugin violations
       [

@@ -78,4 +78,5 @@ fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
+    - '!config/services/detections_response/**/*'
 tasks: {}

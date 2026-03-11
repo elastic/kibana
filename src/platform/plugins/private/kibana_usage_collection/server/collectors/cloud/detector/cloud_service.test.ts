@@ -10,9 +10,32 @@
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
+class TestCloudService extends CloudService {
+  public checkIfServiceInternal(signal?: AbortSignal) {
+    return this._checkIfService(signal);
+  }
+
+  public createUnconfirmedResponse() {
+    return this._createUnconfirmedResponse();
+  }
+
+  public stringToJson(value: unknown) {
+    return this._stringToJson(value as string);
+  }
+
+  public parseResponse<Body>(
+    body?: string | Body | null,
+    parseBodyFn?: (parsedBody: Body) => CloudServiceResponse | null
+  ) {
+    return this._parseResponse(
+      body as string | Body,
+      parseBodyFn as (parsedBody: Body) => CloudServiceResponse | null
+    );
+  }
+}
+
 describe('CloudService', () => {
-  // @ts-expect-error Creating an instance of an abstract class for testing
-  const service = new CloudService('xyz');
+  const service = new TestCloudService('xyz');
 
   describe('getName', () => {
     it('is named by the constructor', () => {
@@ -32,14 +55,14 @@ describe('CloudService', () => {
   describe('_checkIfService', () => {
     it('throws an exception unless overridden', async () => {
       await expect(() =>
-        service._checkIfService(undefined)
+        service.checkIfServiceInternal(undefined)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
     });
   });
 
   describe('_createUnconfirmedResponse', () => {
     it('is always unconfirmed', () => {
-      const response = service._createUnconfirmedResponse();
+      const response = service.createUnconfirmedResponse();
 
       expect(response.getName()).toEqual('xyz');
       expect(response.isConfirmed()).toBe(false);
@@ -48,24 +71,24 @@ describe('CloudService', () => {
 
   describe('_stringToJson', () => {
     it('only handles strings', () => {
-      expect(() => service._stringToJson({})).toThrow();
-      expect(() => service._stringToJson(123)).toThrow();
-      expect(() => service._stringToJson(true)).toThrow();
+      expect(() => service.stringToJson({})).toThrow();
+      expect(() => service.stringToJson(123)).toThrow();
+      expect(() => service.stringToJson(true)).toThrow();
     });
 
     it('fails with unexpected values', () => {
       // array
-      expect(() => service._stringToJson('[{}]')).toThrow();
+      expect(() => service.stringToJson('[{}]')).toThrow();
       // normal values
-      expect(() => service._stringToJson('true')).toThrow();
-      expect(() => service._stringToJson('123')).toThrow();
-      expect(() => service._stringToJson('xyz')).toThrow();
+      expect(() => service.stringToJson('true')).toThrow();
+      expect(() => service.stringToJson('123')).toThrow();
+      expect(() => service.stringToJson('xyz')).toThrow();
       // invalid JSON
-      expect(() => service._stringToJson('{"xyz"}')).toThrow();
+      expect(() => service.stringToJson('{"xyz"}')).toThrow();
       // (single quotes are not actually valid in serialized JSON)
-      expect(() => service._stringToJson("{'a': 'xyz'}")).toThrow();
-      expect(() => service._stringToJson('{{}')).toThrow();
-      expect(() => service._stringToJson('{}}')).toThrow();
+      expect(() => service.stringToJson("{'a': 'xyz'}")).toThrow();
+      expect(() => service.stringToJson('{{}')).toThrow();
+      expect(() => service.stringToJson('{}}')).toThrow();
     });
 
     it('parses objects', () => {
@@ -80,9 +103,9 @@ describe('CloudService', () => {
         etc: 'abc',
       };
 
-      expect(service._stringToJson(' {} ')).toEqual({});
-      expect(service._stringToJson('{ "a" : "key" }\n')).toEqual({ a: 'key' });
-      expect(service._stringToJson(JSON.stringify(testObject))).toEqual(testObject);
+      expect(service.stringToJson(' {} ')).toEqual({});
+      expect(service.stringToJson('{ "a" : "key" }\n')).toEqual({ a: 'key' });
+      expect(service.stringToJson(JSON.stringify(testObject))).toEqual(testObject);
     });
   });
 
@@ -90,22 +113,22 @@ describe('CloudService', () => {
     const body = { some: { body: {} } };
 
     it('throws error upon failure to parse body as object', () => {
-      expect(() => service._parseResponse()).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse()).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(() => service._parseResponse(null)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse(null)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(() => service._parseResponse({})).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse({})).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(() => service._parseResponse(123)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse(123)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(() => service._parseResponse('raw string')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse('raw string')).toThrowErrorMatchingInlineSnapshot(
         `"'raw string' is not a JSON object"`
       );
-      expect(() => service._parseResponse('{{}')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse('{{}')).toThrowErrorMatchingInlineSnapshot(
         `"'{{}' is not a JSON object"`
       );
     });
@@ -114,13 +137,13 @@ describe('CloudService', () => {
       const parseBody = jest.fn().mockReturnValue(null);
 
       expect(() =>
-        service._parseResponse(JSON.stringify(body), parseBody)
+        service.parseResponse(JSON.stringify(body), parseBody)
       ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
       expect(parseBody).toBeCalledTimes(1);
       expect(parseBody).toBeCalledWith(body);
       parseBody.mockClear();
 
-      expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => service.parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
       expect(parseBody).toBeCalledTimes(1);
@@ -131,7 +154,7 @@ describe('CloudService', () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
-      const response = await service._parseResponse(body, parseBody);
+      const response = await service.parseResponse(body, parseBody);
       expect(parseBody).toBeCalledWith(body);
       expect(response).toBe(serviceResponse);
     });
@@ -140,7 +163,7 @@ describe('CloudService', () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
       const parseBody = jest.fn().mockReturnValue(serviceResponse);
 
-      const response = await service._parseResponse(JSON.stringify(body), parseBody);
+      const response = await service.parseResponse(JSON.stringify(body), parseBody);
       expect(parseBody).toBeCalledWith(body);
       expect(response).toBe(serviceResponse);
     });

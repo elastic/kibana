@@ -7,7 +7,6 @@
 
 import { useQuery } from '@kbn/react-query';
 
-import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { readListIndex } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import {
@@ -17,6 +16,7 @@ import {
 } from '@kbn/securitysolution-t-grid';
 
 import { READ_INDEX_QUERY_KEY } from '../constants';
+import type { SecuritySolutionListHttp } from '../types';
 
 const readListIndexWithOptionalSignal = withOptionalSignal(readListIndex);
 
@@ -26,7 +26,7 @@ export const useReadListIndex = ({
   onError,
 }: {
   isEnabled: boolean;
-  http: ApiParams['http'];
+  http: SecuritySolutionListHttp;
   onError?: (err: unknown) => void;
 }) => {
   const query = useQuery(

@@ -10,6 +10,17 @@ import { schema } from '@kbn/config-schema';
 import type { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
 
+interface GlobalSearchFindRequestBody {
+  options?: {
+    preference?: string;
+  };
+  params: {
+    tags?: string[];
+    term?: string;
+    types?: string[];
+  };
+}
+
 export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
   router.post(
     {
@@ -36,7 +47,7 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
       },
     },
     async (ctx, req, res) => {
-      const { params, options } = req.body;
+      const { params, options } = req.body as GlobalSearchFindRequestBody;
       try {
         const globalSearch = await ctx.globalSearch;
         const { client } = (await ctx.core).elasticsearch;

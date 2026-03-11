@@ -16,6 +16,15 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
+interface GetAlertSummaryRequestBody {
+  consumers?: string[];
+  filter?: object[];
+  fixed_interval?: string;
+  gte: string;
+  lte: string;
+  ruleTypeIds: string[];
+}
+
 export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
@@ -53,6 +62,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
+        const requestBody = request.body as GetAlertSummaryRequestBody;
         const {
           gte,
           lte,
@@ -60,7 +70,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           consumers,
           filter,
           fixed_interval: fixedInterval,
-        } = request.body;
+        } = requestBody;
         if (
           !(
             moment(gte, 'YYYY-MM-DDTHH:mm:ss.SSSZ', true).isValid() &&

@@ -12,6 +12,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { lensCMGetResultSchema } from '../../../../content_management';
 import type {
   lensCreateRequestBodySchema,
+  lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
   lensDeleteRequestParamsSchema,
@@ -30,6 +31,7 @@ export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
 export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
 export type CMItemResultMeta = TypeOf<typeof lensCMGetResultSchema>['meta'];
 
+export type LensCreateRequestParams = TypeOf<typeof lensCreateRequestParamsSchema>;
 export type LensCreateRequestQuery = TypeOf<typeof lensCreateRequestQuerySchema>;
 export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
 export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;

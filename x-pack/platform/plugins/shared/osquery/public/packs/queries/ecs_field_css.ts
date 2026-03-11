@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const resultComboBoxCss = {
+import { css } from '@emotion/react';
+
+export const resultComboBoxCss = css({
   '&.euiComboBox': {
     position: 'relative',
     left: '-1px',
@@ -14,9 +16,9 @@ export const resultComboBoxCss = {
       borderRadius: '0 6px 6px 0',
     },
   },
-};
+});
 
-export const euiSuperSelectCss = {
+export const euiSuperSelectCss = css({
   minWidth: '70px',
   borderRadius: '6px 0 0 6px',
 
@@ -25,36 +27,36 @@ export const euiSuperSelectCss = {
     width: '18px',
     background: 'none',
   },
-};
+});
 
-export const fieldIconCss = {
+export const fieldIconCss = css({
   width: '32px',
 
   '> svg': {
     padding: '0 6px !important',
   },
-};
+});
 
-export const fieldSpanCss = {
+export const fieldSpanCss = css({
   paddingTop: '0 !important',
   paddingBottom: '0 !important',
   paddingLeft: '5px',
-};
+});
 
-export const descriptionWrapperCss = {
+export const descriptionWrapperCss = css({
   overflow: 'hidden',
-};
+});
 
-export const semicolonWrapperCss = {
+export const semicolonWrapperCss = css({
   marginTop: '28px',
-};
+});
 
 // align the icon to the inputs
-export const buttonWrapperCss = {
+export const buttonWrapperCss = css({
   marginTop: '28px',
   width: '24px',
-};
+});
 
-export const ECSFieldWrapperCss = {
+export const ECSFieldWrapperCss = css({
   maxWidth: '100%',
-};
+});

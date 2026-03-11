@@ -14,18 +14,18 @@ import type {
 } from '@kbn/shared-ux-page-kibana-template-types';
 import { getNoDataConfigPageServicesMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 
-export const getServicesMock = (): KibanaPageTemplateServices => {
+export function getServicesMock(): KibanaPageTemplateServices {
   const services: KibanaPageTemplateServices = {
     ...getNoDataConfigPageServicesMock(),
   };
 
   return services;
-};
+}
 
-export const getKibanaDependenciesMock = (): KibanaPageTemplateKibanaDependencies => {
+export function getKibanaDependenciesMock(): KibanaPageTemplateKibanaDependencies {
   const dependencies: KibanaPageTemplateKibanaDependencies = {
     ...getNoDataCardKibanaDependenciesMock(),
   };
 
   return dependencies;
-};
+}

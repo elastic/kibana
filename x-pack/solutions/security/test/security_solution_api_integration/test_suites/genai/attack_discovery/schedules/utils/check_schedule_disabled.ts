@@ -7,15 +7,21 @@
 
 import expect from 'expect';
 
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getAttackDiscoverySchedulesApis } from './apis';
+
+type AttackDiscoverySchedulesSupertest = Parameters<
+  typeof getAttackDiscoverySchedulesApis
+>[0]['supertest'];
+type GetAttackDiscoverySchedulesService = (
+  service: 'supertest'
+) => AttackDiscoverySchedulesSupertest;
 
 export const checkIfScheduleDisabled = async ({
   getService,
   id,
   kibanaSpace,
 }: {
-  getService: FtrProviderContext['getService'];
+  getService: GetAttackDiscoverySchedulesService;
   id: string;
   kibanaSpace?: string;
 }) => {

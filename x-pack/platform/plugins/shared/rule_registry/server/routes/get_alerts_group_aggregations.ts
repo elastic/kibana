@@ -9,12 +9,26 @@ import type { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 import { alertsAggregationsSchema, alertsGroupFilterSchema } from '../../common/types';
 import { DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE } from '../alert_data_client/constants';
+
+interface GetAlertsGroupAggregationsRequestBody {
+  aggregations?: t.TypeOf<typeof alertsAggregationsSchema>;
+  consumers?: string[];
+  filters?: QueryDslQueryContainer[];
+  groupByField: string;
+  pageIndex?: number;
+  pageSize?: number;
+  ruleTypeIds: string[];
+  sort?: SortCombinations[];
+}
 
 export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
@@ -52,6 +66,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
       },
     },
     async (context, request, response) => {
+      const requestBody = request.body as GetAlertsGroupAggregationsRequestBody;
       const {
         ruleTypeIds,
         consumers,
@@ -61,7 +76,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         sort,
         pageIndex = 0,
         pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
-      } = request.body;
+      } = requestBody;
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
@@ -71,7 +86,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
           groupByField,
           aggregations,
           filters,
-          sort: sort as SortCombinations[],
+          sort,
           pageIndex,
           pageSize,
         });

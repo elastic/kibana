@@ -13,6 +13,12 @@ import { wrapError } from '../../../lib/errors';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
+interface UpdateObjectsSpacesRequestBody {
+  objects: Array<{ id: string; type: string }>;
+  spacesToAdd: string[];
+  spacesToRemove: string[];
+}
+
 export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
   const { router, getStartServices, isServerless } = deps;
 
@@ -76,7 +82,8 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
       const [startServices] = await getStartServices();
       const scopedClient = startServices.savedObjects.getScopedClient(request);
 
-      const { objects, spacesToAdd, spacesToRemove } = request.body;
+      const { objects, spacesToAdd, spacesToRemove } =
+        request.body as UpdateObjectsSpacesRequestBody;
 
       try {
         const updateObjectsSpacesResponse = await scopedClient.updateObjectsSpaces(

@@ -13,7 +13,7 @@ import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test
 import mockFs from 'mock-fs';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Package } from '@kbn/repo-packages';
+import type { Package as RepoPackageCtor } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs';
@@ -27,6 +27,8 @@ import type { PluginsConfigType } from '../plugins_config';
 import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
+
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),
@@ -62,9 +64,12 @@ function getMockPackage(id: string, group: string = 'platform') {
       oss: false,
     }),
     getGroup: () => group,
+    getVisibility: () => 'shared',
+    isDevOnly: () => false,
+    determineGroupAndVisibility: () => ({ group, visibility: 'shared' as const }),
     directory: resolve(REPO_ROOT, relativePath),
     normalizedRepoRelativeDir: relativePath,
-  } as Package;
+  } as unknown as RepoPackage;
 }
 
 const Plugins = {
@@ -622,7 +627,7 @@ describe('plugins discovery system', () => {
         pluginSearchPaths: [],
         repoPackages: [foo, bar],
       };
-      const filterFn = jest.fn((p: Package) => p === foo);
+      const filterFn = jest.fn((p: RepoPackage) => p === foo);
       getPluginPackagesFilterMock.mockReturnValue(filterFn);
 
       const { plugin$ } = discover({

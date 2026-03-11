@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   lensCreateRequestBodySchema,
+  lensCreateRequestParamsSchema,
   lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
   lensDeleteRequestParamsSchema,
@@ -27,6 +28,7 @@ import type { lensItemMetaSchema, lensResponseItemSchema } from './schema/common
 export type LensItemMeta = TypeOf<typeof lensItemMetaSchema>;
 export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
 
+export type LensCreateRequestParams = TypeOf<typeof lensCreateRequestParamsSchema>;
 export type LensCreateRequestQuery = TypeOf<typeof lensCreateRequestQuerySchema>;
 export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
 export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;

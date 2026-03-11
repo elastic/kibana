@@ -8,7 +8,18 @@
 import moment from 'moment';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { log, timerange } from '@kbn/synthtrace-client';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+
+interface SynthtraceService {
+  createLogsSynthtraceEsClient(): LogsSynthtraceEsClient;
+}
+
+type GetLogsWithErrorsService = (name: 'synthtrace') => SynthtraceService;
+
+interface CreateLogsWithErrorsArgs {
+  getService: GetLogsWithErrorsService;
+  serviceName?: string;
+  environment?: string;
+}
 
 export interface LogData {
   traceId: string;
@@ -27,11 +38,7 @@ export const createLogsWithErrors = async ({
   getService,
   serviceName = 'payment-service',
   environment = 'production',
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  serviceName?: string;
-  environment?: string;
-}): Promise<LogsResult> => {
+}: CreateLogsWithErrorsArgs): Promise<LogsResult> => {
   const synthtrace = getService('synthtrace');
   const logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
 

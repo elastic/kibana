@@ -9,7 +9,6 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
@@ -310,9 +309,10 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type EqlTabStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type PropsFromRedux = EqlTabStateProps;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+const connector = connect<EqlTabStateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 const EqlTabContent = connector(
   React.memo(

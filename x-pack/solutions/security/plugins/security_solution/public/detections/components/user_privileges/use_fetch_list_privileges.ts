@@ -12,7 +12,7 @@ import { useHttp, useKibana } from '../../../common/lib/kibana';
 import type { Privilege } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
 
-interface ListPrivileges {
+export interface ListPrivileges {
   is_authenticated: boolean;
   lists: {
     index: Privilege['index'];

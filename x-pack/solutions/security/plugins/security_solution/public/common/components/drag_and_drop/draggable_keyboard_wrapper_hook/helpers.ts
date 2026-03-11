@@ -6,9 +6,9 @@
  */
 
 import type { Position } from 'css-box-model';
-import type { FluidDragActions } from '@hello-pangea/dnd';
 import { KEYBOARD_DRAG_OFFSET } from '@kbn/securitysolution-t-grid';
 
+import type { DragActions } from '@kbn/timelines-plugin/public';
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 
 /**
@@ -34,22 +34,22 @@ export const temporarilyDisableInteractiveChildTabIndexes = (draggableElement: H
 };
 
 export interface DraggableKeyDownHandlerProps {
-  beginDrag: () => FluidDragActions | null;
+  beginDrag: () => DragActions | null;
   cancelDragActions: () => void;
   closePopover?: () => void;
   draggableElement: HTMLDivElement;
-  dragActions: FluidDragActions | null;
+  dragActions: DragActions | null;
   dragToLocation: ({
     dragActions,
     position,
   }: {
-    dragActions: FluidDragActions | null;
+    dragActions: DragActions | null;
     position: Position;
   }) => void;
   keyboardEvent: React.KeyboardEvent;
-  endDrag: (dragActions: FluidDragActions | null) => void;
+  endDrag: (dragActions: DragActions | null) => void;
   openPopover?: () => void;
-  setDragActions: (value: React.SetStateAction<FluidDragActions | null>) => void;
+  setDragActions: (value: React.SetStateAction<DragActions | null>) => void;
 }
 
 export const draggableKeyDownHandler = ({

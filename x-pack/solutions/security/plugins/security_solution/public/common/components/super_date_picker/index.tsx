@@ -17,7 +17,6 @@ import type {
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { getOr, isEmpty, take } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
@@ -368,8 +367,15 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type SuperDatePickerStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type SuperDatePickerDispatchProps = ReturnType<typeof mapDispatchToProps>;
+type PropsFromRedux = SuperDatePickerStateProps & SuperDatePickerDispatchProps;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+export const connector = connect<
+  SuperDatePickerStateProps,
+  SuperDatePickerDispatchProps,
+  OwnProps,
+  State
+>(makeMapStateToProps, mapDispatchToProps);
 
 export const SuperDatePicker = connector(SuperDatePickerComponent);

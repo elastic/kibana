@@ -14,6 +14,7 @@ import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
@@ -27,6 +28,12 @@ export interface Plugin {
 
 export type Plugins = Plugin[];
 
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
+
+const pluginPackageFilter = getPluginPackagesFilter();
+const isPluginPackage = (pkg: RepoPackage): pkg is RepoPluginPackage => pluginPackageFilter(pkg);
+
 const getReadmeName = (directory: string) =>
   Fs.readdirSync(directory).find(
     (name) => name.toLowerCase() === 'readme.md' || name.toLowerCase() === 'readme.mdx'
@@ -37,7 +44,7 @@ const getReadmeAsciidocName = (directory: string) =>
 
 export const discoverPlugins = (pluginDir: string): Plugins =>
   getPackages(REPO_ROOT)
-    .filter(getPluginPackagesFilter())
+    .filter(isPluginPackage)
     .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith(pluginDir + '/'))
     .map((pkg): Plugin => {
       const directory = Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir);

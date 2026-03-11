@@ -11,6 +11,10 @@ import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
+interface GetShareableReferencesRequestBody {
+  objects: Array<{ id: string; type: string }>;
+}
+
 export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   const { router, getStartServices, isServerless } = deps;
 
@@ -42,7 +46,7 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
       const [startServices] = await getStartServices();
       const scopedClient = startServices.savedObjects.getScopedClient(request);
 
-      const { objects } = request.body;
+      const { objects } = request.body as GetShareableReferencesRequestBody;
 
       try {
         const collectedObjects = await scopedClient.collectMultiNamespaceReferences(objects, {
