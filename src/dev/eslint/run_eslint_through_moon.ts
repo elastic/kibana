@@ -18,12 +18,15 @@ const IS_CI = !!process.env.CI;
 const options = {
   description: 'Run ESLint on all Moon projects in the repository.',
   flags: {
-    boolean: ['update-cache', 'fix'],
+    boolean: ['update-cache', 'fix', 'affected'],
     default: {
       updateCache: false,
+      affected: false,
+      fix: false,
     },
     help: `
         --update-cache    Update Moon's caches locally, ignores cache in CI
+        --affected        Only run ESLint on affected projects (default on CI)
         --fix             Fix files
       `,
   },
@@ -51,8 +54,8 @@ run(async ({ log, flags }) => {
     }
   }
 
-  if (!IS_CI) {
-    fullArgs.push('--summary');
+  if (flags.affected && !IS_CI) {
+    fullArgs.push('--affected');
   }
 
   log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);

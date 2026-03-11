@@ -13,3 +13,13 @@ tasks:
       - "@group(src)"
     options:
       runFromWorkspaceRoot: true
+
+  source-upstream-direct:
+    script: "echo source-upstream-direct-check at $MOON_PROJECT_ID@$MOON_TASK_HASH"
+    inputs:
+      - "@group(src)"
+    deps:
+      - ^:source
+    options:
+      runFromWorkspaceRoot: true
+

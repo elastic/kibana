@@ -17,11 +17,9 @@ tasks:
       runFromWorkspaceRoot: true
       cache: true
     deps:
-      - '@kbn/eslint-config:source'
+      - '@kbn/eslint-config:source-upstream-direct'
     inputs:
-      - '@group(src)'
-      # Other config files
-      - '*.config.*'
+      - '**/*.{js,mjs,ts,tsx}'
       # Project configs, any format, any depth
       - '**/.eslintrc.*'
       # Root configs, any format
@@ -40,11 +38,9 @@ tasks:
       runFromWorkspaceRoot: true
       cache: true
     deps:
-      - '@kbn/eslint-config:source'
+      - '@kbn/eslint-config:source-upstream-direct'
     inputs:
-      - '@group(src)'
-      # Other config files
-      - '*.config.*'
+      - '**/*.{js,mjs,ts,tsx}'
       # Project configs, any format, any depth
       - '**/.eslintrc.*'
       # Root configs, any format
