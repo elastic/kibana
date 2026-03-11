@@ -1,0 +1,139 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { IRouter } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { PLUGIN_ID } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
+import type {
+  ScheduledActionResultsRequestOptions,
+  ScheduledActionResultsStrategyResponse,
+} from '../../../common/search_strategy';
+import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+
+export const getScheduledActionResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/internal/osquery/scheduled_results/{scheduleId}/{executionCount}',
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              scheduleId: schema.string(),
+              executionCount: schema.number(),
+            }),
+            query: schema.object({
+              page: schema.maybe(schema.number()),
+              pageSize: schema.maybe(schema.number()),
+              sort: schema.maybe(schema.string()),
+              sortOrder: schema.maybe(schema.string()),
+              kuery: schema.maybe(schema.string()),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
+        try {
+          const { scheduleId, executionCount } = request.params;
+
+          const search = await context.search;
+          const res = await lastValueFrom(
+            search.search<
+              ScheduledActionResultsRequestOptions,
+              ScheduledActionResultsStrategyResponse
+            >(
+              {
+                scheduleId,
+                executionCount,
+                factoryQueryType: OsqueryQueries.scheduledActionResults,
+                pagination: generateTablePaginationOptions(
+                  request.query.page ?? 0,
+                  request.query.pageSize ?? 20
+                ),
+                sort: {
+                  direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                  field: request.query.sort ?? '@timestamp',
+                },
+              },
+              { abortSignal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          const aggs = (res.rawResponse?.aggregations as Record<string, unknown>)?.aggs as
+            | Record<string, unknown>
+            | undefined;
+          const responsesBySchedule = aggs?.responses_by_schedule as Record<string, unknown>;
+          const rowsCount = (responsesBySchedule?.rows_count as { value?: number })?.value ?? 0;
+          const responsesBuckets = (
+            responsesBySchedule?.responses as {
+              buckets?: Array<{ key: string; doc_count: number }>;
+            }
+          )?.buckets;
+
+          const successful = responsesBuckets?.find((b) => b.key === 'success')?.doc_count ?? 0;
+          const failed = responsesBuckets?.find((b) => b.key === 'error')?.doc_count ?? 0;
+
+          const total =
+            typeof res.rawResponse.hits.total === 'number'
+              ? res.rawResponse.hits.total
+              : res.rawResponse.hits.total?.value ?? 0;
+
+          const pageSize = request.query.pageSize ?? 20;
+          const currentPage = request.query.page ?? 0;
+
+          return response.ok({
+            body: {
+              edges: res.edges,
+              total,
+              currentPage,
+              pageSize,
+              totalPages: Math.ceil(total / pageSize),
+              aggregations: {
+                totalRowCount: rowsCount,
+                totalResponded: successful + failed,
+                successful,
+                failed,
+                pending: 0,
+              },
+              inspect: res.inspect,
+            },
+          });
+        } catch (e) {
+          return response.customError({
+            statusCode: e.statusCode ?? 500,
+            body: { message: e.message },
+          });
+        }
+      }
+    );
+};
+
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+
+  return controller.signal;
+}
