@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/field-types'
   - '@kbn/i18n'
-  - '@kbn/expressions-plugin'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/i18n-react'
   - '@kbn/apm-sources-access-plugin'
