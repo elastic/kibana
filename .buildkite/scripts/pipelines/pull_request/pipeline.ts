@@ -48,11 +48,6 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
       .buildkite/scripts/bootstrap.sh
 
       .buildkite/scripts/steps/test/jest_parallel.sh jest.config.js
-
-      if [ "\${BUILDKITE_RETRY_COUNT:-0}" = "0" ]; then
-        echo "[jest-checkpoint-repro] forcing first attempt to fail to verify retry resume"
-        exit 1
-      fi
     agents:
       machineType: n2d-standard-4
       preemptible: true
