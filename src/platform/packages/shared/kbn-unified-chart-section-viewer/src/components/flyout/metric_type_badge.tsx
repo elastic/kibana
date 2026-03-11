@@ -42,6 +42,9 @@ export const MetricTypeBadge = ({ instrument }: MetricTypeBadgeProps) => {
       <EuiBadge
         tabIndex={0}
         title=""
+        onMouseDown={(e: React.MouseEvent) => {
+          e.preventDefault();
+        }}
         css={css`
           cursor: pointer;
         `}
