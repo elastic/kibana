@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
-import type {
-  FieldConfig,
-  ValidationFunc,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormContext,
@@ -20,7 +18,6 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
-import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
@@ -36,37 +33,17 @@ interface ConnectorFormFieldsProps {
 
 const { emptyField } = fieldValidators;
 
-const createConnectorIdValidator = (http: HttpSetup, isEdit: boolean) => {
-  const validator: ValidationFunc<ConnectorFormData, string, { id: string }> = async ({
-    value,
-  }) => {
-    if (isEdit || !value || typeof value !== 'string') return;
-
-    try {
-      const response = await checkConnectorIdAvailability({ http, id: value });
-      if (!response.connectorIdAvailable) {
-        return {
-          message: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdExists',
-            {
-              defaultMessage:
-                'A connector with this ID already exists. Please choose a different ID.',
-            }
-          ),
-        };
-      }
-    } catch (error) {
-      // if the check fails, allow form submission - server will validate
-    }
-  };
-  return validator;
-};
+const CONNECTOR_ID_EXISTS_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdExists',
+  {
+    defaultMessage: 'A connector with this ID already exists. Please choose a different ID.',
+  }
+);
 
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.nameFieldLabel', {
     defaultMessage: 'Connector name',
   }),
-
   validations: [
     {
       validator: emptyField(
@@ -81,9 +58,9 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const idConfig = (
-  http: HttpSetup,
-  isEdit: boolean
+const createIdConfig = (
+  isEdit: boolean,
+  getIdExistsError: () => string | null
 ): FieldConfig<{ id: string }, ConnectorFormData> => ({
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldLabel', {
     defaultMessage: 'Connector ID',
@@ -95,7 +72,6 @@ const idConfig = (
     : i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldHelpText', {
         defaultMessage: 'A unique identifier for this connector.',
       }),
-
   validations: [
     {
       validator: emptyField(
@@ -124,8 +100,12 @@ const idConfig = (
       },
     },
     {
-      validator: createConnectorIdValidator(http, isEdit),
-      isAsync: true,
+      validator: () => {
+        const error = getIdExistsError();
+        if (error) {
+          return { message: error };
+        }
+      },
     },
   ],
 });
@@ -135,15 +115,47 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
   isEdit,
 }) => {
   const { http } = useKibana().services;
-  const { setFieldValue } = useFormContext();
-  const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name'] });
+  const { setFieldValue, validateFields } = useFormContext();
+  const [{ name, id }] = useFormData<ConnectorFormData>({ watch: ['name', 'id'] });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
+  const idExistsErrorRef = useRef<string | null>(null);
+  const lastCheckedIdRef = useRef<string | null>(null);
+
+  const getIdExistsError = useCallback(() => idExistsErrorRef.current, []);
 
   useEffect(() => {
     if (!isEdit && !usingCustomIdentifier && name) {
       setFieldValue('id', toSlugIdentifier(name));
     }
   }, [name, isEdit, setFieldValue, usingCustomIdentifier]);
+
+  useDebounce(
+    async () => {
+      if (isEdit || !id || !isValidSlugIdentifier(id)) {
+        if (idExistsErrorRef.current) {
+          idExistsErrorRef.current = null;
+          validateFields(['id']);
+        }
+        lastCheckedIdRef.current = id;
+        return;
+      }
+
+      if (lastCheckedIdRef.current === id) {
+        return;
+      }
+      lastCheckedIdRef.current = id;
+
+      try {
+        const response = await checkConnectorIdAvailability({ http, id });
+        idExistsErrorRef.current = response.connectorIdAvailable ? null : CONNECTOR_ID_EXISTS_ERROR;
+      } catch {
+        idExistsErrorRef.current = null;
+      }
+      validateFields(['id']);
+    },
+    500,
+    [id]
+  );
 
   const handleIdChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +166,8 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
     },
     [name, setFieldValue]
   );
+
+  const idConfig = createIdConfig(isEdit, getIdExistsError);
 
   return (
     <>
@@ -170,7 +184,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
       <UseField
         path="id"
         component={Field}
-        config={idConfig(http, isEdit)}
+        config={idConfig}
         componentProps={{
           euiFieldProps: {
             readOnly: !canSave || isEdit,
