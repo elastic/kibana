@@ -6,32 +6,31 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { FieldGroup } from './field_group';
-import { StateTransitionCountField } from '../fields/state_transition_count_field';
-import { StateTransitionTimeframeField } from '../fields/state_transition_timeframe_field';
+import { StateTransitionCountField } from './state_transition_count_field';
+import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 
 type DelayMode = 'immediate' | 'breaches' | 'duration';
 
 const MODE_OPTIONS = [
   {
     id: 'immediate' as const,
-    label: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeImmediate', {
+    label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeImmediate', {
       defaultMessage: 'Immediate',
     }),
   },
   {
     id: 'breaches' as const,
-    label: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeBreaches', {
+    label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeBreaches', {
       defaultMessage: 'Breaches',
     }),
   },
   {
     id: 'duration' as const,
-    label: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeDuration', {
+    label: i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeDuration', {
       defaultMessage: 'Duration',
     }),
   },
@@ -49,9 +48,8 @@ const deriveMode = (stateTransition?: {
   return 'immediate';
 };
 
-export const StateTransitionFieldGroup: React.FC = () => {
+export const AlertDelayField = () => {
   const { control, setValue } = useFormContext<FormValues>();
-  const kind = useWatch({ control, name: 'kind' });
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const [selectedMode, setSelectedMode] = useState<DelayMode>(deriveMode(stateTransition));
 
@@ -60,7 +58,8 @@ export const StateTransitionFieldGroup: React.FC = () => {
       switch (mode as DelayMode) {
         case 'immediate':
           setSelectedMode('immediate');
-          setValue('stateTransition', undefined);
+          setValue('stateTransition.pendingCount', undefined);
+          setValue('stateTransition.pendingTimeframe', undefined);
           break;
         case 'breaches':
           setSelectedMode('breaches');
@@ -83,51 +82,53 @@ export const StateTransitionFieldGroup: React.FC = () => {
     [setValue, stateTransition?.pendingCount, stateTransition?.pendingTimeframe]
   );
 
-  if (kind !== 'alert') {
-    return null;
-  }
-
   return (
-    <FieldGroup
-      title={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.title', {
+    <EuiFormRow
+      label={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.label', {
         defaultMessage: 'Alert delay',
       })}
+      fullWidth
+      data-test-subj="alertDelayFormRow"
     >
-      <EuiButtonGroup
-        buttonSize="s"
-        legend={i18n.translate('xpack.alertingV2.ruleForm.stateTransition.delayModeLegend', {
-          defaultMessage: 'Alert delay mode',
-        })}
-        options={MODE_OPTIONS}
-        idSelected={selectedMode}
-        onChange={onModeChange}
-        isFullWidth
-        data-test-subj="stateTransitionDelayMode"
-      />
-      <EuiSpacer size="s" />
-      {selectedMode === 'immediate' && (
-        <EuiText size="xs" color="subdued" data-test-subj="stateTransitionImmediateDescription">
-          {i18n.translate('xpack.alertingV2.ruleForm.stateTransition.immediateDescription', {
-            defaultMessage: 'No delay - Alerts on first breach',
+      <>
+        <EuiButtonGroup
+          buttonSize="s"
+          legend={i18n.translate('xpack.alertingV2.ruleForm.alertDelay.delayModeLegend', {
+            defaultMessage: 'Alert delay mode',
           })}
-        </EuiText>
-      )}
-      {selectedMode === 'breaches' && (
-        <StateTransitionCountField
-          prependLabel={i18n.translate(
-            'xpack.alertingV2.ruleForm.stateTransition.inlineBreachesPrepend',
-            { defaultMessage: 'Consecutive breaches' }
-          )}
+          options={MODE_OPTIONS}
+          idSelected={selectedMode}
+          onChange={onModeChange}
+          isFullWidth
+          data-test-subj="stateTransitionDelayMode"
         />
-      )}
-      {selectedMode === 'duration' && (
-        <StateTransitionTimeframeField
-          numberPrependLabel={i18n.translate(
-            'xpack.alertingV2.ruleForm.stateTransition.inlineDurationPrepend',
-            { defaultMessage: 'Active for' }
-          )}
-        />
-      )}
-    </FieldGroup>
+        <EuiSpacer size="s" />
+        {selectedMode === 'immediate' && (
+          <EuiText size="xs" color="subdued" data-test-subj="stateTransitionImmediateDescription">
+            {i18n.translate('xpack.alertingV2.ruleForm.alertDelay.immediateDescription', {
+              defaultMessage: 'No delay - Alerts on first breach',
+            })}
+          </EuiText>
+        )}
+        {selectedMode === 'breaches' && (
+          <StateTransitionCountField
+            variant="pending"
+            prependLabel={i18n.translate(
+              'xpack.alertingV2.ruleForm.alertDelay.inlineBreachesPrepend',
+              { defaultMessage: 'Consecutive breaches' }
+            )}
+          />
+        )}
+        {selectedMode === 'duration' && (
+          <StateTransitionTimeframeField
+            variant="pending"
+            numberPrependLabel={i18n.translate(
+              'xpack.alertingV2.ruleForm.alertDelay.inlineDurationPrepend',
+              { defaultMessage: 'Active for' }
+            )}
+          />
+        )}
+      </>
+    </EuiFormRow>
   );
 };

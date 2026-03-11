@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 import type {
   NotificationPolicy,
   NotificationPolicyId,
@@ -13,8 +15,6 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 
 @injectable()
 export class FetchPoliciesStep implements DispatcherStep {
@@ -38,11 +38,16 @@ export class FetchPoliciesStep implements DispatcherStep {
       return { type: 'continue', data: { policies: new Map() } };
     }
 
-    const result = await this.notificationPolicySavedObjectService.bulkGetByIds(uniquePolicyIds);
+    const result = await this.notificationPolicySavedObjectService.bulkGetDecryptedByIds(
+      uniquePolicyIds
+    );
+
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
     for (const doc of result) {
-      if ('error' in doc) continue;
+      if ('error' in doc) {
+        continue;
+      }
 
       policies.set(doc.id, {
         id: doc.id,
@@ -51,6 +56,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         matcher: doc.attributes.matcher,
         groupBy: doc.attributes.group_by ?? [],
         throttle: doc.attributes.throttle,
+        apiKey: doc.attributes.auth.apiKey,
       });
     }
 

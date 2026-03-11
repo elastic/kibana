@@ -27,9 +27,17 @@ jest.mock('../fields/recovery_base_and_condition_field', () => ({
   ),
 }));
 
+jest.mock('../fields/alert_delay_field', () => ({
+  AlertDelayField: () => <div data-test-subj="mockAlertDelayField">Alert Delay Field</div>,
+}));
+
+jest.mock('../fields/recovery_delay_field', () => ({
+  RecoveryDelayField: () => <div data-test-subj="mockRecoveryDelayField">Recovery Delay Field</div>,
+}));
+
 describe('AlertConditionsFieldGroup', () => {
-  it('renders the field group with title', () => {
-    const Wrapper = createFormWrapper();
+  it('renders the field group with title when kind is alert', () => {
+    const Wrapper = createFormWrapper({ kind: 'alert' });
 
     render(
       <Wrapper>
@@ -40,8 +48,44 @@ describe('AlertConditionsFieldGroup', () => {
     expect(screen.getByText('Alert conditions')).toBeInTheDocument();
   });
 
+  it('does not render when kind is signal', () => {
+    const Wrapper = createFormWrapper({ kind: 'signal' });
+
+    render(
+      <Wrapper>
+        <AlertConditionsFieldGroup />
+      </Wrapper>
+    );
+
+    expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
+  });
+
+  it('renders the alert delay field', () => {
+    const Wrapper = createFormWrapper({ kind: 'alert' });
+
+    render(
+      <Wrapper>
+        <AlertConditionsFieldGroup />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('mockAlertDelayField')).toBeInTheDocument();
+  });
+
+  it('renders the recovery delay field', () => {
+    const Wrapper = createFormWrapper({ kind: 'alert' });
+
+    render(
+      <Wrapper>
+        <AlertConditionsFieldGroup />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('mockRecoveryDelayField')).toBeInTheDocument();
+  });
+
   it('renders the recovery type field', () => {
-    const Wrapper = createFormWrapper();
+    const Wrapper = createFormWrapper({ kind: 'alert' });
 
     render(
       <Wrapper>
@@ -54,6 +98,7 @@ describe('AlertConditionsFieldGroup', () => {
 
   it('does not render recovery fields when type is no_breach', () => {
     const Wrapper = createFormWrapper({
+      kind: 'alert',
       recoveryPolicy: { type: 'no_breach' },
     });
 
@@ -69,6 +114,7 @@ describe('AlertConditionsFieldGroup', () => {
 
   it('renders RecoveryBaseQueryOnlyField when type is query and no evaluation condition exists', () => {
     const Wrapper = createFormWrapper({
+      kind: 'alert',
       recoveryPolicy: { type: 'query' },
       evaluation: { query: { base: 'FROM logs | STATS count() BY host' } },
     });
@@ -85,6 +131,7 @@ describe('AlertConditionsFieldGroup', () => {
 
   it('renders RecoveryBaseAndConditionField when type is query and evaluation condition exists', () => {
     const Wrapper = createFormWrapper({
+      kind: 'alert',
       recoveryPolicy: { type: 'query' },
       evaluation: {
         query: {
@@ -106,6 +153,7 @@ describe('AlertConditionsFieldGroup', () => {
 
   it('always renders recovery type field regardless of type', () => {
     const Wrapper = createFormWrapper({
+      kind: 'alert',
       recoveryPolicy: { type: 'query' },
     });
 
@@ -120,6 +168,7 @@ describe('AlertConditionsFieldGroup', () => {
 
   it('falls back to RecoveryBaseQueryOnlyField when evaluation condition is only whitespace', () => {
     const Wrapper = createFormWrapper({
+      kind: 'alert',
       recoveryPolicy: { type: 'query' },
       evaluation: {
         query: {

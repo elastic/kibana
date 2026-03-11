@@ -34,7 +34,7 @@ const extractErrorMessages = (errors: FieldErrors): string[] => {
   return messages;
 };
 
-export const ErrorCallOut: React.FC = () => {
+export const ErrorCallOut = () => {
   const {
     formState: { errors, isSubmitted },
   } = useFormContext<FormValues>();

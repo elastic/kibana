@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
 import { WhereClauseEditor } from '../fields/where_clause_editor';
 import { EvaluationQueryField } from '../fields/evaluation_query_field';
+import { GroupFieldSelect } from '../fields/group_field_select';
+import { TimeFieldSelect } from '../fields/time_field_select';
 
 interface ConditionFieldGroupProps {
   /**
@@ -33,9 +35,7 @@ interface ConditionFieldGroupProps {
  * The base query defines what data is being evaluated, while the
  * condition field defines the threshold or filter that triggers alerts.
  */
-export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
-  includeBase = false,
-}) => {
+export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
 
   // Read the base query from form state (initialized via useFormDefaults)
@@ -47,14 +47,6 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
         defaultMessage: 'Rule evaluation',
       })}
     >
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.alertingV2.ruleForm.conditionDescription', {
-          defaultMessage:
-            'The condition determines when this rule should trigger an alert. Define a WHERE clause condition (e.g., count > 100).',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
-
       {includeBase ? (
         // Editable base query
         <>
@@ -100,6 +92,8 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
         disabled={!baseQuery}
         fullWidth={true}
       />
+      <GroupFieldSelect />
+      <TimeFieldSelect />
     </FieldGroup>
   );
 };

@@ -17,9 +17,9 @@ interface EvaluationQueryFieldProps {
   height?: string | number;
 }
 
-export const EvaluationQueryField: React.FC<EvaluationQueryFieldProps> = ({
+export const EvaluationQueryField = ({
   height = EDITOR_HEIGHT_INLINE,
-}) => {
+}: EvaluationQueryFieldProps) => {
   return (
     <EsqlEditorField
       name="evaluation.query.base"

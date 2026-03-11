@@ -37,9 +37,9 @@ interface RecoveryBaseAndConditionFieldProps {
  * Validation logic is provided by the `useRecoveryValidation` hook via the
  * `validation` prop. Seeding and field management are handled locally.
  */
-export const RecoveryBaseAndConditionField: React.FC<RecoveryBaseAndConditionFieldProps> = ({
+export const RecoveryBaseAndConditionField = ({
   validation,
-}) => {
+}: RecoveryBaseAndConditionFieldProps) => {
   const { getValues, setValue } = useFormContext<FormValues>();
   const {
     recoveryBaseQuery,
