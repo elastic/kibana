@@ -311,7 +311,7 @@ export const useDslLifecycleSummary = ({
 
       {uiState.isEditDslStepsFlyoutOpen && uiState.editFlyoutInitialSteps && (
         <EditDslStepsFlyout
-          initialSteps={uiState.editFlyoutInitialSteps}
+          initialSteps={uiState.previewSteps ?? uiState.editFlyoutInitialSteps}
           selectedStepIndex={uiState.selectedStepIndex}
           setSelectedStepIndex={(index) =>
             dispatchUi({ type: 'setSelectedStepIndex', payload: index })
