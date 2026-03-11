@@ -74,6 +74,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ),
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
+              tags: schema.maybe(schema.string()),
             }),
           },
         },
@@ -95,20 +96,23 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             sourceFilters: sourceFiltersRaw,
             startDate,
             endDate,
+            tags: tagsRaw,
           } = request.query;
 
           const decoded = decodeCursor(nextPage);
           const userIds = userIdsRaw ? userIdsRaw.split(',').filter(Boolean) : undefined;
+          const tags = tagsRaw ? tagsRaw.split(',').filter(Boolean) : undefined;
 
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
             ? new Set(sourceFiltersRaw.split(',').filter(Boolean) as SourceFilter[])
             : undefined;
 
           const hasUserFilter = userIds && userIds.length > 0;
+          const hasTagsFilter = tags && tags.length > 0;
           const includeLive =
             !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
           const includeScheduled =
-            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter;
+            (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter && !hasTagsFilter;
 
           const fetchSize = pageSize + 1;
 
@@ -135,6 +139,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 searchAfter: decoded.actionSearchAfter,
                 kuery,
                 userIds,
+                tags,
                 spaceId,
                 startDate,
                 endDate,

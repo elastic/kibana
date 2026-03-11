@@ -32,6 +32,8 @@ import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { AlertAttachmentContext } from '../../common/contexts';
+import { TagsEditor } from '../../actions/components/tags_editor';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -41,6 +43,7 @@ export interface LiveQueryFormFields {
   ecs_mapping: ECSMapping;
   packId: string[];
   timeout?: number;
+  tags: string[];
   queryType: 'query' | 'pack';
 }
 
@@ -77,6 +80,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   addToTimeline,
 }) => {
   const alertAttachmentContext = useContext(AlertAttachmentContext);
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const { application } = useKibana().services;
   const permissions = application.capabilities.osquery;
@@ -122,9 +126,17 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     isLive,
   });
 
+  const handleTagsChange = useCallback(
+    (newTags: string[]) => {
+      setValue('tags', newTags);
+    },
+    [setValue]
+  );
+
   useEffect(() => {
     register('savedQueryId');
     register('alertIds');
+    register('tags');
   }, [register]);
 
   const queryStatus = useMemo(() => {
@@ -157,6 +169,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
           ...(queryType === 'query' ? { timeout: values.timeout } : {}),
+          tags: values.tags,
         },
         (value) => !isEmpty(value) || isNumber(value)
       ) as unknown as LiveQueryFormFields;
@@ -314,6 +327,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           {!hideAgentsField && (
             <EuiFlexItem>
               <AgentsTableField />
+            </EuiFlexItem>
+          )}
+          {isHistoryEnabled && (
+            <EuiFlexItem>
+              <TagsEditor
+                tags={watchedValues.tags ?? []}
+                onChange={handleTagsChange}
+              />
             </EuiFlexItem>
           )}
           {queryType === 'pack' ? (
