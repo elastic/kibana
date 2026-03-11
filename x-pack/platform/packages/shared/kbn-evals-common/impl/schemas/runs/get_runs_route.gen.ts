@@ -23,6 +23,8 @@ export const EvaluationRunSummary = z.object({
   run_id: z.string(),
   timestamp: z.string(),
   suite_id: z.string().optional(),
+  dataset_id: z.string().nullable().optional(),
+  dataset_name: z.string().nullable().optional(),
   task_model: Model.optional(),
   evaluator_model: Model.optional(),
   git_branch: z.string().nullable().optional(),
@@ -45,6 +47,10 @@ export const GetEvaluationRunsRequestQuery = z.object({
    * Filter by git branch
    */
   branch: z.string().optional(),
+  /**
+   * Filter by dataset ID
+   */
+  dataset_id: z.string().optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
 });

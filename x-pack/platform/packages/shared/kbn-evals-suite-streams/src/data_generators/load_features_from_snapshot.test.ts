@@ -100,7 +100,7 @@ describe('load_features_from_snapshot', () => {
 
     expect(mockCreateGcsRepository).toHaveBeenCalledWith({
       bucket: GCS_BUCKET,
-      basePath: `${OTEL_DEMO_GCS_BASE_PATH_PREFIX}/2026-02-26-test`,
+      basePath: `2026-02-26-test/${OTEL_DEMO_GCS_BASE_PATH_PREFIX}`,
     });
 
     expect(mockRestoreSnapshot).toHaveBeenCalledWith(
