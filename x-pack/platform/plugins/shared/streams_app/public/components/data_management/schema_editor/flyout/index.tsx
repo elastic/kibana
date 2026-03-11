@@ -39,6 +39,13 @@ export interface SchemaEditorFlyoutProps {
   withFieldSimulation?: boolean;
   fields?: SchemaField[];
   enableGeoPointSuggestions?: boolean;
+  /**
+   * When true, the flyout is in description-only editing mode.
+   * In this mode, the type selector is hidden and only description can be edited.
+   * This is used for inherited fields and unmapped fields where the user explicitly
+   * chose to edit description only.
+   */
+  isDescriptionOnlyMode?: boolean;
   onGoToField?: (fieldName: string) => void;
 }
 
@@ -52,6 +59,7 @@ export const SchemaEditorFlyout = ({
   withFieldSimulation = false,
   fields,
   enableGeoPointSuggestions = true,
+  isDescriptionOnlyMode = false,
   onGoToField,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
@@ -76,6 +84,8 @@ export const SchemaEditorFlyout = ({
     });
   }, [enableGeoPointSuggestions, field.name, fields, stream]);
 
+  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+
   const initialField = useMemo(() => {
     if (applyGeoPointSuggestionProp && geoPointSuggestion) {
       return {
@@ -98,6 +108,27 @@ export const SchemaEditorFlyout = ({
   );
 
   const hasValidFieldType = nextField.type !== undefined;
+  // Description-only editing is only allowed for wired streams.
+  // Classic streams require a type to be specified to add a description.
+  // This applies to:
+  // 1. Inherited fields (can only add description override)
+  // 2. When explicitly requested via isDescriptionOnlyMode prop
+  const isDescriptionOnlyEditing =
+    isEditing && streamType === 'wired' && (field.status === 'inherited' || isDescriptionOnlyMode);
+  const isDocOnlyField = field.status === 'unmapped' && !field.type;
+  const hasDescriptionChanged =
+    (nextField.description ?? undefined) !== (field.description ?? undefined);
+  const isInheritedDescriptionOnlyEditing =
+    isDescriptionOnlyEditing && field.status === 'inherited';
+  // For wired streams, unmapped fields can have description-only changes without selecting a type.
+  // This also applies when user explicitly selects "Unmapped" from the type dropdown.
+  const isUnmappedDescriptionOnlyChange =
+    isEditing &&
+    streamType === 'wired' &&
+    field.status === 'unmapped' &&
+    !field.type &&
+    (!nextField.type || nextField.type === 'unmapped') &&
+    hasDescriptionChanged;
 
   const onValidate = ({
     isValid,
@@ -181,13 +212,14 @@ export const SchemaEditorFlyout = ({
           <FieldSummary
             field={nextField}
             isEditing={isEditing}
+            isDescriptionOnlyEditing={isDescriptionOnlyEditing}
             toggleEditMode={toggleEditMode}
             onChange={setNextField}
             stream={stream}
             enableGeoPointSuggestions={enableGeoPointSuggestions}
             onGoToField={onGoToField}
           />
-          {!nextField.alias_for && (
+          {nextField.type && !isDescriptionOnlyEditing && !nextField.alias_for && (
             <AdvancedFieldMappingOptions
               value={nextField.additionalParameters}
               onChange={(additionalParameters) => setNextField({ additionalParameters })}
@@ -195,11 +227,14 @@ export const SchemaEditorFlyout = ({
               isEditing={isEditing}
             />
           )}
-          {withFieldSimulation && !nextField.alias_for && (
-            <EuiFlexItem grow={false}>
-              <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
-            </EuiFlexItem>
-          )}
+          {withFieldSimulation &&
+            nextField.type &&
+            !isDescriptionOnlyEditing &&
+            !nextField.alias_for && (
+              <EuiFlexItem grow={false}>
+                <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
+              </EuiFlexItem>
+            )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
       {isEditing && (
@@ -218,15 +253,67 @@ export const SchemaEditorFlyout = ({
             <EuiButton
               data-test-subj="streamsAppSchemaEditorFieldStageButton"
               disabled={
-                !hasValidFieldType ||
+                // In description-only mode, we don't require a valid field type
+                // For wired streams, unmapped fields can have description-only changes
+                (!isDescriptionOnlyEditing &&
+                  !isUnmappedDescriptionOnlyChange &&
+                  !hasValidFieldType) ||
                 !isValidAdvancedFieldMappings ||
+                // For inherited fields in description-only mode, require description change
+                (isInheritedDescriptionOnlyEditing && !hasDescriptionChanged) ||
+                // For doc-only fields in description-only mode, require description change
+                (isDescriptionOnlyEditing && isDocOnlyField && !hasDescriptionChanged) ||
                 (!isValidSimulation && !isExpensiveQueriesError)
               }
               onClick={() => {
-                onStage({
-                  ...nextField,
-                  status: 'mapped',
-                } as SchemaField);
+                const stagedParent = stream.name;
+
+                const stagedField = (() => {
+                  if (isDescriptionOnlyEditing) {
+                    if (field.status === 'inherited') {
+                      // Keep the inherited status and original parent so the table
+                      // continues to show the correct parent stream.
+                      // buildSchemaSavePayload handles persisting the description
+                      // override for inherited fields.
+                      return {
+                        ...field,
+                        description: nextField.description,
+                      } as SchemaField;
+                    }
+
+                    return {
+                      name: nextField.name,
+                      parent: stagedParent,
+                      status: 'unmapped',
+                      description: nextField.description,
+                    } as SchemaField;
+                  }
+
+                  // For wired streams, unmapped fields can have description-only changes
+                  // without selecting a type - stage as doc-only override
+                  if (isUnmappedDescriptionOnlyChange) {
+                    return {
+                      name: nextField.name,
+                      parent: stagedParent,
+                      status: 'unmapped',
+                      description: nextField.description,
+                    } as SchemaField;
+                  }
+
+                  // If user selected 'unmapped' type, exclude it from the staged field.
+                  // 'unmapped' is a UI-only pseudo-type representing "no mapping".
+                  const { type: rawType, ...fieldWithoutType } = nextField;
+                  const effectiveType = rawType === 'unmapped' ? undefined : rawType;
+
+                  return {
+                    ...fieldWithoutType,
+                    ...(effectiveType !== undefined ? { type: effectiveType } : {}),
+                    parent: stagedParent,
+                    status: effectiveType !== undefined ? 'mapped' : 'unmapped',
+                  } as SchemaField;
+                })();
+
+                onStage(stagedField);
                 if (onClose) onClose();
               }}
             >
