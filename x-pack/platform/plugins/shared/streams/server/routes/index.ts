@@ -32,10 +32,12 @@ import { internalInsightsRoutes } from './internal/streams/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/streams/queries/route';
+import { sigEventsSkillRoutes } from './internal/streams/sig_events_skill/route';
 
 export const streamsRouteRepository = {
   // internal APIs
   ...internalCrudRoutes,
+  ...sigEventsSkillRoutes,
   ...internalManagementRoutes,
   ...internalSchemaRoutes,
   ...internalLifecycleRoutes,

@@ -47,6 +47,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
+
+  // Streams Sig Events
+  `${internalNamespaces.streamsSigEvents}.list_streams`,
+  `${internalNamespaces.streamsSigEvents}.list_features`,
+  `${internalNamespaces.streamsSigEvents}.list_queries`,
+  `${internalNamespaces.streamsSigEvents}.list_significant_events`,
+  `${internalNamespaces.streamsSigEvents}.list_discoveries`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
