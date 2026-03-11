@@ -74,7 +74,6 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/visualizations-common'
   - '@kbn/shared-ux-utility'
-  - '@kbn/std'
 tags:
   - plugin
   - prod
