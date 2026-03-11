@@ -32,4 +32,5 @@ yaml-language-server
 @opentelemetry/instrumentation-hapi
 simple-statistics
 monaco-promql
+oxlint
 react-element-to-jsx-string

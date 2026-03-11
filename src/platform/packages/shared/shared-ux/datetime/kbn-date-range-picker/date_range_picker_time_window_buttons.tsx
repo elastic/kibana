@@ -56,7 +56,7 @@ const BUTTON_ID_NEXT = 'next';
  * Provides step forward/backward and zoom out/in actions.
  */
 export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig }) {
-  const { timeRange, applyRange, compressed } = useDateRangePickerContext();
+  const { timeRange, applyRange, compressed, disabled } = useDateRangePickerContext();
   const {
     showShiftArrows = true,
     showZoomOut = true,
@@ -92,7 +92,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.previousLabel,
         title: '',
         iconType: 'arrowLeft',
-        isDisabled: isInvalid || isWindowDurationZero,
+        isDisabled: disabled || isInvalid || isWindowDurationZero,
         toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.previousTooltip,
         'data-test-subj': 'dateRangePickerPreviousButton',
       });
@@ -104,7 +104,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomOutLabel,
         title: '',
         iconType: 'magnifyWithMinus',
-        isDisabled: isInvalid,
+        isDisabled: disabled || isInvalid,
         toolTipContent: isInvalid ? translations.cannotZoomOutInvalid : translations.zoomOutTooltip,
         'data-test-subj': 'dateRangePickerZoomOutButton',
       });
@@ -116,7 +116,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomInLabel,
         title: '',
         iconType: 'magnifyWithPlus',
-        isDisabled: isInvalid || isWindowDurationZero,
+        isDisabled: disabled || isInvalid || isWindowDurationZero,
         toolTipContent: isInvalid
           ? translations.cannotZoomInInvalid
           : isWindowDurationZero
@@ -132,14 +132,14 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.nextLabel,
         title: '',
         iconType: 'arrowRight',
-        isDisabled: isInvalid || isWindowDurationZero,
+        isDisabled: disabled || isInvalid || isWindowDurationZero,
         toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.nextTooltip,
         'data-test-subj': 'dateRangePickerNextButton',
       });
     }
 
     return items;
-  }, [showShiftArrows, showZoomOut, showZoomIn, isInvalid, isWindowDurationZero]);
+  }, [showShiftArrows, showZoomOut, showZoomIn, disabled, isInvalid, isWindowDurationZero]);
 
   if (options.length === 0) {
     return null;
@@ -156,6 +156,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
       idToSelectedMap={{}}
       onChange={onChange}
       isIconOnly
+      isDisabled={disabled}
       buttonSize={compressed ? 's' : 'm'}
       color="text"
       data-test-subj="dateRangePickerTimeWindowButtons"

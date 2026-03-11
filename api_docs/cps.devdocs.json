@@ -12,7 +12,7 @@
         "label": "CPSConfigType",
         "description": [],
         "path": "src/platform/plugins/shared/cps/public/types.ts",
-        "lineNumber": 16,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25,7 +25,7 @@
             "label": "cpsEnabled",
             "description": [],
             "path": "src/platform/plugins/shared/cps/public/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -65,6 +65,75 @@
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cps",
+          "id": "def-public.CPSPluginSetup.registerAppAccess",
+          "type": "Function",
+          "tags": [],
+          "label": "registerAppAccess",
+          "description": [
+            "\nRegister a dynamic access resolver for a specific app during plugin setup.\nSee {@link ICPSManager.registerAppAccess} for details."
+          ],
+          "signature": [
+            "(appId: string, resolver: ",
+            {
+              "pluginId": "@kbn/cps-utils",
+              "scope": "public",
+              "docId": "kibKbnCpsUtilsPluginApi",
+              "section": "def-public.CPSAppAccessResolver",
+              "text": "CPSAppAccessResolver"
+            },
+            ") => void"
+          ],
+          "path": "src/platform/plugins/shared/cps/public/types.ts",
+          "lineNumber": 14,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "cps",
+              "id": "def-public.CPSPluginSetup.registerAppAccess.$1",
+              "type": "string",
+              "tags": [],
+              "label": "appId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/cps/public/types.ts",
+              "lineNumber": 18,
+              "columnNumber": 21,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "cps",
+              "id": "def-public.CPSPluginSetup.registerAppAccess.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "resolver",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/cps-utils",
+                  "scope": "public",
+                  "docId": "kibKbnCpsUtilsPluginApi",
+                  "section": "def-public.CPSAppAccessResolver",
+                  "text": "CPSAppAccessResolver"
+                }
+              ],
+              "path": "src/platform/plugins/shared/cps/public/types.ts",
+              "lineNumber": 18,
+              "columnNumber": 36,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -78,7 +147,7 @@
       "label": "CPSPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/cps/public/types.ts",
-      "lineNumber": 20,
+      "lineNumber": 25,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -101,7 +170,7 @@
             " | undefined"
           ],
           "path": "src/platform/plugins/shared/cps/public/types.ts",
-          "lineNumber": 21,
+          "lineNumber": 26,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

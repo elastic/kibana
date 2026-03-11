@@ -1,5 +1,5 @@
 {
-  "sha1": "3d17d3aa178a363f56054bbd375d59fb40d20a46",
+  "sha1": "35fa56794f79ba6d30c1a6ebfcb6cf1e2f917f37",
   "tests": [
     {
       "id": "98600d12651f127-aa69b48f5334963",
@@ -30,7 +30,7 @@
     {
       "id": "a2a2e384bed311a-d7e5f697c676699",
       "title": "Flights dashboard (sample data) loads dashboard and renders panels",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",

@@ -122,14 +122,12 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   );
 
   useEffect(() => {
-    setShowLoading(true);
-  }, [options.metric, nodeType]);
-
-  useEffect(() => {
-    const hasNodes = nodes && nodes.length;
-    // Don't show loading screen when we're auto-reloading
-    setShowLoading(!hasNodes);
-  }, [nodes]);
+    if (loading && !isAutoReloading) {
+      setShowLoading(true);
+    } else if (!loading) {
+      setShowLoading(false);
+    }
+  }, [loading, isAutoReloading]);
 
   const handleLegendControlChange = useCallback(
     (opts: LegendControlOptions) => {

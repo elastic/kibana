@@ -38,6 +38,5 @@
     "@kbn/router-utils",
     "@kbn/chart-expressions-common",
     "@kbn/observability-utils-common",
-    "@kbn/esql-language"
   ]
 }

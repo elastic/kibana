@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppDeepLinkId } from './project_navigation';
 
 /** @public */
@@ -20,9 +20,20 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
   deepLinkId?: AppDeepLinkId;
 }
 
-/** @public */
+/**
+ * @example
+ * Append a React element next to the breadcrumbs (recommended):
+ * ```tsx
+ * chrome.setBreadcrumbsAppendExtension({ content: <MyBadge />, order: 10 });
+ * ```
+ *
+ * @public
+ */
 export interface ChromeBreadcrumbsAppendExtension {
-  content: MountPoint<HTMLDivElement>;
+  /**
+   * The extension content as a React node.
+   */
+  content?: ReactNode;
   /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
   order?: number;
 }

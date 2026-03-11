@@ -25,6 +25,7 @@ import type { BuildApiMapResult, CliOptions } from '../types';
  *
  * @param project - TypeScript project instance.
  * @param plugins - List of plugins and packages to analyze.
+ * @param allPlugins - All plugins/packages for cross-reference resolution.
  * @param log - Tooling log instance.
  * @param transaction - APM transaction for tracking.
  * @param options - CLI options including collectReferences and pluginFilter.
@@ -33,6 +34,7 @@ import type { BuildApiMapResult, CliOptions } from '../types';
 export function buildApiMap(
   project: Project,
   plugins: PluginOrPackage[],
+  allPlugins: PluginOrPackage[],
   log: ToolingLog,
   transaction: Transaction,
   options: CliOptions
@@ -46,7 +48,7 @@ export function buildApiMap(
     referencedDeprecations,
     adoptionTrackedAPIs,
     unnamedExports,
-  } = getPluginApiMap(project, plugins, log, {
+  } = getPluginApiMap(project, plugins, allPlugins, log, {
     collectReferences: options.collectReferences,
     pluginFilter: options.pluginFilter,
   });
