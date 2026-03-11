@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   type EuiBasicTableColumn,
@@ -29,12 +30,37 @@ export const RunsListPage: React.FC = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
+  const [suiteIdFilter, setSuiteIdFilter] = useState('');
 
   const { data, isLoading, error } = useEvaluationRuns({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
+    suiteId: suiteIdFilter || undefined,
   });
+
+  const { data: suiteFilterData } = useEvaluationRuns({
+    page: 1,
+    perPage: 100,
+    branch: searchText || undefined,
+  });
+
+  const suiteOptions = useMemo(() => {
+    const options = [{ value: '', text: i18n.SUITE_FILTER_ALL_OPTION }];
+    const suiteSet = new Set<string>();
+
+    for (const run of suiteFilterData?.runs ?? []) {
+      if (run.suite_id) {
+        suiteSet.add(run.suite_id);
+      }
+    }
+
+    for (const id of Array.from(suiteSet).sort()) {
+      options.push({ value: id, text: id });
+    }
+
+    return options;
+  }, [suiteFilterData?.runs]);
 
   const columns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
     () => [
@@ -121,8 +147,22 @@ export const RunsListPage: React.FC = () => {
             <EuiFieldSearch
               placeholder={i18n.SEARCH_PLACEHOLDER}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => {
+                setSearchText(e.target.value);
+                setPageIndex(0);
+              }}
               isClearable
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
+            <EuiSelect
+              aria-label={i18n.SUITE_FILTER_ARIA_LABEL}
+              options={suiteOptions}
+              value={suiteIdFilter}
+              onChange={(event) => {
+                setSuiteIdFilter(event.target.value);
+                setPageIndex(0);
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
