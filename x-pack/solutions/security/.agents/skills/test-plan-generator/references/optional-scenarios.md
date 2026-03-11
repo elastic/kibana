@@ -6,6 +6,21 @@ This file contains the Gherkin templates for optional test plan sections, and th
 
 ## Optional section templates
 
+Include each optional section only when the evidence clearly supports it. If it is not clear whether a section applies, ask the user before including — do not include sections speculatively.
+
+| Section | Include if |
+|---|---|
+| **RBAC** | Issue explicitly mentions roles, permissions, or access control |
+| **Multi-space** | Feature involves UI, data, or configuration that could differ between Kibana spaces |
+| **Multi-tenant** | Feature involves data ingestion, index patterns, or configuration in a Serverless or ECH deployment |
+| **Upgrade** | Feature modifies stored data, index mappings, saved objects, configuration, or navigation structure |
+| **CCS** | Feature queries Elasticsearch indices — especially Alerts index or detection rules |
+
+For RBAC: no template — write scenarios manually based on the roles described in the issue.
+For all others: use the templates below.
+
+---
+
 ### Multi-space scenarios
 
 ```gherkin
@@ -47,28 +62,20 @@ Scenario: Feature data is isolated between tenants
 ### Upgrade scenarios
 
 Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
-- `7.17.x` (last minor of 7.x)
-- `8.19` (last minor of 8.x)
-- `9.2` (last minor before current major cycle)
+- `8.19.x` (last minor of 8.x)
+- `9.3` (last minor of current major cycle)
 
 ```gherkin
 @upgrade
-Scenario: Feature works correctly after upgrading from 7.17.x to TARGET_VERSION
-  Given a Kibana instance running version 7.17.x with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from 8.19.x to TARGET_VERSION
+  Given a Kibana instance running version 8.19.x with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
 
 @upgrade
-Scenario: Feature works correctly after upgrading from 8.19 to TARGET_VERSION
-  Given a Kibana instance running version 8.19 with existing data relevant to this feature
-  When the instance is upgraded to TARGET_VERSION
-  Then the feature is accessible and behaves as expected
-  And existing data or configuration is preserved without errors
-
-@upgrade
-Scenario: Feature works correctly after upgrading from 9.2 to TARGET_VERSION
-  Given a Kibana instance running version 9.2 with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from 9.3 to TARGET_VERSION
+  Given a Kibana instance running version 9.3 with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
@@ -105,17 +112,17 @@ Scenario: Feature handles remote cluster unavailability gracefully
 - Maximum **7 steps** per scenario (Given + When + Then + And lines combined)
 - Every scenario must have a **Given**
 - Use **plain, readable language** — non-technical people must understand it
+- **Describe behaviour and intent, not UI interactions** — write what the user achieves, not which buttons they click. `When user views the feature page` is correct. `When user clicks "Feature" in the submenu` is an anti-pattern.
 
 Example of a correctly structured scenario:
 
 ```gherkin
 @smoke @navigation
-Scenario: Navigate to feature page from main menu
-  Given user is on any application page
-  When user clicks "Module" in the main navigation
-  And user clicks "Feature" in the submenu
-  Then user is navigated to the Feature page
-  And the URL updates accordingly
+Scenario: Feature page is accessible from the main navigation
+  Given user is authenticated and on any application page
+  When user navigates to the Feature page
+  Then the Feature page is displayed
+  And the URL reflects the Feature page location
 ```
 
 ---
@@ -132,9 +139,11 @@ Scenario: Navigate to feature page from main menu
 
 ## Priority levels
 
-- **P0 (Critical):** Core functionality, navigation, data integrity
-- **P1 (High):** Workflows, filtering, search
-- **P2 (Medium):** Edge cases, error handling, integrations
+Priority is assigned based on **impact**, not scenario type. An edge case or error handling scenario can be P0 if failure would block core functionality or cause data loss.
+
+- **P0 (Critical):** Failure blocks core functionality, causes data loss, or creates a security risk.
+- **P1 (High):** Failure significantly degrades an important workflow or user-facing feature.
+- **P2 (Medium):** Failure has limited impact or affects only non-critical paths.
 
 ---
 

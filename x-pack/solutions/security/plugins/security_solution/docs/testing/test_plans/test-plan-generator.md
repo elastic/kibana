@@ -11,7 +11,7 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 3. The agent reads the issue, navigates the parent epic (if any), explores all sub-issues, fetches linked Figma designs and images, and generates a structured test plan
 4. The test plan is saved locally as a draft at `.cursor/tmp/test-plan-#<issue_number>.md` for you to review and edit
 5. When you're happy with it, you run: `/test-plan-generator publish test plan for issue #1234`
-6. The agent posts the plan as a comment on the GitHub issue — using the GitHub MCP if available, or the `gh` CLI as fallback
+6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
 
 ---
@@ -29,7 +29,7 @@ Before starting, make sure you have:
 
 ## Step 1 — Generate Your GitHub Personal Access Token
 
-The agent needs a token to read and comment on GitHub issues via the GitHub MCP server.
+The agent needs a token to read and comment on GitHub issues via the `gh` CLI and, optionally, the GitHub MCP server.
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
 2. Click **"Generate new token (classic)"**
@@ -61,16 +61,30 @@ This step is critical. Without it, all GitHub API calls to `elastic` repositorie
 
 ---
 
-## Step 3 — Configure the GitHub and Figma MCP Servers in Cursor
+## Step 3 — Configure the Figma MCP Server in Cursor
 
-Cursor reads MCP configuration from a file called `mcp.json`. The GitHub MCP is the primary way the agent reads issues and posts comments. The Figma MCP allows the agent to fetch design context from linked Figma files.
+Cursor reads MCP configuration from a file called `mcp.json`. The Figma MCP allows the agent to fetch design context from linked Figma files.
+
+> **Note on the GitHub MCP:** The GitHub MCP is optional. In practice, the agent works more reliably using the `gh` CLI for all GitHub interactions (reading issues, posting comments, navigating sub-issues). When the GitHub MCP is enabled alongside the agent doing complex multi-step work, it can interfere with parallel tool calls and cause Cursor to hang. The recommended setup is to use `gh` CLI as the primary GitHub tool and leave the GitHub MCP disabled unless you have a specific reason to enable it.
 
 ### Locate or create the file
 
 - **macOS / Linux:** `~/.cursor/mcp.json`
 - **Windows:** `%APPDATA%\Cursor\mcp.json`
 
-Open the file (create it if it doesn't exist) and paste the following, replacing the placeholder values with your actual tokens:
+Open the file (create it if it doesn't exist) and paste the following, replacing the placeholder value with your actual Figma token:
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_FIGMA_TOKEN_HERE", "--stdio"]
+    }
+  }
+}
+```
+
+If you do want to enable the GitHub MCP as well, add it alongside Figma:
 ```json
 {
   "mcpServers": {
@@ -91,9 +105,9 @@ Open the file (create it if it doesn't exist) and paste the following, replacing
 
 > **Why this approach?**
 >
-> - **GitHub** uses a remote HTTP server hosted by GitHub — no local installation needed, and it provides the most complete set of tools (~41 actions including reading issues, posting comments, navigating sub-issues, etc.). The older `@modelcontextprotocol/server-github` npm package was deprecated in April 2025.
->
 > - **Figma** uses the `figma-developer-mcp` package, which is the officially recommended package for Cursor (optimised for code generation from designs). The token is passed as a CLI argument — not as an environment variable — because that is how this package expects it. The older `@figma/mcp-server` package does not exist, and `@modelcontextprotocol/server-figma` has been deprecated.
+>
+> - **GitHub MCP** uses a remote HTTP server hosted by GitHub — no local installation needed. The older `@modelcontextprotocol/server-github` npm package was deprecated in April 2025. This MCP is optional — see the note above.
 
 ### Save the file and restart Cursor
 
@@ -102,17 +116,16 @@ After saving, fully quit and reopen Cursor. The MCP servers start automatically 
 ### Verify the MCPs are connected
 
 1. Open Cursor Settings → **MCP** tab
-2. You should see `github` and `figma` listed with a green status indicator
-3. Hover over the `github` entry — you should see ~41 available tools listed
-4. Hover over the `figma` entry — you should see 2 available tools listed
+2. You should see `figma` listed with a green status indicator
+3. Hover over the `figma` entry — you should see 2 available tools listed
 
 > If a server shows as disconnected, double-check the token values and that the JSON has no syntax errors. Use [jsonlint.com](https://jsonlint.com) to validate if needed.
 
 ---
 
-## Step 4 — Install the `gh` CLI (recommended)
+## Step 4 — Install the `gh` CLI (required)
 
-The `gh` CLI is GitHub's official command-line tool. The agent uses it as a fallback to post comments when the GitHub MCP tools are not available in the session. **Having both the GitHub MCP and `gh` installed ensures the agent can always publish test plans**, even if one of them fails.
+The `gh` CLI is GitHub's official command-line tool and is the **primary method** the agent uses to read issues, navigate sub-issues, and post comments. Using `gh` instead of the GitHub MCP avoids the hanging issues that can occur when the MCP is active during complex multi-step agent sessions.
 
 ### Install
 ```bash
@@ -158,10 +171,12 @@ The skill and its reference files were added to the repository by the Engineerin
 The files live at:
 ```
 x-pack/solutions/security/.agent/skills/test-plan-generator/
-├── SKILL.md                          # Agent instructions
+├── SKILL.md                              # Agent instructions
 └── references/
-    ├── optional-scenarios.md         # Gherkin templates and formatting rules
-    └── output-formats.md             # Sources Summary template and chat output formats
+    ├── document-structure.md             # Test plan template and structure
+    ├── optional-scenarios.md             # Gherkin templates and formatting rules
+    ├── output-formats.md                 # Sources Summary template and chat output formats
+    └── security-test-directories.md      # Map of existing test locations in the repo
 ```
 
 > **Why a skill and not a Cursor rule?** Skills are the current standard for extending AI agents in Kibana, agreed by Kibana tech leads and the AI guild. They are more efficient than rules (loaded on demand, not on every agent session), portable across agents, and version-controlled like any other code.
@@ -191,7 +206,7 @@ Since the skill uses `disable-model-invocation: true`, it is **not** applied aut
    /test-plan-generator generate test plan for issue #1234
 ```
    Replace `1234` with a real issue number that has a description, acceptance criteria, and ideally some sub-issues.
-5. Watch the agent work through the steps — it will show what it reads from GitHub, Figma, and any linked content
+5. Watch the agent work through the steps — it will show what it reads from GitHub (via `gh` CLI), Figma, and any linked content
 6. When finished, open `.cursor/tmp/test-plan-#1234.md` in the editor to review the draft
 7. When happy with it, run: `/test-plan-generator publish test plan for issue #1234`
 8. Check the GitHub issue — the test plan should appear as a new comment posted with your account
@@ -229,7 +244,7 @@ If you also need to refresh PR context (e.g., new commits were pushed):
 /test-plan-generator publish test plan for issue #1234
 ```
 
-The agent will use the GitHub MCP if available. If not, it will automatically fall back to the `gh` CLI. Either way, the result is the same: the comment is posted (or updated) on the issue and the local draft is deleted.
+The agent will use the `gh` CLI as the primary method. If `gh` is not available, it will fall back to the GitHub MCP. Either way, the result is the same: the comment is posted (or updated) on the issue and the local draft is deleted.
 
 ---
 
@@ -241,7 +256,7 @@ Your GitHub token is not authorized for the Elastic organization. Go to [github.
 
 ### GitHub MCP shows as disconnected in Cursor
 
-Check that the `mcp.json` entry for `github` uses `"type": "http"` and the URL `https://api.githubcopilot.com/mcp/`. Ensure your GitHub token is correctly placed in the `Authorization` header value (after `Bearer `). Fully quit and reopen Cursor after any changes to `mcp.json`.
+The GitHub MCP is optional — the agent uses `gh` CLI as the primary method for all GitHub interactions. If you have enabled the GitHub MCP and it shows as disconnected, check that the `mcp.json` entry uses `"type": "http"` and the URL `https://api.githubcopilot.com/mcp/`. Ensure your GitHub token is correctly placed in the `Authorization` header value (after `Bearer `). Fully quit and reopen Cursor after any changes to `mcp.json`. If you continue to have issues, simply disable the GitHub MCP and rely on `gh` CLI — the agent works more reliably that way.
 
 ### Figma MCP not connecting or "package not found"
 
@@ -265,23 +280,18 @@ Make sure you select **Login with a web browser** when prompted, not the HTTPS o
 
 ### `gh` CLI posts the comment but the update flow is broken on the next run
 
-The agent looks for a comment whose first line is exactly `<!-- test-plan-generated -->` to detect existing test plans and avoid duplicates. If that marker is missing or not on the first line, the agent will create a new comment instead of updating the existing one. Open the published comment on GitHub, make sure `<!-- test-plan-generated -->` is the very first line, save, and the update flow will work correctly from then on.
-
-### The agent created a file instead of posting a comment
-
-The agent did not follow the skill correctly. Check that the skill files exist at `x-pack/solutions/security/.agent/skills/test-plan-generator/` and that Cursor has loaded them (visible in Cursor Settings → Rules, Skills, Subagents under "Skills"). Try explicitly invoking with `/test-plan-generator` before your command.
-
-### The agent skipped sub-issues
-
-The skill explicitly states sub-issue navigation is mandatory. If it is still skipped, add to your prompt: "before generating the test plan, read all sub-issues of this issue in full." Also verify the GitHub MCP shows ~41 tools in Cursor Settings → MCP.
-
-### The agent generates scenarios for things not in the issue
-
-Add to your prompt: "only include scenarios for functionality explicitly described in the issue and its linked documents. Do not infer or assume features that are not mentioned."
+The agent looks for a comment whose first two lines are exactly:
+```
+<!-- test-plan-generated -->
+<!-- generated-by: [model] -->
+```
+to detect existing test plans and avoid duplicates. If those markers are missing or not at the very top of the comment, the agent will create a new comment instead of updating the existing one. Open the published comment on GitHub, make sure both lines are present and are the very first lines, save, and the update flow will work correctly from then on.
 
 ### Cursor hangs or stops responding during generation
 
-This happens when the issue has many sub-issues and PRs with large diffs, or when `update` is run in a new chat session without prior context — the agent may attempt to re-read everything from scratch.
+This is most commonly caused by the GitHub MCP being enabled at the same time the agent is doing complex multi-step work. The MCP can interfere with parallel tool calls and cause the session to freeze. **The recommended fix is to disable the GitHub MCP in `mcp.json` and use `gh` CLI exclusively** — this has proven to resolve hanging issues completely. See Step 3 for instructions on how to configure `mcp.json` without the GitHub MCP entry.
+
+If the GitHub MCP is already disabled and you still see hangs, it is likely due to the issue having many sub-issues and PRs with large diffs. In that case, split the work:
 
 **For `update` mode:** avoid adding "including PRs" to the command unless necessary. The default update mode re-reads the issue body, sub-issues, and comments to detect changes — but skips PRs, which are the heaviest part. If you need to refresh PR context, do it as a separate step: `/test-plan-generator update test plan for issue #1234 including PRs`.
 
@@ -316,7 +326,7 @@ The agent reads it and uses it to understand what is already covered. It will no
 The agent will detect the existing test plan and ask whether you want to check if it is still up to date, generate from scratch, or cancel. If you choose to check, it will re-read all sources and add only what is missing — it will not rewrite what is already correct.
 
 **Do I need both the GitHub MCP and `gh` CLI?**
-No, but it is strongly recommended. The GitHub MCP is the primary method and provides the richest context for reading issues and navigating sub-issues. The `gh` CLI is the fallback for publishing when the MCP tools are not available in the agent session. Having both means the workflow is never blocked by a connectivity issue with either tool.
+No — `gh` CLI is the primary and recommended method. The GitHub MCP is optional and in practice causes hanging issues when enabled during complex agent sessions. Install and authenticate `gh` CLI (Step 4) and you will have everything you need. The GitHub MCP can be left disabled.
 
 **Who maintains the skill?**
 The skill files live in the repository under `x-pack/solutions/security/.agent/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
