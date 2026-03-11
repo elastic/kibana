@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -32,7 +33,19 @@ export interface ServiceDeps {
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
-export const getKibanaServices = (): ServiceDeps | undefined => servicesReady$.value;
+
+export function useKibanaServices() {
+  const [services, setServices] = useState<ServiceDeps | undefined>(servicesReady$.value);
+  useEffect(() => {
+    const subscription = servicesReady$.subscribe(setServices);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+  return services;
+}
+
 export const untilPluginStartServicesReady = () => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
   return new Promise<ServiceDeps>((resolve) => {
