@@ -212,7 +212,7 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers */
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in alert prevalence */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE =
   'securitySolution:excludeColdAndFrozenTiersInPrevalence' as const;
 
