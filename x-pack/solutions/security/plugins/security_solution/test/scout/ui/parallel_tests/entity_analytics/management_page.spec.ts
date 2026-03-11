@@ -58,7 +58,7 @@ spaceTest.describe(
 
     // TODO: Fix flaky test - backend race condition when toggling entity analytics
     // The entity store cleanup is async and may still be in progress when re-enabling
-    // See: https://github.com/elastic/kibana/issues/XXXXX
+    // See: https://github.com/elastic/security-team/issues/16300
     // eslint-disable-next-line playwright/no-skipped-test
     spaceTest.skip('should init and disable entity analytics', async ({ pageObjects }) => {
       spaceTest.setTimeout(180000);
