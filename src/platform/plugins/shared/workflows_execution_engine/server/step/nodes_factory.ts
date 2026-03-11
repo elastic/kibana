@@ -15,11 +15,13 @@ import type {
   EnterIfNode,
   EnterRetryNode,
   EnterTryBlockNode,
+  EnterWhileNode,
   ExitConditionBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  ExitWhileNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
@@ -62,6 +64,7 @@ import {
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -171,6 +174,20 @@ export class NodesFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(
           node as ExitForeachNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'enter-while':
+        return new EnterWhileNodeImpl(
+          node as EnterWhileNode,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          stepLogger
+        );
+      case 'exit-while':
+        return new ExitWhileNodeImpl(
+          node as ExitWhileNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
