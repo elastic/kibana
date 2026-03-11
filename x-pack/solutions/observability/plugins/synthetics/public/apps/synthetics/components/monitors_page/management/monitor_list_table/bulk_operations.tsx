@@ -19,8 +19,7 @@ export const BulkOperations = ({
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
-  const { isUnhealthy, resetMonitors, isResetting } =
-    useMonitorIntegrationHealth();
+  const { isUnhealthy, resetMonitors, isResetting } = useMonitorIntegrationHealth();
 
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));

@@ -59,7 +59,7 @@ export function useMonitorListColumns({
   const { isServiceAllowed } = useEnablement();
   const { space } = useKibanaSpace();
 
-  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();  
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -97,15 +97,15 @@ export function useMonitorListColumns({
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
       ? [
-        {
-          align: 'left' as const,
-          field: ConfigKey.PROJECT_ID as string,
-          name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
-            defaultMessage: 'Project ID',
-          }),
-          sortable: true,
-        },
-      ]
+          {
+            align: 'left' as const,
+            field: ConfigKey.PROJECT_ID as string,
+            name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+              defaultMessage: 'Project ID',
+            }),
+            sortable: true,
+          },
+        ]
       : []),
     {
       align: 'left' as const,
@@ -180,7 +180,7 @@ export function useMonitorListColumns({
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
-          reloadPage={() => { }}
+          reloadPage={() => {}}
           isSwitchable={!loading}
         />
       ),
@@ -313,13 +313,13 @@ export function useMonitorListColumns({
               aria-label={
                 isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
                   ? i18n.translate('xpack.synthetics.management.monitorList.disableAlert', {
-                    defaultMessage: 'Disable alert for {monitorName}',
-                    values: { monitorName: fields[ConfigKey.NAME] },
-                  })
+                      defaultMessage: 'Disable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
                   : i18n.translate('xpack.synthetics.management.monitorList.enableAlert', {
-                    defaultMessage: 'Enable alert for {monitorName}',
-                    values: { monitorName: fields[ConfigKey.NAME] },
-                  })
+                      defaultMessage: 'Enable alert for {monitorName}',
+                      values: { monitorName: fields[ConfigKey.NAME] },
+                    })
               }
             >
               {isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
@@ -372,4 +372,3 @@ export function useMonitorListColumns({
 
   return columns;
 }
-
