@@ -261,16 +261,15 @@ export class LensVisService {
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }
+        } else if (hasInfoCommand(queryParams.query.esql)) {
+          // skip chart suggestions for info commands
+          return {
+            currentSuggestionContext: {
+              type: UnifiedHistogramSuggestionType.unsupported,
+              suggestion: undefined,
+            },
+          };
         } else {
-          if (hasInfoCommand(queryParams.query.esql)) {
-            return {
-              currentSuggestionContext: {
-                type: UnifiedHistogramSuggestionType.unsupported,
-                suggestion: undefined,
-              },
-            };
-          }
-
           // appends an ES|QL histogram if available
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
             queryParams,
