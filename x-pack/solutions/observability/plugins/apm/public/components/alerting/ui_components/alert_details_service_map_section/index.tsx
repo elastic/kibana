@@ -30,6 +30,7 @@ import {
   getServiceMapPath,
   getServiceMapUrl,
 } from '../../../../embeddable/service_map/get_service_map_url';
+import { getServiceMapTimeRange } from './get_service_map_time_range';
 import type { EmbeddableDeps } from '../../../../embeddable/types';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 
@@ -114,8 +115,8 @@ export function AlertDetailsServiceMapSection({
     return null;
   }
 
-  const rangeFrom = from;
-  const rangeTo = to;
+  // Cap to first 15 minutes for long-running alerts so the service map shows a manageable window
+  const { from: rangeFrom, to: rangeTo } = getServiceMapTimeRange(from, to);
   const env =
     environment != null && String(environment).trim() !== '' ? String(environment) : undefined;
   const serviceMapParams = {
