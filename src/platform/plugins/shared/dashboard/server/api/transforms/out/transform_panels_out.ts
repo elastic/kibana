@@ -15,6 +15,7 @@ import type { DashboardState, DashboardPanel, DashboardSection } from '../../typ
 import { embeddableService, logger } from '../../../kibana_services';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
+import { getTransformType } from '../get_transform_type';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
@@ -77,11 +78,7 @@ function transformPanelProperties(
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  // Temporary escape hatch for as-code embeddable transforms
-  // TODO remove when all as-code transforms are ready for production
-  const ESCAPE_HATCH_TYPES = ['lens', 'search'];
-  const transformType =
-    ESCAPE_HATCH_TYPES.includes(type) && isDashboardAppRequest ? `${type}-dashboard-app` : type;
+  const transformType = getTransformType(type, isDashboardAppRequest);
   const transforms = embeddableService?.getTransforms(transformType);
 
   let transformedPanelConfig;

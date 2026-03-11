@@ -27,13 +27,11 @@ describe('as-code search embeddable transforms', () => {
   describe('transformIn', () => {
     describe('by-reference state', () => {
       it('converts discover_session_id to a saved object reference', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           discover_session_id: 'test-session-id',
           title: 'My Session',
-        };
-
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
+        });
 
         expect(result.references).toContainEqual({
           name: 'savedObjectRef',
@@ -45,13 +43,11 @@ describe('as-code search embeddable transforms', () => {
       });
 
       it('converts selected_tab_id to selectedTabId', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           discover_session_id: 'test-session-id',
           selected_tab_id: 'tab-1',
-        };
-
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
+        });
 
         expect(result.state).toHaveProperty('selectedTabId', 'tab-1');
       });
@@ -59,15 +55,13 @@ describe('as-code search embeddable transforms', () => {
 
     describe('by-value state', () => {
       it('converts a classic tab with filters to stored format', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           title: 'My Session',
           description: 'Test description',
           tabs: [
             {
-              columns: [
-                { name: 'field1', width: 200 },
-                { name: 'field2' },
-              ],
+              columns: [{ name: 'field1', width: 200 }, { name: 'field2' }],
               sort: [{ name: '@timestamp', direction: 'desc' as const }],
               view_mode: 'documents',
               density: 'compact',
@@ -79,46 +73,45 @@ describe('as-code search embeddable transforms', () => {
                 {
                   type: 'condition',
                   data_view_id: 'test-data-view',
-                  condition: {
-                    field: 'status',
-                    operator: 'is',
-                    value: 'active',
-                  },
+                  condition: { field: 'status', operator: 'is', value: 'active' },
                 },
               ],
               dataset: { type: 'dataView', id: 'test-data-view' },
             },
           ],
-        };
+        });
 
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
+        const attrs = result.state as Record<string, unknown>;
+        const attributes = attrs.attributes as Record<string, unknown>;
+        expect(attributes.title).toBe('My Session');
 
-        expect(result.state).toHaveProperty('attributes');
-        const attrs = (result.state as any).attributes;
-        expect(attrs.title).toBe('My Session');
-        expect(attrs.tabs).toHaveLength(1);
+        const tabs = attributes.tabs as Array<Record<string, unknown>>;
+        expect(tabs).toHaveLength(1);
 
-        const tab = attrs.tabs[0];
+        const tab = tabs[0];
         expect(tab.id).toBeDefined();
         expect(tab.label).toBe('My Session');
-        expect(tab.attributes.columns).toEqual(['field1', 'field2']);
-        expect(tab.attributes.sort).toEqual([['@timestamp', 'desc']]);
-        expect(tab.attributes.grid).toEqual({ columns: { field1: { width: 200 } } });
-        expect(tab.attributes.viewMode).toBe('documents');
-        expect(tab.attributes.density).toBe('compact');
-        expect(tab.attributes.rowHeight).toBe(3);
-        expect(tab.attributes.rowsPerPage).toBe(100);
-        expect(tab.attributes.sampleSize).toBe(500);
-        expect(tab.attributes.isTextBasedQuery).toBe(false);
 
-        const searchSource = JSON.parse(tab.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+        const tabAttrs = tab.attributes as Record<string, unknown>;
+        expect(tabAttrs.columns).toEqual(['field1', 'field2']);
+        expect(tabAttrs.sort).toEqual([['@timestamp', 'desc']]);
+        expect(tabAttrs.grid).toEqual({ columns: { field1: { width: 200 } } });
+        expect(tabAttrs.viewMode).toBe('documents');
+        expect(tabAttrs.density).toBe('compact');
+        expect(tabAttrs.rowHeight).toBe(3);
+        expect(tabAttrs.rowsPerPage).toBe(100);
+        expect(tabAttrs.sampleSize).toBe(500);
+        expect(tabAttrs.isTextBasedQuery).toBe(false);
+
+        const meta = tabAttrs.kibanaSavedObjectMeta as Record<string, string>;
+        const searchSource = JSON.parse(meta.searchSourceJSON);
         expect(searchSource.query).toEqual({ language: 'kuery', query: 'field1: value' });
         expect(searchSource.filter).toBeDefined();
       });
 
       it('converts an ES|QL tab to stored format', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           title: 'ESQL Session',
           tabs: [
             {
@@ -127,20 +120,22 @@ describe('as-code search embeddable transforms', () => {
               sort: [{ name: '@timestamp', direction: 'desc' as const }],
             },
           ],
-        };
+        });
 
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
-
-        const attrs = (result.state as any).attributes;
-        const tab = attrs.tabs[0];
-        expect(tab.attributes.isTextBasedQuery).toBe(true);
-        expect(tab.attributes.columns).toEqual(['message']);
-        expect(tab.attributes.sort).toEqual([['@timestamp', 'desc']]);
+        const attributes = (result.state as Record<string, unknown>).attributes as Record<
+          string,
+          unknown
+        >;
+        const tabs = attributes.tabs as Array<Record<string, unknown>>;
+        const tabAttrs = tabs[0].attributes as Record<string, unknown>;
+        expect(tabAttrs.isTextBasedQuery).toBe(true);
+        expect(tabAttrs.columns).toEqual(['message']);
+        expect(tabAttrs.sort).toEqual([['@timestamp', 'desc']]);
       });
 
       it('handles empty filters gracefully', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           title: 'No Filters Session',
           tabs: [
             {
@@ -148,18 +143,22 @@ describe('as-code search embeddable transforms', () => {
               dataset: { type: 'dataView', id: 'test-data-view' },
             },
           ],
-        };
+        });
 
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
-
-        const tab = (result.state as any).attributes.tabs[0];
-        const searchSource = JSON.parse(tab.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+        const attributes = (result.state as Record<string, unknown>).attributes as Record<
+          string,
+          unknown
+        >;
+        const tabs = attributes.tabs as Array<Record<string, unknown>>;
+        const tabAttrs = tabs[0].attributes as Record<string, unknown>;
+        const meta = tabAttrs.kibanaSavedObjectMeta as Record<string, string>;
+        const searchSource = JSON.parse(meta.searchSourceJSON);
         expect(searchSource.filter).toBeUndefined();
       });
 
       it('converts group filters correctly', () => {
-        const asCodeState = {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
           title: 'Group Filter Session',
           tabs: [
             {
@@ -179,16 +178,40 @@ describe('as-code search embeddable transforms', () => {
               dataset: { type: 'dataView', id: 'test-data-view' },
             },
           ],
-        };
+        });
 
-        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-        const result = transforms.transformIn!(asCodeState);
-
-        const tab = (result.state as any).attributes.tabs[0];
-        const searchSource = JSON.parse(tab.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+        const attributes = (result.state as Record<string, unknown>).attributes as Record<
+          string,
+          unknown
+        >;
+        const tabs = attributes.tabs as Array<Record<string, unknown>>;
+        const tabAttrs = tabs[0].attributes as Record<string, unknown>;
+        const meta = tabAttrs.kibanaSavedObjectMeta as Record<string, string>;
+        const searchSource = JSON.parse(meta.searchSourceJSON);
         expect(searchSource.filter).toBeDefined();
         expect(searchSource.filter).toHaveLength(1);
         expect(searchSource.filter[0].meta.type).toBe('combined');
+      });
+
+      it('marks ad-hoc data views correctly', () => {
+        const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+        const result = transforms.transformIn!({
+          title: 'Ad-hoc DV Session',
+          tabs: [
+            {
+              filters: [],
+              dataset: { type: 'index', index: 'my-index-*', time_field: '@timestamp' },
+            },
+          ],
+        });
+
+        const attributes = (result.state as Record<string, unknown>).attributes as Record<
+          string,
+          unknown
+        >;
+        const tabs = attributes.tabs as Array<Record<string, unknown>>;
+        const tabAttrs = tabs[0].attributes as Record<string, unknown>;
+        expect(tabAttrs.usesAdHocDataView).toBe(true);
       });
     });
   });
@@ -199,14 +222,13 @@ describe('as-code search embeddable transforms', () => {
         title: 'My Session',
         description: 'Test',
       };
-      const references = [
-        { name: 'savedObjectRef', type: 'search', id: 'test-session-id' },
-      ];
+      const references = [{ name: 'savedObjectRef', type: 'search', id: 'test-session-id' }];
 
       const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
-      const result = transforms.transformOut!(storedState, references);
+      const result = transforms.transformOut!(storedState, references) as Record<string, unknown>;
 
       expect(result).toHaveProperty('discover_session_id', 'test-session-id');
+      expect(result).toHaveProperty('title', 'My Session');
     });
 
     it('converts a stored by-value state to as-code format with filters', () => {
@@ -220,9 +242,7 @@ describe('as-code search embeddable transforms', () => {
           disabled: false,
           negate: false,
         },
-        query: {
-          match_phrase: { status: 'active' },
-        },
+        query: { match_phrase: { status: 'active' } },
       };
 
       const storedState = {
@@ -242,11 +262,6 @@ describe('as-code search embeddable transforms', () => {
               indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
             }),
           },
-          viewMode: 'documents',
-          density: 'compact',
-          rowHeight: 3,
-          rowsPerPage: 100,
-          sampleSize: 500,
           tabs: [
             {
               id: 'tab-1',
@@ -291,21 +306,17 @@ describe('as-code search embeddable transforms', () => {
       expect(tabs).toHaveLength(1);
 
       const tab = tabs[0];
-      expect(tab.filters).toBeDefined();
       const filters = tab.filters as Array<Record<string, unknown>>;
       expect(filters).toHaveLength(1);
       expect(filters[0]).toHaveProperty('type', 'condition');
-      expect(filters[0]).toHaveProperty('condition');
-      const condition = filters[0].condition as Record<string, unknown>;
+
+      const condition = (filters[0] as Record<string, Record<string, unknown>>).condition;
       expect(condition.field).toBe('status');
       expect(condition.operator).toBe('is');
       expect(condition.value).toBe('active');
 
       expect(tab.dataset).toEqual({ type: 'dataView', id: 'test-data-view' });
-      expect(tab.columns).toEqual([
-        { name: 'field1', width: 200 },
-        { name: 'field2' },
-      ]);
+      expect(tab.columns).toEqual([{ name: 'field1', width: 200 }, { name: 'field2' }]);
       expect(tab.sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(tab.view_mode).toBe('documents');
       expect(tab.density).toBe('compact');
@@ -325,9 +336,7 @@ describe('as-code search embeddable transforms', () => {
           grid: {},
           hideChart: false,
           isTextBasedQuery: false,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{}',
-          },
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         },
       } as unknown as StoredSearchEmbeddableState;
 
@@ -348,11 +357,7 @@ describe('as-code search embeddable transforms', () => {
           params: { gte: 1000, lte: 5000 },
           index: 'test-data-view',
         },
-        query: {
-          range: {
-            bytes: { gte: 1000, lte: 5000 },
-          },
-        },
+        query: { range: { bytes: { gte: 1000, lte: 5000 } } },
       };
 
       const storedState = {
@@ -377,9 +382,7 @@ describe('as-code search embeddable transforms', () => {
                 hideChart: false,
                 isTextBasedQuery: false,
                 kibanaSavedObjectMeta: {
-                  searchSourceJSON: JSON.stringify({
-                    filter: [storedFilter],
-                  }),
+                  searchSourceJSON: JSON.stringify({ filter: [storedFilter] }),
                 },
               },
             },
@@ -394,10 +397,111 @@ describe('as-code search embeddable transforms', () => {
 
       expect(filters).toHaveLength(1);
       expect(filters[0]).toHaveProperty('type', 'condition');
-      const condition = (filters[0] as any).condition;
+      const condition = (filters[0] as Record<string, Record<string, unknown>>).condition;
       expect(condition.field).toBe('bytes');
       expect(condition.operator).toBe('range');
       expect(condition.value).toEqual({ gte: 1000, lte: 5000 });
+    });
+
+    it('converts an ES|QL stored tab to as-code format', () => {
+      const storedState = {
+        title: 'ESQL Session',
+        attributes: {
+          title: 'ESQL Session',
+          description: '',
+          columns: ['message'],
+          sort: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: true,
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Tab 1',
+              attributes: {
+                columns: ['message'],
+                sort: [['@timestamp', 'desc']],
+                grid: {},
+                hideChart: false,
+                isTextBasedQuery: true,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    query: { esql: 'FROM logs-* | LIMIT 10' },
+                  }),
+                },
+                viewMode: 'documents',
+              },
+            },
+          ],
+        },
+      } as unknown as StoredSearchEmbeddableState;
+
+      const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+      const result = transforms.transformOut!(storedState) as Record<string, unknown>;
+      const tabs = result.tabs as Array<Record<string, unknown>>;
+
+      expect(tabs).toHaveLength(1);
+      expect(tabs[0].query).toEqual({ esql: 'FROM logs-* | LIMIT 10' });
+      expect(tabs[0]).not.toHaveProperty('filters');
+      expect(tabs[0]).not.toHaveProperty('dataset');
+      expect(tabs[0].columns).toEqual([{ name: 'message' }]);
+      expect(tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+      expect(tabs[0].view_mode).toBe('documents');
+    });
+
+    it('omits disabled filters from as-code output', () => {
+      const disabledFilter = {
+        $state: { store: 'appState' },
+        meta: {
+          type: 'phrase',
+          key: 'status',
+          field: 'status',
+          params: { query: 'inactive' },
+          index: 'test-data-view',
+          disabled: true,
+          negate: false,
+        },
+        query: { match_phrase: { status: 'inactive' } },
+      };
+
+      const storedState = {
+        title: 'Disabled Filter Session',
+        attributes: {
+          title: 'Disabled Filter Session',
+          description: '',
+          columns: [],
+          sort: [],
+          grid: {},
+          hideChart: false,
+          isTextBasedQuery: false,
+          kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Tab 1',
+              attributes: {
+                columns: [],
+                sort: [],
+                grid: {},
+                hideChart: false,
+                isTextBasedQuery: false,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({ filter: [disabledFilter] }),
+                },
+              },
+            },
+          ],
+        },
+      } as unknown as StoredSearchEmbeddableState;
+
+      const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
+      const result = transforms.transformOut!(storedState) as Record<string, unknown>;
+      const tabs = result.tabs as Array<Record<string, unknown>>;
+      const filters = tabs[0].filters as Array<Record<string, unknown>>;
+
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toHaveProperty('disabled', true);
     });
   });
 
@@ -411,11 +515,7 @@ describe('as-code search embeddable transforms', () => {
               {
                 type: 'condition',
                 data_view_id: 'test-data-view',
-                condition: {
-                  field: 'host.name',
-                  operator: 'is',
-                  value: 'server-1',
-                },
+                condition: { field: 'host.name', operator: 'is', value: 'server-1' },
               },
             ],
             dataset: { type: 'dataView', id: 'test-data-view' },
@@ -428,10 +528,10 @@ describe('as-code search embeddable transforms', () => {
       const transforms = getSearchEmbeddableAsCodeTransforms(mockDrilldownTransforms);
 
       const inResult = transforms.transformIn!(originalAsCode);
-      const outResult = transforms.transformOut!(
-        inResult.state,
-        inResult.references
-      ) as Record<string, unknown>;
+      const outResult = transforms.transformOut!(inResult.state, inResult.references) as Record<
+        string,
+        unknown
+      >;
 
       const tabs = outResult.tabs as Array<Record<string, unknown>>;
       expect(tabs).toHaveLength(1);
@@ -439,7 +539,7 @@ describe('as-code search embeddable transforms', () => {
       const filters = tabs[0].filters as Array<Record<string, unknown>>;
       expect(filters).toHaveLength(1);
       expect(filters[0]).toHaveProperty('type', 'condition');
-      const condition = (filters[0] as any).condition;
+      const condition = (filters[0] as Record<string, Record<string, unknown>>).condition;
       expect(condition.field).toBe('host.name');
       expect(condition.operator).toBe('is');
       expect(condition.value).toBe('server-1');

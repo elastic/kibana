@@ -19,6 +19,7 @@ import type {
 } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
+import { getTransformType } from '../get_transform_type';
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
@@ -65,13 +66,7 @@ function transformPanelIn(
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
-  // Temporary escape hatch for as-code embeddable transforms
-  // TODO remove when all as-code transforms are ready for production
-  const ESCAPE_HATCH_TYPES = ['lens', 'search'];
-  const transformType =
-    ESCAPE_HATCH_TYPES.includes(panel.type) && isDashboardAppRequest
-      ? `${panel.type}-dashboard-app`
-      : panel.type;
+  const transformType = getTransformType(panel.type, isDashboardAppRequest);
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

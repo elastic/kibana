@@ -33,7 +33,7 @@ import {
   getSearchEmbeddableAsCodeTransforms,
   SEARCH_EMBEDDABLE_DASHBOARD_APP_TYPE,
 } from '../common/embeddable';
-import { discoverSessionEmbeddableSchema } from './embeddable/schema';
+import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -72,7 +72,7 @@ export class DiscoverServerPlugin
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
       getTransforms: getSearchEmbeddableAsCodeTransforms,
-      getSchema: () => discoverSessionEmbeddableSchema,
+      getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
     });
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_DASHBOARD_APP_TYPE, {
       getTransforms: getSearchEmbeddableTransforms,

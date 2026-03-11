@@ -330,6 +330,42 @@ export const discoverSessionEmbeddableSchema = schema.oneOf([
   discoverSessionByReferenceEmbeddableSchema,
 ]);
 
+export function getDiscoverSessionEmbeddableSchema(
+  getDrilldownsSchema?: (triggers: string[]) => { getPropSchemas: () => Record<string, unknown> }
+) {
+  const drilldownProps = getDrilldownsSchema?.([])?.getPropSchemas() ?? {};
+
+  const baseWithDrilldowns = serializedTitlesSchema.extends({
+    timeRange: schema.maybe(timeRangeSchema),
+    ...drilldownProps,
+  });
+
+  const byValue = baseWithDrilldowns.extends({
+    tabs: schema.arrayOf(tabSchema, {
+      minSize: 1,
+      maxSize: 1,
+      meta: {
+        description:
+          'Array of tabs for the Discover session embeddable. Currently supports one tab.',
+      },
+    }),
+  });
+
+  const byRef = baseWithDrilldowns.extends({
+    discover_session_id: schema.string(),
+    selected_tab_id: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The selected tab in the Discover session. If omitted, defaults to the first tab.',
+        },
+      })
+    ),
+  });
+
+  return schema.oneOf([byValue, byRef]);
+}
+
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
   typeof discoverSessionByValueEmbeddableSchema
 >;

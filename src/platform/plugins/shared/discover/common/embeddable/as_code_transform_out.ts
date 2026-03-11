@@ -26,6 +26,21 @@ function isByValue(
   );
 }
 
+interface StoredTabAttributes {
+  columns?: string[];
+  sort?: Array<string[] | string>;
+  grid?: { columns?: Record<string, { width?: number }> };
+  kibanaSavedObjectMeta?: { searchSourceJSON?: string };
+  isTextBasedQuery?: boolean;
+  usesAdHocDataView?: boolean;
+  viewMode?: string;
+  density?: string;
+  headerRowHeight?: number;
+  rowHeight?: number;
+  rowsPerPage?: number;
+  sampleSize?: number;
+}
+
 function convertStoredColumnsToAsCode(
   columns?: string[],
   grid?: { columns?: Record<string, { width?: number }> }
@@ -55,23 +70,15 @@ function convertStoredSortToAsCode(
     .filter((s): s is { name: string; direction: 'asc' | 'desc' } => s !== undefined);
 }
 
-interface StoredTabAttributes {
-  columns?: string[];
-  sort?: Array<string[] | string>;
-  grid?: { columns?: Record<string, { width?: number }> };
-  kibanaSavedObjectMeta?: { searchSourceJSON?: string };
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-  viewMode?: string;
-  density?: string;
-  headerRowHeight?: number;
-  rowHeight?: number;
-  rowsPerPage?: number;
-  sampleSize?: number;
-  hideChart?: boolean;
-  breakdownField?: string;
-  chartInterval?: string;
-  controlGroupJson?: string;
+function buildLayoutFields(tabAttributes: StoredTabAttributes): Record<string, unknown> {
+  return {
+    ...(tabAttributes.viewMode !== undefined ? { view_mode: tabAttributes.viewMode } : {}),
+    ...(tabAttributes.density !== undefined ? { density: tabAttributes.density } : {}),
+    ...(tabAttributes.headerRowHeight !== undefined
+      ? { header_row_height: tabAttributes.headerRowHeight }
+      : {}),
+    ...(tabAttributes.rowHeight !== undefined ? { row_height: tabAttributes.rowHeight } : {}),
+  };
 }
 
 function convertStoredTabToAsCode(
@@ -107,18 +114,14 @@ function convertStoredTabToAsCode(
 
   const columns = convertStoredColumnsToAsCode(tabAttributes.columns, tabAttributes.grid);
   const sort = convertStoredSortToAsCode(tabAttributes.sort);
+  const layout = buildLayoutFields(tabAttributes);
 
   if (tabAttributes.isTextBasedQuery) {
     return {
       query,
       ...(columns ? { columns } : {}),
       ...(sort && sort.length > 0 ? { sort } : {}),
-      ...(tabAttributes.viewMode !== undefined ? { view_mode: tabAttributes.viewMode } : {}),
-      ...(tabAttributes.density !== undefined ? { density: tabAttributes.density } : {}),
-      ...(tabAttributes.headerRowHeight !== undefined
-        ? { header_row_height: tabAttributes.headerRowHeight }
-        : {}),
-      ...(tabAttributes.rowHeight !== undefined ? { row_height: tabAttributes.rowHeight } : {}),
+      ...layout,
     };
   }
 
@@ -128,12 +131,7 @@ function convertStoredTabToAsCode(
     ...(dataset ? { dataset } : {}),
     ...(columns ? { columns } : {}),
     ...(sort && sort.length > 0 ? { sort } : {}),
-    ...(tabAttributes.viewMode !== undefined ? { view_mode: tabAttributes.viewMode } : {}),
-    ...(tabAttributes.density !== undefined ? { density: tabAttributes.density } : {}),
-    ...(tabAttributes.headerRowHeight !== undefined
-      ? { header_row_height: tabAttributes.headerRowHeight }
-      : {}),
-    ...(tabAttributes.rowHeight !== undefined ? { row_height: tabAttributes.rowHeight } : {}),
+    ...layout,
     ...(tabAttributes.rowsPerPage !== undefined
       ? { rows_per_page: tabAttributes.rowsPerPage }
       : {}),
@@ -142,7 +140,7 @@ function convertStoredTabToAsCode(
 }
 
 export function getAsCodeTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(
+  return function transformOut(
     storedState: StoredSearchEmbeddableState,
     references?: SavedObjectReference[]
   ) {
@@ -162,7 +160,7 @@ export function getAsCodeTransformOut(transformDrilldownsOut: DrilldownTransform
         return convertStoredTabToAsCode(tabAttrs, references ?? []);
       });
 
-      const { attributes, ...rest } = state;
+      const { attributes: _attributes, ...rest } = state;
       return {
         ...rest,
         tabs: asCodeTabs,
@@ -172,12 +170,9 @@ export function getAsCodeTransformOut(transformDrilldownsOut: DrilldownTransform
     const savedObjectRef = (references ?? []).find(
       (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
     );
-    const { ...rest } = state;
     return {
-      ...rest,
+      ...state,
       ...(savedObjectRef?.id ? { discover_session_id: savedObjectRef.id } : {}),
     };
-  }
-
-  return transformOut;
+  };
 }

@@ -12,23 +12,22 @@ import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { extractReferences } from '@kbn/data-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { DiscoverSessionEmbeddableByValueState } from '../../server/embeddable/schema';
 import type { StoredSearchEmbeddableState } from './types';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 
-interface AsCodeByRefState {
-  discover_session_id: string;
-  selected_tab_id?: string;
-  title?: string;
-  description?: string;
-  hidePanelTitles?: boolean;
+function isByRefState(state: Record<string, unknown>): boolean {
+  return typeof state.discover_session_id === 'string';
 }
 
-type AsCodeState = DiscoverSessionEmbeddableByValueState | AsCodeByRefState;
+function isEsqlTab(tab: Record<string, unknown>): boolean {
+  const query = tab.query as Record<string, unknown> | undefined;
+  return typeof query === 'object' && query !== null && typeof query.esql === 'string';
+}
 
-function isByRefState(state: AsCodeState): state is AsCodeByRefState {
-  return 'discover_session_id' in state;
+function isClassicTab(tab: Record<string, unknown>): boolean {
+  return typeof tab.dataset === 'object' && tab.dataset !== null;
 }
 
 function convertColumnsToStored(columns?: Array<{ name: string; width?: number }>): {
@@ -54,7 +53,7 @@ function convertColumnsToStored(columns?: Array<{ name: string; width?: number }
 }
 
 function convertSortToStored(
-  sort?: Array<{ name: string; direction: 'asc' | 'desc' }>
+  sort?: Array<{ name: string; direction: string }>
 ): Array<[string, string]> {
   if (!sort || sort.length === 0) {
     return [];
@@ -62,46 +61,44 @@ function convertSortToStored(
   return sort.map((s) => [s.name, s.direction]);
 }
 
-interface AsCodeClassicTab {
-  query?: { language: string; query: string };
-  filters?: unknown[];
-  dataset: { type: string; id?: string; index?: string; time_field?: string };
-  columns?: Array<{ name: string; width?: number }>;
-  sort?: Array<{ name: string; direction: 'asc' | 'desc' }>;
-  view_mode?: string;
-  density?: string;
-  header_row_height?: number | 'auto';
-  row_height?: number | 'auto';
-  rows_per_page?: number;
-  sample_size?: number;
-}
-
-function isClassicTab(tab: unknown): tab is AsCodeClassicTab {
-  return typeof tab === 'object' && tab !== null && 'dataset' in tab;
-}
-
-function convertAsCodeTabToStored(tab: AsCodeClassicTab): {
+function convertClassicTabToStored(tab: Record<string, unknown>): {
   storedTabAttributes: Record<string, unknown>;
   references: SavedObjectReference[];
 } {
-  const storedFilters = toStoredFilters(tab.filters as Parameters<typeof toStoredFilters>[0]);
-  const { columns, grid } = convertColumnsToStored(tab.columns);
-  const sort = convertSortToStored(tab.sort);
+  const filters = tab.filters as unknown[] | undefined;
+  const storedFilters = filters
+    ? toStoredFilters(filters as Parameters<typeof toStoredFilters>[0])
+    : undefined;
+  const { columns, grid } = convertColumnsToStored(
+    tab.columns as Array<{ name: string; width?: number }> | undefined
+  );
+  const sort = convertSortToStored(
+    tab.sort as Array<{ name: string; direction: string }> | undefined
+  );
+
+  const dataset = tab.dataset as { type: string; id?: string; index?: string } | undefined;
+  const query = tab.query as { language: string; query: string } | undefined;
 
   const searchSource: Record<string, unknown> = {};
-  if (tab.query) {
-    searchSource.query = tab.query;
+  if (query) {
+    searchSource.query = query;
   }
   if (storedFilters && storedFilters.length > 0) {
     searchSource.filter = storedFilters;
   }
-  if (tab.dataset) {
-    if (tab.dataset.type === 'dataView' && tab.dataset.id) {
-      searchSource.index = tab.dataset.id;
-    }
+  if (dataset?.type === 'dataView' && dataset.id) {
+    searchSource.index = dataset.id;
   }
 
-  const [extractedState, searchSourceReferences] = extractReferences(searchSource);
+  let searchSourceReferences: SavedObjectReference[] = [];
+  let extractedState: Record<string, unknown> = searchSource;
+  try {
+    const [extracted, refs] = extractReferences(searchSource);
+    extractedState = extracted;
+    searchSourceReferences = refs;
+  } catch {
+    // Fall back to un-extracted searchSource
+  }
 
   const storedTabAttributes: Record<string, unknown> = {
     columns,
@@ -120,40 +117,23 @@ function convertAsCodeTabToStored(tab: AsCodeClassicTab): {
     ...(tab.sample_size !== undefined ? { sampleSize: tab.sample_size } : {}),
   };
 
-  if (tab.dataset?.type === 'index') {
+  if (dataset?.type === 'index') {
     storedTabAttributes.usesAdHocDataView = true;
   }
 
   return { storedTabAttributes, references: searchSourceReferences };
 }
 
-interface AsCodeEsqlTab {
-  query: { esql: string };
-  columns?: Array<{ name: string; width?: number }>;
-  sort?: Array<{ name: string; direction: 'asc' | 'desc' }>;
-  view_mode?: string;
-  density?: string;
-  header_row_height?: number | 'auto';
-  row_height?: number | 'auto';
-}
-
-function isEsqlTab(tab: unknown): tab is AsCodeEsqlTab {
-  return (
-    typeof tab === 'object' &&
-    tab !== null &&
-    'query' in tab &&
-    typeof (tab as Record<string, unknown>).query === 'object' &&
-    (tab as Record<string, unknown>).query !== null &&
-    'esql' in ((tab as Record<string, unknown>).query as Record<string, unknown>)
-  );
-}
-
-function convertEsqlTabToStored(tab: AsCodeEsqlTab): {
+function convertEsqlTabToStored(tab: Record<string, unknown>): {
   storedTabAttributes: Record<string, unknown>;
   references: SavedObjectReference[];
 } {
-  const { columns, grid } = convertColumnsToStored(tab.columns);
-  const sort = convertSortToStored(tab.sort as Array<{ name: string; direction: 'asc' | 'desc' }>);
+  const { columns, grid } = convertColumnsToStored(
+    tab.columns as Array<{ name: string; width?: number }> | undefined
+  );
+  const sort = convertSortToStored(
+    tab.sort as Array<{ name: string; direction: string }> | undefined
+  );
 
   const storedTabAttributes: Record<string, unknown> = {
     columns,
@@ -174,16 +154,18 @@ function convertEsqlTabToStored(tab: AsCodeEsqlTab): {
 }
 
 export function getAsCodeTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
-  function transformIn(state: AsCodeState): {
+  return function transformIn(state: object): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
     const { state: processedState, references: drilldownReferences } = transformDrilldownsIn(
-      state as AsCodeState & { drilldowns?: unknown[] }
+      state as SerializedDrilldowns
     );
 
-    if (isByRefState(processedState)) {
-      const { discover_session_id: savedObjectId, selected_tab_id, ...rest } = processedState;
+    const record = processedState as Record<string, unknown>;
+
+    if (isByRefState(record)) {
+      const { discover_session_id, selected_tab_id, ...rest } = record;
       return {
         state: {
           ...rest,
@@ -193,49 +175,49 @@ export function getAsCodeTransformIn(transformDrilldownsIn: DrilldownTransforms[
           {
             name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
             type: SavedSearchType,
-            id: savedObjectId,
+            id: discover_session_id as string,
           },
           ...drilldownReferences,
         ],
       };
     }
 
-    const byValueState = processedState as DiscoverSessionEmbeddableByValueState;
+    const tabs = record.tabs as Array<Record<string, unknown>> | undefined;
     const allTabReferences: SavedObjectReference[] = [];
-    const storedTabs = (byValueState.tabs ?? []).map((tab) => {
+    const storedTabs = (tabs ?? []).map((tab) => {
       const tabId = uuidv4();
 
-      let storedTabAttributes: Record<string, unknown> = {};
-      let tabReferences: SavedObjectReference[] = [];
-
+      let result: {
+        storedTabAttributes: Record<string, unknown>;
+        references: SavedObjectReference[];
+      };
       if (isEsqlTab(tab)) {
-        const result = convertEsqlTabToStored(tab as AsCodeEsqlTab);
-        storedTabAttributes = result.storedTabAttributes;
-        tabReferences = result.references;
+        result = convertEsqlTabToStored(tab);
       } else if (isClassicTab(tab)) {
-        const result = convertAsCodeTabToStored(tab as AsCodeClassicTab);
-        storedTabAttributes = result.storedTabAttributes;
-        tabReferences = result.references;
+        result = convertClassicTabToStored(tab);
+      } else {
+        result = { storedTabAttributes: {}, references: [] };
       }
 
-      allTabReferences.push(...tabReferences);
+      allTabReferences.push(...result.references);
 
       return {
         id: tabId,
-        label: byValueState.title ?? 'Untitled',
-        attributes: storedTabAttributes,
+        label: (record.title as string) ?? 'Untitled',
+        attributes: result.storedTabAttributes,
       };
     });
 
+    const title = (record.title as string) ?? '';
+    const description = (record.description as string) ?? '';
+
     return {
       state: {
-        ...(byValueState.title !== undefined ? { title: byValueState.title } : {}),
-        ...(byValueState.description !== undefined
-          ? { description: byValueState.description }
-          : {}),
+        ...(record.title !== undefined ? { title } : {}),
+        ...(record.description !== undefined ? { description } : {}),
         attributes: {
-          title: byValueState.title ?? '',
-          description: byValueState.description ?? '',
+          title,
+          description,
           columns: [],
           sort: [],
           grid: {},
@@ -247,7 +229,5 @@ export function getAsCodeTransformIn(transformDrilldownsIn: DrilldownTransforms[
       } as unknown as StoredSearchEmbeddableState,
       references: [...allTabReferences, ...drilldownReferences],
     };
-  }
-
-  return transformIn;
+  };
 }
