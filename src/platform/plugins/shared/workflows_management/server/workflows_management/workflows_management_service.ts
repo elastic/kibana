@@ -73,7 +73,7 @@ import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
-import { createStorage } from '../storage/workflow_storage';
+import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -741,40 +741,83 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const searchResponse = await this.workflowStorage.getClient().search({
-      size: 1000,
-      track_total_hits: true,
-      _source: [
-        'name',
-        'description',
-        'enabled',
-        'yaml',
-        'definition',
-        'createdBy',
-        'lastUpdatedBy',
-        'valid',
-        'created_at',
-        'updated_at',
-      ],
-      query: {
-        bool: {
-          must: [
-            { term: { spaceId } },
-            { term: { enabled: true } },
-            { term: { triggerTypes: triggerId } },
-          ],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
+    const pageSize = 1000;
+    const keepAlive = '1m';
+    const indexPattern = `${workflowIndexName}-*`;
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, { _id: { order: 'desc' } }];
+    const query = {
+      bool: {
+        must: [
+          { term: { spaceId } },
+          { term: { enabled: true } },
+          { term: { triggerTypes: triggerId } },
+        ],
+        must_not: [{ exists: { field: 'deleted_at' } }],
       },
-      sort: [{ updated_at: { order: 'desc' } }],
-    });
+    };
+    const _source = [
+      'name',
+      'description',
+      'enabled',
+      'yaml',
+      'definition',
+      'createdBy',
+      'lastUpdatedBy',
+      'valid',
+      'created_at',
+      'updated_at',
+    ];
 
-    return searchResponse.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      return this.transformStorageDocumentToWorkflowDto(hit._id, hit._source as WorkflowProperties);
+    const pitResponse = await this.esClient.openPointInTime({
+      index: indexPattern,
+      keep_alive: keepAlive,
+      ignore_unavailable: true,
     });
+    const pitId = pitResponse.id;
+
+    try {
+      const allHits: Array<{ _id: string; _source: WorkflowProperties }> = [];
+      let searchAfter: estypes.SearchHit['sort'] | undefined;
+      let hasMore = true;
+
+      while (hasMore) {
+        const searchResponse = await this.esClient.search<WorkflowProperties>({
+          pit: { id: pitId, keep_alive: keepAlive },
+          size: pageSize,
+          track_total_hits: searchAfter === undefined,
+          _source,
+          query,
+          sort,
+          search_after: searchAfter,
+        });
+
+        const hits = searchResponse.hits.hits;
+        for (const hit of hits) {
+          if (hit._source && hit._id) {
+            allHits.push({ _id: hit._id, _source: hit._source as WorkflowProperties });
+          }
+        }
+
+        hasMore = hits.length >= pageSize;
+        if (hasMore) {
+          const lastHit = hits[hits.length - 1];
+          if (!lastHit.sort) {
+            throw new Error(
+              `Missing sort value on last hit (required for search_after). Last hit: ${JSON.stringify(
+                lastHit
+              )}`
+            );
+          }
+          searchAfter = lastHit.sort;
+        }
+      }
+
+      return allHits.map(({ _id, _source: source }) =>
+        this.transformStorageDocumentToWorkflowDto(_id, source)
+      );
+    } finally {
+      await this.esClient.closePointInTime({ id: pitId });
+    }
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {

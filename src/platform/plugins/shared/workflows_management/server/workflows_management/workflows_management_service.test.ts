@@ -80,6 +80,8 @@ describe('WorkflowsService', () => {
         hits: { hits: [], total: { value: 0 } },
         aggregations: {},
       }),
+      openPointInTime: jest.fn().mockResolvedValue({ id: 'pit-123' }),
+      closePointInTime: jest.fn().mockResolvedValue({ succeeded: true, num_freed: 1 }),
       get: jest.fn(),
       index: jest.fn().mockResolvedValue({ _id: 'test-id' }),
       update: jest.fn().mockResolvedValue({ _id: 'test-id' }),
@@ -198,6 +200,7 @@ describe('WorkflowsService', () => {
       };
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [workflowWithTrigger], total: { value: 1 } },
+        pit_id: 'pit-123',
       } as any);
 
       const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
@@ -208,8 +211,15 @@ describe('WorkflowsService', () => {
         name: 'Case workflow',
         enabled: true,
       });
+      expect(mockEsClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.stringContaining('workflows'),
+          keep_alive: '1m',
+        })
+      );
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
+          pit: { id: 'pit-123', keep_alive: '1m' },
           query: {
             bool: {
               must: [
@@ -221,18 +231,65 @@ describe('WorkflowsService', () => {
             },
           },
           size: 1000,
+          sort: [{ updated_at: { order: 'desc' } }, { _id: { order: 'desc' } }],
         })
       );
+      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });
     });
 
     it('should return empty array when no workflows are subscribed', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [], total: { value: 0 } },
+        pit_id: 'pit-123',
       } as any);
 
       const result = await service.getWorkflowsSubscribedToTrigger('unknown.trigger', 'default');
 
       expect(result).toEqual([]);
+      expect(mockEsClient.openPointInTime).toHaveBeenCalled();
+      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });
+    });
+
+    it('should page with search_after when results exceed page size', async () => {
+      const createHit = (id: string, updatedAt: string) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          triggerTypes: ['cases.updated'],
+          updated_at: updatedAt,
+        },
+        sort: [updatedAt, id],
+      });
+      const page1Hits = Array.from({ length: 1000 }, (_, i) =>
+        createHit(`wf-${i}`, '2025-01-02T00:00:00.000Z')
+      );
+      const page2Hits = [createHit('wf-1000', '2025-01-01T00:00:00.000Z')];
+
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: { hits: page1Hits, total: { value: 1001 } },
+          pit_id: 'pit-123',
+        } as any)
+        .mockResolvedValueOnce({
+          hits: { hits: page2Hits, total: { value: 1001 } },
+          pit_id: 'pit-123',
+        } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+      expect(result).toHaveLength(1001);
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.not.objectContaining({ search_after: expect.anything() })
+      );
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          search_after: ['2025-01-02T00:00:00.000Z', 'wf-999'],
+        })
+      );
+      expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });
     });
   });
 
