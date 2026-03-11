@@ -9,7 +9,7 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
-const jobId = 'auth_rare_source_ip_for_a_user';
+const jobId = 'auth_rare_source_ip_for_a_user_ea';
 const from = 'now-24h';
 const to = 'now';
 const job = { id: jobId, jobState: 'started', datafeedState: 'started' };
