@@ -131,6 +131,7 @@ describe('useUpdateRule', () => {
       grouping: { fields: ['host.name'] },
       recovery_policy: null,
       state_transition: null,
+      artifacts: null,
     };
 
     await waitFor(() => {

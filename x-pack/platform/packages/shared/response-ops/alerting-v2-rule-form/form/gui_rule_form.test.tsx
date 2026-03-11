@@ -38,10 +38,8 @@ jest.mock('./field_groups/alert_conditions_field_group', () => ({
   ),
 }));
 
-jest.mock('./field_groups/state_transition_field_group', () => ({
-  StateTransitionFieldGroup: () => (
-    <div data-test-subj="mockStateTransitionFieldGroup">State Transition Field Group</div>
-  ),
+jest.mock('./fields/kind_field', () => ({
+  KindField: () => <div data-test-subj="mockKindField">Kind Field</div>,
 }));
 
 jest.mock('./field_groups/attachment_runbook_group', () => ({
@@ -96,10 +94,10 @@ describe('GuiRuleForm', () => {
       expect(screen.getByTestId('mockRuleExecutionFieldGroup')).toBeInTheDocument();
     });
 
-    it('renders StateTransitionFieldGroup', () => {
+    it('renders KindField', () => {
       render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
-      expect(screen.getByTestId('mockStateTransitionFieldGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('mockKindField')).toBeInTheDocument();
     });
 
     it('renders AttacmentRunbookGroup', () => {
@@ -150,7 +148,7 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
-        'mockStateTransitionFieldGroup',
+        'mockKindField',
         'mockAlertConditionsFieldGroup',
         'mockAttachmentRunbookGroup',
       ]);
@@ -169,7 +167,7 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
-        'mockStateTransitionFieldGroup',
+        'mockKindField',
         'mockAlertConditionsFieldGroup',
         'mockAttachmentRunbookGroup',
       ]);

@@ -26,7 +26,6 @@ import {
   type RuleFormServices,
   type RuleFormLayout,
 } from './contexts';
-import { useRuleFormServices } from './contexts';
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
@@ -34,7 +33,6 @@ import { NameField } from './fields/name_field';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
-import { type RuleFormServices } from './contexts';
 
 export type { RuleFormServices } from './contexts';
 
