@@ -67,7 +67,8 @@ export const dataStreamSchemaV1 = schema.object({
             name: schema.string(),
             type: schema.string(),
             is_ecs: schema.boolean(),
-          })
+          }),
+          { maxSize: 10000 }
         )
       ),
       connector: schema.maybe(schema.string()),
