@@ -14,6 +14,10 @@ import { timezoneNames } from './schema/triggers/timezone_names';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
+export const ByteSizeSchema = z
+  .string()
+  .regex(/^\d+(\.\d+)?\s*(b|kb|mb|gb)$/i, 'Invalid byte size format (e.g., "10mb", "1gb")');
+
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
   'max-attempts': z.number().int().min(1).optional(),
@@ -34,6 +38,7 @@ export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
+  'max-step-size': ByteSizeSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -73,6 +78,7 @@ export const WorkflowSettingsSchema = z.object({
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
+  'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -177,6 +183,29 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+export const MaxStepSizePropSchema = z.object({
+  'max-step-size': ByteSizeSchema.optional(),
+});
+export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
+
+export const MaxIterationsObjectSchema = z.object({
+  limit: z.number().int().positive(),
+  'on-limit': z.enum(['continue', 'fail']),
+});
+
+export const MaxIterationsSchema = z.union([
+  z.number().int().positive(),
+  MaxIterationsObjectSchema,
+]);
+export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
+
+export const LoopStepPropsSchema = z.object({
+  'max-iterations': MaxIterationsSchema.optional(),
+  'iteration-timeout': DurationSchema.optional(),
+  'iteration-on-failure': WorkflowOnFailureSchema.optional(),
+});
+export type LoopStepProps = z.infer<typeof LoopStepPropsSchema>;
+
 const StepWithForEachSchema = z.object({
   foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
@@ -184,8 +213,8 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
-const StepWithIfConditionSchema = z.object({
-  if: z.string().optional(),
+export const StepWithIfConditionSchema = z.object({
+  if: z.string().optional().describe('KQL condition that controls whether this step runs'),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
@@ -210,7 +239,11 @@ export const BuiltInStepProperties = [
   'if',
   'foreach',
   'timeout',
+  'max-step-size',
   'on-failure',
+  'max-iterations',
+  'iteration-timeout',
+  'iteration-on-failure',
 ];
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
@@ -249,6 +282,12 @@ export const FetcherConfigSchema = z
       .describe('Whether to follow HTTP redirects. Defaults to true'),
     max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
     keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
+    max_content_length: z
+      .number()
+      .positive()
+      .finite()
+      .optional()
+      .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
@@ -356,6 +395,7 @@ export const ForEachStepConfigSchema = z.object({
     ),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
 });
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z
     .literal('foreach')
@@ -364,17 +404,64 @@ export const ForEachStepSchema = BaseStepSchema.extend({
     ),
   ...ForEachStepConfigSchema.shape,
   ...StepWithIfConditionSchema.shape,
+  ...LoopStepPropsSchema.shape,
+  ...TimeoutPropSchema.shape,
 });
+
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
+
+const getLoopStepSchemaOverrides = (stepSchema: z.ZodType, loose: boolean) => ({
+  'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  'iteration-on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+});
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    ...getLoopStepSchemaOverrides(stepSchema, loose),
   });
 
   if (loose) {
     // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
+export const WhileStepConfigSchema = z.object({
+  condition: z
+    .string()
+    .describe(
+      'Condition expression evaluated after each iteration, e.g. "${{ steps.inner_http.output.status_code != 200 }}". First iteration always runs.'
+    ),
+  steps: z
+    .array(BaseStepSchema)
+    .min(1)
+    .describe('Steps to execute in each iteration of the while loop'),
+});
+
+export const WhileStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('while')
+    .describe(
+      'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
+    ),
+  ...WhileStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+  ...LoopStepPropsSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+
+export type WhileStep = z.infer<typeof WhileStepSchema>;
+
+export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = WhileStepSchema.extend({
+    steps: z.array(stepSchema).min(1),
+    ...getLoopStepSchemaOverrides(stepSchema, loose),
+  });
+
+  if (loose) {
     return schema.partial().required({ type: true });
   }
 
@@ -569,6 +656,7 @@ export const WorkflowConstsSchema = z.record(
 const StepSchema = z.lazy(() =>
   z.union([
     ForEachStepSchema,
+    WhileStepSchema,
     IfStepSchema,
     WaitStepSchema,
     DataSetStepSchema,
@@ -585,6 +673,7 @@ export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
   ForEachStepSchema.shape.type.value,
+  WhileStepSchema.shape.type.value,
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
@@ -832,9 +921,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const WhileContextSchema = z.object({
+  iteration: z.number().int(),
+});
+export type WhileContext = z.infer<typeof WhileContextSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
