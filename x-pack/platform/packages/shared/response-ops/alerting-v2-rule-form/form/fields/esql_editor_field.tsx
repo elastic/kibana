@@ -78,7 +78,7 @@ export interface EsqlEditorFieldProps {
  * />
  * ```
  */
-export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
+export const EsqlEditorField = ({
   name,
   label,
   labelTooltip,
@@ -91,7 +91,7 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
   rules,
   errors: serverErrors,
   warning: serverWarning,
-}) => {
+}: EsqlEditorFieldProps) => {
   const { control } = useFormContext<FormValues>();
 
   const labelElement = label ? (

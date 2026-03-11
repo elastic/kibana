@@ -68,12 +68,12 @@ interface SubmissionButtonsProps {
   cancelLabel?: React.ReactNode;
 }
 
-const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
+const SubmissionButtons = ({
   isSubmitting,
   onCancel,
   submitLabel,
   cancelLabel,
-}) => {
+}: SubmissionButtonsProps) => {
   const defaultSubmitLabel = (
     <FormattedMessage id="xpack.alertingV2.ruleForm.submitLabel" defaultMessage="Save" />
   );
@@ -122,7 +122,7 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
  * (depending on whether `ruleId` is present) to persist the rule via the API
  * and calls `onSuccess` after a successful save.
  */
-const RuleFormContent: React.FC<RuleFormProps> = ({
+const RuleFormContent = ({
   onSubmit: externalOnSubmit,
   onSuccess,
   includeQueryEditor = true,
@@ -134,7 +134,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
   submitLabel,
   cancelLabel,
   ruleId,
-}) => {
+}: RuleFormProps) => {
   const { reset } = useFormContext<FormValues>();
   const services = useRuleFormServices();
   const { layout } = useRuleFormMeta();
@@ -273,7 +273,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
  * Includes its own QueryClientProvider for react-query hooks used by field components.
  * Services and layout metadata are provided via RuleFormProvider context, eliminating prop drilling.
  */
-export const RuleForm: React.FC<RuleFormProps> = ({ layout = 'page', ...props }) => {
+export const RuleForm = ({ layout = 'page', ...props }: RuleFormProps) => {
   const queryClient = useMemo(
     () =>
       new QueryClient({

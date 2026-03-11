@@ -32,7 +32,7 @@ import { RecoveryDelayField } from '../fields/recovery_delay_field';
  *     uses RecoveryBaseQueryOnlyField (full ES|QL editor with "not same as eval" validation)
  * - Recovery delay (recovering state transition: immediate / breaches / duration)
  */
-export const AlertConditionsFieldGroup: React.FC = () => {
+export const AlertConditionsFieldGroup = () => {
   const { control } = useFormContext<FormValues>();
   const { data } = useRuleFormServices();
   const kind = useWatch({ control, name: 'kind' });

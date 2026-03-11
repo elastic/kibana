@@ -44,10 +44,10 @@ const UNIT_TEST_SUBJS: Record<StateTransitionTimeframeVariant, string> = {
   recovering: 'recoveryTransitionTimeframeUnitInput',
 };
 
-export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
+export const StateTransitionTimeframeField = ({
   numberPrependLabel,
   variant = 'pending',
-}) => {
+}: StateTransitionTimeframeFieldProps) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const fieldName = FIELD_NAMES[variant];
 
@@ -95,7 +95,7 @@ interface StateTransitionTimeframeInputProps {
   unitTestSubj?: string;
 }
 
-const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps> = ({
+const StateTransitionTimeframeInput = ({
   value,
   onChange,
   errors,
@@ -103,7 +103,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   numberPrependLabel,
   numberTestSubj = 'stateTransitionTimeframeNumberInput',
   unitTestSubj = 'stateTransitionTimeframeUnitInput',
-}) => {
+}: StateTransitionTimeframeInputProps) => {
   const intervalNumber = useMemo(() => getDurationNumberInItsUnit(value || '2m'), [value]);
 
   const intervalUnit = useMemo(() => getDurationUnitValue(value || '2m'), [value]);

@@ -94,7 +94,7 @@ describe('EvaluationQueryField', () => {
   it('shows required error when submitted with empty value', async () => {
     const queryClient = createTestQueryClient();
 
-    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
@@ -131,7 +131,7 @@ describe('EvaluationQueryField', () => {
   it('shows validation error for invalid ES|QL query syntax', async () => {
     const queryClient = createTestQueryClient();
 
-    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
@@ -168,7 +168,7 @@ describe('EvaluationQueryField', () => {
   it('shows validation error for incomplete query', async () => {
     const queryClient = createTestQueryClient();
 
-    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,

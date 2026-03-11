@@ -16,7 +16,7 @@ import { QueryResultsGrid } from './query_results_grid';
  * Displays a live preview of the evaluation ES|QL query results as the user
  * configures the rule form. Delegates grid rendering to `QueryResultsGrid`.
  */
-export const RuleResultsPreview: React.FC = () => {
+export const RuleResultsPreview = () => {
   const {
     columns,
     rows,

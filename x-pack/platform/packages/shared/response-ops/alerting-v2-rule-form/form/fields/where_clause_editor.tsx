@@ -60,7 +60,7 @@ interface EditorFieldProps {
   queryCallbacks?: ESQLCallbacks;
 }
 
-const EditorField: React.FC<EditorFieldProps> = ({
+const EditorField = ({
   value,
   onChange,
   label,
@@ -74,7 +74,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
   suggestionProvider,
   baseQuery,
   queryCallbacks,
-}) => {
+}: EditorFieldProps) => {
   // Build the label element with optional tooltip
   const labelElement = label ? (
     labelTooltip ? (
@@ -359,7 +359,7 @@ const EditorField: React.FC<EditorFieldProps> = ({
  * // Form value will be: "WHERE count > 100"
  * ```
  */
-export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
+export const WhereClauseEditor = ({
   name,
   label,
   labelTooltip,
@@ -370,7 +370,7 @@ export const WhereClauseEditor: React.FC<WhereClauseEditorProps> = ({
   isOptional = true,
   baseQuery = '',
   rules,
-}) => {
+}: WhereClauseEditorProps) => {
   const { control } = useFormContext<FormValues>();
   const { data } = useRuleFormServices();
   const search = data.search.search;
