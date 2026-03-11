@@ -42,11 +42,9 @@ export const EntitiesOverview: React.FC = () => {
   });
 
   const showUserOverview =
-    userEntityIdentifiers &&
-    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+    userEntityIdentifiers && (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
   const showHostOverview =
-    hostEntityIdentifiers &&
-    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+    hostEntityIdentifiers && (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
   const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
@@ -89,7 +87,9 @@ export const EntitiesOverview: React.FC = () => {
                 <EuiFlexItem>
                   <UserEntityOverview
                     entityIdentifiers={userEntityIdentifiers}
-                    entityRecord={entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined}
+                    entityRecord={
+                      entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
+                    }
                   />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
