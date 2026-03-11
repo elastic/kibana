@@ -30,18 +30,18 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
       set -euo pipefail
       .buildkite/scripts/bootstrap.sh
 
-      PASS_CONFIG=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/pass/jest.config.js"
-      FAIL_CONFIG=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/fail/jest.config.js"
-      PASS_HASH=$(printf '%s' "$PASS_CONFIG" | shasum -a 256 | awk '{print $1}' | cut -c1-12)
-      FAIL_HASH=$(printf '%s' "$FAIL_CONFIG" | shasum -a 256 | awk '{print $1}' | cut -c1-12)
-      PASS_KEY="jest_ckpt_\${BUILDKITE_STEP_ID}_\${BUILDKITE_PARALLEL_JOB:-0}_\${PASS_HASH}"
-      FAIL_KEY="jest_ckpt_\${BUILDKITE_STEP_ID}_\${BUILDKITE_PARALLEL_JOB:-0}_\${FAIL_HASH}"
+      ALERTING_CONFIG="x-pack/platform/plugins/shared/alerting/jest.config.js"
+      ALERTING_SHARDS="\${ALERTING_CONFIG}||shard=1/6,\${ALERTING_CONFIG}||shard=2/6,\${ALERTING_CONFIG}||shard=3/6,\${ALERTING_CONFIG}||shard=4/6,\${ALERTING_CONFIG}||shard=5/6,\${ALERTING_CONFIG}||shard=6/6"
 
       echo "[jest-checkpoint-repro] retry=\${BUILDKITE_RETRY_COUNT:-0} step=\${BUILDKITE_STEP_ID} job=\${BUILDKITE_PARALLEL_JOB:-0}"
-      echo "[jest-checkpoint-repro] pass key=\${PASS_KEY} value=$(buildkite-agent meta-data get "$PASS_KEY" --default '<missing>')"
-      echo "[jest-checkpoint-repro] fail key=\${FAIL_KEY} value=$(buildkite-agent meta-data get "$FAIL_KEY" --default '<missing>')"
+      echo "[jest-checkpoint-repro] running configs=\${ALERTING_SHARDS}"
 
-      node ./scripts/jest_all --configs=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/pass/jest.config.js,.buildkite/scripts/pipelines/pull_request/jest_retry_repro/fail/jest.config.js" --coverage=false --passWithNoTests --maxParallel=1
+      node ./scripts/jest_all --configs="\${ALERTING_SHARDS}" --coverage=false --passWithNoTests --maxParallel=1
+
+      if [ "\${BUILDKITE_RETRY_COUNT:-0}" = "0" ]; then
+        echo "[jest-checkpoint-repro] forcing first attempt to fail to verify retry resume"
+        exit 1
+      fi
     agents:
       machineType: n2d-standard-4
       preemptible: true

@@ -220,16 +220,16 @@ const mockCreatePointInTimeFinderAsInternalUser = (
       version?: string;
     }>;
   } = {
-    saved_objects: [
-      {
-        id: 'abc',
-        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-        attributes: getMockAdHocRunAttributes(),
-        references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
-        version: '1',
-      },
-    ],
-  }
+      saved_objects: [
+        {
+          id: 'abc',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          attributes: getMockAdHocRunAttributes(),
+          references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+          version: '1',
+        },
+      ],
+    }
 ) => {
   unsecuredSavedObjectsClient.createPointInTimeFinder = jest.fn().mockResolvedValue({
     close: jest.fn(),
@@ -269,6 +269,7 @@ describe('BackfillClient', () => {
 
   describe('constructor', () => {
     test('should register backfill task type', async () => {
+      expect(true).toBe(false);
       expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
         'ad_hoc_run-backfill': {
           title: 'Alerting Backfill Rule Run',
