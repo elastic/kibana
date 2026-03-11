@@ -25,8 +25,8 @@ import { validation } from '../validation/validation';
 import type { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
-import type { FieldDefinition } from '../../fields';
-import { fieldDefinitionSchema } from '../../fields';
+import type { ClassicFieldDefinition } from '../../fields';
+import { classicFieldDefinitionSchema } from '../../fields';
 import type { EffectiveFailureStore } from './failure_store';
 import { effectiveFailureStoreSchema, failureStoreSchema } from './failure_store';
 import { ingestStreamProcessingSchema } from './processing';
@@ -35,13 +35,13 @@ import { ingestStreamProcessingSchema } from './processing';
 
 export interface IngestClassic {
   classic: {
-    field_overrides?: FieldDefinition;
+    field_overrides?: ClassicFieldDefinition;
   };
 }
 
 const ingestClassicShape = {
   classic: z.object({
-    field_overrides: z.optional(fieldDefinitionSchema),
+    field_overrides: z.optional(classicFieldDefinitionSchema),
   }),
 };
 
