@@ -31,6 +31,7 @@ import {
 } from '../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import { useConnectDashboardApi } from './hooks/use_connect_dashboard_api';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 import {
@@ -108,6 +109,7 @@ export function DashboardApp({
   useObservabilityAIAssistantContext({
     dashboardApi,
   });
+  useConnectDashboardApi(dashboardApi);
 
   useExecutionContext(coreServices.executionContext, {
     type: 'application',

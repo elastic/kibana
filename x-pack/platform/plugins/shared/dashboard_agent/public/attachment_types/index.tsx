@@ -11,9 +11,30 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import { getConnectedDashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
+import { normalizeDashboardWidgets } from './panel_grid_layout';
+
+const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
+
+const getStateOverridesFromAttachment = (
+  attachment: DashboardAttachment
+): Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'> => {
+  const { title, description, panels = [], sections = [] } = attachment.data;
+
+  return {
+    title: title ?? '',
+    description: description ?? '',
+    panels: normalizeDashboardWidgets({
+      panels,
+      sections,
+    }),
+    time_range: DEFAULT_TIME_RANGE,
+  };
+};
 
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
@@ -46,11 +67,13 @@ export const registerDashboardAttachmentUiDefinition = ({
         doesSavedDashboardExist={doesSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ openCanvas }) => {
+    renderInlineContent: () => {
+      return <div>Dashboard</div>;
+    },
+    getActionButtons: ({ attachment, openCanvas }) => {
       if (!openCanvas) {
         return [];
       }
-
       return [
         {
           label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
@@ -58,7 +81,26 @@ export const registerDashboardAttachmentUiDefinition = ({
           }),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: openCanvas,
+          handler: () => {
+            const isOnDashboardPage = window.location.pathname.includes('/app/dashboards');
+            if (!isOnDashboardPage) {
+              openCanvas();
+              return;
+            }
+
+            const dashboardApi = getConnectedDashboardApi();
+            if (!dashboardApi) {
+              openCanvas();
+              return;
+            }
+
+            const currentState = dashboardApi.getSerializedState().attributes;
+            dashboardApi.setViewMode('edit');
+            dashboardApi.reinitialize({
+              ...currentState,
+              ...getStateOverridesFromAttachment(attachment),
+            });
+          },
         },
       ];
     },
