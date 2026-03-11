@@ -86,7 +86,15 @@ const resolveConnectorId = async ({
   return undefined;
 };
 
-const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {
+const buildSystemPrompt = (
+  sourceNames: string[],
+  fieldsContext?: string,
+  currentQuery?: string
+): string => {
+  if (currentQuery) {
+    return buildSurgicalPrompt(sourceNames, fieldsContext, currentQuery);
+  }
+
   let prompt = `Produce the ES|QL query fenced by the esql tag. Don't explain it.
 
 <AvailableSources>
@@ -108,6 +116,41 @@ Use these exact field names in the query.
   return prompt;
 };
 
+const buildSurgicalPrompt = (
+  sourceNames: string[],
+  fieldsContext: string | undefined,
+  currentQuery: string
+): string => {
+  let prompt = `You are an ES|QL expert. The user has an existing ES|QL query.
+The target comment line is marked with >>> and <<< delimiters in the query below.
+That comment is a natural-language instruction describing what ES|QL code should replace it.
+Other comment lines (without >>> <<<) are regular documentation comments — ignore them as instructions.
+
+Your task: output ONLY the ES|QL pipe(s) that should replace the marked comment. Do not output the full query.
+Fence the replacement code with the esql tag. Do not explain it.
+
+If the instruction asks to modify or extend an existing pipe command (e.g. "also add ...", "change ...", "add a column"),
+output the complete modified version of that pipe. Otherwise output only new pipe(s).
+
+<CurrentQuery>
+${currentQuery}
+</CurrentQuery>
+
+<AvailableSources>
+${sourceNames.join(', ')}
+</AvailableSources>`;
+
+  if (fieldsContext) {
+    prompt += `
+
+<FieldsContext>
+${fieldsContext}
+</FieldsContext>`;
+  }
+
+  return prompt;
+};
+
 const extractEsqlQuery = (content: string): string => {
   const match = content.match(/```esql\s*([\s\S]*?)```/);
   return match ? match[1].trim() : content.trim();
@@ -123,8 +166,9 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          query: schema.string(),
+          nlInstruction: schema.string(),
           sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+          currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
         }),
       },
       security: {
@@ -137,7 +181,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query, sources } = request.body;
+        const { nlInstruction, sources, currentQuery } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -171,10 +215,10 @@ export const registerNLtoESQLRoute = (
           naturalLanguageToEsql({
             client: inference.getClient({ request }),
             connectorId,
-            input: query,
+            input: nlInstruction,
             functionCalling: 'auto',
             logger,
-            system: buildSystemPrompt(sourceNames, fieldsContext),
+            system: buildSystemPrompt(sourceNames, fieldsContext, currentQuery),
           })
         );
 
