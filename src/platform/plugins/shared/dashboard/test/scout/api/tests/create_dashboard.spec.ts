@@ -18,11 +18,19 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
+const createShortUniqueString = (prefix: string): string => {
+  // Avoid long/variable-length float strings from Math.random() when used in IDs/titles.
+  const now = Date.now().toString(36);
+  const rand = Math.floor(Math.random() * 1_000_000_000).toString(36);
+  return `${prefix}-${now}-${rand}`;
+};
+
+apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
@@ -55,8 +63,8 @@ apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}-${Math.random()}`;
+    const title = createShortUniqueString('foo');
+    const id = createShortUniqueString('bar');
 
     const response = await apiClient.post(DASHBOARD_API_PATH, {
       headers: {
@@ -78,7 +86,7 @@ apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
 
   // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
   apiTest('can create a dashboard in a defined space', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
+    const title = createShortUniqueString('foo');
     const spaceId = 'space-1';
 
     const response = await apiClient.post(DASHBOARD_API_PATH, {
@@ -100,7 +108,7 @@ apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest('return error if provided id already exists', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
+    const title = createShortUniqueString('foo');
 
     const response = await apiClient.post(DASHBOARD_API_PATH, {
       headers: {
