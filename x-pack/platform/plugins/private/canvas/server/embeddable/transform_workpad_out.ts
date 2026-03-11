@@ -123,6 +123,7 @@ export function transformWorkpadOut(
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
         const embeddableType = transformBwcType(fn.arguments.type[0] as string);
+        fn.arguments.type[0] = embeddableType;
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transformType = embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType;
