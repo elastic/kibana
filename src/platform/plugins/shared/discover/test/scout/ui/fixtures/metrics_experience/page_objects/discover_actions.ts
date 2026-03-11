@@ -52,18 +52,17 @@ export class DiscoverActions {
   }
 
   async addBreakdownFieldFromSidebar(field: string) {
-    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
-    if (await sidebarToggleButton.isVisible()) {
-      await sidebarToggleButton.click();
-    }
-
     await this.discover.waitUntilFieldListHasCountOfFields();
-    await this.page.testSubj.locator(`field-${field}`).waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(`field-${field}`).click();
-    await this.page.testSubj
-      .locator(`fieldPopoverHeader_addBreakdownField-${field}`)
-      .waitFor({ state: 'visible' });
-    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
+
+    const fieldButton = this.page.testSubj.locator(`field-${field}-showDetails`);
+    await fieldButton.scrollIntoViewIfNeeded();
+    await fieldButton.click();
+
+    const breakdownButton = this.page.testSubj.locator(
+      `fieldPopoverHeader_addBreakdownField-${field}`
+    );
+    await breakdownButton.waitFor({ state: 'visible' });
+    await breakdownButton.click();
     await this.discover.waitUntilSearchingHasFinished();
   }
 }
