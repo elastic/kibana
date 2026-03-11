@@ -44,10 +44,7 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
   return createPortal(<Component {...props} />, el);
 };
 
-export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
-  availableEmbeddables,
-  ...restProps
-}) => {
+export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = (props) => {
   const isByValueEnabled = presentationUtilService.labsService.isProjectEnabled(
     'labs:canvas:byValueEmbeddable'
   );
@@ -64,17 +61,12 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
     (id: string, type: string): void => {
       const expression = embeddableInputToExpression({ savedObjectId: id }, type);
       addEmbeddable(pageId, { expression });
-      restProps.onClose();
+      props.onClose();
     },
-    [addEmbeddable, pageId, restProps]
+    [addEmbeddable, pageId, props]
   );
 
   return (
-    <EmbeddableFlyoutPortal
-      {...restProps}
-      availableEmbeddables={availableEmbeddables || []}
-      onSelect={onSelect}
-      isByValueEnabled={isByValueEnabled}
-    />
+    <EmbeddableFlyoutPortal {...props} onSelect={onSelect} isByValueEnabled={isByValueEnabled} />
   );
 };
