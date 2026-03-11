@@ -17,7 +17,10 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CLASH_ERROR_TYPE, STATUS, type FileUploadManager } from '../file_upload_manager';
 
-export enum UPLOAD_TYPE {  NEW = 'new',  EXISTING = 'existing'}
+export enum UPLOAD_TYPE {
+  NEW = 'new',
+  EXISTING = 'existing',
+}
 
 export function useFileUpload(
   fileUploadManager: FileUploadManager,
