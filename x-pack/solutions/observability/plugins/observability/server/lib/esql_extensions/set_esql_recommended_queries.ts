@@ -128,18 +128,16 @@ export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
     ...TRACES_ESQL_RECOMMENDED_QUERIES,
     ...METRICS_ESQL_RECOMMENDED_QUERIES,
     ...LOGS_ESQL_RECOMMENDED_QUERIES,
-    SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY,
   ];
 
   // Register full observability-specific recommendations for observability solution view.
   esqlExtensionsRegistry.setRecommendedQueries(observabilityRecommendedQueries, 'oblt');
 
-  // Register only the "Search all metrics" recommendation for security and search solution views.
+  // Register "Search all metrics" under classic so it surfaces in all views (classic + every solution).
   esqlExtensionsRegistry.setRecommendedQueries(
     [SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY],
-    'security'
+    'classic'
   );
-  esqlExtensionsRegistry.setRecommendedQueries([SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY], 'es');
 
   // Register recommended fields
   esqlExtensionsRegistry.setRecommendedFields(ALL_RECOMMENDED_FIELDS_FOR_ESQL, 'oblt');
