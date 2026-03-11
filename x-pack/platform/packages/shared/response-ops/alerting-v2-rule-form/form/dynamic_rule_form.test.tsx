@@ -9,32 +9,57 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { RULE_FORM_ID } from './constants';
+
+// Mock the yaml-rule-editor to avoid monaco editor setup
+jest.mock('@kbn/yaml-rule-editor', () => ({
+  YamlRuleEditor: () => <div data-test-subj="yamlRuleEditorMock">YAML Editor Mock</div>,
+}));
+
+// Mock the code-editor to avoid monaco editor setup
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea
+      data-test-subj="codeEditorMock"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+  ESQL_LANG_ID: 'esql',
+}));
 
 // Mock the ES|QL utils to avoid complex setup
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn().mockResolvedValue({
     fields: {
       getByType: () => [{ name: '@timestamp', type: 'date' }],
+      toSpec: () => ({}),
     },
   }),
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([]),
 }));
 
+const createMockApplication = () => ({
+  currentAppId$: {
+    subscribe: () => ({ unsubscribe: () => {} }),
+  },
+});
+
 const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
-  notifications: notificationServiceMock.createStartContract(),
+  application: createMockApplication() as any,
 });
 
 describe('DynamicRuleForm', () => {
   const defaultProps = {
-    formId: 'test-form',
     onSubmit: jest.fn(),
     query: 'FROM logs-* | STATS count = COUNT(*)',
     defaultTimeField: '@timestamp',
@@ -191,7 +216,6 @@ describe('DynamicRuleForm', () => {
       <Wrapper>
         <DynamicRuleForm
           {...defaultProps}
-          formId="submit-test-form"
           onSubmit={onSubmit}
           query="FROM logs-* | STATS count = COUNT(*)"
         />
@@ -202,8 +226,8 @@ describe('DynamicRuleForm', () => {
     const nameInput = screen.getByRole('textbox', { name: 'Name' });
     await user.type(nameInput, 'Test Rule');
 
-    // Submit the form
-    const form = document.getElementById('submit-test-form');
+    // Submit the form using the constant RULE_FORM_ID
+    const form = document.getElementById(RULE_FORM_ID);
     expect(form).toBeInTheDocument();
 
     // Trigger form submission

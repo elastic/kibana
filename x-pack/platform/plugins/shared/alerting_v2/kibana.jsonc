@@ -14,7 +14,11 @@
       "features",
       "spaces",
       "data",
-      "security"
+      "dataViews",
+      "esql",
+      "security",
+      "encryptedSavedObjects",
+      "workflowsManagement"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []

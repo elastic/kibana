@@ -29,6 +29,7 @@ export const LookbackWindowField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <LookbackWindow {...field} errors={error?.message} />
         </EuiFormRow>

@@ -18,8 +18,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { RULE_FORM_ID } from '../form/constants';
 
-export const RULE_FORM_ID = 'ruleV2Form';
 const FLYOUT_TITLE_ID = 'ruleV2FormFlyoutTitle';
 
 export interface RuleFormFlyoutProps {
@@ -51,7 +51,8 @@ export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = ({
       type={push ? 'push' : 'overlay'}
       onClose={onClose || (() => {})}
       aria-labelledby={FLYOUT_TITLE_ID}
-      size="s"
+      size="m"
+      maxWidth={600}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useFormContext, type FieldErrors } from 'react-hook-form';
@@ -39,11 +39,9 @@ export const ErrorCallOut: React.FC = () => {
     formState: { errors, isSubmitted },
   } = useFormContext<FormValues>();
 
-  const errorMessages = useMemo(() => extractErrorMessages(errors), [errors]);
+  const shouldShowCallout = isSubmitted && Object.keys(errors).length > 0;
 
-  const isFormInvalid = errorMessages.length > 0 && isSubmitted;
-
-  if (!isFormInvalid) {
+  if (!shouldShowCallout) {
     return null;
   }
 
@@ -57,7 +55,7 @@ export const ErrorCallOut: React.FC = () => {
         color="danger"
       >
         <ul>
-          {errorMessages.map((error) => (
+          {extractErrorMessages(errors).map((error) => (
             <li key={error}>{error}</li>
           ))}
         </ul>

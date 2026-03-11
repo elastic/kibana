@@ -342,6 +342,15 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects pending_count greater than 1000', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        state_transition: { pending_count: 1001 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a negative recovering_count', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -462,6 +471,52 @@ describe('createRuleDataSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('accepts recovery_policy with type "query" and query.condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: 'status == "ok"' },
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.recovery_policy?.query?.condition).toBe('status == "ok"');
+    });
+
+    it('accepts recovery_policy with type "query" without condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.recovery_policy?.query?.condition).toBeUndefined();
+    });
+
+    it('rejects recovery_policy with an empty condition string', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: '' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_policy condition exceeding 5000 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: 'x'.repeat(5001) },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('required fields', () => {
@@ -564,6 +619,14 @@ describe('updateRuleDataSchema', () => {
     it('rejects a non-integer pending_count', () => {
       const result = updateRuleDataSchema.safeParse({
         state_transition: { pending_count: 1.5 },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects pending_count greater than 1000', () => {
+      const result = updateRuleDataSchema.safeParse({
+        state_transition: { pending_count: 1001 },
       });
 
       expect(result.success).toBe(false);

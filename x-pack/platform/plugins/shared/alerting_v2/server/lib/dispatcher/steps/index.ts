@@ -14,4 +14,4 @@ export { EvaluateMatchersStep } from './evaluate_matchers_step';
 export { BuildGroupsStep } from './build_groups_step';
 export { ApplyThrottlingStep } from './apply_throttling_step';
 export { DispatchStep } from './dispatch_step';
-export { StoreActionsStep } from './record_actions_step';
+export { StoreActionsStep } from './store_actions_step';

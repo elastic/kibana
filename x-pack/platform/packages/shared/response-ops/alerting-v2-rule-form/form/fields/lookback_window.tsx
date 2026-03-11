@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getDurationUnitValue, getDurationNumberInItsUnit } from '../../flyout/utils';
-import { getTimeOptions } from '../../flyout/utils';
-
-const INTEGER_REGEX = /^[1-9][0-9]*$/;
-const INVALID_KEYS = ['-', '+', '.', 'e', 'E'];
+import { DurationInput } from './duration_input';
 
 const LOOKBACK_WINDOW_TITLE_PREFIX = i18n.translate(
   'xpack.alertingV2.ruleForm.lookbackWindow.titlePrefix',
@@ -34,77 +29,14 @@ interface Props {
   errors?: string;
 }
 
-export const LookbackWindow: React.FC<Props> = React.forwardRef<HTMLInputElement, Props>(
-  ({ value, onChange, errors }, ref) => {
-    const intervalNumber = useMemo(() => {
-      return getDurationNumberInItsUnit(value || '5m');
-    }, [value]);
-
-    const intervalUnit = useMemo(() => {
-      return getDurationUnitValue(value || '5m');
-    }, [value]);
-
-    const onIntervalNumberChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value.trim();
-        if (INTEGER_REGEX.test(val)) {
-          const parsedValue = parseInt(val, 10);
-          onChange(`${parsedValue}${intervalUnit}`);
-        }
-      },
-      [intervalUnit, onChange]
-    );
-
-    const onIntervalUnitChange = useCallback(
-      (e: React.ChangeEvent<HTMLSelectElement>) => {
-        onChange(`${intervalNumber}${e.target.value}`);
-      },
-      [intervalNumber, onChange]
-    );
-
-    const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (INVALID_KEYS.includes(e.key)) {
-        e.preventDefault();
-      }
-    }, []);
-
-    return (
-      <EuiFormRow
-        fullWidth
-        data-test-subj="lookbackWindow"
-        display="rowCompressed"
-        isInvalid={!!errors}
-        error={errors}
-      >
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={2}>
-            <EuiFieldNumber
-              fullWidth
-              prepend={[LOOKBACK_WINDOW_TITLE_PREFIX]}
-              isInvalid={!!errors}
-              value={intervalNumber}
-              name="interval"
-              data-test-subj="lookbackWindowNumberInput"
-              onChange={onIntervalNumberChange}
-              onKeyDown={onKeyDown}
-              id="lookbackWindowNumberInput"
-              itemID="lookbackWindowNumberInput"
-              aria-label={LOOKBACK_WINDOW_TITLE_PREFIX}
-              inputRef={ref}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiSelect
-              fullWidth
-              value={intervalUnit}
-              options={getTimeOptions(intervalNumber ?? 1)}
-              onChange={onIntervalUnitChange}
-              data-test-subj="lookbackWindowUnitInput"
-              aria-label={LOOKBACK_WINDOW_UNIT_LABEL}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
-    );
-  }
-);
+export const LookbackWindow = React.forwardRef<HTMLInputElement, Props>((props, ref) => (
+  <DurationInput
+    {...props}
+    ref={ref}
+    fallback="5m"
+    numberLabel={LOOKBACK_WINDOW_TITLE_PREFIX}
+    unitLabel={LOOKBACK_WINDOW_UNIT_LABEL}
+    dataTestSubj="lookbackWindow"
+    idPrefix="lookbackWindow"
+  />
+));

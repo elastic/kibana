@@ -29,6 +29,7 @@ export const TagsField: React.FC = () => {
             })}
             isInvalid={!!error}
             error={error?.message}
+            fullWidth
           >
             <EuiComboBox
               options={options}
@@ -39,6 +40,7 @@ export const TagsField: React.FC = () => {
               }}
               isClearable={true}
               isInvalid={!!error}
+              fullWidth
             />
           </EuiFormRow>
         );

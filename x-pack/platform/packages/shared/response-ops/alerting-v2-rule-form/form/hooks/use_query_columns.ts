@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { useQuery } from '@kbn/react-query';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
+import { ruleFormKeys } from './query_key_factory';
 
 export interface QueryColumn {
   name: string;
@@ -26,7 +27,7 @@ export const useQueryColumns = ({ query, search, onSuccess }: UseQueryColumnsPro
   onSuccessRef.current = onSuccess;
 
   const columnsQuery = useQuery({
-    queryKey: ['queryColumns', query],
+    queryKey: ruleFormKeys.queryColumns(query),
     queryFn: async ({ signal }) => {
       return getESQLQueryColumnsRaw({
         esqlQuery: query,

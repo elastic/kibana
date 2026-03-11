@@ -9,6 +9,7 @@ import { Logger, OnSetup, PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { PluginConfig } from '../config';
+import type { AlertingServerSetupDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { TaskDefinition } from '../lib/services/task_run_scope_service/create_task_runner';
 import { registerSavedObjects } from '../saved_objects';
@@ -22,6 +23,11 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerSavedObjects({
       savedObjects: container.get(CoreSetup('savedObjects')),
+      encryptedSavedObjects: container.get(
+        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
+          'encryptedSavedObjects'
+        )
+      ),
       logger,
     });
 

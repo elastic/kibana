@@ -73,6 +73,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.group_by).to.eql(['service.name', 'environment']);
       expect(response.body.throttle).to.eql({ interval: '5m' });
       expect(response.body.updatedAt).to.be.a('string');
+      expect(response.body.auth).to.be.an('object');
+      expect(response.body.auth.owner).to.be.a('string');
+      expect(response.body.auth.createdByUser).to.be(true);
+      expect(response.body.auth.apiKey).to.be(undefined);
     });
 
     it('should update only name', async () => {
