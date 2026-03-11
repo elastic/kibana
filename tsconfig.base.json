@@ -852,6 +852,8 @@
       "@kbn/core-user-storage-server/*": ["src/core/packages/user-storage/server/*"],
       "@kbn/core-user-storage-server-internal": ["src/core/packages/user-storage/server-internal"],
       "@kbn/core-user-storage-server-internal/*": ["src/core/packages/user-storage/server-internal/*"],
+      "@kbn/core-user-storage-server-mocks": ["src/core/packages/user-storage/server-mocks"],
+      "@kbn/core-user-storage-server-mocks/*": ["src/core/packages/user-storage/server-mocks/*"],
       "@kbn/cps": ["src/platform/plugins/shared/cps"],
       "@kbn/cps/*": ["src/platform/plugins/shared/cps/*"],
       "@kbn/cps-common": ["src/platform/packages/private/kbn-cps-common"],

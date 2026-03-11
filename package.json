@@ -507,6 +507,7 @@
     "@kbn/core-user-storage-common": "link:src/core/packages/user-storage/common",
     "@kbn/core-user-storage-server": "link:src/core/packages/user-storage/server",
     "@kbn/core-user-storage-server-internal": "link:src/core/packages/user-storage/server-internal",
+    "@kbn/core-user-storage-server-mocks": "link:src/core/packages/user-storage/server-mocks",
     "@kbn/cps": "link:src/platform/plugins/shared/cps",
     "@kbn/cps-common": "link:src/platform/packages/private/kbn-cps-common",
     "@kbn/cps-server-utils": "link:src/platform/packages/shared/kbn-cps-server-utils",
