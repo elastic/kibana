@@ -8,6 +8,8 @@
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useNavigation } from '../../hooks/use_navigation';
+import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 
 interface PluginContextMenuProps {
@@ -26,12 +28,23 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
   canManage,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { navigateToAgentBuilderUrl } = useNavigation();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
 
   const panels = useMemo(() => {
-    const items = [];
+    const items = [
+      {
+        name: labels.plugins.viewPluginButtonLabel,
+        icon: 'eye',
+        onClick: () => {
+          navigateToAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }));
+          closePopover();
+        },
+        'data-test-subj': `agentBuilderPluginViewButton-${plugin.id}`,
+      },
+    ];
 
     if (canManage) {
       items.push({
@@ -46,11 +59,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
     }
 
     return [{ id: 0, items }];
-  }, [plugin, canManage, closePopover, onDelete]);
-
-  if (!canManage) {
-    return null;
-  }
+  }, [plugin, canManage, closePopover, onDelete, navigateToAgentBuilderUrl]);
 
   return (
     <EuiPopover

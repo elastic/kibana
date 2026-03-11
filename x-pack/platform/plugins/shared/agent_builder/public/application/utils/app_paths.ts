@@ -38,5 +38,6 @@ export const appPaths = {
   },
   plugins: {
     list: '/plugins',
+    details: ({ pluginId }: { pluginId: string }) => `/plugins/${pluginId}`,
   },
 };

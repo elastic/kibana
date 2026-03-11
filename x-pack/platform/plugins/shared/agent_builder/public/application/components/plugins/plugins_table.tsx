@@ -20,7 +20,9 @@ import type { PluginDefinition } from '@kbn/agent-builder-common';
 import React, { memo, useMemo, useState } from 'react';
 import { useDeletePlugin } from '../../hooks/plugins/use_delete_plugin';
 import { usePluginsService } from '../../hooks/plugins/use_plugins';
+import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
+import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { PluginContextMenu } from './plugins_table_context_menu';
 
@@ -135,6 +137,7 @@ const usePluginsTableColumns = ({
   ) => void;
 }): Array<EuiBasicTableColumn<PluginDefinition>> => {
   const { manageTools } = useUiPrivileges();
+  const { createAgentBuilderUrl } = useNavigation();
 
   return useMemo(
     (): Array<EuiBasicTableColumn<PluginDefinition>> => [
@@ -144,10 +147,13 @@ const usePluginsTableColumns = ({
         sortable: true,
         truncateText: true,
         width: '20%',
-        render: (name: string) => (
-          <EuiText size="s">
+        render: (name: string, plugin: PluginDefinition) => (
+          <EuiLink
+            href={createAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }))}
+            data-test-subj={`agentBuilderPluginNameLink-${plugin.id}`}
+          >
             <strong>{name}</strong>
-          </EuiText>
+          </EuiLink>
         ),
       },
       {
@@ -205,6 +211,6 @@ const usePluginsTableColumns = ({
         ),
       },
     ],
-    [manageTools, onDelete]
+    [manageTools, onDelete, createAgentBuilderUrl]
   );
 };

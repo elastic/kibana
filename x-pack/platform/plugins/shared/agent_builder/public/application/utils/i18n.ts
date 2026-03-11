@@ -753,6 +753,29 @@ export const labels = {
     uploadPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.uploadPluginErrorToast', {
       defaultMessage: 'Failed to upload plugin',
     }),
+    viewPluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.viewPluginButtonLabel', {
+      defaultMessage: 'View',
+    }),
+    pluginDetailsTitle: i18n.translate('xpack.agentBuilder.plugins.pluginDetailsTitle', {
+      defaultMessage: 'Plugin details',
+    }),
+    backToPluginsButton: i18n.translate('xpack.agentBuilder.plugins.backToPluginsButton', {
+      defaultMessage: 'Back to plugins',
+    }),
+    idLabel: i18n.translate('xpack.agentBuilder.plugins.idLabel', {
+      defaultMessage: 'ID',
+    }),
+    authorLabel: i18n.translate('xpack.agentBuilder.plugins.authorLabel', {
+      defaultMessage: 'Author',
+    }),
+    noSkillsLabel: i18n.translate('xpack.agentBuilder.plugins.noSkillsLabel', {
+      defaultMessage: 'None',
+    }),
+    loadPluginErrorToast: (pluginId: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.loadPluginErrorToast', {
+        defaultMessage: 'Unable to load "{pluginId}"',
+        values: { pluginId },
+      }),
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
