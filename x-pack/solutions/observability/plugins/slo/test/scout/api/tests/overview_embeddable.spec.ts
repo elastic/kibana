@@ -18,7 +18,6 @@ apiTest.describe(
   () => {
     let adminCredentials: RoleApiCredentials;
     let sloId: string;
-    const createdDashboardIds: string[] = [];
 
     apiTest.beforeAll(async ({ requestAuth, sloData }) => {
       await sloData.generateSloData();
@@ -30,19 +29,8 @@ apiTest.describe(
       adminCredentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      for (const id of createdDashboardIds) {
-        try {
-          await apiClient.delete(`${DASHBOARD_API_PATH}/${id}`, {
-            headers: {
-              ...COMMON_HEADERS,
-              ...adminCredentials.apiKeyHeader,
-            },
-          });
-        } catch {
-          // Ignore errors during cleanup
-        }
-      }
+    apiTest.afterAll(async ({ kbnClient }) => {
+      await kbnClient.savedObjects.cleanStandardList();
     });
 
     apiTest(
@@ -80,8 +68,6 @@ apiTest.describe(
         expect(response.body.data.title).toBe(dashboardTitle);
         expect(response.body.data.panels).toBeDefined();
         expect(response.body.data.panels).toHaveLength(1);
-
-        createdDashboardIds.push(response.body.id);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.type).toBe(SLO_OVERVIEW_EMBEDDABLE_ID);
@@ -122,8 +108,6 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        createdDashboardIds.push(response.body.id);
-
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.config.slo_instance_id).toBe('*');
       }
@@ -166,8 +150,6 @@ apiTest.describe(
         expect(response.body.data.panels).toBeDefined();
         expect(response.body.data.panels).toHaveLength(1);
 
-        createdDashboardIds.push(response.body.id);
-
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.type).toBe(SLO_OVERVIEW_EMBEDDABLE_ID);
         expect(createdPanel.config).toBeDefined();
@@ -206,8 +188,6 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        createdDashboardIds.push(response.body.id);
-
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.type).toBe(SLO_OVERVIEW_EMBEDDABLE_ID);
         expect(createdPanel.config.overview_mode).toBe('groups');
