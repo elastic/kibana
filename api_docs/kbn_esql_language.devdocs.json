@@ -647,7 +647,7 @@
           "[]; }>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/inline_suggestions/inline_suggest.ts",
-        "lineNumber": 227,
+        "lineNumber": 230,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -663,7 +663,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/inline_suggestions/inline_suggest.ts",
-            "lineNumber": 228,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -680,7 +680,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/inline_suggestions/inline_suggest.ts",
-            "lineNumber": 229,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -697,7 +697,7 @@
               "{ readonly startLineNumber: number; readonly startColumn: number; readonly endLineNumber: number; readonly endColumn: number; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/inline_suggestions/inline_suggest.ts",
-            "lineNumber": 230,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -721,7 +721,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/inline_suggestions/inline_suggest.ts",
-            "lineNumber": 231,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3581,7 +3581,7 @@
         "label": "EsqlCommandNames",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/commands/commands.ts",
-        "lineNumber": 117,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
