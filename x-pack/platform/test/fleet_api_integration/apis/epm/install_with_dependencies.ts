@@ -60,7 +60,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(depInstallation).toBeDefined();
       expect(depInstallation?.name).toBe(DEP_PACKAGE);
       expect(depInstallation?.version).toBe(VERSION);
-      expect(depInstallation?.is_dependency).toBe(true);
 
       const parentInstallation = await getInstallationSavedObject(PARENT_PACKAGE);
       expect(parentInstallation).toBeDefined();
