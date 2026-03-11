@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { EuidAttribute } from '../definitions/entity_schema';
+import type { EuidAttribute, FieldEvaluationSource } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -105,4 +105,20 @@ export function isEuidField(attr: EuidAttribute) {
 
 export function isEuidSeparator(attr: EuidAttribute) {
   return 'sep' in attr;
+}
+
+export function getSourceFieldNames(sources: FieldEvaluationSource[]): {
+  exactMatchFields: string[];
+  prefixMatchFields: string[];
+} {
+  const exactMatchFields: string[] = [];
+  const prefixMatchFields: string[] = [];
+  for (const source of sources) {
+    if ('field' in source) {
+      exactMatchFields.push(source.field);
+    } else {
+      prefixMatchFields.push(source.firstChunkOfField);
+    }
+  }
+  return { exactMatchFields, prefixMatchFields };
 }
