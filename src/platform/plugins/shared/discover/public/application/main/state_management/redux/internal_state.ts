@@ -9,7 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { throttle } from 'lodash';
+import { pick, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
   type PayloadAction,
@@ -38,9 +38,9 @@ import {
   selectTabRuntimeState,
 } from './runtime_state';
 import {
+  DEFAULT_PROFILE_STATE_FIELDS,
   TabsBarVisibility,
   type DiscoverInternalState,
-  type PreviousStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -236,7 +236,7 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    setAppState: (state, action: TabAction<Pick<TabState, 'appState'> & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
         let appState = action.payload.appState;
 
@@ -247,6 +247,8 @@ export const internalStateSlice = createSlice({
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
+        tab.resetDefaultProfileState.previousStateSnapshotsByProfileId[action.payload.profileId] =
+          pick(appState, DEFAULT_PROFILE_STATE_FIELDS);
       }),
 
     /**
@@ -333,20 +335,6 @@ export const internalStateSlice = createSlice({
           };
         }),
     },
-
-    setPreviousStateSnapshot: (
-      state,
-      action: TabAction<{
-        profileId: string;
-        previousStateSnapshot: PreviousStateSnapshot | undefined;
-      }>
-    ) =>
-      withTab(state, action.payload, (tab) => {
-        tab.resetDefaultProfileState.previousStateSnapshotsByProfileId = {
-          ...tab.resetDefaultProfileState.previousStateSnapshotsByProfileId,
-          [action.payload.profileId]: action.payload.previousStateSnapshot,
-        };
-      }),
 
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {

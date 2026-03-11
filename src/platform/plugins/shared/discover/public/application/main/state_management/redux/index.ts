@@ -33,7 +33,12 @@ export {
 } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState'
+  ),
   ...actions,
   syncLocallyPersistedTabState,
 };
