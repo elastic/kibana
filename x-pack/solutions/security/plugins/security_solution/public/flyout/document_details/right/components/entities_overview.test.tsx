@@ -27,11 +27,18 @@ import {
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 const from = '2022-04-05T12:00:00.000Z';
-const to = '2022-04-08T12:00:00.;000Z';
+const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return { ...actual, useUiSetting: jest.fn() };
+});
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
@@ -60,6 +67,9 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../explore/hosts/containers/hosts/details');
 
+const mockUseUiSetting = useUiSetting as jest.Mock;
+const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
+
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
@@ -80,6 +90,16 @@ const NO_DATA_MESSAGE = 'Host and user information are unavailable for this aler
 
 describe('<EntitiesOverview />', () => {
   beforeEach(() => {
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityFromStore.mockImplementation(({ entityType }: { entityType: string }) => ({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    }));
     mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
@@ -148,5 +168,22 @@ describe('<EntitiesOverview />', () => {
 
     const { getByText } = renderEntitiesOverview(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+  });
+
+  it('should render no data message when entity store v2 is enabled and no entity record exists', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const { getByText, queryByTestId } = renderEntitiesOverview(mockContextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
   });
 });

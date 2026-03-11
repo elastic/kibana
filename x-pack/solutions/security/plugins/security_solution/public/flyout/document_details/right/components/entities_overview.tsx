@@ -17,6 +17,9 @@ import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
@@ -25,6 +28,26 @@ export const EntitiesOverview: React.FC = () => {
   const { getFieldsData, dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
   const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
   const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const userEntityFromStore = useEntityFromStore({
+    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityType: 'user',
+    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+  });
+  const hostEntityFromStore = useEntityFromStore({
+    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityType: 'host',
+    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+  });
+
+  const showUserOverview =
+    userEntityIdentifiers &&
+    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+  const showHostOverview =
+    hostEntityIdentifiers &&
+    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+  const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -59,19 +82,25 @@ export const EntitiesOverview: React.FC = () => {
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
-        {userEntityIdentifiers || hostEntityIdentifiers ? (
+        {hasAnyEntity ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {userEntityIdentifiers && (
+            {showUserOverview && userEntityIdentifiers && (
               <>
                 <EuiFlexItem>
-                  <UserEntityOverview entityIdentifiers={userEntityIdentifiers} />
+                  <UserEntityOverview
+                    entityIdentifiers={userEntityIdentifiers}
+                    entityRecord={entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined}
+                  />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
               </>
             )}
-            {hostEntityIdentifiers && (
+            {showHostOverview && hostEntityIdentifiers && (
               <EuiFlexItem>
-                <HostEntityOverview entityIdentifiers={hostEntityIdentifiers} />
+                <HostEntityOverview
+                  entityIdentifiers={hostEntityIdentifiers}
+                  entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

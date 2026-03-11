@@ -31,26 +31,47 @@ function getRiskFromRecord(record: EntityStoreRecord): {
       calculated_score_norm: entityRisk.calculated_score_norm,
     };
   }
-  if ('host' in record && record.host?.risk) {
-    return {
-      calculated_level: record.host.risk.calculated_level,
-      calculated_score: record.host.risk.calculated_score,
-      calculated_score_norm: record.host.risk.calculated_score_norm,
-    };
+  if ('host' in record && record.host) {
+    const hostRisk = record.host.risk ?? record.host.entity?.risk;
+    if (hostRisk) {
+      return {
+        calculated_level: hostRisk.calculated_level,
+        calculated_score: hostRisk.calculated_score,
+        calculated_score_norm: hostRisk.calculated_score_norm,
+      };
+    }
   }
-  if ('user' in record && record.user?.risk) {
-    return {
-      calculated_level: record.user.risk.calculated_level,
-      calculated_score: record.user.risk.calculated_score,
-      calculated_score_norm: record.user.risk.calculated_score_norm,
-    };
+  if ('user' in record && record.user) {
+    const userRisk =
+      record.user.risk ??
+      (
+        record.user as {
+          entity?: {
+            risk?: {
+              calculated_level?: string;
+              calculated_score?: number;
+              calculated_score_norm?: number;
+            };
+          };
+        }
+      ).entity?.risk;
+    if (userRisk) {
+      return {
+        calculated_level: userRisk.calculated_level,
+        calculated_score: userRisk.calculated_score,
+        calculated_score_norm: userRisk.calculated_score_norm,
+      };
+    }
   }
-  if ('service' in record && record.service?.risk) {
-    return {
-      calculated_level: record.service.risk.calculated_level,
-      calculated_score: record.service.risk.calculated_score,
-      calculated_score_norm: record.service.risk.calculated_score_norm,
-    };
+  if ('service' in record && record.service) {
+    const serviceRisk = record.service.risk ?? record.service.entity?.risk;
+    if (serviceRisk) {
+      return {
+        calculated_level: serviceRisk.calculated_level,
+        calculated_score: serviceRisk.calculated_score,
+        calculated_score_norm: serviceRisk.calculated_score_norm,
+      };
+    }
   }
   return null;
 }
@@ -66,9 +87,7 @@ function getEntityNameFromRecord(record: EntityStoreRecord, entityType: EntityTy
  * Extract asset criticality level from an entity store record (host/user/service).
  * Used to populate Risk Summary asset criticality row when entity store is the data source.
  */
-function getAssetCriticalityFromEntityRecord(
-  record: EntityStoreRecord
-): string | undefined {
+function getAssetCriticalityFromEntityRecord(record: EntityStoreRecord): string | undefined {
   if ('asset' in record && record.asset?.criticality) {
     return record.asset.criticality;
   }

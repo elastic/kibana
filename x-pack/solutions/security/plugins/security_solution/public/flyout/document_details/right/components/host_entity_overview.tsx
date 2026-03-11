@@ -32,6 +32,7 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useDocumentDetailsContext } from '../../shared/context';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
 import type { DescriptionList } from '../../../../../common/utility_types';
@@ -88,11 +89,22 @@ const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
 const isRiskSeverity = (value: string): value is RiskSeverity =>
   VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
 
+const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
+  if (level == null || level === '') return null;
+  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
+};
+
 export interface HostEntityOverviewProps {
   /**
    * Entity identifiers for looking up host related ip addresses and risk level
    */
   entityIdentifiers: Record<string, string>;
+  /**
+   * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
+   * so Overview section uses the same entity store data used to decide visibility.
+   */
+  entityRecord?: EntityStoreRecord | null;
 }
 
 export const HOST_PREVIEW_BANNER = {
@@ -106,7 +118,10 @@ export const HOST_PREVIEW_BANNER = {
 /**
  * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityIdentifiers }) => {
+export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
+  entityIdentifiers,
+  entityRecord: entityRecordProp,
+}) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -138,6 +153,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
     entityType: 'host',
     skip: !entityStoreV2Enabled,
   });
+  const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
   const {
     data: hostRisk,
@@ -161,14 +177,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
   });
 
   const hostRiskData = useMemo(() => {
-    if (entityStoreV2Enabled && entityFromStore.entityRecord) {
-      const riskFromRecord = getRiskFromEntityRecord(entityFromStore.entityRecord);
-      if (riskFromRecord?.calculated_level) {
+    if (entityStoreV2Enabled && entityRecord) {
+      const riskFromRecord = getRiskFromEntityRecord(entityRecord);
+      if (riskFromRecord != null) {
         return {
           host: {
             name: hostName,
             risk: {
-              calculated_level: riskFromRecord.calculated_level,
+              calculated_level: riskFromRecord.calculated_level ?? 'Unknown',
               calculated_score: riskFromRecord.calculated_score,
               calculated_score_norm: riskFromRecord.calculated_score_norm,
             },
@@ -177,7 +193,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
       }
     }
     return hostRiskFromSearch;
-  }, [entityStoreV2Enabled, entityFromStore.entityRecord, hostName, hostRiskFromSearch]);
+  }, [entityStoreV2Enabled, entityRecord, hostName, hostRiskFromSearch]);
 
   const isRiskScoreExist = !!hostRiskData?.host?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
@@ -237,8 +253,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
     ? entityFromStore.isLoading
     : isRiskScoreLoading || isHostDetailsLoading;
 
-  const [hostRiskLevel] = useMemo(
-    () => [
+  const [hostRiskLevel] = useMemo(() => {
+    const level = hostRiskData?.host?.risk?.calculated_level;
+    const severity = level != null ? normalizeRiskLevel(level) ?? (level as RiskSeverity) : null;
+    return [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -250,18 +268,18 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ entityId
         ),
         description: (
           <>
-            {hostRiskData?.host?.risk?.calculated_level &&
-            isRiskSeverity(hostRiskData.host.risk.calculated_level) ? (
-              <RiskScoreLevel severity={hostRiskData.host.risk.calculated_level} />
+            {severity && isRiskSeverity(severity) ? (
+              <RiskScoreLevel severity={severity} />
+            ) : hostRiskData?.host?.risk != null ? (
+              <RiskScoreLevel severity="Unknown" />
             ) : (
               getEmptyTagValue()
             )}
           </>
         ),
       },
-    ],
-    [hostRiskData]
-  );
+    ];
+  }, [hostRiskData]);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,

@@ -13,6 +13,9 @@ import { getField, getUserEntityIdentifiers, getHostEntityIdentifiers } from '..
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 export const ENTITIES_TAB_ID = 'entity';
 
@@ -26,9 +29,27 @@ export const EntitiesDetails: React.FC = () => {
   const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
   const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
 
-  const showDetails = timestamp && (hostEntityIdentifiers || userEntityIdentifiers);
-  const showUserDetails = userEntityIdentifiers && timestamp;
-  const showHostDetails = hostEntityIdentifiers && timestamp;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const userEntityFromStore = useEntityFromStore({
+    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityType: 'user',
+    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+  });
+  const hostEntityFromStore = useEntityFromStore({
+    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityType: 'host',
+    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+  });
+
+  const showUserDetails =
+    userEntityIdentifiers &&
+    timestamp &&
+    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+  const showHostDetails =
+    hostEntityIdentifiers &&
+    timestamp &&
+    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+  const showDetails = timestamp && (showUserDetails || showHostDetails);
 
   return (
     <>

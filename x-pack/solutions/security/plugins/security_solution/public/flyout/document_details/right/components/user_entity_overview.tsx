@@ -29,6 +29,7 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { useDocumentDetailsContext } from '../../shared/context';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { useUiSetting } from '../../../../common/lib/kibana';
+import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
@@ -72,9 +73,30 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
+const VALID_RISK_SEVERITIES: readonly RiskSeverity[] = [
+  'Unknown',
+  'Low',
+  'Moderate',
+  'High',
+  'Critical',
+] as const;
+
+const isRiskSeverity = (value: string): value is RiskSeverity =>
+  VALID_RISK_SEVERITIES.includes(value as RiskSeverity);
+
+const normalizeRiskLevel = (level: string | undefined): RiskSeverity | null => {
+  if (level == null || level === '') return null;
+  const normalized = level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+  return isRiskSeverity(normalized) ? normalized : isRiskSeverity(level) ? level : null;
+};
 
 export interface UserEntityOverviewProps {
   entityIdentifiers: Record<string, string>;
+  /**
+   * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
+   * so Overview section uses the same entity store data used to decide visibility.
+   */
+  entityRecord?: EntityStoreRecord | null;
 }
 
 export const USER_PREVIEW_BANNER = {
@@ -88,7 +110,10 @@ export const USER_PREVIEW_BANNER = {
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
-export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityIdentifiers }) => {
+export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
+  entityIdentifiers,
+  entityRecord: entityRecordProp,
+}) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -122,6 +147,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
     entityType: 'user',
     skip: !entityStoreV2Enabled,
   });
+  const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
     entityIdentifiers,
@@ -145,14 +171,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
   const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
   const userRiskData = useMemo(() => {
-    if (entityStoreV2Enabled && entityFromStore.entityRecord) {
-      const riskFromRecord = getRiskFromEntityRecord(entityFromStore.entityRecord);
-      if (riskFromRecord?.calculated_level) {
+    if (entityStoreV2Enabled && entityRecord) {
+      const riskFromRecord = getRiskFromEntityRecord(entityRecord);
+      if (riskFromRecord != null) {
         return {
           user: {
             name: userName,
             risk: {
-              calculated_level: riskFromRecord.calculated_level,
+              calculated_level: riskFromRecord.calculated_level ?? 'Unknown',
               calculated_score: riskFromRecord.calculated_score,
               calculated_score_norm: riskFromRecord.calculated_score_norm,
             },
@@ -161,7 +187,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
       }
     }
     return userRiskFromSearch;
-  }, [entityStoreV2Enabled, entityFromStore.entityRecord, userName, userRiskFromSearch]);
+  }, [entityStoreV2Enabled, entityRecord, userName, userRiskFromSearch]);
 
   const isRiskScoreExist = !!userRiskData?.user?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
@@ -240,8 +266,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
     ? entityFromStore.isLoading
     : isUserDetailsLoading || isRiskScoreLoading;
 
-  const [userRiskLevel] = useMemo(
-    () => [
+  const [userRiskLevel] = useMemo(() => {
+    const level = userRiskData?.user?.risk?.calculated_level;
+    const severity = level != null ? normalizeRiskLevel(level) ?? (level as RiskSeverity) : null;
+    return [
       {
         title: (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
@@ -253,17 +281,18 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
         ),
         description: (
           <>
-            {userRiskData?.user?.risk?.calculated_level ? (
-              <RiskScoreLevel severity={userRiskData.user.risk.calculated_level as RiskSeverity} />
+            {severity && isRiskSeverity(severity) ? (
+              <RiskScoreLevel severity={severity} />
+            ) : userRiskData?.user?.risk != null ? (
+              <RiskScoreLevel severity="Unknown" />
             ) : (
               getEmptyTagValue()
             )}
           </>
         ),
       },
-    ],
-    [userRiskData]
-  );
+    ];
+  }, [userRiskData]);
 
   return (
     <EuiFlexGroup
