@@ -192,26 +192,19 @@ export const FullScreenWaterfall = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
-        {/* TODO: This is a workaround for layout issues when using hidePanelChrome outside of Dashboard.
-          The PresentationPanel applies flex styles (.embPanel__content) that cause width: 0 in non-Dashboard contexts.
-          This should be removed once PresentationPanel properly supports hidePanelChrome as an out-of-the-box solution.
-          Issue: https://github.com/elastic/kibana/issues/248307
-          */}
-        <div>
-          {isWaterfallReady && scrollElement && serviceName ? (
-            <FullTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              serviceName={serviceName}
-              scrollElement={scrollElement}
-              onNodeClick={onNodeClick}
-              onErrorClick={onErrorClick}
-            />
-          ) : serviceName ? (
-            <EuiSkeletonText lines={4} />
-          ) : null}
-        </div>
+        {isWaterfallReady && scrollElement && serviceName ? (
+          <FullTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            serviceName={serviceName}
+            scrollElement={scrollElement}
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
+          />
+        ) : serviceName ? (
+          <EuiSkeletonText lines={4} />
+        ) : null}
       </EuiFlyoutBody>
 
       {docId && activeFlyoutType ? (
