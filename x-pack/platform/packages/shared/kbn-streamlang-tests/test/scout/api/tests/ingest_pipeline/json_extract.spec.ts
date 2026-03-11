@@ -162,7 +162,7 @@ apiTest.describe(
       expect(ingestedDocs[0]).toStrictEqual(expect.objectContaining({ city: 'Seattle' }));
     });
 
-    apiTest('should preserve numeric types from JSON', async ({ testBed }) => {
+    apiTest('should cast numeric types from JSON when type is specified', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-json-extract-numeric';
 
       const streamlangDSL: StreamlangDSL = {
@@ -171,8 +171,8 @@ apiTest.describe(
             action: 'json_extract',
             field: 'message',
             extractions: [
-              { selector: 'count', target_field: 'count' },
-              { selector: 'price', target_field: 'price' },
+              { selector: 'count', target_field: 'count', type: 'integer' },
+              { selector: 'price', target_field: 'price', type: 'double' },
             ],
           } as JsonExtractProcessor,
         ],
@@ -188,7 +188,7 @@ apiTest.describe(
       expect(ingestedDocs[0]).toStrictEqual(expect.objectContaining({ count: 42, price: 19.99 }));
     });
 
-    apiTest('should preserve boolean types from JSON', async ({ testBed }) => {
+    apiTest('should cast boolean types from JSON when type is specified', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-json-extract-boolean';
 
       const streamlangDSL: StreamlangDSL = {
@@ -197,8 +197,8 @@ apiTest.describe(
             action: 'json_extract',
             field: 'message',
             extractions: [
-              { selector: 'active', target_field: 'is_active' },
-              { selector: 'verified', target_field: 'is_verified' },
+              { selector: 'active', target_field: 'is_active', type: 'boolean' },
+              { selector: 'verified', target_field: 'is_verified', type: 'boolean' },
             ],
           } as JsonExtractProcessor,
         ],
@@ -325,7 +325,7 @@ apiTest.describe(
       expect((doc2 as Record<string, unknown>).user_id).toBeUndefined();
     });
 
-    apiTest('should handle complex JSON with mixed types', async ({ testBed }) => {
+    apiTest('should handle complex JSON with mixed types (type casting)', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-json-extract-complex';
 
       const streamlangDSL: StreamlangDSL = {
@@ -336,7 +336,7 @@ apiTest.describe(
             extractions: [
               { selector: 'user.name', target_field: 'username' },
               { selector: 'tags[1]', target_field: 'second_tag' },
-              { selector: 'metadata.count', target_field: 'count' },
+              { selector: 'metadata.count', target_field: 'count', type: 'integer' },
             ],
           } as JsonExtractProcessor,
         ],
