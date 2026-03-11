@@ -891,7 +891,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     :::{note}
     :applies_to: serverless:
-    In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured.
+    In Serverless, the maximum number of rules to run per minute is set to `800` for Elastic Security project while `400` for other projects. This setting can't be configured.
     :::
 
 `xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
