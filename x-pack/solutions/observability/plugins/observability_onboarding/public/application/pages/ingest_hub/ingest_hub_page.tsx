@@ -1996,6 +1996,26 @@ export const IngestHubPage: React.FC = () => {
       body {
         background-color: #fff !important;
       }
+      .euiOverlayMask {
+        left: 24px !important;
+        right: 24px !important;
+        border-radius: 6px !important;
+      }
+      div[data-euiportal]:has(.euiFlyout) {
+        position: fixed !important;
+        top: 0 !important;
+        left: 24px !important;
+        right: 24px !important;
+        bottom: 0 !important;
+        contain: paint !important;
+        pointer-events: none !important;
+        z-index: 1001 !important;
+      }
+      div[data-euiportal]:has(.euiFlyout) .euiFlyout {
+        right: 0 !important;
+        inset-inline-end: 0 !important;
+        pointer-events: auto !important;
+      }
     `}</style>
     <div
       css={css`
