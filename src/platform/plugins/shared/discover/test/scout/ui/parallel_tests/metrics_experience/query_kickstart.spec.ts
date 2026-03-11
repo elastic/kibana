@@ -34,8 +34,8 @@ spaceTest.describe(
 
     spaceTest(
       'should apply Search all metrics and enter the metrics experience',
-      async ({ pageObjects, page }) => {
-        const { discover, metricsExperience } = pageObjects;
+      async ({ pageObjects }) => {
+        const { discover, discoverActions, metricsExperience } = pageObjects;
 
         await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
           await discover.writeAndSubmitEsqlQuery(
@@ -50,7 +50,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify the recommended query popover closed', async () => {
-          await expect(page.testSubj.locator('esql-menu-popover')).toBeHidden();
+          await expect(discoverActions.menuPopover).toBeHidden();
         });
 
         await spaceTest.step(
