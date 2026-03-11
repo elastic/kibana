@@ -151,6 +151,24 @@ describe('applyFieldEvaluations', () => {
     ).toEqual({ 'entity.namespace': 'entra_id' });
   });
 
+  it('returns full data_stream.dataset when it has no delimiter', () => {
+    expect(applyFieldEvaluations({ data_stream: { dataset: 'okta' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'okta',
+    });
+    expect(
+      applyFieldEvaluations(
+        { data_stream: { dataset: 'entityanalytics_entra_id' } },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('sets entity.namespace to unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+    expect(applyFieldEvaluations({ data_stream: { dataset: '.logs' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
+  });
+
   it('prefers event.module over data_stream.dataset when both are present', () => {
     expect(
       applyFieldEvaluations(
@@ -191,6 +209,25 @@ describe('getSourceMatchSpec', () => {
     expect(getSourceMatchSpec({ data_stream: { dataset: 'aws.cloudtrail' } }, userEval)).toEqual({
       type: 'values',
       values: ['aws'],
+    });
+  });
+
+  it('returns full value when data_stream.dataset has no delimiter', () => {
+    // okta matches whenClause so spec expands to sourceMatchesAny
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'okta' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['okta', 'entityanalytics_okta'],
+    });
+    // aws has no whenClause match so single value
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'aws' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['aws'],
+    });
+  });
+
+  it('returns unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+    expect(getSourceMatchSpec({ data_stream: { dataset: '.logs' } }, userEval)).toEqual({
+      type: 'unknown',
     });
   });
 

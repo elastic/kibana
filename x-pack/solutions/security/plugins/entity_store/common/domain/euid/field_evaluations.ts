@@ -35,9 +35,9 @@ function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | u
   if (raw === undefined || raw === '') {
     return undefined;
   }
-  const parts = raw.split(source.splitBy);
-  const first = parts[0];
-  return first !== undefined && first !== '' ? first : undefined;
+  const idx = raw.indexOf(source.splitBy);
+  const first = idx === -1 ? raw : raw.substring(0, idx);
+  return first !== '' ? first : undefined;
 }
 
 /**
