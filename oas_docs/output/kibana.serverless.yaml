@@ -40923,6 +40923,103 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/epm/packages/{pkgName}/review_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/review_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-review-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name to review upgrade for
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              acceptUpgrade:
+                value:
+                  action: accept
+                  target_version: 2.0.0
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - accept
+                    - decline
+                    - pending
+                  type: string
+                target_version:
+                  type: string
+              required:
+                - action
+                - target_version
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Review a pending policy upgrade for a package with deprecations
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/rollback:
     post:
       description: |-
