@@ -49,7 +49,7 @@ export function CalendarPanel() {
   });
 
   // Derived range: pending single-click selection takes priority, otherwise derive from text
-  const range: DateRange | undefined = useMemo(() => {
+  const calendarRange: DateRange | undefined = useMemo(() => {
     if (pendingFrom) return { from: pendingFrom, to: undefined };
     if (timeRange.startDate && timeRange.endDate)
       return { from: timeRange.startDate, to: timeRange.endDate };
@@ -116,9 +116,9 @@ export function CalendarPanel() {
   );
 
   const absoluteRange = useMemo(() => {
-    if (!range?.from || !range?.to) return null;
+    if (!calendarRange?.from || !calendarRange?.to) return null;
 
-    const { start, end } = getOrderedDates(range.from, range.to);
+    const { start, end } = getOrderedDates(calendarRange.from, calendarRange.to);
 
     return {
       start: toLocalPreciseString(start),
@@ -127,15 +127,15 @@ export function CalendarPanel() {
       endDate: end,
       inputText: formatDateRange(start, end),
     };
-  }, [range, getOrderedDates]);
+  }, [calendarRange, getOrderedDates]);
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
       setHasChanges(true);
 
       // Complete range visible — user is starting a new selection
-      if (!pendingFrom && range?.from && range?.to) {
-        const fromChanged = newRange?.from?.getTime() !== range.from.getTime();
+      if (!pendingFrom && calendarRange?.from && calendarRange?.to) {
+        const fromChanged = newRange?.from?.getTime() !== calendarRange.from.getTime();
         const clickedDate = fromChanged ? newRange?.from : newRange?.to;
 
         setPendingFrom(clickedDate ?? null);
@@ -156,10 +156,10 @@ export function CalendarPanel() {
         setText(formatRangeText(newRange.from));
       }
     },
-    [pendingFrom, range, setText, formatRangeText]
+    [pendingFrom, calendarRange, setText, formatRangeText]
   );
 
-  const isRangeComplete = Boolean(range?.from && range?.to);
+  const isRangeComplete = Boolean(calendarRange?.from && calendarRange?.to);
   const isApplyDisabled =
     !(hasChanges || hasTimeRangeChanged) || !isRangeComplete || !absoluteRange;
 
@@ -205,7 +205,7 @@ export function CalendarPanel() {
       </PanelHeader>
       <PanelBody spacingSide="none">
         <Calendar
-          range={range}
+          range={calendarRange}
           onRangeChange={handleRangeChange}
           firstDayOfWeek={calendarOptions?.firstDayOfWeek}
         />
