@@ -23,7 +23,7 @@ export interface PanelPackage<SerializedState extends object = object> {
   /**
    * The serialized state of this panel.
    */
-  serializedState: SerializedState;
+  serializedState?: SerializedState;
 }
 
 export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
