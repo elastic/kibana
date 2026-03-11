@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import type { GetWatchlistResponse } from '../../../../../common/api/entity_analytics/watchlists/management/get.gen';
@@ -28,7 +29,10 @@ export const useGetWatchlist = (watchlistId?: string) => {
     queryFn: ({ signal }) => getWatchlist({ id: watchlistId as string, signal }),
   });
 
-  const initialWatchlist = query.data ? toWatchlistFormValues(query.data) : null;
+  const initialWatchlist = useMemo(
+    () => (query.data ? toWatchlistFormValues(query.data) : null),
+    [query.data]
+  );
 
   return {
     initialWatchlist,
