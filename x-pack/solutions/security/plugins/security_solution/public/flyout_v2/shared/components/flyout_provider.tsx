@@ -7,20 +7,32 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
+import type { History } from 'history';
+import { Router } from '@kbn/shared-ux-router';
+import type { Store } from 'redux';
+import { Provider } from 'react-redux';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 
 export const flyoutProviders = ({
   services,
+  store,
   children,
+  history,
 }: {
   services: StartServices;
+  store: Store;
   children: ReactNode;
+  history?: History;
 }): ReactElement => {
+  const flyoutContent = history ? <Router history={history}>{children}</Router> : children;
+
   return (
     <KibanaContextProvider services={services}>
-      <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
+      <Provider store={store}>
+        <ReactQueryClientProvider>{flyoutContent}</ReactQueryClientProvider>
+      </Provider>
     </KibanaContextProvider>
   );
 };

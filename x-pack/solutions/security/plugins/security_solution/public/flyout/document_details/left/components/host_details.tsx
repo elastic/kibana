@@ -33,7 +33,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';

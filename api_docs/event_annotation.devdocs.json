@@ -12,11 +12,30 @@
         "label": "EventAnnotationServiceType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-public.EventAnnotationServiceType.annotationGroupUpdated$",
+            "type": "Object",
+            "tags": [],
+            "label": "annotationGroupUpdated$",
+            "description": [
+              "Emits the annotation group ID whenever a library annotation group is updated"
+            ],
+            "signature": [
+              "Observable",
+              "<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "eventAnnotation",
             "id": "def-public.EventAnnotationServiceType.loadAnnotationGroup",
@@ -36,7 +55,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 19,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -52,7 +71,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 19,
+                "lineNumber": 22,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -72,7 +91,7 @@
               "(title: string) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +107,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 20,
+                "lineNumber": 23,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -116,7 +135,7 @@
               "[]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +151,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 22,
+                "lineNumber": 25,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -149,7 +168,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 23,
+                "lineNumber": 26,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -166,7 +185,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 24,
+                "lineNumber": 27,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -183,7 +202,7 @@
                   "string[] | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 25,
+                "lineNumber": 28,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -203,7 +222,7 @@
               "(ids: string[]) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -219,7 +238,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 27,
+                "lineNumber": 30,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -247,7 +266,7 @@
               ") => Promise<{ id: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -269,7 +288,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 28,
+                "lineNumber": 31,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -297,7 +316,7 @@
               ", savedObjectId: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -319,7 +338,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 30,
+                "lineNumber": 33,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -336,7 +355,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 31,
+                "lineNumber": 34,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -372,7 +391,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -395,7 +414,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 33,
+                "lineNumber": 36,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -431,7 +450,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -444,7 +463,7 @@
                 "label": "props",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 34,
+                "lineNumber": 37,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -457,7 +476,7 @@
                     "label": "interval",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                    "lineNumber": 35,
+                    "lineNumber": 38,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -481,7 +500,7 @@
                       ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
                     ],
                     "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                    "lineNumber": 36,
+                    "lineNumber": 39,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -518,7 +537,7 @@
               ">; }) => void; onCreateNew: () => void; }) => JSX.Element"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -531,7 +550,7 @@
                 "label": "props",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                "lineNumber": 40,
+                "lineNumber": 43,
                 "columnNumber": 56,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -547,7 +566,7 @@
                       "number | undefined"
                     ],
                     "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                    "lineNumber": 41,
+                    "lineNumber": 44,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
@@ -579,7 +598,7 @@
                       ">; }) => void"
                     ],
                     "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                    "lineNumber": 42,
+                    "lineNumber": 45,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -592,7 +611,7 @@
                         "label": "value",
                         "description": [],
                         "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                        "lineNumber": 42,
+                        "lineNumber": 45,
                         "columnNumber": 23,
                         "deprecated": false,
                         "trackAdoption": false,
@@ -605,7 +624,7 @@
                             "label": "id",
                             "description": [],
                             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                            "lineNumber": 43,
+                            "lineNumber": 46,
                             "columnNumber": 7,
                             "deprecated": false,
                             "trackAdoption": false
@@ -618,7 +637,7 @@
                             "label": "type",
                             "description": [],
                             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                            "lineNumber": 44,
+                            "lineNumber": 47,
                             "columnNumber": 7,
                             "deprecated": false,
                             "trackAdoption": false
@@ -631,7 +650,7 @@
                             "label": "fullName",
                             "description": [],
                             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                            "lineNumber": 45,
+                            "lineNumber": 48,
                             "columnNumber": 7,
                             "deprecated": false,
                             "trackAdoption": false
@@ -662,7 +681,7 @@
                               ">"
                             ],
                             "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                            "lineNumber": 46,
+                            "lineNumber": 49,
                             "columnNumber": 7,
                             "deprecated": false,
                             "trackAdoption": false
@@ -683,7 +702,7 @@
                       "() => void"
                     ],
                     "path": "src/platform/packages/shared/kbn-event-annotation-components/types.ts",
-                    "lineNumber": 48,
+                    "lineNumber": 51,
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false,

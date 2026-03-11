@@ -9,22 +9,12 @@
 
 import type { FC } from 'react';
 import React, { useRef, useLayoutEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { useChromeComponentsDeps } from '../context';
 
-interface HeaderActionMenuProps {
-  mounter: { mount: MountPoint | undefined };
-}
-
-export const useHeaderActionMenuMounter = (
-  actionMenu$: Observable<MountPoint<HTMLElement> | undefined>
-) => {
-  // useObservable relies on useState under the hood. The signature is type SetStateAction<S> = S | ((prevState: S) => S);
-  // As we got a Observable<Function> here, React's setState setter assume he's getting a `(prevState: S) => S` signature,
-  // therefore executing the mount method, causing everything to crash.
-  // piping the observable before calling `useObservable` causes the effect to always having a new reference, as
-  // the piped observable is a new instance on every render, causing infinite loops.
-  // this is why we use `useLayoutEffect` manually here.
+const useHeaderActionMenuMounter = () => {
+  const { application } = useChromeComponentsDeps();
+  const actionMenu$ = application.currentActionMenu$;
   const [mounter, setMounter] = useState<{ mount: MountPoint | undefined }>({ mount: undefined });
   useLayoutEffect(() => {
     const s = actionMenu$.subscribe((value) => {
@@ -32,11 +22,17 @@ export const useHeaderActionMenuMounter = (
     });
     return () => s.unsubscribe();
   }, [actionMenu$]);
-
   return mounter;
 };
 
-export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ mounter }) => {
+export const useHasActionMenu = () => useHeaderActionMenuMounter().mount !== undefined;
+
+/**
+ * Renders the currently mounted header action menu set via {@link ChromeStart.setHeaderActionMenu}.
+ * @deprecated Use {@link HeaderAppMenu} instead. See kibana-team#2651.
+ */
+export const HeaderActionMenu: FC = () => {
+  const mounter = useHeaderActionMenuMounter();
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef = useRef<UnmountCallback | null>(null);
 
