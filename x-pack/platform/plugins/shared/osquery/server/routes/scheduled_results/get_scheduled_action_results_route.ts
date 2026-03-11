@@ -12,6 +12,7 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { PLUGIN_ID } from '../../../common';
+import { packSavedObjectType } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 import type {
   ScheduledActionResultsRequestOptions,
@@ -20,6 +21,7 @@ import type {
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { PackSavedObject } from '../../common/types';
 
 interface ScheduledActionResultsAggregations {
   aggs: {
@@ -30,6 +32,11 @@ interface ScheduledActionResultsAggregations {
       };
     };
   };
+}
+
+interface ActionResponseHitFields {
+  '@timestamp'?: string[];
+  pack_id?: string[];
 }
 
 export const getScheduledActionResultsRoute = (
@@ -99,8 +106,9 @@ export const getScheduledActionResultsRoute = (
             )
           );
 
-          const aggs = res.rawResponse
-            ?.aggregations as ScheduledActionResultsAggregations | undefined;
+          const aggs = res.rawResponse?.aggregations as
+            | ScheduledActionResultsAggregations
+            | undefined;
           const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
           const responsesBuckets = responsesBySchedule?.responses?.buckets;
@@ -116,8 +124,46 @@ export const getScheduledActionResultsRoute = (
           const pageSize = request.query.pageSize ?? 20;
           const currentPage = request.query.page ?? 0;
 
+          const topHitFields = res.rawResponse.hits.hits[0]?.fields as
+            | ActionResponseHitFields
+            | undefined;
+          const timestamp = topHitFields?.['@timestamp']?.[0] ?? '';
+          const packId = topHitFields?.pack_id?.[0] ?? '';
+
+          let packName = '';
+          let queryName = '';
+          let queryText = '';
+
+          if (packId) {
+            try {
+              const coreContext = await context.core;
+              const soClient = coreContext.savedObjects.client;
+              const packSO = await soClient.get<PackSavedObject>(packSavedObjectType, packId);
+              packName = packSO.attributes.name || '';
+
+              const matchingQuery = packSO.attributes.queries?.find(
+                (q) => q.schedule_id === scheduleId
+              );
+              if (matchingQuery) {
+                queryName = matchingQuery.name || matchingQuery.id || '';
+                queryText = matchingQuery.query || '';
+              }
+            } catch {
+              // Pack deleted — gracefully degrade to empty name fields
+            }
+          }
+
           return response.ok({
             body: {
+              metadata: {
+                scheduleId,
+                executionCount,
+                packId,
+                packName,
+                queryName,
+                queryText,
+                timestamp,
+              },
               edges: res.edges,
               total,
               currentPage,

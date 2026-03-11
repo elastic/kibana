@@ -24,6 +24,41 @@ import {
   BooleanFromString,
 } from '@kbn/zod-helpers/v4';
 
+/**
+ * Execution metadata resolved from the pack saved object.
+ */
+export type ScheduledExecutionMetadata = z.infer<typeof ScheduledExecutionMetadata>;
+export const ScheduledExecutionMetadata = z.object({
+  /**
+   * The schedule ID for the scheduled query.
+   */
+  scheduleId: z.string().optional(),
+  /**
+   * The execution count for this scheduled query run.
+   */
+  executionCount: z.number().int().optional(),
+  /**
+   * The ID of the pack containing the query.
+   */
+  packId: z.string().optional(),
+  /**
+   * The name of the pack containing the query.
+   */
+  packName: z.string().optional(),
+  /**
+   * The name of the query within the pack.
+   */
+  queryName: z.string().optional(),
+  /**
+   * The SQL query that was executed.
+   */
+  queryText: z.string().optional(),
+  /**
+   * The timestamp of the most recent response for this execution.
+   */
+  timestamp: z.string().optional(),
+});
+
 export type ScheduledActionResultsAggregations = z.infer<typeof ScheduledActionResultsAggregations>;
 export const ScheduledActionResultsAggregations = z.object({
   /**
@@ -50,6 +85,7 @@ export const ScheduledActionResultsAggregations = z.object({
 
 export type GetScheduledActionResultsResponse = z.infer<typeof GetScheduledActionResultsResponse>;
 export const GetScheduledActionResultsResponse = z.object({
+  metadata: ScheduledExecutionMetadata.optional(),
   /**
    * The paginated list of per-agent action results.
    */

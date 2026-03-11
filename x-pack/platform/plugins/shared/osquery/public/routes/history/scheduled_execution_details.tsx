@@ -109,7 +109,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
                     id="xpack.osquery.scheduledExecutionDetails.executionLabel"
                     defaultMessage="Execution #{executionCount}"
                     // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                    values={{ scheduleId, executionCount }}
+                    values={{ executionCount }}
                   />
                 </EuiText>
               </EuiFlexItem>

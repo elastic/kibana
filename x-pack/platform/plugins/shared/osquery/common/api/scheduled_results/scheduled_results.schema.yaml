@@ -3,47 +3,13 @@ info:
   title: Scheduled Results Schema
   version: '2023-10-31'
 paths:
-  /internal/osquery/history/scheduled/{scheduleId}/{executionCount}:
-    get:
-      summary: Get scheduled execution details
-      description: >
-        Get the execution metadata for a specific scheduled pack query execution,
-        including pack name, query name/text, timestamp, and aggregated
-        agent/success/error/row counts.
-      operationId: OsqueryGetScheduledExecutionDetails
-      x-codegen-enabled: true
-      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
-      x-labels: [ ]
-      #      x-labels: [serverless, ess]
-      parameters:
-        - name: scheduleId
-          in: path
-          required: true
-          schema:
-            description: 'The schedule ID of the scheduled query.'
-            type: string
-            example: 'pack_my_pack_uptime'
-        - name: executionCount
-          in: path
-          required: true
-          schema:
-            description: 'The execution count for this scheduled query run.'
-            type: integer
-            example: 3
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: './get_scheduled_execution_details.schema.yaml#/components/schemas/GetScheduledExecutionDetailsResponse'
-
   /api/osquery/scheduled_results/{scheduleId}/{executionCount}:
     get:
       summary: Get scheduled action results
       description: >
         Get paginated per-agent action results for a specific scheduled query
-        execution, with success/failure aggregation.
+        execution, with success/failure aggregation and execution metadata
+        (pack name, query name/text, timestamp).
       operationId: OsqueryGetScheduledActionResults
       x-codegen-enabled: true
       #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled

@@ -24,7 +24,6 @@ import {
   BooleanFromString,
 } from '@kbn/zod-helpers/v4';
 
-import { GetScheduledExecutionDetailsResponse } from './get_scheduled_execution_details.gen';
 import {
   KueryOrUndefined,
   PageOrUndefined,
@@ -64,22 +63,6 @@ export type OsqueryGetScheduledActionResultsResponse = z.infer<
   typeof OsqueryGetScheduledActionResultsResponse
 >;
 export const OsqueryGetScheduledActionResultsResponse = GetScheduledActionResultsResponse;
-
-export type OsqueryGetScheduledExecutionDetailsRequestParams = z.infer<
-  typeof OsqueryGetScheduledExecutionDetailsRequestParams
->;
-export const OsqueryGetScheduledExecutionDetailsRequestParams = z.object({
-  scheduleId: z.string(),
-  executionCount: z.number().int(),
-});
-export type OsqueryGetScheduledExecutionDetailsRequestParamsInput = z.input<
-  typeof OsqueryGetScheduledExecutionDetailsRequestParams
->;
-
-export type OsqueryGetScheduledExecutionDetailsResponse = z.infer<
-  typeof OsqueryGetScheduledExecutionDetailsResponse
->;
-export const OsqueryGetScheduledExecutionDetailsResponse = GetScheduledExecutionDetailsResponse;
 export type OsqueryGetScheduledQueryResultsRequestQuery = z.infer<
   typeof OsqueryGetScheduledQueryResultsRequestQuery
 >;

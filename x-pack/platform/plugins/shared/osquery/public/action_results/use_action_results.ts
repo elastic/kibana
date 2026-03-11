@@ -43,6 +43,15 @@ export interface UseActionResults {
 }
 
 interface ActionResultsResponse {
+  metadata?: {
+    scheduleId: string;
+    executionCount: number;
+    packId: string;
+    packName: string;
+    queryName: string;
+    queryText: string;
+    timestamp: string;
+  };
   edges: ResultEdges;
   total: number;
   currentPage: number;

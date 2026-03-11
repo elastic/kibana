@@ -42,6 +42,25 @@ export const mapScheduledDetailsToQueryData = (
   },
 ];
 
+interface ScheduledActionResultsResponse {
+  metadata: {
+    scheduleId: string;
+    executionCount: number;
+    packId: string;
+    packName: string;
+    queryName: string;
+    queryText: string;
+    timestamp: string;
+  };
+  aggregations: {
+    totalRowCount: number;
+    totalResponded: number;
+    successful: number;
+    failed: number;
+    pending: number;
+  };
+}
+
 interface UseScheduledExecutionDetails {
   scheduleId: string;
   executionCount: number;
@@ -56,12 +75,15 @@ export const useScheduledExecutionDetails = ({
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery<{ data: ScheduledExecutionDetailsItem }, Error, ScheduledExecutionDetailsItem>(
+  return useQuery<ScheduledActionResultsResponse, Error, ScheduledExecutionDetailsItem>(
     ['scheduledExecutionDetails', { scheduleId, executionCount }],
     () =>
-      http.get<{ data: ScheduledExecutionDetailsItem }>(
-        `/internal/osquery/history/scheduled/${scheduleId}/${executionCount}`,
-        { version: API_VERSIONS.internal.v1 }
+      http.get<ScheduledActionResultsResponse>(
+        `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+        {
+          version: API_VERSIONS.public.v1,
+          query: { pageSize: 1 },
+        }
       ),
     {
       enabled: !skip && !!scheduleId,
@@ -72,7 +94,13 @@ export const useScheduledExecutionDetails = ({
             defaultMessage: 'Error while fetching scheduled execution details',
           }),
         }),
-      select: (response) => response.data,
+      select: (response) => ({
+        ...response.metadata,
+        agentCount: response.aggregations.totalResponded,
+        successCount: response.aggregations.successful,
+        errorCount: response.aggregations.failed,
+        totalRows: response.aggregations.totalRowCount,
+      }),
       refetchOnWindowFocus: false,
     }
   );
