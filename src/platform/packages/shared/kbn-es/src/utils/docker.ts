@@ -243,8 +243,6 @@ export function getSharedServerlessParams(nameSuffix = ''): string[] {
   ];
 }
 
-const SHARED_SERVERLESS_PARAMS = getSharedServerlessParams();
-
 // only allow certain ES args to be overwrote by options
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
   ['ES_LOG_STYLE', 'file'],
@@ -561,14 +559,10 @@ export async function cleanUpDanglingContainers(log: ToolingLog) {
 
 export async function detectRunningNodes(log: ToolingLog, options: BaseOptions) {
   const linkedNodes = getServerlessNodes('-linked', 10);
-  const namesCmd = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).reduce<string[]>(
-    (acc, { name }) => {
-      acc.push('--filter', `name=${name}`);
-
-      return acc;
-    },
-    []
-  );
+  const namesCmd = SERVERLESS_NODES.concat(linkedNodes, UIAM_CONTAINERS).flatMap(({ name }) => [
+    '--filter',
+    `name=${name}`,
+  ]);
 
   const { stdout } = await execa('docker', ['ps', '--quiet'].concat(namesCmd));
   const runningNodeIds = stdout.split(/\r?\n/).filter((s) => s);
@@ -938,7 +932,7 @@ function getServerlessImage({ image, tag }: ImageOptions) {
 export async function runServerlessEsNode(
   log: ToolingLog,
   { params, name, image }: ServerlessEsNodeArgs,
-  sharedParams: string[] = SHARED_SERVERLESS_PARAMS
+  sharedParams: string[] = getSharedServerlessParams()
 ) {
   const dockerCmd = sharedParams.concat(
     params,
