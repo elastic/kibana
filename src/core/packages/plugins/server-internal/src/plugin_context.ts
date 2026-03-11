@@ -326,6 +326,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
     },
+    zodRegistry: deps.zodRegistry,
   };
 }
 

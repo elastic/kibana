@@ -13,15 +13,19 @@
  * instead of inlining or using auto-generated names like `_zod_v4_1___schema1`.
  */
 
-import { registerZodV4Component } from '@kbn/router-to-openapispec';
+import type { CoreSetup } from '@kbn/core/server';
 import { streamsOasDefinitions } from '@kbn/streams-schema';
 import { streamlangOasDefinitions } from '@kbn/streamlang';
 
-export function registerStreamsOasComponents() {
+export function registerStreamsOasComponents({
+  zodRegistry,
+}: {
+  zodRegistry: CoreSetup['zodRegistry'];
+}) {
   for (const [name, schema] of Object.entries(streamsOasDefinitions)) {
-    registerZodV4Component(schema, name);
+    zodRegistry.registerZodV4Component(schema, name);
   }
   for (const [name, schema] of Object.entries(streamlangOasDefinitions)) {
-    registerZodV4Component(schema, name);
+    zodRegistry.registerZodV4Component(schema, name);
   }
 }

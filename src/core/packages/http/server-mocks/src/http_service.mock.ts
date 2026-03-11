@@ -200,6 +200,9 @@ const createInternalSetupContractMock = () => {
     }),
     registerRouterAfterListening: jest.fn(),
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
+    zodRegistry: {
+      registerZodV4Component: jest.fn(),
+    },
   });
 
   mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });

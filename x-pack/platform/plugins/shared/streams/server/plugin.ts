@@ -99,7 +99,7 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    registerStreamsOasComponents();
+    registerStreamsOasComponents({ zodRegistry: core.zodRegistry });
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
