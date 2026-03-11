@@ -12,6 +12,7 @@ import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 
 /**
  * Fixed container height is required for virtuoso to work correctly.
+ * The value is something that doesn't produce a second scrollbar in `PanelBody`.
  */
 const CALENDAR_HEIGHT = 394;
 
