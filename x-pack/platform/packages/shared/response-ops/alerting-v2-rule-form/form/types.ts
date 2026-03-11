@@ -48,6 +48,8 @@ export interface RecoveryPolicy {
 export interface StateTransition {
   pendingCount?: number;
   pendingTimeframe?: string;
+  recoveringCount?: number;
+  recoveringTimeframe?: string;
 }
 
 /**

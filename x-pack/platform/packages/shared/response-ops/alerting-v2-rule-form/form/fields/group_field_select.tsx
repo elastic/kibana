@@ -58,6 +58,9 @@ export const GroupFieldSelect: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
               defaultMessage: 'Group Fields',
             })}
+            labelAppend={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyOptional', {
+              defaultMessage: 'optional',
+            })}
             isInvalid={!!error}
             error={error?.message}
             fullWidth

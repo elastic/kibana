@@ -11,21 +11,13 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { FormValues } from '../types';
+import { assembleFullQuery } from '../utils/assemble_full_query';
 import { useRecoveryQueryGroupingValidation } from './use_recovery_query_grouping_validation';
 
 interface UseRecoveryValidationProps {
   /** Search service for fetching query columns */
   search: ISearchGeneric;
 }
-
-/** Assemble a full ES|QL query from a base query and an optional condition (pipe segment). */
-const assembleQuery = (base?: string, condition?: string): string => {
-  const b = base?.trim() ?? '';
-  const c = condition?.trim() ?? '';
-  if (!b) return '';
-  if (c) return `${b} | ${c}`;
-  return b;
-};
 
 const QUERIES_MATCH_ERROR = i18n.translate(
   'xpack.alertingV2.ruleForm.recoveryQuerySameAsEvaluation',
@@ -75,13 +67,13 @@ export const useRecoveryValidation = ({ search }: UseRecoveryValidationProps) =>
 
   // Assemble full queries from base + condition
   const assembledEvaluationQuery = useMemo(
-    () => assembleQuery(evaluationBaseQuery, evaluationCondition),
+    () => assembleFullQuery(evaluationBaseQuery, evaluationCondition),
     [evaluationBaseQuery, evaluationCondition]
   );
 
   const assembledRecoveryQuery = useMemo(
     () =>
-      assembleQuery(
+      assembleFullQuery(
         hasEvaluationCondition ? effectiveBaseQuery : recoveryBaseQuery, // use effective base query if evaluation has a condition, otherwise use recovery base query
         hasEvaluationCondition ? recoveryCondition : undefined // use recovery condition if evaluation has a condition, otherwise use undefined
       ),

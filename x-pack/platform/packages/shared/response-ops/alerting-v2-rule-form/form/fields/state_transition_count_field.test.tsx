@@ -31,4 +31,37 @@ describe('StateTransitionCountField', () => {
 
     expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(5);
   });
+
+  describe('variant="recovering"', () => {
+    it('renders with the recovering test subject', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
+    });
+
+    it('accepts a positive integer for recovering count', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      const input = screen.getByTestId('recoveryTransitionCountInput');
+      fireEvent.change(input, { target: { value: '4' } });
+      expect(input).toHaveValue(4);
+    });
+
+    it('renders with pre-filled recovering count from form state', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransition: {
+            recoveringCount: 7,
+          },
+        }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionCountInput')).toHaveValue(7);
+    });
+  });
 });
