@@ -29,7 +29,7 @@ export type { ReviewIntegrationDetails } from './review_approve_modal';
 
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
-  canReviewApprove: boolean;
+  isPackageReady: boolean;
   inlineActionType?: 'reviewApprove' | 'editIntegration';
   showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
@@ -44,7 +44,7 @@ export const ManageIntegrationActions: React.FC<{
   onDownloadZip?: (integrationId: string) => Promise<void>;
 }> = ({
   integration,
-  canReviewApprove,
+  isPackageReady,
   inlineActionType,
   showMenuButton = true,
   onEdit,
@@ -152,9 +152,9 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="review"
                 icon="grid"
-                disabled={!canReviewApprove}
+                disabled={!isPackageReady}
                 toolTipContent={
-                  canReviewApprove
+                  isPackageReady
                     ? undefined
                     : i18n.translate(
                         'xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp',
@@ -174,9 +174,9 @@ export const ManageIntegrationActions: React.FC<{
               <EuiContextMenuItem
                 key="downloadZip"
                 icon="download"
-                disabled={!canReviewApprove || isDownloadingZip}
+                disabled={!isPackageReady || isDownloadingZip}
                 toolTipContent={
-                  canReviewApprove
+                  isPackageReady
                     ? undefined
                     : i18n.translate(
                         'xpack.fleet.epmList.manageIntegrations.actions.downloadZipDisabledHelp',

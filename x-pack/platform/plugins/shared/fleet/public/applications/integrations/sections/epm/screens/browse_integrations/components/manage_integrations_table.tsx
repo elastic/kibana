@@ -46,7 +46,7 @@ export interface CreatedIntegrationRow {
   status: TaskStatus;
 }
 
-const canReviewApproveIntegration = (item: CreatedIntegrationRow): boolean =>
+const isIntegrationPackageReady = (item: CreatedIntegrationRow): boolean =>
   item.totalDataStreamCount > 0 &&
   item.successfulDataStreamCount === item.totalDataStreamCount &&
   (item.status === 'completed' || item.status === 'approved');
@@ -362,11 +362,11 @@ export const ManageIntegrationsTable: React.FC<{
       {
         name: '',
         render: (item: CreatedIntegrationRow) => {
-          if (canReviewApproveIntegration(item)) {
+          if (isIntegrationPackageReady(item)) {
             return (
               <ManageIntegrationActions
                 integration={item}
-                canReviewApprove={true}
+                isPackageReady={true}
                 inlineActionType="reviewApprove"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -385,7 +385,7 @@ export const ManageIntegrationsTable: React.FC<{
             return (
               <ManageIntegrationActions
                 integration={item}
-                canReviewApprove={false}
+                isPackageReady={false}
                 inlineActionType="editIntegration"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -414,7 +414,7 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
-            canReviewApprove={canReviewApproveIntegration(item)}
+            isPackageReady={isIntegrationPackageReady(item)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={
