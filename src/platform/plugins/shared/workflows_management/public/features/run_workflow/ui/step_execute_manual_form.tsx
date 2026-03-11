@@ -86,8 +86,6 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
             <CodeEditor
               languageId="json"
               value={value}
-              width={1000}
-              height={500}
               editorDidMount={handleMount}
               onChange={onChange}
               fitToContent={{

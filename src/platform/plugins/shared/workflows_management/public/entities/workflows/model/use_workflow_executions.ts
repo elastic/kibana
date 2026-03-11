@@ -21,6 +21,7 @@ interface UseWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   size?: number;
+  omitStepRuns?: boolean;
 }
 
 export function useWorkflowExecutions(
@@ -49,6 +50,7 @@ export function useWorkflowExecutions(
           ...(params.executedBy && params.executedBy.length > 0
             ? { executedBy: params.executedBy }
             : {}),
+          ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
           page: pageParam,
           size: currentSize,
         },
@@ -60,6 +62,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      params.omitStepRuns,
       currentSize,
     ]
   );

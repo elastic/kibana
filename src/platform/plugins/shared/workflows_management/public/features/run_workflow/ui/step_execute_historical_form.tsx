@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CodeEditor, monaco } from '@kbn/code-editor';
@@ -28,6 +29,7 @@ import type { z } from '@kbn/zod/v4';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowStepExecutions } from '../../../entities/workflows/model/use_workflow_step_executions';
 import { selectWorkflowId } from '../../../entities/workflows/store';
+import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { buildContextOverrideFromExecution } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -102,7 +104,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     );
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
-      const total = stepExecutionsList?.total ?? 0;
       const results = stepExecutionsList?.results ?? [];
       if (!results.length) return [];
       // Count the number of step executions for each workflow run to identify loop executions
@@ -112,17 +113,19 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       }, {} as Record<string, number>);
       const stepRunIdsLoopIndex: Record<string, number> = {};
 
-      return results.map((stepExecution, index): EuiComboBoxOptionOption<string> => {
-        const runNumber = total - index;
-        const formattedDateTime =
-          getFormattedDateTime(new Date(stepExecution.startedAt)) ?? stepExecution.startedAt;
-        const statusIcon = getExecutionStatusIcon(euiTheme, stepExecution.status);
+      return results.map((stepExecution): EuiComboBoxOptionOption<string> => {
+        const { id, stepType, workflowRunId, startedAt, status, isTestRun, executionTimeMs } =
+          stepExecution;
+        const stepDuration = formatDuration(executionTimeMs ?? 0);
+        const formattedDateTime = getFormattedDateTime(new Date(startedAt)) ?? startedAt;
+        const timeAgo = moment(startedAt).fromNow();
+        const statusIcon = getExecutionStatusIcon(euiTheme, status);
 
-        const isLoopExecution = workflowRunIdsStepCount[stepExecution.workflowRunId] > 1;
+        const isLoopExecution = workflowRunIdsStepCount[workflowRunId] > 1;
         const append: React.ReactNode[] = [];
         if (isLoopExecution) {
-          const loopIndex = stepRunIdsLoopIndex[stepExecution.workflowRunId] ?? 0;
-          stepRunIdsLoopIndex[stepExecution.workflowRunId] = loopIndex + 1;
+          const loopIndex = stepRunIdsLoopIndex[workflowRunId] ?? 0;
+          stepRunIdsLoopIndex[workflowRunId] = loopIndex + 1;
           append.push(
             <EuiFlexItem grow={false}>
               <EuiIconTip
@@ -133,7 +136,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
             </EuiFlexItem>
           );
         }
-        if (stepExecution.isTestRun) {
+        if (isTestRun) {
           append.push(
             <EuiFlexItem grow={false}>
               <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />
@@ -141,9 +144,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           );
         }
         return {
-          key: stepExecution.id,
-          value: stepExecution.id,
-          label: translations.getRunLabel(stepId ?? '', runNumber, formattedDateTime),
+          key: id,
+          value: id,
+          label: translations.getRunLabel(stepType ?? '', formattedDateTime, timeAgo, stepDuration),
           prepend: <EuiFlexItem grow={false}>{statusIcon}</EuiFlexItem>,
           ...(append.length > 0 && {
             append: (
@@ -159,13 +162,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           `,
         };
       });
-    }, [
-      stepExecutionsList?.total,
-      stepExecutionsList?.results,
-      getFormattedDateTime,
-      euiTheme,
-      stepId,
-    ]);
+    }, [stepExecutionsList?.results, getFormattedDateTime, euiTheme]);
 
     useEffect(() => {
       if (initialStepExecutionId != null) {
@@ -330,10 +327,10 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
 StepExecuteHistoricalForm.displayName = 'StepExecuteHistoricalForm';
 
 const translations = {
-  getRunLabel: (stepId: string, runNumber: number, dateTime: string) =>
+  getRunLabel: (stepType: string, dateTime: string, timeAgo: string, stepDuration: string) =>
     i18n.translate('workflows.testStepModal.replayOptionLabel', {
-      defaultMessage: 'Run #{runNumber} (Step: "{stepId}") - {dateTime}',
-      values: { stepId, runNumber, dateTime },
+      defaultMessage: 'Step type: "{stepType}" - {dateTime} ({timeAgo}) - took {stepDuration}',
+      values: { stepType, stepDuration, dateTime, timeAgo },
     }),
   loopExecution: (loopIndex: number) =>
     i18n.translate('workflows.testStepModal.loopExecution', {

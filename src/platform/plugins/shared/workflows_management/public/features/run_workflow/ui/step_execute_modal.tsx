@@ -46,10 +46,10 @@ const STEP_TAB_LABELS: Record<StepInputTab, string> = {
 
 const STEP_TAB_DESCRIPTIONS: Record<StepInputTab, string> = {
   manual: i18n.translate('workflows.testStepModal.manualTabDescription', {
-    defaultMessage: 'Enter or edit JSON input manually.',
+    defaultMessage: 'Provide custom JSON data manually',
   }),
   historical: i18n.translate('workflows.testStepModal.historicalTabDescription', {
-    defaultMessage: 'Reuse input from a previous step run.',
+    defaultMessage: 'Reuse input data from previous step executions',
   }),
 };
 
@@ -165,8 +165,13 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
           `}
         >
           <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
-            <EuiFlexItem css={{ padding: euiTheme.size.m }} grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                padding: 0 ${euiTheme.size.l};
+              `}
+            >
+              <EuiFlexGroup direction="row" gutterSize="m">
                 {STEP_INPUT_TABS.map((tab) => (
                   <EuiFlexItem key={tab}>
                     <EuiButton
@@ -178,7 +183,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                           justifyContent: 'flex-start',
                           flexDirection: 'column',
                           alignItems: 'flex-start',
-                          padding: selectedTab === tab ? '10px' : '9px',
                           textAlign: 'left',
                         },
                       }}
@@ -186,10 +190,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                         width: 100%;
                         height: fit-content;
                         min-height: 100%;
-                        svg,
-                        img {
-                          margin-left: auto;
-                        }
+                        padding: ${euiTheme.size.m};
                       `}
                     >
                       <EuiRadio
@@ -198,6 +199,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                         id={`test-step-tab-${tab}`}
                         checked={selectedTab === tab}
                         onChange={() => {}}
+                        css={{ fontWeight: euiTheme.font.weight.bold }}
                       />
                       <EuiText
                         size="s"
@@ -215,10 +217,10 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
             </EuiFlexItem>
 
             <EuiFlexItem
-              css={{
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                padding: euiTheme.size.m,
-              }}
+              css={css`
+                background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                padding: ${euiTheme.size.m} ${euiTheme.size.l};
+              `}
             >
               {selectedTab === 'manual' && (
                 <StepExecuteManualForm

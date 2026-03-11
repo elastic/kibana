@@ -30,14 +30,13 @@ export function useWorkflowExecution({
     queryKey: ['workflowExecution', executionId, includeInput, includeOutput],
     queryFn: async () => {
       if (!executionId) return null;
+      const query: Record<string, boolean> = {};
+      if (includeInput != null) query.includeInput = includeInput;
+      if (includeOutput != null) query.includeOutput = includeOutput;
+
       const response = await http.get<WorkflowExecutionDto>(
         `/api/workflowExecutions/${executionId}`,
-        {
-          query: {
-            includeInput: includeInput ?? false,
-            includeOutput: includeOutput ?? false,
-          },
-        }
+        { query }
       );
       return response;
     },

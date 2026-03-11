@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
@@ -130,22 +130,18 @@ export const WorkflowExecuteManualForm = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiSpacer size="s" />
-      {/* Error Display */}
       {errors && (
-        <>
-          <EuiFlexItem>
-            <EuiCallOut
-              announceOnMount
-              title="Input data is not valid"
-              color="danger"
-              iconType="help"
-              size="s"
-            >
-              <p>{errors}</p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        </>
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title="Input data is not valid"
+            color="danger"
+            iconType="help"
+            size="s"
+          >
+            <p>{errors}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
       )}
 
       {/* Input Data Editor */}
@@ -154,9 +150,6 @@ export const WorkflowExecuteManualForm = ({
           label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
             defaultMessage: 'Input Data',
           })}
-          helpText={i18n.translate('workflows.workflowExecuteManualForm.inputDataHelpText', {
-            defaultMessage: 'JSON payload that will be passed to the workflow',
-          })}
           fullWidth
         >
           <CodeEditor
@@ -164,9 +157,8 @@ export const WorkflowExecuteManualForm = ({
             value={value}
             fitToContent={{
               minLines: 5,
-              maxLines: 10,
+              maxLines: 15,
             }}
-            width="100%"
             onChange={handleChange}
             dataTestSubj={'workflow-manual-json-editor'}
             options={{

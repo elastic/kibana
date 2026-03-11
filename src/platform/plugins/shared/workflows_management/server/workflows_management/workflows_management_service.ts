@@ -93,6 +93,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  omitStepRuns?: boolean;
   page?: number;
   size?: number;
 }
@@ -1150,6 +1151,14 @@ export class WorkflowsService {
       must.push({
         terms: {
           executedBy: params.executedBy,
+        },
+      });
+    }
+
+    if (params.omitStepRuns) {
+      must.push({
+        bool: {
+          must_not: { exists: { field: 'stepId' } },
         },
       });
     }
