@@ -556,7 +556,10 @@ describe('Color util transforms', () => {
         mapping: [
           { color: { type: 'colorCode', value: '#ff0000' }, values: ['value1'] },
           { color: { type: 'colorCode', value: '#00ff00' }, values: ['value2', 'value3'] },
-          { color: { type: 'from_palette', palette: 'no_default', index: 1 }, values: ['value1'] },
+          {
+            color: { type: 'color_from_palette', palette: 'no_default', index: 1 },
+            values: ['value1'],
+          },
         ],
       });
     });
@@ -757,7 +760,7 @@ describe('Color util transforms', () => {
           },
           {
             values: ['value4', 'value5'],
-            color: { type: 'from_palette', index: 2, palette: 'no_default' },
+            color: { type: 'color_from_palette', index: 2, palette: 'no_default' },
           },
         ],
       };
@@ -786,7 +789,7 @@ describe('Color util transforms', () => {
         ],
         gradient: [
           { type: 'colorCode', value: '#ff0000' },
-          { type: 'from_palette', index: 2, palette: 'no_default' },
+          { type: 'color_from_palette', index: 2, palette: 'no_default' },
         ],
         unassignedColor: { type: 'colorCode', value: '#00ff00' },
       };

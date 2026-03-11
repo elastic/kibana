@@ -152,7 +152,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['success'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 6,
                   },
@@ -160,7 +160,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['info'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 9,
                   },
@@ -168,7 +168,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['security'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 4,
                   },
@@ -176,7 +176,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['__other__'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 5,
                   },
@@ -626,7 +626,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['success'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 6,
                   },
@@ -634,7 +634,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['info'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 9,
                   },
@@ -642,7 +642,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['security'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 4,
                   },
@@ -650,7 +650,7 @@ describe('Treemap Schema', () => {
                 {
                   values: ['__other__'],
                   color: {
-                    type: 'from_palette',
+                    type: 'color_from_palette',
                     palette: 'default',
                     index: 5,
                   },

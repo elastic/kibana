@@ -833,7 +833,7 @@ export const esqlCharts = [
             {
               values: ['success'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 6,
               },
@@ -841,7 +841,7 @@ export const esqlCharts = [
             {
               values: ['info'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 9,
               },
@@ -849,7 +849,7 @@ export const esqlCharts = [
             {
               values: ['security'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 4,
               },
@@ -857,7 +857,7 @@ export const esqlCharts = [
             {
               values: ['__other__'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 5,
               },
@@ -1005,7 +1005,7 @@ export const esqlCharts = [
             {
               values: ['success'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 6,
               },
@@ -1013,7 +1013,7 @@ export const esqlCharts = [
             {
               values: ['info'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 9,
               },
@@ -1021,7 +1021,7 @@ export const esqlCharts = [
             {
               values: ['security'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 4,
               },
@@ -1029,7 +1029,7 @@ export const esqlCharts = [
             {
               values: ['__other__'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 5,
               },
@@ -1111,7 +1111,7 @@ export const esqlCharts = [
             {
               values: ['success'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 6,
               },
@@ -1119,7 +1119,7 @@ export const esqlCharts = [
             {
               values: ['info'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 9,
               },
@@ -1127,7 +1127,7 @@ export const esqlCharts = [
             {
               values: ['security'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 4,
               },
@@ -1135,7 +1135,7 @@ export const esqlCharts = [
             {
               values: ['__other__'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 5,
               },
@@ -1202,7 +1202,7 @@ export const esqlCharts = [
             {
               values: ['success'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 6,
               },
@@ -1210,7 +1210,7 @@ export const esqlCharts = [
             {
               values: ['info'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 9,
               },
@@ -1218,7 +1218,7 @@ export const esqlCharts = [
             {
               values: ['security'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 4,
               },
@@ -1226,7 +1226,7 @@ export const esqlCharts = [
             {
               values: ['__other__'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 5,
               },
@@ -1295,7 +1295,7 @@ export const esqlCharts = [
             {
               values: ['success'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 6,
               },
@@ -1303,7 +1303,7 @@ export const esqlCharts = [
             {
               values: ['info'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 9,
               },
@@ -1311,7 +1311,7 @@ export const esqlCharts = [
             {
               values: ['security'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 4,
               },
@@ -1319,7 +1319,7 @@ export const esqlCharts = [
             {
               values: ['__other__'],
               color: {
-                type: 'from_palette',
+                type: 'color_from_palette',
                 palette: 'default',
                 index: 5,
               },

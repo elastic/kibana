@@ -214,7 +214,7 @@ export const staticColorSchema = schema.object(
 
 const colorFromPaletteSchema = schema.object(
   {
-    type: schema.literal('from_palette'),
+    type: schema.literal('color_from_palette'),
     index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
     palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
   },
