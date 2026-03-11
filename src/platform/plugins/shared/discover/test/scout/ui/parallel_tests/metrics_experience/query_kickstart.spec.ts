@@ -33,9 +33,9 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'should show Search all metrics in recommended queries',
+      'should apply Search all metrics and enter the metrics experience',
       async ({ pageObjects, page }) => {
-        const { discover } = pageObjects;
+        const { discover, metricsExperience } = pageObjects;
 
         await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
           await discover.writeAndSubmitEsqlQuery(
@@ -51,6 +51,39 @@ spaceTest.describe(
 
         await spaceTest.step('verify the recommended query popover closed', async () => {
           await expect(page.testSubj.locator('esql-menu-popover')).toBeHidden();
+        });
+
+        await spaceTest.step(
+          'verify the recommended query replaced the editor content with a TS query',
+          async () => {
+            const editorValue = await discover.getEsqlQueryValue();
+            expect(editorValue).toContain('TS');
+            expect(editorValue).toContain(testData.METRICS_TEST_INDEX_NAME);
+          }
+        );
+
+        await spaceTest.step('verify the metrics experience grid is rendered', async () => {
+          await expect(metricsExperience.grid).toBeVisible();
+        });
+      }
+    );
+
+    spaceTest(
+      'should enter the metrics experience when typing a TS query directly',
+      async ({ pageObjects }) => {
+        const { discover, metricsExperience } = pageObjects;
+
+        await spaceTest.step('type and submit a TS query', async () => {
+          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        });
+
+        await spaceTest.step('verify the editor contains the typed TS query verbatim', async () => {
+          const editorValue = await discover.getEsqlQueryValue();
+          expect(editorValue).toBe(testData.ESQL_QUERIES.TS);
+        });
+
+        await spaceTest.step('verify the metrics experience grid is rendered', async () => {
+          await expect(metricsExperience.grid).toBeVisible();
         });
       }
     );

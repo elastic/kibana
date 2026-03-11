@@ -396,6 +396,10 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  async getEsqlQueryValue(nthIndex: number = 0): Promise<string> {
+    return this.codeEditor.getCodeEditorValue(nthIndex);
+  }
+
   async addBreakdownFieldFromSidebar(field: string) {
     const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
     if (await sidebarToggleButton.isVisible()) {
