@@ -104,7 +104,7 @@ class RuleEditorFlyoutUI extends Component {
 
   showFlyout = (anomaly, focusTrapProps) => {
     let ruleIndex = -1;
-    const job = this.props.selectedJob ?? this.mlJobService.getJob(anomaly.jobId);
+    const job = this.mlJobService.getJob(anomaly.jobId) ?? this.props.selectedJob;
     if (job === undefined) {
       // No details found for this job, display an error and
       // don't open the Flyout as no edits can be made without the job.
