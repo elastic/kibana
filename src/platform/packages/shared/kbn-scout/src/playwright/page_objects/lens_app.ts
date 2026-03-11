@@ -218,4 +218,8 @@ export class LensApp {
   getInlineEditor() {
     return this.page.getByTestId('customizeLens');
   }
+
+  getCancelFlyoutButton() {
+    return this.page.getByTestId('cancelFlyoutButton');
+  }
 }

@@ -104,6 +104,26 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
   );
 
   spaceTest(
+    'should correctly cancel the conversion and close the flyout',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+
+      await lens.getConvertToEsqlButton().click();
+      await lens.getConvertToEsqModalConfirmButton().click();
+      await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+
+      await lens.getCancelFlyoutButton().click();
+      await expect(lens.getInlineEditor()).toBeHidden();
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+    }
+  );
+
+  spaceTest(
     'should disable Convert to ES|QL button for visualizations saved to library',
     async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
