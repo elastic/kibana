@@ -130,12 +130,9 @@ function fixAdditionalPropertiesInSchema(
   // Remove additionalProperties: false from objects inside allOf arrays
   // In allOf, each schema should be permissive to allow the union of all properties
   if (objRecord.type === 'object' && objRecord.additionalProperties === false) {
-    const pathParts = path.split('.');
-    const isInAllOf = pathParts.some((part, index) => {
-      // If a path segment equals "allOf" and is followed by a numeric index,
-      // we know this object is nested inside an intersection clause.
-      return part === 'allOf' && pathParts[index + 1] && /^\d+$/.test(pathParts[index + 1]);
-    });
+    // Check if this object is nested inside an allOf clause.
+    // Paths are built as "foo.allOf[0].bar" so we match "allOf[<number>]" anywhere in the path.
+    const isInAllOf = /(?:^|[.\[])allOf\[\d+\](?:\.|$|\[)/.test(path);
 
     if (isInAllOf) {
       delete objRecord.additionalProperties;

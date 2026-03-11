@@ -65,6 +65,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   ): Promise<{
     input: typeof example.input;
     output: {
+      patternType: 'grok' | 'dissect';
       heuristicPattern: string;
       suggestedProcessor: Record<string, unknown> | null;
       parsedLogs: ParsedLog[];
@@ -107,7 +108,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
     return {
       input,
-      output: { heuristicPattern, suggestedProcessor: processor, parsedLogs, metrics },
+      output: { patternType, heuristicPattern, suggestedProcessor: processor, parsedLogs, metrics },
       expected,
       metadata,
     };
@@ -184,10 +185,13 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
       }
 
       if (patternType === 'dissect' && suggestionData.dissectProcessor && dissectResult) {
+        if (!fieldToParse) {
+          return { processor: null, suggestedPattern: heuristicPattern };
+        }
         const processor = getDissectProcessorWithReview(
           dissectResult,
           suggestionData.dissectProcessor as Parameters<typeof getDissectProcessorWithReview>[1],
-          fieldToParse!
+          fieldToParse
         );
         return {
           processor: processor as unknown as Record<string, unknown>,
@@ -503,10 +507,12 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         const inp = input as Record<string, unknown>;
         const proc = processor as Record<string, unknown>;
         const procPatterns = proc?.patterns as string[] | undefined;
+        const resolvedPatternType =
+          (out?.output as Record<string, unknown>)?.patternType ?? out?.patternType ?? 'grok';
         return evaluators.criteria(criteria).evaluate({
           input: {
             sample_logs: (inp?.sample_messages as string[]) ?? [],
-            pattern_type: procPatterns ? 'grok' : 'dissect',
+            pattern_type: resolvedPatternType,
           },
           output: {
             pattern: procPatterns?.[0] ?? (proc?.pattern as string | undefined) ?? heuristicPattern,
