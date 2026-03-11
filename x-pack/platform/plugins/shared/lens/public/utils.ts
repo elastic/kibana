@@ -100,7 +100,10 @@ export function getActiveDatasourceIdFromDoc(doc?: LensDocument): SupportedDatas
   }
 
   const [firstDatasourceFromDoc] = Object.keys(doc.state.datasourceStates);
-  if (firstDatasourceFromDoc === 'formBased' || firstDatasourceFromDoc === 'textBased') {
+  if (
+    firstDatasourceFromDoc === SupportedDatasourceId.FormBased ||
+    firstDatasourceFromDoc === SupportedDatasourceId.TextBased
+  ) {
     return firstDatasourceFromDoc;
   }
   return null;

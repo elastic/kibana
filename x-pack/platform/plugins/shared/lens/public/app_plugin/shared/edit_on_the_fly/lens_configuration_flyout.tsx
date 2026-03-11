@@ -22,7 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { SupportedDatasourceId } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -121,7 +122,7 @@ export function LensEditConfigurationFlyout({
     let previousPersistable: typeof currentPersistable = null;
     if (previousDsState) {
       previousPersistable =
-        datasourceId === 'textBased'
+        datasourceId === SupportedDatasourceId.TextBased
           ? datasource.getPersistableState(previousDsState)
           : {
               state: previousDsState,
@@ -401,7 +402,7 @@ export function LensEditConfigurationFlyout({
     if (!esqlConvertAttributes) return;
 
     // Update local attributes state - this triggers re-render of get_edit_lens_configuration
-    // which will derive the new datasourceId ('textBased') from the updated attributes
+    // which will derive the new datasourceId (SupportedDatasourceId.TextBased) from the updated attributes
     // and recreate the Redux store with the correct datasource
     setCurrentAttributes?.(esqlConvertAttributes);
 

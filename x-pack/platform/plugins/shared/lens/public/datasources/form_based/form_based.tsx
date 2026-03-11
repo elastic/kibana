@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SupportedDatasourceId } from '@kbn/lens-common';
+
 import React from 'react';
 import type { Reference } from '@kbn/content-management-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -239,7 +241,7 @@ export function getFormBasedDatasource({
 }) {
   const { uiSettings } = core;
 
-  const DATASOURCE_ID = 'formBased';
+  const DATASOURCE_ID = SupportedDatasourceId.FormBased;
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
