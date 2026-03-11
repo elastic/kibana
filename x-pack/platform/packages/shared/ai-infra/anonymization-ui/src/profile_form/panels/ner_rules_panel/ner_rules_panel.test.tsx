@@ -10,10 +10,14 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NER_MODEL_ID } from '@kbn/anonymization-common';
 import { NerRulesPanel } from './ner_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
+import { useNerModelAvailability } from '../../hooks/use_ner_model_availability';
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
+}));
+jest.mock('../../hooks/use_ner_model_availability', () => ({
+  useNerModelAvailability: jest.fn(),
 }));
 
 const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0] = {}) => {
@@ -40,6 +44,7 @@ const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0
 describe('NerRulesPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useNerModelAvailability).mockReturnValue({ unavailableNerModels: [] });
   });
 
   it('shows fields for creating new rules', () => {
@@ -198,5 +203,35 @@ describe('NerRulesPanel', () => {
       'aria-invalid',
       'true'
     );
+  });
+
+  it('shows warning when enabled ner model is unavailable or not deployed', async () => {
+    setContext();
+    jest
+      .mocked(useNerModelAvailability)
+      .mockReturnValue({ unavailableNerModels: ['ner-model-v1'] });
+    render(<NerRulesPanel />);
+
+    expect(
+      await screen.findByTestId('anonymizationProfilesNerRulesModelAvailabilityWarning')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Some configured NER models are unavailable or not deployed.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('ner-model-v1')).toBeInTheDocument();
+  });
+
+  it('shows warning on tab load when default ner model is unavailable before adding rules', async () => {
+    setContext({ nerRules: [] });
+    jest.mocked(useNerModelAvailability).mockReturnValue({ unavailableNerModels: [NER_MODEL_ID] });
+    render(<NerRulesPanel />);
+
+    expect(
+      await screen.findByTestId('anonymizationProfilesNerRulesModelAvailabilityWarning')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Some configured NER models are unavailable or not deployed.')
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(NER_MODEL_ID).length).toBeGreaterThan(0);
   });
 });
