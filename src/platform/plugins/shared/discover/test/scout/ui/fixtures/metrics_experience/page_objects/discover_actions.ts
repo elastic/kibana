@@ -57,19 +57,18 @@ export class DiscoverActions {
       await sidebarToggleButton.click();
     }
 
-    const addBreakdownField = this.page.testSubj.locator(
-      `fieldPopoverHeader_addBreakdownField-${field}`
-    );
-
-    // Open the field popover if it's not already visible. Re-query the field
-    // locator each time to avoid stale element references after sidebar re-renders.
     await expect(this.page.testSubj.locator(`field-${field}`)).toBeVisible();
-    if (!(await addBreakdownField.isVisible())) {
-      await this.page.testSubj.locator(`field-${field}`).click();
-    }
 
-    await expect(addBreakdownField).toBeVisible();
-    await addBreakdownField.click();
+    // The sidebar can re-render after the field popover opens, dismissing it.
+    // Retry the click + popover check as a unit until both succeed.
+    await expect(async () => {
+      await this.page.testSubj.locator(`field-${field}`).click();
+      await expect(
+        this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`)
+      ).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+
+    await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
     await this.discover.waitUntilSearchingHasFinished();
   }
 }
