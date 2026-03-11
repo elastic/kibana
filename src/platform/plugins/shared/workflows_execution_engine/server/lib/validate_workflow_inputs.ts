@@ -13,7 +13,6 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   applyInputDefaults,
   makeWorkflowInputsValidator,
-  normalizeInputsToJsonSchema,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -34,7 +33,7 @@ export const validateWorkflowInputs = async (
   if (!inputsDef) {
     return true;
   }
-  const normalizedSchema = normalizeInputsToJsonSchema(inputsDef);
+  const { normalizedSchema, validator } = makeWorkflowInputsValidator(inputsDef);
   if (!normalizedSchema?.properties) {
     return true;
   }
@@ -43,7 +42,6 @@ export const validateWorkflowInputs = async (
       ? (context.inputs as Record<string, unknown>)
       : undefined;
   const inputsWithDefaults = applyInputDefaults(providedInputs, normalizedSchema);
-  const validator = makeWorkflowInputsValidator(inputsDef);
   const result = validator.safeParse(inputsWithDefaults ?? {});
   if (!result.success) {
     const issues = result.error.issues

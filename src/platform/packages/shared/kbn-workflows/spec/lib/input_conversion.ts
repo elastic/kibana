@@ -440,33 +440,36 @@ export function convertJsonSchemaToZodWithRefs(
  * Used by both the UI form and the execution engine for consistent validation.
  *
  * @param inputs - The workflow's input definition (legacy array or JSON Schema format)
- * @returns A Zod object schema for validating input values
+ * @returns The normalized JSON Schema and a Zod object schema for validating input values
  */
 export function makeWorkflowInputsValidator(
   inputs?: JsonModelSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
-): z.ZodType<Record<string, unknown>> {
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+): {
+  normalizedSchema: ReturnType<typeof normalizeInputsToJsonSchema>;
+  validator: z.ZodType<Record<string, unknown>>;
+} {
+  const normalizedSchema = normalizeInputsToJsonSchema(inputs);
 
-  if (!normalizedInputs?.properties) {
-    return z.object({});
+  if (!normalizedSchema?.properties) {
+    return { normalizedSchema, validator: z.object({}) };
   }
 
   const validatorObject: Record<string, z.ZodType> = {};
 
-  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+  for (const [propertyName, propertySchema] of Object.entries(normalizedSchema.properties)) {
     const jsonSchema = propertySchema as JSONSchema7;
 
     const resolvedSchema = jsonSchema.$ref
-      ? resolveRef(jsonSchema.$ref, normalizedInputs) || jsonSchema
+      ? resolveRef(jsonSchema.$ref, normalizedSchema) || jsonSchema
       : jsonSchema;
 
-    let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedInputs);
+    let zodSchema: z.ZodType = convertJsonSchemaToZodWithRefs(jsonSchema, normalizedSchema);
 
     if (resolvedSchema.default !== undefined) {
       zodSchema = zodSchema.default(resolvedSchema.default);
     }
 
-    const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
+    const isRequired = normalizedSchema.required?.includes(propertyName) ?? false;
     if (!isRequired && resolvedSchema.default === undefined) {
       zodSchema = zodSchema.optional();
     }
@@ -474,5 +477,5 @@ export function makeWorkflowInputsValidator(
     validatorObject[propertyName] = zodSchema;
   }
 
-  return z.object(validatorObject);
+  return { normalizedSchema, validator: z.object(validatorObject) };
 }

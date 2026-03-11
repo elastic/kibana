@@ -716,7 +716,7 @@ describe('applyInputDefaults', () => {
 
 describe('makeWorkflowInputsValidator', () => {
   it('should return a permissive schema when inputs is undefined', () => {
-    const validator = makeWorkflowInputsValidator(undefined);
+    const { validator } = makeWorkflowInputsValidator(undefined);
     expect(validator.safeParse({}).success).toBe(true);
     expect(validator.safeParse({ anything: 'goes' }).success).toBe(true);
   });
@@ -730,7 +730,7 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['name'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     expect(validator.safeParse({ name: 'hello', count: 5 }).success).toBe(true);
   });
 
@@ -742,7 +742,7 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['name'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     const result = validator.safeParse({});
     expect(result.success).toBe(false);
   });
@@ -755,7 +755,7 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['name'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     expect(validator.safeParse({}).success).toBe(true);
   });
 
@@ -767,7 +767,7 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['count'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     const result = validator.safeParse({ count: 'not-a-number' });
     expect(result.success).toBe(false);
   });
@@ -781,7 +781,7 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['name'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
   });
 
@@ -791,7 +791,7 @@ describe('makeWorkflowInputsValidator', () => {
       { name: 'count', type: 'number' as const, required: false },
     ] as Array<z.infer<typeof WorkflowInputSchema>>;
 
-    const validator = makeWorkflowInputsValidator(legacyInputs);
+    const { validator } = makeWorkflowInputsValidator(legacyInputs);
     expect(validator.safeParse({ greeting: 'hi' }).success).toBe(true);
 
     const missing = validator.safeParse({});
@@ -806,10 +806,24 @@ describe('makeWorkflowInputsValidator', () => {
       required: ['severity'],
     };
 
-    const validator = makeWorkflowInputsValidator(inputs);
+    const { validator } = makeWorkflowInputsValidator(inputs);
     expect(validator.safeParse({ severity: 'medium' }).success).toBe(true);
 
     const invalid = validator.safeParse({ severity: 'critical' });
     expect(invalid.success).toBe(false);
+  });
+
+  it('should return normalizedSchema alongside validator', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    };
+
+    const { normalizedSchema, validator } = makeWorkflowInputsValidator(inputs);
+    expect(normalizedSchema).toBeDefined();
+    expect(normalizedSchema?.properties).toHaveProperty('name');
+    expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
   });
 });
