@@ -1,5 +1,9 @@
 ---
 navigation_title: "Figma"
+type: reference
+description: "Use the Figma connector to browse design files, inspect structure, render nodes, and explore team projects in Figma."
+mapped_pages:
+  - https://www.elastic.co/guide/en/kibana/current/figma-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview
