@@ -118,14 +118,14 @@ export const AmazonS3: ConnectorSpec = {
           .default(1000),
       }),
       handler: async (ctx, input: ActionListBucketObjectsInput) => {
-        return await listAmazonS3BucketObjects(
+        return (await listAmazonS3BucketObjects(
           ctx,
           input.bucket,
           input.region,
           input.prefix,
           input.maxKeys,
           input.continuationToken
-        ) as AmazonS3BucketObjectListing;
+        )) as AmazonS3BucketObjectListing;
       },
     },
 
@@ -161,7 +161,7 @@ export const AmazonS3: ConnectorSpec = {
           return {
             bucket: input.bucket,
             key: input.key,
-            contentType: contentType,
+            contentType,
             contentLength: metadata.contentLength,
             lastModified: metadata.lastModified,
             etag: metadata.eTag,
@@ -171,7 +171,7 @@ export const AmazonS3: ConnectorSpec = {
           } as AmazonS3Object;
         }
 
-        return await downloadAmazonS3BucketObject(ctx, input.bucket, input.key) as AmazonS3Object;
+        return (await downloadAmazonS3BucketObject(ctx, input.bucket, input.key)) as AmazonS3Object;
       },
     },
   },
