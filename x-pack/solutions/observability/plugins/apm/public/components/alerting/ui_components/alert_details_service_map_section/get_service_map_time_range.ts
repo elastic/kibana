@@ -7,7 +7,9 @@
 
 import moment from 'moment';
 
-const SERVICE_MAP_MAX_RANGE_MINUTES = 15;
+const MINUTES_BEFORE_ALERT_START = 5;
+const MINUTES_AFTER_ALERT_START = 10;
+const MAX_ALERT_DURATION_MINUTES = 15;
 
 export interface ServiceMapTimeRange {
   from: string;
@@ -15,22 +17,27 @@ export interface ServiceMapTimeRange {
 }
 
 /**
- * Returns a time range for the service map, capping the duration to the first 15 minutes
- * when the alert duration is longer. Use this so the service map always shows a manageable
- * window (e.g. 1pm–2pm alert → use 1pm–1:15pm; 1pm–1:05pm → use full 1pm–1:05pm).
- * To use the full alert range instead, pass the padded range through without this helper.
+ * Returns a time range for the service map: 5 minutes before alert start and, for long
+ * alerts (>15 min), 10 minutes after alert start; for shorter alerts, through alert end.
+ * This covers "before and during" the alert. To use the full padded alert range instead,
+ * bypass this helper in the caller.
  */
-export function getServiceMapTimeRange(from: string, to: string): ServiceMapTimeRange {
-  const start = moment(from);
-  const end = moment(to);
-  const durationMs = end.valueOf() - start.valueOf();
-  const maxDurationMs = SERVICE_MAP_MAX_RANGE_MINUTES * 60 * 1000;
+export function getServiceMapTimeRange(alertStart: string, alertEnd?: string): ServiceMapTimeRange {
+  const start = moment(alertStart);
+  const from = start.clone().subtract(MINUTES_BEFORE_ALERT_START, 'minutes');
 
-  const cappedEnd =
-    durationMs > maxDurationMs ? start.clone().add(SERVICE_MAP_MAX_RANGE_MINUTES, 'minutes') : end;
+  const endMoment = alertEnd ? moment(alertEnd) : null;
+  const durationMinutes = endMoment ? endMoment.diff(start, 'minutes', true) : Infinity;
+
+  const to =
+    durationMinutes > MAX_ALERT_DURATION_MINUTES
+      ? start.clone().add(MINUTES_AFTER_ALERT_START, 'minutes')
+      : endMoment
+      ? endMoment
+      : start.clone().add(MINUTES_AFTER_ALERT_START, 'minutes');
 
   return {
-    from: start.toISOString(),
-    to: cappedEnd.toISOString(),
+    from: from.toISOString(),
+    to: to.toISOString(),
   };
 }

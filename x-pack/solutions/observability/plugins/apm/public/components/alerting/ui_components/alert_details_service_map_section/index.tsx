@@ -17,7 +17,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import {
   SERVICE_ENVIRONMENT,
@@ -98,10 +97,6 @@ export function AlertDetailsServiceMapSection({
   embeddableDeps,
 }: AlertDetailsServiceMapSectionProps) {
   const kuery = useMemo(() => buildKueryFromAlert(alert), [alert]);
-  const timeRange = useMemo(
-    () => getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]),
-    [alert.fields]
-  );
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const serviceName =
     alert.fields[SERVICE_NAME] != null ? String(alert.fields[SERVICE_NAME]) : undefined;
@@ -110,13 +105,16 @@ export function AlertDetailsServiceMapSection({
     return null;
   }
 
-  const { from, to } = timeRange;
-  if (!from || !to) {
+  const alertStart = alert.fields[ALERT_START];
+  if (!alertStart) {
     return null;
   }
 
-  // Cap to first 15 minutes for long-running alerts so the service map shows a manageable window
-  const { from: rangeFrom, to: rangeTo } = getServiceMapTimeRange(from, to);
+  // 5 min before alert start; 10 min after for long alerts, or through alert end for short ones
+  const { from: rangeFrom, to: rangeTo } = getServiceMapTimeRange(
+    String(alertStart),
+    alert.fields[ALERT_END] != null ? String(alert.fields[ALERT_END]) : undefined
+  );
   const env =
     environment != null && String(environment).trim() !== '' ? String(environment) : undefined;
   const serviceMapParams = {

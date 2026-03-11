@@ -8,35 +8,42 @@
 import { getServiceMapTimeRange } from './get_service_map_time_range';
 
 describe('getServiceMapTimeRange', () => {
-  it('returns full range when alert duration is under 15 minutes', () => {
-    const from = '2024-01-15T13:00:00.000Z';
-    const to = '2024-01-15T13:05:00.000Z';
-    const result = getServiceMapTimeRange(from, to);
-    expect(result.from).toBe(from);
-    expect(result.to).toBe(to);
+  it('returns 5 min before start through alert end when duration is under 15 minutes', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const alertEnd = '2024-01-15T13:05:00.000Z';
+    const result = getServiceMapTimeRange(alertStart, alertEnd);
+    expect(result.from).toBe('2024-01-15T12:55:00.000Z');
+    expect(result.to).toBe(alertEnd);
   });
 
-  it('returns first 15 minutes when alert duration is over 15 minutes', () => {
-    const from = '2024-01-15T13:00:00.000Z';
-    const to = '2024-01-15T14:00:00.000Z'; // 1 hour later
-    const result = getServiceMapTimeRange(from, to);
-    expect(result.from).toBe(from);
-    expect(result.to).toBe('2024-01-15T13:15:00.000Z');
+  it('returns 5 min before and 10 min after start when alert duration is over 15 minutes', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const alertEnd = '2024-01-15T14:00:00.000Z'; // 1 hour later
+    const result = getServiceMapTimeRange(alertStart, alertEnd);
+    expect(result.from).toBe('2024-01-15T12:55:00.000Z');
+    expect(result.to).toBe('2024-01-15T13:10:00.000Z');
   });
 
-  it('returns full range when alert duration is exactly 15 minutes', () => {
-    const from = '2024-01-15T13:00:00.000Z';
-    const to = '2024-01-15T13:15:00.000Z';
-    const result = getServiceMapTimeRange(from, to);
-    expect(result.from).toBe(from);
-    expect(result.to).toBe(to);
+  it('returns 5 min before start through alert end when duration is exactly 15 minutes', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const alertEnd = '2024-01-15T13:15:00.000Z';
+    const result = getServiceMapTimeRange(alertStart, alertEnd);
+    expect(result.from).toBe('2024-01-15T12:55:00.000Z');
+    expect(result.to).toBe(alertEnd);
   });
 
-  it('caps at 15 minutes for a multi-hour alert', () => {
-    const from = '2024-01-15T13:00:00.000Z';
-    const to = '2024-01-15T17:30:00.000Z';
-    const result = getServiceMapTimeRange(from, to);
-    expect(result.from).toBe(from);
-    expect(result.to).toBe('2024-01-15T13:15:00.000Z');
+  it('returns 5 min before and 10 min after start for a multi-hour alert', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const alertEnd = '2024-01-15T17:30:00.000Z';
+    const result = getServiceMapTimeRange(alertStart, alertEnd);
+    expect(result.from).toBe('2024-01-15T12:55:00.000Z');
+    expect(result.to).toBe('2024-01-15T13:10:00.000Z');
+  });
+
+  it('uses start + 10 min when alert end is missing (active alert)', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const result = getServiceMapTimeRange(alertStart);
+    expect(result.from).toBe('2024-01-15T12:55:00.000Z');
+    expect(result.to).toBe('2024-01-15T13:10:00.000Z');
   });
 });
