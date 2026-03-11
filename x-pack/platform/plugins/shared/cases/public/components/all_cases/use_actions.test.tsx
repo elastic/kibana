@@ -169,6 +169,7 @@ describe('useActions', () => {
     await waitFor(() => {
       expect(screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
     });
+    expect(screen.getByText(i18n.CLOSE_CASE_MODAL_DISCLAIMER)).toBeInTheDocument();
 
     await user.click(screen.getByText('Duplicate'));
     await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));

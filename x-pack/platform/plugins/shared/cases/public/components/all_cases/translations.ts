@@ -283,6 +283,13 @@ export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const CLOSE_CASE_MODAL_DISCLAIMER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.disclaimer',
+  {
+    defaultMessage: 'Alerts already closed will not be updated',
+  }
+);
+
 export const CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON = i18n.translate(
   'xpack.cases.allCasesView.closeCaseModal.reason.closeWithoutReason',
   {

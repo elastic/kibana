@@ -10,6 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -17,6 +18,7 @@ import {
   EuiModalHeaderTitle,
   EuiPanel,
   EuiSelectable,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -52,6 +54,8 @@ const CloseCaseModalComponent = React.memo<CloseCaseModalProps>(
         <EuiModalHeaderTitle>{i18n.CLOSE_CASE_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        <EuiCallOut title={i18n.CLOSE_CASE_MODAL_DISCLAIMER} iconType="info" size="s" />
+        <EuiSpacer size="s" />
         <EuiSelectable
           aria-label={i18n.CLOSE_CASE_MODAL_REASON_LABEL}
           options={closeReasonOptions}
