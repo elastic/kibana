@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -26,7 +26,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { enrichDataViewSpecWithEsqlColumns } from '@kbn/data-view-utils';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import type { EditLookupIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
@@ -163,14 +163,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       return props.dataView;
     }
 
-    const baseSpec = props.dataView.toSpec(false);
-    const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, props.columns);
-
-    return new DataView({
-      spec: enrichedSpec,
+    return cloneDataViewAndUseEsqlColumnsAsFields(props.dataView, props.columns, {
       fieldFormats,
-      shortDotsEnable: false,
-      metaFields: props.dataView.metaFields,
     });
   }, [props.dataView, props.columns, fieldFormats]);
 

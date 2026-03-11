@@ -14,6 +14,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -37,7 +38,6 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
-import { createEsqlDataViewWithColumns } from '../state_management/utils/create_esql_data_view_with_columns';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -191,14 +191,8 @@ export function fetchAll(
         // Create enriched DataView with ES|QL column fields if available
         let esqlDataView;
         if (esqlQueryColumns) {
-          const [shortDotsEnable, metaFields] = await Promise.all([
-            services.dataViews.getShortDotsEnable(),
-            services.dataViews.getMetaFields(),
-          ]);
-          esqlDataView = createEsqlDataViewWithColumns(dataView, esqlQueryColumns, {
+          esqlDataView = cloneDataViewAndUseEsqlColumnsAsFields(dataView, esqlQueryColumns, {
             fieldFormats: services.fieldFormats,
-            shortDotsEnable,
-            metaFields,
           });
         }
 

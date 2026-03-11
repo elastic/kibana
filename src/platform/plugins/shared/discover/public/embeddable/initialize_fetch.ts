@@ -36,8 +36,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
-import { createEsqlDataViewWithColumns } from '../application/main/state_management/utils/create_esql_data_view_with_columns';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -227,15 +227,13 @@ export function initializeFetch({
             // Create enriched DataView with ES|QL column fields if available
             let esqlDataView;
             if (result.esqlQueryColumns) {
-              const [shortDotsEnable, metaFields] = await Promise.all([
-                discoverServices.dataViews.getShortDotsEnable(),
-                discoverServices.dataViews.getMetaFields(),
-              ]);
-              esqlDataView = createEsqlDataViewWithColumns(dataView, result.esqlQueryColumns, {
-                fieldFormats: discoverServices.fieldFormats,
-                shortDotsEnable,
-                metaFields,
-              });
+              esqlDataView = cloneDataViewAndUseEsqlColumnsAsFields(
+                dataView,
+                result.esqlQueryColumns,
+                {
+                  fieldFormats: discoverServices.fieldFormats,
+                }
+              );
             }
 
             return {

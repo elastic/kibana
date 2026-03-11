@@ -12,6 +12,6 @@ export { convertDatatableColumnToDataViewFieldSpec } from './src/utils/convert_t
 export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
 export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';
 export {
-  createFieldsFromEsqlColumns,
-  enrichDataViewSpecWithEsqlColumns,
-} from './src/utils/create_data_view_with_esql_columns';
+  cloneDataViewAndUseEsqlColumnsAsFields,
+  type CloneDataViewAndUseEsqlColumnsAsFieldsDeps,
+} from './src/utils/clone_data_view_and_use_esql_columns_as_fields';

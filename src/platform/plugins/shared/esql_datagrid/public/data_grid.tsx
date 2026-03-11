@@ -25,11 +25,11 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { enrichDataViewSpecWithEsqlColumns } from '@kbn/data-view-utils';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
@@ -65,16 +65,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   // Create an enriched data view with fields from ES|QL columns
   const enrichedDataView = useMemo(() => {
-    const baseSpec = props.dataView.toSpec(false);
-    const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, props.columns);
-
-    return new DataView({
-      spec: enrichedSpec,
+    return cloneDataViewAndUseEsqlColumnsAsFields(props.dataView, props.columns, {
       fieldFormats: props.fieldFormats,
-      shortDotsEnable: props.core.uiSettings.get('shortDots:enable'),
-      metaFields: props.core.uiSettings.get('metaFields'),
     });
-  }, [props.dataView, props.columns, props.fieldFormats, props.core.uiSettings]);
+  }, [props.dataView, props.columns, props.fieldFormats]);
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
