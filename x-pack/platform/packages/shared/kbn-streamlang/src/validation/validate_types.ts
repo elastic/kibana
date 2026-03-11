@@ -148,6 +148,12 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'json_extract':
+      processor.extractions.forEach((extraction) => {
+        fields.push(extraction.target_field);
+      });
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -275,6 +281,9 @@ export function getProcessorOutputType(
     case 'network_direction':
       return 'string';
 
+    case 'json_extract':
+      return 'unknown';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -369,6 +378,7 @@ export function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'network_direction':
+    case 'json_extract':
     case 'manual_ingest_pipeline':
       return null;
     default: {
@@ -439,6 +449,9 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         if ('internal_networks_field' in step && step.internal_networks_field) {
           fieldsUsed.push(step.internal_networks_field);
         }
+        break;
+      case 'json_extract':
+        fieldsUsed.push(step.field);
         break;
       case 'append':
       case 'drop_document':
