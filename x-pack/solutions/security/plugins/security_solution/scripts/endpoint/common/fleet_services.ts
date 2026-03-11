@@ -322,11 +322,17 @@ export const waitForHostToEnroll = async (
       async () =>
         fetchFleetAgents(kbnClient, {
           perPage: 1,
-          kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
+          // kuery: `(local_metadata.host.hostname.keyword : "${hostname}")`,
           showInactive: false,
         }).then((response) => {
-          agentId = response.items[0]?.id;
-          return response.items.filter((agent) => agent.status === 'online')[0];
+          log.info(`--- Waiting on Fleet response: ${JSON.stringify(response, null, 2)}`);
+
+          const fleetServerAgent = response.items.find(
+            (agent) => agent.local_metadata?.host?.hostname === hostname
+          );
+          agentId = fleetServerAgent?.id;
+
+          return fleetServerAgent?.status === 'online' ? fleetServerAgent : undefined;
         }),
       RETRYABLE_TRANSIENT_ERRORS
     );

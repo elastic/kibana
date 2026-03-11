@@ -340,11 +340,12 @@ const startFleetServerWithDocker = async ({
             }
           });
 
-        log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
+        log.info(`Fleet server docker arguments:\n${dockerArgs.join(' ')}`);
 
-        containerId = (await execa('docker', dockerArgs)).stdout;
+        const execResult = await execa('docker', dockerArgs);
+        containerId = execResult.stdout;
 
-        log.info(`Fleet server started`);
+        log.info(`Fleet server started, ${JSON.stringify(execResult, null, 2)}`);
 
         if (!isServerless) {
           await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
@@ -359,7 +360,18 @@ const startFleetServerWithDocker = async ({
           }
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
-          await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+
+          try {
+            await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+          } catch (error) {
+            log.info(`### FLEET LOGS ###
+
+${JSON.stringify(await execa('docker', ['logs', containerId]), null, 2)}
+
+### FLEET LOGS END ###`);
+
+            throw error;
+          }
         }
 
         fleetServerVersionInfo = isServerless
