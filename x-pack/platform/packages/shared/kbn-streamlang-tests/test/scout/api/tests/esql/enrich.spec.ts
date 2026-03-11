@@ -57,5 +57,66 @@ apiTest.describe(
         expect(esqlResult.documents[1].country).toBe('GB');
       }
     );
+
+    apiTest(
+      'should leave the document unchanged if match field is not present and ignore_missing is true',
+      async ({ testBed, esql }) => {
+        const indexName = 'streams-e2e-test-enrich-ignore-missing';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'enrich',
+              policy_name: ENRICH_POLICY_NAME,
+              field: 'ip',
+              to: 'location',
+              ignore_missing: true,
+            } as EnrichProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+        const docs = [
+          { ip: '10.0.0.1', message: 'some message' },
+          { message: 'some other message' },
+        ];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        expect(esqlResult.documents).toHaveLength(2);
+        expect(esqlResult.documents[0].city).toBe('New York');
+        expect(esqlResult.documents[0].country).toBe('US');
+        expect(esqlResult.documents[1].city).toBeNull();
+        expect(esqlResult.documents[1].country).toBeNull();
+      }
+    );
+
+    apiTest(
+      'should filter out documents where match field is missing when ignore_missing is false',
+      async ({ testBed, esql }) => {
+        const indexName = 'streams-e2e-test-enrich-fail-missing';
+
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'enrich',
+              policy_name: ENRICH_POLICY_NAME,
+              field: 'ip',
+              to: 'location',
+              ignore_missing: false,
+            } as EnrichProcessor,
+          ],
+        };
+
+        const { query } = transpile(streamlangDSL);
+        const docs = [{ ip: '10.0.0.1', message: 'has ip' }, { message: 'no ip here' }];
+        await testBed.ingest(indexName, docs);
+        const esqlResult = await esql.queryOnIndex(indexName, query);
+
+        // Only the doc with ip survives the WHERE filter
+        expect(esqlResult.documents).toHaveLength(1);
+        expect(esqlResult.documents[0].city).toBe('New York');
+      }
+    );
   }
 );

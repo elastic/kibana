@@ -8,6 +8,7 @@
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand } from '@elastic/esql/types';
 import type { EnrichProcessor } from '../../../../types/processors';
+import { buildIgnoreMissingFilter } from './common';
 
 /**
  * Converts a Streamlang EnrichProcessor into a list of ES|QL AST commands.
@@ -24,7 +25,13 @@ import type { EnrichProcessor } from '../../../../types/processors';
  * | ENRICH ip_location ON ip WITH location.city = city, location.country = country
  */
 export const convertEnrichProcessorToESQL = (processor: EnrichProcessor): ESQLAstCommand[] => {
-  const { policy_name, field } = processor;
+  const { policy_name, field, ignore_missing = false } = processor;
+  const commands: ESQLAstCommand[] = [];
+
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, field);
+  if (missingFieldFilter) {
+    commands.push(missingFieldFilter);
+  }
 
   const policySource = Builder.expression.source.node({
     sourceType: 'policy',
@@ -42,6 +49,7 @@ export const convertEnrichProcessorToESQL = (processor: EnrichProcessor): ESQLAs
     args: [policySource, onOption],
   });
 
-  // TODO: Add support for to, ignore_missing, and override options
-  return [enrichCmd];
+  // TODO: Add support for "to" and "override" options
+  commands.push(enrichCmd);
+  return commands;
 };
