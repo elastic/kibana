@@ -109,6 +109,8 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
   - '@kbn/lens-embeddable-utils'
+  - '@kbn/resizable-layout'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
