@@ -28,7 +28,7 @@ import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
 import { setDescriptionStepDefinition } from './steps/set_description';
 import { setTitleStepDefinition } from './steps/set_title';
 import { addObservablesStepDefinition } from './steps/add_observables';
-import { addTagStepDefinition } from './steps/add_tag';
+import { addTagsStepDefinition } from './steps/add_tags';
 import { setCategoryStepDefinition } from './steps/set_category';
 
 export function registerCaseWorkflowSteps(
@@ -59,6 +59,6 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(setDescriptionStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setTitleStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addObservablesStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(addTagStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addTagsStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setCategoryStepDefinition(getCasesClient));
 }

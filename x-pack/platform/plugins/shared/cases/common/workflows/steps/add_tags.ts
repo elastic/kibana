@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import {
-  CaseResponseProperties as CaseResponsePropertiesSchema,
-  CaseTags,
-} from '../../bundled-types.gen';
+import { CaseTags } from '../../bundled-types.gen';
 import * as i18n from '../translations';
-import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
+import {
+  CasesStepBaseConfigSchema,
+  CasesStepCaseIdSchema,
+  CasesStepSingleCaseOutputSchema,
+} from './shared';
 
-export const AddTagStepTypeId = 'cases.addTag';
+export const AddTagsStepTypeId = 'cases.addTags';
 
-export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+export const InputSchema = CasesStepCaseIdSchema.extend({
   tags: CaseTags,
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
-export type AddTagStepInputSchema = typeof InputSchema;
-export type AddTagStepOutputSchema = typeof OutputSchema;
+export type AddTagsStepInputSchema = typeof InputSchema;
+export type AddTagsStepOutputSchema = typeof OutputSchema;
 
-export type AddTagStepInput = z.infer<typeof InputSchema>;
-export type AddTagStepOutput = z.infer<typeof OutputSchema>;
+export type AddTagsStepInput = z.infer<typeof InputSchema>;
+export type AddTagsStepOutput = z.infer<typeof OutputSchema>;
 
-export const addTagStepCommonDefinition: CommonStepDefinition<
-  AddTagStepInputSchema,
-  AddTagStepOutputSchema
+export const addTagsStepCommonDefinition: CommonStepDefinition<
+  AddTagsStepInputSchema,
+  AddTagsStepOutputSchema
 > = {
-  id: AddTagStepTypeId,
+  id: AddTagsStepTypeId,
   category: StepCategory.Kibana,
   label: i18n.ADD_TAG_STEP_LABEL,
   description: i18n.ADD_TAG_STEP_DESCRIPTION,
@@ -45,7 +44,7 @@ export const addTagStepCommonDefinition: CommonStepDefinition<
       `## Set case tags
 \`\`\`yaml
 - name: set_case_tags
-  type: ${AddTagStepTypeId}
+  type: ${AddTagsStepTypeId}
   with:
     case_id: "abc-123-def-456"
     tags: ["investigation", "high-priority"]

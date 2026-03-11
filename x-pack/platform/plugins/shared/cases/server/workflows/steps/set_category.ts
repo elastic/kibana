@@ -10,29 +10,19 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   setCategoryStepCommonDefinition,
   type SetCategoryStepInput,
-} from '../../../common/workflows/steps/add_category';
+} from '../../../common/workflows/steps/set_category';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
-import { updateSingleCase } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setCategoryStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...setCategoryStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<SetCategoryStepInput>(
       getCasesClient,
-      async (client, input: SetCategoryStepInput) =>
-        updateSingleCase(client, {
-          caseId: input.case_id,
-          version: input.version,
-          updates: { category: input.category },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-        }),
-      {
-        onError: (_error, input: SetCategoryStepInput) =>
-          new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-      }
+      (input) => ({ category: input.category }),
+      UPDATE_CASE_FAILED_MESSAGE
     ),
   });

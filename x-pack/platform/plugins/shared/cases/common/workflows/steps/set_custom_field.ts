@@ -8,21 +8,21 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import {
+  CasesStepBaseConfigSchema,
+  CasesStepCaseIdVersionSchema,
+  CasesStepSingleCaseOutputSchema,
+} from './shared';
 import * as i18n from '../translations';
 
 export const SetCustomFieldStepTypeId = 'cases.setCustomField';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   field_name: z.string().min(1, 'field_name is required'),
   value: z.union([z.string().min(1), z.boolean(), z.number().int(), z.null()]),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 export type SetCustomFieldStepInputSchema = typeof InputSchema;
 export type SetCustomFieldStepOutputSchema = typeof OutputSchema;

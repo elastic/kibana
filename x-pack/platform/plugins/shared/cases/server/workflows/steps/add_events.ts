@@ -15,7 +15,7 @@ import {
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
 import { ADD_EVENTS_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
+import { createCaseIdOnError, createCasesStepHandler, withCaseOwner } from './utils';
 
 export const addEventsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -25,26 +25,22 @@ export const addEventsStepDefinition = (
     handler: createCasesStepHandler(
       getCasesClient,
       async (client, input: AddEventsStepInput) => {
-        const theCase = await client.cases.get({
-          id: input.case_id,
-          includeComments: false,
-        });
+        return withCaseOwner(client, input.case_id, async (owner) => {
+          const updatedCase = await client.attachments.bulkCreate({
+            caseId: input.case_id,
+            attachments: input.events.map((event) => ({
+              type: AttachmentType.event,
+              eventId: event.eventId,
+              index: event.index,
+              owner,
+            })),
+          });
 
-        const updatedCase = await client.attachments.bulkCreate({
-          caseId: input.case_id,
-          attachments: input.events.map((event) => ({
-            type: AttachmentType.event,
-            eventId: event.eventId,
-            index: event.index,
-            owner: theCase.owner,
-          })),
+          return updatedCase as AddEventsStepOutput['case'];
         });
-
-        return updatedCase as AddEventsStepOutput['case'];
       },
       {
-        onError: (_error, input: AddEventsStepInput) =>
-          new Error(ADD_EVENTS_FAILED_MESSAGE(input.case_id)),
+        onError: createCaseIdOnError<AddEventsStepInput>(ADD_EVENTS_FAILED_MESSAGE),
       }
     ),
   });

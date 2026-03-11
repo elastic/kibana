@@ -15,7 +15,7 @@ import {
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
 import { ADD_ALERTS_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
+import { createCaseIdOnError, createCasesStepHandler, withCaseOwner } from './utils';
 
 export const addAlertsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -25,30 +25,26 @@ export const addAlertsStepDefinition = (
     handler: createCasesStepHandler(
       getCasesClient,
       async (client, input: AddAlertsStepInput) => {
-        const theCase = await client.cases.get({
-          id: input.case_id,
-          includeComments: false,
-        });
+        return withCaseOwner(client, input.case_id, async (owner) => {
+          const updatedCase = await client.attachments.bulkCreate({
+            caseId: input.case_id,
+            attachments: input.alerts.map((alert) => ({
+              type: AttachmentType.alert,
+              alertId: alert.alertId,
+              index: alert.index,
+              owner,
+              rule: {
+                id: alert.rule?.id ?? null,
+                name: alert.rule?.name ?? null,
+              },
+            })),
+          });
 
-        const updatedCase = await client.attachments.bulkCreate({
-          caseId: input.case_id,
-          attachments: input.alerts.map((alert) => ({
-            type: AttachmentType.alert,
-            alertId: alert.alertId,
-            index: alert.index,
-            owner: theCase.owner,
-            rule: {
-              id: alert.rule?.id ?? null,
-              name: alert.rule?.name ?? null,
-            },
-          })),
+          return updatedCase as AddAlertsStepOutput['case'];
         });
-
-        return updatedCase as AddAlertsStepOutput['case'];
       },
       {
-        onError: (_error, input: AddAlertsStepInput) =>
-          new Error(ADD_ALERTS_FAILED_MESSAGE(input.case_id)),
+        onError: createCaseIdOnError<AddAlertsStepInput>(ADD_ALERTS_FAILED_MESSAGE),
       }
     ),
   });

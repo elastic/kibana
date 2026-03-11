@@ -13,26 +13,16 @@ import {
 } from '../../../common/workflows/steps/unassign_case';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
-import { updateSingleCase } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const unassignCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...unassignCaseStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<UnassignCaseStepInput>(
       getCasesClient,
-      async (client, input: UnassignCaseStepInput) =>
-        updateSingleCase(client, {
-          caseId: input.case_id,
-          version: input.version,
-          updates: { assignees: input.assignees },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-        }),
-      {
-        onError: (_error, input: UnassignCaseStepInput) =>
-          new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-      }
+      (input) => ({ assignees: input.assignees }),
+      UPDATE_CASE_FAILED_MESSAGE
     ),
   });

@@ -67,6 +67,46 @@ describe('setCustomFieldStepDefinition', () => {
     });
   });
 
+  it('uses provided version without pre-update fetch', async () => {
+    const updatedCase = {
+      ...createCaseResponseFixture,
+      customFields: [{ key: 'first_key', type: 'text' as const, value: 'updated value' }],
+    };
+    const get = jest.fn().mockResolvedValue(updatedCase);
+    const replaceCustomField = jest.fn().mockResolvedValue({
+      key: 'first_key',
+      type: 'text' as const,
+      value: 'updated value',
+    });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, replaceCustomField },
+    } as unknown as CasesClient);
+    const definition = setCustomFieldStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        ...input,
+        version: 'provided-version',
+      })
+    );
+
+    expect(replaceCustomField).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      customFieldId: 'first_key',
+      request: {
+        caseVersion: 'provided-version',
+        value: 'updated value',
+      },
+    });
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
+    expect(result).toEqual({
+      output: {
+        case: updatedCase,
+      },
+    });
+  });
+
   it('pushes case when push-case is enabled', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const replaceCustomField = jest.fn().mockResolvedValue({

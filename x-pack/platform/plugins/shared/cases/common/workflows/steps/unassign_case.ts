@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import {
-  Assignees,
-  CaseResponseProperties as CaseResponsePropertiesSchema,
-} from '../../bundled-types.gen';
+import { Assignees } from '../../bundled-types.gen';
 import * as i18n from '../translations';
-import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
+import {
+  CasesStepBaseConfigSchema,
+  CasesStepCaseIdVersionSchema,
+  CasesStepSingleCaseOutputSchema,
+} from './shared';
 
 export const UnassignCaseStepTypeId = 'cases.unassignCase';
 
@@ -21,9 +22,7 @@ export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   assignees: Assignees,
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 export type UnassignCaseStepInputSchema = typeof InputSchema;
 export type UnassignCaseStepOutputSchema = typeof OutputSchema;

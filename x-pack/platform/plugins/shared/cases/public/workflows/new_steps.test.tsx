@@ -16,7 +16,7 @@ import { findSimilarCasesStepDefinition } from './find_similar_cases';
 import { setDescriptionStepDefinition } from './set_description';
 import { setTitleStepDefinition } from './set_title';
 import { addObservablesStepDefinition } from './add_observables';
-import { addTagStepDefinition } from './add_tag';
+import { addTagsStepDefinition } from './add_tags';
 import { setCategoryStepDefinition } from './set_category';
 
 describe('new cases public step definitions', () => {
@@ -32,7 +32,7 @@ describe('new cases public step definitions', () => {
     setDescriptionStepDefinition,
     setTitleStepDefinition,
     addObservablesStepDefinition,
-    addTagStepDefinition,
+    addTagsStepDefinition,
     setCategoryStepDefinition,
   ];
 

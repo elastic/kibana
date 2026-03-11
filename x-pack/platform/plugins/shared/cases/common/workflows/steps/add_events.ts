@@ -8,9 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import * as i18n from '../translations';
-import { CasesStepBaseConfigSchema } from './shared';
+import {
+  CasesStepBaseConfigSchema,
+  CasesStepCaseIdSchema,
+  CasesStepSingleCaseOutputSchema,
+} from './shared';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
 
@@ -19,14 +22,11 @@ const EventInputSchema = z.object({
   index: z.string().min(1, 'index is required'),
 });
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
+export const InputSchema = CasesStepCaseIdSchema.extend({
   events: z.array(EventInputSchema).min(1).max(1000),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 export type AddEventsStepInputSchema = typeof InputSchema;
 export type AddEventsStepOutputSchema = typeof OutputSchema;

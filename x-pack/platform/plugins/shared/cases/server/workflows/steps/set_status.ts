@@ -13,26 +13,16 @@ import {
 } from '../../../common/workflows/steps/set_status';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
-import { updateSingleCase } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setStatusStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...setStatusStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<SetStatusStepInput>(
       getCasesClient,
-      async (client, input: SetStatusStepInput) =>
-        updateSingleCase(client, {
-          caseId: input.case_id,
-          version: input.version,
-          updates: { status: input.status },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-        }),
-      {
-        onError: (_error, input: SetStatusStepInput) =>
-          new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-      }
+      (input) => ({ status: input.status }),
+      UPDATE_CASE_FAILED_MESSAGE
     ),
   });

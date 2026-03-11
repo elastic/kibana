@@ -14,8 +14,9 @@ import {
 import { CasePatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../../client';
-import { normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import { normalizeCaseStepUpdatesForBulkPatch, pushCase } from './utils';
 import { UPDATE_CASES_FAILED_MESSAGE } from './translations';
+import { resolveCaseVersion } from './update_case_helpers';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message.length > 0) {
@@ -52,14 +53,11 @@ export const updateCasesStepDefinition = (
         const normalizedCasePatches = await Promise.all(
           input.cases.map(async (caseInput) => {
             try {
-              const version =
-                caseInput.version ??
-                (
-                  await casesClient.cases.get({
-                    id: caseInput.case_id,
-                    includeComments: false,
-                  })
-                ).version;
+              const version = await resolveCaseVersion(
+                casesClient,
+                caseInput.case_id,
+                caseInput.version
+              );
 
               return decodeWithExcessOrThrow(CasePatchRequestRt)({
                 id: caseInput.case_id,
@@ -92,11 +90,7 @@ export const updateCasesStepDefinition = (
         if (context.config['push-case']) {
           for (const updatedCase of updatedCases) {
             try {
-              await casesClient.cases.push({
-                caseId: updatedCase.id,
-                connectorId: updatedCase.connector.id,
-                pushType: 'automatic',
-              });
+              await pushCase(casesClient, updatedCase);
             } catch (error) {
               throw new Error(UPDATE_CASES_FAILED_MESSAGE(updatedCase.id, getErrorMessage(error)));
             }

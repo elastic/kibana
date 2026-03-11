@@ -13,26 +13,16 @@ import {
 } from '../../../common/workflows/steps/close_case';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
-import { updateSingleCase } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const closeCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...closeCaseStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<CloseCaseStepInput>(
       getCasesClient,
-      async (client, input: CloseCaseStepInput) =>
-        updateSingleCase(client, {
-          caseId: input.case_id,
-          version: input.version,
-          updates: { status: 'closed' },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-        }),
-      {
-        onError: (_error, input: CloseCaseStepInput) =>
-          new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-      }
+      () => ({ status: 'closed' }),
+      UPDATE_CASE_FAILED_MESSAGE
     ),
   });

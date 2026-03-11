@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../../common/bundled-types.gen';
 import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update_case';
 import { CasePatchRequestRt } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import {
+  createCaseIdOnError,
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+} from './utils';
 
 type WorkflowUpdatePayload = UpdateCaseStepInput['updates'];
 
@@ -21,18 +26,25 @@ interface UpdateSingleCaseParams {
   onNotFoundError: Error;
 }
 
+interface CaseIdVersionInput {
+  case_id: string;
+  version?: string;
+}
+
+export const resolveCaseVersion = async (client: CasesClient, caseId: string, version?: string) =>
+  version ??
+  (
+    await client.cases.get({
+      id: caseId,
+      includeComments: false,
+    })
+  ).version;
+
 export const updateSingleCase = async (
   client: CasesClient,
   { caseId, version, updates, onNotFoundError }: UpdateSingleCaseParams
 ) => {
-  const resolvedVersion =
-    version ??
-    (
-      await client.cases.get({
-        id: caseId,
-        includeComments: false,
-      })
-    ).version;
+  const resolvedVersion = await resolveCaseVersion(client, caseId, version);
 
   const normalizedCasePatch = decodeWithExcessOrThrow(CasePatchRequestRt)({
     id: caseId,
@@ -51,3 +63,35 @@ export const updateSingleCase = async (
 
   return CaseResponsePropertiesSchema.parse(updatedCase);
 };
+
+export const updateSingleCaseFromInput = <TInput extends CaseIdVersionInput>(
+  client: CasesClient,
+  input: TInput,
+  updates: WorkflowUpdatePayload,
+  getErrorMessage: (caseId: string) => string
+) =>
+  updateSingleCase(client, {
+    caseId: input.case_id,
+    version: input.version,
+    updates,
+    onNotFoundError: new Error(getErrorMessage(input.case_id)),
+  });
+
+export const createUpdateSingleCaseStepHandler = <TInput extends CaseIdVersionInput>(
+  getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
+  getUpdates: (input: TInput) => WorkflowUpdatePayload,
+  getErrorMessage: (caseId: string) => string
+) =>
+  createCasesStepHandler(
+    getCasesClient,
+    async (client, input: TInput) =>
+      updateSingleCase(client, {
+        caseId: input.case_id,
+        version: input.version,
+        updates: getUpdates(input),
+        onNotFoundError: new Error(getErrorMessage(input.case_id)),
+      }),
+    {
+      onError: createCaseIdOnError<TInput>(getErrorMessage),
+    }
+  );

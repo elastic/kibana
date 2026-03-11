@@ -8,11 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import {
-  CaseResponseProperties as CaseResponsePropertiesSchema,
-  UpdateCaseRequest as UpdateCaseRequestSchema,
-} from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import { UpdateCaseRequest as UpdateCaseRequestSchema } from '../../bundled-types.gen';
+import { CasesStepBaseConfigSchema, CasesStepSingleCaseOutputSchema } from './shared';
 import * as i18n from '../translations';
 
 export const CreateCaseFromTemplateStepTypeId = 'cases.createCaseFromTemplate';
@@ -27,9 +24,7 @@ export const InputSchema = z.object({
   overwrites: OverwritesSchema.optional(),
 });
 
-export const OutputSchema = z.object({
-  case: CaseResponsePropertiesSchema,
-});
+export const OutputSchema = CasesStepSingleCaseOutputSchema;
 
 export const ConfigSchema = CasesStepBaseConfigSchema;
 

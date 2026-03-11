@@ -14,8 +14,13 @@ import {
 import { CasePatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import {
+  createCaseIdOnError,
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+} from './utils';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
+import { resolveCaseVersion } from './update_case_helpers';
 
 export const updateCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -25,14 +30,7 @@ export const updateCaseStepDefinition = (
     handler: createCasesStepHandler(
       getCasesClient,
       async (client, input: UpdateCaseStepInput) => {
-        const version =
-          input.version ??
-          (
-            await client.cases.get({
-              id: input.case_id,
-              includeComments: false,
-            })
-          ).version;
+        const version = await resolveCaseVersion(client, input.case_id, input.version);
 
         const normalizedCasePatch = decodeWithExcessOrThrow(CasePatchRequestRt)({
           id: input.case_id,
@@ -52,9 +50,7 @@ export const updateCaseStepDefinition = (
         return updateCaseStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
       },
       {
-        onError: (_error, input: UpdateCaseStepInput) => {
-          return new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id));
-        },
+        onError: createCaseIdOnError<UpdateCaseStepInput>(UPDATE_CASE_FAILED_MESSAGE),
       }
     ),
   });

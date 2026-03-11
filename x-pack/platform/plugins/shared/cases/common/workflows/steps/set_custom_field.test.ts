@@ -18,6 +18,7 @@ import {
   setCustomFieldNumberInputFixture,
   setCustomFieldNullInputFixture,
   caseIdFixture,
+  caseVersionFixture,
 } from './test_fixtures';
 
 describe('set_custom_field common step definition', () => {
@@ -39,6 +40,15 @@ describe('set_custom_field common step definition', () => {
 
   it('accepts valid null custom field update input', () => {
     expect(InputSchema.safeParse(setCustomFieldNullInputFixture).success).toBe(true);
+  });
+
+  it('accepts valid input with version', () => {
+    expect(
+      InputSchema.safeParse({
+        ...setCustomFieldTextInputFixture,
+        version: caseVersionFixture,
+      }).success
+    ).toBe(true);
   });
 
   it('rejects invalid input with missing field_name', () => {

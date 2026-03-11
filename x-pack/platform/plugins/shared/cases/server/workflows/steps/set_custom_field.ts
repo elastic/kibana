@@ -14,6 +14,7 @@ import {
 import type { CasesClient } from '../../client';
 import { SET_CUSTOM_FIELD_FAILED_MESSAGE } from './translations';
 import { createCasesStepHandler } from './utils';
+import { resolveCaseVersion } from './update_case_helpers';
 
 export const setCustomFieldStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -24,16 +25,13 @@ export const setCustomFieldStepDefinition = (
       getCasesClient,
       async (casesClient, input: SetCustomFieldStepInput) => {
         try {
-          const currentCase = await casesClient.cases.get({
-            id: input.case_id,
-            includeComments: false,
-          });
+          const caseVersion = await resolveCaseVersion(casesClient, input.case_id, input.version);
 
           await casesClient.cases.replaceCustomField({
             caseId: input.case_id,
             customFieldId: input.field_name,
             request: {
-              caseVersion: currentCase.version,
+              caseVersion,
               value: input.value,
             },
           });

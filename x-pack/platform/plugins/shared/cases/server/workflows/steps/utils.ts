@@ -13,6 +13,7 @@ import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update
 
 type WorkflowStepCaseResult = CreateCaseStepOutput['case'];
 type WorkflowUpdatePayload = UpdateCaseStepInput['updates'];
+type PushableCase = Pick<WorkflowStepCaseResult, 'id' | 'connector'>;
 
 export const normalizeCaseStepUpdatesForBulkPatch = (updates: WorkflowUpdatePayload) => {
   const { assignees, connector, ...restUpdates } = updates;
@@ -32,6 +33,33 @@ async function getCasesClientFromStepsContext(
   const request = context.contextManager.getFakeRequest();
   return getCasesClient(request);
 }
+
+export const createCaseIdOnError =
+  <TInput extends { case_id: string }, TConfig = unknown>(
+    messageFactory: (caseId: string) => string
+  ) =>
+  (_error: unknown, input: TInput, _config: TConfig) =>
+    new Error(messageFactory(input.case_id));
+
+export const withCaseOwner = async <T>(
+  client: CasesClient,
+  caseId: string,
+  operation: (owner: string) => Promise<T>
+): Promise<T> => {
+  const theCase = await client.cases.get({
+    id: caseId,
+    includeComments: false,
+  });
+
+  return operation(theCase.owner);
+};
+
+export const pushCase = async (casesClient: CasesClient, theCase: PushableCase) =>
+  casesClient.cases.push({
+    caseId: theCase.id,
+    connectorId: theCase.connector.id,
+    pushType: 'automatic',
+  });
 
 /**
  * Creates a standardized handler for cases workflow steps.
@@ -57,11 +85,7 @@ export function createCasesStepHandler<
       );
 
       if (context.config['push-case']) {
-        await casesClient.cases.push({
-          caseId: theCase.id,
-          connectorId: theCase.connector.id,
-          pushType: 'automatic',
-        });
+        await pushCase(casesClient, theCase);
       }
 
       return {

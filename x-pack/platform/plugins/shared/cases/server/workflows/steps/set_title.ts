@@ -13,26 +13,16 @@ import {
 } from '../../../common/workflows/steps/set_title';
 import type { CasesClient } from '../../client';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
-import { updateSingleCase } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setTitleStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...setTitleStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<SetTitleStepInput>(
       getCasesClient,
-      async (client, input: SetTitleStepInput) =>
-        updateSingleCase(client, {
-          caseId: input.case_id,
-          version: input.version,
-          updates: { title: input.title },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-        }),
-      {
-        onError: (_error, input: SetTitleStepInput) =>
-          new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
-      }
+      (input) => ({ title: input.title }),
+      UPDATE_CASE_FAILED_MESSAGE
     ),
   });

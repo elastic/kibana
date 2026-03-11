@@ -15,9 +15,10 @@ const createContext = (input: unknown) =>
 
 describe('addObservablesStepDefinition', () => {
   it('adds observables to a case', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkAddObservables = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { bulkAddObservables },
+      cases: { get, bulkAddObservables },
     } as unknown as CasesClient);
     const definition = addObservablesStepDefinition(getCasesClient);
 
@@ -29,6 +30,7 @@ describe('addObservablesStepDefinition', () => {
     );
 
     expect(definition.id).toBe('cases.addObservables');
+    expect(get).toHaveBeenCalledWith({ id: 'case-1', includeComments: false });
     expect(bulkAddObservables).toHaveBeenCalledWith({
       caseId: 'case-1',
       observables: [{ typeKey: 'ip', value: '10.0.0.8', description: null }],

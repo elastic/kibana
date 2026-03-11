@@ -88,7 +88,7 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_tag').then((m) => m.addTagStepDefinition)
+    import('./add_tags').then((m) => m.addTagsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>

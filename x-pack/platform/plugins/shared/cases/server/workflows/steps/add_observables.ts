@@ -13,7 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_observables';
 import type { CasesClient } from '../../client';
 import { ADD_OBSERVABLES_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
+import { createCaseIdOnError, createCasesStepHandler } from './utils';
 
 export const addObservablesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -23,6 +23,11 @@ export const addObservablesStepDefinition = (
     handler: createCasesStepHandler(
       getCasesClient,
       async (client, input: AddObservablesStepInput) => {
+        await client.cases.get({
+          id: input.case_id,
+          includeComments: false,
+        });
+
         const updatedCase = await client.cases.bulkAddObservables({
           caseId: input.case_id,
           observables: input.observables.map((observable) => ({
@@ -35,8 +40,7 @@ export const addObservablesStepDefinition = (
         return addObservablesStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
       },
       {
-        onError: (_error, input: AddObservablesStepInput) =>
-          new Error(ADD_OBSERVABLES_FAILED_MESSAGE(input.case_id)),
+        onError: createCaseIdOnError<AddObservablesStepInput>(ADD_OBSERVABLES_FAILED_MESSAGE),
       }
     ),
   });
