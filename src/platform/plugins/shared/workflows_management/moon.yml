@@ -89,6 +89,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
 tags:
   - plugin
   - prod
