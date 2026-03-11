@@ -12,7 +12,7 @@ import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { WATCHLISTS_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
-import { GetWatchlistRequestParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
+import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getRequestSavedObjectClient } from '../../shared/utils';
 
@@ -39,7 +39,7 @@ export const deleteWatchlistRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: GetWatchlistRequestParams,
+            params: WatchlistIdParams,
           },
         },
       },
