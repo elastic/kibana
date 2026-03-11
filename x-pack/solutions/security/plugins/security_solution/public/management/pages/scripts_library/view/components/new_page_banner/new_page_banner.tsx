@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -14,28 +14,36 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  type EuiIconProps,
+  useEuiTheme,
 } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { ScriptPageBannerIcon } from './banner_icon';
-
-export type BannerIconProps = Omit<EuiIconProps, 'type'>;
-
-export const BannerIcon = () => {
-  return <EuiIcon type={ScriptPageBannerIcon} size="xxl" aria-hidden={true} />;
-};
+import { ScriptIcon } from './script_icon';
 
 interface NewPageBannerProps {
   onDismiss: () => void;
   'data-test-subj'?: string;
 }
 
+export const Icon = () => {
+  const isDarkMode = useKibanaIsDarkMode();
+  return <ScriptIcon fill={isDarkMode ? '#fff' : undefined} height={24} />;
+};
+
 export const NewPageBanner: React.FC<NewPageBannerProps> = ({
   onDismiss,
   'data-test-subj': dataTestSubj,
 }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const { euiTheme } = useEuiTheme();
+
+  const bannerStyle = useMemo(
+    () => ({
+      borderRadius: euiTheme.border.radius.medium,
+    }),
+    [euiTheme]
+  );
   return (
     <>
       <EuiCallOut
@@ -43,32 +51,29 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
         color="primary"
         onDismiss={onDismiss}
         data-test-subj={getTestId('new-page-banner')}
+        style={bannerStyle}
       >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
-          <EuiFlexItem grow={false} alignSelf="flexStart" data-test-subj={getTestId('banner-icon')}>
-            <BannerIcon />
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
+          <EuiFlexItem grow={false} data-test-subj={getTestId('banner-icon')}>
+            <EuiIcon type={Icon} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj={getTestId('info-text')}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.title"
-                      defaultMessage="New: Scripts library"
-                    />
-                  </h4>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h4>
                 <FormattedMessage
-                  id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.description"
-                  defaultMessage="Create and manage reusable scripts that can be run on endpoints during investigations and response."
+                  id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.title"
+                  defaultMessage="New: Scripts library"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              </h4>
+            </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} alignSelf="flexEnd">
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.description"
+              defaultMessage="Create and manage reusable scripts that can be run on endpoints during investigations and response."
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiLink
               href="https://www.elastic.co/guide/en/security/current/scripts-library.html"
               target="_blank"
