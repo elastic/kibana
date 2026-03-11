@@ -163,6 +163,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         runTestsForEachScenario(streamConvertedToLogsDBIndex, 'logsdb', (indexes) => {
+          it(`should visualize a date histogram chart using a different date field`, async () => {
+            await lens.configureDimension({
+              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+              operation: 'date_histogram',
+              field: 'utc_time',
+            });
+
+            // check the counter field works
+            await lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'min',
+              field: `bytes`,
+            });
+
+            await lens.waitForVisualization('xyVisChart');
+            const data = await lens.getCurrentChartDebugState('xyVisChart');
+            const bars = data?.bars![0].bars;
+
+            log.info('Check counter data before the upgrade');
+            // check there's some data before the upgrade
+            expect(bars?.[0].y).to.be.above(0);
+            log.info('Check counter data after the upgrade');
+            // check there's some data after the upgrade
+            expect(bars?.[bars.length - 1].y).to.be.above(0);
+          });
+
+          it('should visualize an annotation layer from a logsDB stream', async () => {
+            await lens.configureDimension({
+              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+              operation: 'date_histogram',
+              field: 'utc_time',
+            });
+
+            // check the counter field works
+            await lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'min',
+              field: `bytes`,
+            });
+            await lens.createLayer('annotations');
+
+            await lens.assertLayerCount(2);
+            // switch to the annotation tab
+            await lens.ensureLayerTabIsActive(1);
+            expect(
+              await (
+                await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+              ).getVisibleText()
+            ).to.eql('Event');
+            await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+            await testSubjects.click('lnsXY_annotation_query');
+            await lens.configureQueryAnnotation({
+              queryString: 'host.name: *',
+              timeField: '@timestamp',
+              textDecoration: { type: 'name' },
+              extraFields: ['host.name', 'utc_time'],
+            });
+            await lens.closeDimensionEditor();
+
+            await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+            await lens.removeLayer(1);
+          });
+
           it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
             await lens.configureDimension({
               dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

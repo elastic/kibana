@@ -118,5 +118,103 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
     });
+
+    it('should convert metric with params', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        await lens.assertLayerCount(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql(
+          'Counter rate of machine.ram per second'
+        );
+      });
+    });
+
+    it('should not allow converting of not valid panel', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await header.waitUntilLoadingHasFinished();
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
+    });
+
+    it('should not allow converting of unsupported aggregations', async () => {
+      await visualBuilder.selectAggType('Sum of Squares');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
+    });
+
+    it('should convert parent pipeline aggregation with terms', async () => {
+      await visualBuilder.createNewAgg();
+
+      await visualBuilder.selectAggType('Cumulative Sum', 1);
+      await visualBuilder.setFieldForAggregation('Count', 1);
+
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        await lens.assertLayerCount(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(3);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql('Cumulative sum of Records');
+        expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
+      });
+    });
+
+    it('should convert sibling pipeline aggregation with terms', async () => {
+      await visualBuilder.createNewAgg();
+
+      await visualBuilder.selectAggType('Overall Average', 1);
+      await visualBuilder.setFieldForAggregation('Count', 1);
+
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        await lens.assertLayerCount(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(3);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql('overall_average(count())');
+        expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
+      });
+    });
+
+    it('should bring the ignore global filters configured at series level over', async () => {
+      await visualBuilder.clickSeriesOption();
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('timeSeries');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
   });
 }

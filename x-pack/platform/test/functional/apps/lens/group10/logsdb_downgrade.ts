@@ -6,16 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
   getDataMapping,
   getDocsGenerator,
   setupScenarioRunner,
+  TIME_PICKER_FORMAT,
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { lens, timePicker } = getPageObjects(['lens', 'timePicker']);
+  const { common, lens, discover, header, timePicker } = getPageObjects([
+    'common',
+    'lens',
+    'discover',
+    'header',
+    'timePicker',
+  ]);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
@@ -23,6 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataStreams = getService('dataStreams');
   const indexPatterns = getService('indexPatterns');
   const esArchiver = getService('esArchiver');
+  const monacoEditor = getService('monacoEditor');
+  const retry = getService('retry');
+
   const createDocs = getDocsGenerator(log, es, 'logsdb');
 
   describe('lens logsdb downgrade', function () {
@@ -237,6 +248,77 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
             await lens.removeLayer(1);
+          });
+
+          it('should visualize an annotation layer from a logsDB stream using another time field', async () => {
+            await lens.configureDimension({
+              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+              operation: 'date_histogram',
+              field: 'utc_time',
+            });
+
+            // check the counter field works
+            await lens.configureDimension({
+              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+              operation: 'min',
+              field: `bytes`,
+            });
+            await lens.createLayer('annotations');
+
+            await lens.assertLayerCount(2);
+            // switch to the annotation tab
+            await lens.ensureLayerTabIsActive(1);
+            expect(
+              await (
+                await testSubjects.find('lnsXY_xAnnotationsPanel > lns-dimensionTrigger')
+              ).getVisibleText()
+            ).to.eql('Event');
+            await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+            await testSubjects.click('lnsXY_annotation_query');
+            await lens.configureQueryAnnotation({
+              queryString: 'host.name: *',
+              timeField: 'utc_time',
+              textDecoration: { type: 'name' },
+              extraFields: ['host.name', '@timestamp'],
+            });
+            await lens.closeDimensionEditor();
+
+            await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+            await lens.removeLayer(1);
+          });
+
+          it('should visualize correctly ES|QL queries based on a LogsDB stream', async () => {
+            await common.navigateToApp('discover');
+            await discover.selectTextBaseLang();
+
+            await lens.goToTimeRange(
+              fromTimeForScenarios,
+              moment
+                .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
+                .add(2, 'hour')
+                .format(TIME_PICKER_FORMAT)
+            );
+
+            await header.waitUntilLoadingHasFinished();
+            await monacoEditor.setCodeEditorValue(
+              `from ${indexes
+                .map(({ index }) => index)
+                .join(', ')} | stats averageB = avg(bytes) by extension`
+            );
+            await testSubjects.click('querySubmitButton');
+            await header.waitUntilLoadingHasFinished();
+            await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+
+            await header.waitUntilLoadingHasFinished();
+
+            await retry.waitFor('lens flyout', async () => {
+              const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+              return (
+                dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB'
+              );
+            });
+
+            await common.navigateToApp('lens');
           });
         });
       });

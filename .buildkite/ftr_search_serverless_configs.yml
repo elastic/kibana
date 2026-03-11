@@ -57,5 +57,13 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group33.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group34.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group35.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group36.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group37.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group38.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group39.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group40.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group41.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group42.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group43.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.1.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.2.ts
