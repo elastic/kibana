@@ -11,10 +11,6 @@ import semverRcompare from 'semver/functions/rcompare';
 import semverGt from 'semver/functions/gt';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import pRetry from 'p-retry';
-
-import { LockAcquisitionError } from '@kbn/lock-manager';
-
 import { appContextService } from '../../../../app_context';
 
 import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
@@ -77,7 +73,6 @@ export async function stepResolveDependencies(context: InstallContext) {
               spaceId: context.spaceId,
               force: context.force,
               prerelease: isPrerelease,
-              isDependency: true,
             });
           }
         },
@@ -86,12 +81,7 @@ export async function stepResolveDependencies(context: InstallContext) {
     });
   };
 
-  // When installing as a dependency we are already under the parent's lock; skip re-acquiring to avoid LockAcquisitionError
-  if (context.isDependency) {
-    await stepBody();
-  } else {
-    await _runWithLock(stepBody);
-  }
+  await stepBody();
 }
 
 async function verifyPackageDependencies(
@@ -117,23 +107,6 @@ async function verifyPackageDependencies(
       }
     },
     { concurrency: 10 }
-  );
-}
-
-export async function _runWithLock(stepFn: () => Promise<void>) {
-  return await pRetry(
-    () =>
-      appContextService
-        .getLockManagerService()!
-        .withLock('package-resolve-dependencies', () => stepFn()),
-    {
-      onFailedAttempt: async (error) => {
-        if (!(error instanceof LockAcquisitionError)) {
-          throw error;
-        }
-      },
-      maxRetryTime: 30 * 1000, // Retry for 30s to get the lock
-    }
   );
 }
 

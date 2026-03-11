@@ -27,7 +27,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     force,
     verificationResult,
     installedPkg,
-    isDependency,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
@@ -63,7 +62,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
             installSource,
             verificationResult,
             previousVersion,
-            isDependency,
             dependencies,
           })
         );
@@ -88,7 +86,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
           installSource,
           verificationResult,
           previousVersion,
-          isDependency,
           dependencies,
         })
       );
@@ -103,7 +100,6 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         installSource,
         spaceId,
         verificationResult,
-        isDependency,
         dependencies,
       })
     );

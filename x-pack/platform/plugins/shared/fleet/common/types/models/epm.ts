@@ -748,7 +748,6 @@ export interface Installation {
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
   dependencies?: PackageDependencies | null;
-  is_dependency?: boolean;
 }
 
 export interface PackageUsageStats {

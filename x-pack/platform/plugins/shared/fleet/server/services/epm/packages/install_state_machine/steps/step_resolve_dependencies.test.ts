@@ -198,7 +198,6 @@ describe('stepResolveDependencies', () => {
     expect(mockedInstallPackage).toHaveBeenCalledWith(
       expect.objectContaining({
         pkgkey: 'dep-a-1.2.0',
-        isDependency: true,
         spaceId: 'default',
       })
     );
@@ -241,7 +240,6 @@ describe('stepResolveDependencies', () => {
     expect(mockedInstallPackage).toHaveBeenCalledWith(
       expect.objectContaining({
         pkgkey: 'dep-a-1.5.0',
-        isDependency: true,
       })
     );
   });

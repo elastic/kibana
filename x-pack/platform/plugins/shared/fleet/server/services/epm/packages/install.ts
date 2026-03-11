@@ -412,7 +412,6 @@ interface InstallRegistryPackageParams {
   keepFailedInstallation?: boolean;
   useStreaming?: boolean;
   automaticInstall?: boolean;
-  isDependency?: boolean;
   skipDependencyCheck?: boolean;
 }
 
@@ -499,7 +498,6 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
-  isDependency,
   skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
@@ -607,7 +605,6 @@ async function installPackageFromRegistry({
       useStreaming,
       keepFailedInstallation,
       automaticInstall,
-      isDependency,
       skipDependencyCheck,
     });
   } catch (e) {
@@ -652,7 +649,6 @@ export async function installPackageWithStateMachine(options: {
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
   automaticInstall?: boolean;
-  isDependency?: boolean;
   skipDependencyCheck?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
@@ -676,7 +672,6 @@ export async function installPackageWithStateMachine(options: {
     useStreaming,
     keepFailedInstallation,
     automaticInstall,
-    isDependency,
     skipDependencyCheck,
   } = options;
   let { telemetryEvent } = options;
@@ -802,7 +797,6 @@ export async function installPackageWithStateMachine(options: {
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
-      isDependency,
       skipDependencyCheck,
     })
       .then(async (assets) => {
@@ -972,7 +966,6 @@ export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
   retryFromLastState?: boolean;
-  isDependency?: boolean;
   skipDependencyCheck?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
@@ -1008,7 +1001,6 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
-      isDependency,
       skipDependencyCheck,
     } = args;
 
@@ -1055,7 +1047,6 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
-      isDependency,
       skipDependencyCheck,
     });
 
@@ -1221,7 +1212,6 @@ export async function restartInstallation(options: {
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
   previousVersion?: string | null;
-  isDependency?: boolean;
   dependencies?: PackageDependencies | null;
 }) {
   const {
@@ -1231,7 +1221,6 @@ export async function restartInstallation(options: {
     installSource,
     verificationResult,
     previousVersion,
-    isDependency,
     dependencies,
   } = options;
 
@@ -1241,7 +1230,6 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
-    ...(isDependency !== undefined ? { is_dependency: isDependency } : {}),
     ...(dependencies ? { dependencies } : {}),
   };
 
@@ -1269,17 +1257,10 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
-  isDependency?: boolean;
   dependencies?: PackageDependencies | null;
 }) {
-  const {
-    savedObjectsClient,
-    packageInfo,
-    installSource,
-    verificationResult,
-    dependencies,
-    isDependency,
-  } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult, dependencies } =
+    options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1310,7 +1291,6 @@ export async function createInstallation(options: {
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
     ...(dependencies ? { dependencies } : {}),
-    ...(isDependency !== undefined ? { is_dependency: isDependency } : {}),
   };
 
   if (verificationResult) {
