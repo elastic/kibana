@@ -13,7 +13,15 @@ import type { Logger } from '@kbn/core/server';
 import { connectorModelVersions } from './connector_model_versions';
 
 describe('Connector Model Versions', () => {
-  const version = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
+  describe('version 1', () => {
+    it('has correct structure', () => {
+      const version1 = connectorModelVersions['1'] as SavedObjectsFullModelVersion;
+      expect(version1).toBeDefined();
+      expect(version1.changes).toEqual([]);
+      expect(version1.schemas).toBeDefined();
+      expect(version1.schemas?.create).toBeDefined();
+    });
+  });
 
   describe('version 2', () => {
     const version2 = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
@@ -35,7 +43,7 @@ describe('Connector Model Versions', () => {
     });
 
     describe('backfillFn', () => {
-      const backfillChange = version.changes.find((change) => change.type === 'data_backfill');
+      const backfillChange = version2.changes.find((change) => change.type === 'data_backfill');
       const backfillFn =
         backfillChange && backfillChange.type === 'data_backfill'
           ? backfillChange.backfillFn
