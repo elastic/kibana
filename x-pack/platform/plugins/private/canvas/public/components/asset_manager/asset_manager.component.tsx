@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { ASSET_MAX_SIZE } from '../../../common/lib/constants';
 import { Loading } from '../loading';
 import { Asset } from './asset';
-import { AssetType } from '../../../types';
+import type { AssetType } from '../../../types';
 
 const strings = {
   getDescription: () =>
@@ -171,10 +171,4 @@ export const AssetManager: FC<Props> = (props) => {
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-AssetManager.propTypes = {
-  assets: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
 };

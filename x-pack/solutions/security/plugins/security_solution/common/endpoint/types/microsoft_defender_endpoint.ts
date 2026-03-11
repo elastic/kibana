@@ -31,3 +31,11 @@ export interface MicrosoftDefenderEndpointLogEsDoc {
     defender_endpoint: Record<string, unknown>;
   };
 }
+
+export interface MicrosoftDefenderEndpointActionRequestFileMeta
+  extends MicrosoftDefenderEndpointActionRequestCommonMeta {
+  // Timestamp of when the file was created
+  createdAt: string;
+  // Name of the file
+  filename: string;
+}

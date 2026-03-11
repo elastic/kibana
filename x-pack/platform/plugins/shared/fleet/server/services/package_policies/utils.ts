@@ -38,7 +38,12 @@ export const mapPackagePolicySavedObjectToPackagePolicy = ({
   attributes,
   namespaces,
 }: SavedObject<PackagePolicySOAttributes>): PackagePolicy => {
-  const { bump_agent_policy_revision: bumpAgentPolicyRevision, ...restAttributes } = attributes;
+  const {
+    bump_agent_policy_revision: bumpAgentPolicyRevision,
+    latest_revision: latestRevision,
+    inputs_for_versions: inputsForVersions,
+    ...restAttributes
+  } = attributes;
   return {
     id,
     version,
@@ -108,7 +113,7 @@ export async function canUseOutputForIntegration(
       allowedOutputTypesForPackagePolicy.includes(type)
     );
 
-    const output = await outputService.get(soClient, outputId);
+    const output = await outputService.get(outputId);
 
     if (!allowedOutputTypes.includes(output.type)) {
       return {
@@ -124,7 +129,7 @@ export async function canUseOutputForIntegration(
   };
 }
 
-export function canDeployAsAgentlessOrThrow(
+export function canDeployCustomPackageAsAgentlessOrThrow(
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ) {

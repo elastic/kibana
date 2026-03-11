@@ -8,17 +8,12 @@
 import React from 'react';
 import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
-import { NormalizedField, Field as FieldType } from '../../../../types';
-import {
-  UseField,
-  UseMultiFields,
-  FieldHook,
-  FormDataProvider,
-  RangeField,
-} from '../../../../shared_imports';
+import type { NormalizedField, Field as FieldType } from '../../../../types';
+import type { FieldHook } from '../../../../shared_imports';
+import { UseField, UseMultiFields, FormDataProvider, RangeField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
@@ -208,6 +203,7 @@ export const TextType = React.memo(({ field, kibanaVersion }: Props) => {
                       <>
                         <EuiSpacer size="s" />
                         <EuiCallOut
+                          announceOnMount
                           title={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.positionsErrorTitle',
                             {

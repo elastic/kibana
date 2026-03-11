@@ -68,16 +68,16 @@ export interface AssigneesProps {
   onAssigneesUpdated?: () => void;
 
   /**
-   * Boolean to indicate whether it is a preview flyout
+   * Boolean to indicate whether to show assignees
    */
-  isPreview?: boolean;
+  showAssignees?: boolean;
 }
 
 /**
  * Document assignees details displayed in flyout right section header
  */
 export const Assignees = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }: AssigneesProps) => {
+  ({ eventId, assignedUserIds, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
@@ -157,7 +157,7 @@ export const Assignees = memo(
 
     return (
       <>
-        {isPreview ? (
+        {!showAssignees ? (
           <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
         ) : (
           <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>

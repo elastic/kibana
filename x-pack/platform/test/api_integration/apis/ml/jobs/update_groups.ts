@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { Group } from '@kbn/ml-plugin/common/types/groups';
 import type { UpdateGroupsRequest } from '@kbn/ml-plugin/common/types/job_service';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';
 import { SINGLE_METRIC_JOB_CONFIG, MULTI_METRIC_JOB_CONFIG } from './common_jobs';
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Failing: See https://github.com/elastic/kibana/issues/161324
   describe.skip('update groups', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const job of testSetupJobConfigs) {

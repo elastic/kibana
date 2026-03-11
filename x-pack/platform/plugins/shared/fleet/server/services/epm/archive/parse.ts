@@ -131,6 +131,9 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'elasticsearch',
   'description',
   'format_version',
+  'discovery',
+  'var_groups',
+  'deprecated',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -264,7 +267,7 @@ export function parseAndVerifyArchive(
   const parsed: ArchivePackage = { ...reqGiven, ...optGiven };
 
   // Package name and version from the manifest must match those from the toplevel directory
-  logger.debug(`Verifying archive - parsing manifest: ${parsed}`);
+  logger.debug(`Verifying archive - parsing manifest: ${parsed.name} - ${parsed.version}`);
   const pkgKey = pkgToPkgKey({ name: parsed.name, version: parsed.version });
 
   if (!topLevelDirOverride && toplevelDir !== pkgKey) {

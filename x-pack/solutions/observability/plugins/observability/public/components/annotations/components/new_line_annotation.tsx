@@ -10,7 +10,7 @@ import moment from 'moment';
 import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
@@ -88,7 +88,11 @@ export function ObsLineAnnotation({
           <AnnotationIcon annotation={annotation} />
         </span>
       }
-      markerBody={<EuiText>{annotation.annotation?.title ?? annotation.message}</EuiText>}
+      markerBody={
+        <EuiText data-test-subj="annotation-marker-body">
+          {annotation.annotation?.title ?? annotation.message}
+        </EuiText>
+      }
       markerPosition={annotation.annotation.style?.line?.iconPosition ?? 'top'}
       customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />

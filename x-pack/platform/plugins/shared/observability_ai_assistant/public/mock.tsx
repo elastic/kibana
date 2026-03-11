@@ -8,12 +8,12 @@ import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
   ChatCompletionChunkEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
-import { ScreenContextActionDefinition } from '../common/types';
+import type { ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -22,7 +22,7 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils/builders';
-import { FunctionDefinition } from '../common';
+import type { FunctionDefinition } from '../common';
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
@@ -79,6 +79,8 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
+      getConnector: () => undefined,
+      isConnectorSelectionRestricted: false,
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),

@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { SupertestReturnType } from '../../common/apm_api_supertest';
+import type { SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expect(response.body.items.length).to.be.greaterThan(0);
           });
 
-          it('some items have a health status set', () => {
+          it('all items have a health status set', () => {
             // Under the assumption that the loaded archive has
             // at least one APM ML job, and the time range is longer
             // than 15m, at least one items should have a health status
@@ -81,7 +81,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expectSnapshot(healthStatuses).toMatchInline(`
               Array [
-                undefined,
                 "healthy",
                 "healthy",
                 "healthy",

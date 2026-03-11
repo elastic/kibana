@@ -689,6 +689,11 @@ components:
                     id: 6724a474-cbba-41ef-a1aa-66aebf0879e2
                     query: select * from uptime;
                     saved_query_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                result_counts:
+                  error_agents: 0
+                  responded_agents: 1
+                  successful_agents: 1
+                  total_rows: 42
                 user_id: elastic
       type: object
       properties: {}

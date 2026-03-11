@@ -237,16 +237,6 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.testSubjects.click('dropPartialBucketsCheckbox');
   }
 
-  public async expectMarkdownTextArea() {
-    await this.testSubjects.existOrFail('markdownTextarea');
-  }
-
-  public async setMarkdownTxt(markdownTxt: string) {
-    const input = await this.testSubjects.find('markdownTextarea');
-    await input.clearValue();
-    await input.type(markdownTxt);
-  }
-
   public async isSwitchChecked(selector: string) {
     const checkbox = await this.testSubjects.find(selector);
     const isChecked = await checkbox.getAttribute('aria-checked');

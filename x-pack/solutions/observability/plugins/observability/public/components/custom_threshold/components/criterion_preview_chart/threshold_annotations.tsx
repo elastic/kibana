@@ -8,7 +8,8 @@ import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/c
 import { first, last } from 'lodash';
 import React from 'react';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
+import type { Color } from '../../../../../common/custom_threshold_rule/color_palette';
+import { colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 
 interface ThresholdAnnotationsProps {
   threshold: number[];

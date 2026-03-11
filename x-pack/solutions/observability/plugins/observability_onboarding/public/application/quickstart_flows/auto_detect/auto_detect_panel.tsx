@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, type FunctionComponent } from 'react';
+import React, { useState, useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -23,6 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -30,11 +31,18 @@ import { AccordionWithIcon } from '../shared/accordion_with_icon';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { GetStartedPanel } from '../shared/get_started_panel';
+import {
+  WiredStreamsIngestionSelector,
+  type IngestionMode,
+} from '../shared/wired_streams_ingestion_selector';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { usePricingFeature } from '../shared/use_pricing_feature';
+import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
+import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
@@ -44,11 +52,35 @@ export const AutoDetectPanel: FunctionComponent = () => {
     ),
   });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
-  const command = data ? getAutoDetectCommand(data) : undefined;
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const useWiredStreams = ingestionMode === 'wired';
+
+  const command = data
+    ? getAutoDetectCommand({
+        scriptDownloadUrl: data.scriptDownloadUrl,
+        onboardingId: data.onboardingFlow.id,
+        kibanaUrl: data.kibanaUrl,
+        installApiKey: data.installApiKey,
+        ingestApiKey: data.ingestApiKey,
+        elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
+        metricsEnabled: metricsOnboardingEnabled,
+        useWiredStreams,
+      })
+    : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share },
+    services: { share, docLinks },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
   useEffect(() => {
@@ -89,17 +121,38 @@ export const AutoDetectPanel: FunctionComponent = () => {
               <>
                 <EuiText>
                   <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                      {
-                        defaultMessage: "We'll scan your host for logs and metrics, including:",
-                      }
-                    )}
+                    {metricsOnboardingEnabled
+                      ? i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs and metrics, including:",
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs, including:",
+                          }
+                        )}
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
                 <SupportedIntegrationsList />
-                <EuiSpacer />
+                <EuiSpacer size="xl" />
+                {!isWiredStreamsLoading && (
+                  <>
+                    <WiredStreamsIngestionSelector
+                      ingestionMode={ingestionMode}
+                      onChange={setIngestionMode}
+                      streamsDocLink={docLinks?.links.observability.logsStreams}
+                      isWiredStreamsEnabled={isWiredStreamsEnabled}
+                      isEnabling={isEnabling}
+                      flowType="auto_detect"
+                      onEnableWiredStreams={enableWiredStreams}
+                    />
+                    <EuiSpacer size="xl" />
+                  </>
+                )}
                 {/* Bash syntax highlighting only highlights a few random numbers (badly) so it looks less messy to go with plain text */}
                 <EuiCodeBlock
                   paddingSize="m"
@@ -175,7 +228,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         switch (integration.pkgName) {
                           case 'system':
                             actionLinks =
-                              assetDetailsLocator !== undefined
+                              metricsOnboardingEnabled && assetDetailsLocator !== undefined
                                 ? [
                                     {
                                       id: 'inventory-host-details',
@@ -193,8 +246,8 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                         }
                                       ),
                                       href: assetDetailsLocator.getRedirectUrl({
-                                        assetType: 'host',
-                                        assetId: integration.metadata?.hostname,
+                                        entityType: 'host',
+                                        entityId: integration.metadata?.hostname,
                                         assetDetails: {
                                           dateRange: {
                                             from: 'now-15m',
@@ -204,19 +257,68 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                       }),
                                     },
                                   ]
-                                : [];
+                                : [
+                                    {
+                                      id: 'inventory-host-details',
+                                      title: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsTitle',
+                                        {
+                                          defaultMessage: 'View and analyze system logs',
+                                        }
+                                      ),
+                                      label: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsLabel',
+                                        {
+                                          defaultMessage: 'Explore logs',
+                                        }
+                                      ),
+                                      href:
+                                        logsLocator?.getRedirectUrl({
+                                          dataViewSpec: {
+                                            name: integration.pkgName,
+                                            title: `logs-system*`,
+                                            timeFieldName: '@timestamp',
+                                          },
+                                        }) ?? '',
+                                    },
+                                  ];
                             break;
                           default:
                             actionLinks =
-                              dashboardLocator !== undefined
+                              dashboardLocator !== undefined && logsLocator !== undefined
                                 ? integration.kibanaAssets
                                     .filter((asset) => asset.type === 'dashboard')
                                     .map((asset) => {
                                       const dashboard =
                                         DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-                                      const href = dashboardLocator.getRedirectUrl({
-                                        dashboardId: asset.id,
-                                      });
+
+                                      if (
+                                        dashboard.type === 'metrics' &&
+                                        !metricsOnboardingEnabled
+                                      ) {
+                                        return {
+                                          id: asset.id,
+                                          title: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataDiscoverTitle',
+                                            {
+                                              defaultMessage: 'View and analyze your logs',
+                                            }
+                                          ),
+                                          label: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDiscoverDataLabel',
+                                            {
+                                              defaultMessage: 'Explore logs',
+                                            }
+                                          ),
+                                          href: logsLocator.getRedirectUrl({
+                                            dataViewSpec: {
+                                              name: integration.pkgName,
+                                              title: `logs-${integration.pkgName}*`,
+                                              timeFieldName: '@timestamp',
+                                            },
+                                          }),
+                                        };
+                                      }
 
                                       return {
                                         id: asset.id,
@@ -250,7 +352,9 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                                   defaultMessage: 'Explore logs data',
                                                 }
                                               ),
-                                        href,
+                                        href: dashboardLocator.getRedirectUrl({
+                                          dashboardId: asset.id,
+                                        }),
                                       };
                                     })
                                 : [];
@@ -313,13 +417,25 @@ export const AutoDetectPanel: FunctionComponent = () => {
                               <li key={`${integration.pkgName}/${datastream.dataset}`}>
                                 <EuiButtonEmpty
                                   data-test-subj="observabilityOnboardingAutoDetectPanelButton"
-                                  href={logsLocator?.getRedirectUrl({
-                                    dataViewSpec: {
-                                      name: integration.pkgName,
-                                      title: `${datastream.type}-${datastream.dataset}-*`,
-                                      timeFieldName: '@timestamp',
-                                    },
-                                  })}
+                                  href={
+                                    logsLocator?.getRedirectUrl(
+                                      useWiredStreams
+                                        ? {
+                                            dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC,
+                                            query: {
+                                              language: 'kuery',
+                                              query: `service.name: "${integration.pkgName}"`,
+                                            },
+                                          }
+                                        : {
+                                            dataViewSpec: {
+                                              name: integration.pkgName,
+                                              title: `${datastream.type}-${datastream.dataset}-*`,
+                                              timeFieldName: '@timestamp',
+                                            },
+                                          }
+                                    ) ?? ''
+                                  }
                                   target="_blank"
                                   iconType="document"
                                   isDisabled={status !== 'dataReceived'}

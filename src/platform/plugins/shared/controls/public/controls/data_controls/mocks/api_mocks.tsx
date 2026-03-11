@@ -9,21 +9,26 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-import type {
-  OptionsListDisplaySettings,
-  OptionsListSortingType,
-} from '../../../../common/options_list';
+import type { OptionsListDisplaySettings, OptionsListSortingType } from '@kbn/controls-schemas';
 import { initializeSelectionsManager } from '../options_list_control/selections_manager';
-import { OptionsListComponentApi } from '../options_list_control/types';
+import type { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import { initializeLabelManager } from '../../control_labels';
 
 export const getOptionsListContextMock = () => {
   const editorStateManager = initializeEditorStateManager({});
   const selectionsManager = initializeSelectionsManager({});
   const temporaryStateManager = initializeTemporayStateManager();
+
+  const fieldName$ = new BehaviorSubject<string>('field');
+  const labelManager = initializeLabelManager(
+    { title: 'Test', fieldName: 'field' },
+    { fieldName$ },
+    'fieldName'
+  );
   const field$ = new BehaviorSubject<DataViewField | undefined>({
     type: 'string',
   } as DataViewField);
@@ -33,20 +38,19 @@ export const getOptionsListContextMock = () => {
       ...editorStateManager.api,
       ...selectionsManager.api,
       ...temporaryStateManager.api,
+      ...labelManager.api,
       uuid: 'testControl',
       field$,
-      fieldName$: new BehaviorSubject<string>('field'),
+      fieldName$,
       sort$,
       setSort: (next: OptionsListSortingType | undefined) => {
         sort$.next(next);
       },
-      parentApi: {
-        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
-      },
+      parentApi: {},
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
-    } as unknown as OptionsListComponentApi,
+    } as unknown as Required<OptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
     testOnlyMethods: {
       setField: (next: DataViewField | undefined) => {

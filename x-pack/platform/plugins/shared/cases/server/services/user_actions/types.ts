@@ -21,7 +21,6 @@ import type {
   ConnectorUserAction,
   PushedUserAction,
   UserActionType,
-  CaseSettings,
   CaseSeverity,
   CaseStatuses,
   User,
@@ -36,10 +35,11 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
+import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 
 export interface BuilderParameters {
   title: {
@@ -68,7 +68,7 @@ export interface BuilderParameters {
     };
   };
   settings: {
-    parameters: { payload: { settings: CaseSettings } };
+    parameters: { payload: { settings: { syncAlerts?: boolean; extractObservables?: boolean } } };
   };
   comment: {
     parameters: {
@@ -95,6 +95,13 @@ export interface BuilderParameters {
   };
   customFields: {
     parameters: { payload: { customFields: CaseCustomFields } };
+  };
+  observables: {
+    parameters: {
+      payload: {
+        observables: { actionType: ObservablesActionType; count: number };
+      };
+    };
   };
 }
 
@@ -237,6 +244,51 @@ export interface UserActionsStatsAggsResult {
       doc_count: number;
     }>;
   };
+  deletions: {
+    doc_count: number;
+    deletions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  creations: {
+    doc_count: number;
+    creations: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  nonDeletedCommentUpdates: {
+    doc_count: number;
+    comments: {
+      doc_count: number;
+      byCommentId: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          reverse: {
+            doc_count: number;
+            hasDelete: {
+              doc_count: number;
+            };
+            updates: {
+              doc_count: number;
+              byCommentType: {
+                buckets: Array<{
+                  key: string;
+                  doc_count: number;
+                }>;
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {
@@ -291,6 +343,11 @@ export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDiffer
   newValue: T[];
 }
 
+export interface TypedUserActionItem<T> extends GetUserActionItemByDifference {
+  originalValue: T;
+  newValue: T;
+}
+
 export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
   items: Item[]
 ) => UserActionParameters<ActionType>['payload'];
@@ -309,7 +366,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

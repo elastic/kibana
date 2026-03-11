@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -17,13 +17,10 @@ import type {
   RuleAlertData,
   RawRule,
 } from '../types';
-import {
-  MaintenanceWindowStatus,
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
-} from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -83,6 +80,8 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
+  ALERT_MUTED,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
@@ -110,8 +109,10 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { createTaskRunnerLogger } from './lib';
 import type { SavedObject } from '@kbn/core/server';
-import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
+import {
+  getMockMaintenanceWindow,
+  maintenanceWindowsServiceMock,
+} from './maintenance_windows/maintenance_windows_service.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
@@ -128,7 +129,6 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
-let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
 
@@ -165,11 +165,12 @@ describe('Task Runner', () => {
     let mockedTaskInstance: ConcreteTaskInstance;
 
     beforeAll(() => {
-      fakeTimer = sinon.useFakeTimers();
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(DATE_1970));
       mockedTaskInstance = mockTaskInstance();
     });
 
-    afterAll(() => fakeTimer.restore());
+    afterAll(() => jest.useRealTimers());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -229,6 +230,7 @@ describe('Task Runner', () => {
       usageCounter: mockUsageCounter,
       isServerless: false,
       getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+      apiKeyType: ApiKeyType.ES,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -274,6 +276,7 @@ describe('Task Runner', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id1',
+              title: 'test-name1',
             },
             {
               ...getMockMaintenanceWindow(),
@@ -281,6 +284,7 @@ describe('Task Runner', () => {
               eventEndTime: new Date().toISOString(),
               status: MaintenanceWindowStatus.Running,
               id: 'test-id2',
+              title: 'test-name2',
             },
           ],
           maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id2'],
@@ -355,6 +359,8 @@ describe('Task Runner', () => {
             consumer: 'bar',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
+            muteAll: false,
+            mutedInstanceIds: [],
             name: 'rule-name',
             parameters: {
               bar: true,
@@ -625,10 +631,12 @@ describe('Task Runner', () => {
               [ALERT_CONSECUTIVE_MATCHES]: 1,
               [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
+              [ALERT_MUTED]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
               [ALERT_SEVERITY_IMPROVING]: false,
               [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-id1', 'test-id2'],
+              [ALERT_MAINTENANCE_WINDOW_NAMES]: ['test-name1', 'test-name2'],
               [ALERT_PENDING_RECOVERED_COUNT]: 0,
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',
@@ -865,6 +873,7 @@ describe('Task Runner', () => {
         });
 
         const ruleSpecificFlapping = {
+          enabled: false,
           lookBackWindow: 10,
           statusChangeThreshold: 10,
         };
@@ -884,14 +893,15 @@ describe('Task Runner', () => {
         expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             flappingSettings: {
-              enabled: true,
-              ...ruleSpecificFlapping,
+              enabled: false,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
             },
           })
         );
       });
 
-      test('should not use rule specific flapping settings if global flapping is disabled', async () => {
+      test('should still use rule specific flapping settings if global flapping is disabled', async () => {
         rulesSettingsService.getSettings.mockResolvedValue({
           flappingSettings: {
             enabled: false,
@@ -941,9 +951,9 @@ describe('Task Runner', () => {
         expect(mockAlertsClient.initializeExecution).toHaveBeenCalledWith(
           expect.objectContaining({
             flappingSettings: {
-              enabled: false,
-              lookBackWindow: 20,
-              statusChangeThreshold: 20,
+              enabled: true,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
             },
           })
         );

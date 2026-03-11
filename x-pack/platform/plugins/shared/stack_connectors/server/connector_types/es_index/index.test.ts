@@ -9,12 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type {
-  ActionParamsType,
-  ConnectorTypeConfigType,
-  ESIndexConnectorType,
-  ESIndexConnectorTypeExecutorOptions,
-} from '.';
+import type { ESIndexConnectorType, ESIndexConnectorTypeExecutorOptions } from '.';
 import { getConnectorType } from '.';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -22,6 +17,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/logging';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
+import type { ActionParamsType, ConnectorTypeConfigType } from '@kbn/connector-schemas/es_index';
 
 const services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
@@ -81,9 +77,10 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, { index: 666 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [index]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received number
+        → at index"
+    `);
     delete config.executionTimeField;
 
     expect(() => {
@@ -93,10 +90,9 @@ describe('config validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [executionTimeField]: types that failed validation:
-- [executionTimeField.0]: expected value of type [string] but got [boolean]
-- [executionTimeField.1]: expected value to equal [null]"
-`);
+      "error validating connector type config: ✖ Invalid input: expected string, received boolean
+        → at executionTimeField"
+    `);
 
     delete config.refresh;
     expect(() => {
@@ -105,9 +101,10 @@ describe('config validation', () => {
         { index: 'testing-123', refresh: 'foo' },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [refresh]: expected value of type [boolean] but got [string]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected boolean, received string
+        → at refresh"
+    `);
   });
 
   test('config validation fails when config is not valid', () => {
@@ -117,28 +114,10 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(connectorType, baseConfig, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
-    );
-  });
-});
-
-describe('params validation', () => {
-  test('params validation succeeds when params is valid', () => {
-    const params: Record<string, unknown> = {
-      documents: [{ rando: 'thing' }],
-      indexOverride: null,
-    };
-    expect(validateParams(connectorType, params, { configurationUtilities }))
-      .toMatchInlineSnapshot(`
-        Object {
-          "documents": Array [
-            Object {
-              "rando": "thing",
-            },
-          ],
-          "indexOverride": null,
-        }
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Unrecognized key: \\"indeX\\"
+      ✖ Invalid input: expected string, received undefined
+        → at index"
     `);
   });
 
@@ -146,14 +125,15 @@ describe('params validation', () => {
     expect(() => {
       validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [jim]: definition for this key is missing"`
+      `"error validating action params: ✖ Unrecognized key: \\"jim\\""`
     );
 
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [documents]: expected value of type [array] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected array, received undefined
+        → at documents"
+    `);
 
     expect(() => {
       validateParams(
@@ -161,9 +141,10 @@ describe('params validation', () => {
         { documents: ['should be an object'] },
         { configurationUtilities }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [documents.0]: could not parse record value from json input"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected record, received string
+        → at documents[0]"
+    `);
   });
 });
 
@@ -603,7 +584,7 @@ describe('execute()', () => {
         AlertHistoryEsIndexConnectorId
       )
     ).toThrowErrorMatchingInlineSnapshot(
-      `"error creating alert history document for ${AlertHistoryEsIndexConnectorId} connector"`
+      `"error creating alert history document for preconfigured-alert-history-es-index connector"`
     );
   });
 

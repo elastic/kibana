@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   Content,
   EnhancedGenerateContentResponse,
-  FinishReason,
   FunctionCallPart,
   FunctionResponsePart,
   InlineDataPart,
@@ -18,17 +17,13 @@ import {
   SafetyRating,
   TextPart,
 } from '@google/generative-ai';
-import {
-  AIMessageChunk,
-  BaseMessage,
-  ChatMessage,
-  isBaseMessage,
-  UsageMetadata,
-} from '@langchain/core/messages';
+import { FinishReason } from '@google/generative-ai';
+import type { BaseMessage, UsageMetadata } from '@langchain/core/messages';
+import { AIMessageChunk, ChatMessage, isBaseMessage } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
-import { Readable } from 'stream';
-import { StreamParser } from './types';
+import type { ToolCallChunk } from '@langchain/core/dist/messages/tool';
+import type { Readable } from 'stream';
+import type { StreamParser } from './types';
 
 export function convertResponseContentToChatGenerationChunk(
   response: EnhancedGenerateContentResponse,

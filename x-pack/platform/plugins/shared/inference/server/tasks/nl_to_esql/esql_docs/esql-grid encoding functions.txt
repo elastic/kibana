@@ -1,0 +1,70 @@
+# GRID ENCODING FUNCTIONS
+
+The GRID ENCODING FUNCTIONS calculate spatial grid encodings for a given geo_point at a specified precision. These include geotile, geohex (H3 cell-id), and geohash encodings. The result is long encoded and can be converted to a string, long, or geo_shape bounding geometry using TO_STRING, TO_LONG, or TO_GEOSHAPE respectively. These functions are related to the geo_grid query and the corresponding grid aggregations.
+
+## Syntax
+
+`GRID ENCODING FUNCTIONS(geometry, precision, bounds)`
+
+### Parameters
+
+#### geometry
+
+Expression of type `geo_point`. If `null`, the function returns `null`.
+
+#### precision
+
+Expression of type `integer`. If `null`, the function returns `null`. Valid values depend on the function:
+- ST_GEOTILE: 0 to 29
+- ST_GEOHEX: 0 to 15
+- ST_GEOHASH: 1 to 12
+
+#### bounds
+
+Optional. Bounds to filter the grid tiles, specified as a `geo_shape` of type `BBOX`. Use `ST_ENVELOPE` if the `geo_shape` is of any other type.
+
+## Examples
+
+Calculates the geotile grid encoding for each airport location at precision 2, then aggregates by geotile, computes the count and centroid, converts the geotile to a string, sorts by count and geotile string, and keeps relevant fields.
+
+```esql
+FROM airports
+| EVAL geotile = ST_GEOTILE(location, 2)
+| STATS
+    count = COUNT(geotile),
+    centroid = ST_CENTROID_AGG(location)
+      BY geotile
+| EVAL geotileString = TO_STRING(geotile)
+| SORT count DESC, geotileString ASC
+| KEEP count, centroid, geotileString
+```
+
+Calculates the geohex (H3 cell-id) grid encoding for each airport location at precision 1, aggregates by geohex, computes the count and centroid, filters for cells with at least 10 airports, converts the geohex to a string, and sorts the results.
+
+```esql
+FROM airports
+| EVAL geohex = ST_GEOHEX(location, 1)
+| STATS
+    count = COUNT(geohex),
+    centroid = ST_CENTROID_AGG(location)
+      BY geohex
+| WHERE count >= 10
+| EVAL geohexString = TO_STRING(geohex)
+| KEEP count, centroid, geohexString
+| SORT count DESC, geohexString ASC
+```
+
+Calculates the geohash grid encoding for each airport location at precision 1, aggregates by geohash, computes the count and centroid, filters for geohashes with at least 10 airports, converts the geohash to a string, and sorts the results.
+
+```esql
+FROM airports
+| EVAL geohash = ST_GEOHASH(location, 1)
+| STATS
+    count = COUNT(geohash),
+    centroid = ST_CENTROID_AGG(location)
+      BY geohash
+| WHERE count >= 10
+| EVAL geohashString = TO_STRING(geohash)
+| KEEP count, centroid, geohashString
+| SORT count DESC, geohashString ASC
+```

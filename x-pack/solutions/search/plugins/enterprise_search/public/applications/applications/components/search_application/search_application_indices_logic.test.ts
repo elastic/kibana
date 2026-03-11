@@ -7,13 +7,11 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
-import {
-  SearchApplicationIndicesLogic,
-  SearchApplicationIndicesLogicValues,
-} from './search_application_indices_logic';
+import type { SearchApplicationIndicesLogicValues } from './search_application_indices_logic';
+import { SearchApplicationIndicesLogic } from './search_application_indices_logic';
 
 const DEFAULT_VALUES: SearchApplicationIndicesLogicValues = {
   addIndicesFlyoutOpen: false,

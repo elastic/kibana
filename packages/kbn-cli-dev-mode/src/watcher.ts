@@ -13,14 +13,14 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { ImportResolver } from '@kbn/import-resolver';
 import { makeMatcher } from '@kbn/picomatcher';
+import Path from 'path';
 
-import { Log } from './log';
+import type { Log } from './log';
 
 const packageMatcher = makeMatcher([
   '**/*',
   '!**/.*',
   '!x-pack/platform/plugins/shared/screenshotting/chromium/**',
-  '!x-pack/platform/plugins/private/canvas/shareable_runtime/**',
 ]);
 
 /**
@@ -28,6 +28,7 @@ const packageMatcher = makeMatcher([
  */
 const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
 const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
+const OPTIMIZER_RESTART_DEBOUNCE_MS = 1000;
 
 export interface Options {
   enabled: boolean;
@@ -42,6 +43,7 @@ export class Watcher {
   private readonly repoRoot: string;
   private readonly classifier: RepoSourceClassifier;
   private readonly restart$ = new Rx.Subject<void>();
+  private readonly restartOptimizer$ = new Rx.Subject<void>();
   private readonly resolver: ImportResolver;
 
   constructor(options: Options) {
@@ -53,6 +55,8 @@ export class Watcher {
   }
 
   run$ = new Rx.Observable((subscriber) => {
+    const optimizerRestartSignal$ = new Rx.Subject<string>();
+
     if (!this.enabled) {
       this.restart$.complete();
       subscriber.complete();
@@ -64,10 +68,47 @@ export class Watcher {
       this.restart$.next();
     };
 
+    const fireOptimizer = (repoRel: string) => {
+      optimizerRestartSignal$.next(repoRel);
+    };
+
+    subscriber.add(
+      optimizerRestartSignal$
+        .pipe(Rx.debounceTime(OPTIMIZER_RESTART_DEBOUNCE_MS))
+        .subscribe((repoRel) => {
+          this.log.warn(`restarting optimizer`, `due to changes in ${repoRel}`);
+          this.restartOptimizer$.next();
+        })
+    );
+
+    subscriber.add(() => {
+      optimizerRestartSignal$.complete();
+    });
+
     Pw.subscribe(
       this.repoRoot,
       (error, events) => {
         if (error) {
+          // NOTE: This error happens as a result of handling kFSEventStreamEventFlagMustScanSubDirs
+          // which is delivered by macOS if there are too many events and some of them have been dropped, either
+          // by the kernel or the user-space client. The application must assume that all files could have been
+          // modified, and ignore the cache in this case.
+          //
+          // This happens mainly when switching branches, running a package manager, or otherwise changing a lot of
+          // files at once. This results of a new handling introduced in parcel v2.5.1
+          //
+          // For now we are ignoring it and following the previous behaviour in place, if it does cause problems we can
+          // force restart the server
+          //
+          // Parcel PR: https://github.com/parcel-bundler/watcher/pull/196
+          if (
+            error.message &&
+            error.message.includes('Events were dropped by the FSEvents client')
+          ) {
+            return false;
+          }
+
+          // Other runtime errors should still fail
           subscriber.error(error);
           return;
         }
@@ -98,10 +139,14 @@ export class Watcher {
         // some basic high-level ignore statements. Additional filtering is done above
         // before paths are passed to `fire()`, using the RepoSourceClassifier mostly
         ignore: [
-          '**/{node_modules,target,public,coverage,__*__}/**',
+          '**/{node_modules,target,public,coverage,__*__,build,.chromium,.es,.yarn-local-mirror,.git,.github,.buildkite,.vscode,.idea}/**',
+          '**/{bazel-bin,bazel-kibana,bazel-out,bazel-testlogs}/**',
+          '**/{.cache,.temp,.tmp,temp,tmp}/**',
           '**/*.{test,spec,story,stories}.*',
-          '**/*.{http,md,sh,txt}',
-          '**/debug.log',
+          '**/*.{http,md,sh,txt,log,pid,swp,swo}',
+          '**/*~',
+          '**/.DS_Store',
+          '/data/**',
         ],
       }
     ).then(
@@ -116,13 +161,43 @@ export class Watcher {
       }
     );
 
+    const sharedDepsDir = Path.resolve(
+      this.repoRoot,
+      'target/build/src/platform/packages/private/kbn-ui-shared-deps-npm/shared_built_assets'
+    );
+    const manifestName = 'kbn-ui-shared-deps-npm-manifest.json';
+
+    // check for shared dependencies manifest update and restart Optimizer
+    Pw.subscribe(sharedDepsDir, (err, events) => {
+      if (err) return;
+
+      const isManifestChanged = events.some(
+        (e) =>
+          Path.basename(e.path) === manifestName && (e.type === 'update' || e.type === 'create')
+      );
+
+      if (isManifestChanged) {
+        fireOptimizer(Path.relative(this.repoRoot, Path.join(sharedDepsDir, manifestName)));
+      }
+    }).then(
+      (sub) => subscriber.add(() => sub.unsubscribe()),
+      () => {
+        // ignore errors, file might not exist
+      }
+    );
+
     // complete state subjects when run$ completes
     subscriber.add(() => {
       this.restart$.complete();
+      this.restartOptimizer$.complete();
     });
   });
 
   serverShouldRestart$() {
     return this.restart$.asObservable();
+  }
+
+  optimizerShouldRestart$() {
+    return this.restartOptimizer$.asObservable();
   }
 }

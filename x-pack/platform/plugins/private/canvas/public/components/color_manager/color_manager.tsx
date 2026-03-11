@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
@@ -94,12 +94,4 @@ export const ColorManager: FC<Props> = ({
       {buttons}
     </EuiFlexGroup>
   );
-};
-
-ColorManager.propTypes = {
-  hasButtons: PropTypes.bool,
-  onAddColor: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-  onRemoveColor: PropTypes.func,
-  value: PropTypes.string,
 };

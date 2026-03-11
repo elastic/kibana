@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEventHandler } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import type { IconType, CommonProps } from '@elastic/eui';
 
 export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
@@ -19,6 +19,7 @@ export interface MenuItem extends Pick<CommonProps, 'data-test-subj'> {
   isDisabled?: boolean;
   isDeprecated?: boolean;
   order: number;
+  MenuItem?: ReactNode;
 }
 
 export interface MenuItemGroup extends Pick<CommonProps, 'data-test-subj'> {

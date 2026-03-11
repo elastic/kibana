@@ -27,12 +27,12 @@ import {
 } from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
+import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 
 import * as i18n from './translations';
 
@@ -43,7 +43,7 @@ import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
-  scopeId?: string;
+  scopeId: string;
   data: UserItem;
   id: string;
   isInDetailsSidePanel: boolean;
@@ -56,6 +56,7 @@ export interface UserSummaryProps {
   userName: string;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
+  isFlyoutOpen?: boolean;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -83,6 +84,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     userName,
     indexPatterns,
     jobNameById,
+    isFlyoutOpen = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -265,13 +267,33 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+                render={(ip) =>
+                  ip != null ? (
+                    <FlyoutLink
+                      field={'host.ip'}
+                      value={ip}
+                      scopeId={scopeId}
+                      isFlyoutOpen={isFlyoutOpen}
+                    />
+                  ) : (
+                    getEmptyTagValue()
+                  )
+                }
               />
             ),
           },
         ],
       ],
-      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
+      [
+        data,
+        indexPatterns,
+        getDefaultRenderer,
+        contextID,
+        scopeId,
+        userName,
+        firstColumn,
+        isFlyoutOpen,
+      ]
     );
     return (
       <>

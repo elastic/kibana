@@ -8,19 +8,20 @@
  */
 
 import React from 'react';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
-import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
-import { mockPaletteOutput } from '../../common/__mocks__';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { LegendCellValueActions } from './legend_action_popover';
+import { LegendActionPopover } from './legend_action_popover';
+import { mockPaletteOutput } from '../../common/test_utils';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
+import type { RawValue } from '@kbn/data-plugin/common';
 
 const legendCellValueActions: LegendCellValueActions = [
   { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },
@@ -265,5 +266,102 @@ describe('getLegendAction', function () {
     expect(wrapper.find(LegendActionPopover).prop('legendCellValueActions')).toEqual(
       legendCellValueActions.map((action) => ({ ...action, execute: expect.any(Function) }))
     );
+  });
+
+  it('is not rendered if column has isComputedColumn set to true', () => {
+    const tableWithComputedColumn: Datatable = {
+      ...table,
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId' ? { ...col, isComputedColumn: true } : col
+      ),
+    };
+    const layerWithComputedColumn = { ...sampleLayer, table: tableWithComputedColumn };
+    const ComponentWithComputedColumn = getLegendAction(
+      [layerWithComputedColumn],
+      jest.fn(),
+      [legendCellValueActions],
+      {
+        first: {
+          splitSeriesAccessors: {
+            splitAccessorId: {
+              format: { id: 'string' },
+              formatter: {
+                convert(x: unknown) {
+                  return x;
+                },
+              } as FieldFormat,
+            },
+          },
+        } as unknown as LayerFieldFormats,
+      },
+      {
+        first: {
+          table: tableWithComputedColumn,
+          invertedRawValueMap,
+          formattedColumns: {},
+        },
+      },
+      {}
+    );
+    const newProps = {
+      ...wrapperProps,
+      series: [
+        {
+          seriesKeys: ["Women's Accessories", 'b'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
+        },
+      ] as unknown as SeriesIdentifier[],
+    };
+    wrapper = mountWithIntl(<ComponentWithComputedColumn {...newProps} />);
+    expect(wrapper).toEqual({});
+    expect(wrapper.find(EuiPopover).length).toBe(0);
+  });
+
+  it('is rendered if column has isComputedColumn set to false', () => {
+    const tableWithIndexField: Datatable = {
+      ...table,
+      columns: table.columns.map((col) =>
+        col.id === 'splitAccessorId' ? { ...col, isComputedColumn: false } : col
+      ),
+    };
+    const layerWithIndexField = { ...sampleLayer, table: tableWithIndexField };
+    const ComponentWithIndexField = getLegendAction(
+      [layerWithIndexField],
+      jest.fn(),
+      [legendCellValueActions],
+      {
+        first: {
+          splitSeriesAccessors: {
+            splitAccessorId: {
+              format: { id: 'string' },
+              formatter: {
+                convert(x: unknown) {
+                  return x;
+                },
+              } as FieldFormat,
+            },
+          },
+        } as unknown as LayerFieldFormats,
+      },
+      {
+        first: {
+          table: tableWithIndexField,
+          invertedRawValueMap,
+          formattedColumns: {},
+        },
+      },
+      {}
+    );
+    const newProps = {
+      ...wrapperProps,
+      series: [
+        {
+          seriesKeys: ["Women's Accessories", 'b'],
+          splitAccessors: new Map().set('splitAccessorId', "Women's Accessories"),
+        },
+      ] as unknown as SeriesIdentifier[],
+    };
+    wrapper = mountWithIntl(<ComponentWithIndexField {...newProps} />);
+    expect(wrapper.find(EuiPopover).length).toBe(1);
   });
 });

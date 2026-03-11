@@ -11,9 +11,109 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
-  describe('>= 8.18 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
+  describe('< 9.3 panels state', () => {
+    test('should remove "i" from grid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 24, h: 15, i: 'panel1' },
+            type: 'lens',
+            config: {},
+          },
+          {
+            title: 'Section 1',
+            grid: { y: 1, i: 'section1' },
+            panels: [
+              {
+                grid: { x: 0, y: 2, w: 24, h: 15, i: 'panelInSection' },
+                type: 'lens',
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "config": Object {},
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "type": "lens",
+            "uid": "panel1",
+          },
+          Object {
+            "grid": Object {
+              "y": 1,
+            },
+            "panels": Array [
+              Object {
+                "config": Object {},
+                "grid": Object {
+                  "h": 15,
+                  "w": 24,
+                  "x": 0,
+                  "y": 2,
+                },
+                "type": "lens",
+                "uid": "panelInSection",
+              },
+            ],
+            "title": "Section 1",
+            "uid": "section1",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('< 9.2 panels state', () => {
+    test('should move gridData to grid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            gridData: { x: 0, y: 0, w: 24, h: 15 },
+            type: 'lens',
+            config: {},
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          config: {},
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          type: 'lens',
+        },
+      ]);
+    });
+
+    test('should move panelIndex to uid', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            type: 'lens',
+            panelIndex: 'fizz',
+            config: {},
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          config: {},
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          type: 'lens',
+          uid: 'fizz',
+        },
+      ]);
+    });
+
+    test('should move panelConfig to config', () => {
+      const { panels } = extractPanelsState({
         panels: [
           {
             panelConfig: {
@@ -22,36 +122,94 @@ describe('extractPanelsState', () => {
                 to: 'now',
               },
             },
-            gridData: {},
-            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-            title: 'Custom title',
+            grid: {},
             type: 'map',
           },
         ],
       });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
-            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+      expect(panels).toEqual([
+        {
+          config: {
             timeRange: {
               from: 'now-7d/d',
               to: 'now',
             },
-            title: 'Custom title',
           },
-          gridData: {},
+          grid: {},
           type: 'map',
-          panelRefName: undefined,
-          version: undefined,
         },
+      ]);
+    });
+
+    test('should create saved object reference', () => {
+      const { savedObjectReferences } = extractPanelsState({
+        panels: [
+          {
+            embeddableConfig: {
+              savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+            },
+            grid: {},
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            type: 'links',
+          },
+        ],
       });
+      expect(savedObjectReferences).toEqual([
+        {
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+          name: 'c505cc42-fbde-451d-8720-302dc78d7e0d:savedObjectRef',
+          type: 'links',
+        },
+      ]);
     });
   });
 
-  describe('< 8.17 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
-      const dashboardState = extractPanelsState({
+  describe('8.19', () => {
+    test('should migrate panels in sections', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            title: 'Section 1',
+            gridData: {},
+            panels: [
+              {
+                embeddableConfig: {
+                  timeRange: {
+                    from: 'now-7d/d',
+                    to: 'now',
+                  },
+                },
+                gridData: {},
+                type: 'map',
+              },
+            ],
+          },
+        ],
+      });
+      expect(panels).toEqual([
+        {
+          title: 'Section 1',
+          grid: {},
+          panels: [
+            {
+              config: {
+                timeRange: {
+                  from: 'now-7d/d',
+                  to: 'now',
+                },
+              },
+              grid: {},
+              type: 'map',
+            },
+          ],
+        },
+      ]);
+    });
+  });
+
+  describe('< 8.19 panels state', () => {
+    test('should move id and title to config', () => {
+      const { panels } = extractPanelsState({
         panels: [
           {
             embeddableConfig: {
@@ -60,7 +218,7 @@ describe('extractPanelsState', () => {
                 to: 'now',
               },
             },
-            gridData: {},
+            grid: {},
             id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
             title: 'Custom title',
@@ -68,9 +226,9 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
+      expect(panels).toEqual([
+        {
+          config: {
             savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
@@ -78,18 +236,50 @@ describe('extractPanelsState', () => {
             },
             title: 'Custom title',
           },
-          gridData: {},
+          grid: {},
           type: 'map',
-          panelRefName: undefined,
-          version: undefined,
+          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
         },
+      ]);
+    });
+  });
+
+  describe('< 8.17 panels state', () => {
+    test('should convert embeddableConfig to config', () => {
+      const { panels } = extractPanelsState({
+        panels: [
+          {
+            embeddableConfig: {
+              timeRange: {
+                from: 'now-7d/d',
+                to: 'now',
+              },
+            },
+            grid: {},
+            panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+            type: 'map',
+          },
+        ],
       });
+      expect(panels).toEqual([
+        {
+          config: {
+            timeRange: {
+              from: 'now-7d/d',
+              to: 'now',
+            },
+          },
+          grid: {},
+          type: 'map',
+          uid: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
+        },
+      ]);
     });
   });
 
   describe('< 7.3 panels state', () => {
     test('should ignore state and notify user', () => {
-      const dashboardState = extractPanelsState({
+      const { panels } = extractPanelsState({
         panels: [
           {
             col: 1,
@@ -111,7 +301,7 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState).toEqual({});
+      expect(panels).toBeUndefined();
       expect(coreServices.notifications.toasts.addWarning).toHaveBeenCalled();
     });
   });

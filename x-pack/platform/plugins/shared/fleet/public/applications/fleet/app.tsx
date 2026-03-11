@@ -15,7 +15,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { css } from '@emotion/css';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -65,7 +65,16 @@ import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      networkMode: 'always',
+    },
+    mutations: {
+      networkMode: 'always',
+    },
+  },
+});
 
 export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ children }) => {
   useBreadcrumbs('base');
@@ -268,6 +277,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
+    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -286,13 +296,15 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.sendFeedbackButton', {
-        defaultMessage: 'Send feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
+    if (isFeedbackEnabled) {
+      topNavConfig.push({
+        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+          defaultMessage: 'Give feedback',
+        }),
+        iconType: 'popout',
+        run: () => window.open(FEEDBACK_URL),
+      });
+    }
 
     return (
       <TopNavMenu

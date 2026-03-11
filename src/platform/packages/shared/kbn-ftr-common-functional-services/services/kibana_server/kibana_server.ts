@@ -10,7 +10,7 @@
 import Url from 'url';
 import { KbnClient } from '@kbn/test';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function KibanaServerProvider({ getService }: FtrProviderContext): KbnClient {
   const log = getService('log');
@@ -18,6 +18,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   const lifecycle = getService('lifecycle');
   const url = Url.format(config.get('servers.kibana'));
   const defaults = config.get('uiSettings.defaults');
+  const globalDefaults = config.get('uiSettings.globalDefaults');
 
   const kbn = new KbnClient({
     log,
@@ -29,6 +30,12 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   if (defaults) {
     lifecycle.beforeTests.add(async () => {
       await kbn.uiSettings.update(defaults);
+    });
+  }
+
+  if (globalDefaults) {
+    lifecycle.beforeTests.add(async () => {
+      await kbn.uiSettings.updateGlobal(globalDefaults);
     });
   }
 

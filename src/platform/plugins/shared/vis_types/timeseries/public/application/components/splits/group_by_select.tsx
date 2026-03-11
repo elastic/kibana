@@ -9,7 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { isGroupByFieldsEnabled } from '../../../../common/check_ui_restrictions';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
@@ -71,6 +72,9 @@ export const GroupBySelect = ({
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
       data-test-subj="groupBySelect"
+      aria-label={i18n.translate('visTypeTimeseries.splits.groupBySelect.ariaLabel', {
+        defaultMessage: 'Group by mode',
+      })}
     />
   );
 };

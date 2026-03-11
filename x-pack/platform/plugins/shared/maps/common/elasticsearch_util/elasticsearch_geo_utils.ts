@@ -8,8 +8,8 @@
 import _ from 'lodash';
 import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
-import { BBox } from '@turf/helpers';
+import type { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
+import type { BBox } from '@turf/helpers';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
@@ -18,7 +18,7 @@ import {
   LON_INDEX,
   LAT_INDEX,
 } from '../constants';
-import { MapExtent } from '../descriptor_types';
+import type { MapExtent } from '../descriptor_types';
 
 type Coordinates = Position | Position[] | Position[][] | Position[][][];
 

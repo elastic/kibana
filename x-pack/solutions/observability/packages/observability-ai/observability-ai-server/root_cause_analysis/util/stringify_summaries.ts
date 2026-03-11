@@ -10,7 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import { RCA_OBSERVE_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
 import { formatEntity } from './format_entity';
 import { toBlockquote } from './to_blockquote';
-import { ObservationToolMessage, RootCauseAnalysisContext } from '../types';
+import type { ObservationToolMessage, RootCauseAnalysisContext } from '../types';
 
 export function stringifySummaries({ events }: RootCauseAnalysisContext): string {
   const summaries = events

@@ -6,18 +6,15 @@
  */
 
 import type { Index } from '@kbn/index-management-shared-types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 
-const POLLING_INTERVAL = 15 * 1000;
 export const useIndex = (indexName: string) => {
   const { http } = useKibana().services;
   const queryKey = [QueryKeys.FetchIndex, indexName];
   return useQuery<Index, { body: { statusCode: number; message: string; error: string } }>({
     queryKey,
-    refetchInterval: POLLING_INTERVAL,
-    refetchIntervalInBackground: true,
     refetchOnWindowFocus: 'always',
     retry: (failureCount, error) => {
       return !(error?.body?.statusCode === 404 || failureCount === 3);

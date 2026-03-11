@@ -8,17 +8,16 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import {
   LATEST_FINDINGS_RETENTION_POLICY,
   FINDINGS_INDEX_PATTERN,
+  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 
 const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
 const LATEST_FINDINGS_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
 const LATEST_FINDINGS_TRANSFORM_V880 = 'cloud_security_posture.findings_latest-default-8.8.0';
 
-const CURRENT_FINDINGS_TRANSFORM_VERSION = 'cloud_security_posture.findings_latest-default-8.15.0';
+export const CURRENT_FINDINGS_TRANSFORM_VERSION =
+  'cloud_security_posture.findings_latest-default-8.15.0';
 
 export const DEPRECATED_FINDINGS_TRANSFORMS_VERSION = [
   LATEST_FINDINGS_TRANSFORM_V830,
@@ -33,7 +32,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     index: FINDINGS_INDEX_PATTERN,
   },
   dest: {
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   },
   frequency: '5m',
   sync: {

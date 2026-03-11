@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
+import { pathWithSpace } from './kbn_client_requester';
 
 export type UiSettingValues = Record<string, string | number | boolean | string[]>;
 interface UiSettingsApiResponse {
@@ -91,6 +92,22 @@ export class KbnClientUiSettings {
 
     await this.requester.request({
       path: pathWithSpace(space)`/internal/kibana/settings`,
+      method: 'POST',
+      body: {
+        changes: updates,
+      },
+      retries: 3,
+    });
+  }
+
+  /**
+   * Update UI settings globally (like setting 'hideAnnouncements', 'theme:darkMode', etc)
+   */
+  async updateGlobal(updates: UiSettingValues) {
+    this.log.debug('applying global update to kibana config: %j', updates);
+
+    await this.requester.request({
+      path: `/internal/kibana/global_settings`,
       method: 'POST',
       body: {
         changes: updates,

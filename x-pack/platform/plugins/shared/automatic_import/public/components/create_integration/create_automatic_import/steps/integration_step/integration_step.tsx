@@ -77,6 +77,11 @@ export const IntegrationStep = React.memo<IntegrationStepProps>(({ integrationSe
           setLogoError(`${logoFile.name} is too large, maximum size is 1Mb.`);
           return;
         }
+        // make sure the logo is a svg type in the case of drag and drop
+        if (!logoFile.name.endsWith('.svg') || !logoFile.type.startsWith('image/svg+xml')) {
+          setLogoError(i18n.NON_SVG_ERROR);
+          return;
+        }
         logoFile
           .arrayBuffer()
           .then((fileBuffer) => {

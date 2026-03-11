@@ -14,6 +14,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
+import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine';
 import { useScheduleRuleRun } from '../../../../rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../common';
@@ -50,7 +53,7 @@ const MyEuiButtonIcon = styled(EuiButtonIcon)`
 
 interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
-  userHasPermissions: boolean;
+  isDisabled: boolean;
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
@@ -62,7 +65,7 @@ interface RuleActionsOverflowComponentProps {
  */
 const RuleActionsOverflowComponent = ({
   rule,
-  userHasPermissions,
+  isDisabled,
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
   showManualRuleRunConfirmation,
@@ -78,6 +81,10 @@ const RuleActionsOverflowComponent = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
+  const {
+    rules: { edit: canEditRules, read: canReadRules },
+    exceptions: { edit: canEditExceptions },
+  } = useUserPrivileges().rulesPrivileges;
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -86,6 +93,11 @@ const RuleActionsOverflowComponent = ({
     });
   }, [navigateToApp]);
 
+  const {
+    actions: { openCustomizationsRevertFlyout },
+    state: { doesBaseVersionExist },
+  } = useRuleCustomizationsContext();
+
   const actions = useMemo(
     () =>
       rule != null
@@ -93,13 +105,14 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
               icon="copy"
-              disabled={!canDuplicateRuleWithActions || !userHasPermissions}
+              disabled={!canDuplicateRuleWithActions || !canEditRules}
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const modalDuplicationConfirmationResult =
-                  await showBulkDuplicateExceptionsConfirmation();
+                const modalDuplicationConfirmationResult = canEditExceptions
+                  ? await showBulkDuplicateExceptionsConfirmation()
+                  : DuplicateOptions.withoutExceptions;
                 if (modalDuplicationConfirmationResult === null) {
                   return;
                 }
@@ -132,13 +145,13 @@ const RuleActionsOverflowComponent = ({
                     : undefined
                 }
               >
-                <>{i18nActions.DUPLICATE_RULE}</>
+                <span tabIndex={0}>{i18nActions.DUPLICATE_RULE}</span>
               </EuiToolTip>
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
-              disabled={!userHasPermissions}
+              disabled={!canReadRules}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -154,9 +167,9 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.MANUAL_RULE_RUN}
               icon="play"
-              disabled={!userHasPermissions || !rule.enabled}
+              disabled={!canEditRules || !rule.enabled}
               toolTipContent={
-                !userHasPermissions || !rule.enabled ? i18nActions.MANUAL_RULE_RUN_TOOLTIP : ''
+                !canEditRules || !rule.enabled ? i18nActions.MANUAL_RULE_RUN_TOOLTIP : ''
               }
               data-test-subj="rules-details-manual-rule-run"
               onClick={async () => {
@@ -177,10 +190,35 @@ const RuleActionsOverflowComponent = ({
             >
               {i18nActions.MANUAL_RULE_RUN}
             </EuiContextMenuItem>,
+            ...(isCustomizedPrebuiltRule(rule) // Don't display action if rule isn't a customized prebuilt rule
+              ? [
+                  <EuiContextMenuItem
+                    key={i18nActions.REVERT_RULE}
+                    toolTipContent={
+                      !doesBaseVersionExist ? i18nActions.REVERT_RULE_TOOLTIP_CONTENT : undefined
+                    }
+                    toolTipProps={{
+                      title: !doesBaseVersionExist
+                        ? i18nActions.REVERT_RULE_TOOLTIP_TITLE
+                        : undefined,
+                      'data-test-subj': 'rules-details-revert-rule-tooltip',
+                    }}
+                    icon="timeRefresh"
+                    disabled={!canEditRules || !doesBaseVersionExist}
+                    data-test-subj="rules-details-revert-rule"
+                    onClick={() => {
+                      closePopover();
+                      openCustomizationsRevertFlyout();
+                    }}
+                  >
+                    {i18nActions.REVERT_RULE}
+                  </EuiContextMenuItem>,
+                ]
+              : []),
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
-              disabled={!userHasPermissions}
+              disabled={!canEditRules}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
                 closePopover();
@@ -206,9 +244,12 @@ const RuleActionsOverflowComponent = ({
     [
       rule,
       canDuplicateRuleWithActions,
-      userHasPermissions,
+      canEditRules,
+      canReadRules,
+      doesBaseVersionExist,
       startTransaction,
       closePopover,
+      canEditExceptions,
       showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,
@@ -217,6 +258,7 @@ const RuleActionsOverflowComponent = ({
       showManualRuleRunConfirmation,
       telemetry,
       scheduleRuleRun,
+      openCustomizationsRevertFlyout,
       confirmDeletion,
       onRuleDeletedCallback,
     ]
@@ -228,13 +270,13 @@ const RuleActionsOverflowComponent = ({
         <MyEuiButtonIcon
           iconType="boxesHorizontal"
           aria-label={i18n.ALL_ACTIONS}
-          isDisabled={!userHasPermissions}
+          isDisabled={isDisabled}
           data-test-subj="rules-details-popover-button-icon"
           onClick={togglePopover}
         />
       </EuiToolTip>
     ),
-    [togglePopover, userHasPermissions]
+    [togglePopover, isDisabled]
   );
 
   return (

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useErrorBoundary } from './error_boundary_services';
+export { useErrorBoundary } from './error_boundary_provider';

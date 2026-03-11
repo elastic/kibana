@@ -131,7 +131,7 @@ describe('unflattenKnownApmEventFields', () => {
 
     // @ts-expect-error
     expect(() => unflattenKnownApmEventFields(input, requiredFields)).toThrowError(
-      'Missing required fields service.name in event'
+      'Missing required fields (service.name) in event'
     );
   });
 });

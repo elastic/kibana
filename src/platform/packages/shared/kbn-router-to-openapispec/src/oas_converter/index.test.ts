@@ -34,6 +34,7 @@ describe('OasConverter', () => {
       schemas: {
         test: {
           type: 'object',
+          title: 'test',
           additionalProperties: false,
           properties: {
             foo: {

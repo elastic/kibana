@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
@@ -21,15 +20,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
-import { DataViewRow, DataViewColumn } from '../types';
+import { ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DataViewRow, DataViewColumn } from '../types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
@@ -59,14 +59,6 @@ class DataTableFormatClass extends Component<
   DataTableFormatProps & EuiTablePersistInjectedProps<DatatableRow>,
   DataTableFormatState
 > {
-  static propTypes = {
-    data: PropTypes.object.isRequired,
-    uiSettings: PropTypes.object.isRequired,
-    fieldFormats: PropTypes.object.isRequired,
-    uiActions: PropTypes.object.isRequired,
-    isFilterable: PropTypes.func.isRequired,
-  };
-
   csvSeparator = this.props.uiSettings.get('csv:separator', ',');
   quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
@@ -106,7 +98,7 @@ class DataTableFormatClass extends Component<
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                    uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                       data: { data: [eventData] },
                     });
                   }}
@@ -139,7 +131,7 @@ class DataTableFormatClass extends Component<
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+                      uiActions.executeTriggerActions(ON_CLICK_VALUE, {
                         data: { data: [eventData], negate: true },
                       });
                     }}
@@ -210,19 +202,8 @@ class DataTableFormatClass extends Component<
         items={rows}
         sorting={sorting}
         pagination={pagination}
-        onChange={onTableChange}
-        css={css`
-          // Set a min width on each column - you can use [data-test-subj] to target specific columns
-          .euiTableHeaderCell {
-            min-width: 100px;
-          }
-
-          // Make sure the pagination follows the scroll
-          > div:last-child {
-            position: sticky;
-            left: 0;
-          }
-        `}
+        onTableChange={onTableChange}
+        css={styles.table}
       />
     );
   }
@@ -233,3 +214,24 @@ export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 20,
 });
+
+const styles = {
+  table: css({
+    // Set a min width on each column
+    '.euiTableHeaderCell': {
+      minWidth: '100px',
+    },
+    // Make sure the pagination follows the scroll
+    '> div:last-child': {
+      position: 'sticky',
+      left: 0,
+    },
+    // Show filter buttons on row hover or focus
+    'tr:hover .insDataTableFormat__filter, .insDataTableFormat__filter:focus': {
+      opacity: 1,
+    },
+    '.insDataTableFormat__filter': {
+      opacity: 0,
+    },
+  }),
+};

@@ -18,8 +18,8 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { REPOSITORY_TYPES } from '../../../../../../common';
-import { Repository, RepositoryType } from '../../../../../../common/types';
-import { UseRequestResponse } from '../../../../../shared_imports';
+import type { Repository, RepositoryType } from '../../../../../../common/types';
+import type { UseRequestResponse } from '../../../../../shared_imports';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
@@ -305,6 +305,9 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       })}
       cellProps={(item, field) => ({
         'data-test-subj': `${field.name}_cell`,
+      })}
+      tableCaption={i18n.translate('xpack.snapshotRestore.repositoryList.table.tableCaption', {
+        defaultMessage: 'Registered repositories',
       })}
       data-test-subj="repositoryTable"
     />

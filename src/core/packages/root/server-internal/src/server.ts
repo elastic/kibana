@@ -12,9 +12,11 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { Env, RawConfigurationProvider } from '@kbn/config';
+import { ConfigService } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { LoggingService } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
@@ -31,11 +33,13 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
+import { UserActivityService } from '@kbn/core-user-activity-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -45,18 +49,20 @@ import type {
   PrebootRequestHandlerContext,
 } from '@kbn/core-http-request-handler-context-server';
 import { RenderingService } from '@kbn/core-rendering-server-internal';
-import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-internal';
+import { HttpRateLimiterService } from '@kbn/core-http-rate-limiter-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import type {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
+import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
+import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -90,6 +96,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
+  private readonly userActivity: UserActivityService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly pricing: PricingService;
@@ -98,6 +105,8 @@ export class Server {
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly injection: CoreInjectionService;
+  private readonly dataStreams: DataStreamsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -117,12 +126,20 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
+    const serviceVersion =
+      env.packageInfo.buildFlavor === 'serverless'
+        ? env.packageInfo.buildShaShort
+        : env.packageInfo.version;
+    this.loggingSystem.setGlobalContext({
+      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+    });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
+    this.injection = new CoreInjectionService();
     this.context = new ContextService(core);
     this.featureFlags = new FeatureFlagsService(core);
     this.http = new HttpService(core);
@@ -143,6 +160,7 @@ export class Server {
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
     this.deprecations = new DeprecationsService(core);
+    this.userActivity = new UserActivityService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.pricing = new PricingService(core);
@@ -151,6 +169,7 @@ export class Server {
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
+    this.dataStreams = new DataStreamsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -201,15 +220,19 @@ export class Server {
       const contextServicePreboot = this.context.preboot({
         pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
       });
+      const docLinksPreboot = this.docLinks.setup();
 
-      const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
+      const httpPreboot = await this.http.preboot({
+        context: contextServicePreboot,
+        docLinks: docLinksPreboot,
+      });
 
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
-      this.capabilities.preboot({ http: httpPreboot });
-
       this.pricing.preboot({ http: httpPreboot });
+
+      this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();
 
@@ -279,9 +302,16 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
+    const injectionSetup = this.injection.setup();
+
+    const loggingSetup = this.logging.setup();
+
+    const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+      userActivity: userActivitySetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -293,11 +323,20 @@ export class Server {
       analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
+      security: securitySetup,
+      loggingSystem: this.loggingSystem,
     });
+
+    const dataStreamsSetup = await this.dataStreams.setup();
 
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
+    });
+
+    const httpRateLimiterSetup = this.httpRateLimiter.setup({
+      http: httpSetup,
+      metrics: metricsSetup,
     });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
@@ -306,8 +345,6 @@ export class Server {
       savedObjectsStartPromise: this.savedObjectsStartPromise,
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
-
-    const loggingSetup = this.logging.setup();
 
     const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
@@ -336,8 +373,10 @@ export class Server {
       savedObjects: savedObjectsSetup,
       environment: environmentSetup,
       http: httpSetup,
+      httpRateLimiter: httpRateLimiterSetup,
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
+      loggingSystem: this.loggingSystem,
     });
 
     const customBrandingSetup = this.customBranding.setup();
@@ -355,10 +394,6 @@ export class Server {
       i18n: i18nServiceSetup,
     });
 
-    this.httpRateLimiter.setup({
-      http: httpSetup,
-      metrics: metricsSetup,
-    });
     const httpResourcesSetup = this.httpResources.setup({
       http: httpSetup,
       rendering: renderingSetup,
@@ -386,15 +421,25 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      userActivity: userActivitySetup,
       coreUsageData: coreUsageDataSetup,
       pricing: pricingSetup,
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
+      injection: injectionSetup,
+      dataStreams: dataStreamsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
+    /**
+     * This is a necessary step to ensure that the pricing service is ready to be used.
+     * It must be called after all plugins have been setup.
+     * This guarantee that all plugins checking for a feature availability with isFeatureAvailable
+     * in the server setup contract get the right access to the feature availability.
+     */
+    pricingSetup.evaluateProductFeatures();
 
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
@@ -409,6 +454,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();
@@ -421,7 +467,12 @@ export class Server {
       waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
     };
 
+    const dataStreamsStart = await this.dataStreams.start({
+      elasticsearch: elasticsearchStart,
+    });
+
     const deprecationsStart = this.deprecations.start();
+    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -451,6 +502,9 @@ export class Server {
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    httpStart.setRedactedSessionIdGetter((request) =>
+      securityStart.authc.getRedactedSessionId(request)
+    );
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
@@ -481,15 +535,19 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      userActivity: userActivityStart,
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
       pricing: pricingStart,
+      injection: injectionStart,
+      dataStreams: dataStreamsStart,
     };
 
     this.coreApp.start(this.coreStart);
 
-    await this.plugins.start(this.coreStart);
+    const { contracts } = await this.plugins.start(this.coreStart);
+    this.coreStart._plugins = contracts;
 
     await this.http.start();
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GET saved_objects/jobs_spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 

@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 
 import styled from 'styled-components';
-import { createId } from '@paralleldrive/cuid2';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiButton,
@@ -145,7 +145,7 @@ export const SampleClientReadme = () => {
 
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(createId())} disabled={!!apiKey}>
+                    <EuiButton onClick={() => setApiKey(uuidv4())} disabled={!!apiKey}>
                       Generate API key
                     </EuiButton>
                   </EuiFlexItem>

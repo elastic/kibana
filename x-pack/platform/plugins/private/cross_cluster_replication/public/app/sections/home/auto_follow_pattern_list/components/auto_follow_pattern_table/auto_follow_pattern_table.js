@@ -348,6 +348,12 @@ export class AutoFollowPatternTable extends PureComponent {
                 'data-test-subj': `cell_${column.field}`,
               })}
               data-test-subj="autoFollowPatternListTable"
+              tableCaption={i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternList.tableCaption',
+                {
+                  defaultMessage: 'List of auto-follow patterns',
+                }
+              )}
             />
             {this.renderLoading()}
           </>

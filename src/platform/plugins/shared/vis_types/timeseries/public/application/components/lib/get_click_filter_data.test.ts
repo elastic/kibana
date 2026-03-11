@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { getClickFilterData } from './get_click_filter_data';
 import type { TSVBTables } from './types';
-import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisParams } from '../../../types';
 import { SERIES_SEPARATOR } from '../../../../common/constants';
 
 describe('getClickFilterData', () => {

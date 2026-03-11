@@ -12,13 +12,13 @@ import { escape, memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightHtml } from '../utils';
 import { FieldFormat } from '../field_format';
-import {
+import type {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
   FieldFormatMetaParams,
-  FIELD_FORMAT_IDS,
   FieldFormatParams,
 } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
@@ -134,9 +134,21 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
-  textConvert: TextContextTypeConvert = (value: string) => this.formatLabel(value);
+  textConvert: TextContextTypeConvert = (value: string) => {
+    const missing = this.checkForMissingValueText(value);
+    if (missing) {
+      return missing;
+    }
+
+    return this.formatLabel(value);
+  };
 
   htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
+    const missing = this.checkForMissingValueHtml(rawValue);
+    if (missing) {
+      return missing;
+    }
+
     const { field, hit } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};

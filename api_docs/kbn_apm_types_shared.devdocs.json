@@ -28,6 +28,8 @@
         "label": "HistogramItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "key",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,8 @@
             "label": "doc_count",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-types-shared/src/interfaces/correlations.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -66,6 +72,8 @@
         "label": "ProcessorEvent",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-types-shared/src/enums/processor_event.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -83,6 +91,8 @@
           "T | null | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-apm-types-shared/src/types/common.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

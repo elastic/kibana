@@ -8,18 +8,15 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV3 } from './schema/v3';
 
-import {
-  createDashboardSavedObjectTypeMigrations,
-  DashboardSavedObjectTypeMigrationsDeps,
-} from './migrations/dashboard_saved_object_migrations';
-
-export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
+import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export const createDashboardSavedObjectType = ({
   migrationDeps,
@@ -29,6 +26,7 @@ export const createDashboardSavedObjectType = ({
   name: DASHBOARD_SAVED_OBJECT_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
+  supportsAccessControl: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
@@ -110,9 +108,10 @@ export const createDashboardSavedObjectType = ({
       },
       controlGroupInput: {
         properties: {
+          panelsJSON: { type: 'text', index: false },
+          // Following props are deprecated, kept in mappings for backwards compatibility only
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
-          panelsJSON: { type: 'text', index: false },
           showApplySelections: { type: 'boolean', index: false, doc_values: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },

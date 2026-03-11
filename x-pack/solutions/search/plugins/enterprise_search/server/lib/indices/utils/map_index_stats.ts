@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { IndicesIndexState, IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesIndexState,
+  IndicesStatsIndicesStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ElasticsearchIndex } from '@kbn/search-connectors';
+import type { ElasticsearchIndex } from '@kbn/search-connectors';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,

@@ -52,7 +52,11 @@ export const QueryRuleFlyoutBody = css({
   },
 });
 
-export const QueryRuleFlyoutPanel = (theme: EuiThemeComputed<{}>) =>
+export const QueryRuleFlyoutPanel = css({
+  height: '100%',
+});
+
+export const QueryRuleFlyoutRightPanel = (theme: EuiThemeComputed<{}>) =>
   css({
-    height: '100%',
+    borderLeft: `1px solid ${theme.colors.lightShade}`,
   });

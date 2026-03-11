@@ -18,6 +18,7 @@ export interface CloudDeploymentMetadata {
   serverless?: {
     project_id?: string;
     project_type?: string;
+    product_tier?: string;
     orchestrator_target?: string;
   };
 }
@@ -37,6 +38,7 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
     serverless: {
       project_id: projectId,
       project_type: projectType,
+      product_tier: productTier,
       orchestrator_target: orchestratorTarget,
     } = {},
   } = cloudMetadata;
@@ -51,6 +53,7 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       cloudIsElasticStaffOwned,
       projectId,
       projectType,
+      productTier,
       orchestratorTarget,
     }),
     schema: {
@@ -87,6 +90,10 @@ export function registerCloudDeploymentMetadataAnalyticsContext(
       projectType: {
         type: 'keyword',
         _meta: { description: 'The Serverless Project type', optional: true },
+      },
+      productTier: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Product Tier', optional: true },
       },
       orchestratorTarget: {
         type: 'keyword',

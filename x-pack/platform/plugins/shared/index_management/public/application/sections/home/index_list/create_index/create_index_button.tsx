@@ -12,20 +12,25 @@ import { EuiButton } from '@elastic/eui';
 
 import useObservable from 'react-use/lib/useObservable';
 import { CreateIndexModal } from './create_index_modal';
+import { CreateIndexModalV2 } from './create_index_modal_v2';
 import { useAppContext } from '../../../../app_context';
+import { useIsPlatformIndexManagementV2Enabled } from '../../../../hooks/use_is_platform_index_management_v2_enabled';
 
 export interface CreateIndexButtonProps {
   loadIndices: () => void;
   share?: SharePluginStart;
+  dataTestSubj?: string;
 }
 
-export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps) => {
-  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
-  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
-
+export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
   const {
     core: { chrome },
   } = useAppContext();
+  const isPlatformIndexManagementV2Enabled = useIsPlatformIndexManagementV2Enabled();
+  const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
+
+  const IndexModal = isPlatformIndexManagementV2Enabled ? CreateIndexModalV2 : CreateIndexModal;
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
 
@@ -40,7 +45,7 @@ export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps
         fill
         iconType="plusInCircleFilled"
         key="createIndexButton"
-        data-test-subj="createIndexButton"
+        data-test-subj={dataTestSubj || 'createIndexButton'}
         data-telemetry-id="idxMgmt-indexList-createIndexButton"
         {...actionProp}
       >
@@ -50,10 +55,7 @@ export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps
         />
       </EuiButton>
       {createIndexModalOpen && (
-        <CreateIndexModal
-          closeModal={() => setCreateIndexModalOpen(false)}
-          loadIndices={loadIndices}
-        />
+        <IndexModal closeModal={() => setCreateIndexModalOpen(false)} loadIndices={loadIndices} />
       )}
     </>
   );

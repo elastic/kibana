@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -8,12 +8,9 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*",
-    "emotion.d.ts"
+    "types/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -32,7 +29,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
     "@kbn/datemath",
-    "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/deeplinks-observability",
@@ -57,7 +53,9 @@
     "@kbn/spaces-plugin",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
-    "@kbn/deeplinks-management",
     "@kbn/discover-utils",
+    "@kbn/xstate-utils",
+    "@kbn/ml-plugin",
+    "@kbn/saved-search-component"
   ]
 }

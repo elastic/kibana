@@ -24,7 +24,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
           flush="right"
           href={documentationLinks.apis.createFollower}
           target="_blank"
-          iconType="help"
+          iconType="question"
           data-test-subj="docsButton"
         >
           <FormattedMessage

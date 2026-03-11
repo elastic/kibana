@@ -10,14 +10,16 @@ import type {
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DataView } from '@kbn/data-plugin/common';
-import { IESAggSource } from '../../sources/es_agg_source';
-import { IVectorSource } from '../../sources/vector_source';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
-import { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { IESAggSource } from '../../sources/es_agg_source';
+import type { IVectorSource } from '../../sources/vector_source';
+import type { FIELD_ORIGIN } from '../../../../common/constants';
+import { AGG_TYPE } from '../../../../common/constants';
+import type { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
-import { IESAggField, CountAggFieldParams } from './agg_field_types';
+import type { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { getAggRange } from '../../util/tile_meta_feature_utils';
 
 // Agg without field. Essentially a count-aggregation.

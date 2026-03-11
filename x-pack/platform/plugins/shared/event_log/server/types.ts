@@ -58,6 +58,7 @@ export interface IEventLogService {
 
 export interface IEventLogClientService {
   getClient(request: KibanaRequest): IEventLogClient;
+  getClientWithRequestInSpace(request: KibanaRequest, spaceId: string): IEventLogClient;
 }
 
 export interface IEventLogClient {
@@ -101,7 +102,7 @@ export interface IEventLogClient {
 }
 
 export interface IEventLogger {
-  logEvent(properties: IEvent): void;
+  logEvent(properties: IEvent, id?: string): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
   updateEvents(

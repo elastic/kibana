@@ -11,7 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../shared/mocks';
-import { mockManagedUserData, mockObservedUser } from './mocks';
+import { mockObservedUser } from './mocks';
 import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
@@ -35,7 +35,6 @@ export default {
 export const Default = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -44,7 +43,7 @@ export const Default = {
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -54,11 +53,6 @@ export const Default = {
 export const IntegrationDisabled = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: false,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -67,7 +61,7 @@ export const IntegrationDisabled = {
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -77,11 +71,6 @@ export const IntegrationDisabled = {
 export const NoManagedData = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: false,
-        isIntegrationEnabled: true,
-      }}
       observedUser={mockObservedUser}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -90,7 +79,7 @@ export const NoManagedData = {
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -100,7 +89,6 @@ export const NoManagedData = {
 export const NoObservedData = {
   render: () => (
     <UserPanelContent
-      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -124,7 +112,6 @@ export const NoObservedData = {
           isLoading: false,
           date: undefined,
         },
-        anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -133,7 +120,7 @@ export const NoObservedData = {
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 
@@ -143,11 +130,6 @@ export const NoObservedData = {
 export const Loading = {
   render: () => (
     <UserPanelContent
-      managedUser={{
-        data: undefined,
-        isLoading: true,
-        isIntegrationEnabled: true,
-      }}
       observedUser={{
         details: {
           user: {
@@ -171,7 +153,6 @@ export const Loading = {
           isLoading: true,
           date: undefined,
         },
-        anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
@@ -180,7 +161,7 @@ export const Loading = {
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
       recalculatingScore={false}
-      isLinkEnabled={true}
+      isPreviewMode={false}
     />
   ),
 

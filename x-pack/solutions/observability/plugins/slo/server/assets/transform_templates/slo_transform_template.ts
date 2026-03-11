@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TransformDestination,
   TransformPivot,
   TransformPutTransformRequest,
@@ -15,7 +15,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';
-import { SLODefinition } from '../../domain/models';
+import type { SLODefinition } from '../../domain/models';
 
 export interface TransformSettings {
   frequency: TransformPutTransformRequest['frequency'];
@@ -71,7 +71,7 @@ const buildGroupingFilters = (slo: SLODefinition): QueryDslQueryContainer[] => {
 
 const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): TransformSource => {
   const groupingFilters = buildGroupingFilters(slo);
-  const sourceFilters = [source.query?.bool?.filter].flat() || [];
+  const sourceFilters = [source.query?.bool?.filter].flat().filter(Boolean);
   return {
     ...source,
     query: {
@@ -80,6 +80,6 @@ const buildSourceWithFilters = (source: TransformSource, slo: SLODefinition): Tr
         ...source.query?.bool,
         filter: [...sourceFilters, ...groupingFilters] as QueryDslQueryContainer[],
       },
-    },
+    } as QueryDslQueryContainer,
   };
 };

@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { result } from '../../../cloud_security_posture_api/utils';
 
 export default function (providerContext: FtrProviderContext) {
@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('POST /internal/cloud_security_posture/graph', () => {
-    // TODO: fix once feature flag is enabled for the API
-    describe.skip('Feature flag', () => {
+    describe('Feature flag', () => {
       it('should return 404 when feature flag is not toggled', async () => {
         await postGraph(supertest, {
           query: {

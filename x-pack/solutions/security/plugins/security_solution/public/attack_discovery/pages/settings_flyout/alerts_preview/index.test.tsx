@@ -11,10 +11,10 @@ import * as uuid from 'uuid';
 
 import { AlertsPreview } from '.';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../../detections/components/alerts_table';
 
 jest.mock('../../../../detections/components/alerts_table', () => ({
-  DetectionEngineAlertsTable: jest.fn(() => <div>{'Mocked Alerts Table'}</div>),
+  AlertsTable: jest.fn(() => <div>{'Mocked Alerts Table'}</div>),
 }));
 
 jest.mock('uuid', () => ({
@@ -58,11 +58,11 @@ describe('AlertsPreview', () => {
 
     render(<AlertsPreview query={query} size={size} />);
 
-    expect(DetectionEngineAlertsTable).toHaveBeenCalledWith(
+    expect(AlertsTable).toHaveBeenCalledWith(
       {
         id: `attack-discovery-alerts-preview-${uuid.v4()}`,
         tableType: TableId.alertsOnRuleDetailsPage,
-        initialPageSize: size,
+        pageSize: size,
         query,
         showAlertStatusWithFlapping: false,
       },

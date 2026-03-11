@@ -5,26 +5,51 @@
  * 2.0.
  */
 
-import {
+import type {
   FieldDefinitionConfig,
   FieldDefinitionConfigAdvancedParameters,
   Streams,
 } from '@kbn/streams-schema';
-import { TableColumnName } from './constants';
+import type { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
-export type SchemaFieldType = FieldDefinitionConfig['type'];
+/**
+ * Field types used by the Schema editor UI.
+ *
+ * Note: the UI supports pseudo-types that must never be persisted as real mapping types:
+ * - `system`: reserved for system-managed fields
+ * - `unmapped`: used for description-only overrides in wired streams (no ES mapping)
+ */
+export type SchemaFieldType = NonNullable<FieldDefinitionConfig['type']> | 'system' | 'unmapped';
+export type PersistableSchemaFieldType = SchemaFieldType;
 
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
   parent: string;
   alias_for?: string;
   format?: string;
+  source?: string;
+  description?: string;
+  streamSource?: 'template' | 'stream';
 }
 
 export interface MappedSchemaField extends BaseSchemaField {
-  status: 'inherited' | 'mapped';
+  status: 'mapped';
   type: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - available when field exists in ES but may not be directly supported by streams schema
+   */
+  esType?: string;
+  additionalParameters?: FieldDefinitionConfigAdvancedParameters;
+}
+
+export interface InheritedSchemaField extends BaseSchemaField {
+  status: 'inherited';
+  type?: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - available when field exists in ES but may not be directly supported by streams schema
+   */
+  esType?: string;
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
@@ -38,22 +63,36 @@ export interface UnmappedSchemaField extends BaseSchemaField {
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
-export type SchemaField = MappedSchemaField | UnmappedSchemaField;
+export type SchemaField = MappedSchemaField | UnmappedSchemaField | InheritedSchemaField;
+
+export type SchemaEditorField = SchemaField & {
+  result?: 'created' | 'modified';
+  uncommitted?: boolean;
+};
 
 export interface SchemaEditorProps {
   defaultColumns?: TableColumnName[];
-  fields: SchemaField[];
+  fields: SchemaEditorField[];
   isLoading?: boolean;
-  onFieldUnmap: (fieldName: SchemaField['name']) => void;
+  onAddField?: (field: SchemaField) => void;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
-  stream: Streams.ingest.all.Definition;
+  onFieldSelection: (names: string[], selected: boolean) => void;
+  fieldSelection: string[];
+  stream: Streams.all.Definition;
   withControls?: boolean;
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
   withToolbar?: boolean;
+  enableGeoPointSuggestions?: boolean;
 }
 
-export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {
-  return !!field && !!field.name && !!field.type;
+export type TypedMappedSchemaField = MappedSchemaField & {
+  type: Exclude<SchemaFieldType, 'system'>;
+};
+
+export const isSchemaFieldTyped = (field: SchemaField): field is TypedMappedSchemaField => {
+  return (
+    !!field && !!field.name && field.status === 'mapped' && !!field.type && field.type !== 'system'
+  );
 };

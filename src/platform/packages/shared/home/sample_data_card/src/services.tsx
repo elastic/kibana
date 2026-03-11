@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, MouseEventHandler, useContext } from 'react';
-import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { FC, PropsWithChildren, MouseEventHandler } from 'react';
+import React, { useContext } from 'react';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { SampleDataSet } from '@kbn/home-sample-data-types';
 
 import { SAMPLE_DATA_API } from './constants';
 
@@ -30,6 +32,7 @@ type NotifyFn = (notification: NotifyInput) => void;
  */
 export interface Services {
   addBasePath: (path: string) => string;
+  fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   getAppNavigationHandler: (path: string) => MouseEventHandler;
   installSampleDataSet: (id: string, defaultIndex: string) => Promise<void>;
   notifyError: NotifyFn;
@@ -48,6 +51,7 @@ export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({
 }) => {
   const {
     addBasePath,
+    fetchSampleDataSets,
     getAppNavigationHandler,
     installSampleDataSet,
     notifyError,
@@ -59,6 +63,7 @@ export const SampleDataCardProvider: FC<PropsWithChildren<Services>> = ({
     <Context.Provider
       value={{
         addBasePath,
+        fetchSampleDataSets,
         getAppNavigationHandler,
         installSampleDataSet,
         notifyError,
@@ -81,6 +86,7 @@ export interface KibanaDependencies {
         prepend: (path: string) => string;
       };
       delete: (path: string) => Promise<unknown>;
+      get: (path: string) => Promise<unknown>;
       post: (path: string) => Promise<unknown>;
     };
     notifications: {
@@ -112,6 +118,7 @@ export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependenci
 
   const value: Services = {
     addBasePath: http.basePath.prepend,
+    fetchSampleDataSets: async () => (await http.get(SAMPLE_DATA_API)) as SampleDataSet[],
     getAppNavigationHandler: (targetUrl) => (event) => {
       if (event.altKey || event.metaKey || event.ctrlKey) {
         return;

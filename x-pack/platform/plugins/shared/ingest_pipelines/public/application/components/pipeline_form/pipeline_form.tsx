@@ -11,18 +11,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { Pipeline, Processor } from '../../../../common/types';
-import { useForm, Form, FormConfig, useFormIsModified } from '../../../shared_imports';
+import type { Pipeline, Processor } from '../../../../common/types';
+import type { FormConfig } from '../../../shared_imports';
+import { useForm, Form, useFormIsModified } from '../../../shared_imports';
 
 import { useKibana } from '../../../shared_imports';
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import type { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
 import { deepEqualIgnoreUndefined } from './utils';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
-import { PipelineForm as IPipelineForm } from './types';
+import type { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;
@@ -84,17 +85,30 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       return;
     }
 
-    if (processorStateRef.current) {
-      const state = processorStateRef.current;
-      if (await state.validate()) {
+    const editorState = processorStateRef.current;
+    if (editorState) {
+      if (await editorState.validate()) {
         // We only want to show unsaved changed prompts to the user when the form
         // hasnt been submitted.
         setHasSubmittedForm(true);
 
         // Save the form state, this will also trigger a redirect to pipelines list
-        onSave({ ...formData, ...state.getData() });
+        onSave({ ...formData, ...editorState.getData() });
       }
+      return;
     }
+
+    /**
+     * The processors editor registers its `onUpdate` handler in an effect.
+     * If the user submits before that effect fires, we can still safely save
+     * using the last known processors state (initially derived from `defaultValue`).
+     */
+    setHasSubmittedForm(true);
+    onSave({
+      ...formData,
+      processors: processorsState.processors,
+      on_failure: processorsState.onFailure,
+    });
   };
 
   const { form } = useForm<IPipelineForm>({

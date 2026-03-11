@@ -8,13 +8,12 @@
 import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectableProps,
-  EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
@@ -69,10 +68,12 @@ const OptionWrapper = memo(
 
 const RuleTagFilterPopoverButton = memo(
   ({
+    isSelected,
     selectedTags,
     onClosePopover,
     buttonDataTestSubj,
   }: {
+    isSelected: boolean;
     selectedTags: string[];
     onClosePopover: () => void;
     buttonDataTestSubj?: string;
@@ -81,6 +82,7 @@ const RuleTagFilterPopoverButton = memo(
       <EuiFilterButton
         data-test-subj={buttonDataTestSubj}
         iconType="arrowDown"
+        isSelected={isSelected}
         hasActiveFilters={selectedTags.length > 0}
         numActiveFilters={selectedTags.length}
         numFilters={selectedTags.length}
@@ -282,6 +284,7 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
         closePopover={onClosePopover}
         button={
           <RuleTagFilterPopoverButton
+            isSelected={isPopoverOpen}
             selectedTags={selectedTags}
             onClosePopover={onClosePopover}
             buttonDataTestSubj={buttonDataTestSubj}

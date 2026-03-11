@@ -6,7 +6,8 @@
  */
 
 import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
-import { FILTERS, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import {
   normalizeUrlState,
   hydrateDataSourceSelection,
@@ -14,7 +15,7 @@ import {
   getDiscoverFiltersFromState,
 } from './logs_explorer_url_schema';
 import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_types';
-import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
+import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
 jest.mock('@kbn/discover-utils/src/data_types/logs/utils', () => ({
@@ -128,6 +129,7 @@ describe('logs_explorer_url_schema', () => {
         name: 'All logs',
         title: 'logs-*,dataset-logs-*-*',
         timeFieldName: '@timestamp',
+        managed: true,
       });
     });
   });

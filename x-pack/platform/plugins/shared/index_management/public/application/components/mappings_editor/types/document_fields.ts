@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { GenericObject } from './mappings_editor';
+import type { GenericObject } from './mappings_editor';
 
-import { PARAMETERS_DEFINITION } from '../constants';
-import { FieldConfig, RuntimeField } from '../shared_imports';
+import type { PARAMETERS_DEFINITION } from '../constants';
+import type { FieldConfig, RuntimeField } from '../shared_imports';
 
 export interface DataTypeDefinition {
   label: string;

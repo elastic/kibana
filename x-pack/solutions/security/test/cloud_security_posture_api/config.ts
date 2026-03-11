@@ -6,7 +6,7 @@
  */
 import { resolve } from 'path';
 import { getKibanaCliLoggers, type FtrConfigProviderContext } from '@kbn/test';
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(
@@ -15,7 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xPackAPITestsConfig.getAll(),
-    testFiles: [resolve(__dirname, './routes'), resolve(__dirname, './telemetry')],
+    testFiles: [
+      resolve(__dirname, './routes'),
+      resolve(__dirname, './es_queries'),
+      resolve(__dirname, './telemetry'),
+    ],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },

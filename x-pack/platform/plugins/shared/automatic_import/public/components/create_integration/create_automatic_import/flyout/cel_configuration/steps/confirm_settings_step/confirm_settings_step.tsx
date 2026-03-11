@@ -340,6 +340,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           <EuiSpacer size="m" />
           {successfulGeneration && isSelectedPathGenerated ? (
             <EuiCallOut
+              announceOnMount
               title={i18n.SUCCESS}
               color="success"
               iconType="check"

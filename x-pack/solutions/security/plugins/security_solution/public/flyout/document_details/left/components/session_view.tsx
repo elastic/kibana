@@ -11,6 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -22,7 +23,6 @@ import {
 } from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
@@ -39,6 +39,13 @@ export const SESSION_VIEWER_BANNER = {
   backgroundColor: 'warning',
   textColor: 'warning',
 };
+
+const EUI_HEADER_HEIGHT = 96;
+const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
+const VISUALIZE_WRAPPER_PADDING = 16;
+const VISUALIZE_BUTTON_GROUP_HEIGHT = 32;
+const EUI_SPACER_HEIGHT = 16;
+const SESSION_VIEW_SEARCH_BAR_HEIGHT = 64;
 
 /**
  * Session view displayed in the document details expandable flyout left section under the Visualize tab
@@ -61,12 +68,10 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -148,10 +153,20 @@ export const SessionView: FC = memo(() => {
 
   const closeDetailsInPreview = useCallback(() => closePreviewPanel(), [closePreviewPanel]);
 
+  const height =
+    window.innerHeight -
+    EUI_HEADER_HEIGHT -
+    EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT -
+    2 * VISUALIZE_WRAPPER_PADDING -
+    VISUALIZE_BUTTON_GROUP_HEIGHT -
+    EUI_SPACER_HEIGHT -
+    SESSION_VIEW_SEARCH_BAR_HEIGHT;
+
   return isEnabled ? (
     <div data-test-subj={SESSION_VIEW_TEST_ID}>
       {sessionView.getSessionView({
         ...sessionViewConfig,
+        height,
         isFullScreen: true,
         loadAlertDetails: openAlertDetailsPreview,
         openDetails: (selectedProcess: Process | null) => openDetailsInPreview(selectedProcess),

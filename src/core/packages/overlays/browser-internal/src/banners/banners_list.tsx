@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
 
 interface Props {

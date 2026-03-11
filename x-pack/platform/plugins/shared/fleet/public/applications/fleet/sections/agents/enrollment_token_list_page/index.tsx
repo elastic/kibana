@@ -81,6 +81,7 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
         content={i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenButtonLabel', {
           defaultMessage: 'Revoke token',
         })}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           data-test-subj="enrollmentTokenTable.revokeBtn"
@@ -274,6 +275,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
+        tableCaption={i18n.translate(
+          'xpack.fleet.enrollmentTokensList.enrollmentTokens.tableCaption',
+          {
+            defaultMessage: 'List of enrollment tokens',
+          }
+        )}
         loading={isLoading}
         noItemsMessage={
           isLoading ? (

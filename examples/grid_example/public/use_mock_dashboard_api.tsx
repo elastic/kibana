@@ -12,11 +12,10 @@ import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { TimeRange } from '@kbn/es-query';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { TimeRange } from '@kbn/es-query';
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
+import type { ViewMode, PanelPackage } from '@kbn/presentation-publishing';
+import type {
   MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
@@ -39,10 +38,7 @@ export const useMockDashboardApi = ({
 
     return {
       getSerializedStateForChild: (id: string) => {
-        return {
-          rawState: panels$.getValue()[id].explicitInput,
-          references: [],
-        };
+        return panels$.getValue()[id].explicitInput;
       },
       children$: new BehaviorSubject({}),
       timeRange$: new BehaviorSubject<TimeRange>({
@@ -79,7 +75,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
+          explicitInput: { ...(newPanel.serializedState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -93,7 +89,7 @@ export const useMockDashboardApi = ({
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
-        const newId = v4();
+        const newId = panelPackage.maybePanelId ?? v4();
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {
@@ -106,7 +102,7 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...(panelPackage.serializedState?.rawState ?? {}),
+              ...(panelPackage.serializedState ?? {}),
               id: newId,
             },
           },

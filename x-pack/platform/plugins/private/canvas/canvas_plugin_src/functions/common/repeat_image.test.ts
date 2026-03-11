@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { elasticLogo, elasticOutline } from '../../../public/lib';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { repeatImage } from './repeat_image';

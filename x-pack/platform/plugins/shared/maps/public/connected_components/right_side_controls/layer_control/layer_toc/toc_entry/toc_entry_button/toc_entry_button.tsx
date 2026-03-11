@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
-import { IVectorSource } from '../../../../../../classes/sources/vector_source';
+import type { IVectorSource } from '../../../../../../classes/sources/vector_source';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 interface Footnote {

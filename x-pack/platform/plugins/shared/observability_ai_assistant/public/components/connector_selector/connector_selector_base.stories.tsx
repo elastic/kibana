@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
-import { FindActionResult } from '@kbn/actions-plugin/server';
-import { ComponentProps } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
+import type { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectorSelectorBase as Component } from './connector_selector_base';
 

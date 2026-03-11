@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { APIFn } from './types';
-import {
-  PingsResponseType,
+import type { APIFn } from './types';
+import type {
   PingsResponse,
   GetPingsParams,
   GetPingHistogramParams,
   HistogramResult,
 } from '../../../../common/runtime_types';
+import { PingsResponseType } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 

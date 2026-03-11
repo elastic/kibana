@@ -9,14 +9,13 @@
 
 import React, { useMemo } from 'react';
 
-import { RedirectAppLinksContainer } from '@kbn/shared-ux-link-redirect-app';
 import type { NoDataCardProps as Props } from '@kbn/shared-ux-card-no-data-types';
 
 import { NoDataCard as Component } from './no_data_card.component';
 
 import { useServices } from './services';
 
-export const NoDataCard = ({ href: srcHref, category, description, ...props }: Props) => {
+export const NoDataCard = ({ href: srcHref, ...props }: Props) => {
   const { canAccessFleet, addBasePath } = useServices();
 
   const href = useMemo(() => {
@@ -27,18 +26,16 @@ export const NoDataCard = ({ href: srcHref, category, description, ...props }: P
     // TODO: get this URL from a locator
     const prefix = '/app/integrations/browse';
 
-    if (category) {
-      return addBasePath(`${prefix}/${category}`);
-    }
-
     return addBasePath(prefix);
-  }, [addBasePath, srcHref, category]);
+  }, [addBasePath, srcHref]);
 
   return (
-    <RedirectAppLinksContainer>
-      <Component
-        {...{ ...props, href, canAccessFleet: props.canAccessFleet ?? canAccessFleet, description }}
-      />
-    </RedirectAppLinksContainer>
+    <Component
+      {...{
+        ...props,
+        href,
+        canAccessFleet: props.canAccessFleet ?? canAccessFleet,
+      }}
+    />
   );
 };

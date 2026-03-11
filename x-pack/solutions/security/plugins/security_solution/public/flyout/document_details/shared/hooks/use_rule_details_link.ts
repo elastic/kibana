@@ -25,15 +25,19 @@ export interface UseRuleDetailsLinkParams {
  * Hook that returns the url to navigate to the rule details page.
  * If the timeline is open from where the hook is being called, set the state to closed.
  */
-export const useRuleDetailsLink = ({ ruleId }: UseRuleDetailsLinkParams): string | null => {
-  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+export const useRuleDetailsLink = (
+  { ruleId }: UseRuleDetailsLinkParams,
+  override?: Record<string, unknown>
+): string | null => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl(override);
 
   if (!ruleId) return null;
 
   const path = getRuleDetailsUrl(ruleId);
   let href = getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules, path });
+  const sanitisedSeachParams = href?.split('?')?.[1] ?? '';
 
-  const timelineState = new URLSearchParams(href).get(URL_PARAM_KEY.timeline);
+  const timelineState = new URLSearchParams(sanitisedSeachParams).get(URL_PARAM_KEY.timeline);
   if (timelineState) {
     const parsedState = safeDecode(timelineState) as TimelineUrl | null;
 

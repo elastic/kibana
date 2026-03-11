@@ -6,57 +6,57 @@
  */
 
 export { Streams } from './src/models/streams';
-export { IngestBase } from './src/models/ingest/base';
+export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
-export { UnwiredIngest } from './src/models/ingest/unwired';
-export { Group } from './src/models/group';
+export { ClassicIngest } from './src/models/ingest/classic';
+export { Query } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+  getWiredStreamViewQuery,
+} from './src/models/query/view_name';
 
 export {
-  type ProcessorDefinition,
-  type ProcessorConfig,
-  type ProcessorDefinitionWithId,
-  type ProcessorType,
-  type ProcessorTypeOf,
-  type KvProcessorDefinition,
-  type KvProcessorConfig,
-  type GeoIpProcessorConfig,
-  type GeoIpProcessorDefinition,
-  type SetProcessorConfig,
-  type SetProcessorDefinition,
-  type RenameProcessorConfig,
-  type RenameProcessorDefinition,
-  type UrlDecodeProcessorConfig,
-  type UrlDecodeProcessorDefinition,
-  type UserAgentProcessorConfig,
-  type UserAgentProcessorDefinition,
-  type DateProcessorConfig,
-  type DateProcessorDefinition,
-  type DissectProcessorConfig,
-  type DissectProcessorDefinition,
-  type GrokProcessorConfig,
-  type GrokProcessorDefinition,
-  type ManualIngestPipelineProcessorConfig as ManualIngestPipelineProcessorConfig,
-  type ManualIngestPipelineProcessorDefinition as ManualIngestPipelineProcessorDefinition,
-  getProcessorConfig,
-  getProcessorType,
-  processorWithIdDefinitionSchema,
-  processorDefinitionSchema,
-} from './src/models/ingest/processors';
+  type RoutingDefinition,
+  routingStatus,
+  type RoutingStatus,
+  isRoutingEnabled,
+  routingDefinitionListSchema,
+} from './src/models/ingest/routing';
 
-export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
+export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_definition';
+export type { StreamType } from './src/helpers/get_stream_type_from_definition';
+export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
+export { isOtelStream } from './src/helpers/is_otel_stream';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
+export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
+export {
+  convertUpsertRequestIntoDefinition,
+  convertGetResponseIntoUpsertRequest,
+} from './src/helpers/converters';
 
-export { type ContentPack, contentPackSchema } from './src/content';
-
-export { isRootStreamDefinition } from './src/helpers/is_root';
 export {
   keepFields,
   namespacePrefixes,
+  otelReservedFields,
   isNamespacedEcsField,
+  isOtelReservedField,
   getRegularEcsField,
 } from './src/helpers/namespaced_ecs';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
+export { getInheritedSettings } from './src/helpers/get_inherited_settings';
+export {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getFromSources,
+  normalizeEsqlQuery,
+  replaceFromSources,
+  rewriteFromSources,
+} from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -66,45 +66,80 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
 
 export {
   isChildOf,
   isDescendantOf,
+  isParentName,
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  getRoot,
+  MAX_NESTING_LEVEL,
   isRoot,
+  ROOT_STREAM_NAMES,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+  type RootStreamName,
 } from './src/shared/hierarchy';
 
 export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
-export { getConditionFields } from './src/helpers/get_condition_fields';
+export {
+  type EsqlQuery,
+  esqlQuerySchema,
+  type StreamQuery,
+  type QueriesGetResponse,
+  type QueriesOccurrencesGetResponse,
+  upsertStreamQueryRequestSchema,
+  streamQuerySchema,
+} from './src/queries';
 
-export { type StreamQuery, upsertStreamQueryRequestSchema, streamQuerySchema } from './src/queries';
+export {
+  findInheritedLifecycle,
+  findInheritingStreams,
+  effectiveToIngestLifecycle,
+} from './src/helpers/lifecycle';
 
-export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
+export { findInheritedFailureStore } from './src/helpers/failure_store';
+
+export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
 export {
   type IngestStreamLifecycle,
-  type UnwiredIngestStreamEffectiveLifecycle,
+  type ClassicIngestStreamEffectiveLifecycle,
   type IlmPolicyPhases,
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
+  type IngestStreamLifecycleAll,
   type IngestStreamLifecycleILM,
+  type IngestStreamLifecycleDSL,
+  type IngestStreamLifecycleDisabled,
+  type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  type IlmPolicy,
+  type IlmPolicyWithUsage,
+  type IlmPolicyUsage,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -113,27 +148,96 @@ export {
 } from './src/models/ingest/lifecycle';
 
 export {
-  type BinaryFilterCondition,
-  type Condition,
-  type FilterCondition,
-  type UnaryFilterCondition,
-  type AlwaysCondition,
-  type UnaryOperator,
-  type NeverCondition,
-  isAlwaysCondition,
-  isAndCondition,
-  isFilterCondition,
-  isNeverCondition,
-  isOrCondition,
-  isUnaryFilterCondition,
-  isBinaryFilterCondition,
-  conditionSchema,
-  isCondition,
-} from './src/conditions';
+  type IngestStreamSettings,
+  type WiredIngestStreamEffectiveSettings,
+} from './src/models/ingest/settings';
+
+export {
+  type FailureStore,
+  type EffectiveFailureStore,
+  type WiredIngestStreamEffectiveFailureStore,
+  type FailureStoreStatsResponse,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
+} from './src/models/ingest/failure_store';
 
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+  SignificantEventsGenerateResponse,
+  GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
 
-export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+export { emptyAssets } from './src/helpers/empty_assets';
+export {
+  validateStreamName,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from './src/helpers/stream_name_validation';
+
+export {
+  type Feature,
+  type BaseFeature,
+  type FeatureStatus,
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+  COMPUTED_FEATURE_TYPES,
+  isFeature,
+  isComputedFeature,
+  isDuplicateFeature,
+  hasSameFingerprint,
+  featureSchema,
+  baseFeatureSchema,
+  featureStatusSchema,
+} from './src/feature';
+
+export {
+  type BaseSimulationError,
+  type SimulationError,
+  type DocSimulationStatus,
+  type SimulationDocReport,
+  type ProcessorMetrics,
+  type DetectedField,
+  type WithNameAndEsType,
+  type DocumentsMetrics,
+  type ProcessingSimulationResponse,
+} from './src/models/processing_simulation';
+
+export { type IngestStreamProcessing } from './src/models/ingest/processing';
+
+export { TaskStatus, type TaskResult } from './src/tasks/types';
+
+export type { GenerateDescriptionResult } from './src/api/description_generation';
+export type { IdentifyFeaturesResult } from './src/api/features';
+
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
+export type { OnboardingResult } from './src/onboarding';
+export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';

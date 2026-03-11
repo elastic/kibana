@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { MapSerializedState } from '@kbn/maps-plugin/public';
+import type { MapByReferenceState, MapEmbeddableState } from '@kbn/maps-plugin/common';
 
-export function toExpression(input: MapSerializedState & { id: string }): string {
+export function toExpression(input: MapEmbeddableState & { id: string }): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedMap');
 
-  expressionParts.push(`id="${input.savedObjectId}"`);
+  expressionParts.push(`id="${(input as MapByReferenceState).savedObjectId}"`);
 
   if (input.title !== undefined) {
     expressionParts.push(`title="${input.title}"`);
@@ -24,9 +24,9 @@ export function toExpression(input: MapSerializedState & { id: string }): string
     );
   }
 
-  if (input.timeRange) {
+  if (input.time_range) {
     expressionParts.push(
-      `timerange={timerange from="${input.timeRange.from}" to="${input.timeRange.to}"}`
+      `timerange={timerange from="${input.time_range.from}" to="${input.time_range.to}"}`
     );
   }
 

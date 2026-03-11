@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 
 interface SetupDeps {

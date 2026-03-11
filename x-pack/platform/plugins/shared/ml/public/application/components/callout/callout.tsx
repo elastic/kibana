@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CalloutMessage } from '@kbn/ml-validators';
 import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
-export const defaultIconType = 'questionInCircle';
+export const defaultIconType = 'question';
 
 const statusToEuiColor = (status: VALIDATION_STATUS) => {
   switch (status) {
@@ -28,7 +28,7 @@ const statusToEuiColor = (status: VALIDATION_STATUS) => {
 export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   switch (status) {
     case VALIDATION_STATUS.INFO:
-      return 'iInCircle';
+      return 'info';
     case VALIDATION_STATUS.ERROR:
       return 'cross';
     case VALIDATION_STATUS.SUCCESS:

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export enum QueryKeys {
   FetchIndex = 'fetchIndex',
   FetchMapping = 'fetchMapping',
@@ -12,15 +14,29 @@ export enum QueryKeys {
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
   SearchDocuments = 'searchDocuments',
+  FetchSampleDataStatus = 'fetchSampleDataStatus',
+  IngestSampleData = 'ingestSampleData',
 }
 
 export enum MutationKeys {
   SearchIndicesCreateIndex = 'searchIndicesCreateIndex',
   SearchIndicesDeleteDocument = 'searchIndicesDeleteDocument',
+  SearchIndicesUpdateMappings = 'searchIndicesUpdateMappings',
 }
 
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 export const INDEX_PLACEHOLDER = 'my-index';
 
 export const DEFAULT_DOCUMENT_PAGE_SIZE = 10;
+
+export const BREADCRUMB_TEXT = i18n.translate('xpack.searchIndices.indexManagement.breadcrumb', {
+  defaultMessage: 'Build',
+});
+
+export const PARENT_BREADCRUMB = {
+  text: BREADCRUMB_TEXT,
+};
+
+export const ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID = '.elser-2-elasticsearch';
+
+export const ELSER_ON_EIS_INFERENCE_ENDPOINT_ID = '.elser-2-elastic';

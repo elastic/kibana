@@ -28,5 +28,5 @@ export const GetTagsRequestSchema = {
 };
 
 export const GetTagsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });

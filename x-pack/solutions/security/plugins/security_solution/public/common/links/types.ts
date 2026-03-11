@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { IconType } from '@elastic/eui';
 import type {
   NavigationLink as GenericNavigationLink,

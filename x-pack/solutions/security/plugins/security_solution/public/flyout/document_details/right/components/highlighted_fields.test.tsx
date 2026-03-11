@@ -39,9 +39,9 @@ const renderHighlightedFields = (showEditButton = false) =>
       <HighlightedFields
         dataFormattedForFieldBrowser={mockContextValue.dataFormattedForFieldBrowser}
         investigationFields={mockContextValue.investigationFields}
-        isPreview={mockContextValue.isPreview}
         scopeId={mockContextValue.scopeId}
         showEditButton={showEditButton}
+        showCellActions={false}
       />
     </TestProviders>
   );
@@ -52,7 +52,7 @@ describe('<HighlightedFields />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHighlightedFieldsPrivilege as jest.Mock).mockReturnValue({
-      isEditHighlightedFieldsDisabled: false,
+      isDisabled: false,
       tooltipContent: 'tooltip content',
     });
     (useRuleIndexPattern as jest.Mock).mockReturnValue({

@@ -10,16 +10,16 @@ import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
-
+import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { PageScope } from '../../data_view_manager/constants';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
-import { SourcererScopeName } from '../../sourcerer/store/model';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -39,7 +39,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -64,13 +64,13 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
 
-  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(PageScope.timeline);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
 
   const timelineDataViewId = newDataViewPickerEnabled
-    ? dataViewSpec?.id ?? null
+    ? experimentalDataView.id ?? null
     : oldTimelineDataViewId;
 
   const { setDiscoverAppState } = useDiscoverState();
@@ -89,17 +89,29 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       // If esql, don't reset filters or mess with dataview & time range
       if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
         if (discoverStateContainer.current) {
-          discoverStateContainer.current?.appState.set({
-            query: {
-              esql: dataProviders[0].kqlQuery,
-            },
-          });
+          discoverStateContainer.current?.internalState.dispatch(
+            discoverStateContainer.current?.injectCurrentTab(
+              discoverStateContainer.current?.internalStateActions.setAppState
+            )({
+              appState: {
+                query: {
+                  esql: dataProviders[0].kqlQuery,
+                },
+              },
+            })
+          );
 
-          await discoverStateContainer.current?.appState.replaceUrlState({
-            query: {
-              esql: dataProviders[0].kqlQuery,
-            },
-          });
+          await discoverStateContainer.current?.internalState.dispatch(
+            discoverStateContainer.current?.injectCurrentTab(
+              discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
+            )({
+              appState: {
+                query: {
+                  esql: dataProviders[0].kqlQuery,
+                },
+              },
+            })
+          );
         } else {
           setDiscoverAppState({
             ...defaultDiscoverAppState,
@@ -229,7 +241,7 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       if (!keepDataView) {
         dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
+            id: PageScope.timeline,
             selectedDataViewId: defaultDataView.id,
             selectedPatterns: [signalIndexName || ''],
           })
@@ -271,6 +283,9 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       flush="both"
       data-test-subj="sendToTimelineEmptyButton"
       size="xs"
+      css={css`
+        width: 100%;
+      `}
     >
       <EuiToolTip position="right" content={toolTipText}>
         <>{children}</>

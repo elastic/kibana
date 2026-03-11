@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ProfileLoadingPlaceholder } from '.';
 
 describe('Profile Loading Placeholder', () => {
-  it('renders', async () => {
-    const init = registerTestBed(ProfileLoadingPlaceholder);
-    await init();
+  it('renders', () => {
+    render(<ProfileLoadingPlaceholder />);
+
+    // Visible UI boundary: loading title renders
+    expect(screen.getByRole('heading', { name: 'Loading query profiles...' })).toBeInTheDocument();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 const keyword = {
   type: 'keyword' as const,
@@ -83,11 +83,18 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                     trigger: keyword,
                   },
                 },
+                deanonymizations: {
+                  type: 'object',
+                  enabled: false,
+                },
               },
             },
           },
         },
         public: {
+          type: 'boolean',
+        },
+        archived: {
           type: 'boolean',
         },
       },

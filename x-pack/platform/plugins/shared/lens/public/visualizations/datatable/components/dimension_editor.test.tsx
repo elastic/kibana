@@ -13,11 +13,17 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import { FramePublicAPI, DatasourcePublicAPI, OperationDescriptor, DataType } from '../../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  OperationDescriptor,
+  DataType,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
-import { ColumnState } from '../../../../common/expressions';
+import type { TableDimensionEditorProps } from './dimension_editor';
+import { TableDimensionEditor } from './dimension_editor';
+import type { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
 import { getKbnPalettes } from '@kbn/palettes';
 import { renderWithProviders } from '../../../test_utils/test_utils';
@@ -126,25 +132,25 @@ describe('data table dimension editor', () => {
 
   it('should render default alignment', () => {
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Left');
   });
 
   it('should render default alignment for number', () => {
     mockOperationForFirstColumn({ dataType: 'number' });
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Right');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Right');
   });
 
   it('should render default alignment for ranges', () => {
     mockOperationForFirstColumn({ isBucketed: true, dataType: 'number' });
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Left');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Left');
   });
 
   it('should render specific alignment', () => {
     state.columns[0].alignment = 'center';
     renderTableDimensionEditor();
-    expect(btnGroups.alignment.selected).toHaveTextContent('Center');
+    expect(btnGroups.alignment.getSelected()).toHaveTextContent('Center');
   });
 
   it('should set state for the right column', async () => {
@@ -176,7 +182,7 @@ describe('data table dimension editor', () => {
   it('should set the dynamic coloring default to "none"', () => {
     state.columns[0].colorMode = undefined;
     renderTableDimensionEditor();
-    expect(btnGroups.colorMode.selected).toHaveTextContent('None');
+    expect(btnGroups.colorMode.getSelected()).toHaveTextContent('None');
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
@@ -196,7 +202,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode));
+      expect(btnGroups.colorMode.getSelected()).toHaveTextContent(capitalize(colorMode));
       expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
     }
   );
@@ -206,7 +212,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(btnGroups.colorMode.selected).toHaveTextContent(capitalize(colorMode ?? 'none'));
+      expect(btnGroups.colorMode.getSelected()).toHaveTextContent(capitalize(colorMode ?? 'none'));
       expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
     }
   );
@@ -222,10 +228,44 @@ describe('data table dimension editor', () => {
         {
           columnId: 'foo',
           colorMode: 'cell',
+          colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
           palette: expect.objectContaining({ type: 'palette' }),
         },
         {
           columnId: 'bar',
+        },
+      ],
+    });
+  });
+
+  it('should not set colorMapping or palette if color mode is changed to "text"', async () => {
+    const paletteId = 'non-default';
+    state.columns = [
+      {
+        columnId: 'foo',
+        colorMode: 'cell',
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId,
+        },
+        palette: {
+          type: 'palette',
+          name: paletteId,
+        },
+      },
+    ];
+    renderTableDimensionEditor();
+    await user.click(screen.getByRole('button', { name: 'Text' }));
+    jest.advanceTimersByTime(256);
+
+    expect(props.setState).toHaveBeenCalledWith({
+      ...state,
+      columns: [
+        {
+          columnId: 'foo',
+          colorMode: 'text',
+          colorMapping: expect.objectContaining({ paletteId }),
+          palette: expect.objectContaining({ type: 'palette', name: paletteId }),
         },
       ],
     });

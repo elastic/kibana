@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+class Worker {
+  constructor(stringUrl) {
+    this.url = stringUrl;
+    this.onmessage = () => {};
+  }
+
+  postMessage(msg) {
+    this.onmessage(msg);
+  }
+
+  terminate() {}
+}
+
+window.Worker = Worker;
+export default Worker;

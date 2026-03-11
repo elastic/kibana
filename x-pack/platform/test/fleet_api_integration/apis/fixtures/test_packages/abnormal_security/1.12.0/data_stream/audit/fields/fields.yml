@@ -1,0 +1,42 @@
+- name: abnormal_security
+  type: group
+  fields:
+    - name: audit
+      type: group
+      fields:
+        - name: action
+          type: keyword
+          description: The specific action performed during the event. This field is optional and may not be present.
+        - name: action_details
+          type: group
+          fields:
+            - name: message_id
+              type: keyword
+              description: ID of the message on which an action was performed.
+            - name: provided_reason
+              type: keyword
+              description: Reason provided for performing the action.
+            - name: request_url
+              type: keyword
+              description: URL for the request.
+        - name: category
+          type: keyword
+          description: The category of the performed action.
+        - name: source_ip
+          type: ip
+          description: The IP address of the device that caused the event.
+        - name: status
+          type: keyword
+          description: The result of the event. Returned as either SUCCESS or FAILURE.
+        - name: tenant_name
+          type: keyword
+          description: Name of the tenant the user has access to.
+        - name: timestamp
+          type: date
+          description: Date/time when the event occurred in UTC.
+        - name: user
+          type: group
+          fields:
+            - name: email
+              type: keyword
+              description: Email address of the user.

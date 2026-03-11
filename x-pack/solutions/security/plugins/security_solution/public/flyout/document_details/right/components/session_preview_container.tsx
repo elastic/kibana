@@ -11,11 +11,10 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { SessionPreview } from './session_preview';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 /**
  * Checks if the SessionView component is available, if so render it or else render an error message
@@ -26,7 +25,7 @@ export const SessionPreviewContainer: FC = () => {
     indexName,
     scopeId,
     getFieldsData,
-    isPreview,
+    isRulePreview,
     isPreviewMode,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
@@ -35,10 +34,6 @@ export const SessionPreviewContainer: FC = () => {
   const sessionViewConfig = useSessionViewConfig({ getFieldsData, dataFormattedForFieldBrowser });
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
-
-  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationDisabled'
-  );
 
   const { navigateToSessionView } = useNavigateToSessionView({
     eventId,
@@ -50,18 +45,11 @@ export const SessionPreviewContainer: FC = () => {
 
   const iconType = useMemo(() => (!isPreviewMode ? 'arrowStart' : undefined), [isPreviewMode]);
 
-  const isNavigationEnabled = useMemo(() => {
-    // if the session view is not enabled or in rule preview mode, the navigation is not enabled
-    if (!isEnabled || isPreview) {
-      return false;
-    }
-    // if the new navigation is enabled, the navigation is enabled (flyout or timeline)
-    if (isNewNavigationEnabled) {
-      return true;
-    }
-    // if the new navigation is not enabled, the navigation is enabled if the flyout is not in preview mode
-    return !isPreviewMode;
-  }, [isNewNavigationEnabled, isPreviewMode, isEnabled, isPreview]);
+  // if the session view is not enabled or in rule preview mode, the navigation is not enabled
+  const isNavigationEnabled = useMemo(
+    () => !(!isEnabled || isRulePreview),
+    [isEnabled, isRulePreview]
+  );
 
   return (
     <ExpandablePanel

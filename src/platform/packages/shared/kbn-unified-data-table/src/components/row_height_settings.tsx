@@ -17,18 +17,22 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-export enum RowHeightMode {
-  auto = 'auto',
-  custom = 'custom',
-}
+export const RowHeightMode = {
+  auto: 'auto',
+  custom: 'custom',
+} as const;
+
+export type RowHeightModeType = keyof typeof RowHeightMode;
+
 export interface RowHeightSettingsProps {
-  lineCountInput: number;
-  rowHeight?: RowHeightMode;
+  lineCountInput: number | undefined;
+  rowHeight?: RowHeightModeType;
   maxRowHeight?: number;
   label: string;
-  onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
-  onChangeLineCountInput: (newRowHeightLines: number) => void;
+  onChangeRowHeight: (newHeightMode: RowHeightModeType | undefined) => void;
+  onChangeLineCountInput: (newRowHeightLines: number, isValid: boolean) => void;
   'data-test-subj'?: string;
+  fullWidth?: boolean;
 }
 
 const idPrefix = htmlIdGenerator()();
@@ -36,11 +40,12 @@ const idPrefix = htmlIdGenerator()();
 export function RowHeightSettings({
   lineCountInput,
   label,
-  rowHeight,
+  rowHeight = RowHeightMode.custom,
   onChangeRowHeight,
   onChangeLineCountInput,
-  maxRowHeight,
+  maxRowHeight = 20,
   ['data-test-subj']: dataTestSubj,
+  fullWidth,
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
@@ -66,6 +71,7 @@ export function RowHeightSettings({
         aria-label={label}
         display="columnCompressed"
         data-test-subj={dataTestSubj}
+        fullWidth
       >
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiButtonGroup
@@ -74,7 +80,7 @@ export function RowHeightSettings({
             legend={label}
             buttonSize="compressed"
             options={rowHeightModeOptions}
-            idSelected={`${idPrefix}${rowHeight ?? RowHeightMode.custom}`}
+            idSelected={`${idPrefix}${rowHeight}`}
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
@@ -86,10 +92,11 @@ export function RowHeightSettings({
             value={lineCountInput}
             onChange={(e) => {
               const lineCount = Number(e.currentTarget.value);
-              onChangeLineCountInput(lineCount);
+              onChangeLineCountInput(lineCount, e.target.checkValidity());
             }}
             min={1}
-            max={maxRowHeight ?? 20}
+            max={maxRowHeight}
+            required
             step={1}
             disabled={rowHeight !== RowHeightMode.custom}
             data-test-subj={`${dataTestSubj}_lineCountNumber`}

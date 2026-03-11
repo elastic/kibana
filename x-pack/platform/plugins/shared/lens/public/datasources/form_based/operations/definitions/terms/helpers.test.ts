@@ -7,10 +7,15 @@
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import type { FramePublicAPI } from '../../../../../types';
-import type { CountIndexPatternColumn } from '..';
-import type { TermsIndexPatternColumn } from './types';
-import type { GenericIndexPatternColumn } from '../../../form_based';
+import type {
+  FramePublicAPI,
+  TermsIndexPatternColumn,
+  CountIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+} from '@kbn/lens-common';
 import { createMockedIndexPattern } from '../../../mocks';
 import {
   getDisallowedTermsMessage,
@@ -18,10 +23,7 @@ import {
   isSortableByColumn,
   getOtherBucketSwitchDefault,
 } from './helpers';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
-import { MovingAverageIndexPatternColumn } from '../calculations';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -168,7 +170,6 @@ describe('getDisallowedTermsMessage()', () => {
             dataType: 'number',
             operationType: 'moving_average',
             isBucketed: false,
-            scale: 'ratio',
             references: ['col2'],
             timeShift: '3h',
             params: {
@@ -435,7 +436,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'differences',
             isBucketed: false,
             references: ['colX'],
-            scale: 'ratio',
           },
         ]),
         'col2'
@@ -453,7 +453,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'differences',
             isBucketed: false,
             references: ['col3'],
-            scale: 'ratio',
           },
           {
             label: 'Average',
@@ -477,7 +476,6 @@ describe('isSortableByColumn()', () => {
             dataType: 'number',
             operationType: 'static_value',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 100 },
             references: [],
           } as ReferenceBasedIndexPatternColumn,
@@ -497,7 +495,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'percentile_rank',
             sourceField: 'bytes',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 1024.5 },
           } as PercentileRanksIndexPatternColumn,
         ]),
@@ -516,7 +513,6 @@ describe('isSortableByColumn()', () => {
             operationType: 'percentile_rank',
             sourceField: 'bytes',
             isBucketed: false,
-            scale: 'ratio',
             params: { value: 1024 },
           } as PercentileRanksIndexPatternColumn,
         ]),

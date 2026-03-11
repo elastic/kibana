@@ -258,7 +258,7 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,
@@ -296,7 +296,12 @@ export const RolesGridPage: FC<Props> = ({
         truncateText: { lines: 3 },
         render: (description: string, record: Role) => (
           <EuiToolTip position="top" content={description} display="block">
-            <EuiText color="subdued" size="s" data-test-subj={`roleRowDescription-${record.name}`}>
+            <EuiText
+              color="subdued"
+              size="s"
+              data-test-subj={`roleRowDescription-${record.name}`}
+              tabIndex={0}
+            >
               {description}
             </EuiText>
           </EuiToolTip>
@@ -508,6 +513,9 @@ export const RolesGridPage: FC<Props> = ({
           data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
+          tableCaption={i18n.translate('xpack.security.management.roles.rolesTableCaption', {
+            defaultMessage: 'List of roles',
+          })}
           selection={
             readOnly
               ? undefined

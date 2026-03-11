@@ -9,7 +9,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { getPalette } from './palette';
-import { PaletteParams } from './types';
+import type { PaletteParams } from './types';
 
 describe('getPalette', () => {
   const params: PaletteParams = {

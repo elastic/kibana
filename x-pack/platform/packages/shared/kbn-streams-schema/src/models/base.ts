@@ -5,29 +5,43 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { IModel, OmitName } from './core';
-import { StreamQuery, streamQuerySchema } from '../queries';
-import { ModelValidation, modelValidation } from './validation/model_validation';
+import { z } from '@kbn/zod/v4';
+import type { IModel, OmitUpsertProps } from './core';
+import type { StreamQuery } from '../queries';
+import { streamQuerySchema } from '../queries';
+import type { ModelValidation } from './validation/model_validation';
+import { modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
+  export interface QueryStreamReference {
+    name: string;
+  }
+
   export interface Definition {
     name: string;
     description: string;
+    updated_at: string;
+    /**
+     * Child query streams that belong to this stream.
+     * Names must follow the parent.childname naming convention.
+     */
+    query_streams?: QueryStreamReference[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
   export interface GetResponse<TDefinition extends Definition = Definition> {
     dashboards: string[];
+    rules: string[];
     stream: TDefinition;
     queries: StreamQuery[];
   }
 
   export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];
-    stream: OmitName<TDefinition>;
+    rules: string[];
+    stream: OmitUpsertProps<TDefinition>;
     queries: StreamQuery[];
   }
 
@@ -43,14 +57,24 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   Definition: z.object({
     name: z.string(),
     description: z.string(),
+    updated_at: z.iso.datetime(),
+    query_streams: z
+      .array(
+        z.object({
+          name: z.string(),
+        })
+      )
+      .optional(),
   }),
   Source: z.object({}),
   GetResponse: z.object({
     dashboards: z.array(z.string()),
+    rules: z.array(z.string()),
     queries: z.array(streamQuerySchema),
   }),
   UpsertRequest: z.object({
     dashboards: z.array(z.string()),
+    rules: z.array(z.string()),
     queries: z.array(streamQuerySchema),
   }),
 });

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { ADD_CANVAS_ELEMENT_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-import { addCanvasElementTrigger } from '../../../state/triggers/add_canvas_element_trigger';
 import { useCanvasApi } from '../../hooks/use_canvas_api';
 
 const strings = {
@@ -42,7 +43,7 @@ export const EditorMenu: FC<Props> = ({
       return addPanelActions.map((item) => {
         const context = {
           embeddable: canvasApi,
-          trigger: addCanvasElementTrigger,
+          trigger: { id: ADD_CANVAS_ELEMENT_TRIGGER },
         };
         const actionName = item.getDisplayName(context);
         return {

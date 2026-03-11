@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export interface CloudSamlSessionParams {
   hostname: string;
@@ -24,6 +24,7 @@ export interface LocalSamlSessionParams {
   username: string;
   fullname: string;
   role: string;
+  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
   log: ToolingLog;
 }
 

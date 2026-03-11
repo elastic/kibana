@@ -6,11 +6,11 @@
  */
 
 jest.mock('./authenticator');
-jest.mock('./unauthenticated_page');
 
 import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
+import dedent from 'dedent';
 
 import type {
   AuthenticationHandler,
@@ -464,9 +464,30 @@ describe('AuthenticationService', () => {
         expect(reauthenticate).not.toHaveBeenCalled();
       });
 
+      it('does not handle 401 errors if not related to expired token.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'current license is non-compliant' } },
+          })
+        ) as UnauthorizedError;
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: httpServerMock.createKibanaRequest() },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
       it('does not handle error unless provider successfully returns new headers.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const nonHandleableResults = [
@@ -502,7 +523,45 @@ describe('AuthenticationService', () => {
 
       it('handles error if authentication succeeds and authentication headers are available.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
+        ) as UnauthorizedError;
+
+        reauthenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            authHeaders: { header: 'value' },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest();
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { header: 'value' },
+        });
+        expect(mockUnauthorizedErrorToolkit.notHandled).not.toHaveBeenCalled();
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('handles error if authentication succeeds and authentication headers are available (UIAM).', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: {
+              error: {
+                reason: 'failed to authenticate cloud access token for project',
+                caused_by: { authentication_error_code: '0x7E0116' },
+              },
+            },
+          })
         ) as UnauthorizedError;
 
         reauthenticate.mockResolvedValue(
@@ -529,7 +588,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider cannot handle error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -556,7 +618,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider can handle error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -587,7 +652,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider fails with unexpected error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -781,7 +849,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -807,7 +898,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -835,7 +949,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -882,7 +1019,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -908,7 +1068,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -936,7 +1119,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -965,10 +1171,6 @@ describe('AuthenticationService', () => {
       });
 
       it('renders unauthenticated page if user does not have an active session', async () => {
-        const mockRenderUnauthorizedPage = jest
-          .requireMock('./unauthenticated_page')
-          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
-
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
@@ -981,24 +1183,40 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
-        });
-
-        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
-          basePath: mockSetupAuthenticationParams.http.basePath,
-          staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/app/some',
         });
       });
 
       it('renders unauthenticated page if user has an active session', async () => {
-        const mockRenderUnauthorizedPage = jest
-          .requireMock('./unauthenticated_page')
-          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
         const { authenticator, onPreResponseHandler } = getService();
@@ -1014,25 +1232,40 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
-        });
-
-        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
-          basePath: mockSetupAuthenticationParams.http.basePath,
-          staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/app/some',
         });
       });
 
       it('does not preserve path for the authentication flow paths', async () => {
-        const mockRenderUnauthorizedPage = jest
-          .requireMock('./unauthenticated_page')
-          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
-
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
@@ -1050,17 +1283,36 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
           },
-        });
-
-        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
-          basePath: mockSetupAuthenticationParams.http.basePath,
-          staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/',
         });
       });
     });
@@ -1084,10 +1336,6 @@ describe('AuthenticationService', () => {
           loggingSystemMock.create().get(),
           { isTLSEnabled: false }
         );
-        const mockRenderUnauthorizedPage = jest
-          .requireMock('./unauthenticated_page')
-          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
-
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
@@ -1105,18 +1353,36 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
           },
-        });
-
-        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
-          basePath: mockSetupAuthenticationParams.http.basePath,
-          staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/',
-          customBranding: undefined,
         });
       });
 
@@ -1147,7 +1413,30 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
             'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
@@ -1161,9 +1450,6 @@ describe('AuthenticationService', () => {
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
-        const mockRenderUnauthorizedPage = jest
-          .requireMock('./unauthenticated_page')
-          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
 
         await expect(
           onPreResponseHandler(
@@ -1176,11 +1462,37 @@ describe('AuthenticationService', () => {
           )
         ).resolves.toBe(mockReturnedValue);
 
-        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
-          basePath: mockSetupAuthenticationParams.http.basePath,
-          staticAssets: expect.any(Object),
-          originalURL: '/mock-server-basepath/',
-          customBranding: undefined,
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: dedent`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+            <meta name="viewport" content="width=device-width" />
+            <title>Elastic</title>
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+            <link rel="alternate icon" type="image/png" href="/favicons/favicon.png" />
+            <meta name="theme-color" content="#ffffff" />
+            <meta name="color-scheme" content="light dark" />
+            <meta http-equiv="refresh" content="0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F" />
+            <style type="text/css">
+              body { opacity: 0; animation: fade-in 0.5s ease-in 2s forwards; }
+              @keyframes fade-in { to { opacity: 1; } }
+            </style>
+          </head>
+          <body>
+            <h1>Unauthenticated</h1>
+            <a href="/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F">Click here if you are not redirected automatically</a>
+          </body>
+          </html>
+          `,
+          headers: {
+            'Content-Security-Policy': CspConfig.DEFAULT.header,
+            'Content-Security-Policy-Report-Only': CspConfig.DEFAULT.reportOnlyHeader,
+            Refresh:
+              '0;url=/mock-server-basepath/security/unauthenticated?next=%2Fmock-server-basepath%2F',
+          },
         });
       });
     });

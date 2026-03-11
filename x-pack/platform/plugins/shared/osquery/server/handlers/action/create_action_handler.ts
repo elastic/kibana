@@ -8,11 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createDynamicQueries, replacedQueries } from './create_queries';
-import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -21,13 +20,27 @@ import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
+import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 interface Metadata {
   currentUser: string | undefined;
+  userProfileUid: string | undefined;
+}
+
+interface OsqueryActionQuery {
+  action_id?: string;
+  id?: string;
+  query?: string;
+  ecs_mapping?: Record<string, unknown>;
+  version?: string;
+  platform?: string;
+  timeout?: number;
+  agents?: string[];
+  error?: string;
 }
 
 interface CreateActionHandlerOptions {
-  soClient?: SavedObjectsClientContract;
+  space?: { id: string };
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
@@ -40,24 +53,30 @@ export const createActionHandler = async (
 ) => {
   const [coreStartServices] = await osqueryContext.getStartServices();
   const esClientInternal = coreStartServices.elasticsearch.client.asInternalUser;
-  const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-    osqueryContext.getStartServices
+
+  const spaceScopedInternalSavedObjectsClient = getInternalSavedObjectsClientForSpaceId(
+    coreStartServices,
+    options.space?.id ?? DEFAULT_SPACE_ID
   );
 
-  const { soClient, metadata, alertData, error } = options;
-  const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
+  const { metadata, alertData, error } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = params;
+  const {
+    agent_all: agentAll,
+    agent_ids: agentIds,
+    agent_platforms: agentPlatforms,
+    agent_policy_ids: agentPolicyIds,
+  } = params;
   const selectedAgents = await parseAgentSelection(
-    internalSavedObjectsClient,
+    spaceScopedInternalSavedObjectsClient,
     elasticsearchClient,
     osqueryContext,
     {
-      agents: agent_ids,
-      allAgentsSelected: !!agent_all,
-      platformsSelected: agent_platforms,
-      policiesSelected: agent_policy_ids,
+      agents: agentIds,
+      allAgentsSelected: !!agentAll,
+      platformsSelected: agentPlatforms,
+      policiesSelected: agentPolicyIds,
+      spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
     }
   );
 
@@ -68,7 +87,10 @@ export const createActionHandler = async (
   let packSO;
 
   if (params.pack_id) {
-    packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
+    packSO = await spaceScopedInternalSavedObjectsClient.get<PackSavedObject>(
+      packSavedObjectType,
+      params.pack_id
+    );
   }
 
   const osqueryAction = {
@@ -86,12 +108,14 @@ export const createActionHandler = async (
     agent_policy_ids: params.agent_policy_ids,
     agents: selectedAgents,
     user_id: metadata?.currentUser,
+    user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
           const replacedQuery = replacedQueries(packQuery.query, alertData);
@@ -117,22 +141,27 @@ export const createActionHandler = async (
           agents: selectedAgents,
           osqueryContext,
           error,
+          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
 
+  const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
   const fleetActions = !error
     ? map(
-        filter(osqueryAction.queries, (query) => !query.error),
+        filter(actionQueries, (query) => !query.error),
         (query) => ({
-          action_id: query.action_id,
+          action_id: query.action_id as string,
           '@timestamp': moment().toISOString(),
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          agents: query.agents,
+          agents: query.agents as string[],
           user_id: metadata?.currentUser,
           ...(query.timeout !== QUERY_TIMEOUT.DEFAULT ? { timeout: query.timeout } : {}),
-          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']) as {
+            [k: string]: unknown;
+          },
         })
       )
     : [];
@@ -153,7 +182,7 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error']),
     agents: osqueryAction.agents.length,
   });
 

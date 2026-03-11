@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Get the status of the privileged access detection package
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
+
+      responses:
+        "200":
+          description: Privileged access detection status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+                properties:
+                  package_installation_status:
+                    type: string
+                    enum: [complete, incomplete]
+                  ml_module_setup_status:
+                    type: string
+                    enum: [complete, incomplete]
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - job_id
+                        - state
+                      properties:
+                        job_id:
+                          type: string
+                        description:
+                          type: string
+                        state:
+                          type: string
+                          enum: [closing, closed, opened, failed, opening]

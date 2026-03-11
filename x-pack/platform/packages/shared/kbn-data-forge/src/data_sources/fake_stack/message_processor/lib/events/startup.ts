@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { MESSAGE_PROCESSOR_HOSTS } from '../../../common/constants';
 import { createBaseEvent } from './create_base_event';
 
