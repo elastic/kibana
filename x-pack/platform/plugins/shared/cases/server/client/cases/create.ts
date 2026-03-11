@@ -34,7 +34,13 @@ export const create = async (
   casesClient: CasesClient
 ): Promise<Case> => {
   const {
-    services: { caseService, userActionService, licensingService, notificationService },
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      notificationService,
+      templatesService,
+    },
     user,
     logger,
     authorization: auth,
@@ -124,6 +130,16 @@ export const create = async (
         assignees: assigneesWithoutCurrentUser,
         theCase: newCase,
       });
+    }
+
+    if (query.template?.id) {
+      try {
+        await templatesService.incrementUsageStats(query.template.id);
+      } catch (error) {
+        logger.warn(
+          `Failed to update template usage stats for template ${query.template.id}: ${error}`
+        );
+      }
     }
 
     const res = flattenCaseSavedObject({
