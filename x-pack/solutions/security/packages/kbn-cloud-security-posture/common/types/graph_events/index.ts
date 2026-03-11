@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * as graphEventsV1 from './v1';
+export type * as graphEventsV1 from './v1';

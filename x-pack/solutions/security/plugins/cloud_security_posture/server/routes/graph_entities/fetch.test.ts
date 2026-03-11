@@ -11,6 +11,7 @@ import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import { fetchEntities } from './fetch';
 
@@ -71,7 +72,15 @@ describe('fetchEntities', () => {
     });
 
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0][0];
-    const shouldClauses = esqlCallArgs.filter.bool.filter[1].bool.should;
+    const filter = esqlCallArgs.filter as {
+      bool?: {
+        filter?: QueryDslQueryContainer[];
+      };
+    };
+    const targetFilterClause = Array.isArray(filter.bool?.filter)
+      ? (filter.bool.filter[1] as { bool?: { should?: QueryDslQueryContainer[] } })
+      : undefined;
+    const shouldClauses = targetFilterClause?.bool?.should ?? [];
 
     GRAPH_ACTOR_ENTITY_FIELDS.forEach((field) => {
       expect(shouldClauses).toContainEqual({ terms: { [field]: ['entity-1'] } });

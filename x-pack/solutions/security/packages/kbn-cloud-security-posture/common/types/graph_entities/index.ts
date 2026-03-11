@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * as graphEntitiesV1 from './v1';
+export type * as graphEntitiesV1 from './v1';
