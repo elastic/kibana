@@ -127,6 +127,10 @@ User activity events are written as JSON log entries. When using the JSON loggin
 
 ### Service fields
 
-| **Field** | **Description** |
-| --- | --- |
-| `service.version` | Version of Kibana that emitted the event. |
+| **Field**            | **Description**                                |
+|----------------------|------------------------------------------------|
+| `service.id`         | The cluster ID.                                |
+| `service.node.roles` | Roles of Kibana: `["ui", "background_tasks"]`. |
+| `service.state`      | The status of Kibana.                          |
+| `service.type`       | `kibana`.                                      |
+| `service.version`    | Version of Kibana that emitted the event.      |
