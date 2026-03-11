@@ -41,7 +41,7 @@ export const lensSearchRequestQuerySchema = schema.object({
 const lensSearchResponseMetaSchema = schema.object(
   {
     page: searchOptionsSchemas.page,
-    perPage: searchOptionsSchemas.perPage,
+    per_page: searchOptionsSchemas.perPage,
     total: schema.number(), // TODO use shared definition
   },
   { unknowns: 'forbid' }
