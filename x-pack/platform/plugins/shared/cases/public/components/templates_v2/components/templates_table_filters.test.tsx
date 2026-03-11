@@ -22,6 +22,7 @@ describe('TemplatesTableFilters', () => {
     search: '',
     tags: [],
     author: [],
+    owner: [],
     isDeleted: false,
   };
 
