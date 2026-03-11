@@ -53,15 +53,21 @@ export const createBreadcrumbsState = (): BreadcrumbsState => {
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
+  const allBadges$ = combineLatest([breadcrumbsBadges.$, convertedLegacyBadge$]).pipe(
+    map(([badges, converted]) => (converted ? [converted, ...badges] : badges)),
+    distinctUntilChanged((prev, next) =>
+      prev.length === next.length && prev.every((b, i) => b === next[i])
+    ),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
   const badgesExtension$ = combineLatest([
     breadcrumbsAppendExtensions.$,
-    breadcrumbsBadges.$,
-    convertedLegacyBadge$,
+    allBadges$,
   ]).pipe(
-    map(([extensions, badges, converted]): [boolean, ChromeBreadcrumbsBadge[]] => {
-      const allBadges = converted ? [converted, ...badges] : badges;
-      return [extensions.length === 0, allBadges];
-    }),
+    map(([extensions, allBadges]): [boolean, ChromeBreadcrumbsBadge[]] =>
+      [extensions.length === 0, allBadges]
+    ),
     distinctUntilChanged(([prevIsFirst, prevBadges], [nextIsFirst, nextBadges]) =>
       prevIsFirst === nextIsFirst && prevBadges === nextBadges
     ),
