@@ -197,6 +197,15 @@ export function getDataStateContainer({
   };
 
   /**
+   * Allows skipping any fetches that would occur from state updates in the callback
+   */
+  const withSkipNextFetch = async (callback: () => Promise<void>) => {
+    disableNextFetchOnStateChange$.next(true);
+    await callback();
+    disableNextFetchOnStateChange$.next(false);
+  };
+
+  /**
    * The observables the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
@@ -369,12 +378,29 @@ export function getDataStateContainer({
             internalState.dispatch(
               injectCurrentTab(internalStateActions.setPreviousStateSnapshot)({
                 profileId: previousProfileId,
-                previousStateSnapshot: getPreviousStateSnapshot(
-                  appState,
-                  resetDefaultProfileState.fields
-                ),
+                previousStateSnapshot: pick(appState, DEFAULT_PROFILE_STATE_FIELDS),
               })
             );
+
+            const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
+            const nextProfileSnapshot =
+              getCurrentTab().resetDefaultProfileState.previousStateSnapshotsByProfileId[
+                nextProfileId
+              ];
+            const nextProfileStateUpdate = getPreviousStateSnapshot(
+              nextProfileSnapshot ?? {},
+              resetDefaultProfileState.fields
+            );
+
+            if (nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0) {
+              await withSkipNextFetch(() =>
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                    appState: nextProfileStateUpdate,
+                  })
+                )
+              );
+            }
           }
 
           const dataView = currentDataView$.getValue();
@@ -384,13 +410,13 @@ export function getDataStateContainer({
           const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
 
           if (preFetchStateUpdate) {
-            disableNextFetchOnStateChange$.next(true);
-            await internalState.dispatch(
-              injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                appState: preFetchStateUpdate,
-              })
+            await withSkipNextFetch(() =>
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+                  appState: preFetchStateUpdate,
+                })
+              )
             );
-            disableNextFetchOnStateChange$.next(false);
           }
 
           abortController = new AbortController();
