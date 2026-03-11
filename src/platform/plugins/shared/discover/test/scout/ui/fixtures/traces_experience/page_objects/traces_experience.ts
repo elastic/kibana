@@ -8,6 +8,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { TracesFlyout } from './flyout';
 import type { TracesGrid } from './grid';
 import type { TracesCharts } from './charts';
@@ -36,6 +37,13 @@ export class TracesExperiencePage {
   public async openOverviewTab(discover: PageObjects['discover'], rowIndex = 0) {
     await this.openDocumentFlyout(discover, rowIndex);
     await this.flyout.overviewTab.click();
+  }
+
+  public async expectTracesColumnsVisible(discover: PageObjects['discover']) {
+    await discover.waitForDocTableRendered();
+    for (const column of this.grid.expectedColumns) {
+      await expect(discover.getColumnHeader(column)).toBeVisible();
+    }
   }
 
   public async clickRowAction(rowText: string, tableTestSubj?: string) {

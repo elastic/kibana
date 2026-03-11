@@ -8,7 +8,6 @@
  */
 
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   TRACES,
@@ -38,14 +37,8 @@ spaceTest.describe(
     spaceTest(
       'should display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
-        await spaceTest.step('wait for results to load', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-        });
-
         await spaceTest.step('verify trace-specific column headers', async () => {
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -56,9 +49,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-          await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-        }
+        await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
       });
     });
   }

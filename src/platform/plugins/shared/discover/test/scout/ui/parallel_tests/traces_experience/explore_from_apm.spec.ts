@@ -54,10 +54,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
 
         await spaceTest.step('verify Overview tab in document flyout', async () => {
@@ -81,10 +78,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -106,10 +100,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -138,10 +129,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -160,10 +148,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -182,10 +167,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -207,10 +189,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -239,10 +218,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -265,10 +241,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -291,10 +264,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -320,10 +290,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -346,10 +313,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
 
         await spaceTest.step('verify Overview tab in document flyout', async () => {
@@ -381,10 +345,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -411,10 +372,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -444,10 +402,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -469,10 +424,7 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -522,10 +474,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
@@ -550,10 +499,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
         });
       }
     );
