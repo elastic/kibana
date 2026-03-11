@@ -203,8 +203,7 @@ function validateEmails(
 }
 
 export function getActionsConfigurationUtilities(
-  config: ActionsConfig,
-  earsBaseUrlGetter?: () => string | undefined
+  config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
@@ -285,6 +284,6 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
-    getEarsUrl: () => earsBaseUrlGetter?.() ?? config.ears?.url,
+    getEarsUrl: () => config.ears?.url,
   };
 }

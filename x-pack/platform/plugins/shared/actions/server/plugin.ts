@@ -146,8 +146,6 @@ export interface PluginSetupContract {
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
-  setEarsBaseUrl: (url: string) => void;
-
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 }
 
@@ -240,7 +238,6 @@ export class ActionsPlugin
 {
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
-  private earsBaseUrl: string | undefined;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private authTypeRegistry?: AuthTypeRegistry;
@@ -263,7 +260,6 @@ export class ActionsPlugin
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
     );
-    this.earsBaseUrl = this.actionsConfig.ears?.url;
     this.telemetryLogger = initContext.logger.get('usage');
     this.inMemoryConnectors = [];
     this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));
@@ -297,10 +293,7 @@ export class ActionsPlugin
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
-    const actionsConfigUtils = getActionsConfigurationUtilities(
-      this.actionsConfig,
-      () => this.earsBaseUrl
-    );
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       this.inMemoryConnectors.push(getAlertHistoryEsIndex());
@@ -490,9 +483,6 @@ export class ActionsPlugin
           );
         }
       },
-      setEarsBaseUrl: (url: string) => {
-        this.earsBaseUrl = url;
-      },
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
@@ -512,10 +502,7 @@ export class ActionsPlugin
       actionsConfig,
     } = this;
 
-    const actionsConfigUtils = getActionsConfigurationUtilities(
-      actionsConfig,
-      () => this.earsBaseUrl
-    );
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 

@@ -43,7 +43,6 @@ const createSetupMock = () => {
       getEarsUrl: jest.fn(),
     }),
     setEnabledConnectorTypes: jest.fn(),
-    setEarsBaseUrl: jest.fn(),
     isActionTypeEnabled: jest.fn(),
   });
   return mock;

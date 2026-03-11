@@ -784,14 +784,6 @@ describe('getEarsUrl()', () => {
     });
     expect(acu.getEarsUrl()).toBe('https://ears.example.com');
   });
-
-  test('earsBaseUrlGetter override takes precedence over config', () => {
-    const acu = getActionsConfigurationUtilities(
-      { ...defaultActionsConfig, ears: { url: 'https://ears.example.com' } },
-      () => 'https://override.example.com'
-    );
-    expect(acu.getEarsUrl()).toBe('https://override.example.com');
-  });
 });
 
 describe('getEnabledEmailServices()', () => {
