@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useSelector, useDispatch } from 'react-redux';
 import type { Props as ComponentProps } from './flyout.component';
 import { AddEmbeddableFlyout as Component } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
-import { getSelectedPage } from '../../state/selectors/workpad';
-import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import type { State } from '../../../types';
-import type { CanAddNewPanel, PanelPackage } from '@kbn/presentation-publishing';
-
-type AddEmbeddable = (pageId: string, partialElement: { expression: string }) => void;
+import { useCanvasApi } from '../hooks/use_canvas_api';
 
 type FlyoutProps = Pick<ComponentProps, 'onClose'>;
 
@@ -50,31 +44,12 @@ export const EmbeddableFlyoutPortal: React.FunctionComponent<ComponentProps> = (
 export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
   onClose
 }) => {
-  const dispatch = useDispatch();
-  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
-
-  const addEmbeddable: AddEmbeddable = useCallback(
-    (selectedPageId, partialElement) => dispatch(addElement(selectedPageId, partialElement)),
-    [dispatch]
-  );
-
-  const container = useMemo(() => ({
-    addNewPanel: (panel: PanelPackage) => {
-      const expression = embeddableInputToExpression(
-        panel.serializedState,
-        panel.panelType,
-        undefined,
-        true
-      );
-      addEmbeddable(pageId, { expression });
-      onClose();
-    }
-  } as CanAddNewPanel), [addEmbeddable, pageId, onClose]);
-
+  const canvasApi = useCanvasApi();
+  
   return (
     <EmbeddableFlyoutPortal
       onClose={onClose}
-      container={container}
+      container={canvasApi}
     />
   );
 };

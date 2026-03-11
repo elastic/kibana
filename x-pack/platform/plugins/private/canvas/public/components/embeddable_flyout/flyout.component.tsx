@@ -16,13 +16,12 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
+import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { contentManagementService, coreServices } from '../../services/kibana_services';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { getAddFromLibraryType } from '@kbn/embeddable-plugin/public/add_from_library/registry';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 
 const strings = {
