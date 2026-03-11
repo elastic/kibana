@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlIndexer } from './sml_indexer';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
@@ -71,7 +72,7 @@ const createIndexerParams = (
   action: 'create' as const,
   spaces: ['default'],
   esClient: createMockEsClient(),
-  savedObjectsClient: {} as any,
+  savedObjectsClient: {} as unknown as ISavedObjectsRepository,
   logger: createMockLogger(),
   ...overrides,
 });

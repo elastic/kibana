@@ -150,8 +150,11 @@ describe('createSmlCrawler', () => {
           op.index?.document?.update_action === 'create'
       );
       expect(createOp).toBeDefined();
-      expect((createOp as any).index.document.attachment_id).toBe('a');
-      expect((createOp as any).index.document.spaces).toEqual(['default']);
+      const createOpDoc = (
+        createOp as { index?: { document?: { attachment_id?: string; spaces?: string[] } } }
+      ).index?.document;
+      expect(createOpDoc?.attachment_id).toBe('a');
+      expect(createOpDoc?.spaces).toEqual(['default']);
     });
   });
 
@@ -202,7 +205,9 @@ describe('createSmlCrawler', () => {
           op.index?.document?.update_action === 'update'
       );
       expect(updateOp).toBeDefined();
-      expect((updateOp as any).index.document.updated_at).toBe('2024-01-02');
+      const updateOpDoc = (updateOp as { index?: { document?: { updated_at?: string } } }).index
+        ?.document;
+      expect(updateOpDoc?.updated_at).toBe('2024-01-02');
     });
   });
 
@@ -252,7 +257,9 @@ describe('createSmlCrawler', () => {
           op.index?.document?.update_action === 'delete'
       );
       expect(deleteOp).toBeDefined();
-      expect((deleteOp as any).index.document.attachment_id).toBe('deleted-item');
+      const deleteOpDoc = (deleteOp as { index?: { document?: { attachment_id?: string } } }).index
+        ?.document;
+      expect(deleteOpDoc?.attachment_id).toBe('deleted-item');
     });
   });
 
@@ -344,7 +351,9 @@ describe('createSmlCrawler', () => {
           op.index?.document?.update_action === 'update'
       );
       expect(updateOp).toBeDefined();
-      expect((updateOp as any).index.document.spaces).toEqual(['default', 'space-2']);
+      const spaceUpdateDoc = (updateOp as { index?: { document?: { spaces?: string[] } } }).index
+        ?.document;
+      expect(spaceUpdateDoc?.spaces).toEqual(['default', 'space-2']);
     });
   });
 
@@ -723,29 +732,24 @@ describe('createSmlCrawler', () => {
   });
 
   describe('loadCrawlerState error', () => {
-    it('logs warning and returns empty array', async () => {
+    it('skips crawl cycle and logs error when state loading fails', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
         list: jest.fn().mockResolvedValue(items),
       });
-      mockStateClient.search
-        .mockRejectedValueOnce(new Error('search failed'))
-        .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      mockStateClient.search.mockRejectedValueOnce(new Error('search failed'));
 
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('failed to load crawler state')
       );
-      const createOp = mockStateClient.bulk.mock.calls
-        .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
-        .find(
-          (op: { index?: { document?: { update_action?: string } } }) =>
-            op.index?.document?.update_action === 'create'
-        );
-      expect(createOp).toBeDefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('skipping crawl cycle')
+      );
+      expect(mockStateClient.bulk).not.toHaveBeenCalled();
+      expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
     });
   });
 });

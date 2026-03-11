@@ -6,7 +6,8 @@
  */
 
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { SmlSearchResult } from '../../../sml';
 import { createSmlSearchTool } from './sml_search';
 
@@ -43,7 +44,10 @@ describe('createSmlSearchTool', () => {
   it('calls search with correct params', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
-    await tool.handler({ keywords: ['cpu', 'usage'], size: 20 }, mockContext as any);
+    await tool.handler(
+      { keywords: ['cpu', 'usage'], size: 20 },
+      mockContext as unknown as ToolHandlerContext
+    );
     expect(getSmlService).toHaveBeenCalled();
     expect(mockSearch).toHaveBeenCalledWith({
       keywords: ['cpu', 'usage'],
@@ -71,11 +75,14 @@ describe('createSmlSearchTool', () => {
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });
     const tool = createSmlSearchTool({ getSmlService });
-    const result = (await tool.handler({ keywords: ['cpu'] }, mockContext as any)) as {
+    const result = (await tool.handler(
+      { keywords: ['cpu'] },
+      mockContext as unknown as ToolHandlerContext
+    )) as {
       results: unknown[];
     };
     expect(result.results).toHaveLength(1);
-    const data = (result.results[0] as any).data;
+    const data = (result.results[0] as OtherResult<{ total: number; items: unknown[] }>).data;
     expect(data.total).toBe(1);
     expect(data.items).toHaveLength(1);
     expect(data.items[0]).toEqual({
@@ -93,11 +100,21 @@ describe('createSmlSearchTool', () => {
   it('returns "No results found" when empty', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
-    const result = (await tool.handler({ keywords: ['nonexistent'] }, mockContext as any)) as {
+    const result = (await tool.handler(
+      { keywords: ['nonexistent'] },
+      mockContext as unknown as ToolHandlerContext
+    )) as {
       results: unknown[];
     };
     expect(result.results).toHaveLength(1);
-    const data = (result.results[0] as any).data;
+    const data = (
+      result.results[0] as OtherResult<{
+        message: string;
+        keywords: string[];
+        total: number;
+        items: unknown[];
+      }>
+    ).data;
     expect(data.message).toBe('No results found in the Semantic Metadata Layer.');
     expect(data.keywords).toEqual(['nonexistent']);
     expect(data.total).toBe(0);
@@ -108,7 +125,7 @@ describe('createSmlSearchTool', () => {
   it('uses default size when not provided', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
-    await tool.handler({ keywords: ['test'] }, mockContext as any);
+    await tool.handler({ keywords: ['test'] }, mockContext as unknown as ToolHandlerContext);
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         keywords: ['test'],

@@ -102,10 +102,18 @@ class SmlCrawlerImpl implements SmlCrawler {
     }
 
     // 2. Load existing crawler state for this type
-    let existingState = await this.loadCrawlerState({
-      stateClient,
-      attachmentType: definition.id,
-    });
+    let existingState;
+    try {
+      existingState = await this.loadCrawlerState({
+        stateClient,
+        attachmentType: definition.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: skipping crawl cycle for type '${definition.id}' — state loading failed. Will retry on next scheduled run.`
+      );
+      return;
+    }
     this.logger.info(
       `SML crawler: loaded ${existingState.length} existing state doc(s) for type '${definition.id}'`
     );
@@ -406,24 +414,18 @@ class SmlCrawlerImpl implements SmlCrawler {
    * delete it. This can happen when a previous code path wrote directly to the
    * index name (bypassing the adapter), causing ES to auto-create a concrete index.
    * The adapter needs the name free to use as an alias.
-   *
-   * Also cleans up the old `.chat-sml` index/template that was renamed to `.chat-sml-data`
-   * to avoid index template pattern collisions (`.chat-sml-*` matched `.chat-sml-crawler-state-*`).
    */
   private async cleanupStaleConcreteIndices(esClient: ElasticsearchClient): Promise<void> {
     const indexNames = [smlCrawlerStateIndexName, smlIndexName];
 
     for (const indexName of indexNames) {
       try {
-        // Check if a concrete index (not an alias) exists with this name
         const exists = await esClient.indices.exists({ index: indexName });
         if (!exists) continue;
 
-        // Check if it's an alias (which is the expected state) — if so, nothing to clean up
         const isAlias = await esClient.indices.existsAlias({ name: indexName }).catch(() => false);
         if (isAlias) continue;
 
-        // It's a concrete index with the alias name — delete it
         this.logger.warn(
           `Deleting stale concrete index '${indexName}' that conflicts with the StorageIndexAdapter alias`
         );
@@ -433,62 +435,6 @@ class SmlCrawlerImpl implements SmlCrawler {
           `Failed to clean up stale index '${indexName}': ${(error as Error).message}`
         );
       }
-    }
-
-    // Clean up the old `.chat-sml` index template and any backing indices from the
-    // previous naming scheme. The SML data index was renamed from `.chat-sml` to
-    // `.chat-sml-data` to avoid pattern collisions with `.chat-sml-crawler-state`.
-    await this.cleanupOldSmlIndex(esClient);
-  }
-
-  /**
-   * Remove the old `.chat-sml` index template and any concrete/alias indices
-   * that used the old name, so the renamed `.chat-sml-data` can work cleanly.
-   */
-  private async cleanupOldSmlIndex(esClient: ElasticsearchClient): Promise<void> {
-    const oldName = '.chat-sml';
-
-    // Delete old index template if it exists
-    try {
-      await esClient.indices.deleteIndexTemplate({ name: oldName });
-      this.logger.info(`Deleted old index template '${oldName}'`);
-    } catch (error) {
-      // 404 is expected if the template doesn't exist
-      if ((error as { statusCode?: number }).statusCode !== 404) {
-        this.logger.debug(
-          `Failed to delete old index template '${oldName}': ${(error as Error).message}`
-        );
-      }
-    }
-
-    // Delete old backing indices (e.g. `.chat-sml-000001`) if any exist
-    try {
-      const oldIndices = await esClient.indices.get({
-        index: `${oldName}-0*`,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-      });
-
-      const indexNamesToDelete = Object.keys(oldIndices);
-      if (indexNamesToDelete.length > 0) {
-        this.logger.info(`Deleting old SML backing indices: ${indexNamesToDelete.join(', ')}`);
-        await esClient.indices.delete({ index: indexNamesToDelete });
-      }
-    } catch (error) {
-      this.logger.debug(`Failed to clean up old SML backing indices: ${(error as Error).message}`);
-    }
-
-    // Also delete a concrete index named `.chat-sml` if it exists
-    try {
-      const exists = await esClient.indices.exists({ index: oldName });
-      if (exists) {
-        this.logger.info(`Deleting stale concrete index '${oldName}'`);
-        await esClient.indices.delete({ index: oldName });
-      }
-    } catch (error) {
-      this.logger.debug(
-        `Failed to delete old concrete index '${oldName}': ${(error as Error).message}`
-      );
     }
   }
 
@@ -566,12 +512,12 @@ class SmlCrawlerImpl implements SmlCrawler {
         }
       }
     } catch (error) {
-      this.logger.warn(
+      this.logger.error(
         `SML crawler: failed to load crawler state for type '${attachmentType}': ${
           (error as Error).message
         }`
       );
-      return [];
+      throw error;
     }
 
     return allDocs;

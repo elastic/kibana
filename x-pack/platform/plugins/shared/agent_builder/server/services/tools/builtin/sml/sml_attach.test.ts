@@ -6,7 +6,12 @@
  */
 
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  type ErrorResult,
+  type OtherResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
+import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { SmlDocument } from '../../../sml';
 import { createSmlAttachTool } from './sml_attach';
 
@@ -64,7 +69,7 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
       items: [{ id: 'chunk-1', type: 'visualization' }],
@@ -74,8 +79,8 @@ describe('createSmlAttachTool', () => {
     });
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain('Access denied');
-    expect((result.results[0] as any).data.message).toContain('chunk-1');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Access denied');
+    expect((result.results[0] as ErrorResult).data.message).toContain('chunk-1');
   });
 
   it('returns error when document not found', async () => {
@@ -86,12 +91,12 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain('not found in the index');
-    expect((result.results[0] as any).data.message).toContain('chunk-1');
+    expect((result.results[0] as ErrorResult).data.message).toContain('not found in the index');
+    expect((result.results[0] as ErrorResult).data.message).toContain('chunk-1');
   });
 
   it('returns error when type definition is unknown', async () => {
@@ -104,14 +109,14 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'unknown-type' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain(
+    expect((result.results[0] as ErrorResult).data.message).toContain(
       'does not support conversion to attachment'
     );
-    expect((result.results[0] as any).data.message).toContain('unknown-type');
+    expect((result.results[0] as ErrorResult).data.message).toContain('unknown-type');
   });
 
   it('returns error when toAttachment returns undefined', async () => {
@@ -129,11 +134,13 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain('toAttachment returned undefined');
+    expect((result.results[0] as ErrorResult).data.message).toContain(
+      'toAttachment returned undefined'
+    );
   });
 
   it('returns success when toAttachment returns data and attachments.add succeeds', async () => {
@@ -154,13 +161,20 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
-    expect((result.results[0] as any).data.success).toBe(true);
-    expect((result.results[0] as any).data.attachment_id).toBe('att-123');
-    expect((result.results[0] as any).data.attachment_type).toBe('visualization');
+    const successData = (
+      result.results[0] as OtherResult<{
+        success: boolean;
+        attachment_id: string;
+        attachment_type: string;
+      }>
+    ).data;
+    expect(successData.success).toBe(true);
+    expect(successData.attachment_id).toBe('att-123');
+    expect(successData.attachment_type).toBe('visualization');
     expect(mockAttachmentsAdd).toHaveBeenCalledWith(
       { type: 'visualization', data: { layers: [] } },
       expect.any(String)
@@ -183,12 +197,12 @@ describe('createSmlAttachTool', () => {
       {
         items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain('Error converting SML item');
-    expect((result.results[0] as any).data.message).toContain('Conversion failed');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Error converting SML item');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Conversion failed');
   });
 
   it('handles multiple items with mix of authorized and unauthorized', async () => {
@@ -216,14 +230,17 @@ describe('createSmlAttachTool', () => {
           { chunk_id: 'chunk-2', attachment_id: 'ref-2', attachment_type: 'visualization' },
         ],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(2);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toContain('Access denied');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Access denied');
     expect((result.results[1] as { type: string }).type).toBe(ToolResultType.other);
-    expect((result.results[1] as any).data.success).toBe(true);
-    expect((result.results[1] as any).data.attachment_id).toBe('att-456');
+    const multiSuccessData = (
+      result.results[1] as OtherResult<{ success: boolean; attachment_id: string }>
+    ).data;
+    expect(multiSuccessData.success).toBe(true);
+    expect(multiSuccessData.attachment_id).toBe('att-456');
   });
 
   it('uses real SmlDocument from getDocuments when calling toAttachment', async () => {
@@ -253,7 +270,7 @@ describe('createSmlAttachTool', () => {
           },
         ],
       },
-      mockContext as any
+      mockContext as unknown as ToolHandlerContext
     );
     expect(toAttachment).toHaveBeenCalledWith(smlDoc, {
       request: mockContext.request,

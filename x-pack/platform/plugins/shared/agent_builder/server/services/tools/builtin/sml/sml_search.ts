@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId } from '@kbn/agent-builder-server';
+import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -50,13 +50,25 @@ export const createSmlSearchTool = ({
     const smlService = getSmlService();
     const { spaceId, esClient, request } = context;
 
-    const searchResult = await smlService.search({
-      keywords,
-      size,
-      spaceId,
-      esClient: esClient.asCurrentUser,
-      request,
-    });
+    let searchResult;
+    try {
+      searchResult = await smlService.search({
+        keywords,
+        size,
+        spaceId,
+        esClient: esClient.asCurrentUser,
+        request,
+      });
+    } catch (error) {
+      return {
+        results: [
+          createErrorResult({
+            message: `SML search failed: ${(error as Error).message}`,
+            metadata: { keywords },
+          }),
+        ],
+      };
+    }
 
     if (searchResult.results.length === 0) {
       return {

@@ -176,7 +176,7 @@ describe('SmlService', () => {
   beforeEach(() => {
     esClient = createMockEsClient();
     logger = createMockLogger();
-    request = {} as KibanaRequest;
+    request = {} as unknown as KibanaRequest;
   });
 
   describe('search', () => {
@@ -426,23 +426,23 @@ describe('SmlService', () => {
       );
     });
 
-    it('returns empty results on other errors', async () => {
+    it('throws on non-404 errors', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
       esClient.search.mockRejectedValue(new Error('Connection refused'));
 
-      const result = await smlService.search({
-        keywords: ['foo'],
-        size: 10,
-        spaceId: 'default',
-        esClient,
-        request,
-      });
+      await expect(
+        smlService.search({
+          keywords: ['foo'],
+          size: 10,
+          spaceId: 'default',
+          esClient,
+          request,
+        })
+      ).rejects.toThrow('Connection refused');
 
-      expect(result.results).toEqual([]);
-      expect(result.total).toBe(0);
       expect(logger.warn).toHaveBeenCalledWith('SML search failed: Connection refused');
     });
 

@@ -89,7 +89,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       indexAttachment: async (params) => {
-        return this.indexer!.indexAttachment(params);
+        return this.getIndexer().indexAttachment(params);
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
@@ -421,7 +421,7 @@ const searchSml = async ({
       return { results: [], total: 0 };
     }
     logger.warn(`SML search failed: ${(error as Error).message}`);
-    return { results: [], total: 0 };
+    throw error;
   }
 };
 

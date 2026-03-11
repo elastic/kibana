@@ -268,7 +268,6 @@ export class AgentBuilderPlugin
       },
       sml: {
         indexAttachment: async (params) => {
-          const esClient = elasticsearch.client.asScoped(params.request).asCurrentUser;
           const soClient = savedObjects.getScopedClient(params.request);
           const spaceId =
             params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
@@ -277,7 +276,7 @@ export class AgentBuilderPlugin
             attachmentType: params.attachmentType,
             action: params.action,
             spaces: [spaceId],
-            esClient,
+            esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
             logger: this.logger.get('services').get('sml'),
           });

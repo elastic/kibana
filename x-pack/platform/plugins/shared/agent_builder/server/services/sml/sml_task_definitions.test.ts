@@ -6,7 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/logging';
 import type { SmlTypeDefinition } from './types';
+import type { SmlTypeRegistry } from './sml_type_registry';
 import {
   SML_CRAWLER_TASK_TYPE,
   registerSmlCrawlerTaskDefinition,
@@ -46,14 +52,14 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 
 function getRegisteredTaskRunner(params: { attachmentType?: string }) {
   registerSmlCrawlerTaskDefinition({
-    taskManager: mockTaskManager as any,
+    taskManager: mockTaskManager as unknown as TaskManagerSetupContract,
     getCrawlerDeps: mockGetCrawlerDeps,
   });
   const registered = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
   const taskDef = registered[SML_CRAWLER_TASK_TYPE];
   return taskDef.createTaskRunner({
     taskInstance: { params },
-  } as any);
+  } as unknown as { taskInstance: { params?: Record<string, unknown> } });
 }
 
 describe('sml_task_definitions', () => {
@@ -72,7 +78,7 @@ describe('sml_task_definitions', () => {
   describe('registerSmlCrawlerTaskDefinition', () => {
     it('registers task with correct type', () => {
       registerSmlCrawlerTaskDefinition({
-        taskManager: mockTaskManager as any,
+        taskManager: mockTaskManager as unknown as TaskManagerSetupContract,
         getCrawlerDeps: mockGetCrawlerDeps,
       });
 
@@ -156,9 +162,9 @@ describe('sml_task_definitions', () => {
       mockRegistry.list.mockReturnValue([def1, def2]);
 
       await scheduleSmlCrawlerTasks({
-        taskManager: mockTaskManager as any,
-        registry: mockRegistry as any,
-        logger: mockLogger as any,
+        taskManager: mockTaskManager as unknown as TaskManagerStartContract,
+        registry: mockRegistry as unknown as SmlTypeRegistry,
+        logger: mockLogger as unknown as Logger,
       });
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
@@ -188,9 +194,9 @@ describe('sml_task_definitions', () => {
       mockRegistry.list.mockReturnValue([def]);
 
       await scheduleSmlCrawlerTasks({
-        taskManager: mockTaskManager as any,
-        registry: mockRegistry as any,
-        logger: mockLogger as any,
+        taskManager: mockTaskManager as unknown as TaskManagerStartContract,
+        registry: mockRegistry as unknown as SmlTypeRegistry,
+        logger: mockLogger as unknown as Logger,
       });
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -205,9 +211,9 @@ describe('sml_task_definitions', () => {
       mockRegistry.list.mockReturnValue([def]);
 
       await scheduleSmlCrawlerTasks({
-        taskManager: mockTaskManager as any,
-        registry: mockRegistry as any,
-        logger: mockLogger as any,
+        taskManager: mockTaskManager as unknown as TaskManagerStartContract,
+        registry: mockRegistry as unknown as SmlTypeRegistry,
+        logger: mockLogger as unknown as Logger,
       });
 
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
@@ -223,9 +229,9 @@ describe('sml_task_definitions', () => {
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error('schedule failed'));
 
       await scheduleSmlCrawlerTasks({
-        taskManager: mockTaskManager as any,
-        registry: mockRegistry as any,
-        logger: mockLogger as any,
+        taskManager: mockTaskManager as unknown as TaskManagerStartContract,
+        registry: mockRegistry as unknown as SmlTypeRegistry,
+        logger: mockLogger as unknown as Logger,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
