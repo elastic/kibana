@@ -625,11 +625,7 @@ const getAvailableProcessors: (
       return (
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractHelpText"
-          defaultMessage="Extract values from JSON strings using JSONPath-like selectors (e.g., {example1}, {example2})."
-          values={{
-            example1: <EuiCode>user.id</EuiCode>,
-            example2: <EuiCode>items[0].name</EuiCode>,
-          }}
+          defaultMessage="Extract values from JSON strings."
         />
       );
     },
