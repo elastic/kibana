@@ -136,7 +136,12 @@ export function QueryStreamFlyout({
   });
 
   return (
-    <EuiFlyout size="l" onClose={onClose} aria-labelledby="query-stream-flyout-title">
+    <EuiFlyout
+      size="l"
+      onClose={onClose}
+      aria-labelledby="query-stream-flyout-title"
+      data-test-subj="streamsAppQueryStreamFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id="query-stream-flyout-title">{title}</h2>

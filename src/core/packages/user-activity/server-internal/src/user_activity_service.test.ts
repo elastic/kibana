@@ -12,12 +12,12 @@ import { BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
-import type { UserActivityActionId } from '@kbn/core-user-activity-server';
+import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
 
-const TEST_ACTION = 'test_action' as UserActivityActionId;
-const OTHER_ACTION = 'other_action' as UserActivityActionId;
+const TEST_ACTION = 'create_alerting_rule' as UserActivityActionId;
+const OTHER_ACTION = 'create_alerting_rule_bulk' as UserActivityActionId;
 
 const defaultConfig = {
   enabled: true,
@@ -66,7 +66,7 @@ describe('UserActivityService', () => {
       service.trackUserAction({
         message: 'Custom message for action',
         event: { action: TEST_ACTION, type: 'change' },
-        object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
+        object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
       });
 
       expect(loggingSystemMock.collect(core.logger).info).toEqual([
@@ -75,10 +75,38 @@ describe('UserActivityService', () => {
           {
             message: 'Custom message for action',
             event: { action: TEST_ACTION, type: 'change' },
-            object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
+            object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
           },
         ],
       ]);
+    });
+
+    it('logs optional event timing fields and metadata', () => {
+      const params: TrackUserActionParams = {
+        message: 'Action with metadata',
+        event: {
+          action: TEST_ACTION,
+          type: 'change',
+          start: '2026-01-01T00:00:00.000Z',
+          end: '2026-01-01T00:00:00.250Z',
+          duration: 250000000,
+        },
+        object: { id: 'obj-meta', name: 'Object', type: 'rule', tags: [] },
+        metadata: {
+          field1: 'val1',
+          field2: 'val2',
+          num1: 1,
+        },
+      };
+
+      service.trackUserAction(params);
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls).toHaveLength(1);
+      expect(logCalls[0][0]).toBe('Action with metadata');
+      expect(logCalls[0][1]).toMatchObject({
+        ...params,
+      });
     });
 
     it('generates default message when not provided', () => {
@@ -87,13 +115,15 @@ describe('UserActivityService', () => {
       });
 
       service.trackUserAction({
-        event: { action: TEST_ACTION, type: 'change' },
-        object: { id: 'obj-2', name: 'My Dashboard', type: 'dashboard', tags: [] },
+        event: { action: TEST_ACTION, type: 'creation' },
+        object: { id: 'obj-2', name: 'My rule', type: 'rule', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
-      expect(logCalls[0][0]).toBe('User test_user performed test_action on My Dashboard (obj-2)');
+      expect(logCalls[0][0]).toBe(
+        'User test_user performed create_alerting_rule on My rule (obj-2)'
+      );
     });
 
     it('includes injected context in logs', () => {
