@@ -46,7 +46,7 @@ describe('useInlineActionTrigger', () => {
     const { result } = renderHook(() => useInlineActionTrigger());
 
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
 
     expect(result.current.match.isActive).toBe(true);
@@ -60,7 +60,7 @@ describe('useInlineActionTrigger', () => {
     const { result } = renderHook(() => useInlineActionTrigger());
 
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
 
     expect(result.current.match.isActive).toBe(true);
@@ -72,13 +72,13 @@ describe('useInlineActionTrigger', () => {
 
     mockGetTextBeforeCursor.mockReturnValue('@john');
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
 
     mockGetTextBeforeCursor.mockReturnValue('@john ');
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
     expect(result.current.match.activeTrigger?.query).toBe('john ');
@@ -90,7 +90,7 @@ describe('useInlineActionTrigger', () => {
     const { result } = renderHook(() => useInlineActionTrigger());
 
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
 
@@ -105,7 +105,7 @@ describe('useInlineActionTrigger', () => {
 
     mockGetTextBeforeCursor.mockReturnValue('@john');
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
 
     act(() => {
@@ -116,7 +116,7 @@ describe('useInlineActionTrigger', () => {
     // User continues typing — trigger re-activates
     mockGetTextBeforeCursor.mockReturnValue('@johnny');
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
     expect(result.current.match.activeTrigger?.query).toBe('johnny');
@@ -128,7 +128,7 @@ describe('useInlineActionTrigger', () => {
     const { result } = renderHook(() => useInlineActionTrigger({ enabled: false }));
 
     act(() => {
-      result.current.handleInput(mockElement);
+      result.current.checkInputForTrigger(mockElement);
     });
     expect(result.current.match.isActive).toBe(false);
   });

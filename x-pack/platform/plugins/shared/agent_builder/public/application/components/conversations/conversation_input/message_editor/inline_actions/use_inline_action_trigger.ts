@@ -15,7 +15,7 @@ export interface InlineActionTriggerState {
   /** Dismiss the current trigger (e.g., user presses Escape) */
   readonly dismiss: () => void;
   /** Handler to be called on input events */
-  readonly handleInput: (element: HTMLElement) => void;
+  readonly checkInputForTrigger: (element: HTMLElement) => void;
 }
 
 interface UseInlineActionTriggerOptions {
@@ -41,7 +41,7 @@ export const useInlineActionTrigger = (
 
   const [match, setMatch] = useState<TriggerMatchResult>(INACTIVE_MATCH);
 
-  const handleInput = useCallback(
+  const checkInputForTrigger = useCallback(
     (element: HTMLElement) => {
       if (!enabled) {
         setMatch((prev) => (prev.isActive ? INACTIVE_MATCH : prev));
@@ -55,8 +55,8 @@ export const useInlineActionTrigger = (
   );
 
   const dismiss = useCallback(() => {
-    setMatch(INACTIVE_MATCH);
+    setMatch((m) => ({ ...m, isActive: false }));
   }, []);
 
-  return { match, dismiss, handleInput };
+  return { match, dismiss, checkInputForTrigger };
 };

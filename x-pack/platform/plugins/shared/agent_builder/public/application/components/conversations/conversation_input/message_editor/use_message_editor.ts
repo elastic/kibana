@@ -44,8 +44,8 @@ export const useMessageEditor = (): MessageEditorInstance => {
   const [isEmpty, setIsEmpty] = useState(true);
   const {
     match: triggerMatch,
-    dismiss: dismissTrigger,
-    handleInput: handleTriggerInput,
+    dismiss: dismissActionMenu,
+    checkInputForTrigger,
   } = useInlineActionTrigger();
 
   const syncIsEmpty = useCallback(() => {
@@ -68,7 +68,7 @@ export const useMessageEditor = (): MessageEditorInstance => {
         onChange: () => {
           syncIsEmpty();
           if (ref.current) {
-            handleTriggerInput(ref.current);
+            checkInputForTrigger(ref.current);
           }
         },
         triggerMatch,
@@ -97,9 +97,9 @@ export const useMessageEditor = (): MessageEditorInstance => {
         }
       },
       isEmpty,
-      dismissTrigger,
+      dismissTrigger: dismissActionMenu,
     }),
-    [isEmpty, syncIsEmpty, triggerMatch, dismissTrigger, handleTriggerInput]
+    [isEmpty, syncIsEmpty, triggerMatch, dismissActionMenu, checkInputForTrigger]
   );
 
   return instance;

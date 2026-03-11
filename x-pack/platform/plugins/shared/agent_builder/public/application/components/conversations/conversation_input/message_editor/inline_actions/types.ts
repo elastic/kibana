@@ -18,6 +18,8 @@ export interface TriggerDefinition {
   readonly id: TriggerId;
   /** The character sequence that activates the trigger (e.g. '@', '/p') */
   readonly sequence: string;
+  /** Human readable name to be used for a11y */
+  readonly name: string;
 }
 
 /**

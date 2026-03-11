@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TriggerMatchResult, AnchorPosition } from './types';
-import { TriggerId } from './types';
 
 interface InlineActionPopoverProps {
   triggerMatch: TriggerMatchResult;
@@ -23,28 +22,6 @@ const placeholderLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.inlineActionPopover.placeholder',
   { defaultMessage: 'Inline actions' }
 );
-
-const announcementsById: Record<TriggerId, string> = {
-  [TriggerId.Attachment]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.attachmentAnnouncement',
-    { defaultMessage: 'Attachment suggestions opened. Press Escape to close.' }
-  ),
-  [TriggerId.Prompt]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.promptAnnouncement',
-    { defaultMessage: 'Prompt suggestions opened. Press Escape to close.' }
-  ),
-};
-
-const panelLabelsById: Record<TriggerId, string> = {
-  [TriggerId.Attachment]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.attachmentPanelLabel',
-    { defaultMessage: 'Attachment suggestions' }
-  ),
-  [TriggerId.Prompt]: i18n.translate(
-    'xpack.agentBuilder.conversationInput.inlineActionPopover.promptPanelLabel',
-    { defaultMessage: 'Prompt suggestions' }
-  ),
-};
 
 const wrapperStyles = css`
   position: absolute;
@@ -65,14 +42,20 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
   anchorPosition,
   'data-test-subj': dataTestSubj = 'inlineActionPopover',
 }) => {
-  const { activeTrigger } = triggerMatch;
-  const isOpen = activeTrigger !== null && anchorPosition !== null;
-  const triggerId = activeTrigger?.trigger.id;
+  const { activeTrigger, isActive } = triggerMatch;
+  const isOpen = isActive && activeTrigger !== null && anchorPosition !== null;
   let announcementText = '';
   let panelAriaLabel = '';
-  if (triggerId) {
-    announcementText = announcementsById[triggerId];
-    panelAriaLabel = panelLabelsById[triggerId];
+  if (activeTrigger) {
+    const { name } = activeTrigger.trigger;
+    announcementText = i18n.translate(
+      'xpack.agentBuilder.conversationInput.inlineActionPopover.openedAnnouncement',
+      { defaultMessage: '{name} suggestions opened. Press Escape to close.', values: { name } }
+    );
+    panelAriaLabel = i18n.translate(
+      'xpack.agentBuilder.conversationInput.inlineActionPopover.panelLabel',
+      { defaultMessage: '{name} suggestions', values: { name } }
+    );
   }
 
   return (

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type { TriggerDefinition, TriggerMatchResult, ActiveTrigger } from './types';
-// import { TriggerId } from './types';
-
-// TODO: Re-enable trigger definitions
-const TRIGGER_DEFINITIONS: readonly TriggerDefinition[] = [
-  // { id: TriggerId.Attachment, sequence: '@' },
-  // { id: TriggerId.Prompt, sequence: '/p' },
-];
+import { sortedTriggerDefinitions } from './trigger_definitions';
+import type { TriggerMatchResult, ActiveTrigger } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -32,54 +26,43 @@ const INACTIVE_RESULT: TriggerMatchResult = {
 };
 
 /**
- * Creates a trigger matcher function bound to the given trigger definitions.
- * Triggers are sorted longest-first for greedy matching at creation time.
- *
- * Given the text preceding the cursor, the returned function checks if any
- * registered trigger is active, returning the first (longest) matching trigger.
+ * Given the text preceding the cursor, checks if any registered trigger
+ * is active. Returns the first (longest) matching trigger.
  *
  * The algorithm scans backward from the cursor position to find the nearest
  * trigger sequence. For each registered trigger (sorted longest-first), it:
  * 1. Finds the last occurrence of the sequence in the text
  * 2. Checks that the sequence starts at a word boundary
  */
-export const createMatchTrigger = (
-  triggers: readonly TriggerDefinition[] = TRIGGER_DEFINITIONS
-) => {
-  const sortedTriggers = [...triggers].sort((a, b) => b.sequence.length - a.sequence.length);
+export const matchTrigger = (textBeforeCursor: string): TriggerMatchResult => {
+  for (const trigger of sortedTriggerDefinitions) {
+    const { sequence } = trigger;
+    const lastIndex = textBeforeCursor.lastIndexOf(sequence);
 
-  return (textBeforeCursor: string): TriggerMatchResult => {
-    for (const trigger of sortedTriggers) {
-      const { sequence } = trigger;
-      const lastIndex = textBeforeCursor.lastIndexOf(sequence);
-
-      if (lastIndex === -1) {
-        continue;
-      }
-
-      if (!isAtWordBoundary(textBeforeCursor, lastIndex)) {
-        continue;
-      }
-
-      const afterTrigger = textBeforeCursor.substring(lastIndex + sequence.length);
-
-      const activeTrigger: ActiveTrigger = {
-        trigger,
-        triggerStartOffset: lastIndex,
-        query: afterTrigger,
-      };
-
-      return {
-        isActive: true,
-        activeTrigger,
-      };
+    if (lastIndex === -1) {
+      continue;
     }
 
-    return INACTIVE_RESULT;
-  };
-};
+    if (!isAtWordBoundary(textBeforeCursor, lastIndex)) {
+      continue;
+    }
 
-export const matchTrigger = createMatchTrigger();
+    const afterTrigger = textBeforeCursor.substring(lastIndex + sequence.length);
+
+    const activeTrigger: ActiveTrigger = {
+      trigger,
+      triggerStartOffset: lastIndex,
+      query: afterTrigger,
+    };
+
+    return {
+      isActive: true,
+      activeTrigger,
+    };
+  }
+
+  return INACTIVE_RESULT;
+};
 
 /**
  * Extracts the text before the cursor from a contentEditable element.
