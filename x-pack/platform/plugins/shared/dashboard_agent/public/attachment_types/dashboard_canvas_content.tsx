@@ -52,26 +52,18 @@ const createDashboardRendererInitialInput = (
 });
 
 const getDashboardRendererCreationOptions = async ({
-  savedObjectId,
   initialDashboardInput,
 }: {
-  savedObjectId?: string;
   initialDashboardInput: DashboardCanvasInitialInput;
 }): Promise<DashboardCreationOptions> => {
-  if (savedObjectId) {
-    return {
-      getInitialInput: () => ({
-        viewMode: 'view',
-      }),
-    };
-  }
-
   return {
     getInitialInput: () => {
-      const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
       return {
-        ...restInitialDashboardInput,
-        time_range: timeRange,
+        title: initialDashboardInput.title,
+        description: initialDashboardInput.description,
+        panels: initialDashboardInput.panels,
+        time_range: initialDashboardInput.timeRange,
+        viewMode: 'view',
       };
     },
   };
@@ -129,44 +121,25 @@ export const DashboardCanvasContent = ({
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
-
-  // useEffect(
-  //   function checkLinkedSavedDashboardExists() {
-  //     let canceled = false;
-
-  //     if (!linkedSavedObjectId) {
-  //       setLinkedSavedDashboardExists(false);
-  //       return;
-  //     }
-
-  //     setLinkedSavedDashboardExists(false);
-  //     doesSavedDashboardExist(linkedSavedObjectId)
-  //       .then((exists) => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(exists);
-  //         }
-  //       })
-  //       .catch(() => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(false);
-  //         }
-  //       });
-
-  //     return () => {
-  //       canceled = true;
-  //     };
-  //   },
-  //   [linkedSavedObjectId, doesSavedDashboardExist]
-  // );
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
+  const getSavedDashboardExists = useCallback(async () => {
+    if (!linkedSavedObjectId) {
+      return false;
+    }
+
+    try {
+      return await doesSavedDashboardExist(linkedSavedObjectId);
+    } catch {
+      return false;
+    }
+  }, [doesSavedDashboardExist, linkedSavedObjectId]);
 
   const getCreationOptions = useCallback(
     () =>
       getDashboardRendererCreationOptions({
-        savedObjectId: data.savedObjectId,
         initialDashboardInput,
       }),
-    [data.savedObjectId, initialDashboardInput]
+    [initialDashboardInput]
   );
 
   useEffect(
@@ -187,13 +160,16 @@ export const DashboardCanvasContent = ({
           icon: 'pencil',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
+            const shouldUseSavedDashboardId = await getSavedDashboardExists();
+
             await locator.navigate({
-              dashboardId: data.savedObjectId,
+              dashboardId: shouldUseSavedDashboardId ? linkedSavedObjectId : undefined,
               title: initialDashboardInput.title,
               description: initialDashboardInput.description,
               panels: initialDashboardInput.panels,
               time_range: initialDashboardInput.timeRange,
               viewMode: 'edit',
+              useHash: true,
             });
           },
         });
@@ -206,11 +182,15 @@ export const DashboardCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.SECONDARY,
         handler: async () => {
-          const result = await dashboardApi.runInteractiveSave();
-          const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
+          const shouldRunQuickSave = await getSavedDashboardExists();
+          if (shouldRunQuickSave) {
+            await dashboardApi.runQuickSave();
+            return;
+          }
 
-          if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
-            await updateOrigin({ savedObjectId: nextSavedObjectId });
+          const result = await dashboardApi.runInteractiveSave();
+          if (result?.id && result.id !== linkedSavedObjectId) {
+            await updateOrigin({ savedObjectId: result.id });
           }
         },
       });
@@ -224,7 +204,7 @@ export const DashboardCanvasContent = ({
       initialDashboardInput.timeRange,
       initialDashboardInput.title,
       registerActionButtons,
-      data.savedObjectId,
+      getSavedDashboardExists,
       linkedSavedObjectId,
       updateOrigin,
     ]
@@ -253,39 +233,6 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
-      {/* TODO: Hide the callout for now until we agree on the design */}
-      {/*
-      {linkedSavedObjectId && linkedSavedDashboardExists && (
-        <EuiCallOut
-          css={styles.callout}
-          size="s"
-          iconType="info"
-          announceOnMount={false}
-          title={
-            <FormattedMessage
-              id="xpack.dashboardAgent.attachments.dashboard.savedVersionCalloutDescription"
-              defaultMessage="There's a {savedVersion} of this dashboard that may have more up to date content."
-              values={{
-                savedVersion: (
-                  <EuiLink
-                    href={dashboardLocator?.getRedirectUrl({ dashboardId: linkedSavedObjectId })}
-                    css={{
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    {i18n.translate(
-                      'xpack.dashboardAgent.attachments.dashboard.savedVersionLinkText',
-                      {
-                        defaultMessage: 'saved version',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
-      )} */}
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
