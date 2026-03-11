@@ -19,7 +19,7 @@ export const BulkOperations = ({
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
-  const { hasMissingIntegrations, resetMonitors, isResetting } =
+  const { isUnhealthy: hasMissingIntegrations, resetMonitors, isResetting } =
     useMonitorIntegrationHealth();
 
   const onDeleted = () => {

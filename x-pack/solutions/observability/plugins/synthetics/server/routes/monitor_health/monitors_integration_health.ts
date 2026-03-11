@@ -162,6 +162,22 @@ export const getMonitorsIntegrationHealth = async (
 
   const privateLocationAPI = new SyntheticsPrivateLocation(server);
 
+  const syntheticsInstallation =
+    await server.fleet.packageService.asInternalUser.getInstallation('synthetics');
+
+  if (!syntheticsInstallation) {
+    return {
+      monitors: buildAllLocationsWithStatus(
+        foundMonitors,
+        LocationHealthStatusValue.PackageNotInstalled,
+        allPrivateLocationsMap,
+        privateLocationAPI,
+        spaceId
+      ),
+      errors,
+    };
+  }
+
   const referencedAgentPolicyIds = [
     ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
   ];
@@ -241,7 +257,7 @@ export const getMonitorsIntegrationHealth = async (
     return {
       configId: so.id,
       monitorName: so.attributes[ConfigKey.NAME],
-      isMissingIntegration: locationStatuses.some(
+      isUnhealthy: locationStatuses.some(
         (s) => s.status !== LocationHealthStatusValue.Healthy
       ),
       locations: locationStatuses,
@@ -250,6 +266,44 @@ export const getMonitorsIntegrationHealth = async (
 
   return { monitors: monitorsHealthStatuses, errors };
 };
+
+const buildAllLocationsWithStatus = (
+  foundMonitors: Array<{
+    id: string;
+    so: SavedObject<EncryptedSyntheticsMonitorAttributes>;
+  }>,
+  status: LocationHealthStatusValue,
+  allPrivateLocationsMap: Map<string, PrivateLocationAttributes>,
+  privateLocationAPI: SyntheticsPrivateLocation,
+  spaceId: string
+): MonitorHealthStatus[] =>
+  foundMonitors.map(({ so }) => {
+    const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
+    const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+    const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
+      const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
+      const expectedPolicyId = privateLocationAPI.getPolicyId(
+        { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
+        loc.id,
+        spaceId
+      );
+
+      return buildLocationStatus(
+        loc.id,
+        existingPrivateLocation?.label ?? loc.label ?? loc.id,
+        status,
+        expectedPolicyId
+      );
+    });
+
+    return {
+      configId: so.id,
+      monitorName: so.attributes[ConfigKey.NAME],
+      isUnhealthy: true,
+      locations: locationStatuses,
+    };
+  });
 
 const buildLocationStatus = (
   locationId: string,

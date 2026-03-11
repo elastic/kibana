@@ -1187,7 +1187,7 @@ paths:
                         {
                           "configId": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
                           "monitorName": "Website Availability",
-                          "isMissingIntegration": false,
+                          "isUnhealthy": false,
                           "locations": [
                             {
                               "locationId": "fleet-server-policy",
@@ -1200,7 +1200,7 @@ paths:
                         {
                           "configId": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
                           "monitorName": "API Health",
-                          "isMissingIntegration": true,
+                          "isUnhealthy": true,
                           "locations": [
                             {
                               "locationId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
@@ -1224,7 +1224,7 @@ paths:
                         {
                           "configId": "b1234567-abcd-efgh-ijkl-000000000001",
                           "monitorName": "Multi-location check",
-                          "isMissingIntegration": true,
+                          "isUnhealthy": true,
                           "locations": [
                             {
                               "locationId": "loc-a",
@@ -1262,7 +1262,7 @@ paths:
                         {
                           "configId": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
                           "monitorName": "Website Availability",
-                          "isMissingIntegration": false,
+                          "isUnhealthy": false,
                           "locations": [
                             {
                               "locationId": "fleet-server-policy",
@@ -1323,7 +1323,7 @@ paths:
                     {
                       "configId": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
                       "monitorName": "Website Availability",
-                      "isMissingIntegration": false,
+                      "isUnhealthy": false,
                       "locations": [
                         {
                           "locationId": "fleet-server-policy",
@@ -1341,7 +1341,7 @@ paths:
                     {
                       "configId": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
                       "monitorName": "API Health",
-                      "isMissingIntegration": true,
+                      "isUnhealthy": true,
                       "locations": [
                         {
                           "locationId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
@@ -1798,7 +1798,7 @@ components:
       required:
         - configId
         - monitorName
-        - isMissingIntegration
+        - isUnhealthy
         - locations
       properties:
         configId:
@@ -1807,7 +1807,7 @@ components:
         monitorName:
           type: string
           description: The human-readable name of the monitor.
-        isMissingIntegration:
+        isUnhealthy:
           type: boolean
           description: >
             `true` if any private location for this monitor has a non-healthy

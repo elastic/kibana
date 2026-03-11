@@ -12,7 +12,7 @@ import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_inte
 import { getStatusLabel } from '../../common/hooks/status_labels';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
-  const { hasMissingIntegrations, getMissingStatuses, resetMonitor, isResetting } =
+  const { isUnhealthy: hasMissingIntegrations, getUnhealthyLocationStatuses: getMissingStatuses, resetMonitor, isResetting } =
     useMonitorIntegrationHealth({
       configIds: [configId],
     });

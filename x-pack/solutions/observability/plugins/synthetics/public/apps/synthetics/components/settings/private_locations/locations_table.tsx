@@ -60,7 +60,7 @@ export const PrivateLocationsTable = ({
 
   const { locationMonitors, loading } = useLocationMonitors();
 
-  const { getMissingCountForLocation, getMissingConfigIdsForLocation, resetMonitors, isResetting } =
+  const { getUnhealthyMonitorCountForLocation: getMissingCountForLocation, getUnhealthyConfigIdsForLocation: getMissingConfigIdsForLocation, resetMonitors, isResetting } =
     useMonitorIntegrationHealth();
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();

@@ -61,7 +61,7 @@ export function useMonitorListColumns({
   const { space } = useKibanaSpace();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { hasMissingIntegrations, getMissingStatuses } = useMonitorIntegrationHealth();
+  const { isUnhealthy: hasMissingIntegrations, getUnhealthyLocationStatuses: getMissingStatuses } = useMonitorIntegrationHealth();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;

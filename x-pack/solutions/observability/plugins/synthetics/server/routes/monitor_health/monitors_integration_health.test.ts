@@ -75,6 +75,7 @@ const buildRouteContext = (overrides: {
   monitorConfigRepository?: { get: jest.Mock };
   fleetGetByIDs?: jest.Mock;
   fleetAgentPolicyGetByIds?: jest.Mock;
+  fleetGetInstallation?: jest.Mock;
 }): RouteContext => {
   const fleetGetByIDs =
     overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
@@ -84,6 +85,9 @@ const buildRouteContext = (overrides: {
     jest.fn().mockImplementation(async (_soClient: any, ids: string[]) =>
       ids.map((id) => ({ id }))
     );
+
+  const fleetGetInstallation =
+    overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
 
   return {
     savedObjectsClient: {} as any,
@@ -100,6 +104,11 @@ const buildRouteContext = (overrides: {
         },
         agentPolicyService: {
           getByIds: fleetAgentPolicyGetByIds,
+        },
+        packageService: {
+          asInternalUser: {
+            getInstallation: fleetGetInstallation,
+          },
         },
       },
     },
@@ -192,11 +201,94 @@ describe('getMonitorsIntegrationHealth', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isMissingIntegration: false,
+          isUnhealthy: false,
           locations: [],
         },
       ]);
       expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  describe('package not installed', () => {
+    it('returns PackageNotInstalled for all private locations when synthetics package is not installed', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
+      const routeContext = buildRouteContext({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetInstallation,
+      });
+
+      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+
+      expect(result.monitors).toHaveLength(1);
+      const locStatus = result.monitors[0].locations[0];
+      expect(locStatus.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isUnhealthy).toBe(true);
+    });
+
+    it('skips package/agent policy fetches when package is not installed', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
+      const fleetGetByIDs = jest.fn();
+      const fleetAgentPolicyGetByIds = jest.fn();
+      const routeContext = buildRouteContext({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetInstallation,
+        fleetGetByIDs,
+        fleetAgentPolicyGetByIds,
+      });
+
+      await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+
+      expect(fleetGetByIDs).not.toHaveBeenCalled();
+      expect(fleetAgentPolicyGetByIds).not.toHaveBeenCalled();
+    });
+
+    it('marks all locations across multiple monitors as PackageNotInstalled', async () => {
+      const privateLoc1 = createPrivateLocation('loc-1', 'agent-1', 'Location 1');
+      const privateLoc2 = createPrivateLocation('loc-2', 'agent-2', 'Location 2');
+
+      const so1 = createMonitorSO('mon-1', {
+        locations: [
+          { id: 'loc-1', label: 'Location 1', isServiceManaged: false },
+          { id: 'loc-2', label: 'Location 2', isServiceManaged: false },
+        ],
+      });
+      const so2 = createMonitorSO('mon-2', {
+        locations: [{ id: 'loc-1', label: 'Location 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
+
+      const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
+      const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
+      const routeContext = buildRouteContext({
+        monitorConfigRepository: { get: getMock },
+        fleetGetInstallation,
+      });
+
+      const result = await getMonitorsIntegrationHealth(['mon-1', 'mon-2'], routeContext);
+
+      expect(result.monitors).toHaveLength(2);
+      for (const monitor of result.monitors) {
+        expect(monitor.isUnhealthy).toBe(true);
+        for (const loc of monitor.locations) {
+          expect(loc.status).toBe(LocationHealthStatusValue.PackageNotInstalled);
+        }
+      }
     });
   });
 
@@ -224,7 +316,7 @@ describe('getMonitorsIntegrationHealth', () => {
         {
           configId: 'mon-1',
           monitorName: 'Monitor mon-1',
-          isMissingIntegration: false,
+          isUnhealthy: false,
           locations: [
             {
               locationId: 'priv-loc-1',
@@ -258,7 +350,7 @@ describe('getMonitorsIntegrationHealth', () => {
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isMissingIntegration).toBe(true);
+      expect(result.monitors[0].isUnhealthy).toBe(true);
     });
   });
 
@@ -280,7 +372,7 @@ describe('getMonitorsIntegrationHealth', () => {
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingLocation);
       expect(locStatus.locationLabel).toBe('Gone Location');
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isMissingIntegration).toBe(true);
+      expect(result.monitors[0].isUnhealthy).toBe(true);
     });
 
     it('falls back to location id when label is missing', async () => {
@@ -320,7 +412,7 @@ describe('getMonitorsIntegrationHealth', () => {
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isMissingIntegration).toBe(true);
+      expect(result.monitors[0].isUnhealthy).toBe(true);
     });
 
     it('correctly distinguishes between existing and missing agent policies across locations', async () => {
@@ -380,7 +472,7 @@ describe('getMonitorsIntegrationHealth', () => {
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.AgentPolicyMismatch);
       expect(locStatus.reason).toBeDefined();
-      expect(result.monitors[0].isMissingIntegration).toBe(true);
+      expect(result.monitors[0].isUnhealthy).toBe(true);
     });
   });
 
@@ -456,13 +548,13 @@ describe('getMonitorsIntegrationHealth', () => {
       expect(mon1.configId).toBe('mon-1');
       expect(mon1.locations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(mon1.locations[1].status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
-      expect(mon1.isMissingIntegration).toBe(true);
+      expect(mon1.isUnhealthy).toBe(true);
 
       const mon2 = result.monitors[1];
       expect(mon2.configId).toBe('mon-2');
       expect(mon2.locations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(mon2.locations[1].status).toBe(LocationHealthStatusValue.MissingLocation);
-      expect(mon2.isMissingIntegration).toBe(true);
+      expect(mon2.isUnhealthy).toBe(true);
     });
   });
 

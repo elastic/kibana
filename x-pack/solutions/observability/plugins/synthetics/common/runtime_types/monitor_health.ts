@@ -25,7 +25,7 @@ export interface LocationHealthStatus {
 export interface MonitorHealthStatus {
   configId: string;
   monitorName: string;
-  isMissingIntegration: boolean;
+  isUnhealthy: boolean;
   locations: LocationHealthStatus[];
 }
 

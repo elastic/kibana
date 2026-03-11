@@ -21,7 +21,7 @@ export interface MonitorIntegrationStatus {
   locationLabel: string;
   policyId: string;
   status: LocationHealthStatusValue;
-  isMissing: boolean;
+  isUnhealthy: boolean;
 }
 
 interface UseMonitorIntegrationHealthOptions {
@@ -34,11 +34,11 @@ interface UseMonitorIntegrationHealthReturn {
   isResetting: boolean;
   resetMonitor: (configId: string) => Promise<void>;
   resetMonitors: (configIds: string[]) => Promise<void>;
-  hasMissingIntegrations: (configId: string) => boolean;
-  getMissingStatuses: (configId: string) => MonitorIntegrationStatus[];
-  getMissingCount: () => number;
-  getMissingCountForLocation: (locationId: string) => number;
-  getMissingConfigIdsForLocation: (locationId: string) => string[];
+  isUnhealthy: (configId: string) => boolean;
+  getUnhealthyLocationStatuses: (configId: string) => MonitorIntegrationStatus[];
+  getUnhealthyLocationCount: () => number;
+  getUnhealthyMonitorCountForLocation: (locationId: string) => number;
+  getUnhealthyConfigIdsForLocation: (locationId: string) => string[];
 }
 
 export const useMonitorIntegrationHealth = (
@@ -97,7 +97,7 @@ export const useMonitorIntegrationHealth = (
         locationLabel: loc.locationLabel,
         policyId: loc.policyId,
         status: loc.status,
-        isMissing: loc.status !== LocationHealthStatusValue.Healthy,
+        isUnhealthy: loc.status !== LocationHealthStatusValue.Healthy,
       }));
       map.set(monitor.configId, locationStatuses);
     }
@@ -105,46 +105,46 @@ export const useMonitorIntegrationHealth = (
     return map;
   }, [healthData]);
 
-  const hasMissingIntegrations = useCallback(
+  const isUnhealthy = useCallback(
     (configId: string): boolean => {
-      const entries = statuses.get(configId);
-      return entries?.some((s) => s.isMissing) ?? false;
+      const locationStatuses = statuses.get(configId);
+      return locationStatuses?.some((s) => s.isUnhealthy) ?? false;
     },
     [statuses]
   );
 
-  const getMissingStatuses = useCallback(
+  const getUnhealthyLocationStatuses = useCallback(
     (configId: string): MonitorIntegrationStatus[] => {
-      const entries = statuses.get(configId);
-      return entries?.filter((s) => s.isMissing) ?? [];
+      const locationStatuses = statuses.get(configId);
+      return locationStatuses?.filter((s) => s.isUnhealthy) ?? [];
     },
     [statuses]
   );
 
-  const getMissingCount = useCallback((): number => {
+  const getUnhealthyLocationCount = useCallback((): number => {
     let count = 0;
-    for (const entries of statuses.values()) {
-      if (entries.some((s) => s.isMissing)) count++;
+    for (const locationStatuses of statuses.values()) {
+      if (locationStatuses.some((s) => s.isUnhealthy)) count++;
     }
     return count;
   }, [statuses]);
 
-  const getMissingCountForLocation = useCallback(
+  const getUnhealthyMonitorCountForLocation = useCallback(
     (locationId: string): number => {
       let count = 0;
-      for (const entries of statuses.values()) {
-        if (entries.some((s) => s.locationId === locationId && s.isMissing)) count++;
+      for (const locationStatuses of statuses.values()) {
+        if (locationStatuses.some((s) => s.locationId === locationId && s.isUnhealthy)) count++;
       }
       return count;
     },
     [statuses]
   );
 
-  const getMissingConfigIdsForLocation = useCallback(
+  const getUnhealthyConfigIdsForLocation = useCallback(
     (locationId: string): string[] => {
       const ids: string[] = [];
       for (const entries of statuses.values()) {
-        if (entries.some((s) => s.locationId === locationId && s.isMissing)) {
+        if (entries.some((s) => s.locationId === locationId && s.isUnhealthy)) {
           ids.push(entries[0].configId);
         }
       }
@@ -174,10 +174,10 @@ export const useMonitorIntegrationHealth = (
     isResetting,
     resetMonitor,
     resetMonitors,
-    hasMissingIntegrations,
-    getMissingStatuses,
-    getMissingCount,
-    getMissingCountForLocation,
-    getMissingConfigIdsForLocation,
+    isUnhealthy,
+    getUnhealthyLocationStatuses,
+    getUnhealthyLocationCount,
+    getUnhealthyMonitorCountForLocation,
+    getUnhealthyConfigIdsForLocation,
   };
 };
