@@ -154,10 +154,9 @@ export const DashboardCanvasContent = ({
           label: i18n.translate(
             'xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel',
             {
-              defaultMessage: 'Edit',
+              defaultMessage: 'Edit in Dashboards',
             }
           ),
-          icon: 'pencil',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
             const shouldUseSavedDashboardId = await getSavedDashboardExists();
@@ -180,7 +179,7 @@ export const DashboardCanvasContent = ({
           defaultMessage: 'Save',
         }),
         icon: 'save',
-        type: ActionButtonType.SECONDARY,
+        type: ActionButtonType.PRIMARY,
         handler: async () => {
           const shouldRunQuickSave = await getSavedDashboardExists();
           if (shouldRunQuickSave) {
