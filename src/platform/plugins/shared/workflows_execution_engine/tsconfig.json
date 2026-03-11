@@ -30,7 +30,8 @@
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/es-errors"
   ],
   "exclude": ["target/**/*"]
 }
