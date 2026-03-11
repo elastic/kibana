@@ -31,6 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const detectionsApi = getService('detectionsApi');
 
   // Failing: See https://github.com/elastic/kibana/issues/256891
+  // Failing: See https://github.com/elastic/kibana/issues/256891
   describe.skip('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
