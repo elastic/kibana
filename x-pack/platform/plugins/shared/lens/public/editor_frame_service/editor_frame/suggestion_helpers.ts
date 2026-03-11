@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SupportedDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -221,7 +221,7 @@ export function getVisualizeFieldSuggestions({
   // suggestions for visualizing textbased languages
   if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
     if (visualizeTriggerFieldContext.query) {
-      return suggestions.find((s) => s.datasourceId === SupportedDatasourceId.TextBased);
+      return suggestions.find((s) => s.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED);
     }
   }
 

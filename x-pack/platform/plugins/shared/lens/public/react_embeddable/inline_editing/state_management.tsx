@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SupportedDatasourceId } from '@kbn/lens-common';
+import type { LensDatasourceId } from '@kbn/lens-common';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type {
@@ -18,7 +18,7 @@ import { mergeToNewDoc } from '../../state_management/shared_logic';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 
 export function getStateManagementForInlineEditing(
-  initialDatasourceId: SupportedDatasourceId,
+  initialDatasourceId: LensDatasourceId,
   getAttributes: () => TypedLensSerializedState['attributes'],
   updateAttributes: (
     newAttributes: TypedLensSerializedState['attributes'],

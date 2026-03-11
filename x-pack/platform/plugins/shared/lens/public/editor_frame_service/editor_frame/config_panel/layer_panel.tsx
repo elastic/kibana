@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SupportedDatasourceId } from '@kbn/lens-common';
+import type { LensDatasourceId } from '@kbn/lens-common';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
@@ -138,7 +138,7 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId! as SupportedDatasourceId;
+  const datasourceId = datasourcePublicAPI?.datasourceId! as LensDatasourceId;
   let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
