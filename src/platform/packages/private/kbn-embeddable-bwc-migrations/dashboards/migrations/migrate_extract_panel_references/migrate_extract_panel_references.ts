@@ -9,7 +9,6 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { EmbeddableReferenceManagers } from '../../../get_all_embeddable_reference_managers';
 import type { RawDashboardSavedObjectAttributes } from '../types';
 import { extractReferences, injectReferences } from './dashboard_saved_object_references';
 
@@ -24,7 +23,6 @@ import { extractReferences, injectReferences } from './dashboard_saved_object_re
  * All other references like index-patterns are forwarded non touched
  */
 export function createExtractPanelReferencesMigration(
-  bwcEmbeddableReferenceManagers: EmbeddableReferenceManagers,
   embeddableSetup: EmbeddableSetup // TODO remove this argument when all legacy serverside inject / extract logic is moved into kbn-embeddable-bwc-migrations
 ): SavedObjectMigrationFn<RawDashboardSavedObjectAttributes> {
   return (doc) => {
@@ -41,13 +39,11 @@ export function createExtractPanelReferencesMigration(
         attributes: doc.attributes,
         references,
       },
-      bwcEmbeddableReferenceManagers,
       embeddableSetup
     );
 
     const { attributes, references: newPanelReferences } = extractReferences(
       { attributes: injectedAttributes, references: [] },
-      bwcEmbeddableReferenceManagers,
       embeddableSetup
     );
 

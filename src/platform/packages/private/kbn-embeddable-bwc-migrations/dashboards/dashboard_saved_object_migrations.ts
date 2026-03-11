@@ -18,14 +18,10 @@ import { migrateExplicitlyHiddenTitles } from './migrations/migrate_hidden_title
 import { replaceIndexPatternReference } from './migrations/migrate_index_pattern_reference';
 import { migrateMatchAllQuery } from './migrations/migrate_match_all_query';
 import { migrations700, migrations730 } from './migrations/migrate_to_730';
-import { getAllEmbeddableReferenceManagers } from '../get_all_embeddable_reference_managers';
 
 export const getDashboardSavedObjectMigrations = (
   embeddableSetup: EmbeddableSetup
 ): SavedObjectMigrationMap => {
-  // gathers all of the hardcoded BWC reference managers
-  const bwcEmbeddableReferenceManagers = getAllEmbeddableReferenceManagers();
-
   const embeddableMigrations = mapValues<MigrateFunctionsObject, SavedObjectMigrationFn>(
     getAllEmbeddableMigrations(embeddableSetup),
     migrateByValueDashboardPanels
@@ -36,9 +32,7 @@ export const getDashboardSavedObjectMigrations = (
     '7.0.0': flow(migrations700),
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
-    '7.11.0': flow(
-      createExtractPanelReferencesMigration(bwcEmbeddableReferenceManagers, embeddableSetup)
-    ),
+    '7.11.0': flow(createExtractPanelReferencesMigration(embeddableSetup)),
     '7.14.0': flow(replaceIndexPatternReference),
     '7.17.3': flow(migrateExplicitlyHiddenTitles),
   };

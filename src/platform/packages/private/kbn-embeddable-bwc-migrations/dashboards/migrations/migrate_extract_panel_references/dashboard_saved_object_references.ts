@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { EmbeddableReferenceManagers } from '../../../get_all_embeddable_reference_managers';
 import {
   convertPanelMapToSavedPanels,
   convertSavedPanelsToPanelMap,
@@ -41,13 +40,12 @@ function parseDashboardAttributesWithType(attributes: {
 
 export function injectReferences(
   { attributes, references = [] }: DashboardAttributesAndReferences,
-  bwcEmbeddableReferenceManagers: EmbeddableReferenceManagers,
   embeddableSetup: EmbeddableSetup // TODO remove this argument when all legacy serverside inject / extract logic is moved into kbn-embeddable-bwc-migrations
 ): RawDashboardSavedObjectAttributes {
   const parsedAttributes = parseDashboardAttributesWithType(attributes);
 
   // inject references back into panels via the Embeddable persistable state service.
-  const inject = createInject(bwcEmbeddableReferenceManagers, embeddableSetup);
+  const inject = createInject(embeddableSetup);
   const injectedState = inject(parsedAttributes, references) as ParsedDashboardAttributesWithType;
   const injectedPanels = convertPanelMapToSavedPanels(injectedState.panels);
 
@@ -61,7 +59,6 @@ export function injectReferences(
 
 export function extractReferences(
   { attributes, references = [] }: DashboardAttributesAndReferences,
-  bwcEmbeddableReferenceManagers: EmbeddableReferenceManagers,
   embeddableSetup: EmbeddableSetup // TODO remove this argument when all legacy serverside inject / extract logic is moved into kbn-embeddable-bwc-migrations
 ): DashboardAttributesAndReferences {
   const parsedAttributes = parseDashboardAttributesWithType(attributes);
@@ -75,7 +72,7 @@ export function extractReferences(
     throw new Error(`"type" attribute is missing from panel "${panelMissingType[0]}"`);
   }
 
-  const extract = createExtract(bwcEmbeddableReferenceManagers, embeddableSetup);
+  const extract = createExtract(embeddableSetup);
   const { references: extractedReferences, state: extractedState } = extract(parsedAttributes) as {
     references: Reference[];
     state: ParsedDashboardAttributesWithType;

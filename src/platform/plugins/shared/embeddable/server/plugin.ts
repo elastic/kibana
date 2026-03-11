@@ -9,33 +9,33 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
-import type {
-  PersistableStateService,
-  PersistableStateMigrateFn,
-  MigrateFunctionsObject,
-  PersistableState,
-} from '@kbn/kibana-utils-plugin/common';
+import type { PersistableStateService, PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { ObjectType, Type } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
-import {
-  getExtractFunction,
-  getInjectFunction,
-  getMigrateFunction,
-  getTelemetryFunction,
-} from './persistable_state';
-import { getAllMigrations } from './persistable_state/get_all_migrations';
+import { getTelemetryFunction } from './persistable_state';
 import type { EmbeddableTransforms } from '../common';
 import type { DrilldownSetup, DrilldownState } from './drilldowns/types';
 import { getDrilldownRegistry } from './drilldowns/registry';
 import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
 import { getTransformsRegistry } from './embeddable_transforms/registry';
 
-export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
+type TelemetryOnlyPersistableState = Pick<
+  PersistableStateService<EmbeddableStateWithType>,
+  'telemetry'
+>;
+
+export interface EmbeddableSetup extends TelemetryOnlyPersistableState {
+  /**
+   * @deprecated Do not use. These are in the process of being removed.
+   */
+  getLegacyEmbeddableFactories: () => EmbeddableFactoryRegistry;
+
   /**
    * @deprecated Do not use. Register transforms instead.
    */
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+
   /*
    * Use registerDrilldown to register transforms and schema for a drilldown type.
    */
@@ -55,15 +55,15 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
   registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
-
-  /**
-   * @deprecated returns all migrate functions as registered in the legacy serverside embeddable framework.
-   * Do not use. Remove when all Embeddable types have their migrations moved to kbn-embeddable-bwc-migrations
-   */
-  getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+export type EmbeddableStart = TelemetryOnlyPersistableState & {
+  /**
+   * @deprecated
+   * Gets a legacy persistable state factory associated with this type.
+   */
+  getLegacyPersistableStateFactory: (type: string) => PersistableState<EmbeddableStateWithType>;
+
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
@@ -79,34 +79,26 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private migrateFn: PersistableStateMigrateFn | undefined;
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
 
   public setup(core: CoreSetup): EmbeddableSetup {
-    this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
+      getLegacyEmbeddableFactories: () => this.embeddableFactories,
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
       registerTransforms: this.transformsRegistry.registerTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
-      extract: getExtractFunction(this.getEmbeddableFactory),
-      inject: getInjectFunction(this.getEmbeddableFactory),
-      getAllMigrations: () =>
-        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 
   public start(core: CoreStart): EmbeddableStart {
     return {
+      getLegacyPersistableStateFactory: (type) => this.getEmbeddableFactory(type),
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
-      extract: getExtractFunction(this.getEmbeddableFactory),
-      inject: getInjectFunction(this.getEmbeddableFactory),
-      getAllMigrations: () =>
-        getAllMigrations(Array.from(this.embeddableFactories.values()), this.migrateFn!),
     };
   }
 

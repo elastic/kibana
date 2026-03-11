@@ -17,6 +17,11 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import {
+  getAllEmbeddableMigrations,
+  legacyEmbeddableExtract,
+  legacyEmbeddableInject,
+} from '@kbn/embeddable-bwc-migrations';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -59,9 +64,10 @@ export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsSta
     const expressionsSetup = expressionsFork.setup();
     setupInterpreter(expressionsSetup, {
       embeddablePersistableStateService: {
-        extract: plugins.embeddable.extract,
-        inject: plugins.embeddable.inject,
-        getAllMigrations: plugins.embeddable.getAllMigrations,
+        extract: (state) => legacyEmbeddableExtract(state, plugins.embeddable),
+        inject: (state, references) =>
+          legacyEmbeddableInject(state, references, plugins.embeddable),
+        getAllMigrations: () => getAllEmbeddableMigrations(plugins.embeddable),
       },
     });
 

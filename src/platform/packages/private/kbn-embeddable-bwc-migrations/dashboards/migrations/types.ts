@@ -8,12 +8,8 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-
-export interface EmbeddableStateWithType {
-  enhancements?: SerializableRecord;
-  type: string;
-}
+import type { Serializable } from '@kbn/utility-types';
+import type { EmbeddableStateWithType } from '../../persistable_state/types';
 
 export interface GridData {
   x: number;

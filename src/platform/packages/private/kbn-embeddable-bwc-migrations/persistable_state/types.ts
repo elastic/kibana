@@ -8,14 +8,9 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { EmbeddableStateWithType } from './dashboards/migrations/types';
-import { LEGACY_VISUALIZATION_TYPE } from './legacy_visualizations/legacy_visualizations_constants';
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 
-export interface EmbeddableReferenceManagers {
-  [key: string]: EmbeddableReferenceManager;
-}
-
-export interface EmbeddableReferenceManager {
+export interface LegacyEmbeddablePersistableStateItem {
   /**
    * A function which receives state and a list of references and should return
    * back the state with references injected. The default is an identity
@@ -43,13 +38,42 @@ export interface EmbeddableReferenceManager {
     state: EmbeddableStateWithType;
     references: SavedObjectReference[];
   };
+
+  /**
+   * A list of migration functions, which migrate the persistable state
+   * serializable object to the next version. Migration functions should be
+   * keyed using semver, where the version indicates which version the state
+   * will be migrated to.
+   */
+  migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
 }
 
-const identityReferenceManager: EmbeddableReferenceManager = {
-  inject: (state) => state,
-  extract: (state) => ({ state, references: [] }),
-};
+export interface EmbeddableStateWithType {
+  type: string;
+  enhancements?: SerializableRecord;
+}
 
-export const getAllEmbeddableReferenceManagers = (): EmbeddableReferenceManagers => ({
-  [LEGACY_VISUALIZATION_TYPE]: identityReferenceManager, // legacy visualizations never had extract / inject functions registered.
-});
+/**
+ * migrate function runs the specified migration
+ * @param state
+ * @param version
+ */
+export type PersistableStateMigrateFn = (
+  state: SerializableRecord,
+  version: string
+) => SerializableRecord;
+
+export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
+
+/**
+ * Collection of migrations that a given type of persistable state object has
+ * accumulated over time. Migration functions are keyed using semver version
+ * of Kibana releases.
+ */
+export interface MigrateFunctionsObject {
+  [semver: string]: MigrateFunction<any, any>;
+}
+export type MigrateFunction<
+  FromVersion extends Serializable = SerializableRecord,
+  ToVersion extends Serializable = SerializableRecord
+> = (state: FromVersion) => ToVersion;

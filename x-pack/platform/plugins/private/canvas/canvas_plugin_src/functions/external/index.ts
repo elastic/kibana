@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { LegacyEmbeddablePersistableStateItem } from '@kbn/embeddable-bwc-migrations';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { embeddableFunctionFactory } from './embeddable';
 import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';
@@ -14,9 +15,9 @@ import { savedVisualization } from './saved_visualization';
 
 export interface InitializeArguments {
   embeddablePersistableStateService: {
-    extract: EmbeddableStart['extract'];
-    inject: EmbeddableStart['inject'];
-    getAllMigrations: EmbeddableStart['getAllMigrations'];
+    extract: LegacyEmbeddablePersistableStateItem['extract'];
+    inject: LegacyEmbeddablePersistableStateItem['inject'];
+    getAllMigrations: () => MigrateFunctionsObject;
   };
 }
 

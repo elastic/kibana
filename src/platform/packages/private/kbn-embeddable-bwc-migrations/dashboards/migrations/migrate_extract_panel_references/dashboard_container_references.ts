@@ -9,8 +9,13 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { EmbeddableReferenceManagers } from '../../../get_all_embeddable_reference_managers';
-import type { EmbeddableStateWithType, ParsedDashboardAttributesWithType810 } from '../types';
+import { legacyEmbeddableExtract } from '../../../embeddable_extract';
+import { legacyEmbeddableInject } from '../../../embeddable_inject';
+import type {
+  EmbeddableStateWithType,
+  LegacyEmbeddablePersistableStateItem,
+} from '../../../persistable_state/types';
+import type { ParsedDashboardAttributesWithType810 } from '../types';
 
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
@@ -37,9 +42,8 @@ export const prefixReferencesFromPanel = (id: string, references: Reference[]): 
 const controlGroupReferencePrefix = 'controlGroup_';
 
 export const createInject = (
-  bwcEmbeddableReferenceManagers: EmbeddableReferenceManagers,
   embeddableSetup: EmbeddableSetup // TODO remove this argument when all legacy serverside inject / extract logic is moved into kbn-embeddable-bwc-migrations
-): EmbeddableSetup['inject'] => {
+): LegacyEmbeddablePersistableStateItem['inject'] => {
   return (state: EmbeddableStateWithType, references: Reference[]) => {
     const workingState = { ...state } as
       | EmbeddableStateWithType
@@ -85,9 +89,11 @@ export const createInject = (
         const panelType = workingState.panels[key].type;
         const inputWithType = { ...workingState.panels[key].explicitInput, type: panelType };
 
-        const { type, ...injectedState } = bwcEmbeddableReferenceManagers[panelType]
-          ? bwcEmbeddableReferenceManagers[panelType].inject(inputWithType, panelReferences)
-          : embeddableSetup.inject(inputWithType, panelReferences);
+        const { type, ...injectedState } = legacyEmbeddableInject(
+          inputWithType,
+          panelReferences,
+          embeddableSetup
+        );
         workingState.panels[key].explicitInput = injectedState;
       }
     }
@@ -97,9 +103,8 @@ export const createInject = (
 };
 
 export const createExtract = (
-  bwcEmbeddableReferenceManagers: EmbeddableReferenceManagers,
   embeddableSetup: EmbeddableSetup // TODO remove this argument when all legacy serverside inject / extract logic is moved into kbn-embeddable-bwc-migrations
-): EmbeddableSetup['extract'] => {
+): LegacyEmbeddablePersistableStateItem['extract'] => {
   return (state: EmbeddableStateWithType) => {
     const workingState = { ...state } as
       | EmbeddableStateWithType
@@ -130,10 +135,13 @@ export const createExtract = (
           delete (panel.explicitInput as { savedObjectId?: string }).savedObjectId;
         }
 
-        const { state: panelState, references: panelReferences } = embeddableSetup.extract({
-          ...panel.explicitInput,
-          type: panel.type,
-        });
+        const { state: panelState, references: panelReferences } = legacyEmbeddableExtract(
+          {
+            ...panel.explicitInput,
+            type: panel.type,
+          },
+          embeddableSetup
+        );
 
         references.push(...prefixReferencesFromPanel(id, panelReferences));
 
