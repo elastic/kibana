@@ -82,16 +82,17 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
 
     // Run on all source files
-    // **/packages need to be read
-    // before DeletePackagesFromBuildRoot
+    // **/packages need to be read before DeletePackagesFromBuildRoot
     await globalRun(Tasks.CreateNoticeFile);
     await globalRun(Tasks.CreateXPackNoticeFile);
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
+    await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);
-    await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }
