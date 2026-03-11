@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/ebt-tools'
   - '@kbn/es-query'
+  - '@kbn/apm-types-shared'
 tags:
   - shared-browser
   - package

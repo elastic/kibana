@@ -116,6 +116,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/fs'
 tags:
   - plugin
   - prod

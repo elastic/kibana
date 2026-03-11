@@ -4732,21 +4732,7 @@
             "label": "schemas",
             "description": [],
             "signature": [
-              "{ params?: { type: \"zod\"; schema: ",
-              "ZodObject",
-              "<",
-              "ZodRawShape",
-              ", ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }> | ",
-              "ZodIntersection",
-              "<",
-              "ZodTypeAny",
-              ", ",
-              "ZodTypeAny",
-              ">; } | { type: \"config-schema\"; schema: ",
+              "{ params?: { type: \"zod\"; schema: any; } | { type: \"config-schema\"; schema: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -5910,7 +5896,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getBackfill: (id: string) => Promise<Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5918,7 +5904,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; initiator?: \"user\" | \"system\" | undefined; initiatorId?: string | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>>; findBackfill: (params: Readonly<{ start?: string | undefined; end?: string | undefined; sortField?: \"start\" | \"createdAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; initiator?: \"user\" | \"system\" | undefined; initiatorId?: string | undefined; ruleIds?: string | undefined; } & { page: number; perPage: number; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ end?: string | undefined; initiatorId?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; enabled: boolean; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -5926,7 +5912,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }>[]; perPage: number; total: number; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }>[]; perPage: number; total: number; }>>; deleteBackfill: (id: string) => Promise<{}>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {
             "pluginId": "alerting",
             "scope": "server",
@@ -5954,7 +5940,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; schedule: Readonly<{} & { status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; interval: string; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; bulkFillGapsByRuleIds: (params: ",
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; kql: string; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; initiator: \"user\" | \"system\"; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; bulkFillGapsByRuleIds: (params: ",
           "BulkFillGapsByRuleIdsParams",
           ", options: ",
           "BulkFillGapsByRuleIdsOptions",
@@ -5970,7 +5956,7 @@
           "UpdateGapAutoFillSchedulerParams",
           ") => Promise<",
           "GapAutoFillSchedulerResponse",
-          ">; deleteGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<void>; findGapAutoFillSchedulerLogs: (params: Readonly<{ statuses?: (\"error\" | \"success\" | \"skipped\" | \"no_gaps\")[] | undefined; } & { id: string; page: number; start: string; end: string; perPage: number; sortField: string; sortDirection: \"asc\" | \"desc\"; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ message?: string | undefined; timestamp?: string | undefined; status?: string | undefined; results?: Readonly<{ error?: string | undefined; status?: string | undefined; ruleId?: string | undefined; processedGaps?: number | undefined; } & {}>[] | undefined; } & { id: string; }>[]; perPage: number; total: number; }>>; getContext: () => ",
+          ">; deleteGapAutoFillScheduler: (params: Readonly<{} & { id: string; }>) => Promise<void>; findGapAutoFillSchedulerLogs: (params: Readonly<{ statuses?: (\"error\" | \"success\" | \"skipped\" | \"no_gaps\")[] | undefined; } & { id: string; page: number; start: string; end: string; perPage: number; sortField: string; sortDirection: \"asc\" | \"desc\"; }>) => Promise<Readonly<{} & { page: number; data: Readonly<{ message?: string | undefined; timestamp?: string | undefined; results?: Readonly<{ error?: string | undefined; ruleId?: string | undefined; status?: string | undefined; processedGaps?: number | undefined; } & {}>[] | undefined; status?: string | undefined; } & { id: string; }>[]; perPage: number; total: number; }>>; getContext: () => ",
           "RulesClientContext",
           "; }"
         ],
@@ -11399,6 +11385,57 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 218,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_FIND_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_FIND_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill/_find\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 219,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill/_schedule\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 220,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ALERTING_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -11408,7 +11445,7 @@
           "\"alerts\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 238,
+        "lineNumber": 244,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11898,7 +11935,7 @@
           "\"/internal/alerting/rules/gaps\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 217,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11915,7 +11952,7 @@
           "\"/internal/alerting/rules/gaps/auto_fill_scheduler\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 232,
+        "lineNumber": 238,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11932,7 +11969,7 @@
           "\"/internal/alerting/rules/gaps/_fill_by_id\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 229,
+        "lineNumber": 235,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11949,7 +11986,7 @@
           "\"/internal/alerting/rules/gaps/_find\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 220,
+        "lineNumber": 226,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11966,7 +12003,7 @@
           "\"/internal/alerting/rules/gaps/_get_rules\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 223,
+        "lineNumber": 229,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11983,7 +12020,7 @@
           "\"/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 226,
+        "lineNumber": 232,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12000,7 +12037,7 @@
           "\"/internal/alerting/_global_execution_summary\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 235,
+        "lineNumber": 241,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12314,7 +12351,7 @@
           "200"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 239,
+        "lineNumber": 245,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

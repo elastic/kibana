@@ -33,6 +33,7 @@ import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
 import type { MeteringService } from './metering';
+import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -40,6 +41,7 @@ export interface InternalSetupServices {
   attachments: AttachmentServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
+  plugins: PluginsServiceSetup;
   metering: MeteringService;
   sml: SmlServiceSetup;
 }
@@ -60,6 +62,7 @@ export interface InternalStartServices {
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
   sml: SmlService;
+  plugins: PluginsServiceStart;
 }
 
 export interface ServiceSetupDeps {
