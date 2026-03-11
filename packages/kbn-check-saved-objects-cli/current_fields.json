@@ -1331,6 +1331,7 @@
   ],
   "task": [
     "attempts",
+    "cost",
     "enabled",
     "ownerId",
     "partition",

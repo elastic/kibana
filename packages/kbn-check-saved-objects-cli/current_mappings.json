@@ -4437,6 +4437,9 @@
       "attempts": {
         "type": "integer"
       },
+      "cost": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
