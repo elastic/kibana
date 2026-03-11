@@ -6,9 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -24,9 +24,8 @@ import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../../resolver/view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
-import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
+import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
+import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/components/analyzer_no_data_message';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -38,23 +37,17 @@ export const DATA_VIEW_ERROR_TEST_ID = 'analyzer-data-view-error';
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.analyzer.dataViewError', {
   defaultMessage: 'Unable to retrieve the data view for analyzer',
 });
-export const ANALYZER_PREVIEW_BANNER = {
-  title: i18n.translate(
-    'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
-    {
-      defaultMessage: 'Preview analyzer panel',
-    }
-  ),
-  backgroundColor: 'warning',
-  textColor: 'warning',
-};
-
 /**
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  const { eventId, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
-  const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const { eventId, scopeId, searchHit } = useDocumentDetailsContext();
+
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
+  const isEnabled = useIsAnalyzerEnabled(hit);
 
   const key = useWhichFlyout() ?? 'memory';
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
@@ -67,19 +60,35 @@ export const AnalyzeGraph: FC = () => {
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
 
-  const { dataView, status } = useDataView(PageScope.analyzer);
+  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
+    PageScope.analyzer
+  );
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
+    useSourcererDataView(PageScope.analyzer);
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const isLoading: boolean = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
+        : oldSourcererDataViewIsLoading,
+    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
+  );
 
-  const onClick = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAnalyzerPanelKey,
-      params: {
-        resolverComponentInstanceID: `${key}-${scopeId}`,
-        banner: ANALYZER_PREVIEW_BANNER,
-      },
-    });
-  }, [openPreviewPanel, key, scopeId]);
+  const isDataViewInvalid: boolean = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataViewStatus === 'error' ||
+          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
+        : !oldSourcererDataViewSpec ||
+          !oldSourcererDataViewSpec.id ||
+          !oldSourcererDataViewSpec.title,
+    [
+      experimentalDataView,
+      experimentalDataViewStatus,
+      newDataViewPickerEnabled,
+      oldSourcererDataViewSpec,
+    ]
+  );
 
   if (!isEnabled) {
     return (
@@ -89,7 +98,7 @@ export const AnalyzeGraph: FC = () => {
     );
   }
 
-  if (status === 'loading' || status === 'pristine') {
+  if (isLoading) {
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -99,7 +108,7 @@ export const AnalyzeGraph: FC = () => {
     );
   }
 
-  if (status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices())) {
+  if (isDataViewInvalid) {
     return (
       <EuiEmptyPrompt
         color="danger"
@@ -118,8 +127,6 @@ export const AnalyzeGraph: FC = () => {
         indices={selectedPatterns}
         shouldUpdate={shouldUpdate}
         filters={filters}
-        isSplitPanel
-        showPanelOnClick={onClick}
       />
     </div>
   );

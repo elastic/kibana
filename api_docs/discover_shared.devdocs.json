@@ -14,7 +14,7 @@
           "\nService types"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 261,
+        "lineNumber": 255,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +45,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 265,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -61,7 +61,7 @@
         "label": "DiscoverFeaturesServiceStart",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 268,
+        "lineNumber": 262,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -92,7 +92,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 269,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -542,7 +542,7 @@
         "label": "SecuritySolutionAlertFlyoutOverviewTabFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 122,
+        "lineNumber": 117,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -558,7 +558,7 @@
               "\"security-solution-alert-flyout-overview-tab\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 123,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -582,7 +582,7 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 124,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -604,63 +604,13 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-                "lineNumber": 124,
+                "lineNumber": 119,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "discoverShared",
-        "id": "def-public.SecuritySolutionAppWrapperFeature",
-        "type": "Interface",
-        "tags": [],
-        "label": "SecuritySolutionAppWrapperFeature",
-        "description": [],
-        "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 117,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "discoverShared",
-            "id": "def-public.SecuritySolutionAppWrapperFeature.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "\"security-solution-app-wrapper\""
-            ],
-            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 118,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "discoverShared",
-            "id": "def-public.SecuritySolutionAppWrapperFeature.getWrapper",
-            "type": "Function",
-            "tags": [],
-            "label": "getWrapper",
-            "description": [],
-            "signature": [
-              "() => Promise<() => React.FunctionComponent<{ children?: React.ReactNode; }>>"
-            ],
-            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 119,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
             "returnComment": []
           }
         ],
@@ -772,7 +722,7 @@
           "SecuritySolutionFeature"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 248,
+        "lineNumber": 242,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

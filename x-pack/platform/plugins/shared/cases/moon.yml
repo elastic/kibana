@@ -106,6 +106,10 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/response-ops-retry-service'
   - '@kbn/openapi-generator'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows'
+  - '@kbn/resizable-layout'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
@@ -118,7 +122,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - docs/openapi/**/*.gen.ts
     - '!target/**/*'
 tasks:
   jest:

@@ -6,18 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands } from '../../../types';
-import { getSettingsCompletionItems } from '../../definitions/utils/settings';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import {
   isBinaryExpression,
   isIdentifier,
   isMap,
   isStringLiteral,
   isUnknownNode,
-  SuggestionCategory,
   within,
-} from '../../../..';
+} from '@elastic/esql';
+import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
+import { getSettingsCompletionItems } from '../../definitions/utils/settings';
+import { SuggestionCategory } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
 import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem } from '../types';
 import { getCompletionItemsBySettingName } from './utils';

@@ -214,6 +214,12 @@ export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
 export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
 
+// Public backfill API paths
+export const ALERTING_BACKFILL_API_PATH = `${BASE_ALERTING_API_PATH}/rules/backfill` as const;
+export const ALERTING_BACKFILL_FIND_API_PATH = `${ALERTING_BACKFILL_API_PATH}/_find` as const;
+export const ALERTING_BACKFILL_SCHEDULE_API_PATH =
+  `${ALERTING_BACKFILL_API_PATH}/_schedule` as const;
+
 export const INTERNAL_ALERTING_GAPS_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/gaps` as const;
 

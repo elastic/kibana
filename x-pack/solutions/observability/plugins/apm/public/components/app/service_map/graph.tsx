@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
 import { css } from '@emotion/react';
 import { applyDagreLayout } from './layout';
-import { FIT_VIEW_PADDING, FIT_VIEW_DURATION } from './constants';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
 import { ServiceNode } from './service_node';
 import { DependencyNode } from './dependency_node';
 import { GroupedResourcesNode } from './grouped_resources_node';
@@ -42,6 +42,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import { ServiceMapMinimap } from './service_map_minimap';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
   ServiceMapNode,
@@ -70,6 +71,8 @@ interface GraphProps {
   end: string;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  /** When set, shows a "View full service map" button that links to the full map (focused map only) */
+  fullMapHref?: string;
 }
 
 function GraphInner({
@@ -83,6 +86,7 @@ function GraphInner({
   end,
   isFullscreen = false,
   onToggleFullscreen,
+  fullMapHref,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -121,7 +125,8 @@ function GraphInner({
     setEdges(applyEdgeHighlighting(initialEdges, selectedNodeIdRef.current));
 
     if (layoutedNodes.length > 0) {
-      setTimeout(() => fitView(getFitViewOptions()), 50);
+      const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
+      return () => clearTimeout(timer);
     }
   }, [
     layoutedNodes,
@@ -252,6 +257,10 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
+  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
+    defaultMessage: 'View full service map',
+  });
+
   const containerStyle = useMemo(
     () => ({
       height,
@@ -287,10 +296,23 @@ function GraphInner({
       position: relative;
       margin: ${euiTheme.size.s};
 
-      button {
+      button,
+      a[data-test-subj='serviceMapViewFullMapButton'] {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         fill: ${euiTheme.colors.text};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: ${euiTheme.size.s};
+        cursor: pointer;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        width: 100%;
+        box-sizing: border-box;
+        color: inherit;
+        text-decoration: none;
 
         &:hover {
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -381,6 +403,16 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Controls showInteractive={false} position="top-left" css={controlsStyles}>
+          {fullMapHref && (
+            <a
+              href={fullMapHref}
+              title={viewFullMapButtonLabel}
+              aria-label={viewFullMapButtonLabel}
+              data-test-subj="serviceMapViewFullMapButton"
+            >
+              <EuiIcon type="apps" aria-label={viewFullMapButtonLabel} />
+            </a>
+          )}
           {onToggleFullscreen && (
             <ControlButton
               onClick={onToggleFullscreen}
@@ -395,6 +427,7 @@ function GraphInner({
             </ControlButton>
           )}
         </Controls>
+        <ServiceMapMinimap />
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}

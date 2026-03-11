@@ -10,7 +10,7 @@ import { getEuidSourceFields } from './identity_fields';
 
 describe('getEuidSourceFields', () => {
   it('returns expected host identity invariants deduplicated', () => {
-    const result = getEuidSourceFields(EntityType.Values.host);
+    const result = getEuidSourceFields(EntityType.enum.host);
 
     expect(result.requiresOneOf).toEqual(
       expect.arrayContaining(['host.entity.id', 'host.id', 'host.name', 'host.hostname'])

@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import type {
   AboutStepRule,
   ActionsStepRule,
@@ -15,66 +16,99 @@ import type {
   ScheduleStepRule,
 } from '../../../common/types';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
-import { RULE_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
 
-export interface AddRuleAttachmentToChatButtonProps {
+interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
   aboutStepData: AboutStepRule;
   scheduleStepData: ScheduleStepRule;
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
-  size?: 'xs' | 's' | 'm';
+  rule?: never;
 }
 
-export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
-  defineStepData,
-  aboutStepData,
-  scheduleStepData,
-  actionsStepData,
-  actionTypeRegistry,
-  size = 's',
-}) => {
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+interface AddRuleAttachmentFromRuleResponseProps {
+  rule: RuleResponse;
+  defineStepData?: never;
+  aboutStepData?: never;
+  scheduleStepData?: never;
+  actionsStepData?: never;
+  actionTypeRegistry?: never;
+}
 
-  // Format rule for AI assistant attachment
+export type AddRuleAttachmentToChatButtonProps = (
+  | AddRuleAttachmentFromFormProps
+  | AddRuleAttachmentFromRuleResponseProps
+) & {
+  pathway: AgentBuilderAddToChatTelemetry['pathway'];
+};
+
+export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButtonProps> = ({
+  pathway,
+  ...props
+}) => {
+  const {
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry,
+    rule,
+  } = props;
+
+  // Format rule for AI assistant attachment from either form state or an existing rule response.
+  const isFormBased =
+    defineStepData != null &&
+    aboutStepData != null &&
+    scheduleStepData != null &&
+    actionsStepData != null &&
+    actionTypeRegistry != null;
+
   const ruleAttachment = useMemo(() => {
-    const formattedRule = formatRule<RuleCreateProps>(
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
-      actionTypeRegistry
-    );
-    const ruleName = aboutStepData.name;
+    const formattedRule = isFormBased
+      ? formatRule<RuleCreateProps>(
+          defineStepData,
+          aboutStepData,
+          scheduleStepData,
+          actionsStepData,
+          actionTypeRegistry
+        )
+      : rule;
+    const attachmentLabel = formattedRule?.name;
+    const attachmentData = JSON.stringify(formattedRule);
 
     return {
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
-        text: JSON.stringify(formattedRule),
-        attachmentLabel: ruleName,
+        text: attachmentData,
+        attachmentLabel,
       },
-      attachmentPrompt: RULE_ATTACHMENT_PROMPT,
+      attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     };
-  }, [defineStepData, aboutStepData, scheduleStepData, actionsStepData, actionTypeRegistry]);
+  }, [
+    isFormBased,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry,
+    rule,
+  ]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
-
-  if (!isAgentChatExperienceEnabled) {
-    return null;
-  }
 
   return (
     <NewAgentBuilderAttachment
       onClick={openAgentBuilderFlyout}
       telemetry={{
-        pathway: 'rule_creation',
+        pathway,
         attachments: ['rule'],
       }}
-      size={size}
+      size="s"
     />
   );
 };

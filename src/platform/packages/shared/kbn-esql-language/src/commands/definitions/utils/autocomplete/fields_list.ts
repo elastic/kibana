@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression, within, isAssignment, isColumn } from '../../../../ast';
-import type { ESQLAstAllCommands, ESQLAstField } from '../../../../types';
+import { isFunctionExpression, within, isAssignment, isColumn } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
 import {
   getNewUserDefinedColumnSuggestion,
   pipeCompleteItem,
@@ -34,6 +34,8 @@ export async function suggestFieldsList(
     functionsToIgnore?: ExpressionContextOptions['functionsToIgnore'];
     /** Suggestions to show after a complete field expression */
     afterCompleteSuggestions?: ISuggestionItem[];
+    /** Include pipe/comma suggestions after a complete field expression */
+    includePipeAndCommaSuggestions?: boolean;
     /** If true, consideres a single column as a completed field expression */
     allowSingleColumnFields?: boolean;
     /** the preferred field type */
@@ -87,10 +89,13 @@ export async function suggestFieldsList(
     (!isColumn(expressionRoot) || insideAssignment || options?.allowSingleColumnFields) &&
     !insideFunction
   ) {
-    suggestions.push(
-      withAutoSuggest(pipeCompleteItem),
-      withAutoSuggest({ ...commaCompleteItem, text: ', ' })
-    );
+    if (options?.includePipeAndCommaSuggestions !== false) {
+      suggestions.push(
+        withAutoSuggest(pipeCompleteItem),
+        withAutoSuggest({ ...commaCompleteItem, text: ', ' })
+      );
+    }
+
     if (options?.afterCompleteSuggestions) {
       suggestions.push(...options.afterCompleteSuggestions);
     }
