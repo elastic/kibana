@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createGetAppMenu } from './get_app_menu';
-export { getDefaultAdHocDataViews } from './get_default_ad_hoc_data_views';
-export { getDefaultEsqlQuery } from './get_default_esql_query';
-export { getDocViewer } from './get_doc_viewer';
+import type { ObservabilityRootProfileProvider } from '../types';
+
+export const getDefaultEsqlQuery: ObservabilityRootProfileProvider['profile']['getDefaultEsqlQuery'] =
+
+    (prev, { context }) =>
+    () => {
+      if (!context.allLogsIndexPattern) {
+        return prev();
+      }
+
+      return { query: `FROM ${context.allLogsIndexPattern}` };
+    };
