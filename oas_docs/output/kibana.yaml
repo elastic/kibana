@@ -95768,6 +95768,13 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         saved_query_id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+        tags:
+          description: A list of tags to associate with the live query.
+          items:
+            maxLength: 256
+            type: string
+          maxItems: 20
+          type: array
     Security_Osquery_API_CreateLiveQueryResponse:
       example:
         data:
