@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
@@ -32,11 +30,12 @@ import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
-import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { UnhealthyCountBadge } from './unhealthy_count_badge';
+import { RESET_MONITORS_LABEL, ResetLocationMonitors } from './reset_location_monitors';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -60,9 +59,6 @@ export const PrivateLocationsTable = ({
 
   const { locationMonitors, loading } = useLocationMonitors();
 
-  const { getUnhealthyMonitorCountForLocation: getMissingCountForLocation, getUnhealthyConfigIdsForLocation: getMissingConfigIdsForLocation, resetMonitors, isResetting } =
-    useMonitorIntegrationHealth();
-
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
   const { services } = useKibana<ClientPluginsStart>();
@@ -84,31 +80,12 @@ export const PrivateLocationsTable = ({
       field: 'monitors',
       name: MONITORS,
       render: (monitors: number, item: ListItem) => {
-        const missingCount = getMissingCountForLocation(item.id);
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <ViewLocationMonitors count={monitors} locationName={item.label} />
             </EuiFlexItem>
-            {missingCount > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={MISSING_INTEGRATIONS_TOOLTIP}>
-                  <EuiBadge
-                    color="warning"
-                    data-test-subj="syntheticsLocationMissingIntegrationBadge"
-                  >
-                    {i18n.translate(
-                      'xpack.synthetics.privateLocations.missingIntegrations.count',
-                      {
-                        defaultMessage:
-                          '{count} {count, plural, one {missing} other {missing}}',
-                        values: { count: missingCount },
-                      }
-                    )}
-                  </EuiBadge>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            <UnhealthyCountBadge item={item} />
           </EuiFlexGroup>
         );
       },
@@ -162,14 +139,9 @@ export const PrivateLocationsTable = ({
           name: RESET_MONITORS_LABEL,
           description: RESET_MONITORS_LABEL,
           render: (item: ListItem) => {
-            const missingCount = getMissingCountForLocation(item.id);
             return (
               <ResetLocationMonitors
                 locationId={item.id}
-                missingCount={missingCount}
-                getMissingConfigIdsForLocation={getMissingConfigIdsForLocation}
-                resetMonitors={resetMonitors}
-                isResetting={isResetting}
               />
             );
           },
@@ -309,56 +281,3 @@ const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocat
 export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',
 });
-
-const RESET_MONITORS_LABEL = i18n.translate(
-  'xpack.synthetics.settingsRoute.privateLocations.resetMonitors',
-  {
-    defaultMessage: 'Reset monitors',
-  }
-);
-
-const MISSING_INTEGRATIONS_TOOLTIP = i18n.translate(
-  'xpack.synthetics.privateLocations.missingIntegrations.tooltip',
-  {
-    defaultMessage:
-      'These monitors are missing their Fleet package policies and will not run until reset.',
-  }
-);
-
-const ResetLocationMonitors = ({
-  locationId,
-  missingCount,
-  getMissingConfigIdsForLocation,
-  resetMonitors,
-  isResetting,
-}: {
-  locationId: string;
-  missingCount: number;
-  getMissingConfigIdsForLocation: (locId: string) => string[];
-  resetMonitors: (ids: string[]) => Promise<void>;
-  isResetting: boolean;
-}) => {
-  const handleReset = useCallback(async () => {
-    const ids = getMissingConfigIdsForLocation(locationId);
-    if (ids.length > 0) {
-      await resetMonitors(ids);
-    }
-  }, [locationId, getMissingConfigIdsForLocation, resetMonitors]);
-
-  if (missingCount === 0) {
-    return null;
-  }
-
-  return (
-    <EuiButtonEmpty
-      data-test-subj="syntheticsResetLocationMonitorsButton"
-      size="s"
-      iconType="refresh"
-      color="warning"
-      isLoading={isResetting}
-      onClick={handleReset}
-    >
-      {RESET_MONITORS_LABEL}
-    </EuiButtonEmpty>
-  );
-};
