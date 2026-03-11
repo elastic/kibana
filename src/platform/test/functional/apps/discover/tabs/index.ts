@@ -63,6 +63,5 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.savedObjects.cleanStandardList();
     });
-
   });
 }
