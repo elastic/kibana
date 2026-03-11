@@ -1,7 +1,7 @@
 ---
 navigation_title: "Confluence Cloud"
 type: reference
-description: "Use the Confluence Cloud connector to search and retrieve pages and spaces from your Confluence Cloud site via the REST API v2."
+description: "Use the Confluence Cloud connector to search and retrieve pages and spaces from your Confluence Cloud site using the REST API v2."
 applies_to:
   stack: preview 9.4
   serverless: preview
