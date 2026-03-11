@@ -153,10 +153,7 @@ export const FigmaConnector: ConnectorSpec = {
             'Either teamId or url is required. If you do not have the team ID, ask the user to paste the Figma team page URL.'
           );
         }
-        const response = await ctx.client.get(
-          `${FIGMA_API_BASE}/v1/teams/${teamId}/projects`,
-          {}
-        );
+        const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/teams/${teamId}/projects`, {});
         return { ...response.data, teamId };
       },
     },
@@ -175,7 +172,6 @@ export const FigmaConnector: ConnectorSpec = {
         };
       },
     },
-
   },
 
   test: {
@@ -247,4 +243,3 @@ function parseFigmaUrlInternal(urlString: string): ParseFigmaUrlResult {
   }
   return result;
 }
-
