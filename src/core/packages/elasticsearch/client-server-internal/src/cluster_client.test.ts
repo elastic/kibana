@@ -338,7 +338,7 @@ describe('ClusterClient', () => {
         onRequest.get()({} as never, params, {});
 
         expect((params.body as Record<string, unknown>).project_routing).toBe(
-          'kibana_space_my-space_default'
+          '@kibana_space_my-space_default'
         );
       });
 
