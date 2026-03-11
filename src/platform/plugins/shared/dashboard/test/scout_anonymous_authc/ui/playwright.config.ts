@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-void require('@kbn/test').checkFTRCodeOwnersCLI();
+import { createPlaywrightConfig } from '@kbn/scout';
+
+/**
+ * These tests require a custom server configuration that enables anonymous authentication,
+ * which provides a user without a `profile_uid`.
+ */
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
