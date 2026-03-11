@@ -568,4 +568,229 @@ steps:
       expect(result.yaml).toContain('  several lines and should be preserved exactly.');
     });
   });
+
+  describe('edit integrity safety net', () => {
+    const WORKFLOW_WITH_MANY_STEPS = `version: "1"
+name: Open PRs Report
+description: Fetches open PRs and posts a Slack summary
+
+triggers:
+  - type: manual
+
+steps:
+  - name: get_prs_from_github
+    type: http
+    with:
+      url: "{{ consts.github_search_url }}"
+      method: GET
+      headers:
+        Accept: application/vnd.github+json
+
+  - name: build_pr_list
+    type: data.map
+    with:
+      items: "{{ steps.get_prs_from_github.output.data.items }}"
+      fields:
+        title: "{{ item.title }}"
+        url: "{{ item.html_url }}"
+        author: "{{ item.user.login }}"
+
+  - name: format_slack_message
+    type: data.set
+    with:
+      pr_count: "{{ steps.get_prs_from_github.output.data.total_count }}"
+      message: |
+        :github: *Open PRs* ({{ steps.get_prs_from_github.output.data.total_count }} total)
+
+  - name: send_slack_message
+    type: slack
+    connector-id: 0ee5d857-3653-4ec2-930f-638cf2a1d990
+    with:
+      message: "{{ steps.format_slack_message.output.message }}"
+`;
+
+    it('modifyWorkflowProperty (triggers) preserves all steps structurally', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = modifyWorkflowProperty(WORKFLOW_WITH_MANY_STEPS, 'triggers', [
+        {
+          type: 'scheduled',
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              byhour: [9],
+              byminute: [0],
+              tzid: 'Asia/Tbilisi',
+            },
+          },
+        },
+      ]);
+
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.steps).toEqual(beforeParsed.steps);
+      expect(afterParsed.name).toBe(beforeParsed.name);
+      expect(afterParsed.description).toBe(beforeParsed.description);
+      expect(afterParsed.triggers[0].type).toBe('scheduled');
+    });
+
+    it('modifyWorkflowProperty (name) preserves triggers and steps', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = modifyWorkflowProperty(WORKFLOW_WITH_MANY_STEPS, 'name', 'Renamed Workflow');
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+      expect(afterParsed.steps).toEqual(beforeParsed.steps);
+      expect(afterParsed.name).toBe('Renamed Workflow');
+    });
+
+    it('modifyWorkflowProperty (description) preserves all steps with block scalars', () => {
+      const result = modifyWorkflowProperty(
+        WORKFLOW_WITH_MANY_STEPS,
+        'description',
+        'New description'
+      );
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+      expect(afterParsed.steps).toEqual(beforeParsed.steps);
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+    });
+
+    it('modifyStepProperty preserves other steps and top-level properties', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = modifyStepProperty(WORKFLOW_WITH_MANY_STEPS, 'send_slack_message', 'with', {
+        message: 'Updated message',
+      });
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+      expect(afterParsed.name).toBe(beforeParsed.name);
+
+      expect(afterParsed.steps.find((s: { name: string }) => s.name === 'build_pr_list')).toEqual(
+        beforeParsed.steps.find((s: { name: string }) => s.name === 'build_pr_list')
+      );
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'format_slack_message')
+      ).toEqual(
+        beforeParsed.steps.find((s: { name: string }) => s.name === 'format_slack_message')
+      );
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github')
+      ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github'));
+    });
+
+    it('integrity check rejects modifyStepProperty when splice corrupts adjacent steps', () => {
+      const result = modifyStepProperty(WORKFLOW_WITH_MANY_STEPS, 'get_prs_from_github', 'with', {
+        url: 'https://new-url.example.com',
+        method: 'POST',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('integrity violation');
+    });
+
+    it('modifyStep preserves other steps and top-level properties', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = modifyStep(WORKFLOW_WITH_MANY_STEPS, 'build_pr_list', {
+        name: 'build_pr_list',
+        type: 'data.filter',
+        with: { items: '{{ steps.get_prs_from_github.output.data.items }}', condition: 'true' },
+      });
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github')
+      ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github'));
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message')
+      ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message'));
+    });
+
+    it('insertStep preserves all existing steps and top-level properties', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = insertStep(WORKFLOW_WITH_MANY_STEPS, {
+        name: 'log_result',
+        type: 'console',
+        with: { message: 'Done!' },
+      });
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+      expect(afterParsed.name).toBe(beforeParsed.name);
+      expect(afterParsed.steps).toHaveLength(beforeParsed.steps.length + 1);
+
+      for (const step of beforeParsed.steps) {
+        expect(afterParsed.steps.find((s: { name: string }) => s.name === step.name)).toEqual(step);
+      }
+    });
+
+    it('deleteStep preserves all remaining steps and top-level properties', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
+
+      const result = deleteStep(WORKFLOW_WITH_MANY_STEPS, 'format_slack_message');
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.triggers).toEqual(beforeParsed.triggers);
+      expect(afterParsed.name).toBe(beforeParsed.name);
+      expect(afterParsed.steps).toHaveLength(beforeParsed.steps.length - 1);
+
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github')
+      ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github'));
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message')
+      ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message'));
+    });
+
+    it('replacing triggers with rrule on a workflow with no blank line before steps', () => {
+      const compact = `name: Compact
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+  - name: step2
+    type: http
+    with:
+      url: https://example.com
+      method: GET
+`;
+      const beforeParsed = parseDocument(compact).toJSON();
+
+      const result = modifyWorkflowProperty(compact, 'triggers', [
+        {
+          type: 'scheduled',
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              byhour: [9],
+              byminute: [0],
+              tzid: 'Asia/Tbilisi',
+            },
+          },
+        },
+      ]);
+      expect(result.success).toBe(true);
+
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.steps).toEqual(beforeParsed.steps);
+    });
+  });
 });

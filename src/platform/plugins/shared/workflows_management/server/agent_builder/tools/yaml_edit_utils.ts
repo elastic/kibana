@@ -126,6 +126,112 @@ const spliceYaml = (yaml: string, start: number, end: number, replacement: strin
   return yaml.slice(0, start) + replacement + yaml.slice(end);
 };
 
+type EditScope =
+  | { type: 'property'; key: string }
+  | { type: 'step'; stepName: string }
+  | { type: 'insertStep' }
+  | { type: 'deleteStep'; stepName: string };
+
+interface StepJson {
+  name?: string;
+  [k: string]: unknown;
+}
+
+const findCorruptedProperty = (
+  beforeJson: Record<string, unknown>,
+  afterJson: Record<string, unknown>,
+  skipKeys: Set<string>
+): string | undefined => {
+  return Object.keys(beforeJson)
+    .filter((key) => !skipKeys.has(key))
+    .find((key) => JSON.stringify(beforeJson[key]) !== JSON.stringify(afterJson[key]));
+};
+
+const findCorruptedStep = (
+  beforeSteps: StepJson[],
+  afterSteps: StepJson[],
+  excludeStepName?: string
+): StepJson | undefined => {
+  return beforeSteps
+    .filter((s) => s.name != null && s.name !== excludeStepName)
+    .find((step) => {
+      const afterStep = afterSteps.find((s) => s.name === step.name);
+      return !afterStep || JSON.stringify(step) !== JSON.stringify(afterStep);
+    });
+};
+
+/**
+ * After a splice operation, parse both before/after YAML via the AST and
+ * verify that only the intended property or step changed. Returns an error
+ * when unrelated sections were corrupted by the splice.
+ */
+const verifyEditIntegrity = (
+  beforeYaml: string,
+  afterYaml: string,
+  editScope: EditScope
+): { valid: boolean; error?: string } => {
+  const beforeDoc = parseDocument(beforeYaml);
+  const afterDoc = parseDocument(afterYaml);
+
+  if (beforeDoc.errors.length > 0) {
+    return { valid: false, error: 'Failed to parse original YAML for integrity check' };
+  }
+
+  if (afterDoc.errors.length > 0) {
+    return {
+      valid: false,
+      error: `Edit integrity violation: splice produced invalid YAML: ${afterDoc.errors[0].message}`,
+    };
+  }
+
+  const beforeJson = beforeDoc.toJSON() as Record<string, unknown>;
+  const afterJson = afterDoc.toJSON() as Record<string, unknown>;
+
+  const skipKeys = new Set<string>();
+  if (editScope.type === 'property') {
+    skipKeys.add(editScope.key);
+  }
+
+  const stepsNeedPerItemCheck = editScope.type !== 'property' || editScope.key === 'steps';
+  if (stepsNeedPerItemCheck) {
+    skipKeys.add('steps');
+  }
+
+  const corruptedProp = findCorruptedProperty(beforeJson, afterJson, skipKeys);
+  if (corruptedProp) {
+    return {
+      valid: false,
+      error: `Edit integrity violation: property "${corruptedProp}" was unexpectedly modified`,
+    };
+  }
+
+  if (stepsNeedPerItemCheck && editScope.type !== 'property') {
+    const excludeName =
+      editScope.type === 'step' || editScope.type === 'deleteStep' ? editScope.stepName : undefined;
+    const corruptedStep = findCorruptedStep(
+      (beforeJson.steps ?? []) as StepJson[],
+      (afterJson.steps ?? []) as StepJson[],
+      excludeName
+    );
+    if (corruptedStep) {
+      return {
+        valid: false,
+        error: `Edit integrity violation: step "${corruptedStep.name}" was unexpectedly modified`,
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+const checkedResult = (beforeYaml: string, afterYaml: string, editScope: EditScope): EditResult => {
+  const integrity = verifyEditIntegrity(beforeYaml, afterYaml, editScope);
+  if (!integrity.valid) {
+    return { success: false, yaml: beforeYaml, error: integrity.error };
+  }
+  return { success: true, yaml: afterYaml };
+};
+
 export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
   const { doc, error } = parseForEditing(yaml);
   if (error) return { success: false, yaml, error };
@@ -145,13 +251,15 @@ export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
   if (!isSeq(stepsNode) || !stepsNode.range) {
     const newBlock = `steps:\n${stepLines}\n`;
     const trimmed = yaml.trimEnd();
-    return { success: true, yaml: `${trimmed}\n${newBlock}` };
+    return checkedResult(yaml, `${trimmed}\n${newBlock}`, { type: 'insertStep' });
   }
 
   const endOffset = stepsNode.range[2];
   const needsNewline = endOffset > 0 && yaml[endOffset - 1] !== '\n';
   const insertion = `${needsNewline ? '\n' : ''}${stepLines}\n`;
-  return { success: true, yaml: spliceYaml(yaml, endOffset, endOffset, insertion) };
+  return checkedResult(yaml, spliceYaml(yaml, endOffset, endOffset, insertion), {
+    type: 'insertStep',
+  });
 };
 
 export const modifyStep = (
@@ -178,7 +286,10 @@ export const modifyStep = (
   const stepYaml = stringifyValue(updatedStep, indentUnit, depth);
   const replacement = `${stepYaml.trimEnd()}\n`;
 
-  return { success: true, yaml: spliceYaml(yaml, range[0], range[1], replacement) };
+  return checkedResult(yaml, spliceYaml(yaml, range[0], range[1], replacement), {
+    type: 'step',
+    stepName,
+  });
 };
 
 export const modifyStepProperty = (
@@ -196,11 +307,13 @@ export const modifyStepProperty = (
   const pair = findPairInMap(found.node, property);
   const indentUnit = detectIndent(yaml);
 
+  const scope: EditScope = { type: 'step', stepName };
+
   if (pair && pair.value && (pair.value as { range?: unknown }).range) {
     const valRange = nodeRange(pair.value as { range?: [number, number, number] | null });
     if (valRange) {
       const valStr = stringifyValue(value, indentUnit, 0).trimEnd();
-      return { success: true, yaml: spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`) };
+      return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
   }
 
@@ -212,10 +325,11 @@ export const modifyStepProperty = (
       const indent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
       const pad = ' '.repeat(indent);
       const valStr = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
-      return {
-        success: true,
-        yaml: spliceYaml(yaml, pairRange[0], pairRange[1], `${pad}${valStr}\n`),
-      };
+      return checkedResult(
+        yaml,
+        spliceYaml(yaml, pairRange[0], pairRange[1], `${pad}${valStr}\n`),
+        scope
+      );
     }
   }
 
@@ -230,7 +344,7 @@ export const modifyStepProperty = (
   const valStr = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
   const needsNewline = stepRange[1] > 0 && yaml[stepRange[1] - 1] !== '\n';
   const insertion = `${needsNewline ? '\n' : ''}${pad}${valStr}\n`;
-  return { success: true, yaml: spliceYaml(yaml, stepRange[1], stepRange[1], insertion) };
+  return checkedResult(yaml, spliceYaml(yaml, stepRange[1], stepRange[1], insertion), scope);
 };
 
 /**
@@ -281,6 +395,7 @@ export const modifyWorkflowProperty = (
 
   const pair = findPairInMap(doc.contents, property);
   const indentUnit = detectIndent(yaml);
+  const scope: EditScope = { type: 'property', key: property };
 
   if (pair && pair.value && (pair.value as { range?: unknown }).range) {
     const valRange = nodeRange(pair.value as { range?: [number, number, number] | null });
@@ -290,7 +405,7 @@ export const modifyWorkflowProperty = (
       const valueIndent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
       const depth = Math.round(valueIndent / indentUnit);
       const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
-      return { success: true, yaml: spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`) };
+      return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
   }
 
@@ -298,7 +413,11 @@ export const modifyWorkflowProperty = (
     const pairRange = nodeRange(pair as unknown as { range?: [number, number, number] | null });
     if (pairRange) {
       const valStr = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
-      return { success: true, yaml: spliceYaml(yaml, pairRange[0], pairRange[1], `${valStr}\n`) };
+      return checkedResult(
+        yaml,
+        spliceYaml(yaml, pairRange[0], pairRange[1], `${valStr}\n`),
+        scope
+      );
     }
   }
 
@@ -306,14 +425,11 @@ export const modifyWorkflowProperty = (
   const insertOffset = findCanonicalInsertOffset(doc.contents, property);
 
   if (insertOffset !== null) {
-    return {
-      success: true,
-      yaml: spliceYaml(yaml, insertOffset, insertOffset, `${newProp}\n`),
-    };
+    return checkedResult(yaml, spliceYaml(yaml, insertOffset, insertOffset, `${newProp}\n`), scope);
   }
 
   const trimmed = yaml.trimEnd();
-  return { success: true, yaml: `${trimmed}\n${newProp}\n` };
+  return checkedResult(yaml, `${trimmed}\n${newProp}\n`, scope);
 };
 
 export const deleteStep = (yaml: string, stepName: string): EditResult => {
@@ -340,7 +456,10 @@ export const deleteStep = (yaml: string, stepName: string): EditResult => {
     }
   }
 
-  return { success: true, yaml: spliceYaml(yaml, deleteStart, range[1], '') };
+  return checkedResult(yaml, spliceYaml(yaml, deleteStart, range[1], ''), {
+    type: 'deleteStep',
+    stepName,
+  });
 };
 
 export type { StepDefinition, EditResult };
