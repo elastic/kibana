@@ -1423,6 +1423,7 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
           },
+        },
         '7': {
           changes: [
             {
