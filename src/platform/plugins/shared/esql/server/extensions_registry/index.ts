@@ -14,7 +14,7 @@ import type {
   ESQLRegistrySolutionId,
 } from '@kbn/esql-types';
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getSourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 
 /**
@@ -180,7 +180,19 @@ export class ESQLExtensionsRegistry {
       }
     }
 
-    return uniqBy(matchedQueries, 'query');
+    const currentSourceCommand = getSourceCommandFromESQLQuery(queryString);
+
+    const filteredQueries = matchedQueries.filter((recommendedQuery) => {
+      if (recommendedQuery.isStandalone || !currentSourceCommand) {
+        return true;
+      }
+
+      const registeredSourceCommand = getSourceCommandFromESQLQuery(recommendedQuery.query);
+
+      return !registeredSourceCommand || currentSourceCommand === registeredSourceCommand;
+    });
+
+    return uniqBy(filteredQueries, 'query');
   }
 
   unsetRecommendedQueries(

@@ -731,4 +731,54 @@ describe('ESQLExtensionsRegistry', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('source command filtering (FROM vs TS)', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [{ name: 'metrics-system' }],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should only return FROM queries when the current query uses FROM', () => {
+      const fromQuery: RecommendedQuery = {
+        name: 'FROM metrics query',
+        query: 'FROM metrics-system | STATS count()',
+      };
+      const tsQuery: RecommendedQuery = {
+        name: 'TS metrics query',
+        query: 'TS metrics-system | STATS SUM(RATE(system.network.out.bytes))',
+      };
+
+      registry.setRecommendedQueries([fromQuery, tsQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries(
+        'FROM metrics-system',
+        availableDatasources,
+        'oblt'
+      );
+      expect(result).toEqual([fromQuery]);
+    });
+
+    it('should only return TS queries when the current query uses TS', () => {
+      const fromQuery: RecommendedQuery = {
+        name: 'FROM metrics query',
+        query: 'FROM metrics-system | STATS count()',
+      };
+      const tsQuery: RecommendedQuery = {
+        name: 'TS metrics query',
+        query: 'TS metrics-system | STATS SUM(RATE(system.network.out.bytes))',
+      };
+
+      registry.setRecommendedQueries([fromQuery, tsQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries(
+        'TS metrics-system',
+        availableDatasources,
+        'oblt'
+      );
+      expect(result).toEqual([tsQuery]);
+    });
+  });
 });
