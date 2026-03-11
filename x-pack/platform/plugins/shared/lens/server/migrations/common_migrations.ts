@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SupportedDatasourceId } from '@kbn/lens-common';
-
 import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
@@ -583,8 +581,7 @@ export const commonMigrateMetricFormatter = (attributes: LensDocShape860<unknown
     return attributes as LensDocShape860<unknown>;
   }
 
-  type LayersType =
-    LensDocShape860['state']['datasourceStates'][SupportedDatasourceId.FormBased]['layers'];
+  type LayersType = LensDocShape860['state']['datasourceStates']['formBased']['layers'];
 
   const updatedLayersWithCompactFormatters: LayersType = {};
   for (const [layerId, layer] of Object.entries(

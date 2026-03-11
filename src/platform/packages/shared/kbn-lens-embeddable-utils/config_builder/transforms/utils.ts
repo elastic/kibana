@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SupportedDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
@@ -18,6 +18,7 @@ import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
@@ -291,7 +292,7 @@ function buildDatasourceStatesLayer(
     index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
-): [SupportedDatasourceId, DataSourceStateLayer | undefined] {
+): [LensDatasourceId, DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'table'>
@@ -329,12 +330,12 @@ function buildDatasourceStatesLayer(
   }
 
   if (dataset.type === 'esql') {
-    return [SupportedDatasourceId.TextBased, buildESQLLayer(layer, dataset)];
+    return [LENS_DATASOURCE_ID.TEXT_BASED, buildESQLLayer(layer, dataset)];
   }
   if (dataset.type === 'table') {
-    return [SupportedDatasourceId.TextBased, buildValueLayer(layer, dataset)];
+    return [LENS_DATASOURCE_ID.TEXT_BASED, buildValueLayer(layer, dataset)];
   }
-  return [SupportedDatasourceId.FormBased, buildDataLayer(layer, i, datasetIndex)];
+  return [LENS_DATASOURCE_ID.FORM_BASED, buildDataLayer(layer, i, datasetIndex)];
 }
 
 /**

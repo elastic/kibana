@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SupportedDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
@@ -45,7 +45,7 @@ export const injectESQLQueryIntoLensLayers = (
   const datasourceId = getDatasourceId(attributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not fix the query
-  if (!datasourceId || datasourceId === SupportedDatasourceId.FormBased) {
+  if (!datasourceId || datasourceId === LENS_DATASOURCE_ID.FORM_BASED) {
     return attributes;
   }
 
@@ -110,11 +110,11 @@ export function mergeSuggestionWithVisContext({
     return suggestion;
   }
 
-  // it should be one of SupportedDatasourceId.FormBased/SupportedDatasourceId.TextBased and have value
+  // it should be one of LENS_DATASOURCE_ID.FORM_BASED/LENS_DATASOURCE_ID.TEXT_BASED and have value
   const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
 
   // if the datasource is formBased, we should not merge
-  if (!datasourceId || datasourceId === SupportedDatasourceId.FormBased) {
+  if (!datasourceId || datasourceId === LENS_DATASOURCE_ID.FORM_BASED) {
     return suggestion;
   }
 

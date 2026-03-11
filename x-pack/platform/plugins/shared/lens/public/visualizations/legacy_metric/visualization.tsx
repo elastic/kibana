@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SupportedDatasourceId } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -183,7 +183,7 @@ export const getLegacyMetricVisualization = ({
   ],
   hideFromChartSwitch(frame: FramePublicAPI) {
     return Object.values(frame.datasourceLayers).some(
-      (datasource) => datasource && datasource.datasourceId === SupportedDatasourceId.TextBased
+      (datasource) => datasource && datasource.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
     );
   },
 
