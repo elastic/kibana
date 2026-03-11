@@ -15,7 +15,6 @@ import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
 } from '@kbn/core-chrome-browser';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { HeaderBreadcrumbsBadges } from '@kbn/core-chrome-browser-components';
 import { createArrayState, type ArrayState } from './state_helpers';
 
@@ -64,7 +63,7 @@ const toBadgesExtension = (
   }
 
   return {
-    content: mountReactNode(
+    content: (
       <HeaderBreadcrumbsBadges
         badges={badgesRenderModel.badges}
         isFirst={badgesRenderModel.isFirst}

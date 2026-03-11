@@ -26,18 +26,27 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
       // Get the userActivity service from core
       const [coreStart] = await core.getStartServices();
 
+      const start = Date.now();
       // Track the user action
       coreStart.userActivity.trackUserAction({
         event: {
-          // using `as any` because we don't want to add this action to the public docs
-          action: 'example_button_click' as any,
-          type: 'change',
+          // using `as any` because we don't want to add this action to the public docs,
+          // action ids should follow the format {verb}_{context}_{noun}, more info the service readme
+          action: 'create_security_rule' as any,
+          type: 'creation',
+          start: new Date(start).toISOString(),
+          end: new Date().toISOString(),
+          duration: (Date.now() - start) * 1_000_000,
         },
         object: {
           id: 'example-object-1',
           name: 'Example Object',
           type: 'example',
           tags: ['demo', 'user-activity'],
+        },
+        metadata: {
+          some_field_1: 'some_value_1',
+          some_field_2: 'some_value_2',
         },
       });
 

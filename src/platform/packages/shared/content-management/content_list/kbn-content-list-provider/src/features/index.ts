@@ -27,6 +27,15 @@ export { useContentListSearch } from './search';
 export type { UseContentListSelectionReturn } from './selection';
 export { useContentListSelection } from './selection';
 
+// Filtering feature.
+export type { FilterDisplayState, UseContentListFiltersReturn } from './filtering';
+export {
+  useFilterDisplay,
+  useContentListFilters,
+  useTagFilterToggle,
+  TAG_FILTER_ID,
+} from './filtering';
+
 // Delete feature.
 export type {
   DeleteConfirmationModalProps,
