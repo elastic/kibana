@@ -51,6 +51,15 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = selectTabRuntimeState(runtimeStateManager, payload.tabId)
+      .scopedProfilesManager$.getValue()
+      .getContexts().dataSourceContext.profileId;
+
+    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
 /**
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
@@ -59,9 +68,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(
-        internalStateSlice.actions.setAppState({ tabId: payload.tabId, appState: mergedAppState })
-      );
+      dispatch(setAppState({ tabId: payload.tabId, appState: mergedAppState }));
     }
   };
 

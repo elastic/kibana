@@ -263,17 +263,7 @@ describe('test getDataStateContainer', () => {
       const scopedProfilesManager = scopedProfilesManager$.getValue();
       const initialContexts = scopedProfilesManager.getContexts();
       const incomingProfileId = 'incoming-profile-id';
-
-      jest
-        .spyOn(scopedProfilesManager, 'getContexts')
-        .mockReturnValueOnce(initialContexts)
-        .mockReturnValue({
-          ...initialContexts,
-          dataSourceContext: {
-            ...initialContexts.dataSourceContext,
-            profileId: incomingProfileId,
-          },
-        });
+      const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts');
 
       jest
         .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
@@ -300,26 +290,43 @@ describe('test getDataStateContainer', () => {
           resetDefaultProfileState: ['columns', 'rowHeight'],
         })
       );
-      toolkit.internalState.dispatch(
-        internalStateActions.setPreviousStateSnapshot({
-          tabId: toolkit.getCurrentTab().id,
+      getContextsSpy.mockReturnValue({
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
           profileId: incomingProfileId,
-          previousStateSnapshot: {
+        },
+      });
+      toolkit.internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            ...toolkit.getCurrentTab().appState,
             columns: ['restored_column'],
             rowHeight: 2,
           },
         })
       );
 
+      getContextsSpy.mockReturnValue(initialContexts);
       toolkit.internalState.dispatch(
-        internalStateActions.updateAppState({
+        internalStateActions.setAppState({
           tabId: toolkit.getCurrentTab().id,
           appState: {
+            ...toolkit.getCurrentTab().appState,
             columns: ['custom_column'],
             rowHeight: 5,
           },
         })
       );
+
+      getContextsSpy.mockReturnValueOnce(initialContexts).mockReturnValue({
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
+          profileId: incomingProfileId,
+        },
+      });
 
       await waitFor(() => {
         expect(toolkit.getCurrentTab().appState.columns).toEqual(['restored_column']);
@@ -363,10 +370,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'none',
-        previousStateSnapshotsByProfileId: {},
-      });
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -406,10 +410,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'none',
-        previousStateSnapshotsByProfileId: {},
-      });
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

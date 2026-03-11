@@ -111,15 +111,16 @@ describe('InternalStateStore', () => {
   });
 
   it('should preserve previousStateSnapshotsByProfileId when updating reset state', async () => {
-    const { store } = await createTestStore();
+    const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = 'test-profile-id';
+    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+      .scopedProfilesManager$.getValue()
+      .getContexts().dataSourceContext.profileId;
 
-    store.dispatch(
-      internalStateActions.setPreviousStateSnapshot({
+    await store.dispatch(
+      internalStateActions.setAppState({
         tabId,
-        profileId,
-        previousStateSnapshot: {
+        appState: {
           columns: ['field1'],
           rowHeight: 3,
         },
@@ -151,9 +152,11 @@ describe('InternalStateStore', () => {
   });
 
   it('should only update previousStateSnapshotsByProfileId', async () => {
-    const { store } = await createTestStore();
+    const { store, runtimeStateManager } = await createTestStore();
     const tabId = store.getState().tabs.unsafeCurrentId;
-    const profileId = 'test-profile-id';
+    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+      .scopedProfilesManager$.getValue()
+      .getContexts().dataSourceContext.profileId;
 
     store.dispatch(
       internalStateActions.setResetDefaultProfileState({
@@ -167,11 +170,10 @@ describe('InternalStateStore', () => {
       tabId
     ).resetDefaultProfileState;
 
-    store.dispatch(
-      internalStateActions.setPreviousStateSnapshot({
+    await store.dispatch(
+      internalStateActions.setAppState({
         tabId,
-        profileId,
-        previousStateSnapshot: {
+        appState: {
           columns: ['field1'],
         },
       })

@@ -364,7 +364,6 @@ export function getDataStateContainer({
             })
           );
 
-          const previousProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
           const { didProfileChange } = await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,
@@ -375,13 +374,6 @@ export function getDataStateContainer({
           );
 
           if (didProfileChange) {
-            internalState.dispatch(
-              injectCurrentTab(internalStateActions.setPreviousStateSnapshot)({
-                profileId: previousProfileId,
-                previousStateSnapshot: pick(appState, DEFAULT_PROFILE_STATE_FIELDS),
-              })
-            );
-
             const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const nextProfileSnapshot =
               getCurrentTab().resetDefaultProfileState.previousStateSnapshotsByProfileId[
