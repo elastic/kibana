@@ -12,13 +12,18 @@ import type { ScheduledActionResultsRequestOptions } from '../../../../../common
 export const buildScheduledActionResultsQuery = ({
   scheduleId,
   executionCount,
+  spaceId,
   sort,
   pagination,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
-  const filterQuery = [
+  const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },
     { term: { schedule_execution_count: executionCount } },
   ];
+
+  if (spaceId) {
+    filterQuery.push({ term: { space_id: spaceId } });
+  }
 
   return {
     allow_no_indices: true,
@@ -34,6 +39,7 @@ export const buildScheduledActionResultsQuery = ({
                 must: [
                   { term: { schedule_id: scheduleId } },
                   { term: { schedule_execution_count: executionCount } },
+                  ...(spaceId ? [{ term: { space_id: spaceId } }] : []),
                 ],
               },
             },

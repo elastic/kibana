@@ -25,6 +25,23 @@ export interface ScheduledExecutionDetailsItem {
   totalRows: number;
 }
 
+export const mapScheduledDetailsToQueryData = (
+  data: ScheduledExecutionDetailsItem,
+  scheduleId: string
+) => [
+  {
+    action_id: scheduleId,
+    id: data.queryName || scheduleId,
+    query: data.queryText || '',
+    agents: [] as string[],
+    status: 'completed' as const,
+    docs: data.totalRows,
+    successful: data.successCount,
+    failed: data.errorCount,
+    pending: 0,
+  },
+];
+
 interface UseScheduledExecutionDetails {
   scheduleId: string;
   executionCount: number;

@@ -38,6 +38,7 @@ export interface ScheduledActionResultsStrategyResponse
 export interface ScheduledActionResultsRequestOptions extends RequestOptionsPaginated {
   scheduleId: string;
   executionCount: number;
+  spaceId?: string;
   startDate?: string;
   integrationNamespaces?: string[];
 }

@@ -93,6 +93,8 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
             },
           ];
 
+      const defaultFrom = isScheduled ? 'now-1y' : 'now-1d';
+
       const newUrl = await locator.getUrl({
         indexPatternId: logsDataView.id,
         filters,
@@ -109,7 +111,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               }
             : {
                 to: 'now',
-                from: 'now-1d',
+                from: defaultFrom,
                 mode: 'relative',
               },
       });

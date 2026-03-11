@@ -50,11 +50,12 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 
       if (logsDataView) {
         const isScheduled = !!scheduleId && executionCount != null;
+        const defaultFrom = isScheduled ? 'now-1y' : 'now-1d';
         lensService?.navigateToPrefilledEditor(
           {
             id: '',
             time_range: {
-              from: startDate ?? 'now-1d',
+              from: startDate ?? defaultFrom,
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },

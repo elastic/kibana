@@ -14,7 +14,7 @@ describe('buildScheduledActionResultsQuery', () => {
     executionCount: 42,
     sort: { field: '@timestamp', direction: Direction.desc },
     pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
-    factoryQueryType: 'scheduledActionResults' as const,
+    factoryQueryType: 'scheduledActionResults',
   };
 
   it('filters by schedule_id and schedule_execution_count', () => {
@@ -68,5 +68,36 @@ describe('buildScheduledActionResultsQuery', () => {
     const result = buildScheduledActionResultsQuery(options as any);
 
     expect(result.sort).toEqual([{ 'agent.id': { order: 'asc' } }]);
+  });
+
+  it('includes space_id filter when spaceId is provided', () => {
+    const options = { ...defaultOptions, spaceId: 'my-space' };
+
+    const result = buildScheduledActionResultsQuery(options as any);
+
+    expect(result.query).toEqual({
+      bool: {
+        filter: [
+          { term: { schedule_id: 'test-schedule-id' } },
+          { term: { schedule_execution_count: 42 } },
+          { term: { space_id: 'my-space' } },
+        ],
+      },
+    });
+
+    const aggs = result.aggs as any;
+    const mustFilters = aggs.aggs.aggs.responses_by_schedule.filter.bool.must;
+    expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
+  });
+
+  it('omits space_id filter when spaceId is not provided', () => {
+    const result = buildScheduledActionResultsQuery(defaultOptions as any);
+    const filterQuery = result.query as any;
+    const filters = filterQuery.bool.filter;
+    const hasSpaceFilter = filters.some(
+      (f) => f.term && Object.prototype.hasOwnProperty.call(f.term, 'space_id')
+    );
+
+    expect(hasSpaceFilter).toBe(false);
   });
 });

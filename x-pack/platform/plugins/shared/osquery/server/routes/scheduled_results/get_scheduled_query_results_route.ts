@@ -7,10 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { PLUGIN_ID } from '../../../common';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
   ResultsRequestOptions,
@@ -19,6 +20,7 @@ import type {
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 export const getScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -71,6 +73,29 @@ export const getScheduledQueryResultsRoute = (
             });
           }
 
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
+          let integrationNamespaces: Record<string, string[]> = {};
+          const logger = osqueryContext.logFactory.get('scheduled_query_results');
+
+          if (osqueryContext?.service?.getIntegrationNamespaces) {
+            const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+              osqueryContext,
+              request
+            );
+            integrationNamespaces = await osqueryContext.service.getIntegrationNamespaces(
+              [OSQUERY_INTEGRATION_NAME],
+              spaceScopedClient,
+              logger
+            );
+          }
+
+          const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
+          const namespacesOrUndefined =
+            osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
           const search = await context.search;
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
@@ -88,6 +113,7 @@ export const getScheduledQueryResultsRoute = (
                     field: request.query.sort ?? '@timestamp',
                   },
                 ],
+                integrationNamespaces: namespacesOrUndefined,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
@@ -105,10 +131,3 @@ export const getScheduledQueryResultsRoute = (
       }
     );
 };
-
-function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
-  const controller = new AbortController();
-  aborted$.subscribe(() => controller.abort());
-
-  return controller.signal;
-}
