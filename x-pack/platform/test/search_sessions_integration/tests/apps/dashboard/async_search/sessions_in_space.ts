@@ -52,6 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
 
+        // Clear any stale toasts before restoration validation.
+        await toasts.dismissAllWithChecks();
+
         // navigate to discover
         await searchSessionItem.view();
 
