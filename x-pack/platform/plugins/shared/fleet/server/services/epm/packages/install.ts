@@ -499,7 +499,7 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
-  isDependency = false,
+  isDependency,
   skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
@@ -1241,8 +1241,8 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
-    is_dependency: isDependency,
-    ...(dependencies !== undefined ? { dependencies } : {}),
+    ...(isDependency !== undefined ? { is_dependency: isDependency } : {}),
+    ...(dependencies ? { dependencies } : {}),
   };
 
   if (verificationResult) {
@@ -1272,8 +1272,14 @@ export async function createInstallation(options: {
   isDependency?: boolean;
   dependencies?: PackageDependencies | null;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult, dependencies } =
-    options;
+  const {
+    savedObjectsClient,
+    packageInfo,
+    installSource,
+    verificationResult,
+    dependencies,
+    isDependency,
+  } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(
     getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
@@ -1303,8 +1309,8 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
-    ...(dependencies !== undefined ? { dependencies } : {}),
-    ...(options.isDependency ? { is_dependency: true } : {}),
+    ...(dependencies ? { dependencies } : {}),
+    ...(isDependency !== undefined ? { is_dependency: isDependency } : {}),
   };
 
   if (verificationResult) {
