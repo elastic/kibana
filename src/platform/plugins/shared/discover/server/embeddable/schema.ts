@@ -331,39 +331,13 @@ export const discoverSessionEmbeddableSchema = schema.oneOf([
 ]);
 
 export function getDiscoverSessionEmbeddableSchema(
-  getDrilldownsSchema?: (triggers: string[]) => { getPropSchemas: () => Record<string, unknown> }
+  _getDrilldownsSchema?: (triggers: string[]) => { getPropSchemas: () => Record<string, unknown> }
 ) {
-  const drilldownProps = getDrilldownsSchema?.([])?.getPropSchemas() ?? {};
-
-  const baseWithDrilldowns = serializedTitlesSchema.extends({
-    timeRange: schema.maybe(timeRangeSchema),
-    ...drilldownProps,
-  });
-
-  const byValue = baseWithDrilldowns.extends({
-    tabs: schema.arrayOf(tabSchema, {
-      minSize: 1,
-      maxSize: 1,
-      meta: {
-        description:
-          'Array of tabs for the Discover session embeddable. Currently supports one tab.',
-      },
-    }),
-  });
-
-  const byRef = baseWithDrilldowns.extends({
-    discover_session_id: schema.string(),
-    selected_tab_id: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'The selected tab in the Discover session. If omitted, defaults to the first tab.',
-        },
-      })
-    ),
-  });
-
-  return schema.oneOf([byValue, byRef]);
+  // Discover sessions do not support drilldown triggers yet. Return the static
+  // schema directly to avoid calling getDrilldownsSchema with an empty trigger
+  // list, which would produce an invalid schema.oneOf([]) inside the drilldown
+  // registry. When drilldown support is added, pass the supported triggers here.
+  return discoverSessionEmbeddableSchema;
 }
 
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
