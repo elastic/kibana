@@ -538,13 +538,7 @@ export function getTextBasedDatasource({
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
-          // Normalize before use
-          const columnsArray: TextBasedLayerColumn[] = Array.isArray(layer?.columns)
-            ? layer.columns
-            : layer?.columns && typeof layer.columns === 'object'
-            ? (Object.values(layer.columns) as TextBasedLayerColumn[])
-            : [];
-          const column = columnsArray.find((c) => c.columnId === columnId);
+          const column = layer?.columns?.find((c) => c.columnId === columnId);
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
           let scale: OperationMetadata['scale'] = 'ordinal';
           switch (column?.meta?.type) {
