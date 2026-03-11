@@ -66,9 +66,7 @@ function getEntityNameFromRecord(record: EntityStoreRecord, entityType: EntityTy
  * Extract asset criticality level from an entity store record (host/user/service).
  * Used to populate Risk Summary asset criticality row when entity store is the data source.
  */
-function getAssetCriticalityFromEntityRecord(
-  record: EntityStoreRecord
-): string | undefined {
+function getAssetCriticalityFromEntityRecord(record: EntityStoreRecord): string | undefined {
   if ('asset' in record && record.asset?.criticality) {
     return record.asset.criticality;
   }

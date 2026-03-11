@@ -82,7 +82,8 @@ export const HostPanelContent = ({
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}
-      {!skipRiskAndCriticality && riskScoreState.hasEngineBeenInstalled &&
+      {!skipRiskAndCriticality &&
+        riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
             <FlyoutRiskSummary

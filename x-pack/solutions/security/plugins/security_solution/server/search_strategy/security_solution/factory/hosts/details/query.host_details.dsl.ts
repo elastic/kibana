@@ -30,8 +30,8 @@ export const buildHostDetailsQuery = ({
     isExploreContext && hostNameValue
       ? { term: { 'host.name': hostNameValue } }
       : entityIdentifiers && Object.keys(entityIdentifiers).length > 0
-        ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers)
-        : { term: { 'host.name': hostName } };
+      ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers)
+      : { term: { 'host.name': hostName } };
 
   const filter = [
     ...(entityFilters ? [entityFilters] : []),
