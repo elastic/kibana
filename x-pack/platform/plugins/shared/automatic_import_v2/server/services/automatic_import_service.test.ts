@@ -859,6 +859,7 @@ describe('AutomaticImportSetupService', () => {
         dataStreamId: 'test-datastream',
         ingestPipeline: expect.any(Object),
         pipelineDocs: expect.any(Array),
+        fieldMapping: expect.any(Array),
         status: 'completed',
       });
     });

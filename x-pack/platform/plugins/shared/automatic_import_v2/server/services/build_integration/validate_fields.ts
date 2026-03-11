@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
 
 export interface FieldValidationResult {
@@ -58,25 +59,27 @@ const VALID_ES_TYPES = new Set([
 /**
  * Converts flat dotted-name field mappings into ES mapping `properties` format.
  */
-const fieldMappingsToEsProperties = (fields: FieldMappingEntry[]): Record<string, unknown> => {
-  const properties: Record<string, unknown> = {};
+const fieldMappingsToEsProperties = (
+  fields: FieldMappingEntry[]
+): Record<string, MappingProperty> => {
+  const properties: Record<string, MappingProperty> = {};
 
   for (const field of fields) {
     if (field.type === 'group') continue;
 
     const parts = field.name.split('.');
-    let current = properties;
+    let current: Record<string, MappingProperty> = properties;
 
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
       if (!current[part]) {
-        current[part] = { properties: {} };
+        current[part] = { type: 'object', properties: {} } as MappingProperty;
       }
-      current = (current[part] as Record<string, unknown>).properties as Record<string, unknown>;
+      current = (current[part] as { properties: Record<string, MappingProperty> }).properties;
     }
 
     const leafName = parts[parts.length - 1];
-    current[leafName] = { type: field.type };
+    current[leafName] = { type: field.type } as MappingProperty;
   }
 
   return properties;
@@ -111,16 +114,12 @@ export const validateFieldMappings = async (
   }
 
   const properties = fieldMappingsToEsProperties(customFields);
-  const templateName = `validate_auto_import_fields_${Date.now()}`;
 
   try {
-    await esClient.indices.simulateIndexTemplate({
-      name: templateName,
-      body: {
-        index_patterns: [`${templateName}-*`],
-        template: {
-          mappings: { properties },
-        },
+    await esClient.indices.simulateTemplate({
+      index_patterns: ['validate_auto_import_fields-*'],
+      template: {
+        mappings: { properties },
       },
     });
 
