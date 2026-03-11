@@ -45,12 +45,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./overview'));
-      loadTestFile(require.resolve('./ml_anomaly'));
-      loadTestFile(require.resolve('./feature_controls'));
-    });
-
-    describe('mappings error state', () => {
-      loadTestFile(require.resolve('./missing_mappings'));
     });
   });
 };

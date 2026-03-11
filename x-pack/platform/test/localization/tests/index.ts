@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Sanity checks', () => {
-    loadTestFile(require.resolve('./login_page'));
-    loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./index_1'));
+    loadTestFile(require.resolve('./index_2'));
   });
 }

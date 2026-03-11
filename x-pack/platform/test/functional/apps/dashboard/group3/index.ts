@@ -11,6 +11,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./drilldowns'));
-    loadTestFile(require.resolve('./share'));
   });
 }

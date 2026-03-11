@@ -16,12 +16,6 @@ import { threatIndexField } from './threat_index';
 import { threatQueryField } from './threat_query';
 import { threatMappingField } from './threat_mapping';
 import { threatIndicatorPathField } from './threat_indicator_path';
-import { thresholdField } from './threshold';
-import { machineLearningJobIdField } from './machine_learning_job_id';
-import { anomalyThresholdField } from './anomaly_threshold';
-import { newTermsFieldsField } from './new_terms_fields';
-import { historyWindowStartField } from './history_window_start';
-
 export default (context: FtrProviderContext): void => {
   const es = context.getService('es');
   const supertest = context.getService('supertest');
@@ -50,16 +44,5 @@ export default (context: FtrProviderContext): void => {
     threatQueryField(context);
     threatMappingField(context);
     threatIndicatorPathField(context);
-
-    // Threshold rule type
-    thresholdField(context);
-
-    // Machine Learning rule type
-    machineLearningJobIdField(context);
-    anomalyThresholdField(context);
-
-    // New Terms rule type
-    newTermsFieldsField(context);
-    historyWindowStartField(context);
   });
 };

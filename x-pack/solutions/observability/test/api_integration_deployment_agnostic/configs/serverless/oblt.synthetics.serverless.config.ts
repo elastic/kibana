@@ -13,6 +13,7 @@ export default createServerlessTestConfig<typeof services>({
   serverlessProject: 'oblt',
   testFiles: [require.resolve('./oblt.synthetics.index.ts')],
   junit: {
-    reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
+    reportName:
+      'Serverless Observability - Deployment-agnostic Synthetics API Integration Tests - Group 1',
   },
 });

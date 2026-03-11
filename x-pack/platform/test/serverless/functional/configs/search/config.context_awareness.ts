@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../../test_suites/discover/context_awareness')],
+  testFiles: [require.resolve('../../test_suites/discover/context_awareness/index_1')],
   junit: {
     reportName: 'Serverless Search Discover Context Awareness Functional Tests',
   },

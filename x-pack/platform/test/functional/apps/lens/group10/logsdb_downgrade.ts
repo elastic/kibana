@@ -291,7 +291,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await common.navigateToApp('discover');
             await discover.selectTextBaseLang();
 
-            // Use the lens page object here also for discover: both use the same timePicker object
             await lens.goToTimeRange(
               fromTimeForScenarios,
               moment
@@ -319,7 +318,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               );
             });
 
-            // go back to Lens to not break the wrapping function
             await common.navigateToApp('lens');
           });
         });

@@ -18,11 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../test_suites/dev_tools'),
       require.resolve('../../test_suites/platform_security'),
       require.resolve('../../test_suites/reporting'),
-      require.resolve('../../test_suites/grok_debugger'),
-      require.resolve('../../test_suites/console'),
-      require.resolve('../../test_suites/painless_lab'),
-      require.resolve('../../test_suites/spaces'),
-      require.resolve('../../test_suites/data_usage'),
     ],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 1',

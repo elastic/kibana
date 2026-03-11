@@ -14,7 +14,7 @@ import expect from '@kbn/expect';
 
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { OPTIONS_LIST_DASHBOARD_NAME } from '.';
+import { OPTIONS_LIST_DASHBOARD_NAME } from './index_1';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');

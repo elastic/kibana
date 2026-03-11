@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const testConfig = {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('..')],
+    testFiles: [require.resolve('..'), require.resolve('../index_2')],
     junit: {
       reportName: 'Rules Management - Prebuilt Rules Upgrade (Customization Enabled) - ESS Env',
     },

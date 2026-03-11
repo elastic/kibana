@@ -17,10 +17,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/pipelines'));
     loadTestFile(require.resolve('../test_suites/cases/attachment_framework'));
     loadTestFile(require.resolve('../test_suites/dashboards/build_dashboard'));
-    loadTestFile(require.resolve('../test_suites/dashboards/import_dashboard'));
-    loadTestFile(require.resolve('../test_suites/advanced_settings'));
-    loadTestFile(require.resolve('../test_suites/rules/rule_details'));
-    loadTestFile(require.resolve('../test_suites/ml'));
-    loadTestFile(require.resolve('../test_suites/custom_role_access'));
   });
 }

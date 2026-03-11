@@ -13,9 +13,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dataset_quality_summary'));
     loadTestFile(require.resolve('./dataset_quality_table'));
     loadTestFile(require.resolve('./dataset_quality_table_filters'));
-    loadTestFile(require.resolve('./dataset_quality_privileges'));
-    loadTestFile(require.resolve('./dataset_quality_details'));
-    loadTestFile(require.resolve('./degraded_field_flyout'));
-    loadTestFile(require.resolve('./dataset_quality_details_failure_store'));
   });
 }

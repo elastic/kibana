@@ -65,14 +65,5 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./mvt_joins'));
     loadTestFile(require.resolve('./mapbox_styles'));
     loadTestFile(require.resolve('./mvt_scaling'));
-    loadTestFile(require.resolve('./mvt_geotile_grid'));
-    loadTestFile(require.resolve('./add_layer_panel'));
-    loadTestFile(require.resolve('./file_upload'));
-    loadTestFile(require.resolve('./layer_errors'));
-    loadTestFile(require.resolve('./visualize_create_menu'));
-    loadTestFile(require.resolve('./discover'));
-    loadTestFile(require.resolve('./geofile_wizard_auto_open'));
-    loadTestFile(require.resolve('./lens'));
-    loadTestFile(require.resolve('./tile_map'));
   });
 }

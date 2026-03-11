@@ -23,7 +23,7 @@ orig_archive="src/platform/test/functional/fixtures/es_archiver/saved_objects_ma
 new_archive="x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/hidden_saved_objects"
 testFiles=("src/platform/test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
 
-test_config="src/platform/test/plugin_functional/config.ts"
+test_config="src/platform/test/plugin_functional/config_2.ts"
 
 list_stragglers() {
 

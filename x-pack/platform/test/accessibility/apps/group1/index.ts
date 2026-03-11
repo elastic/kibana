@@ -17,13 +17,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./search_profiler'));
     loadTestFile(require.resolve('./painless_lab'));
     loadTestFile(require.resolve('./spaces'));
-    loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./dashboard_controls'));
-    loadTestFile(require.resolve('./dashboard_links'));
-    loadTestFile(require.resolve('./dashboard_panel_options'));
-    loadTestFile(require.resolve('./users'));
-    loadTestFile(require.resolve('./roles'));
-    loadTestFile(require.resolve('./ingest_node_pipelines'));
-    loadTestFile(require.resolve('./index_lifecycle_management'));
   });
 };

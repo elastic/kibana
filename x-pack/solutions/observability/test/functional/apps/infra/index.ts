@@ -17,15 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./metrics_anomalies'));
       loadTestFile(require.resolve('./metrics_explorer'));
       loadTestFile(require.resolve('./hosts_view'));
-      // keep this test last as it can potentially break other tests
-      loadTestFile(require.resolve('./metrics_source_configuration'));
-    });
-
-    describe('Logs UI', function () {
-      loadTestFile(require.resolve('./logs/log_entry_categories_tab'));
-      loadTestFile(require.resolve('./logs/log_entry_rate_tab'));
-      loadTestFile(require.resolve('./logs/link_to'));
-      loadTestFile(require.resolve('./logs/ml_job_id_formats/tests'));
     });
   });
 };

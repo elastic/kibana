@@ -15,7 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../test_suites/discover/group3'),
       require.resolve('../../test_suites/discover/group4'),
-      require.resolve('../../test_suites/discover/group5'),
     ],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 11',

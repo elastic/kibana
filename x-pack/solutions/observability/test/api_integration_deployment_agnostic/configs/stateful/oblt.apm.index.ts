@@ -8,7 +8,16 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability - Deployment-agnostic APM API integration tests', () => {
-    loadTestFile(require.resolve('../../apis/apm'));
+  describe('Stateful Observability - Deployment-agnostic APM API integration tests - Group 1', () => {
+    loadTestFile(require.resolve('../../apis/apm/agent_explorer'));
+    loadTestFile(require.resolve('../../apis/apm/alerts'));
+    loadTestFile(require.resolve('../../apis/apm/cold_start'));
+    loadTestFile(require.resolve('../../apis/apm/correlations'));
+    loadTestFile(require.resolve('../../apis/apm/custom_dashboards'));
+    loadTestFile(require.resolve('../../apis/apm/data_view'));
+    loadTestFile(require.resolve('../../apis/apm/dependencies'));
+    loadTestFile(require.resolve('../../apis/apm/diagnostics'));
+    loadTestFile(require.resolve('../../apis/apm/environment'));
+    loadTestFile(require.resolve('../../apis/apm/error_rate'));
   });
 }

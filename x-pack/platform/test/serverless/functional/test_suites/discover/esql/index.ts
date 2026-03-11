@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover/esql', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./_esql_view'));
+    loadTestFile(require.resolve('./_esql_view_part1'));
+    loadTestFile(require.resolve('./_esql_view_part2'));
   });
 }

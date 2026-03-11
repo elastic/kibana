@@ -12,10 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/discover/embeddable'),
-      require.resolve('../../test_suites/discover/x_pack'),
-    ],
+    testFiles: [require.resolve('../../test_suites/discover/embeddable')],
     junit: {
       reportName: 'Serverless Observability Functional Tests - Common Group 6',
     },

@@ -25,6 +25,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_discover'));
-    loadTestFile(require.resolve('./_discover_histogram'));
   });
 }

@@ -18,10 +18,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./cases/delete_cases'));
     loadTestFile(require.resolve('./cases/patch_cases'));
-
-    /**
-     * Internal routes
-     */
-    loadTestFile(require.resolve('./internal/bulk_create_attachments'));
   });
 };

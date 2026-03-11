@@ -1,4 +1,7 @@
 disabled:
+  # Replaced by ess_1.config.ts and ess_2.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess.config.ts
+
   # Base config files, only necessary to inform config finding script
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.basic.ts
@@ -76,9 +79,12 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_trial_license.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/customization/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/configs/ess_2.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_notifications/configs/ess.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess_1.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess_2.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess_2.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/ess_basic_license.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
@@ -140,6 +146,11 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/group1/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group2/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group3/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group4/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config_2.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group5/config_3.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group6/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
@@ -151,6 +162,7 @@ enabled:
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common_2.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts
   - x-pack/solutions/security/test/api_integration/apis/cases/config.ts
   - x-pack/solutions/security/test/fleet_api_integration/config.agent.ts

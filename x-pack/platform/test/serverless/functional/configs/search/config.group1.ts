@@ -17,10 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../../test_suites/management'),
       require.resolve('../../test_suites/dev_tools'),
       require.resolve('../../test_suites/platform_security'),
-      require.resolve('../../test_suites/reporting'),
-      require.resolve('../../test_suites/console'),
-      require.resolve('../../test_suites/spaces'),
-      require.resolve('../../test_suites/data_usage'),
     ],
     junit: {
       reportName: 'Serverless Search Functional Tests - Common Group 1',
