@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/product-doc-base-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/ai-agent-confirmation-modal'
+  - '@kbn/anonymization-ui'
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
   - '@kbn/agent-builder-common'
