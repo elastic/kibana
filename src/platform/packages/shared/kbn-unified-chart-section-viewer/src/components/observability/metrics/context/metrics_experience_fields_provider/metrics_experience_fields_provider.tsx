@@ -12,8 +12,8 @@ import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/ty
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Dimension, MetricField } from '../../../../../types';
-import { categorizeFields, createSampleRowByField } from './helpers/fields_parser';
+import type { Dimension, MetricField, ParsedMetricsInfo } from '../../../../../types';
+import { createSampleRowByField } from './helpers/fields_parser';
 import { extractWhereCommand } from '../../../../../utils/extract_where_command';
 
 export type FieldCapsResponseMap = Record<
@@ -40,13 +40,15 @@ export const MetricsExperienceFieldsContext =
 
 export interface MetricsExperienceFieldsProviderProps {
   fetchParams: ChartSectionProps['fetchParams'];
+  metricsInfo?: ParsedMetricsInfo | null;
 }
 
 export const MetricsExperienceFieldsProvider = ({
   fetchParams,
+  metricsInfo,
   children,
 }: PropsWithChildren<MetricsExperienceFieldsProviderProps>) => {
-  const { table, dataView, query } = fetchParams;
+  const { table, query } = fetchParams;
   const esqlQuery = useMemo(
     () => (query && isOfAggregateQueryType(query) ? query.esql : undefined),
     [query]
@@ -54,16 +56,19 @@ export const MetricsExperienceFieldsProvider = ({
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
   const { metricFields, dimensions } = useMemo(() => {
-    if (!dataView) {
-      return { metricFields: [], dimensions: [] };
+    const hasMetricsInfoData =
+      metricsInfo &&
+      (metricsInfo.metricFields.length > 0 || (metricsInfo.allDimensionFields?.length ?? 0) > 0);
+    if (hasMetricsInfoData && metricsInfo) {
+      const allDimensionFields = metricsInfo.allDimensionFields ?? [];
+      return {
+        metricFields: metricsInfo.metricFields,
+        dimensions: allDimensionFields.map((name) => ({ name })),
+      };
     }
 
-    return categorizeFields({
-      index: dataView.getIndexPattern(),
-      dataViewFieldMap: dataView.fields.toSpec(),
-      columns: table?.columns,
-    });
-  }, [dataView, table?.columns]);
+    return { metricFields: [], dimensions: [] };
+  }, [metricsInfo]);
 
   const rows = useMemo(() => table?.rows ?? [], [table?.rows]);
   const metricFieldNames = useMemo(() => metricFields.map((f) => f.name), [metricFields]);

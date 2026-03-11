@@ -11,6 +11,7 @@ import { stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricField } from '../../../types';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import { getPrimaryValue } from '../get_primary_value';
 
 interface CreateESQLQueryParams {
   metric: MetricField;
@@ -33,7 +34,10 @@ export function createESQLQuery({
   splitAccessors = [],
   whereStatements = [],
 }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, type } = metric;
+  const { name: metricField, metricTypes, fieldtypes: fieldTypes, dataStreams } = metric;
+  const index = getPrimaryValue(dataStreams) ?? 'unknown';
+  const type = getPrimaryValue(fieldTypes);
+  const instrument = metricTypes?.[0];
   const source = timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {
@@ -41,6 +45,7 @@ export function createESQLQuery({
     return trimmed.length > 0 ? [where(trimmed)] : [];
   });
 
+  // TODO rename instrument to match metrics_info response
   const queryPipeline = source.pipe(
     ...whereCommands,
     stats(

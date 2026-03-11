@@ -23,7 +23,7 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import type { MetricField, Dimension } from '../../types';
+import type { MetricField } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
@@ -41,14 +41,17 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
-  const unitLabel = useMemo(() => getUnitLabel({ unit: metric.unit }), [metric.unit]);
+  const unitLabel = useMemo(
+    () => getUnitLabel({ unit: metric.units?.[0] ?? undefined }),
+    [metric.units]
+  );
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
     if (!metric.dimensions || metric.dimensions.length === 0) {
       return [];
     }
-    return [...metric.dimensions].sort((a, b) => a.name.localeCompare(b.name));
+    return [...metric.dimensions].sort((a, b) => a.localeCompare(b));
   }, [metric.dimensions]);
 
   // Calculate pagination - 0 means show all
@@ -89,7 +92,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           defaultMessage: 'Data stream',
         }),
         <EuiText color="primary" size="s">
-          {metric.index}
+          {metric.dataStreams?.[0] ?? ''}
         </EuiText>
       ),
       createDescriptionListItem(
@@ -97,7 +100,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           defaultMessage: 'Field type',
         }),
         <div>
-          <EuiBadge>{metric.type}</EuiBadge>
+          <EuiBadge>{metric.fieldtypes?.[0] ?? ''}</EuiBadge>
         </div>
       ),
       ...(unitLabel
@@ -111,21 +114,27 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
             ),
           ]
         : []),
-      ...(metric.instrument
+      ...(metric.metricTypes?.[0]
         ? [
             createDescriptionListItem(
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
               <div>
-                <EuiBadge>{metric.instrument}</EuiBadge>
+                <EuiBadge>{metric.metricTypes?.[0] ?? ''}</EuiBadge>
               </div>,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
         : []),
     ],
-    [metric.index, metric.type, metric.instrument, unitLabel, createDescriptionListItem]
+    [
+      metric.dataStreams,
+      metric.fieldtypes,
+      metric.metricTypes,
+      unitLabel,
+      createDescriptionListItem,
+    ]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the container height
@@ -137,10 +146,10 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   // Create list items from dimensions
   const dimensionListItems = useMemo(
     () =>
-      paginatedDimensions.map((dimension: Dimension) => {
+      paginatedDimensions.map((dimension: string) => {
         return {
-          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
-          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
+          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension}`,
+          label: <FieldNameWithIcon name={dimension} />,
         };
       }),
     [paginatedDimensions]
@@ -211,7 +220,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
                     count: paginatedDimensions.length,
                     page: activePage + 1,
                     total: pageCount,
-                    dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
+                    dimensions: paginatedDimensions.map((d) => `${d}`).join('. '),
                   },
                 })}
               </div>

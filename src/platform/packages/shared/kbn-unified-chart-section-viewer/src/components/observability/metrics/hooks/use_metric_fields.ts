@@ -50,7 +50,17 @@ export const useMetricFields = (): UseMetricFieldsReturn => {
 
     for (const metricField of metricFields) {
       const row = getSampleRow(metricField.name);
-      if (row) {
+      const hasMetricsInfoData =
+        (Array.isArray(metricField.units) && metricField.units.length > 0) ||
+        (Array.isArray(metricField.dimensions) && metricField.dimensions.length > 0);
+
+      if (hasMetricsInfoData) {
+        // From METRICS_INFO: include even without sample row; use existing units/dimensions
+        fields.push({
+          ...metricField,
+          dimensions: metricField.dimensions ?? [],
+        });
+      } else if (row) {
         const enriched = enrichMetricField(metricField, dimensions, row);
         fields.push(enriched);
       }
@@ -118,9 +128,10 @@ const enrichMetricField = (
   dimensions: Dimension[],
   row: DatatableRow
 ): MetricField => {
+  const unitFromRow = getUnit(row, metricField.name);
   return {
     ...metricField,
     dimensions: getDimensionsFromRow(row, dimensions),
-    unit: getUnit(row, metricField.name),
+    units: unitFromRow != null ? [unitFromRow] : [],
   };
 };

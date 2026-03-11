@@ -60,6 +60,7 @@ export async function fetchMetricsInfo({
     filter,
     timeRange,
     variables,
+    dropNullColumns: true,
   });
 
   return response;

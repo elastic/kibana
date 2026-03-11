@@ -99,6 +99,7 @@ export const DimensionsSelector = ({
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
+      // TODO fix disabled state, does allow selecting more than one
       const isDisabled = getOptionDisabledState({
         singleSelection,
         isSelected,

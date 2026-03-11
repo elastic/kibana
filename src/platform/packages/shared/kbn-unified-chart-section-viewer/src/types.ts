@@ -30,20 +30,23 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  /**
+   * Parsed METRICS_INFO result from Discover. When provided, used as the single source for metricFields and dimensions.
+   */
+  metricsInfo?: ParsedMetricsInfo | null;
 }
 
 export interface Dimension {
   name: string;
-  type: ES_FIELD_TYPES;
 }
 
 export interface MetricField {
   name: string;
-  index: string;
-  type: ES_FIELD_TYPES;
-  instrument?: MappingTimeSeriesMetricType;
-  unit?: MetricUnit;
-  dimensions: Dimension[];
+  dataStreams: string[];
+  metricTypes: MappingTimeSeriesMetricType[];
+  fieldtypes: ES_FIELD_TYPES[];
+  units: (MetricUnit | null)[];
+  dimensions: string[];
 }
 
 export type MetricUnit =
@@ -58,3 +61,12 @@ export type MetricUnit =
   | 'bytes'
   | 'count'
   | `{${string}}`; // otel special units of count
+
+/**
+ * Parsed result of METRICS_INFO ES|QL command.
+ * Used as the single source for metricFields and dimensions in the metrics experience.
+ */
+export interface ParsedMetricsInfo {
+  metricFields: MetricField[];
+  allDimensionFields: string[];
+}

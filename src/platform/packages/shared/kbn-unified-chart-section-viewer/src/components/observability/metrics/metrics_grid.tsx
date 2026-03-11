@@ -220,7 +220,8 @@ const ChartItem = React.memo(
     );
 
     const esqlQuery = useMemo(() => {
-      const isSupported = metric.type !== 'unsigned_long';
+      const metricType = metric.fieldtypes?.[0];
+      const isSupported = metricType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({
             metric,

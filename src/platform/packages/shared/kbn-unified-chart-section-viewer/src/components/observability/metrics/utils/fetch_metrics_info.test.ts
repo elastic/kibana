@@ -12,7 +12,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
 import { fetchMetricsInfo } from './fetch_metrics_info';
 
 jest.mock('@kbn/esql-utils', () => ({

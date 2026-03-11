@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useMetricsInfo } from './hooks/use_metrics_info';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
-import { useMetricFields } from './hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDiscoverFieldForBreakdown } from './hooks';
@@ -31,7 +31,6 @@ export const MetricsExperienceGrid = ({
   services,
   fetch$: discoverFetch$,
   fetchParams,
-  isChartLoading: isDiscoverLoading,
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
@@ -45,7 +44,16 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
   } = useMetricsExperienceState();
 
-  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+  // TODO simplify the dimensions to a string array
+  const { metricsInfo, loading: isDiscoverLoading } = useMetricsInfo({
+    fetchParams,
+    services,
+    isComponentVisible,
+    selectedDimensionNames: selectedDimensions,
+  });
+  const allMetricFields = metricsInfo?.metricFields ?? [];
+  const visibleMetricFields = metricsInfo?.metricFields ?? [];
+  const dimensions = metricsInfo?.allDimensionFields.map((name) => ({ name })) ?? [];
 
   useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
 
@@ -97,7 +105,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0) {
+  if (allMetricFields.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 

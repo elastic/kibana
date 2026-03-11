@@ -138,10 +138,10 @@ describe('useMetricFields', () => {
       expect(result.current.allMetricFields).toHaveLength(2);
 
       const cpuField = result.current.allMetricFields.find((f) => f.name === 'cpu.usage');
-      expect(cpuField?.unit).toBe('percent');
+      expect(cpuField?.units).toEqual(['percent']);
 
       const latencyField = result.current.allMetricFields.find((f) => f.name === 'latency');
-      expect(latencyField?.unit).toBe('ms');
+      expect(latencyField?.units).toEqual(['ms']);
     });
 
     it('excludes dimensions without values', () => {

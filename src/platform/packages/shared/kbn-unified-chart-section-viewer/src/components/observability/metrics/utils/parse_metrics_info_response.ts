@@ -8,7 +8,14 @@
  */
 
 import type { ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
+import type { MetricField } from '@kbn/unified-chart-section-viewer';
 import { normaliseToStringArray } from './normalise_to_string_array';
+
+/** Parsed METRICS_INFO result; allDimensionFields is union of all dimension_fields (no duplicates). */
+export interface ParsedMetricFields {
+  metricFields: MetricField[];
+  allDimensionFields: string[];
+}
 
 /**
  * One parsed metric item (one per data stream after expansion).
@@ -45,7 +52,7 @@ function getColumnIndex(columns: Array<{ name?: string }>): Record<MetricColumnN
 }
 
 /** Maps one raw ESQL row to a typed normalised row using column indices. */
-function rowToNormalisedRow(
+function normaliseRows(
   columnIndex: Record<MetricColumnName, number>,
   row: ESQLRow
 ): ParsedMetricsInfoItem {
@@ -61,36 +68,48 @@ function rowToNormalisedRow(
 }
 
 /**
- * Parses the METRICS_INFO ES|QL response into an array of normalised items.
+ * Parses the METRICS_INFO ES|QL response into metric fields and a union of all dimension fields.
  * Columns expected: metric_name, data_stream, unit, metric_type, field_type, dimension_fields.
  * Expands one output item per data stream when a row has multiple data streams.
+ * Collects all unique dimension_fields across rows (no duplicates). Dimensions are returned as string[].
  */
-export function parseMetricsInfoResponse(response: ESQLSearchResponse): ParsedMetricsInfoItem[] {
+export function parseMetricsInfoResponse(response: ESQLSearchResponse): ParsedMetricFields {
   const columns = response.columns;
   const values = response.values;
 
   if (columns.length === 0 || values.length === 0) {
-    return [];
+    return { metricFields: [], allDimensionFields: [] };
   }
 
   const columnIndex = getColumnIndex(columns);
-  const result: ParsedMetricsInfoItem[] = [];
+  const metricFields: MetricField[] = [];
+  const allDimensionFields = new Set<string>();
 
   for (const row of values) {
-    const normalised = rowToNormalisedRow(columnIndex, row);
+    const normalised = normaliseRows(columnIndex, row);
+    for (const d of normalised.dimensions ?? []) {
+      if (typeof d === 'string' && d !== '') {
+        allDimensionFields.add(d);
+      }
+    }
+
     const dataStreams = normalised.dataStreams ?? [];
     const streams = dataStreams.length > 0 ? dataStreams : [''];
+    const dimensions = normalised.dimensions ?? [];
     for (const stream of streams) {
-      result.push({
-        metricName: normalised.metricName,
+      metricFields.push({
+        name: normalised.metricName,
         dataStreams: [stream],
-        units: normalised.units,
         metricTypes: normalised.metricTypes,
-        fieldTypes: normalised.fieldTypes,
-        dimensions: normalised.dimensions,
+        fieldtypes: normalised.fieldTypes,
+        units: normalised.units,
+        dimensions,
       });
     }
   }
 
-  return result;
+  return {
+    metricFields,
+    allDimensionFields: Array.from(allDimensionFields),
+  };
 }
