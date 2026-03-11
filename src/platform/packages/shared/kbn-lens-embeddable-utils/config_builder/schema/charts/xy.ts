@@ -368,7 +368,7 @@ const xySharedSettings = {
       },
       {
         meta: {
-          id: 'xyAxis',
+          id: 'xy_axis',
           title: 'Axis',
           description: 'Axis configuration for X, left Y, and right Y axes',
         },
