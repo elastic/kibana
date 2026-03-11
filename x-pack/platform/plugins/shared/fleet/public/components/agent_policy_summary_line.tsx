@@ -79,7 +79,7 @@ export const AgentPolicySummaryLine = memo<{
           'xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarningExpanded',
           {
             defaultMessage:
-              "This agent isn't synced to the latest policy revision. Check its connection to the fleet server.",
+              "This agent isn't synced to the latest policy revision. Check its connection to the Fleet server.",
           }
         ),
       });
@@ -93,7 +93,7 @@ export const AgentPolicySummaryLine = memo<{
           'xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip',
           {
             defaultMessage:
-              'This policy contains the following incompatible integrations: {integrations}. Upgrade agent to {minVersion} or higher.',
+              'This policy contains the following incompatible integrations: {integrations}. Upgrade the agent to {minVersion} or later.',
             values: {
               integrations: incompatibleIntegrations
                 .map(({ title, name: pkgName }) => title || pkgName)

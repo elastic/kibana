@@ -25,7 +25,7 @@ export const MinAgentVersionCallout: React.FC<{ minVersion: string }> = ({ minVe
       >
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.minAgentVersionCallout.body"
-          defaultMessage="This policy contains integrations that require Elastic Agent {minVersion} or higher. Enrolling an agent on an earlier version may result in unexpected or broken functionality."
+          defaultMessage="This policy contains integrations that require Elastic Agent {minVersion} or later. Enrolling an agent on an earlier version can result in unexpected or broken functionality."
           values={{ minVersion }}
         />
       </EuiCallOut>
