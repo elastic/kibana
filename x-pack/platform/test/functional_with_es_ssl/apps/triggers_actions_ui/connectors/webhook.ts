@@ -92,6 +92,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         config: {
           method: 'post',
           hasAuth: false,
+          authType: null,
           url: 'https://example.com/webhook',
           headers: {
             configHeader: 'config-value',

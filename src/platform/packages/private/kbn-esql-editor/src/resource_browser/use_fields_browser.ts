@@ -9,9 +9,12 @@
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type {
+  ESQLFieldWithMetadata,
+  RecommendedField,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
 import type { TimeRange } from '@kbn/es-query';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
@@ -36,7 +39,7 @@ interface UseFieldsBrowserParams {
   search: ISearchGeneric;
   getTimeRange: () => TimeRange;
   signal?: AbortSignal;
-  activeSolutionId?: SolutionId;
+  activeSolutionId?: ESQLRegistrySolutionId;
   telemetryService: ESQLEditorTelemetryService;
 }
 

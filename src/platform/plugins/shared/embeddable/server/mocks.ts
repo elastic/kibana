@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
 import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
@@ -23,3 +25,19 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   getAllEmbeddableSchemas: jest.fn(),
   getTransforms: jest.fn(),
 });
+
+export function mockGetDrilldownsSchema(triggers: string[]) {
+  return schema.object({
+    drilldowns: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          label: schema.string(),
+          trigger: schema.oneOf(
+            triggers.map((trigger) => schema.literal(trigger)) as [Type<string>]
+          ),
+          type: schema.string(),
+        })
+      )
+    ),
+  });
+}
