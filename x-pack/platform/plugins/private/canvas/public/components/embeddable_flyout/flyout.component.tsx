@@ -17,8 +17,12 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectFinder, SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { contentManagementService, coreServices } from '../../services/kibana_services';
+import { CanAddNewPanel } from '@kbn/presentation-publishing';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { getAddFromLibraryType } from '@kbn/embeddable-plugin/public/add_from_library/registry';
+import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 
 const strings = {
   getNoItemsText: () =>
@@ -33,16 +37,12 @@ const strings = {
 
 export interface Props {
   onClose: () => void;
-  onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
-  availableEmbeddables: string[];
-  isByValueEnabled?: boolean;
+  container: CanAddNewPanel;
 }
 
 export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
+  container,
   onClose,
-  isByValueEnabled,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -53,11 +53,26 @@ export const AddEmbeddableFlyout: FC<Props> = ({
     return libraryTypes.filter(({ type }) => type !== 'links');
   }, [libraryTypes]);
 
-  const onAddPanel = useCallback(
-    (id: string, savedObjectType: string) => {
-      onSelect(id, savedObjectType, isByValueEnabled);
+  const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
+    async (
+      id: SavedObjectCommon['id'],
+      type: SavedObjectCommon['type'],
+      name: string,
+      savedObject: SavedObjectCommon
+    ) => {
+      const libraryType = getAddFromLibraryType(type);
+      if (!libraryType) {
+        getCanvasNotifyService().warning(
+          i18n.translate('canvas.addPanel.typeNotFound', {
+            defaultMessage: 'Unable to load type: {type}',
+            values: { type },
+          })
+        );
+        return;
+      }
+      libraryType.onAdd(container, savedObject);
     },
-    [isByValueEnabled, onSelect]
+    [container]
   );
 
   return (
@@ -75,7 +90,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
       <EuiFlyoutBody>
         <SavedObjectFinder
           id="canvasEmbeddableFlyout"
-          onChoose={onAddPanel}
+          onChoose={onChoose}
           savedObjectMetaData={canvasOnlyLibraryTypes}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
