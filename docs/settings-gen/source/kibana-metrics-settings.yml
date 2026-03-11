@@ -8,71 +8,37 @@ page_description: |
   You do not need to configure any settings to use the Metrics app in Kibana. It is enabled by default.
 
 groups:
-  - group: General settings
+  - group: General metrics settings
     id: general-infra-ui-settings-kb
-    # description: |
-    # example: |
     settings:
 
       - setting: xpack.infra.sources.default.fields.message
-        # id:
         description: |
           Fields used to display messages in the Logs app.
-        state: deprecated
-        deprecation_details: "Deprecated in 8.18."
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: string
         default: "['message', '@message']"
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: deprecated 8.18
+          self: ga
+          ech: unavailable
+        deprecation_details: "Deprecated in 8.18."
 
       - setting: xpack.infra.alerting.inventory_threshold.group_by_page_size
-        # id:
         description: |
           Controls the size of the composite aggregations used by the Inventory Threshold to retrieve all the hosts.
-        # state:
-        # deprecation_details:
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: int
         default: 10000
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          self: ga
+          ech: unavailable
 
       - setting: xpack.infra.alerting.metric_threshold.group_by_page_size
-        # id:
         description: |
           Controls the size of the composite aggregations used by the Metric Threshold group by feature.
-        # state:
-        # deprecation_details:
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: int
         default: 10000
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          self: ga
+          ech: unavailable
