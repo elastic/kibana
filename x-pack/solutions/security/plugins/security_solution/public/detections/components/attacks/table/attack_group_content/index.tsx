@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
+import { AssigneesBadge } from './assignees_badge';
 
 export const EXPAND_BUTTON_ARIAL_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.attacks.tableSection.expandButtonArialLabel',
@@ -27,6 +28,7 @@ export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
 export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
 export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
 export const ATTACK_STATUS_TEST_ID_SUFFIX = '-status' as const;
+export const ATTACK_ASSIGNEES_TEST_ID_SUFFIX = '-assignees' as const;
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface AttackGroupContentProps {
@@ -90,6 +92,14 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
                 >
                   <RuleStatus value={attack.alertWorkflowStatus} />
                 </EuiFlexItem>
+                {attack.assignees && attack.assignees.length > 0 && (
+                  <EuiFlexItem
+                    grow={false}
+                    data-test-subj={`${dataTestSubj}${ATTACK_ASSIGNEES_TEST_ID_SUFFIX}`}
+                  >
+                    <AssigneesBadge assignees={attack.assignees} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem
