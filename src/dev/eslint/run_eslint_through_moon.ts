@@ -41,21 +41,17 @@ const env = {
 } as Record<string, string>;
 
 run(async ({ log, flags }) => {
-  const moonCommand = IS_CI ? 'ci' : 'run';
-  const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
-  const fullArgs = [moonCommand, lintCommand];
+  const fullArgs = ['run', flags.fix ? ':eslint-fix' : ':eslint'];
 
   if (flags.updateCache) {
-    if (!IS_CI) {
-      fullArgs.push('-u');
-    } else {
-      // moon ci doesn't support -u, set it to 'write' if it's not set already
-      env.MOON_CACHE = env.MOON_CACHE ?? 'write';
-    }
+    fullArgs.push('-u');
   }
 
-  if (flags.affected && !IS_CI) {
+  if (flags.affected) {
     fullArgs.push('--affected');
+    if (!IS_CI) {
+      fullArgs.push('--remote');
+    }
   }
 
   log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
@@ -70,6 +66,7 @@ run(async ({ log, flags }) => {
   if (exitCode > 0) {
     log.error(`Linting errors found ❌`);
     process.exit(exitCode);
+  } else {
+    log.info('Linting successful ✅');
   }
-  log.info('Linting successful ✅');
 }, options);
