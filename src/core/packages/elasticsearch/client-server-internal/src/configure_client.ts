@@ -56,7 +56,7 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
-  instrumentCpsMetrics({ client });
+  instrumentCpsMetrics({ client, logger });
 
   return client;
 };
@@ -64,27 +64,15 @@ export const configureClient = (
 /**
  * Instruments CPS metrics with HTTP response status.
  *
- * Emits metrics after response returns so we can include http_status dimension.
+ * Emits a single unified metric after response returns so we can include http_status dimension.
+ * The metric includes bypass_reason when applicable, and projectId/region are automatically
+ * added to resource.attributes by the OpenTelemetry SDK.
  */
-function instrumentCpsMetrics({ client }: { client: Client }) {
+function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logger }) {
   const meter = metrics.getMeter('kibana.elasticsearch.cps');
-  const requestCountGlobalCounter = meter.createCounter('kibana.elasticsearch.cps.request.count', {
-    description: 'Total count of CPS-eligible Elasticsearch API requests (global aggregations)',
-    unit: '{request}',
-    valueType: ValueType.INT,
-  });
-
-  const requestsByProjectCounter = meter.createCounter(
-    'kibana.elasticsearch.cps.requests.by_project',
-    {
-      description: 'Count of CPS-routed requests per project (for per-project error rate)',
-      unit: '{request}',
-      valueType: ValueType.INT,
-    }
-  );
-
-  const adoptionCounter = meter.createCounter('kibana.elasticsearch.cps.adoption', {
-    description: 'Count of CPS-routed requests per project and region (for adoption tracking)',
+  const cpsRequestCounter = meter.createCounter('kibana.elasticsearch.cps.request.count', {
+    description:
+      'Unified count of Elasticsearch CPS requests with routing type, status, and bypass reason',
     unit: '{request}',
     valueType: ValueType.INT,
   });
@@ -95,30 +83,46 @@ function instrumentCpsMetrics({ client }: { client: Client }) {
     const routingContext = (event.meta.request.options?.context as any)?.cpsRoutingContext;
     if (!routingContext) return; // Not a CPS-instrumented request
 
-    const { routingType, cpsEnabled, apiName, projectId, region } = routingContext;
+    const { routingType, cpsEnabled, apiName, bypassReason, requestId, routePath, requestPath } =
+      routingContext;
     const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
 
-    // Metric 1: Global aggregations
-    requestCountGlobalCounter.add(1, {
+    const metricAttributes: Record<string, string | number | boolean> = {
       'kibana.cps.enabled': cpsEnabled,
       'kibana.cps.routing.type': routingType,
       'db.operation.name': apiName,
       'http.response.status_code': httpStatus,
-    });
+    };
 
-    // Metric 2: Per-project (only for CPS-routed requests)
-    if (routingType === 'injected' || routingType === 'explicit') {
-      requestsByProjectCounter.add(1, {
-        'kibana.cps.routing.target': projectId,
-        'http.response.status_code': httpStatus,
-      });
-
-      // Metric 3: Adoption (only for CPS-routed requests)
-      adoptionCounter.add(1, {
-        'kibana.cps.routing.target': projectId,
-        'kibana.cps.region': region,
-      });
+    if (routingType === 'none' && bypassReason) {
+      metricAttributes['kibana.cps.routing.bypass_reason'] = bypassReason;
     }
+
+    cpsRequestCounter.add(1, metricAttributes);
+
+    logger.debug('CPS request completed', {
+      event: {
+        kind: routingType === 'none' && bypassReason ? 'alert' : 'metric',
+        category: ['web', 'api'],
+      },
+      cps: {
+        routing_type: routingType,
+        api_name: apiName,
+        is_cps_enabled: cpsEnabled,
+        bypass_reason: bypassReason ?? null,
+        request_id: requestId,
+        route_path: routePath,
+        request_path: requestPath,
+      },
+      http: {
+        request: {
+          method: event.meta.request.params?.method ?? 'unknown',
+        },
+        response: {
+          status_code: httpStatus,
+        },
+      },
+    } as any);
   });
 }
 
