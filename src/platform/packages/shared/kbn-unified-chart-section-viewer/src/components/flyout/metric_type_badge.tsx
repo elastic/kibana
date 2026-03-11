@@ -10,10 +10,11 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { METRIC_TYPE_DESCRIPTIONS } from '../../common/constants';
 
 interface MetricTypeBadgeProps {
-  instrument: string;
+  instrument: MappingTimeSeriesMetricType;
 }
 
 export const MetricTypeBadge = ({ instrument }: MetricTypeBadgeProps) => {
