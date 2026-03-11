@@ -14,8 +14,10 @@ import { asError } from '../utils/as_error';
 import {
   AgentBuilderAuditAction,
   agentAuditEvent,
+  skillAuditEvent,
   toolAuditEvent,
   type AgentAuditEventParams,
+  type SkillAuditEventParams,
   type ToolAuditEventParams,
 } from './audit_events';
 import { getSerializedErrorMessage } from './helpers';
@@ -80,6 +82,36 @@ export class AuditLogService {
       agentAuditEvent({
         ...params,
         action: AgentBuilderAuditAction.AGENT_DELETE,
+      })
+    );
+  }
+
+  logSkillCreated(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_CREATE,
+      })
+    );
+  }
+
+  logSkillUpdated(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_UPDATE,
+      })
+    );
+  }
+
+  logSkillDeleted(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_DELETE,
       })
     );
   }
