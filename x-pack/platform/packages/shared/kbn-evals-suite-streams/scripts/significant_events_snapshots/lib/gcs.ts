@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { GCS_BUCKET, GCS_BUCKET_FOLDER, OTEL_DEMO_NAMESPACE } from './constants';
+import { GCS_BUCKET, OTEL_DEMO_NAMESPACE } from './constants';
 import { getSigeventsSnapshotFeaturesIndex } from '../../../src/data_generators/sigevents_features_index';
 
 export function generateGcsBasePath({
@@ -17,12 +17,8 @@ export function generateGcsBasePath({
   runId: string;
   appNamespace?: string;
 }): string {
-  if (appNamespace) {
-    return `${GCS_BUCKET_FOLDER}/${appNamespace}/${runId}`;
-  }
-
-  // Defaults to the OTel Demo namespace when a custom app ID is not provided
-  return `${GCS_BUCKET_FOLDER}/${OTEL_DEMO_NAMESPACE}/${runId}`;
+  const dataset = appNamespace ?? OTEL_DEMO_NAMESPACE;
+  return `${runId}/${dataset}`;
 }
 
 export function generateGcsRepoName({ runId }: { runId: string }): string {

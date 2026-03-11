@@ -59,6 +59,7 @@ export {
   isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isPluginNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
   isWorkflowAbortedError,
@@ -71,6 +72,7 @@ export {
   createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createPluginNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
   createWorkflowAbortedError,
@@ -81,6 +83,7 @@ export {
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
+  type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderWorkflowAbortedError,
@@ -97,6 +100,7 @@ export { EsResourceType } from './base/resources';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
+  AgentVisibility,
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
@@ -176,11 +180,20 @@ export {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
+  type SkillSelection,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
+  maxToolsPerSkill,
 } from './skills';
 export * from './telemetry';
 export {
@@ -188,3 +201,14 @@ export {
   type VersionedAttachment,
   type UpdateOriginResponse,
 } from './attachments';
+export {
+  type PluginManifestAuthor,
+  type PluginManifest,
+  type ParsedSkillMeta,
+  type ParsedSkillFile,
+  type ParsedSkillReferencedFile,
+  type UnmanagedPluginAssets,
+  type ParsedPluginArchive,
+  type PluginManifestMetadata,
+  type PluginDefinition,
+} from './plugins';
