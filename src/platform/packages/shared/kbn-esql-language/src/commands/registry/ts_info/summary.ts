@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getPreviousVersionType } from './previous_version_type';
-export { getVersions } from './versions';
+import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLCommandSummary } from '../types';
+import { TS_INFO_FIELDS } from './columns_after';
+
+export const summary = (_command: ESQLCommand): ESQLCommandSummary => {
+  return { newColumns: new Set(TS_INFO_FIELDS.map(({ name }) => name)) };
+};
