@@ -7,8 +7,8 @@
 
 import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
+import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
+import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
 import type {
@@ -113,6 +113,47 @@ export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
  */
 export const DEFAULT_DATE_HISTOGRAM_INTERVAL = '1h';
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
+
+export const AUTO_INTERVAL = 'auto';
+
+export const hasDateRange = (dateRange: DateRange | undefined) => {
+  return dateRange?.fromDate != null && dateRange?.toDate != null;
+};
+
+export function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRestrictions>) {
+  if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
+    return;
+  }
+
+  return (
+    aggregationRestrictions.date_histogram.calendar_interval ||
+    aggregationRestrictions.date_histogram.fixed_interval
+  );
+}
+
+export function getTimeZoneAndInterval(
+  column: DateHistogramIndexPatternColumn,
+  indexPattern: IndexPattern
+) {
+  const usedField = indexPattern.getFieldByName(column.sourceField);
+
+  if (
+    usedField &&
+    usedField.aggregationRestrictions &&
+    usedField.aggregationRestrictions.date_histogram
+  ) {
+    return {
+      interval: restrictedInterval(usedField.aggregationRestrictions) ?? AUTO_INTERVAL,
+      timeZone: usedField.aggregationRestrictions.date_histogram.time_zone,
+      usedField,
+    };
+  }
+  return {
+    usedField: undefined,
+    timeZone: undefined,
+    interval: column.params?.interval ?? AUTO_INTERVAL,
+  };
+}
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -324,29 +365,26 @@ export function generateEsqlQuery(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
-    let interval: number | undefined;
+    let intervalInMs: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-      const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-      const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
+      const { interval } = getTimeZoneAndInterval(col, indexPattern);
 
-      if (dateHistogramColumn.params?.interval === 'auto') {
-        // Same rule as date_histogram toESQL: use raw dateRange so both fall back to 1h when input is missing.
-        const hasDateRange = dateRange?.fromDate != null && dateRange?.toDate != null;
-        if (!hasDateRange) {
-          interval = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
-        } else {
+      if (interval === AUTO_INTERVAL) {
+        if (hasDateRange(dateRange)) {
           const rangeDuration = moment.duration(
             new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime(),
             'ms'
           );
           const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
-          interval = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+          intervalInMs = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        } else {
+          // Fall back to default 1h when date range is missing
+          intervalInMs = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
         }
       } else {
-        const kibanaInterval =
-          dateHistogramColumn.params?.interval || DEFAULT_DATE_HISTOGRAM_INTERVAL;
-        const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-        interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
+        const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
+        const esInterval = convertIntervalToEsInterval(cleanInterval(interval));
+        intervalInMs = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }
     }
 
@@ -408,7 +446,7 @@ export function generateEsqlQuery(
       col,
       colId,
       format,
-      interval,
+      interval: intervalInMs,
       layer,
       indexPattern,
       uiSettings,
