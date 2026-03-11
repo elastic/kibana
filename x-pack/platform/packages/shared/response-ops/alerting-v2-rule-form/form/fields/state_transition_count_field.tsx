@@ -12,23 +12,43 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
-const DEFAULT_PENDING_COUNT = 2;
+const DEFAULT_COUNT = 2;
+
+export type StateTransitionCountVariant = 'pending' | 'recovering';
 
 interface StateTransitionCountFieldProps {
   prependLabel?: string;
+  /** Which state transition field to bind to. Defaults to 'pending'. */
+  variant?: StateTransitionCountVariant;
 }
+
+const FIELD_NAMES: Record<
+  StateTransitionCountVariant,
+  'stateTransition.pendingCount' | 'stateTransition.recoveringCount'
+> = {
+  pending: 'stateTransition.pendingCount',
+  recovering: 'stateTransition.recoveringCount',
+};
+
+const TEST_SUBJS: Record<StateTransitionCountVariant, string> = {
+  pending: 'stateTransitionCountInput',
+  recovering: 'recoveryTransitionCountInput',
+};
 
 export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps> = ({
   prependLabel,
+  variant = 'pending',
 }) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
+  const fieldName = FIELD_NAMES[variant];
+  const testSubj = TEST_SUBJS[variant];
 
   useEffect(() => {
-    const currentCount = getValues('stateTransition.pendingCount');
+    const currentCount = getValues(fieldName);
     if (currentCount == null) {
-      setValue('stateTransition.pendingCount', DEFAULT_PENDING_COUNT);
+      setValue(fieldName, DEFAULT_COUNT);
     }
-  }, [getValues, setValue]);
+  }, [getValues, setValue, fieldName]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (INVALID_NUMBER_KEYS.includes(e.key)) {
@@ -38,7 +58,7 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
 
   return (
     <Controller
-      name="stateTransition.pendingCount"
+      name={fieldName}
       control={control}
       rules={{
         required: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countRequiredError', {
@@ -57,7 +77,7 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
         <EuiFieldNumber
-          value={value ?? DEFAULT_PENDING_COUNT}
+          value={value ?? DEFAULT_COUNT}
           onChange={(e) => {
             const parsedValue = parsePositiveIntegerInput(e.target.value);
             if (parsedValue != null && parsedValue <= MAX_CONSECUTIVE_BREACHES) {
@@ -69,7 +89,7 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
           max={MAX_CONSECUTIVE_BREACHES}
           step={1}
           isInvalid={!!error}
-          data-test-subj="stateTransitionCountInput"
+          data-test-subj={testSubj}
           inputRef={ref}
           fullWidth
           prepend={prependLabel ? [prependLabel] : undefined}

@@ -91,4 +91,56 @@ describe('StateTransitionTimeframeField', () => {
     expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toHaveValue(15);
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toHaveValue('m');
   });
+
+  describe('variant="recovering"', () => {
+    it('renders with the recovering test subjects', () => {
+      render(<StateTransitionTimeframeField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toBeInTheDocument();
+      expect(screen.getByTestId('recoveryTransitionTimeframeUnitInput')).toBeInTheDocument();
+    });
+
+    it('defaults recovering timeframe to 2 minutes', () => {
+      render(<StateTransitionTimeframeField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      const numberInput = screen.getByTestId(
+        'recoveryTransitionTimeframeNumberInput'
+      ) as HTMLInputElement;
+      expect(numberInput.value).toBe('2');
+
+      const unitSelect = screen.getByTestId('recoveryTransitionTimeframeUnitInput');
+      expect(unitSelect).toHaveValue('m');
+    });
+
+    it('renders with pre-filled recovering timeframe from form state', () => {
+      render(<StateTransitionTimeframeField variant="recovering" />, {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransition: {
+            recoveringTimeframe: '30m',
+          },
+        }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionTimeframeNumberInput')).toHaveValue(30);
+      expect(screen.getByTestId('recoveryTransitionTimeframeUnitInput')).toHaveValue('m');
+    });
+
+    it('updates recovering timeframe unit when changed', () => {
+      render(<StateTransitionTimeframeField variant="recovering" />, {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransition: { recoveringTimeframe: '5m' },
+        }),
+      });
+
+      const unitSelect = screen.getByTestId('recoveryTransitionTimeframeUnitInput');
+      fireEvent.change(unitSelect, { target: { value: 'h' } });
+      expect(unitSelect).toHaveValue('h');
+    });
+  });
 });

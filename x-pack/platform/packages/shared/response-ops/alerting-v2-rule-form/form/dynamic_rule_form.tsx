@@ -11,13 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from './types';
 import { RuleForm } from './rule_form';
-import type { RuleFormServices } from './contexts';
+import type { RuleFormServices, RuleFormLayout } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface DynamicRuleFormProps {
   /** The query that drives form values - changes will sync to form state */
   query: string;
   services: RuleFormServices;
+  /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */
+  layout?: RuleFormLayout;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted, the form uses `useCreateRule` internally.
@@ -53,6 +55,7 @@ export interface DynamicRuleFormProps {
 export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   query,
   services,
+  layout,
   onSubmit,
   onSuccess,
   includeYaml = false,
@@ -90,6 +93,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
       />
       <RuleForm
         services={services}
+        layout={layout}
         onSubmit={onSubmit}
         onSuccess={onSuccess}
         includeQueryEditor={false}
