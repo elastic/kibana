@@ -19,7 +19,7 @@ export const BulkOperations = ({
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
-  const { isUnhealthy: hasMissingIntegrations, resetMonitors, isResetting } =
+  const { isUnhealthy, resetMonitors, isResetting } =
     useMonitorIntegrationHealth();
 
   const onDeleted = () => {
@@ -27,11 +27,11 @@ export const BulkOperations = ({
   };
 
   const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
-  const missingIds = selectedConfigIds.filter((id) => hasMissingIntegrations(id));
+  const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
 
   const onReset = useCallback(async () => {
-    await resetMonitors(missingIds);
-  }, [resetMonitors, missingIds]);
+    await resetMonitors(unhealthyConfigIds);
+  }, [resetMonitors, unhealthyConfigIds]);
 
   if (selectedItems.length === 0) {
     return null;
@@ -39,7 +39,7 @@ export const BulkOperations = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
-      {missingIds.length > 0 && (
+      {unhealthyConfigIds.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="syntheticsBulkResetIntegrationButton"
@@ -52,7 +52,7 @@ export const BulkOperations = ({
             {i18n.translate('xpack.synthetics.bulkOperations.resetIntegration', {
               defaultMessage:
                 'Reset {count, number} {count, plural, one {monitor} other {monitors}}',
-              values: { count: missingIds.length },
+              values: { count: unhealthyConfigIds.length },
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
