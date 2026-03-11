@@ -127,9 +127,7 @@ export const getPreloadedState = ({
   const isDashboardListingOrigin =
     embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
     Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
-  const isVisualizeListingOrigin =
-    embeddableEditorIncomingState?.originatingApp === 'visualize' &&
-    !embeddableEditorIncomingState?.originatingPath;
+  const isVisualizeListingOrigin = embeddableEditorIncomingState?.originatingApp === 'visualize';
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
