@@ -36,6 +36,7 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV7,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1439,6 +1440,10 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
+          },
         },
       },
       migrations: {
