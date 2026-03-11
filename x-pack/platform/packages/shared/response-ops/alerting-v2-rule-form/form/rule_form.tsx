@@ -34,7 +34,7 @@ import { NameField } from './fields/name_field';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
-import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
+import { type RuleFormServices } from './contexts';
 
 export type { RuleFormServices } from './contexts';
 
