@@ -99,8 +99,9 @@ export const getScheduledActionResultsRoute = (
             )
           );
 
-          const aggs = res.rawResponse
-            ?.aggregations as ScheduledActionResultsAggregations | undefined;
+          const aggs = res.rawResponse?.aggregations as
+            | ScheduledActionResultsAggregations
+            | undefined;
           const responsesBySchedule = aggs?.aggs?.responses_by_schedule;
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
           const responsesBuckets = responsesBySchedule?.responses?.buckets;
