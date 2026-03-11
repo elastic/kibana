@@ -275,6 +275,9 @@ export const getNavigationTreeDefinition = ({
                     {
                       link: 'management:inference_endpoints',
                     },
+                    {
+                      link: 'management:model_settings',
+                    },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
