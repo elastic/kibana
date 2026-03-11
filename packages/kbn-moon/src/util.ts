@@ -16,8 +16,6 @@ import _ from 'lodash';
 
 import jsYaml from 'js-yaml';
 
-import type { Package } from '@kbn/repo-packages';
-
 const getKibanaDirCached = (() => {
   let kibanaDir: string | undefined;
   return (): string => {
@@ -61,7 +59,10 @@ export function resolveFirstExisting(dir: string, files: string[]) {
   return files.find((f) => existsSync(path.resolve(dir, f)));
 }
 
-export function filterPackages(allPackages: Package[], filter: string[]): Package[] {
+export function filterPackages<T extends { name: string; normalizedRepoRelativeDir: string }>(
+  allPackages: T[],
+  filter: string[]
+): T[] {
   return allPackages.filter((pkg) => {
     return filter.some(
       (filterAllow) =>

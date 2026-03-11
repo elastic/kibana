@@ -15,7 +15,10 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { getAffectedPackages, filterFilesByAffectedPackages } from '../../../packages/kbn-moon';
+import {
+  getAffectedPackages,
+  filterFilesByAffectedPackages,
+} from '../../../packages/kbn-moon/src/affected';
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
