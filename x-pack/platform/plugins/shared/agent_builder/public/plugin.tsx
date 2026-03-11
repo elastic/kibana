@@ -185,7 +185,7 @@ export class AgentBuilderPlugin
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
-        return { flyoutRef: this.activeSidebarRef };
+        return { chatRef: this.activeSidebarRef };
       }
 
       // Set runtime context before opening
@@ -213,7 +213,7 @@ export class AgentBuilderPlugin
       };
 
       this.activeSidebarRef = sidebarRef;
-      return { flyoutRef: sidebarRef };
+      return { chatRef: sidebarRef };
     };
 
     const agentBuilderService: AgentBuilderPluginStart = {
@@ -226,26 +226,26 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.addAttachment(attachment);
         }
       },
-      setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
+      setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
         // If there is already an active sidebar, update its props
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.updateProps(config);
-          return { flyoutRef: this.activeSidebarRef };
+          return { chatRef: this.activeSidebarRef };
         }
       },
-      clearConversationFlyoutActiveConfig: () => {
+      clearChatConfig: () => {
         this.conversationActiveConfig = {};
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           // Removes stale browserApiTools from the sidebar
           this.sidebarCallbacks.resetBrowserApiTools();
         }
       },
-      openConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      openChat: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
-      toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      toggleChat: (options?: OpenConversationSidebarOptions) => {
         if (this.activeSidebarRef) {
           const sidebarRef = this.activeSidebarRef;
           // Be defensive: clear local references immediately in case the sidebar doesn't
