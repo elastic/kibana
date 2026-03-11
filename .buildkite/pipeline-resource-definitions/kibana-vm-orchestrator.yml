@@ -15,7 +15,7 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / vm orchestrator
+      name: kibana / VM build orchestrator
       description: Build CI agent VM images for Kibana
     spec:
       env:
