@@ -87,13 +87,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       riskEntity: entityType,
       useEntityStoreV2,
     });
-  }, [
-    entityData?.name,
-    entityData?.risk?.calculated_level,
-    entityType,
-    spaceId,
-    useEntityStoreV2,
-  ]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId, useEntityStoreV2]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(

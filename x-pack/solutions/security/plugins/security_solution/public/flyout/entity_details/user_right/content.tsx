@@ -80,20 +80,22 @@ export const UserPanelContent = ({
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
       )}
-      {!skipRiskAndCriticality && riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            entityType={EntityType.user}
-            useEntityStoreV2={useEntityStoreV2}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {!skipRiskAndCriticality &&
+        riskScoreState.hasEngineBeenInstalled &&
+        riskScoreState.data?.length !== 0 && (
+          <>
+            <FlyoutRiskSummary
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              entityType={EntityType.user}
+              useEntityStoreV2={useEntityStoreV2}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       {!skipRiskAndCriticality && (
         <AssetCriticalityAccordion
           entity={{ identifiers: entityIdentifiers, name: userName, type: EntityType.user }}
