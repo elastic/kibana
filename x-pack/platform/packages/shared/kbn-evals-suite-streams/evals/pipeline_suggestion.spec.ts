@@ -618,8 +618,9 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               example.input.stream_name = 'logs.otel';
             } else {
               // INDEX MODE: Create worker-specific stream to avoid parallel collisions
-              // Use logs.otel.<workerPrefix>.<system> pattern (e.g., logs.otel.w0.apache)
-              const workerStreamName = `logs.otel.${workerStreamPrefix}.${example.input.system.toLowerCase()}`;
+              // Use logs.otel.<workerPrefix>_<system> pattern (e.g., logs.otel.w0_apache)
+              // Note: Using underscore, not dot, because the child must be a direct child of logs.otel
+              const workerStreamName = `logs.otel.${workerStreamPrefix}_${example.input.system.toLowerCase()}`;
               example.input.stream_name = workerStreamName;
 
               // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
