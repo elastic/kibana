@@ -18,25 +18,49 @@ import {
 } from '../utils';
 import type { FormValues } from '../types';
 
+export type StateTransitionTimeframeVariant = 'pending' | 'recovering';
+
 interface StateTransitionTimeframeFieldProps {
   numberPrependLabel?: string;
+  /** Which state transition field to bind to. Defaults to 'pending'. */
+  variant?: StateTransitionTimeframeVariant;
 }
+
+const FIELD_NAMES: Record<
+  StateTransitionTimeframeVariant,
+  'stateTransition.pendingTimeframe' | 'stateTransition.recoveringTimeframe'
+> = {
+  pending: 'stateTransition.pendingTimeframe',
+  recovering: 'stateTransition.recoveringTimeframe',
+};
+
+const NUMBER_TEST_SUBJS: Record<StateTransitionTimeframeVariant, string> = {
+  pending: 'stateTransitionTimeframeNumberInput',
+  recovering: 'recoveryTransitionTimeframeNumberInput',
+};
+
+const UNIT_TEST_SUBJS: Record<StateTransitionTimeframeVariant, string> = {
+  pending: 'stateTransitionTimeframeUnitInput',
+  recovering: 'recoveryTransitionTimeframeUnitInput',
+};
 
 export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
   numberPrependLabel,
+  variant = 'pending',
 }) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
+  const fieldName = FIELD_NAMES[variant];
 
   useEffect(() => {
-    const currentTimeframe = getValues('stateTransition.pendingTimeframe');
+    const currentTimeframe = getValues(fieldName);
     if (currentTimeframe == null) {
-      setValue('stateTransition.pendingTimeframe', '2m');
+      setValue(fieldName, '2m');
     }
-  }, [getValues, setValue]);
+  }, [getValues, setValue, fieldName]);
 
   return (
     <Controller
-      name="stateTransition.pendingTimeframe"
+      name={fieldName}
       control={control}
       rules={{
         required: i18n.translate(
@@ -53,6 +77,8 @@ export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFie
           errors={error?.message}
           inputRef={ref}
           numberPrependLabel={numberPrependLabel}
+          numberTestSubj={NUMBER_TEST_SUBJS[variant]}
+          unitTestSubj={UNIT_TEST_SUBJS[variant]}
         />
       )}
     />
@@ -65,6 +91,8 @@ interface StateTransitionTimeframeInputProps {
   errors?: string;
   inputRef?: React.Ref<HTMLInputElement>;
   numberPrependLabel?: string;
+  numberTestSubj?: string;
+  unitTestSubj?: string;
 }
 
 const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps> = ({
@@ -73,6 +101,8 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   errors,
   inputRef,
   numberPrependLabel,
+  numberTestSubj = 'stateTransitionTimeframeNumberInput',
+  unitTestSubj = 'stateTransitionTimeframeUnitInput',
 }) => {
   const intervalNumber = useMemo(() => getDurationNumberInItsUnit(value || '2m'), [value]);
 
@@ -112,7 +142,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
           onKeyDown={onKeyDown}
           min={1}
           step={1}
-          data-test-subj="stateTransitionTimeframeNumberInput"
+          data-test-subj={numberTestSubj}
           inputRef={inputRef}
           prepend={numberPrependLabel ? [numberPrependLabel] : undefined}
         />
@@ -123,7 +153,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
           value={intervalUnit}
           options={getTimeOptions(intervalNumber)}
           onChange={onIntervalUnitChange}
-          data-test-subj="stateTransitionTimeframeUnitInput"
+          data-test-subj={unitTestSubj}
           aria-label={i18n.translate(
             'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitLabel',
             { defaultMessage: 'Time unit' }

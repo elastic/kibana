@@ -9,13 +9,15 @@ import React, { useMemo } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
 import { RuleForm } from './rule_form';
-import type { RuleFormServices } from './contexts';
+import type { RuleFormServices, RuleFormLayout } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface StandaloneRuleFormProps {
   /** Initial query for the rule */
   query: string;
   services: RuleFormServices;
+  /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */
+  layout?: RuleFormLayout;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted (and `includeSubmission` is true), the form uses `useCreateRule` internally.
@@ -60,6 +62,7 @@ export interface StandaloneRuleFormProps {
 export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   query,
   services,
+  layout,
   onSubmit,
   onSuccess,
   includeYaml = false,
@@ -113,6 +116,7 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
     <FormProvider {...methods}>
       <RuleForm
         services={services}
+        layout={layout}
         onSubmit={onSubmit}
         onSuccess={onSuccess}
         includeYaml={includeYaml}

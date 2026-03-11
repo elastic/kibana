@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useRef, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
+import {
+  RuleFormProvider,
+  useRuleFormServices,
+  useRuleFormMeta,
+  type RuleFormServices,
+  type RuleFormLayout,
+} from './contexts';
 import { useRuleFormServices } from './contexts';
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
+import { RulePreviewPanel } from './fields/rule_preview_panel';
+import { NameField } from './fields/name_field';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
@@ -24,6 +40,8 @@ export type { RuleFormServices } from './contexts';
 
 export interface RuleFormProps {
   services: RuleFormServices;
+  /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */
+  layout?: RuleFormLayout;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted and `includeSubmission` is true, the form uses `useCreateRule` internally.
@@ -70,19 +88,8 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
 
   return (
     <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            type="submit"
-            form={RULE_FORM_ID}
-            isLoading={isSubmitting}
-            fill
-            data-test-subj="ruleV2FormSubmitButton"
-          >
-            {submitLabel ?? defaultSubmitLabel}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiHorizontalRule />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {onCancel && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -94,6 +101,18 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            type="submit"
+            form={RULE_FORM_ID}
+            isLoading={isSubmitting}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="ruleV2FormSubmitButton"
+          >
+            {submitLabel ?? defaultSubmitLabel}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
@@ -122,6 +141,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
 }) => {
   const { reset } = useFormContext<FormValues>();
   const services = useRuleFormServices();
+  const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
 
@@ -130,19 +150,27 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
   const { createRule, isLoading: isCreating } = useCreateRule({
     http,
     notifications,
-    onSuccess,
   });
 
   const { updateRule, isLoading: isUpdating } = useUpdateRule({
     http,
     notifications,
     ruleId: ruleId ?? '',
-    onSuccess,
   });
+
+  // Keep a stable ref so the internalSubmit callback doesn't re-create on every render
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   // Resolve the effective submit handler: external callback takes precedence,
   // otherwise use updateRule for edits (ruleId present) or createRule for new rules.
-  const internalSubmit = ruleId ? updateRule : createRule;
+  const internalSubmit = useCallback(
+    (values: FormValues) => {
+      const mutate = ruleId ? updateRule : createRule;
+      mutate(values, { onSuccess: onSuccessRef.current });
+    },
+    [ruleId, createRule, updateRule]
+  );
   const onSubmit = externalOnSubmit ?? internalSubmit;
   const isSubmitting = externalIsSubmitting || isCreating || isUpdating;
 
@@ -165,11 +193,22 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
 
   const isYamlMode = editMode === 'yaml';
 
-  return (
+  const formContent = (
     <>
-      {includeYaml && (
-        <>
-          <EuiFlexGroup justifyContent="flexEnd">
+      {isYamlMode ? (
+        includeYaml && (
+          <EditModeToggle
+            editMode={editMode}
+            onChange={handleModeChange}
+            disabled={isDisabled || isSubmitting}
+          />
+        )
+      ) : (
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem>
+            <NameField />
+          </EuiFlexItem>
+          {includeYaml && (
             <EuiFlexItem grow={false}>
               <EditModeToggle
                 editMode={editMode}
@@ -177,10 +216,10 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
                 disabled={isDisabled || isSubmitting}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
+          )}
+        </EuiFlexGroup>
       )}
+      <EuiSpacer size="m" />
 
       {isYamlMode && includeYaml ? (
         <YamlRuleForm
@@ -203,6 +242,25 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
       )}
     </>
   );
+
+  if (layout === 'page') {
+    return (
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        <EuiFlexItem grow={1}>{formContent}</EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <RulePreviewPanel />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  // Flyout layout: form with nested flyout preview
+  return (
+    <>
+      {formContent}
+      <RulePreviewPanel />
+    </>
+  );
 };
 
 /**
@@ -217,9 +275,9 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
  * calls `onSuccess` after a successful API save.
  *
  * Includes its own QueryClientProvider for react-query hooks used by field components.
- * Services are provided via RuleFormServicesProvider context, eliminating prop drilling.
+ * Services and layout metadata are provided via RuleFormProvider context, eliminating prop drilling.
  */
-export const RuleForm: React.FC<RuleFormProps> = (props) => {
+export const RuleForm: React.FC<RuleFormProps> = ({ layout = 'page', ...props }) => {
   const queryClient = useMemo(
     () =>
       new QueryClient({
@@ -233,11 +291,13 @@ export const RuleForm: React.FC<RuleFormProps> = (props) => {
     []
   );
 
+  const meta = useMemo(() => ({ layout }), [layout]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleFormServicesProvider services={props.services}>
+      <RuleFormProvider services={props.services} meta={meta}>
         <RuleFormContent {...props} />
-      </RuleFormServicesProvider>
+      </RuleFormProvider>
     </QueryClientProvider>
   );
 };
