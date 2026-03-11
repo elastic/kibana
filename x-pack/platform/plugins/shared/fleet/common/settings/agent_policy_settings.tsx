@@ -271,6 +271,25 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     ],
   },
   {
+    name: 'agent.features.disable_policy_change_acks.enabled',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksTitle', {
+      defaultMessage: 'Disable policy change acknowledgments',
+    }),
+    description: () =>
+      i18n.translate(
+        'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksDescription',
+        {
+          defaultMessage:
+            'Disable policy change acknowlegements from the Elastic Agent to Fleet. Policy changes will be communicated through regular checkins.',
+        }
+      ),
+    api_field: {
+      name: 'agent_features_disable_policy_change_acks_enabled',
+    },
+    schema: z.boolean().default(false),
+    example_value: false,
+  },
+  {
     name: 'agent.internal',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
       defaultMessage: 'Advanced internal YAML settings',
