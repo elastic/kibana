@@ -3,7 +3,7 @@ navigation_title: "Microsoft Teams"
 type: reference
 description: "Use the Microsoft Teams connector to search messages and browse teams, channels, and chats using the Microsoft Graph API."
 applies_to:
-  stack: preview 9.3
+  stack: preview 9.4
   serverless: preview
 ---
 
