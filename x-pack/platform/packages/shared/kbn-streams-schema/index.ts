@@ -15,6 +15,7 @@ export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
   getStreamNameFromViewName,
+  getWiredStreamViewQuery,
 } from './src/models/query/view_name';
 
 export {
@@ -29,7 +30,7 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
@@ -53,6 +54,7 @@ export {
   extractWhereExpression,
   getFromSources,
   normalizeEsqlQuery,
+  replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
 
@@ -64,7 +66,7 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
 
 export {
   isChildOf,
@@ -88,9 +90,15 @@ export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
@@ -231,3 +239,5 @@ export {
 } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';

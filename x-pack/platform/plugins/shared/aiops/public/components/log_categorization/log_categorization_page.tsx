@@ -64,6 +64,7 @@ export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -215,6 +216,7 @@ export const LogCategorizationPage: FC = () => {
     };
 
     const runtimeMappings = dataView.getRuntimeMappings();
+    const projectRouting = cps?.cpsManager?.getProjectRouting();
 
     try {
       const [validationResult, categorizationResult] = await Promise.all([
@@ -225,6 +227,7 @@ export const LogCategorizationPage: FC = () => {
           timeRange,
           searchQuery,
           runtimeMappings,
+          projectRouting,
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -237,6 +240,7 @@ export const LogCategorizationPage: FC = () => {
           timeRange,
           searchQuery,
           runtimeMappings,
+          projectRouting,
           intervalMs
         ),
       ]);
@@ -258,15 +262,16 @@ export const LogCategorizationPage: FC = () => {
   }, [
     dataView,
     selectedField,
-    cancelRequest,
-    runValidateFieldRequest,
     earliest,
     latest,
+    cancelRequest,
+    cps,
+    runValidateFieldRequest,
     searchQuery,
+    embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
     toasts,
-    embeddingOrigin,
   ]);
 
   useEffect(() => {

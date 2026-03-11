@@ -31,6 +31,8 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { AutomaticImportService } from './services';
 
 export const PLUGIN_ID = 'automaticImportV2' as const;
@@ -57,6 +59,7 @@ export interface AutomaticImportV2PluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  fieldsMetadata: FieldsMetadataServerStart;
 }
 
 export interface AutomaticImportV2PluginApiRequestHandlerContext {
@@ -70,6 +73,7 @@ export interface AutomaticImportV2PluginApiRequestHandlerContext {
   getSpaceId: () => string;
   automaticImportService: AutomaticImportService;
   esClient: ElasticsearchClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
 }
 
 /**

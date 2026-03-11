@@ -7,7 +7,6 @@
 
 import type { MouseEventHandler, FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Popover } from '../popover';
@@ -63,8 +62,4 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       }
     </Popover>
   );
-};
-
-ArgAddPopover.propTypes = {
-  options: PropTypes.array.isRequired,
 };
