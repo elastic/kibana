@@ -6,6 +6,7 @@
  */
 
 import type { EuiBadgeProps } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export enum AgentVisibility {
   Private = 'private',
@@ -13,21 +14,11 @@ export enum AgentVisibility {
   Shared = 'shared',
 }
 
-/**
- * Icon type used in the UI for each visibility level.
- * Use with EuiIcon type prop.
- */
-export enum AgentVisibilityIcon {
-  Globe = 'globe',
-  Users = 'users',
-  Lock = 'lock',
-}
-
 /** Map from agent visibility to the icon used in the UI. */
-export const VISIBILITY_ICON: Record<AgentVisibility, AgentVisibilityIcon> = {
-  [AgentVisibility.Public]: AgentVisibilityIcon.Globe,
-  [AgentVisibility.Shared]: AgentVisibilityIcon.Users,
-  [AgentVisibility.Private]: AgentVisibilityIcon.Lock,
+export const VISIBILITY_ICON: Record<AgentVisibility, EuiIconType> = {
+  [AgentVisibility.Public]: 'globe',
+  [AgentVisibility.Shared]: 'users',
+  [AgentVisibility.Private]: 'lock',
 };
 
 export const VISIBILITY_BADGE_COLOR: Record<AgentVisibility, EuiBadgeProps['color']> = {

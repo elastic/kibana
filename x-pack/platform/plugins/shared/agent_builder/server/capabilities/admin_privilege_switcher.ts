@@ -7,10 +7,10 @@
 
 import type { CapabilitiesSwitcher, CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { hasAgentVisibilityAccessOverrideFromRequest } from '../services/utils';
+import { isAdminFromRequest } from '../services/utils';
 
 /**
- * Creates a capability switcher that sets `agentBuilder.hasAgentVisibilityAccessOverride` based on
+ * Creates a capability switcher that sets `agentBuilder.isAdmin` based on
  * an unregistered ES application privilege (only wildcard roles get true).
  *
  * When does this switcher run?
@@ -20,7 +20,7 @@ import { hasAgentVisibilityAccessOverrideFromRequest } from '../services/utils';
  *   coreStart.capabilities.resolveCapabilities(request, ...). When they request a narrow
  *   path (e.g. uptime.*), only switchers for that path run;
  */
-export const createVisibilityAccessOverrideSwitcher = (
+export const createAdminPrivilegeSwitcher = (
   getStartServices: CoreSetup['getStartServices'],
   logger: Logger
 ): CapabilitiesSwitcher => {
@@ -32,24 +32,24 @@ export const createVisibilityAccessOverrideSwitcher = (
     try {
       const [coreStart] = await getStartServices();
       const scopedClient = coreStart.elasticsearch.client.asScoped(request);
-      const hasAgentVisibilityAccessOverride = await hasAgentVisibilityAccessOverrideFromRequest({
+      const isAdmin = await isAdminFromRequest({
         esClient: scopedClient.asCurrentUser,
       });
 
-      if (hasAgentVisibilityAccessOverride) {
+      if (isAdmin) {
         return {
           agentBuilder: {
-            hasAgentVisibilityAccessOverride: true,
+            isAdmin: true,
           },
         };
       }
 
       return {};
     } catch (e) {
-      logger.debug(`Visibility access override capability switcher failed`, { error: e });
+      logger.debug(`Admin privilege capability switcher failed`, { error: e });
       return {
         agentBuilder: {
-          hasAgentVisibilityAccessOverride: false,
+          isAdmin: false,
         },
       };
     }

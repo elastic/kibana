@@ -69,12 +69,12 @@ describe('isAgentOwner', () => {
 });
 
 describe('canChangeAgentVisibility', () => {
-  test('returns true when hasAgentVisibilityAccessOverride is true', () => {
+  test('returns true when isAdmin is true', () => {
     expect(
       canChangeAgentVisibility({
         owner,
         currentUser: otherUser,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(true);
   });
@@ -84,7 +84,7 @@ describe('canChangeAgentVisibility', () => {
       canChangeAgentVisibility({
         owner,
         currentUser: otherUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -94,7 +94,7 @@ describe('canChangeAgentVisibility', () => {
       canChangeAgentVisibility({
         owner,
         currentUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -106,7 +106,7 @@ describe('canChangeAgentVisibility', () => {
       canChangeAgentVisibility({
         owner: ownerByUsername,
         currentUser: userByUsername,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -117,7 +117,7 @@ describe('canChangeAgentVisibility', () => {
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -128,7 +128,7 @@ describe('canChangeAgentVisibility', () => {
         agentId: agentBuilderDefaultAgentId,
         owner,
         currentUser: otherUser,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(false);
   });
@@ -138,15 +138,15 @@ describe('hasAgentReadAccess', () => {
   const baseArgs = {
     owner,
     currentUser: otherUser,
-    hasAgentVisibilityAccessOverride: false,
+    isAdmin: false,
   };
 
-  test('returns true when hasAgentVisibilityAccessOverride is true', () => {
+  test('returns true when isAdmin is true', () => {
     expect(
       hasAgentReadAccess({
         ...baseArgs,
         visibility: AgentVisibility.Private,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(true);
   });
@@ -193,7 +193,7 @@ describe('hasAgentReadAccess', () => {
       hasAgentReadAccess({
         owner,
         currentUser: otherUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -203,15 +203,15 @@ describe('hasAgentWriteAccess', () => {
   const baseArgs = {
     owner,
     currentUser: otherUser,
-    hasAgentVisibilityAccessOverride: false,
+    isAdmin: false,
   };
 
-  test('returns true when hasAgentVisibilityAccessOverride is true', () => {
+  test('returns true when isAdmin is true', () => {
     expect(
       hasAgentWriteAccess({
         ...baseArgs,
         visibility: AgentVisibility.Private,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(true);
   });
@@ -258,7 +258,7 @@ describe('hasAgentWriteAccess', () => {
       hasAgentWriteAccess({
         owner,
         currentUser: otherUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });

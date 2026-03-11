@@ -32,33 +32,31 @@ export const canChangeAgentVisibility = ({
   agentId,
   owner,
   currentUser,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   agentId?: string;
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean =>
   // The default agent is a very special cookie, and we can't change its visibility
-  agentId === agentBuilderDefaultAgentId
-    ? false
-    : hasAgentVisibilityAccessOverride || isAgentOwner({ owner, currentUser });
+  agentId === agentBuilderDefaultAgentId ? false : isAdmin || isAgentOwner({ owner, currentUser });
 
 /** Legacy agents without a visibility field are treated as Public. */
 export const hasAgentReadAccess = ({
   visibility,
   owner,
   currentUser,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   visibility?: AgentVisibility;
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean => {
   const effectiveVisibility = visibility ?? AgentVisibility.Public;
   return (
-    hasAgentVisibilityAccessOverride ||
+    isAdmin ||
     isAgentOwner({ owner, currentUser }) ||
     effectiveVisibility !== AgentVisibility.Private
   );
@@ -69,16 +67,16 @@ export const hasAgentWriteAccess = ({
   visibility,
   owner,
   currentUser,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   visibility?: AgentVisibility;
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean => {
   const effectiveVisibility = visibility ?? AgentVisibility.Public;
   return (
-    hasAgentVisibilityAccessOverride ||
+    isAdmin ||
     isAgentOwner({ owner, currentUser }) ||
     effectiveVisibility === AgentVisibility.Public
   );

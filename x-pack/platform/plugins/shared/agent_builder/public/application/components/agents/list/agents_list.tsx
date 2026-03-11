@@ -74,14 +74,14 @@ const canCurrentUserEditAgent = ({
   manageAgents,
   experimentalFeaturesEnabled,
   currentUser,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
   isCurrentUserLoading,
 }: {
   agent: AgentDefinition;
   manageAgents: boolean;
   experimentalFeaturesEnabled: boolean;
   currentUser?: UserIdAndName | null;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
   isCurrentUserLoading: boolean;
 }) => {
   if (agent.readonly || !manageAgents) {
@@ -101,7 +101,7 @@ const canCurrentUserEditAgent = ({
     visibility: agent.visibility,
     owner: agent.created_by,
     currentUser,
-    hasAgentVisibilityAccessOverride,
+    isAdmin,
   });
 };
 
@@ -110,7 +110,7 @@ export const AgentsList: React.FC = () => {
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
-  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const { manageAgents, isAdmin } = useUiPrivileges();
   const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser({
     enabled: isExperimentalFeaturesEnabled,
   });
@@ -130,7 +130,7 @@ export const AgentsList: React.FC = () => {
         manageAgents,
         experimentalFeaturesEnabled: isExperimentalFeaturesEnabled,
         currentUser,
-        hasAgentVisibilityAccessOverride,
+        isAdmin,
         isCurrentUserLoading,
       });
 
@@ -260,7 +260,7 @@ export const AgentsList: React.FC = () => {
     createAgentBuilderUrl,
     currentUser,
     deleteAgent,
-    hasAgentVisibilityAccessOverride,
+    isAdmin,
     isCurrentUserLoading,
     manageAgents,
     isExperimentalFeaturesEnabled,

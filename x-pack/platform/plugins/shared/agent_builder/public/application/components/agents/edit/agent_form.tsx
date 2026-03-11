@@ -90,7 +90,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const { manageAgents, isAdmin } = useUiPrivileges();
   const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
@@ -162,7 +162,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         visibility: agentState?.visibility,
         owner: agentState?.created_by,
         currentUser: currentUser ?? undefined,
-        hasAgentVisibilityAccessOverride,
+        isAdmin,
       });
 
   const formMethods = useForm<AgentFormData>({

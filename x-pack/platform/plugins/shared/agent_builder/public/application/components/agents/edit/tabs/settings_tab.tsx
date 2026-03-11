@@ -70,7 +70,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
   const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
-  const { hasAgentVisibilityAccessOverride } = useUiPrivileges();
+  const { isAdmin } = useUiPrivileges();
 
   const canChangeVisibility =
     isExperimentalFeaturesEnabled &&
@@ -79,7 +79,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         agentId,
         owner,
         currentUser,
-        hasAgentVisibilityAccessOverride,
+        isAdmin,
       }));
 
   const showAgentWorkflowsSection = useMemo(() => {

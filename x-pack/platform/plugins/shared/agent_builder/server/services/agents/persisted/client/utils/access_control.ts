@@ -23,33 +23,33 @@ const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
 export const hasReadAccess = ({
   source,
   user,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
     currentUser: user,
-    hasAgentVisibilityAccessOverride,
+    isAdmin,
   });
 
 export const hasWriteAccess = ({
   source,
   user,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   source: AgentProperties;
   user: UserIdAndName;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
     currentUser: user,
-    hasAgentVisibilityAccessOverride,
+    isAdmin,
   });
 
 export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => {
@@ -80,12 +80,12 @@ export const validateVisibilityUpdateAccess = ({
   source,
   update,
   user,
-  hasAgentVisibilityAccessOverride,
+  isAdmin,
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
   user: UserIdAndName;
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 }): boolean => {
   const isVisibilityChange =
     update.visibility !== undefined &&
@@ -97,7 +97,7 @@ export const validateVisibilityUpdateAccess = ({
       agentId: source.id,
       owner: sourceToOwner(source),
       currentUser: user,
-      hasAgentVisibilityAccessOverride,
+      isAdmin,
     })
   );
 };

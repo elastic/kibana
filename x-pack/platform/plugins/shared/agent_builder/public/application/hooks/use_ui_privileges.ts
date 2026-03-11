@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../../../common/features';
 
-/** UI-facing privileges for Agent Builder (feature-backed + phantom hasAgentVisibilityAccessOverride). */
+/** UI-facing privileges for Agent Builder (feature-backed + phantom isAdmin). */
 export type AgentBuilderUiPrivileges = {
   [K in keyof typeof uiPrivileges]: boolean;
 } & {
   /** Phantom capability: true only for wildcard roles (e.g. superuser). Resolved server-side. */
-  hasAgentVisibilityAccessOverride: boolean;
+  isAdmin: boolean;
 };
 
 export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
@@ -33,7 +33,7 @@ export const useUiPrivileges = (): AgentBuilderUiPrivileges => {
 
     return {
       ...fromFeature,
-      hasAgentVisibilityAccessOverride: !!capabilities.hasAgentVisibilityAccessOverride,
+      isAdmin: !!capabilities.isAdmin,
     };
   }, [application]);
 

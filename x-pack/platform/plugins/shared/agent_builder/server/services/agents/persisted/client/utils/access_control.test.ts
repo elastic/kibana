@@ -32,30 +32,22 @@ const ownerByUsernameOnly = { username: 'owner' };
 describe('hasReadAccess', () => {
   it('returns true for users with visibility access override regardless of visibility', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
-    expect(
-      hasReadAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: true })
-    ).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
   it('returns true for owner regardless of visibility', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
-    expect(
-      hasReadAccess({ source, user: ownerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasReadAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
   it('returns true for owner by username only', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
-    expect(
-      hasReadAccess({ source, user: ownerByUsernameOnly, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasReadAccess({ source, user: ownerByUsernameOnly, isAdmin: false })).toBe(true);
   });
 
   it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
-    expect(
-      hasReadAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
   it('returns true for non-owner when visibility is shared', () => {
@@ -64,9 +56,7 @@ describe('hasReadAccess', () => {
       visibility: AgentVisibility.Shared,
       created_by_name: 'owner',
     };
-    expect(
-      hasReadAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
   it('returns false for non-owner when visibility is private', () => {
@@ -75,32 +65,24 @@ describe('hasReadAccess', () => {
       visibility: AgentVisibility.Private,
       created_by_name: 'owner',
     };
-    expect(
-      hasReadAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(false);
+    expect(hasReadAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
   });
 });
 
 describe('hasWriteAccess', () => {
   it('returns true for users with visibility access override regardless of visibility', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
-    expect(
-      hasWriteAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: true })
-    ).toBe(true);
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: true })).toBe(true);
   });
 
   it('returns true for owner regardless of visibility', () => {
     const source = { ...baseSource, visibility: AgentVisibility.Private, created_by_name: 'owner' };
-    expect(
-      hasWriteAccess({ source, user: ownerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasWriteAccess({ source, user: ownerUser, isAdmin: false })).toBe(true);
   });
 
   it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
-    expect(
-      hasWriteAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(true);
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(true);
   });
 
   it('returns false for non-owner when visibility is shared', () => {
@@ -109,9 +91,7 @@ describe('hasWriteAccess', () => {
       visibility: AgentVisibility.Shared,
       created_by_name: 'owner',
     };
-    expect(
-      hasWriteAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(false);
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
   });
 
   it('returns false for non-owner when visibility is private', () => {
@@ -120,9 +100,7 @@ describe('hasWriteAccess', () => {
       visibility: AgentVisibility.Private,
       created_by_name: 'owner',
     };
-    expect(
-      hasWriteAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
-    ).toBe(false);
+    expect(hasWriteAccess({ source, user: nonOwnerUser, isAdmin: false })).toBe(false);
   });
 });
 
@@ -163,7 +141,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { name: 'New Name' },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -179,7 +157,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { description: 'Updated' },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -195,7 +173,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Public },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -211,7 +189,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Private },
         user: ownerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(true);
   });
@@ -227,7 +205,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Private },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(true);
   });
@@ -243,7 +221,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Private },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -261,7 +239,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Private },
         user: ownerUser,
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       })
     ).toBe(false);
   });
@@ -278,7 +256,7 @@ describe('validateVisibilityUpdateAccess', () => {
         source,
         update: { visibility: AgentVisibility.Shared },
         user: nonOwnerUser,
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       })
     ).toBe(false);
   });

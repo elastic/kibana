@@ -7,8 +7,8 @@
 
 import type { Capabilities, CoreSetup, CoreStart } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createVisibilityAccessOverrideSwitcher } from './visibility_access_override_switcher';
-import { hasAgentVisibilityAccessOverrideFromRequest } from '../services/utils';
+import { createAdminPrivilegeSwitcher } from './admin_privilege_switcher';
+import { isAdminFromRequest } from '../services/utils';
 
 function createStartServicesWithScopedEsClient(
   asCurrentUser: object
@@ -26,18 +26,16 @@ const minimalCapabilities: Capabilities = {
 };
 
 jest.mock('../services/utils', () => ({
-  hasAgentVisibilityAccessOverrideFromRequest: jest.fn(),
+  isAdminFromRequest: jest.fn(),
 }));
 
-const mockHasAgentVisibilityAccessOverrideFromRequest = jest.mocked(
-  hasAgentVisibilityAccessOverrideFromRequest
-);
+const mockIsAdminFromRequest = jest.mocked(isAdminFromRequest);
 
-describe('createVisibilityAccessOverrideSwitcher', () => {
+describe('createAdminPrivilegeSwitcher', () => {
   const logger = loggingSystemMock.createLogger();
 
   const createSwitcher = (getStartServices: CoreSetup['getStartServices']) =>
-    createVisibilityAccessOverrideSwitcher(getStartServices, logger);
+    createAdminPrivilegeSwitcher(getStartServices, logger);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -52,11 +50,11 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
 
     expect(result).toEqual({});
     expect(getStartServices).not.toHaveBeenCalled();
-    expect(mockHasAgentVisibilityAccessOverrideFromRequest).not.toHaveBeenCalled();
+    expect(mockIsAdminFromRequest).not.toHaveBeenCalled();
   });
 
-  it('returns agentBuilder.hasAgentVisibilityAccessOverride true when privilege check grants override', async () => {
-    mockHasAgentVisibilityAccessOverrideFromRequest.mockResolvedValue(true);
+  it('returns agentBuilder.isAdmin true when privilege check grants admin', async () => {
+    mockIsAdminFromRequest.mockResolvedValue(true);
     const asCurrentUser = {};
     const getStartServices = jest
       .fn()
@@ -68,17 +66,17 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
 
     expect(result).toEqual({
       agentBuilder: {
-        hasAgentVisibilityAccessOverride: true,
+        isAdmin: true,
       },
     });
-    expect(mockHasAgentVisibilityAccessOverrideFromRequest).toHaveBeenCalledTimes(1);
-    expect(mockHasAgentVisibilityAccessOverrideFromRequest).toHaveBeenCalledWith({
+    expect(mockIsAdminFromRequest).toHaveBeenCalledTimes(1);
+    expect(mockIsAdminFromRequest).toHaveBeenCalledWith({
       esClient: asCurrentUser,
     });
   });
 
-  it('returns empty object when privilege check does not grant override', async () => {
-    mockHasAgentVisibilityAccessOverrideFromRequest.mockResolvedValue(false);
+  it('returns empty object when privilege check does not grant admin', async () => {
+    mockIsAdminFromRequest.mockResolvedValue(false);
     const asCurrentUser = {};
     const getStartServices = jest
       .fn()
@@ -89,10 +87,10 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
     const result = await switcher(request, minimalCapabilities, false);
 
     expect(result).toEqual({});
-    expect(mockHasAgentVisibilityAccessOverrideFromRequest).toHaveBeenCalledTimes(1);
+    expect(mockIsAdminFromRequest).toHaveBeenCalledTimes(1);
   });
 
-  it('returns agentBuilder.hasAgentVisibilityAccessOverride false and logs when getStartServices rejects', async () => {
+  it('returns agentBuilder.isAdmin false and logs when getStartServices rejects', async () => {
     const getStartServices = jest.fn().mockRejectedValue(new Error('Core not ready'));
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
@@ -101,20 +99,17 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
 
     expect(result).toEqual({
       agentBuilder: {
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       },
     });
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Visibility access override capability switcher failed',
-      { error: expect.any(Error) }
-    );
-    expect(mockHasAgentVisibilityAccessOverrideFromRequest).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith('Admin privilege capability switcher failed', {
+      error: expect.any(Error),
+    });
+    expect(mockIsAdminFromRequest).not.toHaveBeenCalled();
   });
 
-  it('returns agentBuilder.hasAgentVisibilityAccessOverride false and logs when privilege check throws', async () => {
-    mockHasAgentVisibilityAccessOverrideFromRequest.mockRejectedValue(
-      new Error('Elasticsearch unavailable')
-    );
+  it('returns agentBuilder.isAdmin false and logs when privilege check throws', async () => {
+    mockIsAdminFromRequest.mockRejectedValue(new Error('Elasticsearch unavailable'));
     const asCurrentUser = {};
     const getStartServices = jest
       .fn()
@@ -126,12 +121,11 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
 
     expect(result).toEqual({
       agentBuilder: {
-        hasAgentVisibilityAccessOverride: false,
+        isAdmin: false,
       },
     });
-    expect(logger.debug).toHaveBeenCalledWith(
-      'Visibility access override capability switcher failed',
-      { error: expect.any(Error) }
-    );
+    expect(logger.debug).toHaveBeenCalledWith('Admin privilege capability switcher failed', {
+      error: expect.any(Error),
+    });
   });
 });

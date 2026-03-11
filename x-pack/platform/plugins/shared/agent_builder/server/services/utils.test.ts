@@ -11,19 +11,15 @@ import {
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
-import {
-  hasAgentVisibilityAccessOverrideFromRequest,
-  getAgentApiAccessFromRequest,
-  getUserFromRequest,
-} from './utils';
+import { isAdminFromRequest, getAgentApiAccessFromRequest, getUserFromRequest } from './utils';
 import { apiPrivileges } from '../../common/features';
 
-const EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST = {
+const EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST = {
   application: [
     {
       application: `${APPLICATION_PREFIX}.kibana`,
       resources: ['*'],
-      privileges: ['agent_builder:agent_visibility_access_override'],
+      privileges: ['agent_builder:admin'],
     },
   ],
 };
@@ -95,14 +91,14 @@ describe('getUserFromRequest', () => {
   });
 });
 
-describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
+describe('isAdminFromRequest', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
-  it('returns true when privilege check authorizes override privilege', async () => {
+  it('returns true when privilege check authorizes admin privilege', async () => {
     esClient.security.hasPrivileges.mockResolvedValue({
       application: {},
       cluster: {},
@@ -111,16 +107,16 @@ describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await isAdminFromRequest({ esClient });
 
     expect(result).toBe(true);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
-      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
     );
   });
 
-  it('returns false when privilege check does not authorize override privilege', async () => {
+  it('returns false when privilege check does not authorize admin privilege', async () => {
     esClient.security.hasPrivileges.mockResolvedValue({
       application: {},
       cluster: {},
@@ -129,23 +125,23 @@ describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
       username: 'testuser',
     });
 
-    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await isAdminFromRequest({ esClient });
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
-      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
     );
   });
 
   it('returns false when privilege check throws (fail closed)', async () => {
     esClient.security.hasPrivileges.mockRejectedValue(new Error('Elasticsearch unavailable'));
 
-    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
+    const result = await isAdminFromRequest({ esClient });
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
-      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+      EXPECTED_ADMIN_HAS_PRIVILEGES_REQUEST
     );
   });
 });

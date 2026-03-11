@@ -70,7 +70,7 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 }));
 
 jest.mock('../../../hooks/use_ui_privileges', () => ({
-  useUiPrivileges: () => ({ manageAgents: true, hasAgentVisibilityAccessOverride: false }),
+  useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
 }));
 
 jest.mock('../../../hooks/use_experimental_features', () => ({

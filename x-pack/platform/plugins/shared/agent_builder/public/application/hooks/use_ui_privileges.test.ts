@@ -18,7 +18,7 @@ describe('useUiPrivileges', () => {
     jest.clearAllMocks();
   });
 
-  it('returns hasAgentVisibilityAccessOverride true when capability is set', () => {
+  it('returns isAdmin true when capability is set', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -26,7 +26,7 @@ describe('useUiPrivileges', () => {
             agentBuilder: {
               show: true,
               write: true,
-              hasAgentVisibilityAccessOverride: true,
+              isAdmin: true,
             },
           },
         },
@@ -35,10 +35,10 @@ describe('useUiPrivileges', () => {
 
     const { result } = renderHook(() => useUiPrivileges());
 
-    expect(result.current.hasAgentVisibilityAccessOverride).toBe(true);
+    expect(result.current.isAdmin).toBe(true);
   });
 
-  it('returns hasAgentVisibilityAccessOverride false when capability is false', () => {
+  it('returns isAdmin false when capability is false', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -46,7 +46,7 @@ describe('useUiPrivileges', () => {
             agentBuilder: {
               show: true,
               write: true,
-              hasAgentVisibilityAccessOverride: false,
+              isAdmin: false,
             },
           },
         },
@@ -55,10 +55,10 @@ describe('useUiPrivileges', () => {
 
     const { result } = renderHook(() => useUiPrivileges());
 
-    expect(result.current.hasAgentVisibilityAccessOverride).toBe(false);
+    expect(result.current.isAdmin).toBe(false);
   });
 
-  it('returns hasAgentVisibilityAccessOverride false when agentBuilder capabilities are missing', () => {
+  it('returns isAdmin false when agentBuilder capabilities are missing', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -69,7 +69,7 @@ describe('useUiPrivileges', () => {
 
     const { result } = renderHook(() => useUiPrivileges());
 
-    expect(result.current.hasAgentVisibilityAccessOverride).toBe(false);
+    expect(result.current.isAdmin).toBe(false);
   });
 
   it('derives feature-backed privileges from uiPrivileges keys', () => {
@@ -82,7 +82,7 @@ describe('useUiPrivileges', () => {
               write: false,
               manageAgents: true,
               manageTools: false,
-              hasAgentVisibilityAccessOverride: true,
+              isAdmin: true,
             },
           },
         },
@@ -95,6 +95,6 @@ describe('useUiPrivileges', () => {
     expect(result.current.write).toBe(false);
     expect(result.current.manageAgents).toBe(true);
     expect(result.current.manageTools).toBe(false);
-    expect(result.current.hasAgentVisibilityAccessOverride).toBe(true);
+    expect(result.current.isAdmin).toBe(true);
   });
 });
