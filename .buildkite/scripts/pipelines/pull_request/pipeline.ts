@@ -30,8 +30,7 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
       set -euo pipefail
       .buildkite/scripts/bootstrap.sh
 
-      ALERTING_CONFIG="x-pack/platform/plugins/shared/alerting/jest.config.js"
-      ALERTING_SHARDS="\${ALERTING_CONFIG}||shard=1/6,\${ALERTING_CONFIG}||shard=2/6,\${ALERTING_CONFIG}||shard=3/6,\${ALERTING_CONFIG}||shard=4/6,\${ALERTING_CONFIG}||shard=5/6,\${ALERTING_CONFIG}||shard=6/6"
+      ALERTING_SHARDS="x-pack/platform/plugins/shared/alerting/jest.config.js||shard=1/6,x-pack/platform/plugins/shared/alerting/jest.config.js||shard=2/6,x-pack/platform/plugins/shared/alerting/jest.config.js||shard=3/6,x-pack/platform/plugins/shared/alerting/jest.config.js||shard=4/6,x-pack/platform/plugins/shared/alerting/jest.config.js||shard=5/6,x-pack/platform/plugins/shared/alerting/jest.config.js||shard=6/6"
 
       echo "[jest-checkpoint-repro] retry=\${BUILDKITE_RETRY_COUNT:-0} step=\${BUILDKITE_STEP_ID} job=\${BUILDKITE_PARALLEL_JOB:-0}"
       echo "[jest-checkpoint-repro] running configs=\${ALERTING_SHARDS}"
