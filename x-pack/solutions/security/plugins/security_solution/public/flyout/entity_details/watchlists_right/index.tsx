@@ -8,9 +8,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiFlyoutBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { WatchlistsFlyoutFooter } from './footer';
 import { WatchlistForm } from './watchlist_form';
@@ -123,10 +123,10 @@ export const WatchlistsFlyoutPanel = ({
     <>
       <FlyoutNavigation flyoutIsExpandable={false} isRulePreview={false} />
 
-      <WatchlistsFlyoutHeader title={title}>
+      <WatchlistsFlyoutHeader title={title} />
+      <FlyoutBody>
         <WatchlistForm watchlist={watchlist} onFieldChange={setWatchlistField} />
-      </WatchlistsFlyoutHeader>
-      <EuiFlyoutBody />
+      </FlyoutBody>
       <WatchlistsFlyoutFooter
         onSave={() => mutation.mutate()}
         isLoading={mutation.isLoading}

@@ -6,23 +6,22 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 export interface WatchlistsFlyoutHeaderProps {
   title: string;
-  children?: React.ReactNode;
 }
 
-export const WatchlistsFlyoutHeader = ({ title, children }: WatchlistsFlyoutHeaderProps) => {
+export const WatchlistsFlyoutHeader = ({ title }: WatchlistsFlyoutHeaderProps) => {
   return (
     <FlyoutHeader data-test-subj="watchlist-flyout-header">
-      <EuiFlexItem grow={false}>
-        <FlyoutTitle title={title} />
-      </EuiFlexItem>
-      <EuiSpacer size="m" />
-      {children}
+      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+        <EuiFlexItem grow={false}>
+          <FlyoutTitle title={title} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </FlyoutHeader>
   );
 };
