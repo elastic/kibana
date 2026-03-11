@@ -17,8 +17,8 @@ import {
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import type { services as inheritedServices } from '@kbn/test-suites-xpack-platform/functional/services';
-import { pageObjects } from '../page_objects';
-import { services } from '../services';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
 type SecurityTelemetryServices = typeof inheritedServices &
   typeof services & {

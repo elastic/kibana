@@ -62,10 +62,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     loadTestFile(require.resolve('./dashboard'));
-<<<<<<<< HEAD:x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_1/index.ts
     loadTestFile(require.resolve('./metric'));
-========
-    loadTestFile(require.resolve('./timeseries'));
->>>>>>>> upstream/main:x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group1/index.ts
   });
 }
