@@ -70,7 +70,10 @@ const createMockScheduledResponse = ({
   inspect: { dsl: [] },
 });
 
-const createMockContext = (mockSearchFn: jest.Mock, soClientOverrides?: Record<string, jest.Mock>) => {
+const createMockContext = (
+  mockSearchFn: jest.Mock,
+  soClientOverrides?: Record<string, jest.Mock>
+) => {
   const mockCoreContext = coreMock.createRequestHandlerContext();
 
   if (soClientOverrides) {
@@ -192,9 +195,9 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('space ID resolution', () => {
     it('should pass resolved space ID to search strategy', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: '' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         service: {
@@ -210,11 +213,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'custom-space' }),
@@ -223,9 +222,9 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('should fall back to default space when getActiveSpace is absent', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: '' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         service: {},
@@ -239,11 +238,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'default' }),
@@ -280,11 +275,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
@@ -325,11 +316,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: expect.objectContaining({
@@ -347,9 +334,9 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('pack lookup', () => {
     it('should resolve pack name, query name, and query text from saved objects', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: 'pack-abc' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: 'pack-abc' })));
 
       const soGet = jest.fn().mockResolvedValue({
         attributes: {
@@ -393,9 +380,9 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('should gracefully handle deleted pack', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: 'deleted-pack' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: 'deleted-pack' })));
 
       const soGet = jest.fn().mockRejectedValue(new Error('Saved object not found'));
 
@@ -431,9 +418,9 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('should skip pack lookup when packId is empty', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: '' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const soGet = jest.fn();
 
@@ -464,9 +451,9 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('pagination and sorting', () => {
     it('should use default values when query params are not provided', async () => {
-      const mockSearchFn = jest.fn().mockReturnValue(
-        of(createMockScheduledResponse({ packId: '' }))
-      );
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         service: {
@@ -482,11 +469,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -524,11 +507,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockSearchFn).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -564,11 +543,7 @@ describe('getScheduledActionResultsRoute', () => {
       });
       const mockResponse = httpServerMock.createResponseFactory();
 
-      await routeHandler(
-        createMockContext(mockSearchFn) as any,
-        mockRequest,
-        mockResponse
-      );
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
