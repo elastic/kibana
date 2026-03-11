@@ -17,6 +17,16 @@ import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_vie
  *
  * @param columns - The columns returned from the ES|QL query response (DatatableColumn[])
  * @returns A map of field names to field specs
+ *
+ * @example
+ * ```typescript
+ * const columns: DatatableColumn[] = [
+ *   { id: 'message', name: 'message', meta: { type: 'string', esType: 'keyword' } },
+ *   { id: 'count', name: 'count', meta: { type: 'number', esType: 'long' }, isComputedColumn: true }
+ * ];
+ * const fields = createFieldsFromEsqlColumns(columns);
+ * // Returns: { message: { name: 'message', type: 'string', ... }, count: { name: 'count', type: 'number', isComputedColumn: true, ... } }
+ * ```
  */
 export function createFieldsFromEsqlColumns(columns: DatatableColumn[]): Record<string, FieldSpec> {
   const fields: Record<string, FieldSpec> = {};
@@ -33,16 +43,26 @@ export function createFieldsFromEsqlColumns(columns: DatatableColumn[]): Record<
  * Enriches a DataViewSpec with fields from ES|QL columns.
  * The caller is responsible for creating the DataView instance from the returned spec.
  *
- * @param baseSpec - The base DataView spec to enrich
+ * @param dataViewSpec - The source DataView spec to enrich
  * @param columns - The columns returned from the ES|QL query response
  * @returns An enriched DataViewSpec with fields from the columns
+ *
+ * @example
+ * ```typescript
+ * const baseSpec = existingDataView.toSpec(false);
+ * const columns: DatatableColumn[] = [
+ *   { id: 'bytes', name: 'bytes', meta: { type: 'string', esType: 'keyword' }, isComputedColumn: false }
+ * ];
+ * const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, columns);
+ * // enrichedSpec.fields now contains the field specs from columns, overriding the original bytes field type
+ * ```
  */
 export function enrichDataViewSpecWithEsqlColumns(
-  baseSpec: DataViewSpec,
+  dataViewSpec: DataViewSpec,
   columns: DatatableColumn[]
 ): DataViewSpec {
   return {
-    ...baseSpec,
+    ...dataViewSpec,
     fields: createFieldsFromEsqlColumns(columns),
   };
 }

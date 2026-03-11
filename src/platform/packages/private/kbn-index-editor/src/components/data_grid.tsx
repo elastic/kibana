@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -26,6 +26,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { enrichDataViewSpecWithEsqlColumns } from '@kbn/data-view-utils';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import type { EditLookupIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
@@ -153,19 +154,39 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomCellRenderer);
   }, [CellValueRenderer, renderedColumns]);
 
+  // Create an enriched DataView with fields from ES|QL columns.
+  // This provides a single source of truth for field metadata, eliminating the need
+  // for a separate columnsMap lookup. The enriched DataView is used by both the grid
+  // and custom column header renderers.
+  const enrichedDataView = useMemo(() => {
+    if (props.columns.length === 0) {
+      return props.dataView;
+    }
+
+    const baseSpec = props.dataView.toSpec(false);
+    const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, props.columns);
+
+    return new DataView({
+      spec: enrichedSpec,
+      fieldFormats,
+      shortDotsEnable: false,
+      metaFields: props.dataView.metaFields,
+    });
+  }, [props.dataView, props.columns, fieldFormats]);
+
   // We render an editable header for columns that are not saved in the index.
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    // Create a lookup map from columns for quick access to column metadata
-    // TODO: Revert these changes and find a better replacement
-    const columnsMap = new Map(props.columns.map((col) => [col.id, col]));
-
     return renderedColumns.reduce<CustomGridColumnsConfiguration>(
       (acc, columnName, columnIndex) => {
+        // Check if the column exists in the original (non-enriched) DataView
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
         const editMode = editingColumnIndex === columnIndex;
-        const columnMeta = columnsMap.get(columnName)?.meta;
-        const columnType = columnMeta?.esType ?? columnMeta?.type;
-        const isUnsupportedESQLType = columnMeta?.type === KBN_FIELD_TYPES.UNKNOWN;
+
+        // Get field metadata from the enriched DataView
+        const field = enrichedDataView.fields.getByName(columnName);
+        const columnType = field?.esTypes?.[0] ?? field?.type;
+        const isUnsupportedESQLType = field?.type === KBN_FIELD_TYPES.UNKNOWN;
+
         acc[columnName] = memoize(
           getColumnHeaderRenderer(
             columnName,
@@ -187,7 +208,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [
     renderedColumns,
     props.dataView.fields,
-    props.columns,
+    enrichedDataView,
     editingColumnIndex,
     indexUpdateService,
     indexEditorTelemetryService,
@@ -259,7 +280,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       sampleSizeState={10000}
       canDragAndDropColumns={false}
       loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-      dataView={props.dataView}
+      dataView={enrichedDataView}
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}

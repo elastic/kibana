@@ -166,4 +166,111 @@ describe('createEsqlDataViewWithColumns', () => {
     const field = enrichedDataView.fields.getByName('index_field');
     expect(field?.spec.isComputedColumn).toBe(false);
   });
+
+  it('should override existing DataView field types when ES|QL returns different types', () => {
+    // Create a base DataView with a bytes field as number
+    const baseDataView = new DataView({
+      spec: {
+        id: 'test-data-view',
+        title: 'test-*',
+        timeFieldName: '@timestamp',
+        name: 'Test Data View',
+        fields: {
+          bytes: {
+            name: 'bytes',
+            type: 'number',
+            esTypes: ['long'],
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+      fieldFormats: mockFieldFormats,
+      shortDotsEnable: false,
+      metaFields: ['_source', '_id'],
+    });
+
+    // ES|QL returns bytes as a keyword (type override)
+    const esqlQueryColumns: DatatableColumn[] = [
+      {
+        id: 'bytes',
+        name: 'bytes',
+        meta: { type: 'string', esType: 'keyword' },
+        isComputedColumn: false,
+      },
+    ];
+
+    const enrichedDataView = createEsqlDataViewWithColumns(baseDataView, esqlQueryColumns, {
+      fieldFormats: mockFieldFormats,
+      shortDotsEnable: false,
+      metaFields: ['_source', '_id'],
+    });
+
+    const bytesField = enrichedDataView.fields.getByName('bytes');
+    expect(bytesField).toBeDefined();
+    expect(bytesField?.type).toBe('string'); // Overridden from number to string
+    expect(bytesField?.esTypes).toEqual(['keyword']); // Overridden from long to keyword
+    expect(bytesField?.spec.isComputedColumn).toBe(false);
+  });
+
+  it('should handle mix of computed fields and index fields with type overrides', () => {
+    // Create a base DataView with message as keyword
+    const baseDataView = new DataView({
+      spec: {
+        id: 'test-data-view',
+        title: 'test-*',
+        timeFieldName: '@timestamp',
+        name: 'Test Data View',
+        fields: {
+          message: {
+            name: 'message',
+            type: 'string',
+            esTypes: ['keyword'],
+            searchable: true,
+            aggregatable: true,
+          },
+        },
+      },
+      fieldFormats: mockFieldFormats,
+      shortDotsEnable: false,
+      metaFields: ['_source', '_id'],
+    });
+
+    // ES|QL returns:
+    // - message as text (type override)
+    // - message_length as computed field
+    const esqlQueryColumns: DatatableColumn[] = [
+      {
+        id: 'message',
+        name: 'message',
+        meta: { type: 'string', esType: 'text' },
+        isComputedColumn: false,
+      },
+      {
+        id: 'message_length',
+        name: 'message_length',
+        meta: { type: 'number', esType: 'long' },
+        isComputedColumn: true,
+      },
+    ];
+
+    const enrichedDataView = createEsqlDataViewWithColumns(baseDataView, esqlQueryColumns, {
+      fieldFormats: mockFieldFormats,
+      shortDotsEnable: false,
+      metaFields: ['_source', '_id'],
+    });
+
+    expect(enrichedDataView.fields.length).toBe(2);
+
+    const messageField = enrichedDataView.fields.getByName('message');
+    expect(messageField).toBeDefined();
+    expect(messageField?.type).toBe('string');
+    expect(messageField?.esTypes).toEqual(['text']); // Overridden from keyword
+    expect(messageField?.spec.isComputedColumn).toBe(false);
+
+    const messageLengthField = enrichedDataView.fields.getByName('message_length');
+    expect(messageLengthField).toBeDefined();
+    expect(messageLengthField?.type).toBe('number');
+    expect(messageLengthField?.spec.isComputedColumn).toBe(true);
+  });
 });

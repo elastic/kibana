@@ -17,6 +17,7 @@
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
     "@kbn/data-views-plugin",
+    "@kbn/data-view-utils",
     "@kbn/discover-utils",
     "@kbn/expressions-plugin",
     "@kbn/i18n",
