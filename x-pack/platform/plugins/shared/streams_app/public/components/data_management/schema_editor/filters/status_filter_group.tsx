@@ -14,6 +14,7 @@ import { FIELD_STATUS_MAP } from '../constants';
 import type { TControlsChangeHandler } from '../hooks/use_controls';
 import type { SchemaFieldStatus } from '../types';
 import { useSchemaEditorContext } from '../schema_editor_context';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldStatusFilterGroupButtonLabel',
@@ -21,18 +22,21 @@ const BUTTON_LABEL = i18n.translate(
 );
 
 export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
-  const { fields } = useSchemaEditorContext();
+  const { fields, stream } = useSchemaEditorContext();
+  const streamType = useMemo(() => getStreamTypeFromDefinition(stream), [stream]);
 
   const fieldStatus = useMemo(() => uniq(fields.map((field) => field.status)), [fields]);
 
-  const [items, setItems] = useState<EuiSelectableOption[]>(() => getStatusOptions(fieldStatus));
+  const [items, setItems] = useState<EuiSelectableOption[]>(() =>
+    getStatusOptions(fieldStatus, streamType)
+  );
 
   // This side effect is due to the fact that the available field status can be updated once the unmapped fields are fetched.
   useEffect(() => {
     setItems((prevItems) => {
       const prevSelection = new Map(prevItems.map((item) => [item.key, item.checked]));
 
-      const nextItems = getStatusOptions(fieldStatus);
+      const nextItems = getStatusOptions(fieldStatus, streamType);
 
       nextItems.forEach((item) => {
         if (prevSelection.has(item.key)) {
@@ -42,7 +46,7 @@ export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChange
 
       return nextItems;
     });
-  }, [fieldStatus]);
+  }, [fieldStatus, streamType]);
 
   const onChangeItems = useCallback<Required<EuiSelectableProps>['onChange']>(
     (nextItems) => {
@@ -61,9 +65,12 @@ export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChange
   );
 };
 
-const getStatusOptions = (fieldStatus: SchemaFieldStatus[]): EuiSelectableOption[] => {
+const getStatusOptions = (
+  fieldStatus: SchemaFieldStatus[],
+  streamType: ReturnType<typeof getStreamTypeFromDefinition>
+): EuiSelectableOption[] => {
   return fieldStatus.map((key) => ({
-    label: FIELD_STATUS_MAP[key].label,
+    label: FIELD_STATUS_MAP[key === 'unmapped' && streamType === 'classic' ? 'dynamic' : key].label,
     key,
   }));
 };
