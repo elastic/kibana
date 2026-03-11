@@ -516,8 +516,9 @@ class RuleEditorFlyoutUI extends Component {
           onClose={this.closeFlyout}
           aria-labelledby="flyoutTitle"
           focusTrapProps={focusTrapProps}
+          data-test-subj="mlRuleEditorFlyout"
         >
-          <EuiFlyoutHeader hasBorder={true}>
+          <EuiFlyoutHeader hasBorder={true} data-test-subj="mlRuleEditorEditRulesTitle">
             <EuiTitle size="m">
               <h1 id="flyoutTitle">
                 <FormattedMessage
