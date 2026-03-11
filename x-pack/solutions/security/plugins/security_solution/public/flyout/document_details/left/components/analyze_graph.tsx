@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -23,8 +24,8 @@ import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { Resolver } from '../../../../resolver/view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
+import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
+import { AnalyzerPreviewNoDataMessage } from '../../../../flyout_v2/document/components/analyzer_no_data_message';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -40,8 +41,13 @@ const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.analyzer.dataViewE
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  const { eventId, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
-  const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const { eventId, scopeId, searchHit } = useDocumentDetailsContext();
+
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
+  const isEnabled = useIsAnalyzerEnabled(hit);
 
   const key = useWhichFlyout() ?? 'memory';
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
