@@ -20,7 +20,7 @@ import type {
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
 import { publicApiPath } from '../../common/constants';
-import { internalToPublicDefinition } from '../services/skills/utils';
+import { internalToPublicDefinition, internalToPublicSummary } from '../services/skills/utils';
 import { AGENT_BUILDER_READ_SECURITY, AGENT_BUILDER_WRITE_SECURITY } from './route_security';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
@@ -80,12 +80,10 @@ export function registerSkillsRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const skills = await registry.list();
-        const publicSkills = await Promise.all(skills.map(internalToPublicDefinition));
+        const skills = await registry.list({ summaryOnly: true });
+        const results = await Promise.all(skills.map(internalToPublicSummary));
         return response.ok<ListSkillsResponse>({
-          body: {
-            results: publicSkills,
-          },
+          body: { results },
         });
       }, featureFlagConfig)
     );

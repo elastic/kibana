@@ -63,4 +63,8 @@ export interface InternalSkillDefinition {
    * If this skill was installed from a plugin, the plugin name.
    */
   plugin_id?: string;
+  /**
+   * Number of referenced content items.
+   */
+  referencedContentCount: number;
 }
