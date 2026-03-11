@@ -10,7 +10,6 @@ import type { IRouter } from '@kbn/core/server';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
@@ -72,10 +71,6 @@ export const getScheduledQueryResultsRoute = (
               },
             });
           }
-
-          const spaceId = osqueryContext?.service?.getActiveSpace
-            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
-            : DEFAULT_SPACE_ID;
 
           let integrationNamespaces: Record<string, string[]> = {};
           const logger = osqueryContext.logFactory.get('scheduled_query_results');

@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { JsonValue } from '@kbn/utility-types';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { AlertAttachmentContext } from '../common/contexts';
@@ -67,7 +68,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
-    const metadata: Record<string, unknown> = { actionId, agentIds, queryId };
+    const metadata: Record<string, JsonValue> = { actionId, agentIds, queryId };
     if (scheduleId) {
       metadata.scheduleId = scheduleId;
     }

@@ -6,19 +6,24 @@
  */
 
 import { buildScheduledActionResultsQuery } from './query.scheduled_action_results.dsl';
-import { Direction } from '../../../../../common/search_strategy';
+import type { ScheduledActionResultsRequestOptions } from '../../../../../common/search_strategy';
+import { Direction, OsqueryQueries } from '../../../../../common/search_strategy';
+
+interface TermFilter {
+  term?: Record<string, unknown>;
+}
 
 describe('buildScheduledActionResultsQuery', () => {
-  const defaultOptions = {
+  const defaultOptions: ScheduledActionResultsRequestOptions = {
     scheduleId: 'test-schedule-id',
     executionCount: 42,
     sort: { field: '@timestamp', direction: Direction.desc },
     pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
-    factoryQueryType: 'scheduledActionResults',
+    factoryQueryType: OsqueryQueries.scheduledActionResults,
   };
 
   it('filters by schedule_id and schedule_execution_count', () => {
-    const result = buildScheduledActionResultsQuery(defaultOptions as any);
+    const result = buildScheduledActionResultsQuery(defaultOptions);
 
     expect(result.query).toEqual({
       bool: {
@@ -31,49 +36,55 @@ describe('buildScheduledActionResultsQuery', () => {
   });
 
   it('queries the action responses data stream index', () => {
-    const result = buildScheduledActionResultsQuery(defaultOptions as any);
+    const result = buildScheduledActionResultsQuery(defaultOptions);
 
     expect(result.index).toContain('logs-osquery_manager.action.responses');
   });
 
   it('includes aggregations for success/error counts and rows', () => {
-    const result = buildScheduledActionResultsQuery(defaultOptions as any);
-    const aggs = result.aggs as any;
+    const result = buildScheduledActionResultsQuery(defaultOptions);
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
 
-    expect(aggs.aggs.aggs.responses_by_schedule).toBeDefined();
-    expect(aggs.aggs.aggs.responses_by_schedule.aggs.rows_count).toEqual({
+    expect(responsesBySchedule).toBeDefined();
+    expect((responsesBySchedule.aggs as Record<string, unknown>).rows_count).toEqual({
       sum: { field: 'action_response.osquery.count' },
     });
-    expect(aggs.aggs.aggs.responses_by_schedule.aggs.responses).toBeDefined();
+    expect((responsesBySchedule.aggs as Record<string, unknown>).responses).toBeDefined();
   });
 
   it('applies pagination correctly', () => {
-    const options = {
+    const options: ScheduledActionResultsRequestOptions = {
       ...defaultOptions,
       pagination: { activePage: 2, cursorStart: 0, querySize: 10 },
     };
 
-    const result = buildScheduledActionResultsQuery(options as any);
+    const result = buildScheduledActionResultsQuery(options);
 
     expect(result.from).toBe(20);
     expect(result.size).toBe(10);
   });
 
   it('sorts by specified field and direction', () => {
-    const options = {
+    const options: ScheduledActionResultsRequestOptions = {
       ...defaultOptions,
       sort: { field: 'agent.id', direction: Direction.asc },
     };
 
-    const result = buildScheduledActionResultsQuery(options as any);
+    const result = buildScheduledActionResultsQuery(options);
 
     expect(result.sort).toEqual([{ 'agent.id': { order: 'asc' } }]);
   });
 
   it('includes space_id filter when spaceId is provided', () => {
-    const options = { ...defaultOptions, spaceId: 'my-space' };
+    const options: ScheduledActionResultsRequestOptions = {
+      ...defaultOptions,
+      spaceId: 'my-space',
+    };
 
-    const result = buildScheduledActionResultsQuery(options as any);
+    const result = buildScheduledActionResultsQuery(options);
 
     expect(result.query).toEqual({
       bool: {
@@ -85,18 +96,20 @@ describe('buildScheduledActionResultsQuery', () => {
       },
     });
 
-    const aggs = result.aggs as any;
-    const mustFilters = aggs.aggs.aggs.responses_by_schedule.filter.bool.must;
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
+    const filter = responsesBySchedule.filter as Record<string, Record<string, TermFilter[]>>;
+    const mustFilters = filter.bool.must;
     expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
   });
 
   it('omits space_id filter when spaceId is not provided', () => {
-    const result = buildScheduledActionResultsQuery(defaultOptions as any);
-    const filterQuery = result.query as any;
+    const result = buildScheduledActionResultsQuery(defaultOptions);
+    const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;
     const filters = filterQuery.bool.filter;
-    const hasSpaceFilter = filters.some(
-      (f) => f.term && Object.prototype.hasOwnProperty.call(f.term, 'space_id')
-    );
+    const hasSpaceFilter = filters.some((f) => f.term && 'space_id' in f.term);
 
     expect(hasSpaceFilter).toBe(false);
   });
