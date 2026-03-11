@@ -45,6 +45,18 @@ const JEST_CACHE_DIR = 'data/jest-cache';
 const NODE_ARGV_SLICE_INDEX = 2;
 
 /**
+ * Builds the checkpoint identity and key for a resolved config path and optional shard.
+ * Used so each shard has its own Buildkite checkpoint when running in parallel.
+ */
+function getCheckpointIdentity(
+  relConfigPath: string,
+  shard: string | undefined
+): { identity: string; key: string } {
+  const identity = shard ? annotateConfigWithShard(relConfigPath, shard) : relConfigPath;
+  return { identity, key: getCheckpointKey(identity) };
+}
+
+/**
  * Runs Jest tests with automatic config discovery and argument forwarding.
  *
  * Searches for jest.config.js files starting from the working directory
@@ -102,40 +114,26 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
 
   const getShardValue = (): string | undefined => {
     const shard = parsedArguments.shard;
-    if (typeof shard === 'string' && shard.length > 0) return shard;
-    if (Array.isArray(shard) && typeof shard[0] === 'string' && shard[0].length > 0)
-      return shard[0];
-    return undefined;
+    return typeof shard === 'string' && shard.length > 0 ? shard : undefined;
   };
 
   // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
   // Use relative path for checkpoint key so it's stable across different CI agents.
   if (isInBuildkite() && resolvedConfigPath) {
-    const relConfigForCheckpoint = relative(REPO_ROOT, resolvedConfigPath);
-    const shardForCheckpoint = getShardValue();
-    const shardIdentity = shardForCheckpoint
-      ? annotateConfigWithShard(relConfigForCheckpoint, shardForCheckpoint)
-      : relConfigForCheckpoint;
-    const checkpointIdentity = shardIdentity;
-    const checkpointKey = getCheckpointKey(checkpointIdentity);
+    const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+    const { identity, key: checkpointKey } = getCheckpointIdentity(relConfig, getShardValue());
 
     log.info(
-      `[jest-checkpoint] Identity details: config=${relConfigForCheckpoint}, shard=${
-        shardForCheckpoint || '<none>'
-      }, shardIdentity=${shardIdentity}, key=${checkpointKey}`
-    );
-
-    log.info(
-      `[jest-checkpoint] Checking prior completion for ${checkpointIdentity} (step=${
+      `[jest-checkpoint] Checking prior completion for ${identity} (step=${
         process.env.BUILDKITE_STEP_ID || ''
       }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
         process.env.BUILDKITE_RETRY_COUNT || '0'
       }, key=${checkpointKey})`
     );
-    const alreadyCompleted = await isConfigCompleted(checkpointIdentity);
+    const alreadyCompleted = await isConfigCompleted(identity);
     if (alreadyCompleted) {
       log.info(
-        `[jest-checkpoint] Skipping ${checkpointIdentity} (already completed on previous attempt, key=${checkpointKey})`
+        `[jest-checkpoint] Skipping ${identity} (already completed on previous attempt, key=${checkpointKey})`
       );
       process.exit(0);
     }
@@ -208,22 +206,13 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     // Uses synchronous markConfigCompletedSync because async is not supported in 'exit' handlers.
     if (isInBuildkite() && resolvedConfigPath) {
       const relConfig = relative(REPO_ROOT, resolvedConfigPath);
-      const shardForCheckpoint = getShardValue();
-      const shardIdentity = shardForCheckpoint
-        ? annotateConfigWithShard(relConfig, shardForCheckpoint)
-        : relConfig;
-      const checkpointIdentity = shardIdentity;
-      const checkpointKey = getCheckpointKey(checkpointIdentity);
+      const { identity, key: checkpointKey } = getCheckpointIdentity(relConfig, getShardValue());
       process.on('exit', () => {
         // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
         // Both are falsy, while failure codes (1, etc.) are truthy.
         if (!process.exitCode) {
-          log.info(
-            `[jest-checkpoint] Marking ${checkpointIdentity} as completed (key=${checkpointKey}, shard=${
-              shardForCheckpoint || '<none>'
-            }, shardIdentity=${shardIdentity})`
-          );
-          markConfigCompletedSync(checkpointIdentity);
+          log.info(`[jest-checkpoint] Marking ${identity} as completed (key=${checkpointKey})`);
+          markConfigCompletedSync(identity);
         }
       });
     }
