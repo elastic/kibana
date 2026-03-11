@@ -1580,7 +1580,6 @@
     "@kbn/stdio-dev-helpers": "link:src/platform/packages/private/kbn-stdio-dev-helpers",
     "@kbn/storybook": "link:src/platform/packages/shared/kbn-storybook",
     "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
-    "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
     "@kbn/telemetry-tools": "link:src/platform/packages/private/kbn-telemetry-tools",
     "@kbn/test": "link:src/platform/packages/shared/kbn-test",
