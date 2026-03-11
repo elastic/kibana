@@ -69,6 +69,7 @@ export async function fetchMetricsInfo({
       filter,
       timeRange,
       variables,
+      executionContext: { page: 'metrics_experience' },
     });
     return response;
   } catch (error) {
