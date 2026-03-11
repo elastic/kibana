@@ -362,7 +362,7 @@ const startFleetServerWithDocker = async ({
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
 
           try {
-            await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+            await waitForHostToEnroll(kbnClient, log, hostname, 5 * 60_000);
           } catch (error) {
             log.info(`### FLEET LOGS ###
 
