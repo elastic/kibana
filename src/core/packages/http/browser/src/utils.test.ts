@@ -27,7 +27,7 @@ describe('buildPath', () => {
     ).toBe('/api/myapi/hello%2F%2F/%2F%2Fworld');
   });
 
-  it('removes optional path segments when the parameter is present', () => {
+  it('adds optional path segments when the parameter is present', () => {
     expect(buildPath('/api/myapi/{section}/{id?}', { section: 'test', id: 'tada' })).toBe(
       '/api/myapi/test/tada'
     );
