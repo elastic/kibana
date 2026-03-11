@@ -212,7 +212,8 @@ function parseFigmaUrlInternal(urlString: string): ParseFigmaUrlResult {
   const result: ParseFigmaUrlResult = {};
   try {
     const url = new URL(urlString.trim());
-    if (!url.hostname.includes('figma.com')) {
+    const hostname = url.hostname.toLowerCase();
+    if (hostname !== 'figma.com' && !hostname.endsWith('.figma.com')) {
       return { error: 'Not a Figma URL', code: 'NOT_FIGMA' };
     }
     const pathSegments = url.pathname.replace(/^\/+|\/+$/g, '').split('/');
