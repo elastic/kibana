@@ -31,13 +31,32 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
-import { isInBuildkite, isConfigCompleted, markConfigCompletedSync } from './buildkite_checkpoint';
-import { parseShardAnnotation } from './shard_config';
+import {
+  isInBuildkite,
+  isConfigCompleted,
+  markConfigCompletedSync,
+  getCheckpointKey,
+} from './buildkite_checkpoint';
+import { annotateConfigWithShard, parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
 // Skip 'node' and script name
 const NODE_ARGV_SLICE_INDEX = 2;
+
+/**
+ * Builds the checkpoint identity and key for a resolved config path and optional shard.
+ * Used so each shard has its own Buildkite checkpoint when running in parallel.
+ */
+function getCheckpointIdentity(
+  relConfigPath: string,
+  shard: string | undefined
+): { identity: string; key: string } {
+  const identity = shard
+    ? annotateConfigWithShard(relConfigPath, shard)
+    : relConfigPath;
+  return { identity, key: getCheckpointKey(identity) };
+}
 
 /**
  * Runs Jest tests with automatic config discovery and argument forwarding.
@@ -95,25 +114,32 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   let testFiles: string[] = [];
   let resolvedConfigPath: string = parsedArguments.config ?? '';
 
+  const getShardValue = (): string | undefined => {
+    const shard = parsedArguments.shard;
+    return typeof shard === 'string' && shard.length > 0 ? shard : undefined;
+  };
+
   // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
   // Use relative path for checkpoint key so it's stable across different CI agents.
   if (isInBuildkite() && resolvedConfigPath) {
-    const relConfigForCheckpoint = relative(REPO_ROOT, resolvedConfigPath);
+    const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+    const { identity, key: checkpointKey } = getCheckpointIdentity(relConfig, getShardValue());
+
     log.info(
-      `[jest-checkpoint] Checking prior completion for ${relConfigForCheckpoint} (step=${
+      `[jest-checkpoint] Checking prior completion for ${identity} (step=${
         process.env.BUILDKITE_STEP_ID || ''
       }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
         process.env.BUILDKITE_RETRY_COUNT || '0'
-      })`
+      }, key=${checkpointKey})`
     );
-    const alreadyCompleted = await isConfigCompleted(relConfigForCheckpoint);
+    const alreadyCompleted = await isConfigCompleted(identity);
     if (alreadyCompleted) {
       log.info(
-        `[jest-checkpoint] Skipping ${relConfigForCheckpoint} (already completed on previous attempt)`
+        `[jest-checkpoint] Skipping ${identity} (already completed on previous attempt, key=${checkpointKey})`
       );
       process.exit(0);
     }
-    log.info(`[jest-checkpoint] No prior checkpoint found, running config`);
+    log.info(`[jest-checkpoint] No prior checkpoint found, running config (key=${checkpointKey})`);
   }
 
   // Handle config discovery if no config was explicitly provided
@@ -182,12 +208,13 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     // Uses synchronous markConfigCompletedSync because async is not supported in 'exit' handlers.
     if (isInBuildkite() && resolvedConfigPath) {
       const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+      const { identity, key: checkpointKey } = getCheckpointIdentity(relConfig, getShardValue());
       process.on('exit', () => {
         // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
         // Both are falsy, while failure codes (1, etc.) are truthy.
         if (!process.exitCode) {
-          log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
-          markConfigCompletedSync(relConfig);
+          log.info(`[jest-checkpoint] Marking ${identity} as completed (key=${checkpointKey})`);
+          markConfigCompletedSync(identity);
         }
       });
     }
