@@ -28,6 +28,18 @@ import { QueryBar } from '../../../common/components/query_bar';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { SUPPORTED_FILE_TYPES } from './constants';
+import {
+  WATCHLIST_DESCRIPTION_LABEL,
+  WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
+  WATCHLIST_ENTITY_FIELD_PLACEHOLDER,
+  WATCHLIST_FILE_PICKER_ARIA_LABEL,
+  WATCHLIST_FILE_UPLOAD_LABEL,
+  WATCHLIST_FILTER_QUERY_HELP_TEXT,
+  WATCHLIST_FILTER_QUERY_LABEL,
+  WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL,
+  WATCHLIST_NAME_LABEL,
+  WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
+} from './translations';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
@@ -85,7 +97,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
   return (
     <EuiForm component="form" fullWidth>
       <EuiFormRow
-        label="Name"
+        label={WATCHLIST_NAME_LABEL}
         isInvalid={isNameInvalid}
         error={
           isNameInvalid
@@ -102,14 +114,14 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
         }
       >
         <EuiFieldText
-          name="Enter Watchlist Name"
+          name="WatchlistName"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
           isInvalid={isNameInvalid}
         />
       </EuiFormRow>
       <EuiFormRow
-        label="Description"
+        label={WATCHLIST_DESCRIPTION_LABEL}
         labelAppend={
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -120,12 +132,12 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
         }
       >
         <EuiFieldText
-          name="Enter Watchlist Description"
+          name="WatchlistDescription"
           value={watchlist.description}
           onChange={(e) => onFieldChange('description', e.target.value)}
         />
       </EuiFormRow>
-      <EuiFormRow label="Risk Score Weighting">
+      <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>
         <EuiRange
           min={0}
           max={2}
@@ -136,7 +148,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
-      <EuiFormRow label="File upload">
+      <EuiFormRow label={WATCHLIST_FILE_UPLOAD_LABEL}>
         <EuiFilePicker
           data-test-subj="upload-watchlist-file"
           accept={SUPPORTED_FILE_TYPES.join(',')}
@@ -144,12 +156,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
           onChange={() => {}} // TODO use fileUploader from privmon
           isInvalid={false}
           isLoading={false}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.watchlists.flyout.filePicker.AriaLabel',
-            {
-              defaultMessage: 'Watchlist file picker',
-            }
-          )}
+          aria-label={WATCHLIST_FILE_PICKER_ARIA_LABEL}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -181,16 +188,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLabel',
-          { defaultMessage: 'Watchlist filter' }
-        )}
-        helpText={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryHelpText',
-          { defaultMessage: 'Build a query to filter matching events for this watchlist (POC).' }
-        )}
-      >
+      <EuiFormRow label={WATCHLIST_FILTER_QUERY_LABEL} helpText={WATCHLIST_FILTER_QUERY_HELP_TEXT}>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             {dataView ? (
@@ -219,15 +217,12 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow label="Identify entities by">
+      <EuiFormRow label={WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiSuperSelect
               valueOfSelected={entityField}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.watchlists.flyout.entityFieldPlaceholder',
-                { defaultMessage: 'Select a field' }
-              )}
+              placeholder={WATCHLIST_ENTITY_FIELD_PLACEHOLDER}
               // TODO: remove this when backend route available: https://github.com/elastic/security-team/issues/15538
               options={[
                 { value: 'user.name', inputDisplay: 'user.name' },
@@ -235,10 +230,7 @@ export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: Watch
                 { value: 'source.ip', inputDisplay: 'source.ip' },
               ]}
               onChange={(value) => setEntityField(value)}
-              aria-label={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.watchlists.flyout.entityFieldAriaLabel',
-                { defaultMessage: 'Watchlist entity field selector' }
-              )}
+              aria-label={WATCHLIST_ENTITY_FIELD_ARIA_LABEL}
               style={{ width: 240 }}
             />
           </EuiFlexItem>
