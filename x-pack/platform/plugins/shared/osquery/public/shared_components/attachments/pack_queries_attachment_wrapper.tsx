@@ -8,7 +8,10 @@
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
-import { useScheduledExecutionDetails } from '../../actions/use_scheduled_execution_details';
+import {
+  useScheduledExecutionDetails,
+  mapScheduledDetailsToQueryData,
+} from '../../actions/use_scheduled_execution_details';
 
 interface PackQueriesAttachmentWrapperProps {
   actionId: string;
@@ -47,23 +50,10 @@ export const PackQueriesAttachmentWrapper = ({
     }
   }, [liveData?.status, isScheduled]);
 
-  const scheduledQueryData = useMemo(() => {
-    if (!scheduledData) return undefined;
-
-    return [
-      {
-        action_id: scheduleId!,
-        id: scheduledData.queryName || scheduleId!,
-        query: scheduledData.queryText || '',
-        agents: [],
-        status: 'completed' as const,
-        docs: scheduledData.totalRows,
-        successful: scheduledData.successCount,
-        failed: scheduledData.errorCount,
-        pending: 0,
-      },
-    ];
-  }, [scheduledData, scheduleId]);
+  const scheduledQueryData = useMemo(
+    () => (scheduledData ? mapScheduledDetailsToQueryData(scheduledData, scheduleId!) : undefined),
+    [scheduledData, scheduleId]
+  );
 
   if (isScheduled) {
     return (

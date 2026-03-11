@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type {
@@ -59,6 +60,10 @@ export const getScheduledActionResultsRoute = (
         try {
           const { scheduleId, executionCount } = request.params;
 
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           const search = await context.search;
           const res = await lastValueFrom(
             search.search<
@@ -68,6 +73,7 @@ export const getScheduledActionResultsRoute = (
               {
                 scheduleId,
                 executionCount,
+                spaceId,
                 factoryQueryType: OsqueryQueries.scheduledActionResults,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
@@ -130,10 +136,3 @@ export const getScheduledActionResultsRoute = (
       }
     );
 };
-
-function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
-  const controller = new AbortController();
-  aborted$.subscribe(() => controller.abort());
-
-  return controller.signal;
-}

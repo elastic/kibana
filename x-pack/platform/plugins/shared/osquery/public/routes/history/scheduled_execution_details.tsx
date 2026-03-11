@@ -23,7 +23,10 @@ import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
 import { WithHeaderLayout } from '../../components/layouts';
-import { useScheduledExecutionDetails } from '../../actions/use_scheduled_execution_details';
+import {
+  useScheduledExecutionDetails,
+  mapScheduledDetailsToQueryData,
+} from '../../actions/use_scheduled_execution_details';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 
 const tableWrapperCss = {
@@ -63,23 +66,10 @@ const ScheduledExecutionDetailsPageComponent = () => {
 
   const executionLabelValues = useMemo(() => ({ executionCount }), [executionCount]);
 
-  const queryData = useMemo(() => {
-    if (!data) return undefined;
-
-    return [
-      {
-        action_id: scheduleId,
-        id: data.queryName || scheduleId,
-        query: data.queryText || '',
-        agents: [],
-        status: 'completed' as const,
-        docs: data.totalRows,
-        successful: data.successCount,
-        failed: data.errorCount,
-        pending: 0,
-      },
-    ];
-  }, [data, scheduleId]);
+  const queryData = useMemo(
+    () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
+    [data, scheduleId]
+  );
 
   const LeftColumn = useMemo(
     () => (

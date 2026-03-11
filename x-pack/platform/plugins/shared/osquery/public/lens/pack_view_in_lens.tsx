@@ -27,17 +27,22 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
   scheduleId,
   executionCount,
 }) => {
+  const isScheduled = !!scheduleId;
   const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
-    skip: !!scheduleId,
+    skip: isScheduled,
   });
 
-  const startDate = lastResultsData?.lastResultTime
+  const startDate = isScheduled
+    ? undefined
+    : lastResultsData?.lastResultTime
     ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.lastResultTime
+  const endDate = isScheduled
+    ? undefined
+    : lastResultsData?.lastResultTime
     ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
 
@@ -47,7 +52,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
+      mode={isScheduled ? undefined : lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
       scheduleId={scheduleId}
       executionCount={executionCount}
     />

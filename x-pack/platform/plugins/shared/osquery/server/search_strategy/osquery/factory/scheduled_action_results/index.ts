@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import type {
   ScheduledActionResultsRequestOptions,
@@ -33,19 +34,19 @@ export const scheduledActionResults: OsqueryFactory<OsqueryQueries.scheduledActi
 
     return buildScheduledActionResultsQuery(optionsWithDefaults);
   },
-  // @ts-expect-error update types
   parse: async (
-    options,
-    response: ScheduledActionResultsStrategyResponse
+    options: ScheduledActionResultsRequestOptions,
+    response: IEsSearchResponse
   ): Promise<ScheduledActionResultsStrategyResponse> => {
+    const typedResponse = response as unknown as ScheduledActionResultsStrategyResponse;
     const inspect = {
       dsl: [inspectStringifyObject(buildScheduledActionResultsQuery(options))],
     };
 
     return {
-      ...response,
+      ...typedResponse,
       inspect,
-      edges: response.rawResponse.hits.hits,
+      edges: typedResponse.rawResponse.hits.hits,
     };
   },
 };
