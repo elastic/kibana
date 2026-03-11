@@ -71,7 +71,7 @@ export function prepareInlineEditPanel(
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      'formBased') as SupportedDatasourceId;
+      SupportedDatasourceId.FormBased) as SupportedDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,

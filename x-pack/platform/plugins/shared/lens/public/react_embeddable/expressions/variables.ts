@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { SupportedDatasourceId } from '@kbn/lens-common';
+
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { TextBasedPersistedState, LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 
 function getInternalTables(states: Record<string, unknown>) {
   const result: Record<string, Datatable> = {};
-  if ('textBased' in states) {
+  if (SupportedDatasourceId.TextBased in states) {
     const layers = (states.textBased as TextBasedPersistedState).layers;
     for (const layer in layers) {
       if (layers[layer]?.table) {

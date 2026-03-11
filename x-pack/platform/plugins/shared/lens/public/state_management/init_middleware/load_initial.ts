@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SupportedDatasourceId } from '@kbn/lens-common';
+
 import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
@@ -375,7 +377,7 @@ export async function loadInitial(
 
   let activeDatasourceId: string | undefined;
   if (initialContext && 'query' in initialContext) {
-    activeDatasourceId = 'textBased';
+    activeDatasourceId = SupportedDatasourceId.TextBased;
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters
