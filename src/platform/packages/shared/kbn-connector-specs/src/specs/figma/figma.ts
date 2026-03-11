@@ -147,6 +147,9 @@ export const FigmaConnector: ConnectorSpec = {
             throw new Error(parsed.error);
           }
           teamId = parsed.teamId;
+          if (teamId === undefined || teamId === '') {
+            throw new Error('URL did not match a file or team page');
+          }
         }
         if (teamId === undefined || teamId === '') {
           throw new Error(
