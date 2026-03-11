@@ -10,7 +10,6 @@ import type { CoreSetup, IRouter, KibanaResponseFactory, Logger } from '@kbn/cor
 import { i18n } from '@kbn/i18n';
 import { capitalize, escape } from 'lodash';
 import { OAuthAuthorizationService } from '../lib';
-import { resolveEarsUrl } from '../lib/ears';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import {
@@ -530,19 +529,16 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType;
-          const storedTokenUrl = secrets.tokenUrl || config?.tokenUrl;
-
-          if (!storedTokenUrl) {
-            throw new Error('Connector missing required OAuth configuration (tokenUrl)');
-          }
 
           let tokenResult;
           if (authType === 'ears') {
-            // EARS flow: storedTokenUrl is a relative URL path;
-            // JSON body with { code, pkce_verifier }, no client credentials
-            const tokenUrl = resolveEarsUrl(storedTokenUrl, configurationUtilities.getEarsUrl());
+            const provider = secrets.provider;
+            if (!provider) {
+              throw new Error('Connector missing required OAuth configuration (provider)');
+            }
+
             tokenResult = await requestEarsToken(
-              tokenUrl,
+              provider,
               logger,
               {
                 code,
@@ -551,13 +547,13 @@ export const oauthCallbackRoute = (
               configurationUtilities
             );
           } else {
-            // Standard OAuth Authorization Code flow
             const clientId = secrets.clientId || config?.clientId;
             const clientSecret = secrets.clientSecret;
             const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true;
-            if (!clientId || !clientSecret) {
+            const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
+            if (!clientId || !clientSecret || !tokenUrl) {
               throw new Error(
-                'Connector missing required OAuth configuration (clientId, clientSecret)'
+                'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
               );
             }
 
@@ -567,7 +563,7 @@ export const oauthCallbackRoute = (
             );
 
             tokenResult = await requestOAuthAuthorizationCodeToken(
-              storedTokenUrl,
+              tokenUrl,
               logger,
               {
                 code,

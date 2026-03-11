@@ -50,7 +50,7 @@ export interface OAuthFlowConfig {
  */
 export interface EarsFlowConfig {
   authTypeId: 'ears';
-  authorizationUrl: string;
+  provider: string;
   scope?: string;
 }
 
@@ -152,31 +152,27 @@ export class OAuthAuthorizationService {
       );
 
     const secrets = rawAction.attributes.secrets;
-
-    // Extract OAuth config - for connector specs, check secrets first, then config
-    // For connector specs, OAuth config is always in secrets (encrypted)
-    // Fallback to config for backwards compatibility with legacy connectors
-    const provider = secrets.provider;
-    const authorizationUrl = provider
-      ? `/${provider}/oauth/authorize`
-      : secrets.authorizationUrl || config?.authorizationUrl;
     const scope = secrets.scope || config?.scope;
 
-    if (!authorizationUrl) {
-      throw new Error('Connector missing required OAuth configuration (authorizationUrl)');
-    }
-
     if (authTypeId === 'ears') {
+      const provider = secrets.provider;
+      if (!provider) {
+        throw new Error('Connector missing required OAuth configuration (EARS provider)');
+      }
       return {
         authTypeId: 'ears',
-        authorizationUrl,
+        provider,
         scope,
       };
     }
 
     // Standard OAuth Authorization Code flow requires clientId
+    // Extract OAuth config - for connector specs, check secrets first, then config
+    // For connector specs, OAuth config is always in secrets (encrypted)
+    // Fallback to config for backwards compatibility with legacy connectors
+    const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
-    if (!clientId) {
+    if (!authorizationUrl || !clientId) {
       throw new Error(
         'Connector missing required OAuth configuration (authorizationUrl, clientId)'
       );

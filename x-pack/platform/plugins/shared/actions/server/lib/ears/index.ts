@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { resolveEarsUrl } from './url';
+export { getEarsEndpointsForProvider, resolveEarsUrl, type EarsEndpoints } from './url';
 export { getEarsAccessToken } from './get_ears_access_token';

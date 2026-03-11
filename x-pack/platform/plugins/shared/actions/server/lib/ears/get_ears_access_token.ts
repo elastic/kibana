@@ -16,7 +16,7 @@ interface GetEarsAccessTokenOpts {
   connectorId: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  tokenUrl: string;
+  provider: string;
   connectorTokenClient: ConnectorTokenClientContract;
   authMode?: AuthMode;
   profileUid?: string;
@@ -40,7 +40,7 @@ export const getEarsAccessToken = async ({
   connectorId,
   logger,
   configurationUtilities,
-  tokenUrl,
+  provider,
   connectorTokenClient,
   authMode,
   profileUid,
@@ -63,7 +63,7 @@ export const getEarsAccessToken = async ({
     isPerUser,
     profileUid,
     authMode,
-    doRefresh: (refreshToken) =>
-      requestEarsRefreshToken(tokenUrl, logger, { refreshToken }, configurationUtilities),
+    refreshFn: (refreshToken) =>
+      requestEarsRefreshToken(provider, logger, { refreshToken }, configurationUtilities),
   });
 };

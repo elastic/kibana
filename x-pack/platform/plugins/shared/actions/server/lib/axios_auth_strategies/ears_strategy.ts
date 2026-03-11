@@ -8,13 +8,11 @@
 import type { AxiosInstance } from 'axios';
 import type { EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
-import { getEarsAccessToken } from '../ears/get_ears_access_token';
-import { resolveEarsUrl } from '../ears/url';
+import { getEarsAccessToken } from '../ears';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
 
 interface EarsSecrets {
   provider?: string;
-  tokenUrl?: string;
 }
 
 export class EarsStrategy implements AxiosAuthStrategy {
@@ -45,21 +43,16 @@ export class EarsStrategy implements AxiosAuthStrategy {
           `Attempting EARS token refresh for connectorId ${connectorId} after 401 error`
         );
 
-        const { provider, tokenUrl: rawTokenUrl } = secrets as EarsSecrets;
-        const derivedTokenPath = provider ? `/${provider}/oauth/token` : rawTokenUrl;
-        if (!derivedTokenPath) {
-          error.message =
-            'Authentication failed: Missing required EARS configuration (provider or tokenUrl).';
+        const { provider } = secrets as EarsSecrets;
+        if (!provider) {
+          error.message = 'Authentication failed: Missing required EARS provider.';
           return Promise.reject(error);
         }
-
-        const tokenUrl = resolveEarsUrl(derivedTokenPath, configurationUtilities.getEarsUrl());
-
         const newAccessToken = await getEarsAccessToken({
           connectorId,
           logger,
           configurationUtilities,
-          tokenUrl,
+          provider,
           connectorTokenClient: connectorTokenClient!,
           authMode,
           profileUid,
@@ -95,12 +88,12 @@ export class EarsStrategy implements AxiosAuthStrategy {
       throw new Error('ConnectorTokenClient is required for EARS OAuth flow');
     }
 
-    const earsOpts = opts as EarsGetTokenOpts;
+    const { provider } = opts as EarsGetTokenOpts;
     return getEarsAccessToken({
       connectorId,
       logger,
       configurationUtilities,
-      tokenUrl: resolveEarsUrl(earsOpts.tokenUrl, configurationUtilities.getEarsUrl()),
+      provider,
       connectorTokenClient,
       authMode,
       profileUid,

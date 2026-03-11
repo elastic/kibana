@@ -8,6 +8,7 @@
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
+import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthTokenResponse } from '../request_oauth_token';
@@ -24,12 +25,14 @@ export interface EarsTokenRequestParams {
  * no client credentials, and no redirect_uri.
  */
 export async function requestEarsToken(
-  tokenUrl: string,
+  provider: string,
   logger: Logger,
   params: EarsTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
+  const { tokenEndpoint: earsTokenPath } = getEarsEndpointsForProvider(provider);
+  const tokenUrl = resolveEarsUrl(earsTokenPath, configurationUtilities.getEarsUrl());
 
   const res = await request({
     axios: axiosInstance,

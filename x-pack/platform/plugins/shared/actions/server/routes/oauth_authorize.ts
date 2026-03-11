@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
-import { resolveEarsUrl } from '../lib/ears';
+import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
@@ -158,11 +158,9 @@ export const oauthAuthorizeRoute = (
 
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
+            const { tokenEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: resolveEarsUrl(
-                oauthConfig.authorizationUrl,
-                actionsConfigUtils.getEarsUrl()
-              ),
+              baseAuthorizationUrl: resolveEarsUrl(tokenEndpoint, actionsConfigUtils.getEarsUrl()),
               scope: oauthConfig.scope,
               callbackUri: redirectUri,
               state: state.state,

@@ -87,7 +87,7 @@ export interface OAuthGetTokenOpts {
 
 export interface EarsGetTokenOpts {
   kind: 'ears';
-  tokenUrl: string;
+  provider: string;
   scope?: string;
 }
 

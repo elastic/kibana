@@ -8,19 +8,13 @@
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
+import { getEarsEndpointsForProvider, resolveEarsUrl } from './url';
 import { request } from '../axios_utils';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { OAuthTokenResponse } from '../request_oauth_token';
 
 export interface EarsRefreshTokenRequestParams {
   refreshToken: string;
-}
-
-/**
- * Derives the EARS refresh endpoint from the token URL by replacing `/token` with `/refresh`.
- */
-export function getEarsRefreshUrl(tokenUrl: string): string {
-  return tokenUrl.replace(/\/token$/, '/refresh');
 }
 
 /**
@@ -31,13 +25,14 @@ export function getEarsRefreshUrl(tokenUrl: string): string {
  * by replacing `/token` with `/refresh`.
  */
 export async function requestEarsRefreshToken(
-  tokenUrl: string,
+  provider: string,
   logger: Logger,
   params: EarsRefreshTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
-  const refreshUrl = getEarsRefreshUrl(tokenUrl);
+  const { refreshEndpoint: earsRefreshPath } = getEarsEndpointsForProvider(provider);
+  const refreshUrl = resolveEarsUrl(earsRefreshPath, configurationUtilities.getEarsUrl());
 
   const res = await request({
     axios: axiosInstance,

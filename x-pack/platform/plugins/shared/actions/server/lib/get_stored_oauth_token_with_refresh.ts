@@ -40,7 +40,7 @@ export interface GetStoredTokenWithRefreshOpts {
    * Called when a refresh is needed. Receives the stored refresh token
    * and must return a new token response from the auth server.
    */
-  doRefresh: (refreshToken: string) => Promise<OAuthTokenResponse>;
+  refreshFn: (refreshToken: string) => Promise<OAuthTokenResponse>;
 }
 
 interface ExtractedStoredOAuthTokens {
@@ -92,7 +92,7 @@ export const getStoredTokenWithRefresh = async ({
   isPerUser = false,
   profileUid,
   authMode,
-  doRefresh,
+  refreshFn,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
   // Acquire lock for this connector to prevent concurrent token refreshes
   const lock = getOrCreateLock(connectorId);
@@ -166,7 +166,7 @@ export const getStoredTokenWithRefresh = async ({
     // Refresh the token
     logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
     try {
-      const tokenResult = await doRefresh(storedRefreshToken);
+      const tokenResult = await refreshFn(storedRefreshToken);
 
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
