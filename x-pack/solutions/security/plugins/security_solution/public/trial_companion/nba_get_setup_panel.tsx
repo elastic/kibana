@@ -239,6 +239,10 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
     },
     paddingTop: euiTheme.size.base,
     paddingBottom: euiTheme.size.l,
+    '.euiAccordion__optionalAction': {
+      alignSelf: 'flex-start',
+      marginTop: '0rem',
+    },
   });
   const firstLineSelected = expandedItemId === todoItems[0].milestoneId;
   const lastLineSelected = expandedItemId === todoItems[todoItems.length - 1].milestoneId;
@@ -257,81 +261,72 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   return (
     isVisible && (
       <EuiPanel css={styles}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiAccordion
-              id={accordionId}
-              buttonContent={buttonContent(completed.length, todoItems.length, euiTheme)}
-              buttonProps={{ css: css({ '&:hover': { textDecoration: 'none' } }) }}
-              arrowProps={{ css: css({ alignSelf: 'flex-start', marginTop: '0rem' }) }}
-              arrowDisplay="right"
-              paddingSize="none"
-              css={{
-                gap: euiTheme.size.m,
-              }}
-              data-test-subj={GET_SET_UP_ACCORDION_TEST_ID}
-              element="fieldset"
-            >
-              <EuiSpacer size="l" />
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="l" />
-              <EuiFlexGroup
-                alignItems={'center'}
-                direction={'column'}
-                css={{ gap: euiTheme.size.m }}
-              >
-                {todoItems.map((item) => {
-                  return (
-                    <EuiFlexItem key={item.milestoneId}>
-                      <YourTrialCompanionTODOItem
-                        key={item.milestoneId}
-                        item={item}
-                        completed={completed}
-                        setExpandedItemId={setExpandedItemId}
-                        trigger={expandedItemId === item.milestoneId ? 'open' : 'closed'}
-                        showTopBorder={!firstLineSelected}
-                        showBottomBorder={!lastLineSelected}
-                      />
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGroup>
-              {showDismiss && (
-                <>
-                  {!lastLineSelected && <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />}
-                  <EuiHorizontalRule margin="none" />
-                  <EuiSpacer css={css({ blockSize: euiTheme.size.l })} />
-                  <EuiFlexGroup alignItems={'center'} direction={'column'} gutterSize="s">
-                    <EuiFlexItem>
-                      <FormattedMessage
-                        id="xpack.securitySolution.trialNotifications.yourTrialCompanion.dismiss.allStepsCompleted"
-                        defaultMessage="All steps complete!"
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiButton
-                        fill={true}
-                        onClick={onDismissButton}
-                        color={'primary'}
-                        data-test-subj={GET_SET_UP_DISMISS_BUTTON_TEST_ID}
-                      >
-                        <FormattedMessage
-                          id="xpack.securitySolution.trialNotifications.yourTrialCompanion.dismiss"
-                          defaultMessage="Dismiss"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
-              )}
-            </EuiAccordion>
-          </EuiFlexItem>
-          <EuiFlexItem grow={0} css={{ alignSelf: 'flex-start', marginTop: '0rem' }}>
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={buttonContent(completed.length, todoItems.length, euiTheme)}
+          buttonProps={{ css: css({ '&:hover': { textDecoration: 'none' } }) }}
+          arrowDisplay="left"
+          paddingSize="none"
+          css={{
+            gap: euiTheme.size.m,
+          }}
+          extraAction={
             <EuiPanel onClick={onClose} hasBorder={false} hasShadow={false} paddingSize="none">
               <EuiIcon type="cross" size="m" aria-hidden={true} />
             </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+          data-test-subj={GET_SET_UP_ACCORDION_TEST_ID}
+          element="fieldset"
+        >
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="l" />
+          <EuiFlexGroup alignItems={'center'} direction={'column'} css={{ gap: euiTheme.size.m }}>
+            {todoItems.map((item) => {
+              return (
+                <EuiFlexItem key={item.milestoneId}>
+                  <YourTrialCompanionTODOItem
+                    key={item.milestoneId}
+                    item={item}
+                    completed={completed}
+                    setExpandedItemId={setExpandedItemId}
+                    trigger={expandedItemId === item.milestoneId ? 'open' : 'closed'}
+                    showTopBorder={!firstLineSelected}
+                    showBottomBorder={!lastLineSelected}
+                  />
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+          {showDismiss && (
+            <>
+              {!lastLineSelected && <EuiSpacer css={css({ blockSize: euiTheme.size.m })} />}
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer css={css({ blockSize: euiTheme.size.l })} />
+              <EuiFlexGroup alignItems={'center'} direction={'column'} gutterSize="s">
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.securitySolution.trialNotifications.yourTrialCompanion.dismiss.allStepsCompleted"
+                    defaultMessage="All steps complete!"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButton
+                    fill={true}
+                    onClick={onDismissButton}
+                    color={'primary'}
+                    data-test-subj={GET_SET_UP_DISMISS_BUTTON_TEST_ID}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.trialNotifications.yourTrialCompanion.dismiss"
+                      defaultMessage="Dismiss"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
+        </EuiAccordion>
       </EuiPanel>
     )
   );
