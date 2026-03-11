@@ -30,12 +30,13 @@ const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
 
-const BROTLI_QUALITY = 9;
+const BROTLI_QUALITY_RELEASE = zlib.constants.BROTLI_MAX_QUALITY;
+const BROTLI_QUALITY_SNAPSHOT = 9;
 const PARALLEL_CONCURRENCY = cpus().length;
 const brotliCompressAsync = promisify(zlib.brotliCompress);
 const cssTargets = browserslistToTargets(browserslist());
 
-async function optimizeAssets(log: ToolingLog, assetDir: string) {
+async function optimizeAssets(log: ToolingLog, assetDir: string, brotliQuality: number) {
   log.info('Creating optimized assets for', assetDir);
   log.indent(4);
   try {
@@ -74,7 +75,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
       const content = await Fsp.readFile(file);
       const compressed = await brotliCompressAsync(content, {
         params: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: BROTLI_QUALITY,
+          [zlib.constants.BROTLI_PARAM_QUALITY]: brotliQuality,
         },
       });
       await Fsp.writeFile(file + '.br', compressed);
@@ -161,9 +162,11 @@ export const GeneratePackagesOptimizedAssets: Task = {
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
 
+    const brotliQuality = config.isRelease ? BROTLI_QUALITY_RELEASE : BROTLI_QUALITY_SNAPSHOT;
+
     // process assets in each ui-shared-deps package
     for (const assetDir of assetDirs) {
-      await optimizeAssets(log, assetDir);
+      await optimizeAssets(log, assetDir, brotliQuality);
     }
 
     // analyze assets to produce metrics.json file

@@ -69,7 +69,7 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   await compressTar({
     source: dockerFilesBuildDir,
     destination: dockerFilesOutputDir,
-    gzipLevel: 6,
+    gzipLevel: config.isRelease ? 9 : 6,
     createRootDirectory: false,
   });
 }

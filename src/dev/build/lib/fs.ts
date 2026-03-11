@@ -237,7 +237,7 @@ interface CompressTarOptions {
 export async function compressTar({
   source,
   destination,
-  gzipLevel = 6,
+  gzipLevel = 9,
   createRootDirectory,
   rootDirectoryName,
 }: CompressTarOptions): Promise<number> {
