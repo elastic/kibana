@@ -771,6 +771,39 @@ export const labels = {
     noSkillsLabel: i18n.translate('xpack.agentBuilder.plugins.noSkillsLabel', {
       defaultMessage: 'None',
     }),
+    identitySectionTitle: i18n.translate('xpack.agentBuilder.plugins.identitySectionTitle', {
+      defaultMessage: 'Identity',
+    }),
+    identitySectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.identitySectionDescription',
+      {
+        defaultMessage: 'Core identifiers and version information for the plugin.',
+      }
+    ),
+    aboutSectionTitle: i18n.translate('xpack.agentBuilder.plugins.aboutSectionTitle', {
+      defaultMessage: 'About',
+    }),
+    aboutSectionDescription: i18n.translate('xpack.agentBuilder.plugins.aboutSectionDescription', {
+      defaultMessage: 'Description and authorship information.',
+    }),
+    sourceSectionTitle: i18n.translate('xpack.agentBuilder.plugins.sourceSectionTitle', {
+      defaultMessage: 'Source',
+    }),
+    sourceSectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.sourceSectionDescription',
+      {
+        defaultMessage: 'Where the plugin was installed from.',
+      }
+    ),
+    skillsSectionTitle: i18n.translate('xpack.agentBuilder.plugins.skillsSectionTitle', {
+      defaultMessage: 'Skills',
+    }),
+    skillsSectionDescription: i18n.translate(
+      'xpack.agentBuilder.plugins.skillsSectionDescription',
+      {
+        defaultMessage: 'Skills provided by this plugin.',
+      }
+    ),
     loadPluginErrorToast: (pluginId: string) =>
       i18n.translate('xpack.agentBuilder.plugins.loadPluginErrorToast', {
         defaultMessage: 'Unable to load "{pluginId}"',

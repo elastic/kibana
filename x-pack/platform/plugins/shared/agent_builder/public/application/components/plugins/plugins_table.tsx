@@ -146,7 +146,7 @@ const usePluginsTableColumns = ({
         name: labels.plugins.nameLabel,
         sortable: true,
         truncateText: true,
-        width: '20%',
+        width: '15%',
         render: (name: string, plugin: PluginDefinition) => (
           <EuiLink
             href={createAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }))}
@@ -160,7 +160,6 @@ const usePluginsTableColumns = ({
         field: 'description',
         name: labels.plugins.descriptionLabel,
         truncateText: true,
-        width: '35%',
         render: (description: string) => (
           <EuiText size="xs" color="subdued">
             {description}
@@ -170,7 +169,7 @@ const usePluginsTableColumns = ({
       {
         field: 'version',
         name: labels.plugins.versionLabel,
-        width: '80px',
+        width: '70px',
         render: (version: string) => (
           <EuiText size="xs" color="subdued">
             {version}
@@ -180,7 +179,7 @@ const usePluginsTableColumns = ({
       {
         field: 'skill_ids',
         name: labels.plugins.skillsLabel,
-        width: '80px',
+        width: '60px',
         render: (skillIds: string[]) => (
           <EuiText size="xs" color="subdued">
             {skillIds.length}
@@ -188,23 +187,7 @@ const usePluginsTableColumns = ({
         ),
       },
       {
-        field: 'source_url',
-        name: labels.plugins.sourceLabel,
-        truncateText: true,
-        width: '20%',
-        render: (sourceUrl: string | undefined) =>
-          sourceUrl ? (
-            <EuiLink href={sourceUrl} target="_blank" external>
-              <EuiText size="xs">{sourceUrl}</EuiText>
-            </EuiLink>
-          ) : (
-            <EuiText size="xs" color="subdued">
-              &mdash;
-            </EuiText>
-          ),
-      },
-      {
-        width: '60px',
+        width: '40px',
         align: 'right' as const,
         render: (plugin: PluginDefinition) => (
           <PluginContextMenu plugin={plugin} onDelete={onDelete} canManage={manageTools} />
