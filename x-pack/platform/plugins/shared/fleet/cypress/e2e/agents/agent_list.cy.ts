@@ -14,7 +14,7 @@ import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
 import { setUISettings } from '../../tasks/ui_settings';
 
-import { request } from '../../tasks/common';
+import { request, visit } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
 const createAgentDocs = (kibanaVersion: string) => [
@@ -139,7 +139,7 @@ describe('View agents list', () => {
 
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
-      cy.visit('/app/fleet/agents');
+      visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).type('agent.id: "agent-1"{enter}');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE);
       assertTableContainsNAgents(1);

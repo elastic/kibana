@@ -19,6 +19,45 @@
 
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
+const USES_ELASTIC_APM_AGENT = [
+  // Core platform APM integration & agent infrastructure
+  /src[\/\\]core[\/\\]/,
+  /kbn-apm-config-loader[\/\\]/,
+  /kbn-apm-utils[\/\\]/,
+
+  // Test & dev tooling
+  /kbn-test[\/\\]src[\/\\]/,
+  /kbn-journeys[\/\\]/,
+  /kbn-cli-dev-mode[\/\\]/,
+  /kbn-docs-utils[\/\\]/,
+  /src[\/\\]platform[\/\\]test[\/\\]/,
+  /x-pack[\/\\]platform[\/\\]test[\/\\]/,
+
+  // Shared packages with APM tracing
+  /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
+  /kbn-reporting[\/\\]export_types[\/\\]/,
+
+  // Plugins with legacy APM custom spans (pending OTel migration)
+  /workflows_execution_engine[\/\\]server[\/\\]/,
+  /task_manager[\/\\]server[\/\\]/,
+  /fleet[\/\\]server[\/\\]/,
+  /alerting[\/\\]server[\/\\]/,
+  /screenshotting[\/\\]server[\/\\]/,
+  /reporting[\/\\]server[\/\\]/,
+  /intercepts[\/\\]server[\/\\]/,
+  /data_usage[\/\\]server[\/\\]/,
+  /encrypted_saved_objects[\/\\]server[\/\\]/,
+  /plugins[\/\\]shared[\/\\]data[\/\\]server[\/\\]search[\/\\]/,
+  /telemetry[\/\\]server[\/\\]/,
+  /telemetry_collection_manager[\/\\]server[\/\\]/,
+  /security_solution[\/\\]server[\/\\]/,
+  /lists[\/\\]server[\/\\]/,
+  /elastic_assistant[\/\\]server[\/\\]/,
+  /plugins[\/\\]apm[\/\\]/,
+  /synthetics[\/\\]server[\/\\]/,
+  /feature-flags[\/\\]server-internal[\/\\]/,
+];
+
 module.exports = {
   extends: [
     './javascript.js',
@@ -184,6 +223,12 @@ module.exports = {
           exact: true,
           disallowedMessage:
             'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
+        },
+        {
+          from: 'elastic-apm-node',
+          to: false,
+          exclude: USES_ELASTIC_APM_AGENT,
+          disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
         },
       ],
     ],
