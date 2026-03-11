@@ -189,9 +189,14 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
-    service.conversations.openNewConversation({
-      messages: [],
-    });
+    if (isOpen) {
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
+      setIsOpen(false);
+    } else {
+      service.conversations.openNewConversation({
+        messages: [],
+      });
+    }
   };
   const variant = isOpen ? 'accent' : 'base';
   return (

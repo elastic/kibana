@@ -49,8 +49,12 @@ export const AssistantNavLink: FC = () => {
   } = useAssistantContext();
   const tooltipRef = useRef<EuiToolTip>(null);
 
-  const showOverlay = useCallback(() => {
+  const toggleOverlay = useCallback(() => {
     tooltipRef.current?.hideToolTip();
+    showAssistantOverlay({ showOverlay: !isOverlayOpen });
+  }, [showAssistantOverlay, isOverlayOpen]);
+
+  const openOverlay = useCallback(() => {
     showAssistantOverlay({ showOverlay: true });
   }, [showAssistantOverlay]);
 
@@ -58,12 +62,12 @@ export const AssistantNavLink: FC = () => {
     if (!openChatTrigger$) return;
     const sub = openChatTrigger$.subscribe((selection) => {
       if (selection === AIAssistantType.Security) {
-        showOverlay();
+        openOverlay();
         completeOpenChat?.();
       }
     });
     return () => sub.unsubscribe();
-  }, [completeOpenChat, openChatTrigger$, showOverlay]);
+  }, [completeOpenChat, openChatTrigger$, openOverlay]);
 
   if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
@@ -79,7 +83,7 @@ export const AssistantNavLink: FC = () => {
             variant={variant}
             size="s"
             iconType="aiAssistantLogo"
-            onClick={showOverlay}
+            onClick={toggleOverlay}
             data-test-subj="assistantNavLink"
           >
             {LINK_LABEL}
@@ -94,7 +98,7 @@ export const AssistantNavLink: FC = () => {
             variant={variant}
             size="s"
             iconType="aiAssistantLogo"
-            onClick={showOverlay}
+            onClick={toggleOverlay}
             aria-label={OPEN_LABEL}
             data-test-subj="assistantNavLinkButtonIcon"
           />

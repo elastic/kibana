@@ -99,9 +99,13 @@ export function NavControl() {
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
-    service.conversations.openNewConversation({
-      messages: [],
-    });
+    if (isOpen) {
+      setIsOpen(false);
+    } else {
+      service.conversations.openNewConversation({
+        messages: [],
+      });
+    }
   };
   const variant = isOpen ? 'accent' : 'base';
   return (
