@@ -11,7 +11,6 @@ import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
 import { ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
-  WATCHLISTS_MANAGEMENT_PAGE_TITLE,
   WATCHLISTS_MANAGEMENT_TABLE_EMPTY,
   WATCHLISTS_MANAGEMENT_TABLE_ERROR,
   WATCHLISTS_MANAGEMENT_TABLE_LOADING,
@@ -100,7 +99,7 @@ describe(
     it('renders page as expected', () => {
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
       cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.get(WATCHLISTS_MANAGEMENT_PAGE_TITLE, { timeout: 60000 }).should('exist');
+      cy.contains('h1', 'Watchlists Management', { timeout: 60000 }).should('exist');
     });
 
     it('shows empty state when no watchlists are returned', () => {
@@ -132,7 +131,6 @@ describe(
 
       visitWatchlistsPage();
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('exist');
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('not.exist');
     });
 
@@ -148,13 +146,12 @@ describe(
       }).as('watchlistsList');
 
       visitWatchlistsPage();
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains('Test watchlist');
     });
 
     it('creates a watchlist via the flyout', () => {
-      const watchlistName = 'CypressWatchlist';
+      const watchlistName = 'cypress_watchlist';
       const watchlistDescription = 'Watchlist created via flyout';
       let watchlists: Array<{
         id: string;
@@ -184,14 +181,13 @@ describe(
       }).as('createWatchlist');
 
       visitWatchlistsPage();
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
 
       cy.contains('button', 'Create').click();
       cy.get('[data-test-subj="watchlist-flyout-header"]').should('exist');
-      cy.get('input[name="Enter Watchlist Name"]').type(watchlistName);
-      cy.get('input[name="Enter Watchlist Description"]').type(watchlistDescription);
-      cy.contains('button', 'Save').click();
+      cy.get('input[name="WatchlistName"]').type(watchlistName);
+      cy.get('input[name="WatchlistDescription"]').type(watchlistDescription);
+      cy.get('[data-test-subj="watchlist-flyout-save"]').click();
       cy.wait('@createWatchlist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
@@ -218,7 +214,6 @@ describe(
       }).as('deleteWatchlist');
 
       visitWatchlistsPage();
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
 
@@ -234,10 +229,10 @@ describe(
     it('updates a watchlist via edit mode', () => {
       const existingWatchlist = buildWatchlist({
         id: 'watchlist-2',
-        name: 'Editable Watchlist',
+        name: 'editable_watchlist',
         description: 'Original description',
       });
-      const updatedName = 'Editable Watchlist Updated';
+      const updatedName = 'editable_watchlist_updated';
       let watchlists = [existingWatchlist];
 
       interceptWatchlistsList(() => watchlists);
@@ -268,14 +263,14 @@ describe(
       cy.get('[aria-label="Edit watchlist"]').click();
       cy.wait('@getWatchlist');
       cy.get('[data-test-subj="watchlist-flyout-header"]').contains('Edit watchlist');
-      cy.get('input[name="Enter Watchlist Description"]').should(
+      cy.get('input[name="WatchlistDescription"]').should(
         'have.value',
         existingWatchlist.description
       );
-      cy.get('input[name="Enter Watchlist Name"]').should('have.value', existingWatchlist.name);
-      cy.get('input[name="Enter Watchlist Name"]').clear();
-      cy.get('input[name="Enter Watchlist Name"]').type(updatedName);
-      cy.contains('button', 'Save').click();
+      cy.get('input[name="WatchlistName"]').should('have.value', existingWatchlist.name);
+      cy.get('input[name="WatchlistName"]').clear();
+      cy.get('input[name="WatchlistName"]').type(updatedName);
+      cy.get('[data-test-subj="watchlist-flyout-save"]').click();
       cy.wait('@updateWatchlist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(updatedName);

@@ -62,7 +62,7 @@ export const deleteWatchlistRoute = (
             const error = transformError(e);
             logger.error(`Failed to delete watchlist: ${error.message}`);
             return siemResponse.error({
-              body: error.message,
+              body: { message: error.message },
               statusCode: error.statusCode,
             });
           }

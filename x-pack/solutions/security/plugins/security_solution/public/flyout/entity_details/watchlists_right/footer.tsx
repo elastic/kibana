@@ -23,7 +23,13 @@ export const WatchlistsFlyoutFooter = ({
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onSave} isLoading={isLoading} isDisabled={isDisabled}>
+            <EuiButton
+              data-test-subj="watchlist-flyout-save"
+              fill
+              onClick={onSave}
+              isLoading={isLoading}
+              isDisabled={isDisabled}
+            >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.watchlists.flyout.saveButton"
                 defaultMessage="Save"

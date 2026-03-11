@@ -91,11 +91,9 @@ const getLastUpdatedColumn = (): EuiBasicTableColumn<WatchlistTableItemType> => 
 
 const WatchlistsActionsMenu = ({
   record,
-  onEdit,
   onDelete,
 }: {
   record: WatchlistTableItemType;
-  onEdit: (record: WatchlistTableItemType) => void;
   onDelete: (record: WatchlistTableItemType) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
