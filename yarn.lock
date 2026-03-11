@@ -3530,9 +3530,9 @@
     redux "^5.0.1"
 
 "@hono/node-server@^1.19.9":
-  version "1.19.9"
-  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.19.9.tgz#8f37119b1acf283fd3f6035f3d1356fdb97a09ac"
-  integrity sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==
+  version "1.19.10"
+  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.19.10.tgz#e230fbb7fb31891cafc653d01deee03f437dd66b"
+  integrity sha512-hZ7nOssGqRgyV3FVVQdfi+U4q02uB23bpnYpdvNXkYTRRyWx84b7yf1ans+dnJ/7h41sGL3CeQTfO+ZGxuO+Iw==
 
 "@huggingface/hub@2.2.0":
   version "2.2.0"
@@ -11088,12 +11088,12 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@playwright/test@1.56.1":
-  version "1.56.1"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.56.1.tgz#6e3bf3d0c90c5cf94bf64bdb56fd15a805c8bd3f"
-  integrity sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==
+"@playwright/test@1.58.2":
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.58.2.tgz#b0ad585d2e950d690ef52424967a42f40c6d2cbd"
+  integrity sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==
   dependencies:
-    playwright "1.56.1"
+    playwright "1.58.2"
 
 "@pmmmwh/react-refresh-webpack-plugin@0.5.15":
   version "0.5.15"
@@ -12617,11 +12617,6 @@
   version "0.23.0"
   resolved "https://registry.yarnpkg.com/@tootallnate/quickjs-emscripten/-/quickjs-emscripten-0.23.0.tgz#db4ecfd499a9765ab24002c3b696d02e6d32a12c"
   integrity sha512-C5Mc6rdnsaJDjO3UpGW/CQTHtCKaYlScZTly4JIu97Jxo/odCiH0ITnDXSJPTOrEKk/ycSZ0AOgTmkDtkOsvIA==
-
-"@trysound/sax@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@trysound/sax/-/sax-0.2.0.tgz#cccaab758af56761eb7bf37af6f03f326dd798ad"
-  integrity sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==
 
 "@ts-morph/common@~0.16.0":
   version "0.16.0"
@@ -17852,14 +17847,6 @@ css-tree@^1.1.2:
     mdn-data "2.0.14"
     source-map "^0.6.1"
 
-css-tree@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-2.3.1.tgz#10264ce1e5442e8572fc82fbe490644ff54b5c20"
-  integrity sha512-6Fv1DV/TYw//QF5IzQdqsNDjx/wc8TrMBZsqjL9eW01tWb7R7k/mq+/VXfJCl7SoD5emsJop9cOByJZfs8hYIw==
-  dependencies:
-    mdn-data "2.0.30"
-    source-map-js "^1.0.1"
-
 css-tree@^3.0.1, css-tree@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/css-tree/-/css-tree-3.1.0.tgz#7aabc035f4e66b5c86f54570d55e05b1346eb0fd"
@@ -19152,10 +19139,10 @@ domhandler@^5.0.1, domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@3.3.0, dompurify@^3.2.4:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.3.0.tgz#aaaadbb83d87e1c2fbb066452416359e5b62ec97"
-  integrity sha512-r+f6MYR1gGN1eJv0TVQbhA7if/U7P87cdPl3HN5rikqaBSBxLiCb/b9O+2eG0cxz0ghyU+mU1QkbsOwERMYlWQ==
+dompurify@3.3.2, dompurify@^3.2.4:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.3.2.tgz#58c515d0f8508b8749452a028aa589ad80b36325"
+  integrity sha512-6obghkliLdmKa56xdbLOpUZ43pAR6xFy1uOrxBaIDjT+yaRuuybLjGS9eVBoSR/UPU5fq3OXClEHLJNGvbxKpQ==
   optionalDependencies:
     "@types/trusted-types" "^2.0.7"
 
@@ -19961,12 +19948,12 @@ eslint-plugin-node@11.1.0:
     resolve "^1.10.1"
     semver "^6.1.0"
 
-eslint-plugin-playwright@2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.2.2.tgz#f722649b0bf04acd8fef39184249710335b10a6f"
-  integrity sha512-j0jKpndIPOXRRP9uMkwb9l/nSmModOU3452nrFdgFJoEv/435J1onk8+aITzjDW8DfypxgmVaDMdmVIa6F7I0w==
+eslint-plugin-playwright@2.9.0:
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-2.9.0.tgz#86204dc5720509ce0baae6dcd383dbe802a7e55d"
+  integrity sha512-k3xrG6YzrallWNFMoGUjMNeu3SFFKXN79KJQBD2PkM4PasJegqV2Up+mPY5od2UmPKQGT+MeIhCmWH8r5eYuQQ==
   dependencies:
-    globals "^13.23.0"
+    globals "^17.3.0"
 
 eslint-plugin-prettier@4.2.1:
   version "4.2.1"
@@ -21538,12 +21525,17 @@ globals@^11.1.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
   integrity sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==
 
-globals@^13.19.0, globals@^13.20.0, globals@^13.23.0:
+globals@^13.19.0, globals@^13.20.0:
   version "13.24.0"
   resolved "https://registry.yarnpkg.com/globals/-/globals-13.24.0.tgz#8432a19d78ce0c1e833949c36adb345400bb1171"
   integrity sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==
   dependencies:
     type-fest "^0.20.2"
+
+globals@^17.3.0:
+  version "17.4.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-17.4.0.tgz#33d7d297ed1536b388a0e2f4bcd0ff19c8ff91b5"
+  integrity sha512-hjrNztw/VajQwOLsMNT1cbJiH2muO3OROCHnbehc8eY5JyD2gqz4AcMHPqgaOR59DjgUjYAYLeH699g/eWi2jw==
 
 globalthis@^1.0.3:
   version "1.0.3"
@@ -22513,9 +22505,9 @@ immer@9.0.21, immer@^9.0.21:
   integrity sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==
 
 immutable@^5.0.2:
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.1.3.tgz#e6486694c8b76c37c063cca92399fa64098634d4"
-  integrity sha512-+chQdDfvscSF1SJqv2gn4SRO2ZyS3xL3r7IW/wWEEzrzLisnOlKiQu5ytC/BVNcS15C39WT2Hg/bjKjDMcu+zg==
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.1.5.tgz#93ee4db5c2a9ab42a4a783069f3c5d8847d40165"
+  integrity sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==
 
 import-fresh@^3.2.1, import-fresh@^3.3.0:
   version "3.3.0"
@@ -25404,11 +25396,6 @@ mdn-data@2.0.28:
   resolved "https://registry.yarnpkg.com/mdn-data/-/mdn-data-2.0.28.tgz#5ec48e7bef120654539069e1ae4ddc81ca490eba"
   integrity sha512-aylIc7Z9y4yzHYAJNuESG3hfhC+0Ibp/MAMiaOZgNv4pmEdFyfZhhhny4MNiAfWdBQ1RQ2mfDWmM1x8SvGyp8g==
 
-mdn-data@2.0.30:
-  version "2.0.30"
-  resolved "https://registry.yarnpkg.com/mdn-data/-/mdn-data-2.0.30.tgz#ce4df6f80af6cfbe218ecd5c552ba13c4dfa08cc"
-  integrity sha512-GaqWWShW4kv/G9IEucWScBx9G1/vsFZZJUO+tD26M8J8z3Kw5RDQjaoZe03YAClgeS/SWPOcb4nkFBTEi5DUEA==
-
 mdn-data@2.12.2:
   version "2.12.2"
   resolved "https://registry.yarnpkg.com/mdn-data/-/mdn-data-2.12.2.tgz#9ae6c41a9e65adf61318b32bff7b64fbfb13f8cf"
@@ -27704,17 +27691,17 @@ platform@^1.3.0:
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
   integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
 
-playwright-core@1.56.1:
-  version "1.56.1"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.56.1.tgz#24a66481e5cd33a045632230aa2c4f0cb6b1db3d"
-  integrity sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==
+playwright-core@1.58.2:
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.58.2.tgz#ac5f5b4b10d29bcf934415f0b8d133b34b0dcb13"
+  integrity sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==
 
-playwright@1.56.1:
-  version "1.56.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.56.1.tgz#62e3b99ddebed0d475e5936a152c88e68be55fbf"
-  integrity sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==
+playwright@1.58.2:
+  version "1.58.2"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.58.2.tgz#afe547164539b0bcfcb79957394a7a3fa8683cfd"
+  integrity sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==
   dependencies:
-    playwright-core "1.56.1"
+    playwright-core "1.58.2"
   optionalDependencies:
     fsevents "2.3.2"
 
@@ -30180,10 +30167,10 @@ sass-lookup@^5.0.1:
   dependencies:
     commander "^10.0.1"
 
-sax@>=0.6.0, sax@^1.2.4, sax@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/sax/-/sax-1.4.1.tgz#44cc8988377f126304d3b3fc1010c733b929ef0f"
-  integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
+sax@>=0.6.0, sax@^1.2.4, sax@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.5.0.tgz#b5549b671069b7aa392df55ec7574cf411179eb8"
+  integrity sha512-21IYA3Q5cQf089Z6tgaUTr7lDAyzoTPx5HRtbhsME8Udispad8dC/+sziTNugOEx54ilvatQ9YCzl4KQLPcRHA==
 
 saxes@^6.0.0:
   version "6.0.0"
@@ -31749,23 +31736,10 @@ svg-tags@^1.0.0:
   resolved "https://registry.yarnpkg.com/svg-tags/-/svg-tags-1.0.0.tgz#58f71cee3bd519b59d4b2a843b6c7de64ac04764"
   integrity sha1-WPcc7jvVGbWdSyqEO2x95krAR2Q=
 
-svgo@3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/svgo/-/svgo-3.3.2.tgz#ad58002652dffbb5986fc9716afe52d869ecbda8"
-  integrity sha512-OoohrmuUlBs8B8o6MB2Aevn+pRIH9zDALSR+6hhqVfa6fRwG/Qw9VUMSMW9VNg2CFc/MTIfabtdOVl9ODIJjpw==
-  dependencies:
-    "@trysound/sax" "0.2.0"
-    commander "^7.2.0"
-    css-select "^5.1.0"
-    css-tree "^2.3.1"
-    css-what "^6.1.0"
-    csso "^5.0.5"
-    picocolors "^1.0.0"
-
-svgo@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/svgo/-/svgo-4.0.0.tgz#17e0fa2eaccf429e0ec0d2179169abde9ba8ad3d"
-  integrity sha512-VvrHQ+9uniE+Mvx3+C9IEe/lWasXCU0nXMY2kZeLrHNICuRiC8uMPyM14UEaMOFA5mhyQqEkB02VoQ16n3DLaw==
+svgo@4.0.1, svgo@^4.0.0:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/svgo/-/svgo-4.0.1.tgz#c82dacd04ee9f1d55cd4e0b7f9a214c86670e3ee"
+  integrity sha512-XDpWUOPC6FEibaLzjfe0ucaV0YrOjYotGJO1WpF0Zd+n6ZGEQUsSugaoLq9QkEZtAfQIxT42UChcssDVPP3+/w==
   dependencies:
     commander "^11.1.0"
     css-select "^5.1.0"
@@ -31773,7 +31747,7 @@ svgo@^4.0.0:
     css-what "^6.1.0"
     csso "^5.0.5"
     picocolors "^1.1.1"
-    sax "^1.4.1"
+    sax "^1.5.0"
 
 swagger-jsdoc@6.2.8:
   version "6.2.8"
