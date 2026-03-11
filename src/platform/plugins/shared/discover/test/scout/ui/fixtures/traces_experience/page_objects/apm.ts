@@ -17,6 +17,7 @@ export interface ApmPage {
   ): Promise<void>;
   clickDetailLink(linkText: string, tableTestSubj?: string): Promise<void>;
   clickWaterfallItem(itemName: string): Promise<void>;
+  dismissFlyout(): Promise<void>;
 }
 
 export function createApmPage(page: ScoutPage): ApmPage {
@@ -47,6 +48,13 @@ export function createApmPage(page: ScoutPage): ApmPage {
 
     async clickWaterfallItem(itemName: string) {
       await page.testSubj.locator('waterfall').getByText(itemName).click();
+    },
+
+    async dismissFlyout() {
+      const flyout = page.locator('.euiFlyout');
+      await flyout.waitFor({ state: 'visible' });
+      await page.keyboard.press('Escape');
+      await flyout.waitFor({ state: 'hidden' });
     },
   };
 }

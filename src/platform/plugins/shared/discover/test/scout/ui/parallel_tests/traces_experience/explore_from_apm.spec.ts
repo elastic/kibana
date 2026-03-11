@@ -251,8 +251,7 @@ spaceTest.describe(
           }
           await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
           await page.goBack();
-          // Close open flyout
-          await page.keyboard.press('Escape');
+          await pageObjects.tracesExperience.apm.dismissFlyout();
         });
 
         await spaceTest.step('Latency correlations opens traces experience', async () => {
