@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n'
   - '@kbn/core-chrome-browser'
+  - '@kbn/data-view-utils'
 tags:
   - plugin
   - prod
