@@ -64,3 +64,9 @@ export {
   type DataStringifyJsonStepInputSchema,
   type DataStringifyJsonStepOutputSchema,
 } from './data_stringify_json_step';
+export {
+  DataConcatStepTypeId,
+  dataConcatStepCommonDefinition,
+  type DataConcatStepInputSchema,
+  type DataConcatStepOutputSchema,
+} from './data_concat_step';

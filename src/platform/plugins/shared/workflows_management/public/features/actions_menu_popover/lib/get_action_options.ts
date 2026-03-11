@@ -144,7 +144,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };
@@ -177,6 +177,17 @@ export function getActionOptions(
         }),
         description: i18n.translate('workflows.actionsMenu.loopDescription', {
           defaultMessage: 'Iterate the action over a specified list',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
         iconColor: euiTheme.colors.vis.euiColorVis0,
