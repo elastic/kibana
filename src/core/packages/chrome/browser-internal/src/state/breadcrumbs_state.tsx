@@ -8,20 +8,23 @@
  */
 
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { combineLatest, distinctUntilChanged, map, type Observable, shareReplay } from 'rxjs';
 import deepEqual from 'react-fast-compare';
 import type {
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
 } from '@kbn/core-chrome-browser';
 import { HeaderBreadcrumbsBadges } from '@kbn/core-chrome-browser-components';
-import { createArrayState, type ArrayState } from './state_helpers';
+import { createState, createArrayState, type State, type ArrayState } from './state_helpers';
 
-interface BreadcrumbsState {
+export interface BreadcrumbsState {
   breadcrumbs: ArrayState<ChromeBreadcrumb>;
   breadcrumbsAppendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
   breadcrumbsBadges: ArrayState<ChromeBreadcrumbsBadge>;
+  legacyBadge: State<ChromeBadge | undefined>;
   breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
 }
 
@@ -72,12 +75,38 @@ const toBadgesExtension = (
   };
 };
 
+const chromeBadgeToBreadcrumbsBadge = (badge: ChromeBadge): ChromeBreadcrumbsBadge => ({
+  badgeText: badge.text,
+  renderCustomBadge: ({ badgeText }) => (
+    <EuiBetaBadge
+      alignment="middle"
+      label={badgeText}
+      tooltipContent={badge.tooltip}
+      iconType={badge.iconType}
+      data-test-subj="headerBadge"
+      data-test-badge-label={badge.text}
+    />
+  ),
+});
+
 export const createBreadcrumbsState = (): BreadcrumbsState => {
   const breadcrumbs = createArrayState<ChromeBreadcrumb>();
   const breadcrumbsAppendExtensions = createArrayState<ChromeBreadcrumbsAppendExtension>();
   const breadcrumbsBadges = createArrayState<ChromeBreadcrumbsBadge>();
+  const legacyBadge = createState<ChromeBadge | undefined>(undefined);
 
-  const badgesExtension$ = combineLatest([breadcrumbsBadges.$, breadcrumbsAppendExtensions.$]).pipe(
+  const allBadges$ = combineLatest([breadcrumbsBadges.$, legacyBadge.$]).pipe(
+    map(([badges, legacy]) => {
+      if (!legacy) {
+        return badges;
+      }
+      return [chromeBadgeToBreadcrumbsBadge(legacy), ...badges];
+    }),
+    distinctUntilChanged(deepEqual),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  const badgesExtension$ = combineLatest([allBadges$, breadcrumbsAppendExtensions.$]).pipe(
     map(([badges, extensions]) => toBadgesExtensionRenderModel(badges, extensions.length)),
     distinctUntilChanged(areBadgesRenderModelsEqual),
     map(toBadgesExtension),
@@ -102,6 +131,7 @@ export const createBreadcrumbsState = (): BreadcrumbsState => {
     breadcrumbs,
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
+    legacyBadge,
     breadcrumbsAppendExtensionsWithBadges$,
   };
 };
