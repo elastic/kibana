@@ -360,7 +360,19 @@ const startFleetServerWithDocker = async ({
           }
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
-          await waitForHostToEnroll(kbnClient, log, hostname, 240000);
+          try {
+            await waitForHostToEnroll(kbnClient, log, hostname, 240000);
+          } catch (enrollErr) {
+            log.warning(
+              `Agent enrollment lookup timed out for [${hostname}], falling back to fleet server status check`
+            );
+            if (!(await isFleetServerRunning(kbnClient, log))) {
+              throw enrollErr;
+            }
+            log.info(
+              `Fleet server at [${fleetServerUrl}] is responding — proceeding despite enrollment lookup timeout`
+            );
+          }
         }
 
         fleetServerVersionInfo = isServerless
