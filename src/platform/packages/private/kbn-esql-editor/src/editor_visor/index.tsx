@@ -113,7 +113,7 @@ export function QuickSearchVisor({
       const sourceNames = selectedSources.map((s) => s.label);
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
-          query: trimmed,
+          nlInstruction: trimmed,
           sources: sourceNames.length ? sourceNames : undefined,
         }),
       });

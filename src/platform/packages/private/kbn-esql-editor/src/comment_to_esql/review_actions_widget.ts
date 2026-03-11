@@ -20,6 +20,15 @@ interface ReviewActionsCallbacks {
   onReject: () => void;
 }
 
+/**
+ * A widget that displays the review actions for the generated code
+ * when a comment is added to the editor.
+ * The widget displays two buttons:
+ * - Accept: Accept the generated code
+ * - Reject: Reject the generated code
+ * The widget is positioned below the comment.
+ * The widget is disposed when the comment is removed or the editor is disposed.
+ */
 export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   private domNode: HTMLElement | undefined;
   private lineNumber: number;
@@ -134,7 +143,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       cursor: pointer;
       border: none;
       border-radius: ${this.euiTheme.border.radius.small};
-      padding: 2px ${this.euiTheme.size.s};
+      padding: ${this.euiTheme.size.xxs} ${this.euiTheme.size.s};
       font-size: ${this.euiTheme.size.m};
       font-weight: ${this.euiTheme.font.weight.medium};
       background-color: ${bg};

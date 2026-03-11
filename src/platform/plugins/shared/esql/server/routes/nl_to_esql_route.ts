@@ -166,7 +166,7 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          query: schema.string(),
+          nlInstruction: schema.string(),
           sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
           currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
         }),
@@ -181,7 +181,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query, sources, currentQuery } = request.body;
+        const { nlInstruction, sources, currentQuery } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -215,7 +215,7 @@ export const registerNLtoESQLRoute = (
           naturalLanguageToEsql({
             client: inference.getClient({ request }),
             connectorId,
-            input: query,
+            input: nlInstruction,
             functionCalling: 'auto',
             logger,
             system: buildSystemPrompt(sourceNames, fieldsContext, currentQuery),
