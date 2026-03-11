@@ -148,11 +148,19 @@ export function prepareInlineEditPanel(
           );
           onCancel?.();
         }}
-        onApply={(newAttributes) => {
-          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
+        onApply={async (newAttributes) => {
+          let appliedAttributes = newAttributes;
           if (newAttributes.visualizationType != null) {
-            onApply?.(newAttributes);
+            const result = await onApply?.(newAttributes);
+            if (result) {
+              appliedAttributes = result;
+            }
           }
+          panelManagementApi.onStopEditing(false, {
+            ...getState(),
+            attributes: appliedAttributes,
+          });
+          return appliedAttributes;
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
