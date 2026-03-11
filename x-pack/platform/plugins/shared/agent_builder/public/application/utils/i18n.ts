@@ -519,7 +519,7 @@ export const labels = {
     }),
     toolsLabel: i18n.translate('xpack.agentBuilder.skills.toolsLabel', { defaultMessage: 'Tools' }),
     referencedContentLabel: i18n.translate('xpack.agentBuilder.skills.referencedContentLabel', {
-      defaultMessage: 'Refs',
+      defaultMessage: 'Additional files',
     }),
     typeLabel: i18n.translate('xpack.agentBuilder.skills.typeLabel', { defaultMessage: 'Type' }),
     saveButtonLabel: i18n.translate('xpack.agentBuilder.skills.saveButtonLabel', {
