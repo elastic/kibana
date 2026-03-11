@@ -12,10 +12,7 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import {
-  GRAPH_DOCUMENT_DETAILS_LIMIT,
-  SECURITY_ALERTS_PARTIAL_IDENTIFIER,
-} from '../../../common/constants';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import { generateFieldHintCases, checkIfEntitiesIndexLookupMode } from '../graph/utils';
 import type { EntityRecord } from './types';
 
@@ -44,7 +41,6 @@ export const fetchEntities = async ({
   indexPatterns,
 }: FetchEntitiesParams): Promise<EsqlToRecords<EntityRecord>> => {
   const lookupIndexName = getEntitiesLatestIndexName(spaceId);
-  const limit = GRAPH_DOCUMENT_DETAILS_LIMIT;
   const resolvedIndexPatterns = indexPatterns ?? [
     `${SECURITY_ALERTS_PARTIAL_IDENTIFIER}${spaceId}`,
     'logs-*',
@@ -57,7 +53,6 @@ export const fetchEntities = async ({
     lookupIndexName,
     isLookupIndexAvailable,
     entityCount: entityIds.length,
-    limit,
   });
 
   logger.trace(`Fetching entities with query [${query}]`);
@@ -106,7 +101,6 @@ interface BuildEntitiesQueryParams {
   lookupIndexName: string;
   isLookupIndexAvailable: boolean;
   entityCount: number;
-  limit: number;
 }
 
 const buildEntitiesEsqlQuery = ({
@@ -114,7 +108,6 @@ const buildEntitiesEsqlQuery = ({
   lookupIndexName,
   isLookupIndexAvailable,
   entityCount,
-  limit,
 }: BuildEntitiesQueryParams): string => {
   const entityIdParams = Array.from({ length: entityCount }, (_, idx) => `?entity_id${idx}`).join(
     ', '
@@ -148,8 +141,7 @@ ${buildSingleEntityEnrichment(isLookupIndexAvailable, lookupIndexName)}
   timestamp = MAX(timestamp),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes))
-    BY entityId
-| LIMIT ${limit}`;
+    BY entityId`;
 };
 
 /**

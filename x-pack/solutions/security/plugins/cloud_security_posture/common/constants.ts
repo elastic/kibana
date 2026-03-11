@@ -39,14 +39,6 @@ export const GRAPH_EVENTS_ROUTE_PATH = '/internal/cloud_security_posture/graph/e
 export const GRAPH_EVENTS_API_CURRENT_VERSION = '1';
 
 /**
- * Internal ESQL query result limit for graph document details.
- * This is NOT an API-exposed limit - it controls the maximum number of records
- * fetched internally by ESQL queries before aggregation and pagination.
- * API pagination limits are defined separately in the route schemas.
- */
-export const GRAPH_DOCUMENT_DETAILS_LIMIT = 1000;
-
-/**
  * Partial identifier for security alerts indices.
  * Used to detect whether an index is an alerts index (e.g., for isAlert flag in ESQL queries).
  */

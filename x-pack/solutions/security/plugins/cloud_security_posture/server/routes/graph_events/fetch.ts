@@ -11,10 +11,7 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import {
-  GRAPH_DOCUMENT_DETAILS_LIMIT,
-  SECURITY_ALERTS_PARTIAL_IDENTIFIER,
-} from '../../../common/constants';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import {
   buildActorEntityIdEval,
   buildTargetEntityIdEvals,
@@ -48,8 +45,6 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const limit = GRAPH_DOCUMENT_DETAILS_LIMIT;
-
   const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
@@ -57,7 +52,6 @@ export const fetchEvents = async ({
     eventCount: eventIds.length,
     isLookupIndexAvailable,
     spaceId,
-    limit,
   });
 
   logger.trace(`Fetching events with query [${query}]`);
@@ -98,7 +92,6 @@ interface BuildEventsQueryParams {
   eventCount: number;
   isLookupIndexAvailable: boolean;
   spaceId: string;
-  limit: number;
 }
 
 const buildEventsEsqlQuery = ({
@@ -106,7 +99,6 @@ const buildEventsEsqlQuery = ({
   eventCount,
   isLookupIndexAvailable,
   spaceId,
-  limit,
 }: BuildEventsQueryParams): string => {
   // Generate document ID params
   const documentIdParams = Array.from({ length: eventCount }, (_, idx) => `?doc_id${idx}`).join(
@@ -143,6 +135,5 @@ ${buildSourceMetadataEvals()}
   targetEntityName = MIN(targetEntityName),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes))
-    BY docId, eventId, index
-| LIMIT ${limit}`;
+    BY docId, eventId, index`;
 };
