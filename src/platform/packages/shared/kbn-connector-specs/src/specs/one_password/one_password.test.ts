@@ -34,7 +34,7 @@ describe('OnePasswordConnector', () => {
 
   describe('metadata', () => {
     it('should have correct id and display name', () => {
-      expect(OnePasswordConnector.metadata.id).toBe('.one_password');
+      expect(OnePasswordConnector.metadata.id).toBe('.1password');
       expect(OnePasswordConnector.metadata.displayName).toBe('1Password');
       expect(OnePasswordConnector.metadata.minimumLicense).toBe('enterprise');
       expect(OnePasswordConnector.metadata.supportedFeatureIds).toContain('workflows');

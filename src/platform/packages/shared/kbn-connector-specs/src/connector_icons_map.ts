@@ -122,7 +122,7 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
-    '.one_password',
+    '.1password',
     lazy(
       () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
     ),

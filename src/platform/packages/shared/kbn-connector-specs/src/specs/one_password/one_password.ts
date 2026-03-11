@@ -30,7 +30,7 @@ const throwWithApiError = (error: unknown): never => {
 
 export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
-    id: '.one_password',
+    id: '.1password',
     displayName: '1Password',
     description: i18n.translate('core.kibanaConnectorSpecs.onePassword.metadata.description', {
       defaultMessage:
