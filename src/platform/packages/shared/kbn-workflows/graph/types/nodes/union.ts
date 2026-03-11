@@ -24,7 +24,12 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
-import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import {
+  EnterForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitForeachNodeSchema,
+  ExitWhileNodeSchema,
+} from './loop_nodes';
 import {
   EnterContinueNodeSchema,
   EnterFallbackPathNodeSchema,
@@ -58,6 +63,8 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ExitConditionBranchNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitWhileNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,
