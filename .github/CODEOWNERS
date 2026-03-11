@@ -2549,14 +2549,14 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
 
 # Security Solution OpenAPI bundles
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_endpoint_management_api_* @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_entity_analytics_api_* @elastic/security-entity-analytics
-/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_detections_api_* @elastic/security-detection-rule-management @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_endpoint_management_api_* @elastic/security-defend-workflows @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_entity_analytics_api_* @elastic/security-entity-analytics @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/serverless/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_detections_api_* @elastic/security-detection-rule-management @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_endpoint_management_api_* @elastic/security-defend-workflows @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_entity_analytics_api_* @elastic/security-entity-analytics @elastic/security-docs-reviewers
+/x-pack/solutions/security/plugins/security_solution/docs/openapi/ess/security_solution_timeline_api_* @elastic/security-threat-hunting-investigations @elastic/security-docs-reviewers
 
 # Security Solution Offering plugins
 # TODO: assign sub directories to sub teams
@@ -3154,14 +3154,46 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
-# OpenAPI spec files
+# OpenAPI shared infrastructure
 oas_docs/linters                              @elastic/experience-docs
 oas_docs/overlays                             @elastic/experience-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/experience-docs
+oas_docs/output                               @elastic/api-docs-reviewer
 
-# Documentation settings files
+# OpenAPI input specs -- experience-docs (response ops, general)
+/x-pack/platform/plugins/shared/alerting/docs/openapi/           @elastic/response-ops @elastic/experience-docs
+/x-pack/platform/plugins/shared/cases/docs/openapi/              @elastic/kibana-cases @elastic/experience-docs
+/x-pack/platform/plugins/shared/actions/docs/openapi/            @elastic/response-ops @elastic/experience-docs
+/src/platform/plugins/shared/data_views/docs/openapi/            @elastic/kibana-data-discovery @elastic/experience-docs
+/x-pack/platform/plugins/shared/features/docs/openapi/           @elastic/kibana-core @elastic/experience-docs
+/src/core/packages/saved-objects/docs/openapi/                    @elastic/kibana-core @elastic/experience-docs
+/x-pack/platform/plugins/shared/security/docs/openapi/           @elastic/kibana-security @elastic/experience-docs
+/src/platform/plugins/shared/share/docs/openapi/                  @elastic/appex-sharedux @elastic/experience-docs
+
+# OpenAPI input specs -- developer-docs
+/x-pack/platform/plugins/shared/ml/common/openapi/               @elastic/ml-ui @elastic/developer-docs
+/x-pack/platform/plugins/shared/task_manager/docs/openapi/       @elastic/response-ops @elastic/developer-docs
+/x-pack/platform/plugins/private/upgrade_assistant/docs/openapi/ @elastic/kibana-management @elastic/developer-docs
+
+# OpenAPI input specs -- ingest-docs
+/x-pack/platform/plugins/private/logstash/docs/openapi/          @elastic/logstash @elastic/ingest-docs
+
+# OpenAPI input specs -- security-docs-reviewers
+/x-pack/solutions/security/packages/kbn-securitysolution-lists-common/docs/openapi/  @elastic/security-detection-engine @elastic/security-docs-reviewers
+/x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/docs/openapi/  @elastic/security-detection-engine @elastic/security-docs-reviewers
+/x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common/docs/openapi/  @elastic/security-detection-engine @elastic/security-docs-reviewers
+/x-pack/platform/packages/shared/kbn-elastic-assistant-common/docs/openapi/  @elastic/security-generative-ai @elastic/security-docs-reviewers
+/x-pack/platform/plugins/shared/osquery/docs/openapi/            @elastic/security-defend-workflows @elastic/security-docs-reviewers
+
+# OpenAPI input specs -- obs-docs-reviewers
+/x-pack/solutions/observability/plugins/apm/docs/openapi/        @elastic/obs-presentation-team @elastic/obs-docs-reviewers
+/x-pack/solutions/observability/plugins/slo/docs/openapi/        @elastic/actionable-obs-team @elastic/obs-docs-reviewers
+/x-pack/solutions/observability/plugins/uptime/docs/openapi/     @elastic/actionable-obs-team @elastic/obs-docs-reviewers
+/x-pack/solutions/observability/plugins/synthetics/docs/openapi/ @elastic/actionable-obs-team @elastic/obs-docs-reviewers
+/x-pack/solutions/observability/plugins/observability_ai_assistant_app/docs/openapi/  @elastic/obs-ai-team @elastic/obs-docs-reviewers
+
+# Documentation settings and reference
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
 
