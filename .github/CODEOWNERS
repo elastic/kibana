@@ -3155,11 +3155,11 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI shared infrastructure
-oas_docs/linters                              @elastic/experience-docs
-oas_docs/overlays                             @elastic/experience-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
-oas_docs/kibana.info.yaml                     @elastic/experience-docs
-oas_docs/output                               @elastic/api-docs-reviewer
+oas_docs/linters                              @elastic/developer-docs
+oas_docs/overlays                             @elastic/ski-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/ski-docs
+oas_docs/kibana.info.yaml                     @elastic/ski-docs
+oas_docs/output                               @elastic/ski-docs
 
 # Documentation settings and reference
 docs/settings-gen                             @elastic/experience-docs
