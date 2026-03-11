@@ -49,7 +49,7 @@
       "observabilityAIAssistant",
       "usageCollection",
       "cases",
-      "cps",
+      "cps"
     ],
     "requiredBundles": [
       "cases",

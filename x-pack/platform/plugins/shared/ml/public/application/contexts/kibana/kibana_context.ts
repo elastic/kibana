@@ -68,7 +68,7 @@ interface StartPlugins {
   usageCollection?: UsageCollectionSetup;
   fieldsMetadata: FieldsMetadataPublicStart;
   fileUpload: FileUploadPluginStart;
-  cps: CPSPluginStart;
+  cps?: CPSPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {
