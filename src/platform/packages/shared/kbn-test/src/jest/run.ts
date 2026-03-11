@@ -116,7 +116,8 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     const shardIdentity = shardForCheckpoint
       ? annotateConfigWithShard(relConfigForCheckpoint, shardForCheckpoint)
       : relConfigForCheckpoint;
-    const checkpointKey = getCheckpointKey(relConfigForCheckpoint);
+    const checkpointIdentity = shardIdentity;
+    const checkpointKey = getCheckpointKey(checkpointIdentity);
 
     log.info(
       `[jest-checkpoint] Identity details: config=${relConfigForCheckpoint}, shard=${
@@ -125,16 +126,16 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     );
 
     log.info(
-      `[jest-checkpoint] Checking prior completion for ${relConfigForCheckpoint} (step=${
+      `[jest-checkpoint] Checking prior completion for ${checkpointIdentity} (step=${
         process.env.BUILDKITE_STEP_ID || ''
       }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
         process.env.BUILDKITE_RETRY_COUNT || '0'
       }, key=${checkpointKey})`
     );
-    const alreadyCompleted = await isConfigCompleted(relConfigForCheckpoint);
+    const alreadyCompleted = await isConfigCompleted(checkpointIdentity);
     if (alreadyCompleted) {
       log.info(
-        `[jest-checkpoint] Skipping ${relConfigForCheckpoint} (already completed on previous attempt, key=${checkpointKey})`
+        `[jest-checkpoint] Skipping ${checkpointIdentity} (already completed on previous attempt, key=${checkpointKey})`
       );
       process.exit(0);
     }
@@ -211,17 +212,18 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
       const shardIdentity = shardForCheckpoint
         ? annotateConfigWithShard(relConfig, shardForCheckpoint)
         : relConfig;
-      const checkpointKey = getCheckpointKey(relConfig);
+      const checkpointIdentity = shardIdentity;
+      const checkpointKey = getCheckpointKey(checkpointIdentity);
       process.on('exit', () => {
         // process.exitCode is 0 or undefined for success (Jest only sets it for failures).
         // Both are falsy, while failure codes (1, etc.) are truthy.
         if (!process.exitCode) {
           log.info(
-            `[jest-checkpoint] Marking ${relConfig} as completed (key=${checkpointKey}, shard=${
+            `[jest-checkpoint] Marking ${checkpointIdentity} as completed (key=${checkpointKey}, shard=${
               shardForCheckpoint || '<none>'
             }, shardIdentity=${shardIdentity})`
           );
-          markConfigCompletedSync(relConfig);
+          markConfigCompletedSync(checkpointIdentity);
         }
       });
     }
