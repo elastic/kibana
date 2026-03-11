@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
-  EuiTextTruncate,
   euiTextTruncate,
   EuiToolTip,
   useEuiTheme,
@@ -234,21 +233,20 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 )}
               />
             ) : (
-              <EuiTextTruncate
-                text={stepDescription}
-                truncation="end"
-                children={() => (
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    css={css`
-                      font-family: ${euiTheme.font.familyCode};
-                    `}
-                  >
-                    {stepDescription}
-                  </EuiText>
-                )}
-              />
+              <EuiToolTip content={stepDescription} display="block">
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  tabIndex={0}
+                  data-test-subj="streamsAppProcessorDescription"
+                  css={css`
+                    font-family: ${euiTheme.font.familyCode};
+                    ${euiTextTruncate()}
+                  `}
+                >
+                  {stepDescription}
+                </EuiText>
+              </EuiToolTip>
             )}
           </EuiPanel>
         </EuiFlexItem>

@@ -12,12 +12,17 @@ import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
 import { useAttackDetailsContext } from '../context';
 
 const INSIGHTS_TAB_ID = 'insights' as const;
+const ENTITIES_SUB_TAB_ID = 'entity' as const;
 
 export interface UseNavigateToAttackDetailsLeftPanelParams {
   /**
    * Optional tab to open in the left panel. Defaults to the Insights tab.
    */
   tab?: string;
+  /**
+   * Optional sub-tab (e.g. 'entity' for Entities). When opening Insights, defaults to Entities.
+   */
+  subTab?: string;
 }
 
 /**
@@ -26,7 +31,7 @@ export interface UseNavigateToAttackDetailsLeftPanelParams {
 export const useNavigateToAttackDetailsLeftPanel = (
   params: UseNavigateToAttackDetailsLeftPanelParams = {}
 ): (() => void) => {
-  const { tab = INSIGHTS_TAB_ID } = params;
+  const { tab = INSIGHTS_TAB_ID, subTab = ENTITIES_SUB_TAB_ID } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
 
@@ -39,9 +44,10 @@ export const useNavigateToAttackDetailsLeftPanel = (
       },
       path: {
         tab,
+        subTab,
       },
     }),
-    [attackId, indexName, tab]
+    [attackId, indexName, tab, subTab]
   );
 
   return useCallback(() => {

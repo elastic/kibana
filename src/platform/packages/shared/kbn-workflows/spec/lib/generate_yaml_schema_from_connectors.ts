@@ -20,8 +20,11 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getTriggerSchema,
+  getWhileStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
@@ -99,6 +102,7 @@ function createRecursiveStepSchema(
     // Create step schemas with the recursive reference
     // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
@@ -115,11 +119,14 @@ function createRecursiveStepSchema(
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
       forEachSchema,
+      whileSchema,
       ifSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
       DataSetStepSchema,
+      WorkflowExecuteStepSchema,
+      WorkflowExecuteAsyncStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);

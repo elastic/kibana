@@ -41,7 +41,7 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
-import type { TrackingService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager, createToolManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runTool, runInternalTool } from './run_tool';
@@ -66,6 +66,7 @@ export interface CreateScopedRunnerDeps {
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
+  analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;
   // other deps
   logger: Logger;

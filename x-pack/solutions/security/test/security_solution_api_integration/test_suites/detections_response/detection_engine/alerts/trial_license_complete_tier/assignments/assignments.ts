@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           error: 'Bad Request',
-          message: '[request body]: ids: Array must contain at least 1 element(s)',
+          message: '[request body]: ids: Too small: expected array to have >=1 items',
           statusCode: 400,
         });
       });
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({
           error: 'Bad Request',
           message:
-            '[request body]: ids.1: String must contain at least 1 character(s), ids.1: No empty strings allowed',
+            '[request body]: ids.1: Too small: expected string to have >=1 characters, ids.1: No empty strings allowed',
           statusCode: 400,
         });
       });
