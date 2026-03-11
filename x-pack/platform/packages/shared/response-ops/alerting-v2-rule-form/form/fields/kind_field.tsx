@@ -13,7 +13,7 @@ import type { FormValues } from '../types';
 
 const CARD_ID = 'ruleV2KindField';
 
-export const KindField: React.FC = () => {
+export const KindField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (

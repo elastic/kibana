@@ -59,7 +59,7 @@ export interface StandaloneRuleFormProps {
  * Uses react-hook-form's `defaultValues` for static initialization.
  * Time field is auto-selected by TimeFieldSelect based on available date fields.
  */
-export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
+export const StandaloneRuleForm = ({
   query,
   services,
   layout,
@@ -74,7 +74,7 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   cancelLabel,
   initialValues,
   ruleId,
-}) => {
+}: StandaloneRuleFormProps) => {
   const queryDefaults = useFormDefaults({ query });
 
   const defaultValues = useMemo<FormValues>(

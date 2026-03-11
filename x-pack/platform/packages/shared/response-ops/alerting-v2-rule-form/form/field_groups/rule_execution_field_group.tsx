@@ -11,7 +11,7 @@ import { FieldGroup } from './field_group';
 import { ScheduleField } from '../fields/schedule_field';
 import { LookbackWindowField } from '../fields/lookback_window_field';
 
-export const RuleExecutionFieldGroup: React.FC = () => {
+export const RuleExecutionFieldGroup = () => {
   return (
     <FieldGroup
       title={i18n.translate('xpack.alertingV2.ruleForm.ruleExecution', {

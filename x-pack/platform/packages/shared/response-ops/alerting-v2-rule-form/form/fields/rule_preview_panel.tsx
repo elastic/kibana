@@ -22,7 +22,7 @@ import { RecoveryResultsPreview } from './recovery_results_preview';
  * - **Flyout layout**: Renders a trigger button that opens a nested flyout
  *   containing both previews.
  */
-export const RulePreviewPanel: React.FC = () => {
+export const RulePreviewPanel = () => {
   const { layout } = useRuleFormMeta();
   const { control } = useFormContext<FormValues>();
   const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
@@ -45,7 +45,7 @@ export const RulePreviewPanel: React.FC = () => {
   return <FlyoutPreview showRecoveryPreview={showRecoveryPreview} />;
 };
 
-const FlyoutPreview: React.FC<{ showRecoveryPreview: boolean }> = ({ showRecoveryPreview }) => {
+const FlyoutPreview = ({ showRecoveryPreview }: { showRecoveryPreview: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const openFlyout = useCallback(() => setIsOpen(true), []);
