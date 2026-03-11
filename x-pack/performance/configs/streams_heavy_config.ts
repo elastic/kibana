@@ -9,7 +9,10 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 
 /**
  * Extended FTR config for heavy Streams performance journeys (e.g. large wired hierarchy).
- * Increases mochaOpts.timeout to 30 minutes to accommodate bulk stream creation in beforeSteps.
+ * Increases mochaOpts.timeout to 45 minutes to accommodate bulk stream creation in beforeSteps.
+ *
+ * TODO(streams-program#958): reduce timeout back to default once the import API scales without
+ * server-side timeouts at large hierarchy sizes.
  */
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -19,7 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseConfig.getAll(),
     mochaOpts: {
       ...baseConfig.get('mochaOpts'),
-      timeout: 1_800_000, // 30 minutes
+      timeout: 2_700_000, // 45 minutes
     },
   };
 }

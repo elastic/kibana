@@ -54,12 +54,6 @@ function isConflictError(error: unknown): boolean {
   return err?.response?.status === 409;
 }
 
-/** 409 for "already exists" (content import may have succeeded before timing out). */
-function isAlreadyExistsConflict(error: unknown): boolean {
-  const err = error as { response?: { status?: number; data?: { message?: string } } };
-  return err?.response?.status === 409 && /already exists/i.test(err.response.data?.message ?? '');
-}
-
 function isLockContentionError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 422;
@@ -73,15 +67,26 @@ function isRequestTimeoutError(error: unknown): boolean {
   );
 }
 
-/** Quick probe to check whether a stream already exists. */
+/** Network-level failure (ECONNRESET, ECONNREFUSED, socket hang up, etc.). */
+function isNetworkError(error: unknown): boolean {
+  const err = error as { code?: string; message?: string };
+  return (
+    /ECONNRESET|ECONNREFUSED|EPIPE|ETIMEDOUT|socket hang up/i.test(err?.code ?? '') ||
+    /ECONNRESET|ECONNREFUSED|EPIPE|ETIMEDOUT|socket hang up/i.test(err?.message ?? '')
+  );
+}
+
+/** Quick probe to check whether a stream already exists (single attempt, no retries). */
 async function checkStreamExists(kibanaServer: KibanaServer, streamName: string): Promise<boolean> {
   try {
-    await kibanaServer.request({
+    const response = await kibanaServer.request({
       path: `/api/streams/${streamName}`,
       method: 'GET',
       headers: PUBLIC_API_HEADERS,
+      ignoreErrors: [404],
+      retries: 1,
     });
-    return true;
+    return response.status !== 404;
   } catch {
     return false;
   }
@@ -463,13 +468,21 @@ function buildBatchedContentPackEntries(batchStart: number, batchEnd: number) {
   return [rootEntry, ...childEntries];
 }
 
-/** Upload a content pack archive (multipart/form-data). */
+/**
+ * Upload a content pack archive (multipart/form-data).
+ * Returns { status, data } without retrying on 409/422/500 so the caller can
+ * branch on the status code instead of wasting time in KbnClient's retry loop.
+ * Network-level errors (ECONNRESET, etc.) still throw.
+ *
+ * TODO(streams-program#958): once the import API has a proper timeout and handles large
+ * hierarchies without 500s, revert to a normal request (remove ignoreErrors/retries:1).
+ */
 async function uploadContentPack(
   kibanaServer: KibanaServer,
   streamName: string,
   archiveBuffer: Buffer,
   include: object
-) {
+): Promise<{ status: number; data: unknown }> {
   const boundary = `----FormBoundary${Date.now()}`;
   const includeJson = JSON.stringify(include);
 
@@ -490,7 +503,7 @@ async function uploadContentPack(
 
   const body = Buffer.concat(parts);
 
-  await kibanaServer.request({
+  const response = await kibanaServer.request({
     path: `/api/streams/${streamName}/content/import`,
     method: 'POST',
     headers: {
@@ -498,10 +511,19 @@ async function uploadContentPack(
       'Content-Type': `multipart/form-data; boundary=${boundary}`,
     },
     body: body as unknown as Record<string, unknown>,
+    ignoreErrors: [409, 422, 500],
+    retries: 1,
   });
+
+  return { status: response.status, data: response.data };
 }
 
-/** Update root routing after batched imports. */
+/**
+ * Update root routing after batched imports.
+ *
+ * TODO(streams-program#958): this exists because each batch only carries its own routing
+ * rules. A single unbatched import would not need this consolidation step.
+ */
 async function updateRootRouting(
   kibanaServer: KibanaServer,
   log: ToolingLog,
@@ -556,16 +578,18 @@ async function updateRootRouting(
       });
       break;
     } catch (err) {
-      if ((isConflictError(err) || isLockContentionError(err)) && attempt < MAX_RETRIES) {
-        const code = isLockContentionError(err) ? 422 : 409;
+      const isRetriable =
+        isConflictError(err) ||
+        isLockContentionError(err) ||
+        isRequestTimeoutError(err) ||
+        isNetworkError(err);
+      if (isRetriable && attempt < MAX_RETRIES) {
         const delay = RETRY_BASE_DELAY_MS * attempt;
-        log.warning(
-          `Root routing update: ${code} on attempt ${attempt}, retrying in ${delay}ms...`
-        );
+        log.warning(`Root routing update: error on attempt ${attempt}, retrying in ${delay}ms...`);
         await sleep(delay);
-      } else {
-        throw err;
+        continue;
       }
+      throw err;
     }
   }
 
@@ -575,6 +599,10 @@ async function updateRootRouting(
 /**
  * Create many wired children via batched content imports.
  * One huge import can OOM. Batch to keep memory bounded.
+ *
+ * TODO(streams-program#958): once the import API handles large content packs server-side
+ * (batching, scoped state loading, proper timeout), replace this with a single import call
+ * and remove the client-side retry loop, probe-before-retry, and adaptive delays.
  */
 async function createLargeWiredHierarchyViaImport(
   kibanaServer: KibanaServer,
@@ -619,63 +647,120 @@ async function createLargeWiredHierarchyViaImport(
     );
 
     const probeChild = `${rootStreamName}.perf_child_${String(batchStart).padStart(4, '0')}`;
-    let lastError: unknown;
+    const batchLabel = `Batch ${batchIndex + 1}/${totalBatches}`;
+    let imported = false;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        await uploadContentPack(kibanaServer, rootStreamName, archiveBuffer, {
-          objects: { all: {} },
-        });
-        lastError = undefined;
-        break;
-      } catch (err) {
-        lastError = err;
-        if (isAlreadyExistsConflict(err)) {
+      if (attempt > 1) {
+        const alreadyDone = await checkStreamExists(kibanaServer, probeChild);
+        if (alreadyDone) {
           log.warning(
-            `  Batch ${batchIndex + 1}/${totalBatches}: streams already exist ` +
-              `(prior attempt likely succeeded before timeout), continuing`
+            `  ${batchLabel}: ${probeChild} exists before retry ${attempt}, ` +
+              `prior attempt succeeded despite error, skipping re-import`
           );
-          lastError = undefined;
+          imported = true;
           break;
         }
-        if (isRequestTimeoutError(err)) {
+      }
+
+      let status: number;
+      let data: unknown;
+      try {
+        ({ status, data } = await uploadContentPack(kibanaServer, rootStreamName, archiveBuffer, {
+          objects: { all: {} },
+        }));
+      } catch (err) {
+        if (isNetworkError(err)) {
           const exists = await checkStreamExists(kibanaServer, probeChild);
           if (exists) {
             log.warning(
-              `  Batch ${batchIndex + 1}/${totalBatches}: HTTP 500 timeout but ` +
-                `${probeChild} exists, treating as done`
+              `  ${batchLabel}: network error but ${probeChild} exists, treating as done`
             );
-            lastError = undefined;
+            imported = true;
             break;
           }
           if (attempt < MAX_RETRIES) {
             const delay = RETRY_BASE_DELAY_MS * attempt;
             log.warning(
-              `  Batch ${batchIndex + 1}/${totalBatches}: HTTP 500 timeout and ` +
-                `${probeChild} not found, retrying in ${delay}ms...`
+              `  ${batchLabel}: network error and ${probeChild} not found, ` +
+                `retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})...`
             );
             await sleep(delay);
             continue;
           }
         }
-        if ((isConflictError(err) || isLockContentionError(err)) && attempt < MAX_RETRIES) {
-          const code = isLockContentionError(err) ? 422 : 409;
+        throw err;
+      }
+
+      if (status < 400) {
+        imported = true;
+        break;
+      }
+
+      if (status === 409) {
+        const msg = (data as { message?: string })?.message ?? '';
+        if (/already exists/i.test(msg)) {
+          log.warning(
+            `  ${batchLabel}: streams already exist ` +
+              `(prior attempt likely succeeded before timeout), continuing`
+          );
+          imported = true;
+          break;
+        }
+        if (attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          log.warning(`  ${batchLabel}: 409 on attempt ${attempt}, retrying in ${delay}ms...`);
+          await sleep(delay);
+          continue;
+        }
+        throw new Error(`${batchLabel}: 409 conflict after ${MAX_RETRIES} attempts: ${msg}`);
+      }
+
+      if (status === 500) {
+        const msg500 = (data as { message?: string })?.message ?? '';
+        if (!/request timed out/i.test(msg500)) {
+          throw new Error(`${batchLabel}: HTTP 500 (not a timeout): ${msg500}`);
+        }
+        const exists = await checkStreamExists(kibanaServer, probeChild);
+        if (exists) {
+          log.warning(
+            `  ${batchLabel}: HTTP 500 timeout but ${probeChild} exists, treating as done`
+          );
+          imported = true;
+          break;
+        }
+        if (attempt < MAX_RETRIES) {
           const delay = RETRY_BASE_DELAY_MS * attempt;
           log.warning(
-            `  Batch ${
-              batchIndex + 1
-            }/${totalBatches}: ${code} on attempt ${attempt}, retrying in ${delay}ms...`
+            `  ${batchLabel}: HTTP 500 timeout and ${probeChild} not found, ` +
+              `retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})...`
           );
           await sleep(delay);
-        } else {
-          throw err;
+          continue;
         }
+        throw new Error(`${batchLabel}: HTTP 500 timeout after ${MAX_RETRIES} attempts`);
       }
+
+      if (status === 422) {
+        if (attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          log.warning(
+            `  ${batchLabel}: 422 lock contention on attempt ${attempt}, ` +
+              `retrying in ${delay}ms...`
+          );
+          await sleep(delay);
+          continue;
+        }
+        throw new Error(`${batchLabel}: 422 lock contention after ${MAX_RETRIES} attempts`);
+      }
+
+      throw new Error(`${batchLabel}: unexpected status ${status}`);
     }
-    if (lastError) throw lastError;
-    log.info(`  Batch ${batchIndex + 1}/${totalBatches}: imported successfully`);
+    if (!imported) throw new Error(`${batchLabel}: failed after ${MAX_RETRIES} attempts`);
+    log.info(`  ${batchLabel}: imported successfully`);
 
     if (batchIndex < totalBatches - 1) {
-      await sleep(3000);
+      const interBatchDelay = 3000 + batchIndex * 500;
+      await sleep(interBatchDelay);
     }
   }
 
