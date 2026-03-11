@@ -39,6 +39,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        `--xpack.fleet.packages.0.name=endpoint`,
+        `--xpack.fleet.packages.0.version=8.19.0`,
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
