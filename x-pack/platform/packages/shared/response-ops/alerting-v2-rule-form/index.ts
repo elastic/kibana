@@ -24,12 +24,21 @@ export { DynamicRuleForm, StandaloneRuleForm } from './form';
 // Context - for consumers who need custom integrations
 export { RuleFormServicesProvider, useRuleFormServices } from './form';
 
+// Mappers
+export {
+  mapFormValuesToRuleRequest,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+  mapRuleResponseToFormValues,
+} from './form';
+
 // Types
 export type {
   FormValues,
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,
+  RuleRequestCommon,
 } from './form';
 
 export type {
