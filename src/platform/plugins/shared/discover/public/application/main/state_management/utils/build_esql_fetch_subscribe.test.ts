@@ -16,7 +16,6 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { omit } from 'lodash';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -613,9 +612,7 @@ describe('buildEsqlFetchSubscribe', () => {
       defaultFetchStatus: FetchStatus.LOADING,
     });
     const documents$ = stateContainer.dataState.data$.documents$;
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      fields: 'none',
-    });
+    expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
@@ -630,9 +627,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'all',
-      })
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -653,9 +648,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'none',
-      })
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -671,9 +664,7 @@ describe('buildEsqlFetchSubscribe', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'all',
-      })
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('all')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -739,18 +730,14 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      fields: 'none',
-    });
+    expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern' },
       result: result1,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: 'none',
-      })
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none')
     );
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -758,9 +745,7 @@ describe('buildEsqlFetchSubscribe', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        fields: ['columns'],
-      })
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual(['columns'])
     );
   });
 });

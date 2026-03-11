@@ -142,6 +142,10 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
 
+export type PreviousStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+
+export type PreviousStateSnapshotsByProfileId = Record<string, PreviousStateSnapshot | undefined>;
+
 type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
 
 export type ResetDefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
@@ -149,6 +153,7 @@ export type ResetDefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultPro
 export interface ResetDefaultProfileState {
   resetId: string;
   fields: ResetDefaultProfileStateFields;
+  previousStateSnapshotsByProfileId: PreviousStateSnapshotsByProfileId;
 }
 
 export interface TabState extends TabItem {
