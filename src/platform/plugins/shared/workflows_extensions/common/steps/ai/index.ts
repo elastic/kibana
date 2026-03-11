@@ -37,14 +37,6 @@ export {
 } from './ai_classify_step';
 
 export {
-  AiGuardrailsStepCommonDefinition,
-  AiGuardrailsStepTypeId,
-  type AiGuardrailsStepConfigSchema,
-  type AiGuardrailsStepInputSchema,
-  type AiGuardrailsStepOutputSchema,
-} from './ai_guardrails_step';
-
-export {
   MAX_CONVERSATION_HISTORY_MESSAGES,
   MAX_CONVERSATION_HISTORY_CHARS,
   MAX_ATTACHMENT_DATA_CHARS,

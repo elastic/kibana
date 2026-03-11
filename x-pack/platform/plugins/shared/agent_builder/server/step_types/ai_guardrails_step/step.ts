@@ -9,14 +9,14 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import {
-  AiGuardrailsStepCommonDefinition,
   MAX_ATTACHMENT_DATA_CHARS,
   MAX_ATTACHMENTS,
   MAX_CONVERSATION_HISTORY_MESSAGES,
-} from '../../../../common/steps/ai';
-import { createServerStepDefinition } from '../../../step_registry/types';
-import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+} from '@kbn/workflows-extensions/common';
+import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { AgentBuilderStartDependencies } from '../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
+import { AiGuardrailsStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types';
 
 const GUARDRAIL_SYSTEM_PROMPT = `You are a guardrail evaluator. Your job is to decide whether the user message and context below are acceptable to proceed (e.g. no harmful content, no policy violations, no off-topic or inappropriate requests).
 
@@ -68,8 +68,8 @@ function buildContextText(input: {
   return parts.join('');
 }
 
-export const aiGuardrailsStepDefinition = (
-  coreSetup: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>
+export const getAiGuardrailsStepDefinition = (
+  coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>
 ) =>
   createServerStepDefinition({
     ...AiGuardrailsStepCommonDefinition,

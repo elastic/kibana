@@ -16,3 +16,11 @@ export type {
   RunAgentStepOutputSchema,
   RunAgentStepConfigSchema,
 } from './run_agent_step';
+
+export {
+  AiGuardrailsStepCommonDefinition,
+  AiGuardrailsStepTypeId,
+  type AiGuardrailsStepConfigSchema,
+  type AiGuardrailsStepInputSchema,
+  type AiGuardrailsStepOutputSchema,
+} from './ai_guardrails_step';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAiGuardrailsStepDefinition } from './ai_guardrails_step/step';
 import { getRunAgentStepDefinition } from './run_agent_step';
 
-export { getRunAgentStepDefinition };
+export { getAiGuardrailsStepDefinition, getRunAgentStepDefinition };
