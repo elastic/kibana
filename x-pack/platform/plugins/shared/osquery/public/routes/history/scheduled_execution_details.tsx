@@ -64,8 +64,6 @@ const ScheduledExecutionDetailsPageComponent = () => {
     [data?.timestamp]
   );
 
-  const executionLabelValues = useMemo(() => ({ executionCount }), [executionCount]);
-
   const queryData = useMemo(
     () => (data ? mapScheduledDetailsToQueryData(data, scheduleId) : undefined),
     [data, scheduleId]
@@ -110,7 +108,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
                   <FormattedMessage
                     id="xpack.osquery.scheduledExecutionDetails.executionLabel"
                     defaultMessage="Execution #{executionCount}"
-                    values={executionLabelValues}
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    values={{ scheduleId, executionCount }}
                   />
                 </EuiText>
               </EuiFlexItem>
