@@ -2487,7 +2487,7 @@
           "() => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/code_owners.ts",
-        "lineNumber": 26,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

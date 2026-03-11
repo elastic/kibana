@@ -32,7 +32,7 @@
           "(owner: string) => \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-        "lineNumber": 94,
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -50,7 +50,7 @@
               "string"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 100,
+            "lineNumber": 99,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -466,7 +466,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
-            "lineNumber": 91,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -11,7 +11,7 @@ import { generateTriggerSnippet } from './generate_trigger_snippet';
 
 describe('generateTriggerSnippet', () => {
   describe('built-in trigger types (alert, manual, scheduled)', () => {
-    it('should not include with.condition for alert, manual or scheduled', () => {
+    it('should not include on.condition for alert, manual or scheduled', () => {
       const builtInTypes = ['alert', 'manual', 'scheduled'] as const;
       for (const triggerType of builtInTypes) {
         const snippet = generateTriggerSnippet(triggerType, {
