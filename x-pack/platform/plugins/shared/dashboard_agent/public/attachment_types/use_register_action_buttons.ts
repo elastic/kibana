@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
+import useLatest from 'react-use/lib/useLatest';
 import type { DashboardCanvasInitialInput } from './dashboard_canvas_content';
 
 interface UseRegisterActionButtonsParams {
@@ -32,26 +33,14 @@ export const useRegisterActionButtons = ({
   linkedSavedObjectId,
   doesSavedDashboardExist,
 }: UseRegisterActionButtonsParams) => {
-  const timeRangeRef = useRef(timeRange);
-  useEffect(() => {
-    timeRangeRef.current = timeRange;
-  }, [timeRange]);
-
-  const linkedSavedObjectIdRef = useRef(linkedSavedObjectId);
-  useEffect(() => {
-    linkedSavedObjectIdRef.current = linkedSavedObjectId;
-  }, [linkedSavedObjectId]);
-
-  const initialDashboardInputRef = useRef(initialDashboardInput);
-  useEffect(() => {
-    initialDashboardInputRef.current = initialDashboardInput;
-  }, [initialDashboardInput]);
+  const timeRangeRef = useLatest(timeRange);
+  const linkedSavedObjectIdRef = useLatest(linkedSavedObjectId);
+  const initialDashboardInputRef = useLatest(initialDashboardInput);
 
   useEffect(() => {
     if (!dashboardApi) {
       return;
     }
-
     const buttons: ActionButton[] = [];
 
     if (dashboardApi.locator) {
@@ -91,5 +80,13 @@ export const useRegisterActionButtons = ({
       },
     });
     registerActionButtons(buttons);
-  }, [dashboardApi, registerActionButtons, updateOrigin, doesSavedDashboardExist]);
+  }, [
+    dashboardApi,
+    registerActionButtons,
+    updateOrigin,
+    doesSavedDashboardExist,
+    timeRangeRef,
+    linkedSavedObjectIdRef,
+    initialDashboardInputRef,
+  ]);
 };
