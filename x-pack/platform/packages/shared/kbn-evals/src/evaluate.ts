@@ -256,7 +256,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         const model: Model = {
           family: getConnectorFamily(inferenceConnector),
           provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector),
+          id: getConnectorModel(inferenceConnector) ?? connectorWithId.name,
         };
 
         return model;
