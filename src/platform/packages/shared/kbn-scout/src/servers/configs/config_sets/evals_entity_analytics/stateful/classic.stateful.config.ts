@@ -14,7 +14,7 @@ import type { ScoutServerConfig } from '../../../../../types';
  * Custom Scout stateful server configuration that enables AI Agents and experimental features.
  *
  * Usage:
- *   node scripts/scout.js start-server --stateful --config-dir evals_entity_analytics
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_entity_analytics
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -23,6 +23,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.evals.enabled=true',
+      '--xpack.actions.responseTimeout=120s',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,
     ],

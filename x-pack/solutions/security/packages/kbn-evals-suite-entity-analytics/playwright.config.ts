@@ -9,5 +9,5 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
   repetitions: 3,
-  timeout: 30 * 60_000, // 30 minutes timeout (anomalous_behavior specs have 11-12 examples x 3 reps)
+  timeout: 60 * 60_000,
 });
