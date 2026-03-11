@@ -11,7 +11,6 @@ import {
 } from '@kbn/cloud-security-posture-common/schema/graph_events/latest';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { EventsRequest } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
-import { SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING } from '@kbn/management-settings-ids';
 import { GRAPH_EVENTS_ROUTE_PATH } from '../../../common/constants';
 import type { CspRequestHandlerContext, CspRouter } from '../../types';
 import { getEvents } from './v1';
@@ -46,15 +45,6 @@ export const defineGraphEventsRoute = (router: CspRouter) =>
         const { eventIds, start, end, indexPatterns } = request.body
           .query as EventsRequest['query'];
         const spaceId = await cspContext.spacesService?.getSpaceId(request);
-        const isGraphEnabled = await (
-          await context.core
-        ).uiSettings.client.get(SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING);
-
-        cspContext.logger.debug(`isGraphEnabled: ${isGraphEnabled} for space: ${spaceId}`);
-
-        if (!isGraphEnabled) {
-          return response.notFound();
-        }
 
         try {
           const resp = await getEvents({
