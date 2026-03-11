@@ -35,6 +35,7 @@ export const MOCK_IDP_UIAM_COSMOS_DB_URL =
 
 export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
+export const MOCK_IDP_UIAM_PROJECT_ID2 = 'fedcba65432109876543210987654321';
 
 // Sometimes it is useful or required to point local UIAM service clients, or clients operating within the same Docker
 // network (i.e., Elasticsearch), to a different UIAM service URL. For example, http://host.docker.internal:8080 can be
