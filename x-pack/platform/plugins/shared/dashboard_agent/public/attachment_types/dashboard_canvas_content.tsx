@@ -25,7 +25,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { normalizePanels } from './panel_grid_layout';
+import { normalizeDashboardWidgets } from './panel_grid_layout';
 
 interface DashboardCanvasInitialInput {
   timeRange: {
@@ -43,7 +43,10 @@ const createDashboardRendererInitialInput = (
 ): DashboardCanvasInitialInput => ({
   timeRange: { from: 'now-24h', to: 'now' },
   viewMode: 'view',
-  panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
+  panels: normalizeDashboardWidgets({
+    panels: data.panels ?? [],
+    sections: data.sections,
+  }),
   title: data.title,
   description: data.description,
 });
@@ -96,9 +99,11 @@ const dashboardCanvasContentStyles = {
     minHeight: 0,
     display: 'flex',
   }),
-  searchBar: css({
-    flexShrink: 0,
-  }),
+  searchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      padding: `0 ${euiTheme.size.s}`,
+    }),
   callout: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: euiTheme.size.s,
@@ -230,10 +235,14 @@ export const DashboardCanvasContent = ({
       <div css={styles.searchBar}>
         <SearchBar
           appName="dashboardAgent"
+          isAutoRefreshDisabled={true}
           showQueryInput={false}
           showDatePicker={true}
           showFilterBar={false}
-          useDefaultBehaviors={true}
+          showQueryMenu={false}
+          query={undefined}
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
           onQuerySubmit={({ dateRange }) => {
             dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });

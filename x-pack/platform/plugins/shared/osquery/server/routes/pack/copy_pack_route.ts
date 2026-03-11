@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -75,12 +77,19 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             ...restAttributes
           } = sourceAttributes;
 
+          const copiedQueries = restAttributes.queries?.map((q) => ({
+            ...q,
+            schedule_id: uuidv4(),
+            start_date: moment().toISOString(),
+          }));
+
           const newPackSO = await client.create<
             Omit<PackSavedObject, 'saved_object_id' | 'references'>
           >(
             packSavedObjectType,
             {
               ...restAttributes,
+              queries: copiedQueries,
               name: newName,
               enabled: false, // Always disable copy to prevent unexpected deployments
               shards: [],
