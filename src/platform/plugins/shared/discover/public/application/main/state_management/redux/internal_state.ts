@@ -246,7 +246,12 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (state, action: TabAction<Pick<TabState, 'appState'> & { profileId: string }>) =>
+    setAppState: (
+      state,
+      action: TabAction<
+        Pick<TabState, 'appState'> & { profileId: string; isSystemTriggered?: boolean }
+      >
+    ) =>
       withTab(state, action.payload, (tab) => {
         let appState = action.payload.appState;
 
@@ -258,17 +263,19 @@ export const internalStateSlice = createSlice({
         tab.previousAppState = tab.appState;
         tab.appState = appState;
 
-        const previousStateSnapshots =
-          tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
-        const previousStateSnapshot = previousStateSnapshots[action.payload.profileId] ?? {};
+        if (!action.payload.isSystemTriggered) {
+          const previousStateSnapshots =
+            tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
+          const previousStateSnapshot = previousStateSnapshots[action.payload.profileId] ?? {};
 
-        for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
-          if (!isEqual(tab.previousAppState[field], tab.appState[field])) {
-            setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+          for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+            if (!isEqual(tab.previousAppState[field], tab.appState[field])) {
+              setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+            }
           }
-        }
 
-        previousStateSnapshots[action.payload.profileId] = previousStateSnapshot;
+          previousStateSnapshots[action.payload.profileId] = previousStateSnapshot;
+        }
       }),
 
     /**

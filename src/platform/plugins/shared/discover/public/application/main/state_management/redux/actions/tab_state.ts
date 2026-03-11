@@ -40,7 +40,9 @@ import type {
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
+type AppStatePayload = TabActionPayload<
+  Pick<TabState, 'appState'> & { isSystemTriggered?: boolean }
+>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -68,7 +70,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(setAppState({ tabId: payload.tabId, appState: mergedAppState }));
+      dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
   };
 

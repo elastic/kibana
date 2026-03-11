@@ -120,7 +120,13 @@ export const changeDataView: InternalStateThunkActionCreator<
         currentAppState.query
       );
 
-      dispatch(internalStateActions.updateAppState({ tabId, appState: nextAppState }));
+      dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: nextAppState,
+          isSystemTriggered: true,
+        })
+      );
 
       const currentTab = selectTab(currentState, tabId);
       if (currentTab.expandedDoc) {
