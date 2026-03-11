@@ -56,7 +56,7 @@ function buildLogSearchSkillContent(): string {
     Decision:
     - categories has fewer than 20 patterns → skip to Answer (focused enough to review samples directly)
     - Spike or dip in histogram → note the time, then Phase 2
-    - totalCount > 10,000 (even with a flat histogram) → Phase 2
+    - 20+ category patterns (noisy, no clear spike) → Phase 2
     - Otherwise → Phase 3 (moderate volume, start filtering directly)
 
     ### Phase 2: Analyze with log rate analysis
@@ -69,7 +69,6 @@ function buildLogSearchSkillContent(): string {
     - **No spike, no context, high volume**: use a prior period as baseline (e.g., baseline = "now-2h to now-1h", deviation = "now-1h to now").
 
     This is a change detection tool — if the issue is steady-state across both windows, it returns nothing. Continue with Phase 3.
-    Skip this phase only if totalCount < 10,000 and there is no spike.
 
     ### Phase 3: Reduce noise (The Funnel)
     The dataset is too large to review manually. Call \`get_logs\` repeatedly to narrow it down using two strategies:
