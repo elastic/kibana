@@ -803,7 +803,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'json_extract',
           field,
-          extractions: filteredExtractions.length > 0 ? filteredExtractions : extractions,
+          extractions: filteredExtractions,
           ignore_failure,
           ignore_missing,
           description,

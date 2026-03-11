@@ -287,6 +287,8 @@ describe('parseJsonPath', () => {
     it('rejects unsupported JSONPath features - wildcards', () => {
       expect(() => parseJsonPath('a[*]')).toThrow(JsonPathParseError);
       expect(() => parseJsonPath('a[*]')).toThrow('expected integer array index');
+      expect(() => parseJsonPath('a.*')).toThrow(JsonPathParseError);
+      expect(() => parseJsonPath('a.*')).toThrow('unsupported character');
     });
 
     it('rejects unsupported JSONPath features - array slicing', () => {

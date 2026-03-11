@@ -94,7 +94,13 @@ function normalizePath(
 }
 
 /**
+ * Characters that are not allowed in bare keys (unsupported JSONPath features).
+ */
+const INVALID_KEY_CHARS = ['*', '?', ':', '@', '!', '&', '|', '(', ')', ','];
+
+/**
  * Reads a bare key using dot notation until a delimiter is found.
+ * Validates that keys don't contain unsupported characters like wildcards.
  */
 function readKey(
   path: string,
@@ -108,6 +114,13 @@ function readKey(
     const c = path[end];
     if (c === DOT || c === OPEN_BRACKET || c === CLOSE_BRACKET) {
       break;
+    }
+    if (INVALID_KEY_CHARS.includes(c)) {
+      throw new JsonPathParseError(
+        originalPath,
+        `unsupported character [${c}] in key name`,
+        baseOffset + end
+      );
     }
     end++;
   }

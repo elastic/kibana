@@ -281,8 +281,23 @@ export function getProcessorOutputType(
     case 'network_direction':
       return 'string';
 
-    case 'json_extract':
-      return 'unknown';
+    case 'json_extract': {
+      const extraction = processor.extractions.find(
+        ({ target_field }) => target_field === fieldName
+      );
+      switch (extraction?.type ?? 'keyword') {
+        case 'keyword':
+          return 'string';
+        case 'integer':
+        case 'long':
+        case 'double':
+          return 'number';
+        case 'boolean':
+          return 'boolean';
+        default:
+          return 'unknown';
+      }
+    }
 
     case 'remove':
     case 'remove_by_prefix':
@@ -378,8 +393,12 @@ export function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'network_direction':
-    case 'json_extract':
     case 'manual_ingest_pipeline':
+      return null;
+    case 'json_extract':
+      if (processor.field === fieldName) {
+        return ['string'];
+      }
       return null;
     default: {
       const _exhaustiveCheck: never = processor;

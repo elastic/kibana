@@ -152,15 +152,12 @@ export function convertJsonExtractProcessorToESQL(
 
   const commands: ESQLAstCommand[] = [];
 
-  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, field);
-  if (missingFieldFilter) {
-    commands.push(missingFieldFilter);
-  }
-
   const fromColumn = Builder.expression.column(field);
+  const hasConditionalWhere =
+    'where' in processor && processor.where && !('always' in processor.where);
 
-  if ('where' in processor && processor.where && !('always' in processor.where)) {
-    const conditionExpression = conditionToESQLAst(processor.where);
+  if (hasConditionalWhere) {
+    const conditionExpression = conditionToESQLAst(processor.where!);
 
     const assignments = extractions.map((extraction) => {
       const targetColumn = Builder.expression.column(extraction.target_field);
@@ -182,6 +179,11 @@ export function convertJsonExtractProcessorToESQL(
 
     commands.push(evalCommand);
   } else {
+    const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, field);
+    if (missingFieldFilter) {
+      commands.push(missingFieldFilter);
+    }
+
     const assignments = extractions.map((extraction) => {
       const targetColumn = Builder.expression.column(extraction.target_field);
       const extractionExpr = buildExtractionExpression(fromColumn, extraction);

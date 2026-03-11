@@ -97,11 +97,12 @@ function generateJsonExtractScript(
   lines.push('def parsed = Processors.json(jsonStr);');
 
   // Generate extraction for each selector
-  for (const extraction of extractions) {
+  for (let i = 0; i < extractions.length; i++) {
+    const extraction = extractions[i];
     const parts = segmentsToStrings(parseJsonPath(extraction.selector).segments);
     const traversalExpr = generateTraversalExpression('parsed', parts);
     const targetAssignment = painlessFieldAssignment(extraction.target_field);
-    const varName = `extracted_${parts.join('_').replace(/[^a-zA-Z0-9_]/g, '_')}`;
+    const varName = `extracted_${i}`;
     const targetType = extraction.type ?? 'keyword';
 
     lines.push(`def ${varName} = ${traversalExpr};`);
