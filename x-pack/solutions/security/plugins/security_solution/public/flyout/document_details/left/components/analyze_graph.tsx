@@ -46,6 +46,10 @@ export const DATA_VIEW_ERROR_TEST_ID = 'analyzer-data-view-error';
 
 // This variable is used to track if the cold/frozen tier callout has been dismissed in the current tab session.
 let isAnalyzerColdFrozenTierCalloutDismissedInTab = false;
+// This function is used in tests to reset the callout dismissed state between tests, as the variable is shared across the entire tab session.
+export const resetAnalyzerColdFrozenTierCalloutDismissedStateForTests = () => {
+  isAnalyzerColdFrozenTierCalloutDismissedInTab = false;
+};
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.analyzer.dataViewError', {
   defaultMessage: 'Unable to retrieve the data view for analyzer',

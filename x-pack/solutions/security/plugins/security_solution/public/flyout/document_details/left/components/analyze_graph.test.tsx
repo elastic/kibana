@@ -6,14 +6,23 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
-import { AnalyzeGraph, DATA_VIEW_ERROR_TEST_ID, DATA_VIEW_LOADING_TEST_ID } from './analyze_graph';
-import { ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID, ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import {
+  AnalyzeGraph,
+  DATA_VIEW_ERROR_TEST_ID,
+  DATA_VIEW_LOADING_TEST_ID,
+  resetAnalyzerColdFrozenTierCalloutDismissedStateForTests,
+} from './analyze_graph';
+import {
+  ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
+  ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
+  ANALYZER_GRAPH_TEST_ID,
+} from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
@@ -100,6 +109,7 @@ const renderAnalyzer = (
 describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
@@ -157,6 +167,42 @@ describe('<AnalyzeGraph />', () => {
       const { queryByTestId } = renderAnalyzer();
 
       expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should keep callout hidden in same tab session after dismissing and opening another alert flyout', () => {
+      const { getByTestId, queryByTestId, unmount } = renderAnalyzer();
+
+      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+      unmount();
+
+      const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = renderAnalyzer({
+        eventId: 'eventId-2',
+        scopeId: TableId.test,
+        searchHit: {
+          ...searchHit,
+          _id: 'eventId-2',
+        } as unknown as DocumentDetailsContext['searchHit'],
+      } as unknown as DocumentDetailsContext);
+
+      expect(
+        queryByTestIdAfterOpeningAnotherFlyout(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show callout again after page refresh', () => {
+      const { getByTestId, queryByTestId } = renderAnalyzer();
+
+      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+      resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
+      const { getByTestId: getByTestIdAfterRefresh } = renderAnalyzer();
+
+      expect(
+        getByTestIdAfterRefresh(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+      ).toBeInTheDocument();
     });
 
     it('should render no data message when analyzer is not enabled', () => {
