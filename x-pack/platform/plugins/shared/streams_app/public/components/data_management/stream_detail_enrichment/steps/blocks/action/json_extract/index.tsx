@@ -21,8 +21,8 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
-import { FieldNameWithIcon } from '@kbn/react-field';
 import { capitalize } from 'lodash';
 import { jsonExtractTypes } from '@kbn/streamlang';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -33,8 +33,15 @@ import type { JsonExtractFormState } from '../../../../types';
 
 const typeOptions = jsonExtractTypes.map((type) => ({
   value: type,
-  inputDisplay: <FieldNameWithIcon name={capitalize(type)} type={type} />,
+  inputDisplay: capitalize(type),
 }));
+
+const extractionGridStyles = css`
+  display: grid;
+  grid-template-columns: 4fr 4fr 2fr auto;
+  gap: 8px;
+  align-items: start;
+`;
 
 export const JsonExtractProcessorForm = () => {
   const { control } = useFormContext<JsonExtractFormState>();
@@ -100,20 +107,20 @@ export const JsonExtractProcessorForm = () => {
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiButtonEmpty
-              iconType="plus"
-              onClick={() => append({ selector: '', target_field: '', type: 'keyword' })}
-              size="xs"
-              flush="both"
-              data-test-subj="streamsAppJsonExtractAddExtractionButton"
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractAddExtraction',
-                { defaultMessage: 'Add extraction' }
-              )}
-            </EuiButtonEmpty>
           </EuiPanel>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plus"
+            onClick={() => append({ selector: '', target_field: '', type: 'keyword' })}
+            size="xs"
+            flush="both"
+            data-test-subj="streamsAppJsonExtractAddExtractionButton"
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractAddExtraction',
+              { defaultMessage: 'Add extraction' }
+            )}
+          </EuiButtonEmpty>
         </div>
       </EuiFormRow>
       <EuiSpacer size="m" />
@@ -215,69 +222,60 @@ const ExtractionField = ({ index, onRemove, canRemove, showLabels }: ExtractionF
     : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-      <EuiFlexItem grow={4}>
-        <EuiFormRow
-          label={selectorLabel}
-          isInvalid={selectorFieldState.invalid}
-          error={selectorFieldState.error?.message}
-          fullWidth
-        >
-          <EuiFieldText
-            placeholder={i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractSelectorPlaceholder',
-              { defaultMessage: 'e.g., user.id or $.data[0].value' }
-            )}
-            isInvalid={selectorFieldState.invalid}
-            {...selectorInputProps}
-            inputRef={selectorRef}
-            fullWidth
-            compressed
-            data-test-subj={`streamsAppJsonExtractSelectorInput-${index}`}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={4}>
-        <EuiFormRow
-          label={targetLabel}
-          isInvalid={targetFieldState.invalid}
-          error={targetFieldState.error?.message}
-          fullWidth
-        >
-          <EuiFieldText
-            placeholder={i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTargetFieldPlaceholder',
-              { defaultMessage: 'e.g., extracted.user_id' }
-            )}
-            isInvalid={targetFieldState.invalid}
-            {...targetInputProps}
-            inputRef={targetRef}
-            fullWidth
-            compressed
-            data-test-subj={`streamsAppJsonExtractTargetFieldInput-${index}`}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <EuiFormRow label={typeLabel} fullWidth>
-          <EuiSuperSelect
-            options={typeOptions}
-            valueOfSelected={typeField.value ?? 'keyword'}
-            onChange={typeField.onChange}
-            compressed
-            fullWidth
-            data-test-subj={`streamsAppJsonExtractTypeSelect-${index}`}
-            aria-label={i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTypeAriaLabel',
-              { defaultMessage: 'Extraction type' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={showLabels ? { alignSelf: 'flex-end', marginBottom: 4 } : { alignSelf: 'center' }}
+    <div css={extractionGridStyles}>
+      <EuiFormRow
+        label={selectorLabel}
+        isInvalid={selectorFieldState.invalid}
+        error={selectorFieldState.error?.message}
+        fullWidth
       >
+        <EuiFieldText
+          placeholder={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractSelectorPlaceholder',
+            { defaultMessage: 'e.g., user.id or $.data[0].value' }
+          )}
+          isInvalid={selectorFieldState.invalid}
+          {...selectorInputProps}
+          inputRef={selectorRef}
+          fullWidth
+          compressed
+          data-test-subj={`streamsAppJsonExtractSelectorInput-${index}`}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={targetLabel}
+        isInvalid={targetFieldState.invalid}
+        error={targetFieldState.error?.message}
+        fullWidth
+      >
+        <EuiFieldText
+          placeholder={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTargetFieldPlaceholder',
+            { defaultMessage: 'e.g., extracted.user_id' }
+          )}
+          isInvalid={targetFieldState.invalid}
+          {...targetInputProps}
+          inputRef={targetRef}
+          fullWidth
+          compressed
+          data-test-subj={`streamsAppJsonExtractTargetFieldInput-${index}`}
+        />
+      </EuiFormRow>
+      <EuiFormRow label={typeLabel} fullWidth>
+        <EuiSuperSelect
+          options={typeOptions}
+          valueOfSelected={typeField.value ?? 'keyword'}
+          onChange={typeField.onChange}
+          compressed
+          fullWidth
+          data-test-subj={`streamsAppJsonExtractTypeSelect-${index}`}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTypeAriaLabel',
+            { defaultMessage: 'Extraction type' }
+          )}
+        />
+      </EuiFormRow>
+      <div css={showLabels ? { alignSelf: 'end', marginBottom: 4 } : { alignSelf: 'center' }}>
         <EuiButtonIcon
           iconType="trash"
           color="danger"
@@ -289,7 +287,7 @@ const ExtractionField = ({ index, onRemove, canRemove, showLabels }: ExtractionF
           )}
           data-test-subj={`streamsAppJsonExtractRemoveExtractionButton-${index}`}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+    </div>
   );
 };
