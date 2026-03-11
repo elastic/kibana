@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiListGroup,
   EuiTablePagination,
+  EuiToolTip,
   useEuiTheme,
   EuiPanel,
   EuiFlexGroup,
@@ -25,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
+import { METRIC_TYPE_DESCRIPTIONS } from '../../common/constants';
 import { TabTitleAndDescription } from './tab_title_and_description';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
@@ -117,9 +119,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
-              <div>
-                <EuiBadge>{metric.instrument}</EuiBadge>
-              </div>,
+              <MetricTypeBadge instrument={metric.instrument} />,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
@@ -282,5 +282,19 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
         </>
       )}
     </>
+  );
+};
+
+const MetricTypeBadge = ({ instrument }: { instrument: string }) => {
+  const tooltipDescription = METRIC_TYPE_DESCRIPTIONS[instrument];
+
+  if (!tooltipDescription) {
+    return <EuiBadge>{instrument}</EuiBadge>;
+  }
+
+  return (
+    <EuiToolTip content={tooltipDescription}>
+      <EuiBadge tabIndex={0}>{instrument}</EuiBadge>
+    </EuiToolTip>
   );
 };
