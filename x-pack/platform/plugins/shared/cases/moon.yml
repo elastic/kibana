@@ -108,6 +108,8 @@ dependsOn:
   - '@kbn/openapi-generator'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows'
+  - '@kbn/resizable-layout'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

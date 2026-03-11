@@ -15,7 +15,11 @@ import {
   dataViewRouteHelpersFactory,
   initEntityEnginesWithRetry,
 } from '../../../cloud_security_posture_api/utils';
+<<<<<<<< HEAD:x-pack/solutions/security/test/cloud_security_posture_functional/group5/pages/entity_preview_flyout.ts
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
+========
+import type { SecurityTelemetryFtrProviderContext } from '../config';
+>>>>>>>> upstream/main:x-pack/solutions/security/test/cloud_security_posture_functional/group3/pages/entity_preview_flyout.ts
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {
