@@ -3,7 +3,8 @@ name: 'sources.figma.parse_figma_url'
 description: >
   Ask the user to paste a Figma URL (file or team page). Returns extracted file_key,
   team_id, and node_id (when present) for use with get_file, list_team_projects, list_project_files, or
-  render_nodes. No API call—parses the URL only.
+  render_nodes. No API call—parses the URL only. On invalid or non-matching URL, returns an error
+  message and code (INVALID_URL, NOT_FIGMA, NO_MATCH).
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

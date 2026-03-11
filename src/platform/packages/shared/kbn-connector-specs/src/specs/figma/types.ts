@@ -36,6 +36,10 @@ export interface ParseFigmaUrlResult {
   fileKey?: string;
   teamId?: string;
   nodeId?: string;
+  /** Present when the URL could not be parsed or did not match a Figma file/team URL */
+  error?: string;
+  /** Machine-readable code for the kind of failure */
+  code?: 'INVALID_URL' | 'NOT_FIGMA' | 'NO_MATCH';
 }
 
 export interface WhoAmIResult {
