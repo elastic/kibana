@@ -15,7 +15,7 @@ import type {
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
-import { useStorage, useToasts } from '../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
@@ -30,6 +30,9 @@ import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 import { NewPageBanner } from './new_page_banner/new_page_banner';
 
+export const SCRIPTS_LIBRARY_PAGE_STORAGE_KEY =
+  'securitySolution.endpointManagement.scriptsLibrary.showNewPageBanner';
+
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
 }
@@ -38,10 +41,10 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const getTestId = useTestIdGenerator(dataTestSubj ?? 'ScriptsLibraryPage');
   const history = useHistory();
   const toasts = useToasts();
-  const storage = useStorage();
+  const { storage } = useKibana().services;
 
   const [showNewPageBanner, setShowNewPageBanner] = useState(
-    storage.get('securitySolution.scriptsLibrary.showNewPageBanner') ?? true
+    storage.get(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY) ?? true
   );
 
   const { pagination: paginationFromUrlParams } = useUrlPagination();
@@ -65,7 +68,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
 
   const onBannerDismiss = useCallback(() => {
     setShowNewPageBanner(false);
-    storage.set('securitySolution.scriptsLibrary.showNewPageBanner', false);
+    storage.set(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, false);
   }, [storage]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(

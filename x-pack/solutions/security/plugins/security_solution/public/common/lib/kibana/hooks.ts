@@ -38,8 +38,6 @@ export const useBasePath = (): string => useKibana().services.http.basePath.get(
 export const useToasts = (): StartServices['notifications']['toasts'] =>
   useKibana().services.notifications.toasts;
 
-export const useStorage = (): StartServices['storage'] => useKibana().services.storage;
-
 export const useHttp = (): StartServices['http'] => useKibana().services.http;
 
 interface UserRealm {
