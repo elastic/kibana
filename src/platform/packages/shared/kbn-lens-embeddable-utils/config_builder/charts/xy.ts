@@ -119,13 +119,13 @@ function buildVisualizationState(config: LensXYConfig): XYState {
           return {
             layerId: `layer_${i}`,
             layerType: 'referenceLine',
-            accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
-            yConfig: layer.yAxis.map((yAxis, index) => ({
+            accessors: layer.y_axis.map((_, index) => `${ACCESSOR}${i}_${index}`),
+            yConfig: layer.y_axis.map((y_axis, index) => ({
               forAccessor: `${ACCESSOR}${i}_${index}`,
               axisMode: 'left',
-              color: yAxis.seriesColor,
-              ...(yAxis.fill ? { fill: yAxis.fill } : {}),
-              ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
+              color: y_axis.seriesColor,
+              ...(y_axis.fill ? { fill: y_axis.fill } : {}),
+              ...(y_axis.lineThickness ? { lineWidth: y_axis.lineThickness } : {}),
             })),
           } satisfies XYReferenceLineLayerConfig;
         case 'series': {
@@ -141,11 +141,11 @@ function buildVisualizationState(config: LensXYConfig): XYState {
                   ),
                 }
               : {}),
-            accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
+            accessors: layer.y_axis.map((_, index) => `${ACCESSOR}${i}_${index}`),
             seriesType: layer.seriesType || 'line',
-            yConfig: layer.yAxis.map((yAxis, index) => ({
+            yConfig: layer.y_axis.map((y_axis, index) => ({
               forAccessor: `${ACCESSOR}${i}_${index}`,
-              color: yAxis.seriesColor,
+              color: y_axis.seriesColor,
             })),
           } as XYDataLayerConfig;
         }
@@ -154,10 +154,10 @@ function buildVisualizationState(config: LensXYConfig): XYState {
   };
 }
 
-function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
+function hasFormatParams(y_axis: LensSeriesLayer['y_axis'][number]) {
   return (
-    yAxis.format &&
-    (yAxis.suffix || yAxis.compactValues || yAxis.decimals || yAxis.fromUnit || yAxis.toUnit)
+    y_axis.format &&
+    (y_axis.suffix || y_axis.compactValues || y_axis.decimals || y_axis.fromUnit || y_axis.toUnit)
   );
 }
 
@@ -173,22 +173,22 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     ...layerBreakdown.map((bd, breakdownIndex) =>
       getValueColumn(`${ACCESSOR}${i}_breakdown_${breakdownIndex}`, bd as string)
     ),
-    ...getXValueColumn(layer.xAxis, i),
-    ...layer.yAxis.map((yAxis, index) => {
-      const params = hasFormatParams(yAxis)
+    ...getXValueColumn(layer.x_axis, i),
+    ...layer.y_axis.map((y_axis, index) => {
+      const params = hasFormatParams(y_axis)
         ? {
-            id: yAxis.format as string,
+            id: y_axis.format as string,
             params: {
-              compact: yAxis.compactValues,
-              decimals: yAxis.decimals ?? 0,
-              suffix: yAxis.suffix,
-              fromUnit: yAxis.fromUnit,
-              toUnit: yAxis.toUnit,
+              compact: y_axis.compactValues,
+              decimals: y_axis.decimals ?? 0,
+              suffix: y_axis.suffix,
+              fromUnit: y_axis.fromUnit,
+              toUnit: y_axis.toUnit,
             },
           }
         : undefined;
 
-      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
+      return getValueColumn(`${ACCESSOR}${i}_${index}`, y_axis.value, 'number', params);
     }),
   ];
 }
@@ -222,7 +222,7 @@ function buildAllFormulasInLayer(
   i: number,
   dataView: DataView
 ): PersistedIndexPatternLayer {
-  return layer.yAxis.reduce((acc, curr, valueIndex) => {
+  return layer.y_axis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
       `${ACCESSOR}${i}_${valueIndex}`,
       mapToFormula(curr),
@@ -241,10 +241,10 @@ function buildFormulaLayer(
   if (layer.type === 'series') {
     const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
 
-    if (layer.xAxis) {
+    if (layer.x_axis) {
       const columnName = `x_${ACCESSOR}${i}`;
       const breakdownColumn = getBreakdownColumn({
-        options: layer.xAxis,
+        options: layer.x_axis,
         dataView,
       });
       addLayerColumn(resultLayer, columnName, breakdownColumn, true);

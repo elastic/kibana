@@ -19,7 +19,7 @@ test('generates metric chart config', async () => {
         esql: 'from test | count=count() by @timestamp, category',
       },
       breakdown: 'category',
-      xAxis: '@timestamp',
+      x_axis: '@timestamp',
       value: 'count',
     },
     {
