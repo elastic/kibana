@@ -25,7 +25,12 @@ export {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from './src/control_constants';
-export { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from './src/options_list_constants';
+export {
+  DEFAULT_SEARCH_TECHNIQUE,
+  OPTIONS_LIST_DEFAULT_SORT,
+  DEFAULT_DSL_SINGLE_SELECT,
+  DEFAULT_ESQL_SINGLE_SELECT,
+} from './src/options_list_constants';
 
 export {
   ACTION_CREATE_CONTROL,

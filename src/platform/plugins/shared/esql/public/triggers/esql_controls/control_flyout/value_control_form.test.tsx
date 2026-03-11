@@ -20,6 +20,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import { DEFAULT_SINGLE_SELECT } from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -163,6 +164,7 @@ describe('ValueControlForm', () => {
         title: 'my control',
         available_options: ['5 minutes'],
         selected_options: ['5 minutes'],
+        single_select: DEFAULT_SINGLE_SELECT,
         variable_name: 'myInterval',
         variable_type: ESQLVariableType.TIME_LITERAL,
         esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
@@ -195,6 +197,7 @@ describe('ValueControlForm', () => {
         title: 'my control',
         available_options: ['5 minutes'],
         selected_options: ['5 minutes'],
+        single_select: DEFAULT_SINGLE_SELECT,
         variable_name: 'myInterval',
         variable_type: ESQLVariableType.TIME_LITERAL,
         esql_query: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
@@ -303,6 +306,7 @@ describe('ValueControlForm', () => {
           title: 'Custom Query Control',
           available_options: [],
           selected_options: [], // Start with empty to trigger the useEffect
+          single_select: DEFAULT_SINGLE_SELECT,
           variable_name: 'customVar',
           variable_type: ESQLVariableType.VALUES,
           esql_query: customQuery,

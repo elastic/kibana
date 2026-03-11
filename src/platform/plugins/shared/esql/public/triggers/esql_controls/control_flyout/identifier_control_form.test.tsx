@@ -18,6 +18,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
+import { DEFAULT_SINGLE_SELECT } from '@kbn/controls-constants';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
@@ -151,6 +152,7 @@ describe('IdentifierControlForm', () => {
         title: 'my control',
         available_options: ['column2'],
         selected_options: ['column2'],
+        single_select: DEFAULT_SINGLE_SELECT,
         variable_name: 'myField',
         variable_type: ESQLVariableType.FIELDS,
         esql_query: 'FROM foo | STATS BY',
@@ -182,6 +184,7 @@ describe('IdentifierControlForm', () => {
         title: 'my control',
         available_options: ['column2'],
         selected_options: ['column2'],
+        single_select: DEFAULT_SINGLE_SELECT,
         variable_name: 'myField',
         variable_type: ESQLVariableType.FIELDS,
         esql_query: 'FROM foo | STATS BY',

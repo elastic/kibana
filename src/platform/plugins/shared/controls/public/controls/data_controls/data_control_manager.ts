@@ -28,8 +28,10 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ...defaultControlLabelComparators,
   data_view_id: 'referenceEquality',
   field_name: 'referenceEquality',
-  use_global_filters: (a, b) => (a ?? true) === (b ?? true),
-  ignore_validations: (a, b) => Boolean(a) === Boolean(b),
+  use_global_filters: (a, b) =>
+    (a ?? DEFAULT_USE_GLOBAL_FILTERS) === (b ?? DEFAULT_USE_GLOBAL_FILTERS),
+  ignore_validations: (a, b) =>
+    (a ?? DEFAULT_IGNORE_VALIDATIONS) === (b ?? DEFAULT_IGNORE_VALIDATIONS),
 };
 
 export const defaultDataControlState = {

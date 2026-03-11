@@ -13,3 +13,5 @@ export const OPTIONS_LIST_DEFAULT_SORT = {
 } as const;
 
 export const DEFAULT_SEARCH_TECHNIQUE = 'wildcard';
+export const DEFAULT_DSL_SINGLE_SELECT = false;
+export const DEFAULT_ESQL_SINGLE_SELECT = true;
