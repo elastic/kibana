@@ -10,31 +10,26 @@ page_description: |
 groups:
   - group: General settings
     id: general-i18n-settings
-    # description: |
-    # example: |
     settings:
 
       - setting: i18n.locale
-        # id:
         description: |
-          Set the Kibana interface language.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
-        datatype: string
+          Set the {{kib}} interface language:
+
+          * English - `en`
+          * Chinese - `zh-CN`
+          * Japanese - `ja-JP`
+          * French - `fr-FR`
+          * German - `de-DE`
+        datatype: enum
         default: en
         options:
-           - option: en
-           - option: zh-CN
-           - option: ja-JP
-           - option: fr-FR
-        #     description: ""
-        # type: static/dynamic
+          - option: en
+          - option: zh-CN
+          - option: ja-JP
+          - option: fr-FR
+          - option: de-DE
         applies_to:
-          deployment:
-            self: all
-            ess: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
