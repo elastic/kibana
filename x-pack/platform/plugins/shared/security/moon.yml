@@ -104,6 +104,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/mock-idp-utils'
   - '@kbn/core-user-activity-server'
+  - '@kbn/core-user-activity-server-mocks'
 tags:
   - plugin
   - prod
