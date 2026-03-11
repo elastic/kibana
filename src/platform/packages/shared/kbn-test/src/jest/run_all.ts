@@ -18,7 +18,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
-import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
+import {
+  isInBuildkite,
+  markConfigCompleted,
+  isConfigCompleted,
+  getCheckpointKey,
+} from './buildkite_checkpoint';
 import { parseShardAnnotation, annotateConfigWithShard } from './shard_config';
 
 interface JestConfigResult {
@@ -183,8 +188,11 @@ async function runConfigs(
       allConfigs.map(async (config) => {
         // Use relative path for checkpoint key so it's stable across different CI agents
         const relConfig = relative(REPO_ROOT, config);
+        const checkpointKey = getCheckpointKey(relConfig);
         const completed = await isConfigCompleted(relConfig);
-        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relConfig}`);
+        log.info(
+          `[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relConfig} (key=${checkpointKey})`
+        );
         return { config, completed };
       })
     );
@@ -359,7 +367,10 @@ async function runConfigs(
             // Write checkpoint for successful configs before proceeding
             // Use relative path for stable keys across CI agents
             if (code === 0 && isInBuildkite()) {
-              log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
+              const checkpointKey = getCheckpointKey(relConfigPath);
+              log.info(
+                `[jest-checkpoint] Marking ${relConfigPath} as completed (key=${checkpointKey})`
+              );
               markConfigCompleted(relConfigPath).then(proceed, proceed);
             } else {
               proceed();
