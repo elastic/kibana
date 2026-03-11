@@ -15,9 +15,12 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useGetFieldsData } from './use_get_fields_data';
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: () => ({ hasAlertsRead: true }),
-}));
+jest.mock(
+  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  () => ({
+    useAlertsPrivileges: () => ({ hasAlertsRead: true }),
+  })
+);
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');

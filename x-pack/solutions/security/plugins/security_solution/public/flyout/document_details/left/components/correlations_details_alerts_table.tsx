@@ -261,10 +261,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         title,
         iconType: 'warning',
         headerContent:
-          hasAlertsRead &&
-          alertIds &&
-          alertIds.length &&
-          alertIds.length > 0 ? (
+          hasAlertsRead && alertIds && alertIds.length && alertIds.length > 0 ? (
             <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
               <InvestigateInTimelineButton
                 dataProviders={dataProviders}
