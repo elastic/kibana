@@ -27,6 +27,8 @@ export interface AddToCaseButtonProps {
   isIcon?: boolean;
   isDisabled?: boolean;
   iconProps?: Record<string, string>;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
@@ -36,6 +38,8 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   isIcon = false,
   isDisabled,
   iconProps,
+  scheduleId,
+  executionCount,
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
@@ -63,6 +67,15 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
+    const metadata: Record<string, unknown> = { actionId, agentIds, queryId };
+    if (scheduleId) {
+      metadata.scheduleId = scheduleId;
+    }
+
+    if (executionCount != null) {
+      metadata.executionCount = executionCount;
+    }
+
     const attachments: CaseAttachmentsWithoutOwner = [
       ...alertAttachments,
       {
@@ -72,13 +85,22 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
           type: ExternalReferenceStorageType.elasticSearchDoc,
         },
         externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds, queryId },
+        externalReferenceMetadata: metadata,
       },
     ];
     if (hasCasesPermissions) {
       selectCaseModal.open({ getAttachments: () => attachments });
     }
-  }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
+  }, [
+    actionId,
+    agentIds,
+    alertAttachments,
+    executionCount,
+    hasCasesPermissions,
+    queryId,
+    scheduleId,
+    selectCaseModal,
+  ]);
 
   if (isIcon) {
     return (

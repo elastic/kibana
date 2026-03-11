@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+import type { IRouter } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { PLUGIN_ID } from '../../../common';
+import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import type {
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
+} from '../../../common/search_strategy';
+import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+
+export const getScheduledQueryResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
+  router.versioned
+    .get({
+      access: 'internal',
+      path: '/internal/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              scheduleId: schema.string(),
+              executionCount: schema.number(),
+            }),
+            query: schema.object({
+              page: schema.maybe(schema.number()),
+              pageSize: schema.maybe(schema.number()),
+              sort: schema.maybe(schema.string()),
+              sortOrder: schema.maybe(schema.string()),
+              kuery: schema.maybe(schema.string()),
+              startDate: schema.maybe(schema.string()),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+
+        try {
+          const { scheduleId, executionCount } = request.params;
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+
+          if (page * pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+            return response.badRequest({
+              body: {
+                message: `Cannot paginate beyond ${DEFAULT_MAX_TABLE_QUERY_SIZE} results. Use Discover for full access.`,
+                attributes: { code: 'PAGINATION_LIMIT_EXCEEDED' },
+              },
+            });
+          }
+
+          const search = await context.search;
+          const res = await lastValueFrom(
+            search.search<ResultsRequestOptions, ResultsStrategyResponse>(
+              {
+                actionId: scheduleId,
+                scheduleId,
+                executionCount,
+                factoryQueryType: OsqueryQueries.results,
+                kuery: request.query.kuery,
+                startDate: request.query.startDate,
+                pagination: generateTablePaginationOptions(page, pageSize),
+                sort: [
+                  {
+                    direction: (request.query.sortOrder as Direction) ?? Direction.desc,
+                    field: request.query.sort ?? '@timestamp',
+                  },
+                ],
+              },
+              { abortSignal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          return response.ok({
+            body: { data: res },
+          });
+        } catch (e) {
+          return response.customError({
+            statusCode: e.statusCode ?? 500,
+            body: { message: e.message },
+          });
+        }
+      }
+    );
+};
+
+function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {
+  const controller = new AbortController();
+  aborted$.subscribe(() => controller.abort());
+
+  return controller.signal;
+}
