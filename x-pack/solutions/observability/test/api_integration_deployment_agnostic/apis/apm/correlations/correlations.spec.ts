@@ -7,7 +7,6 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-import { CorrelationEndpointType } from '@kbn/apm-plugin/common/correlations/types';
 import type {
   CorrelationsResponse,
   UnifiedCorrelation,
@@ -58,7 +57,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              type: CorrelationEndpointType.LATENCY,
+              entityType: 'transaction',
+              metric: 'latency',
               percentileThreshold: 95,
             },
           },
@@ -86,7 +86,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              type: CorrelationEndpointType.FAILED_TRANSACTION_RATE,
+              entityType: 'transaction',
+              metric: 'failure_rate',
               percentileThreshold: 95,
             },
           },
@@ -122,7 +123,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              type: CorrelationEndpointType.LATENCY,
+              entityType: 'transaction',
+              metric: 'latency',
               percentileThreshold: 95,
             },
           },
@@ -192,7 +194,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               start: '2020',
               end: '2021',
               kuery: '',
-              type: CorrelationEndpointType.LATENCY,
+              entityType: 'transaction',
+              metric: 'latency',
               percentileThreshold: 95,
             },
           },
@@ -231,7 +234,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              type: CorrelationEndpointType.FAILED_TRANSACTION_RATE,
+              entityType: 'transaction',
+              metric: 'failure_rate',
               percentileThreshold: 95,
             },
           },

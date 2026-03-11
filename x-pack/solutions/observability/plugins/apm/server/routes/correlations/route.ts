@@ -31,7 +31,7 @@ import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/correlations/constants';
-import { CorrelationEndpointType, CorrelationType } from '../../../common/correlations/types';
+import { CorrelationType } from '../../../common/correlations/types';
 import type { CorrelationsResponse } from '../../../common/correlations/types';
 import { fetchCorrelations } from './queries/fetch_correlations';
 
@@ -343,28 +343,28 @@ const pValuesTransactionsRoute = createApmServerRoute({
   },
 });
 
-const correlationEndpointTypeRt = t.union([
-  t.literal(CorrelationEndpointType.LATENCY),
-  t.literal(CorrelationEndpointType.FAILED_TRANSACTION_RATE),
-]);
+const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
 
-const scopeRt = t.union([t.literal('transactions'), t.literal('exitSpans')]);
+const metricRt = t.union([
+  t.literal('throughput'),
+  t.literal('latency'),
+  t.literal('failure_rate'),
+]);
 
 /**
  * Unified correlations API
  *
- * To run exit span latency correlations (backed by the `exitSpanLatencyCorrelations`
- * chart type), call:
+ * To run exit span latency correlations, call:
  *
  *  - `POST /internal/apm/correlations`
- *  - with `type` set to `CorrelationEndpointType.LATENCY`
- *  - and `scope` set to `'exitSpans'`
+ *  - with `entityType` set to `'exit_span'`
+ *  - and `metric` set to `'latency'`
  *
  * Example request body:
  *
  * {
- *   "type": "latency",
- *   "scope": "exitSpans",
+ *   "entityType": "exit_span",
+ *   "metric": "latency",
  *   "start": "<from>",
  *   "end": "<to>",
  *   "kuery": "<optional KQL>",
@@ -378,11 +378,10 @@ const unifiedCorrelationsRoute = createApmServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        type: correlationEndpointTypeRt,
+        entityType: entityTypeRt,
+        metric: metricRt,
       }),
       t.partial({
-        /** When 'exitSpans', run correlations on raw exit span documents (outgoing requests to dependencies). Default 'transactions'. */
-        scope: scopeRt,
         fieldCandidates: t.array(t.string),
         durationMin: toNumberRt,
         durationMax: toNumberRt,
@@ -405,8 +404,8 @@ const unifiedCorrelationsRoute = createApmServerRoute({
 
     const {
       body: {
-        type,
-        scope = 'transactions',
+        entityType,
+        metric,
         start,
         end,
         kuery,
@@ -420,10 +419,24 @@ const unifiedCorrelationsRoute = createApmServerRoute({
 
     const includeHistogramWithDefault = includeHistogram ?? true;
 
-    const correlationType =
-      type === CorrelationEndpointType.LATENCY
-        ? CorrelationType.TRANSACTION_DURATION
-        : CorrelationType.ERROR_RATE;
+    const correlationType: CorrelationType = ((): CorrelationType => {
+      if (metric === 'latency') {
+        return CorrelationType.TRANSACTION_DURATION;
+      }
+      if (metric === 'failure_rate') {
+        return CorrelationType.ERROR_RATE;
+      }
+      throw Boom.notImplemented(
+        i18n.translate('xpack.apm.correlations.metric.notImplemented', {
+          defaultMessage:
+            "Correlations for metric '{metric}' are not implemented yet. Supported metrics are 'latency' and 'failure_rate'.",
+          values: { metric },
+        })
+      );
+    })();
+
+    const scope: 'transactions' | 'exitSpans' =
+      entityType === 'exit_span' ? 'exitSpans' : 'transactions';
 
     const query =
       scope === 'exitSpans'
