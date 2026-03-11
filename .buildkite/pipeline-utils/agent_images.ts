@@ -68,11 +68,11 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
       '#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove ```TEST_ENABLE_FIPS_VERSION``` environment variable and/or the ```ci:enable-fips-<version>-agent``` Github label.'
     );
   } else {
-    config = DEFAULT_AGENT_IMAGE_CONFIG;
+    config = { ...DEFAULT_AGENT_IMAGE_CONFIG };
   }
 
   if (useQaImage) {
-    config.imageProject = ELASTIC_IMAGES_QA_PROJECT;
+    config = { ...config, imageProject: ELASTIC_IMAGES_QA_PROJECT };
   }
 
   if (returnYaml) {
