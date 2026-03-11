@@ -17,9 +17,11 @@ import type {
 import {
   addAgentStreamToZip,
   addDataStreamToZip,
+  addFieldsToZip,
   addIngestPipelineToZip,
   addManifestToZip,
 } from './util';
+import { generateFieldMappings } from './fields';
 import { getInputVars } from './input_vars';
 
 const FORMAT_VERSION = '3.4.0';
@@ -166,6 +168,13 @@ export const buildIntegrationPackage = async (
     }
 
     addAgentStreamToZip(zip, packageName, dataStream.data_stream_id, dataStream.input_types);
+
+    const fieldMappings =
+      dataStream.result?.field_mapping ??
+      generateFieldMappings(
+        (dataStream.result?.pipeline_docs as Array<Record<string, unknown>>) ?? []
+      );
+    addFieldsToZip(zip, packageName, dataStream.data_stream_id, manifest.name, fieldMappings);
   }
 
   const buffer = await zip.toBufferPromise();

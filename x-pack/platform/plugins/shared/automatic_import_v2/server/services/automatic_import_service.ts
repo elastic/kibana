@@ -42,6 +42,8 @@ import type {
 import { TASK_STATUSES } from './saved_objects/constants';
 import type { BuildIntegrationPackageResult } from './build_integration/build_integration_service';
 import { buildIntegrationPackage } from './build_integration/build_integration_service';
+import { generateFieldMappings } from './build_integration/fields';
+import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
@@ -545,11 +547,23 @@ export class AutomaticImportService {
           source !== undefined
       );
 
+    const fieldMapping = generateFieldMappings(pipelineDocs as Array<Record<string, unknown>>);
+
+    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+    if (!validationResult.valid) {
+      this.logger.warn(
+        `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
+          ', '
+        )}`
+      );
+    }
+
     await this.savedObjectService.updateDataStreamSavedObjectAttributes({
       integrationId,
       dataStreamId,
       ingestPipeline: parsedPipeline,
       pipelineDocs,
+      fieldMapping,
       status: TASK_STATUSES.completed,
     });
 
