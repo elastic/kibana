@@ -50,6 +50,7 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
     get: jest.fn(),
     list: jest.fn(),
     execute: jest.fn(),
+    listWorkflows: jest.fn(),
   };
 };
 
@@ -74,6 +75,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
           flyoutRef: mockSidebarRef,
         };
       }),
+    addAttachment: jest.fn(),
   };
 };
 

@@ -26,6 +26,22 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       },
     }),
 
+  // empty state labels
+  noPrivilegeEmptyTitle: i18n.translate(
+    'xpack.securitySolution.scriptsLibrary.noPrivilegeEmptyTitle',
+    { defaultMessage: 'There are no scripts to display.' }
+  ),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateTitle', {
+    defaultMessage: 'Add your first script',
+  }),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateInfo', {
+    defaultMessage: 'View and manage scripts to upload and execute on Elastic Defend agents.',
+  }),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.scriptsLibrary.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Upload script' }
+  ),
+
   // table labels
   table: {
     noItemsMessage: i18n.translate('xpack.securitySolution.scriptsLibrary.table.noItemsMessage', {

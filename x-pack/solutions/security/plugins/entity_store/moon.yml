@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/zod-helpers'
   - '@kbn/task-manager-plugin'
-  - '@kbn/core-lifecycle-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-server'
   - '@kbn/config-schema'
@@ -40,8 +39,11 @@ dependsOn:
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
   - '@kbn/std'
+  - '@kbn/object-utils'
   - '@kbn/es-query'
   - '@kbn/security-plugin'
+  - '@kbn/streamlang'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod

@@ -6,7 +6,10 @@
  */
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiText } from '@elastic/eui';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
@@ -18,7 +21,7 @@ import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useGetSettings } from '../../../../pages/slo_settings/hooks/use_get_settings';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { GroupBy, GroupFilters } from '../types';
+import type { GroupBy, GroupFilters } from '../../../../../common/embeddables/overview/types';
 
 interface Option {
   value: string;
@@ -26,8 +29,18 @@ interface Option {
 }
 
 interface Props {
-  onSelected: (prop: string, value: string | Array<string | undefined> | Filter[]) => void;
+  onSelected: (
+    prop: string,
+    value: string | Array<string | undefined> | Filter[] | AsCodeFilter[]
+  ) => void;
   selectedFilters: GroupFilters;
+}
+
+/** Ensure each filter has $state so FilterEditor onSubmit runs (it returns early if !$state?.store). */
+function ensureFiltersHaveState(filters: Filter[]): Filter[] {
+  return filters.map((f) =>
+    f.$state?.store != null ? f : { ...f, $state: { store: FilterStateStore.APP_STATE } }
+  );
 }
 
 const mapGroupsToOptions = (groups: string[] | undefined, selectedGroupBy: string) =>
@@ -88,10 +101,13 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   const { dataView } = useCreateDataView({
     indexPatternString: SUMMARY_DESTINATION_INDEX_NAME,
   });
-  const [selectedGroupBy, setSelectedGroupBy] =
-    useState<GroupBy>(selectedFilters.groupBy) ?? 'status';
-  const [filters, setFilters] = useState(selectedFilters.filters) ?? [];
-  const [kqlQuery, setkqlQuery] = useState(selectedFilters.kqlQuery);
+  const [selectedGroupBy, setSelectedGroupBy] = useState<GroupBy>(
+    selectedFilters.group_by ?? 'status'
+  );
+  const [filters, setFilters] = useState<Filter[]>(() =>
+    ensureFiltersHaveState(toStoredFilters(selectedFilters.filters) ?? [])
+  );
+  const [kqlQuery, setkqlQuery] = useState(selectedFilters.kql_query);
   const [selectedGroupByLabel, setSelectedGroupByLabel] = useState('Status');
   const [groupOptions, setGroupOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedGroupOptions, setSelectedGroupOptions] = useState<
@@ -175,7 +191,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           value={selectedGroupBy}
           onChange={(e) => {
             setSelectedGroupBy(e.target.value as GroupBy);
-            onSelected('groupBy', e.target.value);
+            onSelected('group_by', e.target.value);
             setSelectedGroupOptions([]);
             onSelected('groups', []);
           }}
@@ -240,16 +256,16 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           showFilterBar={true}
           filters={filters}
           onFiltersUpdated={(newFilters) => {
-            setFilters(newFilters);
-            onSelected('filters', newFilters);
+            setFilters(ensureFiltersHaveState(newFilters));
+            onSelected('filters', fromStoredFilters(newFilters) ?? []);
           }}
           onQuerySubmit={({ query: value }) => {
             setkqlQuery(String(value?.query));
-            onSelected('kqlQuery', String(value?.query));
+            onSelected('kql_query', String(value?.query));
           }}
           onQueryChange={({ query: value }) => {
             setkqlQuery(String(value?.query));
-            onSelected('kqlQuery', String(value?.query));
+            onSelected('kql_query', String(value?.query));
           }}
           query={{ query: String(kqlQuery), language: 'kuery' }}
           showDatePicker={false}
@@ -258,8 +274,12 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {
-            setFilters(savedQuery.attributes.filters);
-            setkqlQuery(String(savedQuery.attributes.query.query));
+            const storedFilters = ensureFiltersHaveState(savedQuery.attributes.filters ?? []);
+            setFilters(storedFilters);
+            onSelected('filters', fromStoredFilters(storedFilters) ?? []);
+            const kql = String(savedQuery.attributes.query.query);
+            setkqlQuery(kql);
+            onSelected('kql_query', kql);
           }}
         />
       </EuiFormRow>

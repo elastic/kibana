@@ -14,6 +14,7 @@
       "_project/tags"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-tags",
     "availability": {
       "stack": false,
       "serverless": true

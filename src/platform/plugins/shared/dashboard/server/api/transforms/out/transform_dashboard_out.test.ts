@@ -91,7 +91,6 @@ describe('transformDashboardOut', () => {
           grid: { x: 0, y: 0, w: 10, h: 10 },
           uid: '1',
           type: 'type1',
-          version: '2',
         },
       ],
       title: 'my title',
@@ -181,7 +180,6 @@ describe('transformDashboardOut', () => {
           },
           uid: '1',
           type: 'type1',
-          version: '2',
         },
       ],
       refresh_interval: {
@@ -268,7 +266,6 @@ describe('transformDashboardOut', () => {
           },
           uid: '1',
           type: 'type1',
-          version: '2',
         },
       ],
       title: 'title',

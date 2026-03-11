@@ -43,7 +43,7 @@ export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCou
  */
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
-  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
+  totalCardinality: number;
   invalidSelections?: OptionsListSelection[];
 }
 
@@ -86,7 +86,6 @@ export interface OptionsListRequestBody {
   selectedOptions?: OptionsListDSLControlState['selected_options'];
 
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
-  allowExpensiveQueries: boolean;
   ignoreValidations?: boolean;
   filters?: Array<{ bool: BoolQuery }>;
   runPastTimeout?: boolean;

@@ -84,12 +84,22 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   async executeAgent({
     request,
     params,
+    executionId: providedExecutionId,
     useTaskManager,
     abortSignal,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
-    const executionId = uuidv4();
+    const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+
+    const executionClient = this.createExecutionClient();
+
+    if (providedExecutionId) {
+      const existing = await executionClient.peek(providedExecutionId);
+      if (existing) {
+        throw createBadRequestError(`Execution with id ${providedExecutionId} already exists`);
+      }
+    }
 
     const validatedAttachments = await this.validateAttachmentsIfProvided(
       params.nextInput.attachments
@@ -98,7 +108,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
       : params;
 
-    const executionClient = this.createExecutionClient();
     const execution = await executionClient.create({
       executionId,
       agentId,
@@ -124,6 +133,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } else {
       return this.executeLocally({ execution, request });
     }
+  }
+
+  async getExecution(executionId: string): Promise<AgentExecution | undefined> {
+    const executionClient = this.createExecutionClient();
+    return executionClient.get(executionId);
   }
 
   async abortExecution(executionId: string): Promise<void> {

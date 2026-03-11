@@ -75,7 +75,7 @@ export function WorkflowYamlValidationAccordion({
               hoverMessage: null,
               severity: 'error' as YamlValidationErrorSeverity,
               message: errorValidating.message,
-              owner: 'variable-validation' as YamlValidationResult['owner'],
+              owner: 'variable-validation' as const,
               startLineNumber: 0,
               startColumn: 0,
               afterMessage: null,

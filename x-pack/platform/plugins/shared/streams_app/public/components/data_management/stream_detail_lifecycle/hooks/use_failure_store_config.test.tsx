@@ -96,6 +96,7 @@ const createWiredDefinition = (
     from: isRoot ? name : 'logs',
   },
   effective_settings: {},
+  data_stream_exists: true,
   inherited_fields: {},
   dashboards: [],
   queries: [],
@@ -246,7 +247,7 @@ describe('useFailureStoreConfig', () => {
 
   describe('Wired Stream (child)', () => {
     it('should return config for enabled failure store with custom retention', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '5d',
@@ -271,7 +272,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should return config when inheriting from parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '30d',
@@ -287,7 +288,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should detect when overriding parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '10d',

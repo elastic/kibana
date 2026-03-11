@@ -7,17 +7,11 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type {
-  PackagePolicyConfigRecord,
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-  PackageInfo,
-} from '../../../common';
+import type { PackagePolicyConfigRecord } from '../../../common';
 import type { AwsCloudConnectorVars, AzureCloudConnectorVars } from '../../../common/types';
 
 import {
   updateInputVarsWithCredentials,
-  updatePolicyWithAwsCloudConnectorCredentials,
   isCloudConnectorReusableEnabled,
   isAwsCloudConnectorVars,
   isAzureCloudConnectorVars,
@@ -28,7 +22,7 @@ import {
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
 } from './utils';
-import { getMockPolicyAWS, getMockPackageInfoAWS } from './test/mock';
+import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
 import { AWS_PROVIDER, AZURE_PROVIDER } from './constants';
 
@@ -232,210 +226,85 @@ describe('updateInputVarsWithCredentials - Azure support', () => {
   });
 });
 
-describe('updatePolicyWithAwsCloudConnectorCredentials', () => {
-  let mockPackagePolicy: NewPackagePolicy;
-  let mockInput: NewPackagePolicyInput;
-
-  beforeEach(() => {
-    mockInput = {
-      type: 'cloudbeat/cis_aws',
-      policy_template: 'cis_aws',
-      enabled: true,
-      streams: [
-        {
-          enabled: true,
-          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
-          vars: {
-            role_arn: { value: 'arn:aws:iam::123456789012:role/OriginalRole' },
-            external_id: { value: 'original-external-id' },
-            'aws.role_arn': { value: 'arn:aws:iam::123456789012:role/OriginalAwsRole' },
-            'aws.credentials.external_id': { value: 'original-aws-external-id' },
-          },
-        },
-      ],
+describe('updateInputVarsWithCredentials - supports_cloud_connectors flag', () => {
+  it('should set supports_cloud_connectors to true when AWS credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
     };
 
-    mockPackagePolicy = {
-      id: 'test-policy-id',
-      enabled: true,
-      policy_id: 'test-policy',
-      policy_ids: ['test-policy'],
-      name: 'test-policy',
-      namespace: 'default',
-      package: {
-        name: 'cloud_security_posture',
-        title: 'Cloud Security Posture',
-        version: '1.0.0',
-      },
-      inputs: [
-        {
-          type: 'cloudbeat/cis_aws',
-          policy_template: 'cis_aws',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
-              vars: mockInput.streams[0].vars,
-            },
-          ],
-        },
-      ],
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
     };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
   });
 
-  it('should return original policy when credentials is empty object', () => {
-    const result = updatePolicyWithAwsCloudConnectorCredentials(mockPackagePolicy, mockInput, {});
+  it('should set supports_cloud_connectors to true when Azure credentials are provided and var exists', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      tenant_id: { value: '' },
+      client_id: { value: '' },
+      supports_cloud_connectors: { value: undefined },
+    };
 
-    expect(result).toStrictEqual(mockPackagePolicy);
+    const credentials: CloudConnectorCredentials = {
+      tenantId: 'test-tenant-id',
+      clientId: 'test-client-id',
+    };
+
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
   });
 
-  it('should update role_arn when provided in credentials', () => {
-    const credentials = {
-      role_arn: 'arn:aws:iam::123456789012:role/UpdatedRole',
+  it('should set supports_cloud_connectors to false when credentials are undefined', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: 'some-arn' },
+      external_id: { value: 'some-id' },
+      supports_cloud_connectors: { value: true },
     };
 
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      mockInput,
-      credentials
-    );
+    const result = updateInputVarsWithCredentials(inputVars, undefined);
 
-    expect(result.inputs[0].streams[0].vars?.role_arn.value).toBe(
-      'arn:aws:iam::123456789012:role/UpdatedRole'
-    );
+    expect(result?.supports_cloud_connectors?.value).toBe(false);
   });
 
-  it('should update external_id when provided in credentials', () => {
-    const credentials = {
-      external_id: 'updated-external-id',
+  it('should not add supports_cloud_connectors if it does not exist in input vars', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
     };
 
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      mockInput,
-      credentials
-    );
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
+    };
 
-    expect(result.inputs[0].streams[0].vars?.external_id.value).toBe('updated-external-id');
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
+
+    expect(result).not.toHaveProperty('supports_cloud_connectors');
   });
 
-  it('should update aws.role_arn when provided in credentials', () => {
-    const credentials = {
-      'aws.role_arn': 'arn:aws:iam::123456789012:role/UpdatedAwsRole',
+  it('should preserve other properties on the supports_cloud_connectors var entry', () => {
+    const inputVars: PackagePolicyConfigRecord = {
+      role_arn: { value: '' },
+      external_id: { value: '' },
+      supports_cloud_connectors: { value: undefined, type: 'bool' },
     };
 
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      mockInput,
-      credentials
-    );
-
-    expect(result.inputs[0].streams[0].vars?.['aws.role_arn'].value).toBe(
-      'arn:aws:iam::123456789012:role/UpdatedAwsRole'
-    );
-  });
-
-  it('should update aws.credentials.external_id when provided in credentials', () => {
-    const credentials = {
-      'aws.credentials.external_id': 'updated-aws-external-id',
+    const credentials: CloudConnectorCredentials = {
+      roleArn: 'arn:aws:iam::123456789012:role/TestRole',
+      externalId: 'test-external-id',
     };
 
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      mockInput,
-      credentials
-    );
+    const result = updateInputVarsWithCredentials(inputVars, credentials);
 
-    expect(result.inputs[0].streams[0].vars?.['aws.credentials.external_id'].value).toBe(
-      'updated-aws-external-id'
-    );
-  });
-
-  it('should handle multiple credential fields at once', () => {
-    const credentials = {
-      role_arn: 'arn:aws:iam::123456789012:role/UpdatedRole',
-      external_id: 'updated-external-id',
-      'aws.role_arn': 'arn:aws:iam::123456789012:role/UpdatedAwsRole',
-      'aws.credentials.external_id': 'updated-aws-external-id',
-    };
-
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      mockInput,
-      credentials
-    );
-
-    const updatedVars = result.inputs[0].streams[0].vars;
-    expect(updatedVars?.role_arn.value).toBe('arn:aws:iam::123456789012:role/UpdatedRole');
-    expect(updatedVars?.external_id.value).toBe('updated-external-id');
-    expect(updatedVars?.['aws.role_arn'].value).toBe(
-      'arn:aws:iam::123456789012:role/UpdatedAwsRole'
-    );
-    expect(updatedVars?.['aws.credentials.external_id'].value).toBe('updated-aws-external-id');
-  });
-
-  it('should handle policy without inputs', () => {
-    const policyWithoutInputs = { ...mockPackagePolicy, inputs: [] };
-
-    const credentials = {
-      role_arn: 'arn:aws:iam::123456789012:role/UpdatedRole',
-    };
-
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      policyWithoutInputs,
-      mockInput,
-      credentials
-    );
-
-    expect(result.inputs).toEqual([]);
-  });
-
-  it('should return policy with empty inputs array when inputs is undefined', () => {
-    const policyWithoutInputs = { ...mockPackagePolicy };
-    delete (policyWithoutInputs as Partial<NewPackagePolicy>).inputs;
-
-    const credentials = {
-      role_arn: 'arn:aws:iam::123456789012:role/UpdatedRole',
-    };
-
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      policyWithoutInputs,
-      mockInput,
-      credentials
-    );
-
-    expect(result.inputs).toEqual([]);
-  });
-
-  it('should return updated policy when input streams vars is undefined', () => {
-    const inputWithoutVars: NewPackagePolicyInput = {
-      type: 'test-input',
-      policy_template: 'test-template',
-      enabled: true,
-      streams: [
-        {
-          enabled: true,
-          data_stream: { type: 'logs', dataset: 'test.dataset' },
-        },
-      ],
-    };
-
-    const credentials = {
-      role_arn: 'arn:aws:iam::123456789012:role/UpdatedRole',
-    };
-
-    const result = updatePolicyWithAwsCloudConnectorCredentials(
-      mockPackagePolicy,
-      inputWithoutVars,
-      credentials
-    );
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        inputs: expect.any(Array),
-      })
-    );
+    expect(result?.supports_cloud_connectors?.value).toBe(true);
+    expect(result?.supports_cloud_connectors?.type).toBe('bool');
   });
 });
 
@@ -573,258 +442,144 @@ describe('Cloud Connector Type Guards', () => {
 });
 
 describe('getCloudConnectorRemoteRoleTemplate', () => {
-  const mockInput = getMockPolicyAWS().inputs[0];
-  const mockPackageInfo = getMockPackageInfoAWS();
-
-  // AWS-specific cloud setup
-  const mockAwsCloudSetup = {
+  // Cloud setup for testing - ESS deployment
+  const mockCloudSetup = {
     isCloudEnabled: true,
     // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-    // Decodes to: 'aws-endpoint$aws-deployment$aws-kibana-id'
-    cloudId: 'aws-cluster:YXdzLWVuZHBvaW50JGF3cy1kZXBsb3ltZW50JGF3cy1raWJhbmEtaWQ=',
-    baseUrl: 'https://aws.elastic.co',
-    deploymentUrl: 'https://cloud.elastic.co/deployments/aws-deployment-123/kibana',
-    profileUrl: 'https://aws.elastic.co/profile',
-    organizationUrl: 'https://aws.elastic.co/organizations',
-    snapshotsUrl: 'https://aws.elastic.co/snapshots',
+    // Decodes to: 'endpoint$deployment$kibana-component-id'
+    cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudCRraWJhbmEtY29tcG9uZW50LWlk',
+    baseUrl: 'https://elastic.co',
+    deploymentUrl: 'https://cloud.elastic.co/deployments/deployment-123/kibana',
+    profileUrl: 'https://elastic.co/profile',
+    organizationUrl: 'https://elastic.co/organizations',
+    snapshotsUrl: 'https://elastic.co/snapshots',
     isServerlessEnabled: false,
   } as CloudSetup;
 
-  // Azure-specific cloud setup
-  const mockAzureCloudSetup = {
-    isCloudEnabled: true,
-    // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-    // Decodes to: 'azure-endpoint$azure-deployment$azure-kibana-id'
-    cloudId: 'azure-cluster:YXp1cmUtZW5kcG9pbnQkYXp1cmUtZGVwbG95bWVudCRhenVyZS1raWJhbmEtaWQ=',
-    baseUrl: 'https://azure.elastic.co',
-    deploymentUrl: 'https://cloud.elastic.co/deployments/azure-deployment-456/kibana',
-    profileUrl: 'https://azure.elastic.co/profile',
-    organizationUrl: 'https://azure.elastic.co/organizations',
-    snapshotsUrl: 'https://azure.elastic.co/snapshots',
-    isServerlessEnabled: false,
+  // Serverless cloud setup
+  const mockServerlessCloudSetup = {
+    isCloudEnabled: false,
+    isServerlessEnabled: true,
+    serverless: { projectId: 'serverless-project-id' },
   } as CloudSetup;
 
-  // GCP-specific cloud setup
-  const mockGcpCloudSetup = {
-    isCloudEnabled: true,
-    // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-    // Decodes to: 'gcp-endpoint$gcp-deployment$gcp-kibana-id'
-    cloudId: 'gcp-cluster:Z2NwLWVuZHBvaW50JGdjcC1kZXBsb3ltZW50JGdjcC1raWJhbmEtaWQ=',
-    baseUrl: 'https://gcp.elastic.co',
-    deploymentUrl: 'https://cloud.elastic.co/deployments/gcp-deployment-789/kibana',
-    profileUrl: 'https://gcp.elastic.co/profile',
-    organizationUrl: 'https://gcp.elastic.co/organizations',
-    snapshotsUrl: 'https://gcp.elastic.co/snapshots',
-    isServerlessEnabled: false,
-  } as CloudSetup;
+  const mockIacTemplateUrl =
+    'https://example.com/templates/ACCOUNT_TYPE/RESOURCE_ID/cloudformation.yaml';
 
-  beforeEach(() => {
-    // Add cloud_formation_cloud_connectors_template to mock package info
-    const policyTemplate = mockPackageInfo.policy_templates?.[0];
-    if (policyTemplate && 'inputs' in policyTemplate && policyTemplate.inputs?.[0]?.vars) {
-      policyTemplate.inputs[0].vars = [
-        ...(policyTemplate.inputs[0].vars || []),
-        {
-          name: 'cloud_formation_cloud_connectors_template',
-          type: 'text',
-          title: 'CloudFormation Template',
-          multi: false,
-          required: false,
-          show_user: false,
-          default:
-            'https://s3.amazonaws.com/cloudformation-templates/ACCOUNT_TYPE/RESOURCE_ID/template.yaml',
-        },
-      ];
-    }
-  });
-
-  describe('AWS Provider - Successful cases', () => {
-    it('should generate template URL for AWS with serverless enabled', () => {
-      const serverlessCloudSetup = {
-        ...mockAwsCloudSetup,
-        isCloudEnabled: false, // Disable ESS to test serverless only
-        isServerlessEnabled: true,
-        serverless: { projectId: 'aws-serverless-project' },
-      } as CloudSetup;
-
+  describe('Successful template URL generation', () => {
+    it('should generate template URL with ESS deployment resource ID', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: serverlessCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBe(
-        'https://s3.amazonaws.com/cloudformation-templates/single-account/aws-serverless-project/template.yaml'
+        'https://example.com/templates/single-account/kibana-component-id/cloudformation.yaml'
       );
     });
 
-    it('should generate template URL for AWS with cloud ESS deployment', () => {
+    it('should generate template URL with serverless project ID', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        cloud: mockServerlessCloudSetup,
+        accountType: ORGANIZATION_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBe(
-        'https://s3.amazonaws.com/cloudformation-templates/single-account/aws-kibana-id/template.yaml'
+        'https://example.com/templates/organization-account/serverless-project-id/cloudformation.yaml'
       );
     });
 
-    it('should use cloud ESS deployment ID when both serverless and cloud are enabled', () => {
-      // Note: When both are enabled, cloud ESS takes precedence (last assignment wins)
-      const hybridCloudSetup = {
-        ...mockAwsCloudSetup,
-        isServerlessEnabled: true,
-        serverless: { projectId: 'serverless-priority' },
-      } as CloudSetup;
-
+    it('should replace ACCOUNT_TYPE placeholder with organization-account', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: hybridCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      // Current behavior: cloud ESS ID overwrites serverless project ID
-      expect(result).toContain('aws-kibana-id');
-      expect(result).not.toContain('serverless-priority');
-    });
-
-    it('should use organization-account type when specified in input', () => {
-      const orgInput: NewPackagePolicyInput = {
-        ...mockInput,
-        streams: [
-          {
-            ...mockInput.streams[0],
-            vars: {
-              'aws.account_type': { value: 'organization-account', type: 'text' },
-            },
-          },
-        ],
-      };
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: orgInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        cloud: mockCloudSetup,
+        accountType: ORGANIZATION_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toContain('/organization-account/');
+      expect(result).not.toContain('ACCOUNT_TYPE');
     });
 
-    it('should use single-account type by default for AWS', () => {
+    it('should replace ACCOUNT_TYPE placeholder with single-account', () => {
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toContain('/single-account/');
+      expect(result).not.toContain('ACCOUNT_TYPE');
     });
 
-    it('should handle complex cloud ID with base64 encoding for AWS', () => {
+    it('should replace RESOURCE_ID placeholder with elastic resource ID', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('/kibana-component-id/');
+      expect(result).not.toContain('RESOURCE_ID');
+    });
+
+    it('should use ESS deployment ID when both serverless and cloud are enabled', () => {
+      const hybridCloudSetup = {
+        ...mockCloudSetup,
+        isServerlessEnabled: true,
+        serverless: { projectId: 'serverless-should-not-use' },
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: hybridCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toContain('kibana-component-id');
+      expect(result).not.toContain('serverless-should-not-use');
+    });
+
+    it('should handle complex cloud ID with base64 encoding', () => {
       const complexCloudSetup = {
-        ...mockAwsCloudSetup,
-        // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-        // Decodes to: 'eu-west-1.aws.found.io$deployment-complex$aws-kibana-complex-id'
+        ...mockCloudSetup,
+        // Decodes to: 'eu-west-1.aws.found.io$deployment-complex$complex-kibana-id'
         cloudId:
-          'production:ZXUtd2VzdC0xLmF3cy5mb3VuZC5pbyRkZXBsb3ltZW50LWNvbXBsZXgkYXdzLWtpYmFuYS1jb21wbGV4LWlk',
+          'production:ZXUtd2VzdC0xLmF3cy5mb3VuZC5pbyRkZXBsb3ltZW50LWNvbXBsZXgkY29tcGxleC1raWJhbmEtaWQ=',
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: complexCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
-      expect(result).toContain('aws-kibana-complex-id');
-    });
-
-    it('should handle complex cloud ID with base64 encoding for GCP', () => {
-      const complexGcpCloudSetup = {
-        ...mockGcpCloudSetup,
-        // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-        // Decodes to: 'us-central1.gcp.cloud.es.io$gcp-deployment-complex$gcp-kibana-complex-id'
-        cloudId:
-          'gcp-production:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGdjcC1kZXBsb3ltZW50LWNvbXBsZXgkZ2NwLWtpYmFuYS1jb21wbGV4LWlk',
-      } as CloudSetup;
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: complexGcpCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toContain('gcp-kibana-complex-id');
-    });
-
-    it('should handle complex cloud ID with base64 encoding for Azure', () => {
-      const complexAzureCloudSetup = {
-        ...mockAzureCloudSetup,
-        // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-        // Decodes to: 'westeurope.azure.elastic-cloud.com$azure-deployment-complex$azure-kibana-complex-id'
-        cloudId:
-          'azure-production:d2VzdGV1cm9wZS5henVyZS5lbGFzdGljLWNsb3VkLmNvbSRhenVyZS1kZXBsb3ltZW50LWNvbXBsZXgkYXp1cmUta2liYW5hLWNvbXBsZXgtaWQ=',
-      } as CloudSetup;
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: complexAzureCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toContain('azure-kibana-complex-id');
-    });
-
-    it('should handle deployment URL with different formats', () => {
-      const differentUrlSetup = {
-        ...mockAwsCloudSetup,
-        deploymentUrl:
-          'https://cloud.elastic.co/deployments/aws-deployment-with-dashes-123/kibana/app',
-      } as CloudSetup;
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: differentUrlSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toBeDefined();
-      expect(result).toContain('aws-kibana-id');
+      expect(result).toContain('complex-kibana-id');
     });
   });
 
-  describe('AWS Provider - Failure cases', () => {
+  describe('Failure cases', () => {
+    it('should return undefined when iacTemplateUrl is not provided', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: undefined,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
     it('should return undefined when no elastic resource ID is available', () => {
       const noResourceCloudSetup = {
-        ...mockAwsCloudSetup,
         isCloudEnabled: false,
         isServerlessEnabled: false,
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: noResourceCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
@@ -832,18 +587,15 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when serverless is enabled but project ID is missing', () => {
       const serverlessNoProjectSetup = {
-        ...mockAwsCloudSetup,
-        isCloudEnabled: false, // Disable ESS fallback
+        isCloudEnabled: false,
         isServerlessEnabled: true,
         serverless: { projectId: undefined },
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: serverlessNoProjectSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
@@ -851,16 +603,14 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when cloud is enabled but deployment URL is missing', () => {
       const noDeploymentUrlSetup = {
-        ...mockAwsCloudSetup,
+        ...mockCloudSetup,
         deploymentUrl: undefined,
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: noDeploymentUrlSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
@@ -868,73 +618,14 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when cloud is enabled but cloud ID is missing', () => {
       const noCloudIdSetup = {
-        ...mockAwsCloudSetup,
+        ...mockCloudSetup,
         cloudId: undefined,
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: noCloudIdSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when provider is invalid', () => {
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        // @ts-expect-error Testing invalid provider type
-        provider: 'invalid-provider',
-      });
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when template name does not exist in package info', () => {
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'non-existent-template',
-        provider: AWS_PROVIDER,
-      });
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when template URL field is not found in package info', () => {
-      const originalTemplate = mockPackageInfo.policy_templates![0];
-      const packageInfoWithoutTemplate = {
-        ...mockPackageInfo,
-        policy_templates: [
-          {
-            ...originalTemplate,
-            ...('inputs' in originalTemplate && originalTemplate.inputs
-              ? {
-                  inputs: [
-                    {
-                      ...originalTemplate.inputs[0],
-                      vars: [], // Empty vars array
-                    },
-                  ],
-                }
-              : {}),
-          },
-        ],
-      } as PackageInfo;
-
-      const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
-        cloud: mockAwsCloudSetup,
-        packageInfo: packageInfoWithoutTemplate,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
@@ -942,18 +633,15 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when cloud ID has missing kibana component', () => {
       const invalidCloudIdSetup = {
-        ...mockAwsCloudSetup,
-        // Cloud ID format: name:base64(endpoint$deployment) - missing kibana ID
-        // Decodes to: 'aws-endpoint$aws-deployment' (no third part)
-        cloudId: 'aws-cluster:YXdzLWVuZHBvaW50JGF3cy1kZXBsb3ltZW50',
+        ...mockCloudSetup,
+        // Decodes to: 'endpoint$deployment' (no third part)
+        cloudId: 'cluster:ZW5kcG9pbnQkZGVwbG95bWVudA==',
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: invalidCloudIdSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
@@ -961,204 +649,17 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
     it('should return undefined when deployment URL has invalid format', () => {
       const invalidDeploymentUrlSetup = {
-        ...mockAwsCloudSetup,
+        ...mockCloudSetup,
         deploymentUrl: 'https://invalid-url-without-deployments-path',
       } as CloudSetup;
 
       const result = getCloudConnectorRemoteRoleTemplate({
-        input: mockInput,
         cloud: invalidDeploymentUrlSetup,
-        packageInfo: mockPackageInfo,
-        templateName: 'cspm',
-        provider: AWS_PROVIDER,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
       });
 
       expect(result).toBeUndefined();
-    });
-  });
-
-  describe('Azure Provider Tests', () => {
-    let azureInput: NewPackagePolicyInput;
-    let azurePackageInfo: PackageInfo;
-
-    beforeEach(() => {
-      // Create Azure-specific input
-      azureInput = {
-        ...mockInput,
-        type: 'cloudbeat/cis_azure',
-        policy_template: 'cspm',
-        streams: [
-          {
-            enabled: true,
-            data_stream: { type: 'logs', dataset: 'cloud_security_posture.findings' },
-            vars: {
-              'azure.account_type': { value: 'single-account', type: 'text' },
-            },
-          },
-        ],
-      };
-
-      // Create Azure-specific package info with ARM template URL
-      azurePackageInfo = {
-        ...mockPackageInfo,
-        policy_templates: [
-          {
-            name: 'cspm',
-            title: 'CSPM',
-            description: 'CSPM',
-            inputs: [
-              {
-                type: 'cloudbeat/cis_azure',
-                title: 'Azure CIS',
-                description: 'Azure CIS compliance monitoring',
-                vars: [
-                  {
-                    name: 'arm_template_cloud_connectors_url',
-                    type: 'text',
-                    title: 'ARM Template URL',
-                    multi: false,
-                    required: false,
-                    show_user: false,
-                    default:
-                      'https://portal.azure.com/ACCOUNT_TYPE/deploy/RESOURCE_ID/template.json',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      } as PackageInfo;
-    });
-
-    describe('Successful cases', () => {
-      it('should generate ARM template URL for Azure with serverless enabled', () => {
-        const serverlessCloudSetup = {
-          ...mockAzureCloudSetup,
-          isCloudEnabled: false,
-          isServerlessEnabled: true,
-          serverless: { projectId: 'azure-serverless-project' },
-        } as CloudSetup;
-
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInput,
-          cloud: serverlessCloudSetup,
-          packageInfo: azurePackageInfo,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toBe(
-          'https://portal.azure.com/single-account/deploy/azure-serverless-project/template.json'
-        );
-      });
-
-      it('should generate ARM template URL for Azure with cloud ESS deployment', () => {
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInput,
-          cloud: mockAzureCloudSetup,
-          packageInfo: azurePackageInfo,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toBe(
-          'https://portal.azure.com/single-account/deploy/azure-kibana-id/template.json'
-        );
-      });
-
-      it('should use Azure single-account type by default', () => {
-        const azureInputNoAccountType: NewPackagePolicyInput = {
-          ...azureInput,
-          streams: [
-            {
-              ...azureInput.streams[0],
-              vars: {},
-            },
-          ],
-        };
-
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInputNoAccountType,
-          cloud: mockAzureCloudSetup,
-          packageInfo: azurePackageInfo,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toContain('/single-account/');
-      });
-
-      it('should handle complex Azure cloud ID with base64 encoding', () => {
-        const complexAzureCloudSetup = {
-          ...mockAzureCloudSetup,
-          // Cloud ID format: name:base64(endpoint$deployment$kibanaId)
-          // Decodes to: 'westeurope.azure.elastic-cloud.com$azure-complex$azure-kibana-complex'
-          cloudId:
-            'azure-production:d2VzdGV1cm9wZS5henVyZS5lbGFzdGljLWNsb3VkLmNvbSRhenVyZS1jb21wbGV4JGF6dXJlLWtpYmFuYS1jb21wbGV4',
-        } as CloudSetup;
-
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInput,
-          cloud: complexAzureCloudSetup,
-          packageInfo: azurePackageInfo,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toContain('azure-kibana-complex');
-      });
-    });
-
-    describe('Failure cases', () => {
-      it('should return undefined when Azure template URL field is not found', () => {
-        const originalTemplate = azurePackageInfo.policy_templates![0];
-        const packageInfoWithoutArmTemplate = {
-          ...azurePackageInfo,
-          policy_templates: [
-            {
-              ...originalTemplate,
-              ...('inputs' in originalTemplate && originalTemplate.inputs
-                ? {
-                    inputs: [
-                      {
-                        ...originalTemplate.inputs[0],
-                        vars: [],
-                      },
-                    ],
-                  }
-                : {}),
-            },
-          ],
-        } as PackageInfo;
-
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInput,
-          cloud: mockAzureCloudSetup,
-          packageInfo: packageInfoWithoutArmTemplate,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return undefined when no elastic resource ID is available for Azure', () => {
-        const noResourceCloudSetup = {
-          ...mockAzureCloudSetup,
-          isCloudEnabled: false,
-          isServerlessEnabled: false,
-        } as CloudSetup;
-
-        const result = getCloudConnectorRemoteRoleTemplate({
-          input: azureInput,
-          cloud: noResourceCloudSetup,
-          packageInfo: azurePackageInfo,
-          templateName: 'cspm',
-          provider: AZURE_PROVIDER,
-        });
-
-        expect(result).toBeUndefined();
-      });
     });
   });
 });
