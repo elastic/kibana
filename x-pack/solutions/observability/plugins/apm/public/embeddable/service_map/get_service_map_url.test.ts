@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { getServiceMapUrl } from './get_service_map_url';
+import { getServiceMapPath, getServiceMapUrl } from './get_service_map_url';
 
 describe('getServiceMapUrl', () => {
   const core = coreMock.createStart();
@@ -30,14 +30,14 @@ describe('getServiceMapUrl', () => {
     );
   });
 
-  it('returns service-specific service map URL when serviceName is provided', () => {
+  it('always uses full service map path (serviceName is not used in path)', () => {
     getServiceMapUrl(core, {
       rangeFrom: 'now-1h',
       rangeTo: 'now',
       serviceName: 'my-service',
     });
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('apm', {
-      path: '#/services/my-service/service-map?rangeFrom=now-1h&rangeTo=now',
+      path: '#/service-map?rangeFrom=now-1h&rangeTo=now',
     });
   });
 
@@ -50,5 +50,47 @@ describe('getServiceMapUrl', () => {
     expect(core.application.getUrlForApp).toHaveBeenCalledWith('apm', {
       path: '#/service-map?rangeFrom=now-15m&rangeTo=now&serviceGroup=group-1',
     });
+  });
+});
+
+describe('getServiceMapPath', () => {
+  it('returns path with rangeFrom and rangeTo', () => {
+    expect(getServiceMapPath({ rangeFrom: 'now-1h', rangeTo: 'now' })).toBe(
+      '#/service-map?rangeFrom=now-1h&rangeTo=now'
+    );
+  });
+
+  it('returns path with only hash when no params', () => {
+    expect(getServiceMapPath({ rangeFrom: '', rangeTo: '' })).toBe(
+      '#/service-map?rangeFrom=&rangeTo='
+    );
+  });
+
+  it('includes environment and kuery when provided', () => {
+    const path = getServiceMapPath({
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      environment: 'oteldemo',
+      kuery: 'service.name: "product-reviews"',
+    });
+    expect(path).toContain('environment=oteldemo');
+    expect(path).toContain('kuery=');
+    expect(path).toContain('service.name');
+    expect(path).toContain('product-reviews');
+  });
+
+  it('encodes kuery with service name in query string', () => {
+    const path = getServiceMapPath({
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      kuery: 'service.name: "product-reviews"',
+    });
+    expect(path).toContain('#/service-map');
+    expect(path).toContain('rangeFrom=now-15m');
+    expect(path).toContain('rangeTo=now');
+    expect(path).toContain('kuery=');
+    const kueryParam = path.split('kuery=')[1]?.split('&')[0] ?? '';
+    const decoded = decodeURIComponent(kueryParam.replace(/\+/g, ' '));
+    expect(decoded).toBe('service.name: "product-reviews"');
   });
 });

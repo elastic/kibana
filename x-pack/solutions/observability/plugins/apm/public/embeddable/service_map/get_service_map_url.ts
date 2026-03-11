@@ -23,7 +23,7 @@ export interface ServiceMapUrlParams {
  * or with getServiceMapUrl() for full URLs (e.g. target="_blank").
  */
 export function getServiceMapPath(params: ServiceMapUrlParams): string {
-  const { rangeFrom, rangeTo, environment, kuery, serviceName, serviceGroupId } = params;
+  const { rangeFrom, rangeTo, environment, kuery, serviceGroupId } = params;
   const searchParams = new URLSearchParams();
   searchParams.set('rangeFrom', rangeFrom);
   searchParams.set('rangeTo', rangeTo);
@@ -37,9 +37,14 @@ export function getServiceMapPath(params: ServiceMapUrlParams): string {
     searchParams.set('serviceGroup', serviceGroupId);
   }
   const queryString = searchParams.toString();
-  const hashPath = serviceName
-    ? `#/services/${encodeURIComponent(serviceName)}/service-map`
-    : '#/service-map';
+  // For now we will test the solution with the full service map page navigation
+  // We will keep the service-specific service map page navigation in this comment
+  // in case we need to revert it
+  // const hashPath = serviceName
+  //   ? `#/services/${encodeURIComponent(serviceName)}/service-map`
+  //   : '#/service-map';
+  // return queryString ? `${hashPath}?${queryString}` : hashPath;
+  const hashPath = '#/service-map';
   return queryString ? `${hashPath}?${queryString}` : hashPath;
 }
 
