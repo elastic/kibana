@@ -34,9 +34,19 @@ import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
+/**
+ * Get worker-specific stream prefix to avoid collisions in parallel execution.
+ * Uses the TEST_PARALLEL_INDEX environment variable set by Playwright.
+ */
+function getWorkerStreamPrefix(): string {
+  const parallelIndex = process.env.TEST_PARALLEL_INDEX ?? '0';
+  return `w${parallelIndex}`;
+}
+
 evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const from = kbnDatemath.parse('now-2m')!;
   const to = kbnDatemath.parse('now')!;
+  const workerStreamPrefix = getWorkerStreamPrefix();
 
   /**
    * Flatten nested objects into dot notation.
@@ -583,7 +593,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       evaluate.afterAll(async ({ apiServices, esClient }) => {
         await apiServices.streams.disable();
         await esClient.indices.deleteDataStream({
-          name: 'logs*',
+          name: `logs.otel.${workerStreamPrefix}*`,
         });
       });
 
@@ -607,10 +617,13 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               // No need to fork or index - documents are passed directly
               example.input.stream_name = 'logs.otel';
             } else {
-              // INDEX MODE: Create system-specific stream AND index data
-              // stream_name in dataset must be logs.otel.<system> (child of logs.otel per API)
+              // INDEX MODE: Create worker-specific stream to avoid parallel collisions
+              // Use logs.otel.<workerPrefix>.<system> pattern (e.g., logs.otel.w0.apache)
+              const workerStreamName = `logs.otel.${workerStreamPrefix}.${example.input.system.toLowerCase()}`;
+              example.input.stream_name = workerStreamName;
+
               // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
-              await apiServices.streams.forkStream('logs.otel', example.input.stream_name, {
+              await apiServices.streams.forkStream('logs.otel', workerStreamName, {
                 field: 'attributes.filepath',
                 eq: `${example.input.system}.log`,
               });

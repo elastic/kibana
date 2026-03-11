@@ -43,11 +43,11 @@ import {
 evaluate.describe.configure({ timeout: 300_000 });
 
 evaluate.describe('Pattern extraction quality evaluation', () => {
-  evaluate.beforeEach(async ({ apiServices }) => {
+  evaluate.beforeAll(async ({ apiServices }) => {
     await apiServices.streams.enable();
   });
 
-  evaluate.afterEach(async ({ apiServices }) => {
+  evaluate.afterAll(async ({ apiServices }) => {
     await apiServices.streams.disable();
   });
 

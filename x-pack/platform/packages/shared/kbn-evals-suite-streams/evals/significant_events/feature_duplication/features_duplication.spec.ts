@@ -23,9 +23,20 @@ import {
   createIdConsistencyEvaluator,
 } from '../../../src/evaluators/feature_duplication_evaluators';
 
+/**
+ * Get worker-specific stream prefix to avoid collisions in parallel execution.
+ * Uses the TEST_PARALLEL_INDEX environment variable set by Playwright.
+ */
+function getWorkerStreamPrefix(): string {
+  const parallelIndex = process.env.TEST_PARALLEL_INDEX ?? '0';
+  return `w${parallelIndex}`;
+}
+
 evaluate.describe('Streams features duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
   const to = kbnDatemath.parse('now')!;
+  const workerStreamPrefix = getWorkerStreamPrefix();
+  const workerStreamName = `logs.otel.${workerStreamPrefix}`;
 
   async function runRepeatedFeatureIdentification({
     esClient,
@@ -76,12 +87,14 @@ evaluate.describe('Streams features duplication (harness)', () => {
     evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
+        // Create a worker-specific child stream to isolate data between parallel workers
+        await apiServices.streams.forkStream('logs.otel', workerStreamName, { always: {} });
       });
 
       evaluate.afterAll(async ({ apiServices, esClient }) => {
         await apiServices.streams.disable();
         await esClient.indices.deleteDataStream({
-          name: 'logs*',
+          name: `logs.otel.${workerStreamPrefix}*`,
         });
       });
 
@@ -110,14 +123,15 @@ evaluate.describe('Streams features duplication (harness)', () => {
             to,
           });
 
-          await esClient.indices.refresh({ index: dataset.input.stream_name });
+          // Refresh the worker-specific stream to ensure indexed data is available
+          await esClient.indices.refresh({ index: workerStreamName });
 
           await executorClient.runExperiment(
             {
               dataset: {
                 name: dataset.name,
                 description: dataset.description,
-                examples: [{ input: dataset.input }],
+                examples: [{ input: { ...dataset.input, stream_name: workerStreamName } }],
               },
               task: async ({
                 input,
