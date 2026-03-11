@@ -15,6 +15,7 @@ import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 export const buildHostDetailsQuery = ({
   hostName,
   entityIdentifiers,
+  isExploreContext,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
@@ -23,10 +24,14 @@ export const buildHostDetailsQuery = ({
     ...cloudFieldsMap,
   });
 
+  const hostNameValue =
+    hostName ?? entityIdentifiers?.['host.name'] ?? Object.values(entityIdentifiers ?? {})[0] ?? '';
   const entityFilters =
-    entityIdentifiers && Object.keys(entityIdentifiers).length > 0
-      ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers)
-      : { term: { 'host.name': hostName } };
+    isExploreContext && hostNameValue
+      ? { term: { 'host.name': hostNameValue } }
+      : entityIdentifiers && Object.keys(entityIdentifiers).length > 0
+        ? euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers)
+        : { term: { 'host.name': hostName } };
 
   const filter = [
     ...(entityFilters ? [entityFilters] : []),

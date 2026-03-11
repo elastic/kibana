@@ -63,7 +63,22 @@ function getEntityNameFromRecord(record: EntityStoreRecord, entityType: EntityTy
 }
 
 /**
+ * Extract asset criticality level from an entity store record (host/user/service).
+ * Used to populate Risk Summary asset criticality row when entity store is the data source.
+ */
+function getAssetCriticalityFromEntityRecord(
+  record: EntityStoreRecord
+): string | undefined {
+  if ('asset' in record && record.asset?.criticality) {
+    return record.asset.criticality;
+  }
+  return undefined;
+}
+
+/**
  * Build a minimal RiskStats from entity store risk fields (for flyout display).
+ * When asset criticality is present on the record, adds modifiers and category_2_score
+ * so FlyoutRiskSummaryComponent shows a non-zero value for the Asset Criticality row.
  */
 function buildMinimalRiskStats(
   risk: {
@@ -73,8 +88,20 @@ function buildMinimalRiskStats(
   } | null,
   timestamp: string,
   idField: string,
-  idValue: string
+  idValue: string,
+  assetCriticalityLevel?: string
 ): RiskStats {
+  const modifiers =
+    assetCriticalityLevel != null
+      ? [
+          {
+            type: 'asset_criticality',
+            contribution: 1,
+            metadata: { criticality_level: assetCriticalityLevel },
+          },
+        ]
+      : undefined;
+
   return {
     '@timestamp': timestamp,
     id_field: idField,
@@ -84,15 +111,18 @@ function buildMinimalRiskStats(
     calculated_score_norm: risk?.calculated_score_norm ?? 0,
     category_1_score: 0,
     category_1_count: 0,
+    category_2_score: assetCriticalityLevel != null ? 1 : undefined,
     inputs: [],
     notes: [],
     rule_risks: [],
     multipliers: [],
+    ...(modifiers && { modifiers }),
   };
 }
 
 /**
  * Build RiskScoreState for the flyout from an entity store record (when FF_ENABLE_ENTITY_STORE_V2).
+ * When inspect is provided (e.g. from entity store API response), the Risk Summary inspect button will be enabled.
  */
 export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(
   entityType: T,
@@ -101,23 +131,37 @@ export function buildRiskScoreStateFromEntityRecord<T extends EntityType>(
     refetch: () => void;
     isLoading: boolean;
     error: unknown;
+    /** Entity store API inspect so the Risk Summary Table inspect button is clickable. */
+    inspect?: { dsl: string[]; response: string[] };
   }
 ): RiskScoreState<T> {
   const timestamp = record['@timestamp'] ?? new Date().toISOString();
   const name = getEntityNameFromRecord(record, entityType);
   const riskFromRecord = getRiskFromRecord(record);
+  const assetCriticalityLevel = getAssetCriticalityFromEntityRecord(record);
   const idField =
     entityType === 'host' ? 'host.name' : entityType === 'user' ? 'user.name' : 'service.name';
-  const riskStats = buildMinimalRiskStats(riskFromRecord, timestamp, idField, name);
+  const riskStats = buildMinimalRiskStats(
+    riskFromRecord,
+    timestamp,
+    idField,
+    name,
+    assetCriticalityLevel
+  );
 
   const dataItem = {
     '@timestamp': timestamp,
     [entityType]: { name, risk: riskStats },
   } as unknown as EntityRiskScore<T>;
 
+  const inspect =
+    options.inspect?.dsl?.length && options.inspect?.response?.length
+      ? options.inspect
+      : { dsl: [] as string[], response: [] as string[] };
+
   return {
     data: [dataItem] as RiskScoreState<T>['data'],
-    inspect: { dsl: [], response: [] },
+    inspect,
     isInspected: false,
     refetch: options.refetch,
     totalCount: 1,

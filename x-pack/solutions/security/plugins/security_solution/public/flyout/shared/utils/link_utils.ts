@@ -59,9 +59,6 @@ interface GetFlyoutParams {
 const FLYOUT_FIELDS = [
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
-  'user.entity.id',
-  'user.id',
-  'user.email',
   SIGNAL_RULE_NAME_FIELD_NAME,
   EVENT_SOURCE_FIELD_DESCRIPTOR,
 ];
@@ -105,9 +102,6 @@ export const getRightPanelParams = ({
         },
       };
     case USER_NAME_FIELD_NAME:
-    case 'user.entity.id':
-    case 'user.id':
-    case 'user.email':
       return {
         id: UserPanelKey,
         params: {

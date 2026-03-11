@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { euid } from '@kbn/entity-store/public';
@@ -35,6 +36,7 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/compon
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
+import { useEntityFromStore } from '../shared/hooks/use_entity_from_store';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
@@ -102,7 +104,12 @@ export const UserPanel = ({
     return effectiveUserName ? (buildUserNamesFilter([effectiveUserName]) as ESQuery) : undefined;
   }, [entityStoreV2Enabled, safeEntityIdentifiers, effectiveUserName]);
 
-  const { to, from, setQuery, deleteQuery } = useGlobalTime();
+  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const entityFromStoreResult = useEntityFromStore({
+    entityIdentifiers: safeEntityIdentifiers,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
   const observedUser = useObservedUser(safeEntityIdentifiers, scopeId);
 
   const riskScoreState = useRiskScore({
@@ -142,12 +149,14 @@ export const UserPanel = ({
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
 
+  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedUser.entityRecord != null;
+
   useQueryInspector({
     deleteQuery,
-    inspect,
-    loading,
+    inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
+    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
-    refetch,
+    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
     setQuery,
   });
 
@@ -174,6 +183,7 @@ export const UserPanel = ({
           refetch: observedUser.refetchEntityStore ?? (() => {}),
           isLoading: observedUser.isLoading,
           error: null,
+          inspect: entityFromStoreResult?.inspect,
         })
       : null;
 
@@ -198,6 +208,12 @@ export const UserPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
+  const noEntityInStore =
+    entityStoreV2Enabled &&
+    hasValidIdentifiers &&
+    !entityFromStoreResult.isLoading &&
+    !observedUser.entityRecord;
+
   const hasUserDetailsData =
     isRiskScoreExist ||
     !!managedUser.data?.[ManagedUserDatasetKey.OKTA] ||
@@ -217,6 +233,15 @@ export const UserPanel = ({
         managedUser={managedUser}
         userName={effectiveUserName}
       />
+      {noEntityInStore && (
+        <EuiCallOut
+          title="No corresponding entity exists."
+          color="warning"
+          iconType="warning"
+          data-test-subj="entity-flyout-no-entity-warning"
+          announceOnMount
+        />
+      )}
       <UserPanelContent
         observedUser={observedUser}
         riskScoreState={effectiveRiskScoreState}
@@ -238,6 +263,8 @@ export const UserPanel = ({
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }
+        skipRiskAndCriticality={noEntityInStore}
+        useEntityStoreV2={entityStoreV2Enabled && observedUser.entityRecord != null}
       />
       {!isPreviewMode && assetInventoryEnabled && (
         <UserPanelFooter entityIdentifiers={safeEntityIdentifiers} />

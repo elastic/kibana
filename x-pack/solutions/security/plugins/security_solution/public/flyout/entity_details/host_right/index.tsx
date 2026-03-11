@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -149,20 +150,24 @@ export const HostPanel = ({
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
   });
 
-  useQueryInspector({
-    deleteQuery,
-    inspect: inspectRiskScore,
-    loading,
-    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
-    refetch,
-    setQuery,
-  });
-
   const observedHost = useObservedHost(
     entityIdentifiers,
     scopeId,
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
+
+  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedHost.entityRecord != null;
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: useEntityStoreInspectForRisk
+      ? entityFromStoreResult?.inspect ?? null
+      : inspectRiskScore,
+    loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
+    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    setQuery,
+  });
 
   // When entity store v2 is enabled, use the first entity from the store that matches entityIdentifiers
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
@@ -176,6 +181,7 @@ export const HostPanel = ({
           refetch: observedHost.refetchEntityStore ?? (() => {}),
           isLoading: observedHost.isLoading,
           error: null,
+          inspect: entityFromStoreResult?.inspect,
         })
       : null;
 
@@ -215,6 +221,12 @@ export const HostPanel = ({
     [isRiskScoreExist, openDetailsPanel]
   );
 
+  const noEntityInStore =
+    entityStoreV2Enabled &&
+    hasValidIdentifiers &&
+    !entityFromStoreResult.isLoading &&
+    !observedHost.entityRecord;
+
   return (
     <>
       <FlyoutNavigation
@@ -233,6 +245,15 @@ export const HostPanel = ({
         lastSeen={observedHost.lastSeen}
         entity={entityFromStore}
       />
+      {noEntityInStore && (
+        <EuiCallOut
+          title="No corresponding entity exists."
+          color="warning"
+          iconType="warning"
+          data-test-subj="entity-flyout-no-entity-warning"
+          announceOnMount
+        />
+      )}
       <HostPanelContent
         entityIdentifiers={entityIdentifiers}
         observedHost={observedHost}
@@ -255,6 +276,8 @@ export const HostPanel = ({
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }
+        skipRiskAndCriticality={noEntityInStore}
+        useEntityStoreV2={entityStoreV2Enabled && observedHost.entityRecord != null}
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter

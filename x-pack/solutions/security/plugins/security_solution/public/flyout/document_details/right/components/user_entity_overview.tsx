@@ -124,6 +124,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ entityId
   });
 
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
+    entityIdentifiers,
     userName,
     endDate: to,
     indexNames: selectedPatterns,

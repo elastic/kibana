@@ -202,14 +202,16 @@ describe('<UserDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
-      expect(mockUseObservedUserDetails).toBeCalledWith({
-        id: 'entities-users-details-uuid',
-        startDate: from,
-        endDate: to,
-        userName: 'test user',
-        indexNames: ['index'],
-        skip: false,
-      });
+      expect(mockUseObservedUserDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'entities-users-details-uuid',
+          startDate: from,
+          endDate: to,
+          userName: 'test user',
+          indexNames: ['index'],
+          skip: false,
+        })
+      );
       expect(getByTestId(USER_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 

@@ -146,6 +146,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
+    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 

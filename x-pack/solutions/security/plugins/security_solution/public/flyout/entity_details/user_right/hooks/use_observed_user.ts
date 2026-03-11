@@ -63,22 +63,26 @@ export const useObservedUser = (
     [entityIdentifiers]
   );
 
+  const useEntityStoreData =
+    entityStoreV2Enabled && (entityFromStore.entityRecord ?? entityFromStore.entity);
+
   const [loadingObservedUser, { userDetails: observedUserDetails, inspect, refetch, id: queryId }] =
     useObservedUserDetails({
       endDate: to,
       startDate: from,
+      entityIdentifiers,
       userName,
       indexNames: securityDefaultPatterns,
-      skip: isInitializing || entityStoreV2Enabled,
+      skip: isInitializing,
     });
 
   useQueryInspector({
     deleteQuery,
-    inspect: entityStoreV2Enabled ? entityFromStore.inspect : inspect,
-    refetch: entityStoreV2Enabled ? entityFromStore.refetch : refetch,
+    inspect: useEntityStoreData ? entityFromStore.inspect : inspect,
+    refetch: useEntityStoreData ? entityFromStore.refetch : refetch,
     setQuery,
     queryId,
-    loading: entityStoreV2Enabled ? entityFromStore.isLoading : loadingObservedUser,
+    loading: useEntityStoreData ? entityFromStore.isLoading : loadingObservedUser,
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
@@ -87,7 +91,7 @@ export const useObservedUser = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: entityStoreV2Enabled,
+    skip: useEntityStoreData ? false : true,
   });
 
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
@@ -96,13 +100,28 @@ export const useObservedUser = (
     defaultIndex: securityDefaultPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: entityStoreV2Enabled,
+    skip: useEntityStoreData ? false : true,
   });
 
   return useMemo((): ObservedUserResult => {
-    if (entityStoreV2Enabled) {
+    if (useEntityStoreData) {
+      const entityDetails = (entityFromStore.entity ?? {}) as UserItem;
+      const fromAggregation = observedUserDetails ?? {};
+      const mergedDetails: UserItem = {
+        ...entityDetails,
+        user: {
+          ...entityDetails.user,
+          id: entityDetails.user?.id ?? fromAggregation.user?.id,
+          domain: entityDetails.user?.domain ?? fromAggregation.user?.domain,
+          email: entityDetails.user?.email ?? fromAggregation.user?.email,
+          full_name: entityDetails.user?.full_name ?? fromAggregation.user?.full_name,
+          name: entityDetails.user?.name ?? fromAggregation.user?.name,
+          hash: entityDetails.user?.hash ?? fromAggregation.user?.hash,
+        },
+        host: entityDetails.host ?? fromAggregation.host,
+      };
       return {
-        details: (entityFromStore.entity ?? {}) as UserItem,
+        details: mergedDetails,
         isLoading: entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,
@@ -124,9 +143,11 @@ export const useObservedUser = (
         isLoading: loadingFirstSeen,
       },
       lastSeen: { date: lastSeen, isLoading: loadingLastSeen },
+      entityRecord: null,
+      refetchEntityStore: entityStoreV2Enabled ? entityFromStore.refetch : undefined,
     };
   }, [
-    entityStoreV2Enabled,
+    useEntityStoreData,
     observedUserDetails,
     loadingObservedUser,
     loadingLastSeen,
@@ -139,5 +160,6 @@ export const useObservedUser = (
     entityFromStore.lastSeen,
     entityFromStore.entityRecord,
     entityFromStore.refetch,
+    entityStoreV2Enabled,
   ]);
 };

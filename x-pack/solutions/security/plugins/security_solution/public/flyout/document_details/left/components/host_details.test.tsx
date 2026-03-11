@@ -209,14 +209,16 @@ describe('<HostDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostDetails).toBeCalledWith({
-        id: 'entities-hosts-details-uuid',
-        startDate: from,
-        endDate: to,
-        hostName: 'test host',
-        indexNames: ['index'],
-        skip: false,
-      });
+      expect(mockUseHostDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'entities-hosts-details-uuid',
+          startDate: from,
+          endDate: to,
+          hostName: 'test host',
+          indexNames: ['index'],
+          skip: false,
+        })
+      );
       expect(getByTestId(HOST_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 
@@ -303,6 +305,7 @@ describe('<HostDetails />', () => {
         params: {
           contextID: defaultProps.scopeId,
           entityIdentifiers: { 'user.name': 'test user' },
+          userName: 'test user',
           scopeId: defaultProps.scopeId,
           banner: USER_PREVIEW_BANNER,
         },
@@ -317,6 +320,7 @@ describe('<HostDetails />', () => {
             ...defaultProps.entityIdentifiers,
             'host.ip': '100.XXX.XXX',
           },
+          hostName: 'test host',
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
         },

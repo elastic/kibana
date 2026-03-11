@@ -24,8 +24,12 @@ import { EntityInsight } from '../../../cloud_security_posture/components/entity
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
-export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
+export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+  refetchEntityStore?: () => void;
+};
 
 interface UserPanelContentProps {
   entityIdentifiers: EntityIdentifiers;
@@ -40,6 +44,10 @@ interface UserPanelContentProps {
   entityRecord?: Entity;
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
+  skipRiskAndCriticality?: boolean;
+  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
+  useEntityStoreV2?: boolean;
 }
 
 export const UserPanelContent = ({
@@ -55,6 +63,8 @@ export const UserPanelContent = ({
   entityRecord,
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
+  skipRiskAndCriticality = false,
+  useEntityStoreV2 = false,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -67,10 +77,10 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
+      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
       )}
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
+      {!skipRiskAndCriticality && riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}
@@ -79,17 +89,20 @@ export const UserPanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.user}
+            useEntityStoreV2={useEntityStoreV2}
           />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion
-        entity={{ identifiers: entityIdentifiers, name: userName, type: EntityType.user }}
-        onChange={onAssetCriticalityChange}
-        entityRecord={entityRecord}
-        criticalityFromEntityStore={criticalityFromEntityStore}
-        onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
-      />
+      {!skipRiskAndCriticality && (
+        <AssetCriticalityAccordion
+          entity={{ identifiers: entityIdentifiers, name: userName, type: EntityType.user }}
+          onChange={onAssetCriticalityChange}
+          entityRecord={entityRecord}
+          criticalityFromEntityStore={criticalityFromEntityStore}
+          onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
+        />
+      )}
       <EntityInsight
         entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}

@@ -81,6 +81,7 @@ describe('<PreviewLink />', () => {
       params: {
         contextID: 'scopeId',
         entityIdentifiers: { 'host.name': 'host' },
+        hostName: 'host',
         scopeId: 'scopeId',
         banner: HOST_PREVIEW_BANNER,
       },
@@ -91,11 +92,12 @@ describe('<PreviewLink />', () => {
     const { getByTestId } = renderPreviewLink({ 'user.name': 'user' }, 'user-link');
     getByTestId('user-link').click();
 
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenLastCalledWith({
       id: UserPreviewPanelKey,
       params: {
         contextID: 'scopeId',
         entityIdentifiers: { 'user.name': 'user' },
+        userName: 'user',
         scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
       },

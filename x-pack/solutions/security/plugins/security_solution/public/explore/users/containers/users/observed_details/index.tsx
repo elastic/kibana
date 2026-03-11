@@ -25,25 +25,41 @@ export interface UserDetailsArgs {
   endDate: string;
 }
 
+export type EntityIdentifiers = Record<string, string>;
+
 interface UseUserDetails {
   endDate: string;
-  userName: string;
+  /** When provided (and non-empty), used for the query; otherwise entityIdentifiers are derived from userName. */
+  entityIdentifiers?: EntityIdentifiers;
   id?: string;
   indexNames: string[];
   isExploreContext?: boolean;
   skip?: boolean;
   startDate: string;
+  /** Required when entityIdentifiers is not provided. Used to build entityIdentifiers as { 'user.name': userName }. */
+  userName?: string;
 }
 
 export const useObservedUserDetails = ({
   endDate,
-  userName,
+  entityIdentifiers: entityIdentifiersProp,
   indexNames,
   id = OBSERVED_USER_QUERY_ID,
   isExploreContext = false,
   skip = false,
   startDate,
+  userName,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
+  const entityIdentifiers = useMemo((): EntityIdentifiers => {
+    if (entityIdentifiersProp != null && Object.keys(entityIdentifiersProp).length > 0) {
+      return entityIdentifiersProp;
+    }
+    if (userName != null && userName !== '') {
+      return { 'user.name': userName };
+    }
+    return {};
+  }, [entityIdentifiersProp, userName]);
+
   const {
     loading,
     result: response,
@@ -75,8 +91,7 @@ export const useObservedUserDetails = ({
     () => ({
       defaultIndex: indexNames,
       factoryQueryType: UsersQueries.observedDetails,
-      userName,
-      entityIdentifiers: { 'user.name': userName },
+      entityIdentifiers,
       isExploreContext,
       timerange: {
         interval: '12h',
@@ -85,7 +100,7 @@ export const useObservedUserDetails = ({
       },
       filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     }),
-    [endDate, indexNames, startDate, userName, isExploreContext]
+    [endDate, indexNames, startDate, entityIdentifiers, isExploreContext]
   );
 
   useEffect(() => {

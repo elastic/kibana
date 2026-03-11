@@ -45,6 +45,10 @@ interface HostPanelContentProps {
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
   /** When using Entity Store v2: save criticality via entity store API. */
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
+  skipRiskAndCriticality?: boolean;
+  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
+  useEntityStoreV2?: boolean;
 }
 
 export const HostPanelContent = ({
@@ -61,6 +65,8 @@ export const HostPanelContent = ({
   entityRecord,
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
+  skipRiskAndCriticality = false,
+  useEntityStoreV2 = false,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -73,10 +79,10 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
+      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}
-      {riskScoreState.hasEngineBeenInstalled &&
+      {!skipRiskAndCriticality && riskScoreState.hasEngineBeenInstalled &&
         (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
           <>
             <FlyoutRiskSummary
@@ -86,17 +92,20 @@ export const HostPanelContent = ({
               queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
+              useEntityStoreV2={useEntityStoreV2}
             />
             <EuiHorizontalRule />
           </>
         )}
-      <AssetCriticalityAccordion
-        entity={{ identifiers: entityIdentifiers, name: hostName, type: EntityType.host }}
-        onChange={onAssetCriticalityChange}
-        entityRecord={entityRecord}
-        criticalityFromEntityStore={criticalityFromEntityStore}
-        onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
-      />
+      {!skipRiskAndCriticality && (
+        <AssetCriticalityAccordion
+          entity={{ identifiers: entityIdentifiers, name: hostName, type: EntityType.host }}
+          onChange={onAssetCriticalityChange}
+          entityRecord={entityRecord}
+          criticalityFromEntityStore={criticalityFromEntityStore}
+          onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
+        />
+      )}
       <EntityInsight
         entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}

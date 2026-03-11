@@ -62,11 +62,12 @@ export const useObservedHost = (
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,
+    startDate: from,
+    entityIdentifiers,
     hostName,
     indexNames: securityDefaultPatterns,
     id: HOST_PANEL_RISK_SCORE_QUERY_ID,
     skip: isInitializing || entityStoreV2Enabled,
-    startDate: from,
   });
 
   useQueryInspector({

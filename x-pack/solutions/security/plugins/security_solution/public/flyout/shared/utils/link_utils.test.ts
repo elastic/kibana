@@ -16,12 +16,6 @@ describe('isFlyoutLink', () => {
     expect(isFlyoutLink({ field: 'user.name', scopeId: 'scopeId' })).toBe(true);
   });
 
-  it('should return true if field is user entity identifier (user.entity.id, user.id, user.email)', () => {
-    expect(isFlyoutLink({ field: 'user.entity.id', scopeId: 'scopeId' })).toBe(true);
-    expect(isFlyoutLink({ field: 'user.id', scopeId: 'scopeId' })).toBe(true);
-    expect(isFlyoutLink({ field: 'user.email', scopeId: 'scopeId' })).toBe(true);
-  });
-
   it('should return true if field is rule.name and ruleId is provided', () => {
     expect(
       isFlyoutLink({ field: 'kibana.alert.rule.name', ruleId: 'ruleId', scopeId: 'scopeId' })
@@ -50,8 +44,11 @@ describe('isFlyoutLink', () => {
     expect(isFlyoutLink({ field: 'host.ip', scopeId: 'scopeId' })).toBe(true);
   });
 
-  it('should return false if field is not host.name, user name, user entity identifier, rule name or ip type', () => {
+  it('should return false if field is not host.name, user name, rule name or ip type', () => {
     expect(isFlyoutLink({ field: 'field', scopeId: 'scopeId' })).toBe(false); // non-ecs field
     expect(isFlyoutLink({ field: 'event.category', scopeId: 'scopeId' })).toBe(false); // ecs field but not flyout link type
+    expect(isFlyoutLink({ field: 'user.entity.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'user.id', scopeId: 'scopeId' })).toBe(false);
+    expect(isFlyoutLink({ field: 'user.email', scopeId: 'scopeId' })).toBe(false);
   });
 });
