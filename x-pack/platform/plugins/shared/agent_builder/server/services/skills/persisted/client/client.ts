@@ -175,6 +175,7 @@ class SkillClientImpl implements SkillClient {
       plugin_id: attributes.plugin_id,
       created_at: attributes.created_at,
       updated_at: attributes.updated_at,
+      referenced_content_count: attributes.referenced_content?.length ?? 0,
     }));
   }
 
