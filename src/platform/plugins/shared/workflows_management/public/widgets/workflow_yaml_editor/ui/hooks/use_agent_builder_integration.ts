@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { monaco } from '@kbn/monaco';
 import {
   AttachmentBridge,
@@ -47,18 +45,6 @@ export const useAgentBuilderIntegration = ({
   const agentBuilder = workflowsManagement?.agentBuilder;
   const proposalManagerRef = useRef<ProposalManager | null>(null);
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
-  const history = useHistory();
-
-  useEffect(() => {
-    if (!workflowId) return;
-    const params = parse(history.location.search);
-    const urlConversationId = params.conversationId as string | undefined;
-    if (urlConversationId) {
-      const sessionTag = `workflow-${workflowId}`;
-      const key = `agentBuilder.lastConversation.${sessionTag}.default`;
-      localStorage.setItem(key, JSON.stringify(urlConversationId));
-    }
-  }, [workflowId, history]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -132,41 +118,6 @@ export const useAgentBuilderIntegration = ({
     };
   }, [isEditorMounted, editorRef, agentBuilder, workflowId, workflowName]);
 
-  const syncConversationIdToUrl = useCallback(() => {
-    const sessionTag = workflowId ? `workflow-${workflowId}` : 'workflow-new';
-    const storageKey = `agentBuilder.lastConversation.${sessionTag}.default`;
-
-    const poll = setInterval(() => {
-      try {
-        const raw = localStorage.getItem(storageKey);
-        if (raw) {
-          const id = JSON.parse(raw);
-          if (id && typeof id === 'string') {
-            const currentParams = parse(history.location.search);
-            if (currentParams.conversationId !== id) {
-              history.replace({
-                ...history.location,
-                search: `?${stringify(
-                  { ...currentParams, conversationId: id },
-                  { encode: false }
-                )}`,
-              });
-            }
-            clearInterval(poll);
-          }
-        }
-      } catch {
-        // Ignore parse errors
-      }
-    }, 300);
-
-    const timeout = setTimeout(() => clearInterval(poll), 5000);
-    return () => {
-      clearInterval(poll);
-      clearTimeout(timeout);
-    };
-  }, [workflowId, history]);
-
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
       if (!agentBuilder) return;
@@ -175,7 +126,6 @@ export const useAgentBuilderIntegration = ({
       const currentYaml = editor?.getModel()?.getValue() ?? '';
 
       agentBuilder.openConversationFlyout({
-        sessionTag: workflowId ? `workflow-${workflowId}` : 'workflow-new',
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
@@ -189,10 +139,8 @@ export const useAgentBuilderIntegration = ({
           },
         ],
       });
-
-      syncConversationIdToUrl();
     },
-    [agentBuilder, editorRef, workflowId, workflowName, syncConversationIdToUrl]
+    [agentBuilder, editorRef, workflowId, workflowName]
   );
 
   return {
