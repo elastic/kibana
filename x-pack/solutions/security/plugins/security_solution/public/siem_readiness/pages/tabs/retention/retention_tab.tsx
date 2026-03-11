@@ -37,6 +37,7 @@ import { buildRetentionCaseDescription, getRetentionCaseTitle } from './retentio
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 import { isRetentionNonCompliant } from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
@@ -490,6 +491,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="retentionDays"
         defaultSortDirection="asc"
         itemName="data streams / indices"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );
