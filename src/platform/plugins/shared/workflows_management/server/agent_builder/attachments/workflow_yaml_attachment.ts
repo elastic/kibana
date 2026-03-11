@@ -32,10 +32,20 @@ import {
 
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
+const clientDiagnosticSchema = z.object({
+  severity: z.enum(['error', 'warning']),
+  message: z.string(),
+  source: z.string(),
+});
+
 const workflowYamlDataSchema = z.object({
   yaml: z.string().describe('The workflow YAML content'),
   workflowId: z.string().optional().describe('The workflow ID'),
   name: z.string().optional().describe('The workflow name'),
+  clientDiagnostics: z
+    .array(clientDiagnosticSchema)
+    .optional()
+    .describe('Client-side validation diagnostics from the editor'),
 });
 
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
@@ -106,6 +116,19 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
           }
         } catch {
           // Validation service unavailable; LLM can use validate_workflow tool.
+        }
+
+        if (data.clientDiagnostics && data.clientDiagnostics.length > 0) {
+          const clientErrors = data.clientDiagnostics.filter((d) => d.severity === 'error');
+          const clientWarnings = data.clientDiagnostics.filter((d) => d.severity === 'warning');
+          if (clientErrors.length > 0) {
+            const lines = clientErrors.map((d) => `- [${d.source}] ${d.message}`).join('\n');
+            validationSection += `\n\nClient-side validation errors (${clientErrors.length}):\n${lines}`;
+          }
+          if (clientWarnings.length > 0) {
+            const lines = clientWarnings.map((d) => `- [${d.source}] ${d.message}`).join('\n');
+            validationSection += `\n\nClient-side validation warnings (${clientWarnings.length}):\n${lines}`;
+          }
         }
 
         return {

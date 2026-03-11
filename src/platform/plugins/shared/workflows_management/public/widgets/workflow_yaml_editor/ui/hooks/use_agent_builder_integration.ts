@@ -15,6 +15,7 @@ import {
   setProposalActionHandlers,
   updateProposalStatus,
 } from '../../../../features/ai_integration';
+import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 interface UseAgentBuilderIntegrationParams {
@@ -22,6 +23,7 @@ interface UseAgentBuilderIntegrationParams {
   isEditorMounted?: boolean;
   workflowId?: string;
   workflowName?: string;
+  validationErrors?: YamlValidationResult[] | null;
 }
 
 interface OpenAgentChatOptions {
@@ -35,16 +37,35 @@ interface UseAgentBuilderIntegrationReturn {
   proposalManager: ProposalManager | null;
 }
 
+const serializeClientDiagnostics = (
+  errors: YamlValidationResult[] | null | undefined
+): Array<{ severity: string; message: string; source: string }> | undefined => {
+  if (!errors || errors.length === 0) return undefined;
+  const relevant = errors.filter(
+    (e): e is YamlValidationResult & { severity: 'error' | 'warning'; message: string } =>
+      (e.severity === 'error' || e.severity === 'warning') && e.message != null
+  );
+  if (relevant.length === 0) return undefined;
+  return relevant.map((e) => ({
+    severity: e.severity,
+    message: e.message,
+    source: e.owner,
+  }));
+};
+
 export const useAgentBuilderIntegration = ({
   editorRef,
   isEditorMounted,
   workflowId,
   workflowName,
+  validationErrors,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
   const proposalManagerRef = useRef<ProposalManager | null>(null);
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
+  const validationErrorsRef = useRef(validationErrors);
+  validationErrorsRef.current = validationErrors;
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -103,6 +124,7 @@ export const useAgentBuilderIntegration = ({
               yaml: currentYaml,
               workflowId,
               name: workflowName,
+              clientDiagnostics: serializeClientDiagnostics(validationErrorsRef.current),
             },
           });
         }, 500);
@@ -137,12 +159,13 @@ export const useAgentBuilderIntegration = ({
               workflowId,
               name: workflowName,
               yaml: currentYaml,
+              clientDiagnostics: serializeClientDiagnostics(validationErrors),
             },
           },
         ],
       });
     },
-    [agentBuilder, editorRef, workflowId, workflowName]
+    [agentBuilder, editorRef, workflowId, workflowName, validationErrors]
   );
 
   return {

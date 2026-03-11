@@ -247,14 +247,6 @@ export const WorkflowYAMLEditor = ({
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
-    editorRef,
-    isEditorMounted,
-    workflowId: workflow?.id,
-    workflowName: workflow?.name,
-  });
-
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
     interceptMonacoYamlProvider();
@@ -293,6 +285,15 @@ export const WorkflowYAMLEditor = ({
     const hasErrors = validationErrors.some((e) => e.severity === 'error');
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
+
+  // Agent Builder integration for AI-assisted editing
+  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+    editorRef,
+    isEditorMounted,
+    workflowId: workflow?.id,
+    workflowName: workflow?.name,
+    validationErrors,
+  });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
