@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   UnifiedDataTableProps,
@@ -20,6 +20,7 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -121,6 +122,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
   }) {
     const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
     const dispatch = useDispatch();
+    const store = useStore();
+    const history = useHistory();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
@@ -183,10 +186,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         if (newFlyoutSystemEnabled) {
           const hit: DataTableRecord = buildDataTableRecord(eventData.raw);
           overlays.openSystemFlyout(
-            flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
+            flyoutProviders({
+              services,
+              store,
+              history,
+              children: <OverviewTab hit={hit} />,
+            }),
             {
               ownFocus: false,
-              // @ts-ignore EUI to fix this typing issue
               resizable: true,
               size: 's',
               type: 'overlay',
@@ -220,7 +227,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           });
         }
       },
-      [newFlyoutSystemEnabled, overlays, services, timelineId, openFlyout, telemetry]
+      [
+        newFlyoutSystemEnabled,
+        overlays,
+        services,
+        store,
+        history,
+        timelineId,
+        openFlyout,
+        telemetry,
+      ]
     );
 
     const onSetExpandedDoc = useCallback(
