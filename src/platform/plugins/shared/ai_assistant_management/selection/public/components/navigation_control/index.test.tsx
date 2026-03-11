@@ -19,6 +19,14 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
+// workaround because of JSDOM not supporting :focus-visible
+// https://github.com/jsdom/jsdom/issues/3426
+const matchesOriginal = HTMLElement.prototype.matches;
+HTMLElement.prototype.matches = function (query: string) {
+  if (query === ':focus-visible') return false;
+  return matchesOriginal.call(this, query);
+};
+
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();
 
