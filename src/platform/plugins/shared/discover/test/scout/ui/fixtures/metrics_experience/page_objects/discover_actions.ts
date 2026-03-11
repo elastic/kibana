@@ -8,7 +8,6 @@
  */
 
 import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 export class DiscoverActions {
   public readonly menuPopover: Locator;
@@ -28,7 +27,7 @@ export class DiscoverActions {
       name: queryLabel,
     });
 
-    await expect(queryOption).toBeVisible();
+    await queryOption.waitFor({ state: 'visible' });
     await queryOption.click();
     await this.discover.waitUntilSearchingHasFinished();
   }
@@ -38,16 +37,16 @@ export class DiscoverActions {
       await this.page.testSubj.click('esql-help-popover-button');
     }
 
-    await expect(this.menuPopover).toBeVisible();
+    await this.menuPopover.waitFor({ state: 'visible' });
     const selectedPanelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
     if (await selectedPanelTitleButton.isVisible()) {
       return this.menuPopover;
     }
 
     const recommendedQueriesCategoryButton = this.page.testSubj.locator('esql-recommended-queries');
-    await expect(recommendedQueriesCategoryButton).toBeVisible();
+    await this.menuPopover.waitFor({ state: 'visible' });
     await recommendedQueriesCategoryButton.click();
-    await expect(selectedPanelTitleButton).toBeVisible();
+    await selectedPanelTitleButton.waitFor({ state: 'visible' });
 
     return this.menuPopover;
   }
@@ -59,11 +58,11 @@ export class DiscoverActions {
     }
 
     await this.discover.waitUntilFieldListHasCountOfFields();
-    await expect(this.page.testSubj.locator(`field-${field}`)).toBeVisible();
+    await this.page.testSubj.locator(`field-${field}`).waitFor({ state: 'visible' });
     await this.page.testSubj.locator(`field-${field}`).click();
-    await expect(
-      this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`)
-    ).toBeVisible();
+    await this.page.testSubj
+      .locator(`fieldPopoverHeader_addBreakdownField-${field}`)
+      .waitFor({ state: 'visible' });
     await this.page.testSubj.locator(`fieldPopoverHeader_addBreakdownField-${field}`).click();
     await this.discover.waitUntilSearchingHasFinished();
   }
