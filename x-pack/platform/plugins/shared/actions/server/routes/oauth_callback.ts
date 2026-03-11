@@ -530,25 +530,17 @@ export const oauthCallbackRoute = (
           const config = rawAction.attributes.config;
           const secrets = rawAction.attributes.secrets;
           const authType = secrets.authType;
-
-          // For EARS, derive the token path from the provider field; fall back to stored tokenUrl
-          const storedTokenUrl = secrets.provider
-            ? `/${secrets.provider}/oauth/token`
-            : secrets.tokenUrl || config?.tokenUrl;
+          const storedTokenUrl = secrets.tokenUrl || config?.tokenUrl;
 
           if (!storedTokenUrl) {
-            throw new Error(
-              'Connector missing required OAuth configuration (tokenUrl or provider)'
-            );
+            throw new Error('Connector missing required OAuth configuration (tokenUrl)');
           }
 
           let tokenResult;
           if (authType === 'ears') {
-            const earsBaseUrl = configurationUtilities.getEarsUrl();
-            const tokenUrl = earsBaseUrl
-              ? resolveEarsUrl(storedTokenUrl, earsBaseUrl)
-              : storedTokenUrl;
-            // EARS flow: JSON body with { code, pkce_verifier }, no client credentials
+            // EARS flow: storedTokenUrl is a relative URL path;
+            // JSON body with { code, pkce_verifier }, no client credentials
+            const tokenUrl = resolveEarsUrl(storedTokenUrl, configurationUtilities.getEarsUrl());
             tokenResult = await requestEarsToken(
               tokenUrl,
               logger,

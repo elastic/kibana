@@ -6,19 +6,16 @@
  */
 
 /**
- * Resolves the full EARS URL by combining the configured base URL with the path
- * from the stored URL (which may be a full URL or just a path).
- * If no base URL is configured, returns the stored URL as-is.
+ * Resolves the full EARS URL by combining the configured base URL with the URL path.
+ * If no base URL is configured, it throws an error.
  */
-// todo: refactor
-export function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): string {
-  if (!earsBaseUrl) return storedUrl;
-  const base = earsBaseUrl.replace(/\/$/, '');
-  let path: string;
-  try {
-    path = new URL(storedUrl).pathname;
-  } catch {
-    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
+export function resolveEarsUrl(urlPath: string, earsBaseUrl: string | undefined): string {
+  if (!earsBaseUrl) {
+    throw new Error('EARS base URL is not configured');
   }
+
+  const base = earsBaseUrl.replace(/\/$/, ''); // strip trailing slash if any present
+  const path = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
+
   return `${base}${path}`;
 }
