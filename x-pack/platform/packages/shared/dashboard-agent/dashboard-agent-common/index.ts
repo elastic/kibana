@@ -13,25 +13,24 @@ export {
 
 export {
   panelGridSchema,
-  sectionGridSchema,
   lensAttachmentPanelSchema,
   genericAttachmentPanelSchema,
   attachmentPanelSchema,
-  dashboardSectionSchema,
-  dashboardAttachmentDataSchema,
-  dashboardAttachmentOriginSchema,
   isLensAttachmentPanel,
   isGenericAttachmentPanel,
-} from './types';
+} from './panel_types';
 
+export { sectionGridSchema, dashboardSectionSchema } from './section_types';
+export { dashboardPinnedPanelStateSchema } from './control_types';
+export { dashboardAttachmentDataSchema, dashboardAttachmentOriginSchema } from './attachment_types';
+
+export type { LensAttachmentPanel, GenericAttachmentPanel, AttachmentPanel } from './panel_types';
+
+export type { DashboardSection } from './section_types';
+export type { DashboardPinnedPanelState } from './control_types';
 export type {
-  LensAttachmentPanel,
-  GenericAttachmentPanel,
-  AttachmentPanel,
-  DashboardSection,
   DashboardAttachmentData,
   DashboardAttachmentOrigin,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
-  DashboardUiEvent,
-} from './types';
+  DashboardAttachment,
+} from './attachment_types';
+export type { PanelAddedEventData, PanelsRemovedEventData, DashboardUiEvent } from './event_types';

@@ -12,6 +12,7 @@ import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-bro
 import type {
   DashboardAttachmentData,
   DashboardAttachmentOrigin,
+  DashboardAttachment,
 } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type {
@@ -24,7 +25,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { normalizeDashboardWidgets } from './panel_grid_layout';
 
 interface DashboardCanvasInitialInput {
@@ -34,6 +34,7 @@ interface DashboardCanvasInitialInput {
   };
   viewMode: 'view';
   panels: DashboardState['panels'];
+  pinnedPanels?: DashboardState['pinned_panels'];
   title?: string;
   description?: string;
 }
@@ -47,6 +48,7 @@ const createDashboardRendererInitialInput = (
     panels: data.panels ?? [],
     sections: data.sections,
   }),
+  pinnedPanels: data.pinnedPanels,
   title: data.title,
   description: data.description,
 });
@@ -68,10 +70,11 @@ const getDashboardRendererCreationOptions = async ({
 
   return {
     getInitialInput: () => {
-      const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
+      const { timeRange, pinnedPanels, ...restInitialDashboardInput } = initialDashboardInput;
       return {
         ...restInitialDashboardInput,
         time_range: timeRange,
+        ...(pinnedPanels !== undefined ? { pinned_panels: pinnedPanels } : {}),
       };
     },
   };
@@ -192,6 +195,7 @@ export const DashboardCanvasContent = ({
               title: initialDashboardInput.title,
               description: initialDashboardInput.description,
               panels: initialDashboardInput.panels,
+              pinned_panels: initialDashboardInput.pinnedPanels,
               time_range: initialDashboardInput.timeRange,
               viewMode: 'edit',
             });
@@ -221,6 +225,7 @@ export const DashboardCanvasContent = ({
       dashboardApi,
       initialDashboardInput.description,
       initialDashboardInput.panels,
+      initialDashboardInput.pinnedPanels,
       initialDashboardInput.timeRange,
       initialDashboardInput.title,
       registerActionButtons,

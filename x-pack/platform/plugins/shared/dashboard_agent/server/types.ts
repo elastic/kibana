@@ -6,13 +6,15 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DashboardAgentStartDependencies {}
+export interface DashboardAgentStartDependencies {
+  dataViews: DataViewsPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardAgentPluginSetup {}

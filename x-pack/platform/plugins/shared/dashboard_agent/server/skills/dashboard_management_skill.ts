@@ -21,7 +21,7 @@ export const dashboardManagementSkill = defineSkillType({
 Use this skill when:
 - A user asks to create a dashboard composed of one or more visualizations.
 - A user asks to update an in-memory dashboard from a previous tool result.
-- A request includes ordered panel-management actions (add/remove panels, markdown, metadata, section edits).
+- A request includes ordered dashboard-management actions (add/remove panels, controls, markdown, metadata, section edits).
 - You need to add existing visualization attachments to a dashboard.
 
 Do **not** use this skill when:
@@ -60,6 +60,8 @@ Use this contract:
     { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
     { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
     { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
+    { "operation": "add_controls", "items": [{ "type": "optionsListControl", "fieldName": "service.name", "indexPattern": "logs-*", "title": "Service" }] },
+    { "operation": "remove_controls", "controlIds": ["control-uid"] },
     { "operation": "remove_panels", "panelIds": ["panel-id"] }
   ]
 }
@@ -83,6 +85,8 @@ If you omit metadata on a new dashboard, creation can fail.
    - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout, optionally targeting an existing section via \`sectionId\`
    - \`add_section\` to create a new section (server generates \`sectionId\`)
    - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
+   - \`add_controls\` to append pinned controls; pass \`indexPattern\` (for example \`logs-*\`) for server-side data view resolution
+   - \`remove_controls\` to remove controls by control \`uid\`
    - \`remove_panels\` to remove by \`panelId\`
    - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
 
@@ -94,7 +98,8 @@ After a successful call, the tool returns:
 - \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
 - \`data.dashboardAttachment.content.panels\`: array of \`{ type, panelId, title }\` for each panel on the dashboard.
 - \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
-- \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
+- \`data.dashboardAttachment.content.pinnedPanels\`: ordered list of pinned controls with \`uid\`, \`type\`, and control \`config\`.
+- \`data.failures\`: array of \`{ type, identifier, error }\` for partial operation failures (for example attachment resolution or control data-view resolution). Only present when there are failures.
 - \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
 
 See \`./examples/tool-result-format\` for the complete result structure with examples.
@@ -125,6 +130,17 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 - New sections should default to \`collapsed: false\`.
 - Panel coordinates inside a section are section-relative (\`y: 0\` is the top of that section).
 - Reorganizing existing panels between top-level and sections is not supported yet; use add/remove operations instead.
+
+## Controls Guidelines
+
+Use controls sparingly and only when they improve exploration:
+
+- Add an **options list** control when multiple panels likely share a data view and there is a meaningful categorical field (for example \`host.name\`, \`service.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`).
+- Add a **range slider** control when a numeric threshold is useful across panels (for example \`latency\`, \`duration\`, \`bytes\`).
+- Prefer fields that already appear in multiple visualizations or key panel breakdowns.
+- Avoid controls for highly unique identifiers (for example trace IDs) or dashboards already scoped to a single entity.
+- \`indexPattern\` is resolved server-side to a data view. If multiple data views match, do not guess; ask the user to choose or provide a more specific \`indexPattern\`.
+- Default to adding **0-2 controls**, usually one high-value options list first.
 
 ## Edge Cases
 
@@ -277,6 +293,37 @@ Use this when the user wants to add a visualization that was already created ear
   ]
 }
 \`\`\`
+
+## Update a dashboard — add controls
+
+Use this when a dashboard needs reusable filters across multiple panels.
+
+\`\`\`json
+{
+  "dashboardAttachmentId": "abc-123",
+  "operations": [
+    {
+      "operation": "add_controls",
+      "items": [
+        {
+          "type": "optionsListControl",
+          "fieldName": "service.name",
+          "indexPattern": "logs-*",
+          "title": "Service",
+          "width": "medium"
+        },
+        {
+          "type": "rangeSliderControl",
+          "fieldName": "event.duration",
+          "indexPattern": "logs-*",
+          "title": "Duration"
+        }
+      ]
+    }
+  ]
+}
+\`\`\`
+
 `,
     },
     {
@@ -327,6 +374,11 @@ Key fields to remember:
         "type": "attachment_panels",
         "identifier": "viz-missing-999",
         "error": "Attachment not found"
+      },
+      {
+        "type": "control_data_view",
+        "identifier": "rangeSliderControl:event.duration",
+        "error": "Could not resolve data view from index pattern \"metrics-*\"."
       }
     ],
     "dashboardAttachment": {
@@ -345,8 +397,9 @@ Key fields to remember:
 
 When \`failures\` is present:
 - The dashboard was still created or updated with the panels that succeeded.
-- Report each failure to the user: include \`identifier\` (the attachment that failed) and \`error\` (the reason).
-- Offer to recreate failed visualizations and retry attachment ingestion.
+- Report each failure to the user: include \`type\`, \`identifier\`, and \`error\`.
+- For \`attachment_panels\`, offer to recreate failed visualizations and retry attachment ingestion.
+- For \`control_data_view\`, suggest refining \`indexPattern\` and retrying the control add.
 
 ## Error result
 

@@ -25,10 +25,10 @@ import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
 
 /**
- * Failure record for tracking visualization errors.
+ * Failure record for tracking partial operation errors.
  */
-export interface VisualizationFailure {
-  type: string;
+export interface DashboardOperationFailure {
+  type: 'attachment_panels' | 'control_data_view';
   identifier: string;
   error: string;
 }
@@ -92,13 +92,13 @@ export const resolvePanelsFromAttachments = async ({
   attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
-}): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
+}): Promise<{ panels: AttachmentPanel[]; failures: DashboardOperationFailure[] }> => {
   if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
 
   const panels: AttachmentPanel[] = [];
-  const failures: VisualizationFailure[] = [];
+  const failures: DashboardOperationFailure[] = [];
 
   for (const { attachmentId, grid } of attachmentInputs) {
     try {

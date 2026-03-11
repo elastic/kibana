@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import { executeDashboardOperations, type DashboardOperation } from './operations';
+import { executeDashboardOperations } from './operations';
+import type { DashboardOperation } from './operation_schemas';
 
 const createMockLogger = (): Logger =>
   ({
@@ -62,6 +63,7 @@ describe('executeDashboardOperations', () => {
       dashboardData: baseDashboardData,
       operations,
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({ panels: [attachmentPanel], failures: [] }),
       onPanelsAdded: (panels) => {
         for (const panel of panels) {
@@ -117,13 +119,14 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async (attachmentInputs) => {
         const attachmentIds = attachmentInputs.map(({ attachmentId }) => attachmentId);
         const panels = attachmentIds.includes('viz-1') ? [attachmentPanel] : [];
         const failures = attachmentIds
           .filter((attachmentId) => attachmentId.startsWith('missing-viz'))
           .map((missingAttachmentId) => ({
-            type: 'attachment_panels',
+            type: 'attachment_panels' as const,
             identifier: missingAttachmentId,
             error: 'Attachment not found',
           }));
@@ -172,6 +175,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({
         panels: [
           {
@@ -215,6 +219,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({
         panels: [createLensPanel('section-panel-1')],
         failures: [],
@@ -270,6 +275,7 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async (attachmentInputs) => ({
         panels: [
           {
@@ -310,6 +316,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'promote' }],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: () => {},
@@ -343,6 +350,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', sectionId: 'section-a', panelAction: 'delete' }],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
@@ -375,6 +383,7 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_panels', panelIds: ['section-a-1', 'top-1'] }],
       logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
       resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
       onPanelsAdded: () => {},
       onPanelsRemoved: (panels) => {
@@ -393,5 +402,173 @@ describe('executeDashboardOperations', () => {
       },
     ]);
     expect(removedPanelIds.sort()).toEqual(['section-a-1', 'top-1']);
+  });
+
+  it('appends controls and generates unique uids', async () => {
+    const resolveControlDataViewId = jest.fn(
+      async ({ indexPattern }: { indexPattern: string }) => `${indexPattern}-id`
+    );
+
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Controls dashboard',
+        description: 'Description',
+        panels: [],
+        pinnedPanels: [
+          {
+            type: 'optionsListControl',
+            uid: 'existing-control',
+            config: {
+              data_view_id: 'logs-id',
+              field_name: 'host.name',
+            },
+          },
+        ],
+      },
+      operations: [
+        {
+          operation: 'add_controls',
+          items: [
+            {
+              type: 'optionsListControl',
+              fieldName: 'service.name',
+              indexPattern: 'logs-*',
+              width: 'medium',
+            },
+            {
+              type: 'rangeSliderControl',
+              fieldName: 'bytes',
+              indexPattern: 'metrics-*',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolveControlDataViewId,
+      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      onPanelsAdded: () => {},
+      onPanelsRemoved: () => {},
+    });
+
+    expect(resolveControlDataViewId).toHaveBeenNthCalledWith(1, {
+      indexPattern: 'logs-*',
+    });
+    expect(resolveControlDataViewId).toHaveBeenNthCalledWith(2, {
+      indexPattern: 'metrics-*',
+    });
+
+    expect(result.dashboardData.pinnedPanels).toHaveLength(3);
+    const addedControls = result.dashboardData.pinnedPanels?.slice(1) ?? [];
+    expect(addedControls[0]).toEqual(
+      expect.objectContaining({
+        type: 'optionsListControl',
+        width: 'medium',
+        config: expect.objectContaining({
+          data_view_id: 'logs-*-id',
+          field_name: 'service.name',
+        }),
+      })
+    );
+    expect(addedControls[0].uid).toEqual(expect.any(String));
+    expect(addedControls[1]).toEqual(
+      expect.objectContaining({
+        type: 'rangeSliderControl',
+        config: expect.objectContaining({
+          data_view_id: 'metrics-*-id',
+          field_name: 'bytes',
+        }),
+      })
+    );
+    expect(addedControls[1].uid).toEqual(expect.any(String));
+    expect(new Set(result.dashboardData.pinnedPanels?.map(({ uid }) => uid)).size).toBe(3);
+    expect(result.failures).toEqual([]);
+  });
+
+  it('removes controls by uid', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Controls dashboard',
+        description: 'Description',
+        panels: [],
+        pinnedPanels: [
+          {
+            type: 'optionsListControl',
+            uid: 'control-1',
+            config: { data_view_id: 'logs-id', field_name: 'host.name' },
+          },
+          {
+            type: 'rangeSliderControl',
+            uid: 'control-2',
+            config: { data_view_id: 'logs-id', field_name: 'bytes' },
+          },
+        ],
+      },
+      operations: [{ operation: 'remove_controls', controlIds: ['control-1'] }],
+      logger,
+      resolveControlDataViewId: async () => 'resolved-data-view-id',
+      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      onPanelsAdded: () => {},
+      onPanelsRemoved: () => {},
+    });
+
+    expect(result.dashboardData.pinnedPanels).toEqual([
+      expect.objectContaining({
+        uid: 'control-2',
+      }),
+    ]);
+  });
+
+  it('skips unresolved controls and returns control-level failures', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: {
+        title: 'Controls dashboard',
+        description: 'Description',
+        panels: [],
+      },
+      operations: [
+        {
+          operation: 'add_controls',
+          items: [
+            {
+              type: 'optionsListControl',
+              fieldName: 'service.name',
+              indexPattern: 'logs-*',
+            },
+            {
+              type: 'rangeSliderControl',
+              fieldName: 'bytes',
+              indexPattern: 'metrics-*',
+            },
+          ],
+        },
+      ],
+      logger,
+      resolveControlDataViewId: async ({ indexPattern }) => {
+        if (indexPattern === 'logs-*') {
+          return 'logs-id';
+        }
+        throw new Error('no selector');
+      },
+      resolvePanelsFromAttachments: async () => ({ panels: [], failures: [] }),
+      onPanelsAdded: () => {},
+      onPanelsRemoved: () => {},
+    });
+
+    expect(result.dashboardData.pinnedPanels).toEqual([
+      expect.objectContaining({
+        type: 'optionsListControl',
+        config: expect.objectContaining({
+          data_view_id: 'logs-id',
+          field_name: 'service.name',
+        }),
+      }),
+    ]);
+    expect(result.failures).toEqual([
+      {
+        type: 'control_data_view',
+        identifier: 'rangeSliderControl:bytes',
+        error: 'no selector',
+      },
+    ]);
   });
 });

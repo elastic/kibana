@@ -5,96 +5,26 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
+  DashboardPinnedPanelState,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
-import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { upsertMarkdownPanel, type VisualizationFailure } from './utils';
-
-export const setMetadataOperationSchema = z.object({
-  operation: z.literal('set_metadata'),
-  title: z.string().optional(),
-  description: z.string().optional(),
-});
-
-export const upsertMarkdownOperationSchema = z.object({
-  operation: z.literal('upsert_markdown'),
-  markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
-});
-
-const attachmentWithGridSchema = z.object({
-  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
-  ),
-});
-
-const sectionGridSchema = z.object({
-  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
-});
-
-export const addPanelsFromAttachmentsOperationSchema = z.object({
-  operation: z.literal('add_panels_from_attachments'),
-  items: z
-    .array(
-      attachmentWithGridSchema.extend({
-        sectionId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional section ID to add this panel into. If omitted, panel is added at the top level.'
-          ),
-      })
-    )
-    .min(1)
-    .describe('Visualization attachments to add, each with its dashboard grid layout.'),
-});
-
-export const addSectionOperationSchema = z.object({
-  operation: z.literal('add_section'),
-  title: z.string().describe('Section title.'),
-  grid: sectionGridSchema,
-  panels: z
-    .array(attachmentWithGridSchema)
-    .describe('Panels to create inside the section. Coordinates are section-relative.'),
-});
-
-export const removeSectionOperationSchema = z.object({
-  operation: z.literal('remove_section'),
-  sectionId: z.string().describe('Section id to remove.'),
-  panelAction: z
-    .enum(['promote', 'delete'])
-    .describe('How to handle section panels: promote to top-level or delete them.'),
-});
-
-export const removePanelsOperationSchema = z.object({
-  operation: z.literal('remove_panels'),
-  panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
-});
-
-export const dashboardOperationSchema = z.discriminatedUnion('operation', [
-  setMetadataOperationSchema,
-  upsertMarkdownOperationSchema,
-  addPanelsFromAttachmentsOperationSchema,
-  addSectionOperationSchema,
-  removeSectionOperationSchema,
-  removePanelsOperationSchema,
-]);
-
-export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
+import { upsertMarkdownPanel, type DashboardOperationFailure } from './utils';
+import type { ResolveControlDataViewIdInput } from './data_view_id_resolver';
+import type { DashboardOperation, ManageControlInput } from './operation_schemas';
 
 interface ExecuteDashboardOperationsParams {
   dashboardData: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
+  resolveControlDataViewId: (input: ResolveControlDataViewIdInput) => Promise<string>;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
+  ) => Promise<{ panels: AttachmentPanel[]; failures: DashboardOperationFailure[] }>;
   onPanelsAdded: (panels: AttachmentPanel[]) => void;
   onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
@@ -105,8 +35,76 @@ const asOptionalSections = (
   return sections && sections.length > 0 ? sections : undefined;
 };
 
+const asOptionalPinnedPanels = (
+  pinnedPanels: DashboardPinnedPanelState[] | undefined
+): DashboardPinnedPanelState[] | undefined => {
+  return pinnedPanels && pinnedPanels.length > 0 ? pinnedPanels : undefined;
+};
+
 const getPanelsBottomY = (panels: AttachmentPanel[]): number => {
   return panels.reduce((maxY, panel) => Math.max(maxY, panel.grid.y + panel.grid.h), 0);
+};
+
+const buildControlConfig = ({
+  input,
+  dataViewId,
+}: {
+  input: ManageControlInput;
+  dataViewId: string;
+}): Record<string, unknown> => {
+  return {
+    data_view_id: dataViewId,
+    field_name: input.fieldName,
+    ...(input.title !== undefined ? { title: input.title } : {}),
+  };
+};
+
+const resolvePinnedControlStates = async ({
+  inputs,
+  logger,
+  resolveControlDataViewId,
+}: {
+  inputs: ManageControlInput[];
+  logger: Logger;
+  resolveControlDataViewId: ExecuteDashboardOperationsParams['resolveControlDataViewId'];
+}): Promise<{ controls: DashboardPinnedPanelState[]; failures: DashboardOperationFailure[] }> => {
+  const controls: DashboardPinnedPanelState[] = [];
+  const failures: DashboardOperationFailure[] = [];
+
+  for (const input of inputs) {
+    const controlIdentifier = `${input.type}:${input.fieldName}`;
+    let dataViewId: string;
+    try {
+      dataViewId = await resolveControlDataViewId({
+        indexPattern: input.indexPattern,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.debug(
+        `Skipping control "${input.type}:${input.fieldName}" because data view could not be resolved: ${errorMessage}`
+      );
+      failures.push({
+        type: 'control_data_view',
+        identifier: controlIdentifier,
+        error: errorMessage,
+      });
+      continue;
+    }
+    const config = buildControlConfig({
+      input,
+      dataViewId,
+    });
+
+    controls.push({
+      type: input.type,
+      uid: uuidv4(),
+      ...(input.width !== undefined ? { width: input.width } : {}),
+      ...(input.grow !== undefined ? { grow: input.grow } : {}),
+      config,
+    } as DashboardPinnedPanelState);
+  }
+
+  return { controls, failures };
 };
 
 const removePanelsFromDashboard = ({
@@ -160,15 +158,16 @@ export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
+  resolveControlDataViewId,
   resolvePanelsFromAttachments,
   onPanelsAdded,
   onPanelsRemoved,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
-  failures: VisualizationFailure[];
+  failures: DashboardOperationFailure[];
 }> => {
   let nextDashboardData = structuredClone(dashboardData);
-  const failures: VisualizationFailure[] = [];
+  const failures: DashboardOperationFailure[] = [];
 
   for (const operation of operations) {
     switch (operation.operation) {
@@ -324,6 +323,40 @@ export const executeDashboardOperations = async ({
           nextDashboardData = dashboardWithoutPanels;
           onPanelsRemoved(removedPanels);
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
+        }
+        break;
+      }
+
+      case 'add_controls': {
+        const existingControls = nextDashboardData.pinnedPanels ?? [];
+        const { controls: controlsToAdd, failures: controlFailures } =
+          await resolvePinnedControlStates({
+            inputs: operation.items,
+            logger,
+            resolveControlDataViewId,
+          });
+        failures.push(...controlFailures);
+
+        nextDashboardData = {
+          ...nextDashboardData,
+          pinnedPanels: asOptionalPinnedPanels([...existingControls, ...controlsToAdd]),
+        };
+        break;
+      }
+
+      case 'remove_controls': {
+        const existingControls = nextDashboardData.pinnedPanels ?? [];
+        if (existingControls.length === 0) {
+          break;
+        }
+
+        const removeControlIdSet = new Set(operation.controlIds);
+        const nextControls = existingControls.filter(({ uid }) => !removeControlIdSet.has(uid));
+        if (nextControls.length !== existingControls.length) {
+          nextDashboardData = {
+            ...nextDashboardData,
+            pinnedPanels: asOptionalPinnedPanels(nextControls),
+          };
         }
         break;
       }
