@@ -12,11 +12,11 @@ import { format as formatUrl } from 'url';
 import { coreWorkerFixtures } from '.';
 
 /**
- * Normalizes a URL path to ensure it starts with exactly one forward slash.
- * Handles paths with leading slashes, multiple leading slashes, or no leading slash.
+ * Strips leading slashes from a URL path so that supertest concatenates it
+ * correctly with the base URL (which already has a trailing slash from formatUrl).
  */
 export const normalizePathSlashes = (path: string): string => {
-  return '/' + path.replace(/^\/+/, '');
+  return path.replace(/^\/+/, '');
 };
 
 export interface ApiClientOptions {
