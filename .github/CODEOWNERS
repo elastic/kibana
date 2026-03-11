@@ -3161,6 +3161,10 @@ oas_docs/kibana.info.serverless.yaml          @elastic/experience-docs
 oas_docs/kibana.info.yaml                     @elastic/experience-docs
 oas_docs/output                               @elastic/api-docs-reviewer
 
+# Documentation settings and reference
+docs/settings-gen                             @elastic/experience-docs
+docs/reference                                @elastic/experience-docs
+
 # OpenAPI input specs -- experience-docs (response ops, general)
 /x-pack/platform/plugins/shared/alerting/docs/openapi/           @elastic/response-ops @elastic/experience-docs
 /x-pack/platform/plugins/shared/cases/docs/openapi/              @elastic/kibana-cases @elastic/experience-docs
@@ -3192,10 +3196,6 @@ oas_docs/output                               @elastic/api-docs-reviewer
 /x-pack/solutions/observability/plugins/uptime/docs/openapi/     @elastic/actionable-obs-team @elastic/obs-docs-reviewers
 /x-pack/solutions/observability/plugins/synthetics/docs/openapi/ @elastic/actionable-obs-team @elastic/obs-docs-reviewers
 /x-pack/solutions/observability/plugins/observability_ai_assistant_app/docs/openapi/  @elastic/obs-ai-team @elastic/obs-docs-reviewers
-
-# Documentation settings and reference
-docs/settings-gen                             @elastic/experience-docs
-docs/reference                                @elastic/experience-docs
 
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
