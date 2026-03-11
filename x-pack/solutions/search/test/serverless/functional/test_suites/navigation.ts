@@ -61,8 +61,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
         {
           link: { navId: 'agent_builder' },
-          breadcrumbs: [],
+          breadcrumbs: ['Agents'],
           pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
+          link: { navId: 'workflows' },
+          breadcrumbs: ['Workflows'],
+          pageTestSubject: 'createWorkflowButton',
         },
         {
           link: { deepLinkId: 'discover' },
@@ -153,17 +158,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           // home:
           'searchHomepage',
           // main;
-          'agent_builder',
           'discover',
           'dashboards',
+          'agent_builder',
+          'workflows',
           'machine_learning',
+          'data_management',
           // footer:
           'search_getting_started',
           'dev_tools',
-          'data_management',
           'admin_and_settings',
         ],
-        { checkOrder: false }
+        { checkOrder: true }
       );
     });
 
