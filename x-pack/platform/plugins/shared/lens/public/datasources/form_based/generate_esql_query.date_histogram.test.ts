@@ -73,6 +73,26 @@ describe('generateEsqlQuery date histogram', () => {
       }
     });
 
+    it(`should fall back to 'auto' when params.interval is missing (uses BUCKET(order_date, 75, ?_tstart, ?_tend))`, () => {
+      const dateHistogramCol = {
+        ...baseDateHistogramColumn,
+        params: {},
+      };
+      const result = generateEsqlQuery(
+        buildAggEntries(dateHistogramCol as DateHistogramIndexPatternColumn),
+        buildLayer(dateHistogramCol as DateHistogramIndexPatternColumn),
+        mockIndexPattern,
+        uiSettings,
+        mockDateRange,
+        new Date()
+      );
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.esql).toContain('BUCKET(order_date, 75, ?_tstart, ?_tend)');
+      }
+    });
+
     it('should fall back to 1 hour when date range is missing', () => {
       const dateHistogramCol: DateHistogramIndexPatternColumn = {
         ...baseDateHistogramColumn,
@@ -157,26 +177,6 @@ describe('generateEsqlQuery date histogram', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.esql).toContain('BUCKET(order_date, 1 day)');
-      }
-    });
-
-    it(`should fall back to 'auto' when params.interval is missing (uses BUCKET(order_date, 75, ?_tstart, ?_tend))`, () => {
-      const dateHistogramCol = {
-        ...baseDateHistogramColumn,
-        params: {},
-      };
-      const result = generateEsqlQuery(
-        buildAggEntries(dateHistogramCol as DateHistogramIndexPatternColumn),
-        buildLayer(dateHistogramCol as DateHistogramIndexPatternColumn),
-        mockIndexPattern,
-        uiSettings,
-        mockDateRange,
-        new Date()
-      );
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.esql).toContain('BUCKET(order_date, 75, ?_tstart, ?_tend)');
       }
     });
   });
