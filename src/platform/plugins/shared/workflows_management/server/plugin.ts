@@ -194,8 +194,6 @@ export class WorkflowsPlugin
     // Register server side APIs
     defineRoutes(router, this.api, this.logger, this.spaces);
 
-    const api = this.api;
-
     void core.plugins
       .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
       .then(({ agentBuilder }) => {
