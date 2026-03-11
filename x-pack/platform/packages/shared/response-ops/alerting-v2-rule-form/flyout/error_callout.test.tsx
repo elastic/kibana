@@ -13,11 +13,15 @@ import type { FormValues } from '../form/types';
 import { ErrorCallOut } from './error_callout';
 
 // Wrapper component that provides form context with configurable state
-const TestWrapper: React.FC<{
+const TestWrapper = ({
+  errors = {},
+  isSubmitted = false,
+  children,
+}: {
   errors?: FieldErrors<FormValues>;
   isSubmitted?: boolean;
   children: React.ReactNode;
-}> = ({ errors = {}, isSubmitted = false, children }) => {
+}) => {
   const methods = useForm<FormValues>({
     defaultValues: {
       kind: 'alert',

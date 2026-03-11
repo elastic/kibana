@@ -35,10 +35,7 @@ export interface GuiRuleFormProps {
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
-export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
-  onSubmit,
-  includeQueryEditor = true,
-}) => {
+export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (

@@ -37,10 +37,10 @@ const TEST_SUBJ_PREFIXES: Record<StateTransitionTimeframeVariant, string> = {
   recovering: 'recoveryTransitionTimeframe',
 };
 
-export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
+export const StateTransitionTimeframeField = ({
   numberPrependLabel,
   variant = 'pending',
-}) => {
+}: StateTransitionTimeframeFieldProps) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const fieldName = FIELD_NAMES[variant];
 

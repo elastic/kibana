@@ -23,13 +23,13 @@ const LazyStandaloneRuleForm = React.lazy(() =>
   }))
 );
 
-export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = (props) => (
+export const DynamicRuleForm = (props: DynamicRuleFormProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyDynamicRuleForm {...props} />
   </Suspense>
 );
 
-export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = (props) => (
+export const StandaloneRuleForm = (props: StandaloneRuleFormProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyStandaloneRuleForm {...props} />
   </Suspense>
@@ -42,7 +42,7 @@ const LazyRuleResultsPreview = React.lazy(() =>
   }))
 );
 
-export const RuleResultsPreview: React.FC = () => (
+export const RuleResultsPreview = () => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyRuleResultsPreview />
   </Suspense>

@@ -74,7 +74,7 @@ export interface QueryResultsGridProps {
  *
  * Used by both the rule preview and recovery preview components.
  */
-export const QueryResultsGrid: React.FC<QueryResultsGridProps> = ({
+export const QueryResultsGrid = ({
   title,
   dataTestSubj,
   emptyBody,
@@ -88,7 +88,7 @@ export const QueryResultsGrid: React.FC<QueryResultsGridProps> = ({
   groupingFields = [],
   uniqueGroupCount,
   hasValidQuery = false,
-}) => {
+}: QueryResultsGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
   const onChangeItemsPerPage = useCallback(

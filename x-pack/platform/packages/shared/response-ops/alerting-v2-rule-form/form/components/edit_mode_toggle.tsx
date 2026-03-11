@@ -36,7 +36,7 @@ const toggleButtons = [
   },
 ];
 
-export const EditModeToggle: React.FC<EditModeToggleProps> = ({ editMode, onChange, disabled }) => {
+export const EditModeToggle = ({ editMode, onChange, disabled }: EditModeToggleProps) => {
   const handleChange = (optionId: string) => {
     onChange(optionId as EditMode);
   };

@@ -16,7 +16,7 @@ const DEFAULT_NAME = i18n.translate('xpack.alertingV2.ruleForm.defaultRuleName',
   defaultMessage: 'Untitled rule',
 });
 
-export const NameField: React.FC = () => {
+export const NameField = () => {
   const { control } = useFormContext<FormValues>();
   const { euiTheme } = useEuiTheme();
   const editTitleId = useGeneratedHtmlId({ prefix: 'ruleNameInlineEdit' });

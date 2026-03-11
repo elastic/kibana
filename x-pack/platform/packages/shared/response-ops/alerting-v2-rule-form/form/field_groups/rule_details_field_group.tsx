@@ -9,7 +9,7 @@ import React from 'react';
 import { TagsField } from '../fields/tags_field';
 import { DescriptionField } from '../fields/description_field';
 
-export const RuleDetailsFieldGroup: React.FC = () => {
+export const RuleDetailsFieldGroup = () => {
   return (
     <>
       <TagsField />
