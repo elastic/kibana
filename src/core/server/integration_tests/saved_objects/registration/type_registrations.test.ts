@@ -125,6 +125,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',

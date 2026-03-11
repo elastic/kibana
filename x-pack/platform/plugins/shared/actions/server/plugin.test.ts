@@ -59,6 +59,10 @@ function getConfig(overrides = {}) {
     usage: {
       url: 'ca.path',
     },
+    oAuthRateLimit: {
+      authorize: { lookbackWindow: '1h', limit: 100 },
+      callback: { lookbackWindow: '1h', limit: 100 },
+    },
     ...overrides,
   };
 }
@@ -108,6 +112,10 @@ describe('Actions Plugin', () => {
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
         usage: {
           url: 'ca.path',
+        },
+        oAuthRateLimit: {
+          authorize: { lookbackWindow: '1h', limit: 100 },
+          callback: { lookbackWindow: '1h', limit: 100 },
         },
       });
       plugin = new ActionsPlugin(context);
@@ -502,6 +510,10 @@ describe('Actions Plugin', () => {
         microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
         usage: {
           url: 'ca.path',
+        },
+        oAuthRateLimit: {
+          authorize: { lookbackWindow: '1h', limit: 100 },
+          callback: { lookbackWindow: '1h', limit: 100 },
         },
       });
       plugin = new ActionsPlugin(context);

@@ -50,3 +50,5 @@ export {
   type CreateMcpClientFn,
   type CreateMcpClientFnOpts,
 } from './get_mcp_client';
+export { OAuthAuthorizationService } from './oauth_authorization_service';
+export type { OAuthConfig } from './oauth_authorization_service';

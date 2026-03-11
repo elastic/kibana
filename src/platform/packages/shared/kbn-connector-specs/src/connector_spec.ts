@@ -92,6 +92,8 @@ export interface AuthContext {
   sslSettings: SSLSettings;
 }
 
+export type AuthMode = 'per-user' | 'shared';
+
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
@@ -100,6 +102,7 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> {
   authenticate: (ctx: AuthContext, secret: T) => Promise<Record<string, string>>;
   /** Optional transport-specific setup (e.g. TLS client certificates). When absent, consumers apply authenticate() headers. */
   configure?: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  authMode?: AuthMode;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
