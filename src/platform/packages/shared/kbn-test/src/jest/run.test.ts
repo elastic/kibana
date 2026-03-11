@@ -853,9 +853,7 @@ describe('run.ts', () => {
 
     beforeEach(() => {
       mockGetopts = jest.mocked(jest.requireMock('getopts'));
-      mockIsInBuildkite = jest.mocked(
-        jest.requireMock('./buildkite_checkpoint').isInBuildkite
-      );
+      mockIsInBuildkite = jest.mocked(jest.requireMock('./buildkite_checkpoint').isInBuildkite);
       mockIsConfigCompleted = jest.mocked(
         jest.requireMock('./buildkite_checkpoint').isConfigCompleted
       );
@@ -868,11 +866,9 @@ describe('run.ts', () => {
       mockIsInBuildkite.mockReturnValue(true);
       mockIsConfigCompleted.mockResolvedValue(true);
 
-      mockProcessExit = jest
-        .spyOn(process, 'exit')
-        .mockImplementation((() => {
-          throw new Error('process.exit called');
-        }) as () => never);
+      mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((() => {
+        throw new Error('process.exit called');
+      }) as () => never);
     });
 
     afterEach(() => {
@@ -958,9 +954,7 @@ describe('run.ts', () => {
         // Expected: process.exit mock throws
       }
 
-      expect(mockIsConfigCompleted).toHaveBeenCalledWith(
-        'x-pack/plugins/alerting/jest.config.js'
-      );
+      expect(mockIsConfigCompleted).toHaveBeenCalledWith('x-pack/plugins/alerting/jest.config.js');
     });
   });
 });
