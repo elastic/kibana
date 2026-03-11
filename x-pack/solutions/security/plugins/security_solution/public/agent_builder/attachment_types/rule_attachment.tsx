@@ -27,8 +27,17 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { setAiCreatedRule } from '../../detection_engine/common/ai_rule_creation_store';
+import { RULES_PATH } from '../../../common/constants';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
+
+const isOnRuleFormPage = (): boolean => {
+  const { pathname } = window.location;
+  return (
+    (pathname.includes(RULES_PATH) && pathname.includes('/create')) ||
+    (pathname.includes(RULES_PATH) && pathname.includes('/edit'))
+  );
+};
 
 const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   console.log('attachment', attachment);
@@ -117,6 +126,61 @@ const ScheduleDisplay: React.FC<{ interval: string; from?: string }> = ({ interv
   );
 };
 
+const QUERY_LANGUAGE_LABELS: Record<string, string> = {
+  esql: 'ES|QL',
+  eql: 'EQL',
+  kuery: 'KQL',
+  lucene: 'Lucene',
+};
+
+const RULE_TYPE_LABELS: Record<string, string> = {
+  esql: 'ES|QL',
+  eql: 'EQL',
+  query: 'Query',
+  saved_query: 'Saved Query',
+  threshold: 'Threshold',
+  threat_match: 'Indicator Match',
+  machine_learning: 'Machine Learning',
+  new_terms: 'New Terms',
+};
+
+const getCodeBlockLanguage = (rule: RuleResponse): string => {
+  const language = 'language' in rule ? (rule.language as string) : undefined;
+  if (language === 'esql') return 'esql';
+  if (language === 'eql') return 'eql';
+  return 'sql';
+};
+
+const getQueryHeading = (rule: RuleResponse): string => {
+  const language = 'language' in rule ? (rule.language as string) : undefined;
+  const languageLabel = language ? QUERY_LANGUAGE_LABELS[language] : undefined;
+  const typeLabel = RULE_TYPE_LABELS[rule.type] ?? rule.type;
+
+  if (languageLabel) {
+    return `${languageLabel} Detection Logic`;
+  }
+  return `${typeLabel} Detection Logic`;
+};
+
+const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
+  <>
+    <SectionHeading>
+      {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.indexPatternsHeading', {
+        defaultMessage: 'Index Patterns',
+      })}
+    </SectionHeading>
+    <EuiSpacer size="xs" />
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {patterns.map((pattern) => (
+        <EuiFlexItem grow={false} key={pattern}>
+          <EuiBadge color="hollow">{pattern}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+    <EuiSpacer size="s" />
+  </>
+);
+
 const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
   const rule = parseRuleFromAttachment(attachment);
 
@@ -125,11 +189,26 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
   }
 
   const query = 'query' in rule ? rule.query : undefined;
+  const index = 'index' in rule ? (rule.index as string[] | undefined) : undefined;
   const interval = 'interval' in rule ? rule.interval : undefined;
   const from = 'from' in rule ? rule.from : undefined;
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+      {rule.type && (
+        <>
+          <EuiText size="xs">
+            <strong>
+              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.ruleTypeLabel', {
+                defaultMessage: 'Rule Type:',
+              })}
+            </strong>{' '}
+            {RULE_TYPE_LABELS[rule.type] ?? rule.type}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {rule.description && (
         <>
           <SectionHeading>
@@ -146,18 +225,21 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
 
       {query && (
         <>
-          <SectionHeading>
-            {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.queryHeading', {
-              defaultMessage: 'ES|QL Detection Logic',
-            })}
-          </SectionHeading>
+          <SectionHeading>{getQueryHeading(rule)}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" overflowHeight={150}>
+          <EuiCodeBlock
+            language={getCodeBlockLanguage(rule)}
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={150}
+          >
             {query}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
         </>
       )}
+
+      {index && index.length > 0 && <IndexPatterns patterns={index} />}
 
       {rule.tags && rule.tags.length > 0 && (
         <>
@@ -223,19 +305,27 @@ export const createRuleAttachmentDefinition = ({
     if (!rule) {
       return [];
     }
+
+    const onRuleForm = isOnRuleFormPage();
+
     return [
       {
-        label: i18n.translate(
-          'xpack.securitySolution.agentBuilder.ruleAttachment.applyToCreation',
-          { defaultMessage: 'Apply to creation' }
-        ),
+        label: onRuleForm
+          ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.buildRule', {
+              defaultMessage: 'Build rule',
+            })
+          : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.applyToCreation', {
+              defaultMessage: 'Apply to creation',
+            }),
         icon: 'plus',
         type: ActionButtonType.PRIMARY,
         handler: () => {
           setAiCreatedRule(rule);
-          application.navigateToApp('securitySolutionUI', {
-            path: '/rules/create',
-          });
+          if (!onRuleForm) {
+            application.navigateToApp('securitySolutionUI', {
+              path: '/rules/create',
+            });
+          }
         },
       },
     ];

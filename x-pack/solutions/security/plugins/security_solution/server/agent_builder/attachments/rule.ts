@@ -57,12 +57,15 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,
     ],
+
     getAgentDescription: () => {
-      return `A security rule attachment. It may contain an existing rule, a migration rule, or an empty placeholder for a new rule.
+      return `
+      A security rule attachment containing a detection rule as stringified JSON in the "text" field. It may be an existing rule, or an empty placeholder for a new rule.
+      
+      ALWAYS call attachment_read first to get the current rule before any action. 
 
-The create_detection_rule tool automatically updates this attachment with the generated rule data. After calling create_detection_rule, use the attachmentId and version from the tool result to render the attachment inline using <render_attachment id="ATTACHMENT_ID" version="VERSION" /> so the user can see the generated rule fields. You MUST include the version attribute from the tool result. Do NOT call attachment_update or attachment_read for rule attachments — the tool handles this.
-
-If this is a migration rule, it includes both the old rule and the new rule. Extract the query or topic from the rule attachment and use the appropriate tools to provide a response.`;
+      If you need to modify, update, make any change or create rule(ES|QL SIEM detection rule, security detection rule, detecttion rule), use the detection-rule-edit skill from the skills/security/rules directory.
+      Load the detection-rule-edit skill from the skills/security/rules directory.`;
     },
   };
 };
