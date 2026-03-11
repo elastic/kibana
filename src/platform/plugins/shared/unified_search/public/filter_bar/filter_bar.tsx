@@ -42,6 +42,8 @@ export interface Props {
   prepend?: ReactNode;
   /** Array of suggestion abstraction that controls the render of the field */
   suggestionsAbstraction?: SuggestionsAbstraction;
+  /** Index of a newly added filter to highlight with a fade-out animation */
+  highlightedFilterIndex?: number | null;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -71,6 +73,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         hiddenPanelOptions={props.hiddenPanelOptions}
         readOnly={props.isDisabled}
         suggestionsAbstraction={props.suggestionsAbstraction}
+        highlightedFilterIndex={props.highlightedFilterIndex}
       />
     </EuiFlexGroup>
   );

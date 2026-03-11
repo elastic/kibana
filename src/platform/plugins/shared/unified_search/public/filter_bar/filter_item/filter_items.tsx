@@ -8,7 +8,7 @@
  */
 
 import React, { useRef } from 'react';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
@@ -45,7 +45,14 @@ export interface FilterItemsProps {
   hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
   /** Array of suggestion abstraction that controls the render of the field */
   suggestionsAbstraction?: SuggestionsAbstraction;
+  /** Index of a newly added filter to highlight with a fade-out animation */
+  highlightedFilterIndex?: number | null;
 }
+
+const filterHighlight = keyframes`
+  0%   { box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.7); background-color: rgba(255, 204, 0, 0.2); border-radius: 4px; }
+  100% { box-shadow: 0 0 0 0px rgba(255, 204, 0, 0); background-color: transparent; border-radius: 4px; }
+`;
 
 const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps) {
   const groupRef = useRef<HTMLDivElement>(null);
@@ -68,9 +75,15 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
       <EuiFlexItem
         key={i}
         grow={false}
-        css={css`
-          max-width: 100%;
-        `}
+        css={[
+          css`
+            max-width: 100%;
+          `,
+          i === props.highlightedFilterIndex &&
+            css`
+              animation: ${filterHighlight} 2s ease-out forwards;
+            `,
+        ]}
       >
         <FilterItem
           id={`${i}`}

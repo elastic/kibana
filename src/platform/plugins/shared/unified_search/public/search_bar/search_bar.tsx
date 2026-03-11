@@ -13,7 +13,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
 import type { EuiIconProps, WithEuiThemeProps } from '@elastic/eui';
-import { EuiLink, withEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, withEuiTheme } from '@elastic/eui';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
@@ -49,6 +49,7 @@ import { SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
+import { AddFilterPopover } from '../query_string_input/add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
@@ -179,6 +180,8 @@ export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBa
 
 export interface SearchBarState<QT extends Query | AggregateQuery = Query> {
   isFiltersVisible: boolean;
+  addFilterOpen: boolean;
+  highlightedFilterIndex: number | null;
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
@@ -204,6 +207,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
   private queryBarMenuRef = createRef<EuiContextMenuClass>();
+  private highlightTimer: ReturnType<typeof setTimeout> | null = null;
 
   public static getDerivedStateFromProps(
     nextProps: SearchBarProps,
@@ -313,7 +317,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
    want to trigger those on every keypress.
   */
   public state = this.prefillWithInitialDraftState({
-    isFiltersVisible: true,
+    isFiltersVisible: false,
+    addFilterOpen: false,
+    highlightedFilterIndex: null,
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
@@ -341,7 +347,25 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     }
   };
 
+  componentDidUpdate(prevProps: SearchBarProps) {
+    const prevCount = prevProps.filters?.length ?? 0;
+    const nextCount = this.props.filters?.length ?? 0;
+    if (nextCount > prevCount) {
+      const updates: Partial<SearchBarState> = {
+        highlightedFilterIndex: nextCount - 1,
+      };
+      if (!this.state.isFiltersVisible) updates.isFiltersVisible = true;
+      this.setState(updates as SearchBarState);
+
+      if (this.highlightTimer) clearTimeout(this.highlightTimer);
+      this.highlightTimer = setTimeout(() => {
+        this.setState({ highlightedFilterIndex: null });
+      }, 2500);
+    }
+  }
+
   componentWillUnmount() {
+    if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.renderSavedQueryManagement.clear();
   }
 
@@ -476,6 +500,14 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     this.setState({
       openQueryBarMenu: value,
     });
+  };
+
+  public toggleFiltersVisible = () => {
+    this.setState((state) => ({ isFiltersVisible: !state.isFiltersVisible }));
+  };
+
+  public handleDoubleClickFilterToggle = () => {
+    this.setState({ isFiltersVisible: true, addFilterOpen: true });
   };
 
   public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
@@ -713,8 +745,48 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       />
     ) : undefined;
 
+    const euiTheme = this.props.theme.euiTheme;
+
     let filterBar;
     if (this.shouldRenderFilterBar()) {
+      const filterPanelPrepend = (
+        <>
+          <EuiFlexItem grow={false}>{queryBarMenu}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AddFilterPopover
+              indexPatterns={this.props.indexPatterns}
+              filters={this.props.filters!}
+              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+              filtersForSuggestions={this.props.filtersForSuggestions}
+              onFiltersUpdated={this.props.onFiltersUpdated}
+              buttonProps={{ size: 's', display: 'empty' }}
+              isDisabled={this.props.isDisabled}
+              suggestionsAbstraction={this.props.suggestionsAbstraction}
+              isOpen={this.state.addFilterOpen}
+              onClose={() => this.setState({ addFilterOpen: false })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={{
+              alignSelf: 'stretch',
+              display: 'flex',
+              alignItems: 'center',
+              padding: `0 ${euiTheme.size.xs}`,
+            }}
+          >
+            <div
+              css={{
+                width: euiTheme.border.width.thin,
+                height: '100%',
+                backgroundColor: euiTheme.colors.borderBasePlain,
+              }}
+            />
+          </EuiFlexItem>
+          {this.props.prependFilterBar}
+        </>
+      );
+
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
@@ -737,8 +809,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           isDisabled={this.props.isDisabled}
           data-test-subj="unifiedFilterBar"
-          prepend={this.props.prependFilterBar}
+          prepend={filterPanelPrepend}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
+          highlightedFilterIndex={this.state.highlightedFilterIndex}
         />
       );
     }
@@ -756,7 +829,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
-          prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}
+          prepend={!this.props.showFilterBar && this.props.showQueryInput ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -795,6 +868,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
+          isFiltersVisible={this.state.isFiltersVisible}
+          onToggleFiltersVisible={this.toggleFiltersVisible}
+          onDoubleClickFilterToggle={this.handleDoubleClickFilterToggle}
           suggestionsSize={this.props.suggestionsSize}
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}

@@ -160,7 +160,7 @@ function QueryBarMenuComponent({
         onClick={onButtonClick}
         isDisabled={isDisabled}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-        iconType="filter"
+        iconType="controls"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
