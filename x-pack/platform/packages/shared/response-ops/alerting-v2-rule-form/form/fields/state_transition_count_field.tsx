@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { MAX_CONSECUTIVE_BREACHES } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { INVALID_NUMBER_KEYS } from '../utils';
-import { StateTransitionCountInput } from './state_transition_count_input';
+import { NumberInput } from './number_input';
 
 const DEFAULT_PENDING_COUNT = 2;
+
+const validateMax = (val: number) => val <= MAX_CONSECUTIVE_BREACHES;
 
 interface StateTransitionCountFieldProps {
   prependLabel?: string;
@@ -30,12 +31,6 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
       setValue('stateTransition.pendingCount', DEFAULT_PENDING_COUNT);
     }
   }, [getValues, setValue]);
-
-  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (INVALID_NUMBER_KEYS.includes(e.key)) {
-      e.preventDefault();
-    }
-  }, []);
 
   return (
     <Controller
@@ -57,13 +52,18 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
         },
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <StateTransitionCountInput
-          value={value}
+        <NumberInput
+          ref={ref}
+          value={value ?? DEFAULT_PENDING_COUNT}
           onChange={onChange}
-          onKeyDown={onKeyDown}
-          error={error}
-          inputRef={ref}
-          prependLabel={prependLabel}
+          validate={validateMax}
+          min={1}
+          max={MAX_CONSECUTIVE_BREACHES}
+          step={1}
+          isInvalid={!!error}
+          data-test-subj="stateTransitionCountInput"
+          fullWidth
+          prepend={prependLabel ? [prependLabel] : undefined}
         />
       )}
     />

@@ -7,54 +7,44 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  StateTransitionCountInput,
-  type StateTransitionCountInputProps,
-} from './state_transition_count_input';
+import { NumberInput, type NumberInputProps } from './number_input';
 
-const defaultProps: StateTransitionCountInputProps = {
+const defaultProps: NumberInputProps = {
   value: 5,
   onChange: jest.fn(),
-  onKeyDown: jest.fn(),
-  inputRef: jest.fn(),
+  'data-test-subj': 'testNumberInput',
 };
 
-const renderInput = (overrides: Partial<StateTransitionCountInputProps> = {}) => {
+const renderInput = (overrides: Partial<NumberInputProps> = {}) => {
   const props = { ...defaultProps, ...overrides, onChange: jest.fn() };
-  const result = render(<StateTransitionCountInput {...props} />);
+  const result = render(<NumberInput {...props} />);
   return { ...result, onChange: props.onChange };
 };
 
-describe('StateTransitionCountInput', () => {
+describe('NumberInput', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('rendering', () => {
     it('renders the input with the provided value', () => {
       renderInput({ value: 7 });
-      expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(7);
-    });
-
-    it('falls back to default count (2) when value is undefined', () => {
-      renderInput({ value: undefined });
-      expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(2);
+      expect(screen.getByTestId('testNumberInput')).toHaveValue(7);
     });
 
     it('renders with a prepend label when provided', () => {
-      renderInput({ prependLabel: 'Count' });
+      renderInput({ prepend: ['Count'] });
       expect(screen.getByText('Count')).toBeInTheDocument();
     });
 
-    it('shows error state when error is provided', () => {
-      renderInput({ error: { message: 'Required' } });
-      const input = screen.getByTestId('stateTransitionCountInput');
-      expect(input).toBeInvalid();
+    it('shows invalid state when isInvalid is true', () => {
+      renderInput({ isInvalid: true });
+      expect(screen.getByTestId('testNumberInput')).toBeInvalid();
     });
   });
 
   describe('number input changes', () => {
     it('calls onChange with a valid positive integer', () => {
       const { onChange } = renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '10' } });
 
@@ -63,7 +53,7 @@ describe('StateTransitionCountInput', () => {
 
     it('does not call onChange for an empty value but updates the display', () => {
       const { onChange } = renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '' } });
 
@@ -73,7 +63,7 @@ describe('StateTransitionCountInput', () => {
 
     it('does not call onChange for zero', () => {
       const { onChange } = renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '0' } });
 
@@ -82,7 +72,7 @@ describe('StateTransitionCountInput', () => {
 
     it('allows clearing and retyping a new value', () => {
       const { onChange } = renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '' } });
       expect(onChange).not.toHaveBeenCalled();
@@ -90,21 +80,38 @@ describe('StateTransitionCountInput', () => {
       fireEvent.change(input, { target: { value: '3' } });
       expect(onChange).toHaveBeenCalledWith(3);
     });
+  });
 
-    it('does not call onChange when value exceeds MAX_CONSECUTIVE_BREACHES', () => {
-      const { onChange } = renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+  describe('validate prop', () => {
+    it('does not call onChange when validate returns false', () => {
+      const { onChange } = renderInput({
+        value: 5,
+        validate: (val) => val <= 100,
+      });
+      const input = screen.getByTestId('testNumberInput');
 
-      fireEvent.change(input, { target: { value: '1001' } });
+      fireEvent.change(input, { target: { value: '101' } });
 
       expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('calls onChange when validate returns true', () => {
+      const { onChange } = renderInput({
+        value: 5,
+        validate: (val) => val <= 100,
+      });
+      const input = screen.getByTestId('testNumberInput');
+
+      fireEvent.change(input, { target: { value: '50' } });
+
+      expect(onChange).toHaveBeenCalledWith(50);
     });
   });
 
   describe('blur behaviour', () => {
     it('restores the last valid value on blur when the field is empty', () => {
       renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '' } });
       expect(input).toHaveValue(null);
@@ -115,12 +122,38 @@ describe('StateTransitionCountInput', () => {
 
     it('does not change the value on blur when the field has a valid value', () => {
       renderInput({ value: 5 });
-      const input = screen.getByTestId('stateTransitionCountInput');
+      const input = screen.getByTestId('testNumberInput');
 
       fireEvent.change(input, { target: { value: '12' } });
       fireEvent.blur(input);
 
       expect(input).toHaveValue(12);
+    });
+  });
+
+  describe('key filtering', () => {
+    it.each(['-', '+', '.', 'e', 'E'])('prevents typing "%s"', (key) => {
+      renderInput({ value: 5 });
+      const input = screen.getByTestId('testNumberInput');
+
+      const event = new KeyboardEvent('keydown', { key, bubbles: true });
+      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+
+      input.dispatchEvent(event);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('allows typing normal number keys', () => {
+      renderInput({ value: 5 });
+      const input = screen.getByTestId('testNumberInput');
+
+      const event = new KeyboardEvent('keydown', { key: '3', bubbles: true });
+      const preventDefaultSpy = jest.spyOn(event, 'preventDefault');
+
+      input.dispatchEvent(event);
+
+      expect(preventDefaultSpy).not.toHaveBeenCalled();
     });
   });
 });

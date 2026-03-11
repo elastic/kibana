@@ -12,7 +12,7 @@ import { createFormWrapper } from '../../test_utils';
 
 describe('StateTransitionTimeframeField', () => {
   it('renders the breached-for-duration timeframe input', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
@@ -21,7 +21,7 @@ describe('StateTransitionTimeframeField', () => {
   });
 
   it('defaults state transition timeframe to 2 minutes', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
@@ -35,7 +35,7 @@ describe('StateTransitionTimeframeField', () => {
   });
 
   it('accepts a positive number and unit for state transition timeframe', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({
         kind: 'alert',
         stateTransition: { pendingTimeframe: '10m' },
@@ -50,7 +50,7 @@ describe('StateTransitionTimeframeField', () => {
   });
 
   it('updates state transition timeframe unit when changed', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({
         kind: 'alert',
         stateTransition: { pendingTimeframe: '5m' },
@@ -63,7 +63,7 @@ describe('StateTransitionTimeframeField', () => {
   });
 
   it('keeps default number when only unit changes', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({ kind: 'alert' }),
     });
 
@@ -79,7 +79,7 @@ describe('StateTransitionTimeframeField', () => {
   });
 
   it('renders with pre-filled state transition timeframe from form state', () => {
-    render(<StateTransitionTimeframeField />, {
+    render(<StateTransitionTimeframeField numberPrependLabel="Active for" />, {
       wrapper: createFormWrapper({
         kind: 'alert',
         stateTransition: {
@@ -90,52 +90,5 @@ describe('StateTransitionTimeframeField', () => {
 
     expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toHaveValue(15);
     expect(screen.getByTestId('stateTransitionTimeframeUnitInput')).toHaveValue('m');
-  });
-
-  it('allows clearing the number input without losing focus', () => {
-    render(<StateTransitionTimeframeField />, {
-      wrapper: createFormWrapper({
-        kind: 'alert',
-        stateTransition: { pendingTimeframe: '5m' },
-      }),
-    });
-
-    const numberInput = screen.getByTestId('stateTransitionTimeframeNumberInput');
-    fireEvent.change(numberInput, { target: { value: '' } });
-
-    expect(numberInput).toHaveValue(null);
-  });
-
-  it('restores the last valid value on blur when the field is empty', () => {
-    render(<StateTransitionTimeframeField />, {
-      wrapper: createFormWrapper({
-        kind: 'alert',
-        stateTransition: { pendingTimeframe: '5m' },
-      }),
-    });
-
-    const numberInput = screen.getByTestId('stateTransitionTimeframeNumberInput');
-    fireEvent.change(numberInput, { target: { value: '' } });
-    expect(numberInput).toHaveValue(null);
-
-    fireEvent.blur(numberInput);
-    expect(numberInput).toHaveValue(5);
-  });
-
-  it('allows clearing and retyping a new number value', () => {
-    render(<StateTransitionTimeframeField />, {
-      wrapper: createFormWrapper({
-        kind: 'alert',
-        stateTransition: { pendingTimeframe: '5m' },
-      }),
-    });
-
-    const numberInput = screen.getByTestId('stateTransitionTimeframeNumberInput');
-
-    fireEvent.change(numberInput, { target: { value: '' } });
-    expect(numberInput).toHaveValue(null);
-
-    fireEvent.change(numberInput, { target: { value: '10' } });
-    expect(numberInput).toHaveValue(10);
   });
 });
