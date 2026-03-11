@@ -101,9 +101,13 @@ describe('SloOverviewPanelContent', () => {
     expect(getByTestId(container, 'group-slo-view')).toBeInTheDocument();
   });
 
-  it('renders group overview panel with undefined groupFilters (uses defaults)', () => {
+  it('renders group overview panel with default groupFilters', () => {
     const { container } = render(
-      <SloOverviewPanelContent {...defaultProps} overviewMode="groups" groupFilters={undefined} />
+      <SloOverviewPanelContent
+        {...defaultProps}
+        overviewMode="groups"
+        groupFilters={{ group_by: 'status' }}
+      />
     );
 
     expect(getByTestId(container, 'sloGroupOverviewPanel')).toBeInTheDocument();
