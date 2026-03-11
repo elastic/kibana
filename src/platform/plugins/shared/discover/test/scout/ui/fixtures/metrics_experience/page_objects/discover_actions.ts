@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class DiscoverActions {
-  constructor(private readonly page: ScoutPage) {}
-
-  private async waitUntilSearchingHasFinished() {
-    await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
-      state: 'hidden',
-      timeout: 30000,
-    });
-  }
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly discover: PageObjects['discover']
+  ) {}
 
   async runRecommendedEsqlQuery(queryLabel: string) {
     await this.openRecommendedQueriesPanel();
@@ -34,7 +30,7 @@ export class DiscoverActions {
 
     await expect(queryOption).toBeVisible({ timeout: 30_000 });
     await queryOption.click();
-    await this.waitUntilSearchingHasFinished();
+    await this.discover.waitUntilSearchingHasFinished();
   }
 
   async openRecommendedQueriesPanel() {
@@ -61,20 +57,19 @@ export class DiscoverActions {
       await sidebarToggleButton.click();
     }
 
-    await this.page.testSubj.waitForSelector(`field-${field}`);
-    const fieldListItem = this.page.testSubj.locator(`field-${field}`);
-    await expect(fieldListItem).toBeVisible();
     const addBreakdownField = this.page.testSubj.locator(
       `fieldPopoverHeader_addBreakdownField-${field}`
     );
 
+    // Open the field popover if it's not already visible. Re-query the field
+    // locator each time to avoid stale element references after sidebar re-renders.
+    await expect(this.page.testSubj.locator(`field-${field}`)).toBeVisible();
     if (!(await addBreakdownField.isVisible())) {
-      await fieldListItem.scrollIntoViewIfNeeded();
-      await fieldListItem.click();
+      await this.page.testSubj.locator(`field-${field}`).click();
     }
 
     await expect(addBreakdownField).toBeVisible();
     await addBreakdownField.click();
-    await this.waitUntilSearchingHasFinished();
+    await this.discover.waitUntilSearchingHasFinished();
   }
 }
