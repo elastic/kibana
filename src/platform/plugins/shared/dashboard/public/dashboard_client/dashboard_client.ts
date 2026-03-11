@@ -8,6 +8,7 @@
  */
 
 import { LRUCache } from 'lru-cache';
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
@@ -34,6 +35,9 @@ const cache = new LRUCache<string, DashboardReadResponseBody>({
   ttl: CACHE_TTL,
 });
 
+const buildDashboardPath = (id: string) => buildPath(`${DASHBOARD_API_PATH}/{id}`, { id });
+const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PATH}/{id}`, { id });
+
 export const dashboardClient = {
   create: async (
     dashboardState: DashboardState,
@@ -49,7 +53,7 @@ export const dashboardClient = {
   },
   delete: async (id: string): Promise<DeleteResult> => {
     cache.delete(id);
-    return coreServices.http.delete(`${DASHBOARD_API_PATH}/${id}`, {
+    return coreServices.http.delete(buildDashboardPath(id), {
       version: DASHBOARD_API_VERSION,
     });
   },
@@ -59,7 +63,7 @@ export const dashboardClient = {
     }
 
     const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`${DASHBOARD_APP_API_PATH}/${id}`, {
+      .get<DashboardReadResponseBody>(buildDashboardAppPath(id), {
         version: DASHBOARD_API_VERSION,
       })
       .catch((e) => {
@@ -93,7 +97,7 @@ export const dashboardClient = {
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `${DASHBOARD_APP_API_PATH}/${id}`,
+      buildDashboardAppPath(id),
       {
         version: DASHBOARD_API_VERSION,
         body: JSON.stringify(dashboardState),
