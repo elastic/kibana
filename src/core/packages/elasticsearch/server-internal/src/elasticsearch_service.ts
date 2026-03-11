@@ -32,6 +32,7 @@ import {
 } from '@kbn/core-elasticsearch-client-server-internal';
 
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -54,6 +55,7 @@ export interface SetupDeps {
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
   security: InternalSecurityServiceSetup;
+  loggingSystem: Pick<ILoggingSystem, 'setGlobalContext'>;
 }
 
 /** @internal */
@@ -145,6 +147,9 @@ export class ElasticsearchService
     this.esNodesCompatibility$ = esNodesCompatibility$;
 
     this.clusterInfo$ = getClusterInfo$(this.client.asInternalUser).pipe(takeUntil(this.stop$));
+    this.clusterInfo$.subscribe(({ cluster_uuid }) =>
+      deps.loggingSystem.setGlobalContext({ service: { id: cluster_uuid } })
+    );
     registerAnalyticsContextProvider(deps.analytics, this.clusterInfo$);
 
     return {
