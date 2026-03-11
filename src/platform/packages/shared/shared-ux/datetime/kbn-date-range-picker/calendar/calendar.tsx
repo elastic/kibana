@@ -38,11 +38,11 @@ interface CalendarProps {
    * First day of the week: 0 for Sunday, 1 for Monday.
    * @default 0
    */
-  weekStartsOn?: 0 | 1;
+  firstDayOfWeek?: 0 | 1;
 }
 
 /** Infinite-scroll calendar built on react-virtuoso. */
-export function Calendar({ range, onRangeChange, weekStartsOn }: CalendarProps) {
+export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarStyles(euiThemeContext);
 
@@ -99,11 +99,11 @@ export function Calendar({ range, onRangeChange, weekStartsOn }: CalendarProps) 
           monthIndex={month.getMonth()}
           range={range}
           setRange={stableOnRangeChange}
-          weekStartsOn={weekStartsOn}
+          firstDayOfWeek={firstDayOfWeek}
         />
       );
     },
-    [range, stableOnRangeChange, weekStartsOn]
+    [range, stableOnRangeChange, firstDayOfWeek]
   );
 
   return (

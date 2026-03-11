@@ -207,7 +207,7 @@ export function CalendarPanel() {
         <Calendar
           range={range}
           onRangeChange={handleRangeChange}
-          weekStartsOn={calendarOptions?.fdow}
+          firstDayOfWeek={calendarOptions?.firstDayOfWeek}
         />
       </PanelBody>
       <PanelFooter>

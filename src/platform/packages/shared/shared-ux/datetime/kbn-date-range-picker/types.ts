@@ -39,7 +39,7 @@ export interface CalendarOptions {
    * First day of the week: 0 for Sunday, 1 for Monday.
    * @default 0
    */
-  fdow?: 0 | 1;
+  firstDayOfWeek?: 0 | 1;
 }
 
 export interface TimeRangeTransformOptions {

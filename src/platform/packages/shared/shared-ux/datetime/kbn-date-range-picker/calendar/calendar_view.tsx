@@ -27,7 +27,7 @@ interface CalendarViewProps {
    * First day of the week: 0 for Sunday, 1 for Monday.
    * @default 0
    */
-  weekStartsOn?: 0 | 1;
+  firstDayOfWeek?: 0 | 1;
 }
 
 /**
@@ -38,7 +38,7 @@ export const CalendarView = function CalendarView({
   monthIndex,
   range,
   setRange,
-  weekStartsOn,
+  firstDayOfWeek,
 }: CalendarViewProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarViewStyles(euiThemeContext);
@@ -53,7 +53,7 @@ export const CalendarView = function CalendarView({
       onSelect={setRange}
       required={false}
       selected={range}
-      weekStartsOn={weekStartsOn}
+      weekStartsOn={firstDayOfWeek}
     />
   );
 };
