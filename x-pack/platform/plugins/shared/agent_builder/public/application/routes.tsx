@@ -18,6 +18,7 @@ import { AgentBuilderBulkImportMcpToolsPage } from './pages/bulk_import_mcp_tool
 import { AgentBuilderSkillsPage } from './pages/skills';
 import { AgentBuilderSkillCreatePage } from './pages/skill_create';
 import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
+import { AgentBuilderPluginsPage } from './pages/plugins';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
@@ -67,6 +68,9 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
             </Route>,
             <Route key="skills-list" path="/skills">
               <AgentBuilderSkillsPage />
+            </Route>,
+            <Route key="plugins-list" path="/plugins">
+              <AgentBuilderPluginsPage />
             </Route>,
           ]
         : null}

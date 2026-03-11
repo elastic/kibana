@@ -621,6 +621,90 @@ export const labels = {
       defaultMessage: 'Select tools that this skill can use.',
     }),
   },
+  plugins: {
+    title: i18n.translate('xpack.agentBuilder.plugins.title', { defaultMessage: 'Plugins' }),
+    pluginsTableCaption: (pluginsCount: number) =>
+      i18n.translate('xpack.agentBuilder.plugins.pluginsTableCaption', {
+        defaultMessage: 'Installed plugins: {pluginsCount} plugins',
+        values: { pluginsCount },
+      }),
+    nameLabel: i18n.translate('xpack.agentBuilder.plugins.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    descriptionLabel: i18n.translate('xpack.agentBuilder.plugins.descriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    versionLabel: i18n.translate('xpack.agentBuilder.plugins.versionLabel', {
+      defaultMessage: 'Version',
+    }),
+    skillsLabel: i18n.translate('xpack.agentBuilder.plugins.skillsLabel', {
+      defaultMessage: 'Skills',
+    }),
+    sourceLabel: i18n.translate('xpack.agentBuilder.plugins.sourceLabel', {
+      defaultMessage: 'Source',
+    }),
+    searchPluginsPlaceholder: i18n.translate(
+      'xpack.agentBuilder.plugins.searchPluginsPlaceholder',
+      {
+        defaultMessage: 'Search',
+      }
+    ),
+    noPluginsMatchMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMatchMessage', {
+      defaultMessage: 'No plugins match your search.',
+    }),
+    noPluginsMessage: i18n.translate('xpack.agentBuilder.plugins.noPluginsMessage', {
+      defaultMessage: 'No plugins installed yet.',
+    }),
+    listPluginsErrorMessage: i18n.translate('xpack.agentBuilder.plugins.listPluginsErrorMessage', {
+      defaultMessage: 'Failed to fetch plugins',
+    }),
+    loadPluginsErrorToast: i18n.translate('xpack.agentBuilder.plugins.loadPluginsErrorToast', {
+      defaultMessage: 'Unable to load plugins',
+    }),
+    deletePluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" deleted',
+        values: { pluginName },
+      }),
+    deletePluginErrorToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginErrorToast', {
+        defaultMessage: 'Unable to delete plugin "{pluginName}"',
+        values: { pluginName },
+      }),
+    deletePluginTitle: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.deletePluginTitle', {
+        defaultMessage: 'Delete {pluginName}?',
+        values: { pluginName },
+      }),
+    deletePluginCancelButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginCancelButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    deletePluginConfirmButton: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginConfirmButton',
+      {
+        defaultMessage: 'Delete plugin',
+      }
+    ),
+    deletePluginConfirmationText: i18n.translate(
+      'xpack.agentBuilder.plugins.deletePluginConfirmationText',
+      {
+        defaultMessage:
+          'This will permanently remove the plugin and all its managed skills. This cannot be undone.',
+      }
+    ),
+    pluginContextMenuButtonLabel: i18n.translate(
+      'xpack.agentBuilder.plugins.pluginContextMenuButtonLabel',
+      {
+        defaultMessage: 'Plugin context menu',
+      }
+    ),
+    deletePluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.deletePluginButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+  },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
     newAgent: i18n.translate('xpack.agentBuilder.agents.new.title', {
