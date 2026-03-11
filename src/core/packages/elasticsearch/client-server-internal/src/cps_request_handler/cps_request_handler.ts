@@ -143,8 +143,8 @@ export function getCpsRequestHandler(
 
       if (criticalReasons.includes(bypassReason)) {
         requestWithoutRoutingCounter.add(1, {
-          api_name: (name ?? 'unknown') as string,
-          bypass_reason: bypassReason,
+          'db.operation.name': (name ?? 'unknown') as string,
+          'kibana.cps.routing.bypass_reason': bypassReason,
         });
 
         log.debug('CPS routing bypassed', {

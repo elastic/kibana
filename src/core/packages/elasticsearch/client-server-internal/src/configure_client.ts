@@ -100,23 +100,23 @@ function instrumentCpsMetrics({ client }: { client: Client }) {
 
     // Metric 1: Global aggregations
     requestCountGlobalCounter.add(1, {
-      routing_type: routingType,
-      api_name: apiName,
-      is_cps_enabled: String(cpsEnabled),
-      http_status: String(httpStatus),
+      'kibana.cps.enabled': cpsEnabled,
+      'kibana.cps.routing.type': routingType,
+      'db.operation.name': apiName,
+      'http.response.status_code': httpStatus,
     });
 
     // Metric 2: Per-project (only for CPS-routed requests)
     if (routingType === 'injected' || routingType === 'explicit') {
       requestsByProjectCounter.add(1, {
-        project_id: projectId,
-        http_status: String(httpStatus),
+        'kibana.cps.routing.target': projectId,
+        'http.response.status_code': httpStatus,
       });
 
       // Metric 3: Adoption (only for CPS-routed requests)
       adoptionCounter.add(1, {
-        project_id: projectId,
-        region,
+        'kibana.cps.routing.target': projectId,
+        'kibana.cps.region': region,
       });
     }
   });
