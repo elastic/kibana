@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-//
-// Do not change constant value - part of public REST APIs
-//
-export const SLO_BURN_RATE_EMBEDDABLE_ID = 'slo_burn_rate';
-
+export { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn_rate/constants';
 export const ADD_BURN_RATE_ACTION_ID = 'CREATE_SLO_BURN_RATE_EMBEDDABLE';

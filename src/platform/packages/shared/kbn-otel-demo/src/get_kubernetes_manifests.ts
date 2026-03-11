@@ -82,7 +82,7 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     rules: [
       {
@@ -108,12 +108,12 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     subjects: [
       {
