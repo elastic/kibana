@@ -78,7 +78,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         placeholder: 'your-domain',
         helpText: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.helpText', {
           defaultMessage:
-            'The subdomain for your Confluence Cloud site (e.g. your-domain for https://your-domain.atlassian.net)',
+            'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
         }),
       }),
   }),
