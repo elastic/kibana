@@ -360,4 +360,58 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
+
+  private get esqlMenuPopover(): Locator {
+    return this.page.testSubj.locator('esql-menu-popover');
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+    await menuPopover.waitFor({ state: 'visible' });
+
+    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
+    if (await panelTitleButton.isVisible()) {
+      return;
+    }
+
+    const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
+    await recommendedQueriesButton.waitFor({ state: 'visible' });
+    await recommendedQueriesButton.click();
+    await panelTitleButton.waitFor({ state: 'visible' });
+  }
+
+  async runRecommendedEsqlQuery(queryLabel: string) {
+    await this.openRecommendedQueriesPanel();
+
+    const queryOption = this.esqlMenuPopover.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+
+    await queryOption.waitFor({ state: 'visible' });
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.waitUntilFieldListHasCountOfFields();
+    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+    await fieldLocator.waitFor({ state: 'visible' });
+    await fieldLocator.click();
+
+    const breakdownButton = this.page.testSubj.locator(
+      `fieldPopoverHeader_addBreakdownField-${field}`
+    );
+    await breakdownButton.waitFor({ state: 'visible' });
+    await breakdownButton.click();
+    await this.waitUntilSearchingHasFinished();
+  }
 }

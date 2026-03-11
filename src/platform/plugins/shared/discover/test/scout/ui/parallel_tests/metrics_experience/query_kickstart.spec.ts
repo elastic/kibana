@@ -35,7 +35,7 @@ spaceTest.describe(
     spaceTest(
       'should show Search all metrics in recommended queries',
       async ({ pageObjects, page }) => {
-        const { discover, discoverActions } = pageObjects;
+        const { discover } = pageObjects;
 
         await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
           await discover.writeAndSubmitEsqlQuery(
@@ -44,7 +44,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify Search all metrics is available and apply it', async () => {
-          await discoverActions.runRecommendedEsqlQuery(
+          await discover.runRecommendedEsqlQuery(
             testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
           );
         });

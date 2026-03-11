@@ -35,14 +35,14 @@ spaceTest.describe(
     spaceTest(
       'should propagate field list breakdown selection to toolbar selector',
       async ({ pageObjects }) => {
-        const { discover, discoverActions, metricsExperience } = pageObjects;
+        const { discover, metricsExperience } = pageObjects;
         const breakdownField = testData.METRICS_DIMENSION_FIELDS.DEFAULT_BREAKDOWN;
 
         await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         await expect(metricsExperience.grid).toBeVisible();
 
         await spaceTest.step('set breakdown by dimension from field list', async () => {
-          await discoverActions.addBreakdownFieldFromSidebar(breakdownField);
+          await discover.addBreakdownFieldFromSidebar(breakdownField);
         });
 
         await spaceTest.step('show selected breakdown in toolbar selector', async () => {
