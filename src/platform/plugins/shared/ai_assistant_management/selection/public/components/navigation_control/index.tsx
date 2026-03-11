@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiModal,
   EuiOverlayMask,
@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { isMac } from '@kbn/shared-ux-utility';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
@@ -64,10 +65,30 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const [selectedType, setSelectedType] = useState<AIExperienceSelection>(AIAssistantType.Default);
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const onModalClose = useCallback(() => {
+    const shouldRestoreFocus = document.activeElement?.matches(':focus-visible');
     setModalOpen(false);
     setSelectedType(AIAssistantType.Default);
+    if (shouldRestoreFocus) {
+      requestAnimationFrame(() => buttonRef.current?.focus());
+    }
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
+      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+        event.preventDefault();
+        setModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   const modalTitleId = useGeneratedHtmlId({ prefix: 'aiAssistantModalTitle' });
 
   const applySelection = useCallback(async () => {
@@ -114,13 +135,28 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       defaultMessage: 'Open AI Assistant',
     }
   );
+  const shortcutLabel = i18n.translate(
+    'aiAssistantManagementSelection.navControl.keyboardShortcutTooltip',
+    {
+      values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+      defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+    }
+  );
 
+  const fullTooltipContent = (
+    <div style={{ textAlign: 'center' }}>
+      <span>{openAIAssistantLabel}</span>
+      <br />
+      <span>{shortcutLabel}</span>
+    </div>
+  );
   const AiAssistantHeaderButton = () => {
     return (
       <>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={openAIAssistantLabel}>
+          <EuiToolTip content={shortcutLabel}>
             <AiButton
+              buttonRef={buttonRef}
               onClick={() => setModalOpen(true)}
               iconType="aiAssistantLogo"
               variant="base"
@@ -134,8 +170,9 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
           </EuiToolTip>
         </EuiShowFor>
         <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip content={openAIAssistantLabel}>
+          <EuiToolTip content={fullTooltipContent}>
             <AiButton
+              buttonRef={buttonRef}
               iconOnly
               iconType="aiAssistantLogo"
               onClick={() => setModalOpen(true)}

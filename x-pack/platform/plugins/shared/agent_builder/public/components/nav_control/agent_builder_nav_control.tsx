@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +28,27 @@ export function AgentBuilderNavControl() {
   } = useKibana<AgentBuilderNavControlServices>();
 
   const { show: hasShowPrivilege } = useUiPrivileges();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<EuiToolTip>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const sidebarOptions = useCallback(
+    () => ({
+      onClose: () => {
+        setIsSidebarOpen(false);
+        if (document.activeElement?.matches(':focus-visible')) {
+          buttonRef.current?.focus();
+        }
+      },
+    }),
+    []
+  );
 
   const toggleSidebar = useCallback(() => {
-    agentBuilder.toggleConversationFlyout();
-  }, [agentBuilder]);
+    tooltipRef.current?.hideToolTip();
+    agentBuilder.toggleConversationFlyout(sidebarOptions());
+    setIsSidebarOpen((prev) => !prev);
+  }, [agentBuilder, sidebarOptions]);
 
   useEffect(() => {
     if (!hasShowPrivilege) {
@@ -40,7 +57,8 @@ export function AgentBuilderNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        agentBuilder.openConversationFlyout();
+        agentBuilder.openConversationFlyout(sidebarOptions());
+        setIsSidebarOpen(true);
         aiAssistantManagementSelection.completeOpenChat();
       }
     });
@@ -48,7 +66,7 @@ export function AgentBuilderNavControl() {
     return () => {
       openChatSubscription.unsubscribe();
     };
-  }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection]);
+  }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection, sidebarOptions]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -64,24 +82,27 @@ export function AgentBuilderNavControl() {
     return null;
   }
 
-  const tooltipContent = (
+  const fullTooltipContent = (
     <div style={{ textAlign: 'center' }}>
       <span>{buttonLabel}</span>
       <br />
       <span>{shortcutLabel}</span>
     </div>
   );
+
+  const variant = isSidebarOpen ? 'accent' : 'base';
+
   const AgentBuilderButton = () => {
     return (
       <>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={tooltipContent}>
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
             <AiButton
-              variant="base"
+              buttonRef={buttonRef}
+              variant={variant}
               size="s"
               iconType="productAgent"
               onClick={toggleSidebar}
-              aria-label={buttonLabel}
               data-test-subj="AgentBuilderNavControlButton"
             >
               <FormattedMessage
@@ -93,10 +114,11 @@ export function AgentBuilderNavControl() {
         </EuiShowFor>
 
         <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip content={tooltipContent}>
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
             <AiButton
+              buttonRef={buttonRef}
               iconOnly
-              variant="base"
+              variant={variant}
               size="s"
               iconType="productAgent"
               onClick={toggleSidebar}
@@ -108,6 +130,7 @@ export function AgentBuilderNavControl() {
       </>
     );
   };
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
@@ -125,5 +148,5 @@ const buttonLabel = i18n.translate(
 
 const shortcutLabel = i18n.translate('xpack.agentBuilder.navControl.keyboardShortcutTooltip', {
   values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
-  defaultMessage: '(Keyboard shortcut {keyboardShortcut})',
+  defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
 });

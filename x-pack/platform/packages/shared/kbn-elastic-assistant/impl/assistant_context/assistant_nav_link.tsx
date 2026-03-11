@@ -5,48 +5,54 @@
  * 2.0.
  */
 
-import type { ComponentProps, FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip } from '@elastic/eui';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useAssistantContext } from '../..';
 
-const TOOLTIP_CONTENT = i18n.translate(
+const SHORTCUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
   {
     values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
   }
 );
+
+const OPEN_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.openAIAssistantLabel', {
+  defaultMessage: 'Open the AI Assistant',
+});
+
 const LINK_LABEL = i18n.translate('xpack.elasticAssistant.assistantContext.assistantNavLink', {
   defaultMessage: 'AI Assistant',
 });
 
+const FULL_TOOLTIP_CONTENT = (
+  <div style={{ textAlign: 'center' }}>
+    <span>{OPEN_LABEL}</span>
+    <br />
+    <span>{SHORTCUT_LABEL}</span>
+  </div>
+);
+
 export const AssistantNavLink: FC = () => {
   const {
-    chrome,
     showAssistantOverlay,
     assistantAvailability,
     openChatTrigger$,
     completeOpenChat,
+    isOverlayOpen,
   } = useAssistantContext();
-  const [chromeStyle, setChromeStyle] = useState<ChromeStyle | undefined>(undefined);
+  const tooltipRef = useRef<EuiToolTip>(null);
 
-  // useObserverable would change the order of re-renders that are tested against closely.
-  useEffect(() => {
-    const s = chrome.getChromeStyle$().subscribe(setChromeStyle);
-    return () => s.unsubscribe();
-  }, [chrome]);
-
-  const showOverlay = useCallback(
-    () => showAssistantOverlay({ showOverlay: true }),
-    [showAssistantOverlay]
-  );
+  const showOverlay = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
+    showAssistantOverlay({ showOverlay: true });
+  }, [showAssistantOverlay]);
 
   useEffect(() => {
     if (!openChatTrigger$) return;
@@ -59,36 +65,41 @@ export const AssistantNavLink: FC = () => {
     return () => sub.unsubscribe();
   }, [completeOpenChat, openChatTrigger$, showOverlay]);
 
-  if (!assistantAvailability.hasAssistantPrivilege || !chromeStyle) {
+  if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
 
-  const AiAssistantButton: React.FC<
-    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
-  > = (props) => (
-    <>
-      <EuiShowFor sizes={['m', 'l', 'xl']}>
-        {chromeStyle === 'project' ? (
-          <EuiButtonEmpty {...props} data-test-subj="assistantNavLink" />
-        ) : (
-          <EuiButton {...props} data-test-subj="assistantNavLink" />
-        )}
-      </EuiShowFor>
-      <EuiShowFor sizes={['xs', 's']}>
-        <EuiButtonIcon
-          {...props}
-          data-test-subj="assistantNavLinkButtonIcon"
-          display={chromeStyle === 'project' ? 'empty' : 'base'}
-        />
-      </EuiShowFor>
-    </>
-  );
+  const variant = isOverlayOpen ? 'accent' : 'base';
 
   return (
-    <EuiToolTip content={TOOLTIP_CONTENT}>
-      <AiAssistantButton onClick={showOverlay} color="primary" size="s" iconType={AssistantIcon}>
-        {LINK_LABEL}
-      </AiAssistantButton>
-    </EuiToolTip>
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef}>
+          <AiButton
+            variant={variant}
+            size="s"
+            iconType="aiAssistantLogo"
+            onClick={showOverlay}
+            data-test-subj="assistantNavLink"
+          >
+            {LINK_LABEL}
+          </AiButton>
+        </EuiToolTip>
+      </EuiShowFor>
+
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiToolTip content={FULL_TOOLTIP_CONTENT} ref={tooltipRef}>
+          <AiButton
+            iconOnly
+            variant={variant}
+            size="s"
+            iconType="aiAssistantLogo"
+            onClick={showOverlay}
+            aria-label={OPEN_LABEL}
+            data-test-subj="assistantNavLinkButtonIcon"
+          />
+        </EuiToolTip>
+      </EuiShowFor>
+    </>
   );
 };
