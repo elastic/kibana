@@ -197,6 +197,12 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
 
+    /**
+     * Reinitializes dashboard state in-place from a full {@link DashboardState}
+     * payload, reusing the same manager-level reset flow used by dashboard reset.
+     */
+    reinitialize: (state: DashboardState) => void;
+
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     publishFilters: () => void;

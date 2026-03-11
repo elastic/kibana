@@ -7,6 +7,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { setDashboardAgentService } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -24,6 +26,7 @@ export class DashboardAgentPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
+  private dashboardApi?: DashboardApi;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -45,6 +48,7 @@ export class DashboardAgentPlugin
         attachments: plugins.agentBuilder.attachments,
         dashboardLocator,
         unifiedSearch: plugins.unifiedSearch,
+        getAttachedDashboardApi: () => this.dashboardApi,
         doesSavedDashboardExist: async (dashboardId: string) => {
           const findDashboardsService = await findDashboardsServicePromise;
           const result = await findDashboardsService.findById(dashboardId);
@@ -53,10 +57,18 @@ export class DashboardAgentPlugin
       });
     });
 
-    return {};
+    const service = {
+      attachDashboard: (dashboardApi: DashboardApi | undefined) => {
+        this.dashboardApi = dashboardApi;
+      },
+    };
+    setDashboardAgentService(service);
+    return service;
   }
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.dashboardApi = undefined;
+    setDashboardAgentService(undefined);
   }
 }

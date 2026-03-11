@@ -11,19 +11,22 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
+import { getStateFromAttachment } from './attachment_to_dashboard_state';
 
 export const registerDashboardAttachmentUiDefinition = ({
   attachments,
   dashboardLocator,
   unifiedSearch,
+  getAttachedDashboardApi,
   doesSavedDashboardExist,
 }: {
   attachments: AttachmentServiceStartContract;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  getAttachedDashboardApi: () => DashboardApi | undefined;
   doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }): (() => void) => {
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
@@ -46,11 +49,10 @@ export const registerDashboardAttachmentUiDefinition = ({
         doesSavedDashboardExist={doesSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ openCanvas }) => {
-      if (!openCanvas) {
+    getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
+      if (isCanvas) {
         return [];
       }
-
       return [
         {
           label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
@@ -58,7 +60,16 @@ export const registerDashboardAttachmentUiDefinition = ({
           }),
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: openCanvas,
+          handler: () => {
+            const dashboardApi = getAttachedDashboardApi();
+            if (!dashboardApi) {
+              openCanvas?.();
+              return;
+            }
+
+            dashboardApi.setViewMode('edit');
+            dashboardApi.reinitialize(getStateFromAttachment(attachment));
+          },
         },
       ];
     },
