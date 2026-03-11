@@ -27,6 +27,8 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_FILTER,
+  FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -241,6 +243,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_PROPERTIES]: feature.properties,
     [FEATURE_CONFIDENCE]: feature.confidence,
     [FEATURE_EVIDENCE]: feature.evidence,
+    [FEATURE_EVIDENCE_DOC_IDS]: feature.evidence_doc_ids,
     [FEATURE_STATUS]: feature.status,
     [FEATURE_LAST_SEEN]: feature.last_seen,
     [FEATURE_TAGS]: feature.tags,
@@ -248,6 +251,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
     [FEATURE_TITLE]: feature.title,
+    [FEATURE_FILTER]: feature.filter,
   };
 }
 
@@ -262,11 +266,13 @@ function fromStorage(feature: StoredFeature): Feature {
     properties: feature[FEATURE_PROPERTIES],
     confidence: feature[FEATURE_CONFIDENCE],
     evidence: feature[FEATURE_EVIDENCE],
+    evidence_doc_ids: feature[FEATURE_EVIDENCE_DOC_IDS],
     status: feature[FEATURE_STATUS],
     last_seen: feature[FEATURE_LAST_SEEN],
     tags: feature[FEATURE_TAGS],
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     title: feature[FEATURE_TITLE],
+    filter: feature[FEATURE_FILTER],
   };
 }
