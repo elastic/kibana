@@ -103,11 +103,7 @@ describe('SloOverviewPanelContent', () => {
 
   it('renders group overview panel with undefined groupFilters (uses defaults)', () => {
     const { container } = render(
-      <SloOverviewPanelContent
-        {...defaultProps}
-        overviewMode="groups"
-        groupFilters={undefined}
-      />
+      <SloOverviewPanelContent {...defaultProps} overviewMode="groups" groupFilters={undefined} />
     );
 
     expect(getByTestId(container, 'sloGroupOverviewPanel')).toBeInTheDocument();
