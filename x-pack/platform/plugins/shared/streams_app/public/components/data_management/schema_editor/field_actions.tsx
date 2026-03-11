@@ -87,6 +87,16 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       }
     };
 
+    const clearDescriptionAction = {
+      name: i18n.translate('xpack.streams.actions.clearDescriptionLabel', {
+        defaultMessage: 'Clear description',
+      }),
+      onClick: () => {
+        const { description, ...fieldWithoutDescription } = field;
+        onFieldUpdate(fieldWithoutDescription as SchemaField);
+      },
+    };
+
     const viewFieldAction = {
       name: i18n.translate('xpack.streams.actions.viewFieldLabel', {
         defaultMessage: 'View field',
@@ -94,17 +104,30 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
       onClick: () => openFlyout(),
     };
 
+    const editFieldAction = {
+      name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+        defaultMessage: 'Edit field',
+      }),
+      onClick: () => openFlyout({ isEditingByDefault: true }),
+    };
+
+    // Check if this field has a real ES mapping in a parent stream.
+    const inheritedField = fields.find((f) => f.name === field.name && f.status === 'inherited');
+    const hasRealMappingInParent = Boolean(inheritedField?.type);
+    // For "Unmap" action, we need to know if there's ANY inherited entry
+    const isInheritedFromParent = !!inheritedField;
+
     switch (field.status) {
       case 'mapped':
-        actions = [
-          viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
-              defaultMessage: 'Edit field',
-            }),
-            onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-          {
+        actions = [viewFieldAction, editFieldAction];
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
+        // Don't show "Unmap field" for:
+        // - Fields inherited from parent (the parent's mapping or documentation still applies)
+        // - Documentation-only fields (no type) since there's nothing to unmap
+        if (!isInheritedFromParent && field.type) {
+          actions.push({
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
@@ -113,23 +136,34 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
                 name: field.name,
                 parent: field.parent,
                 status: 'unmapped',
+                ...(Streams.WiredStream.Definition.is(stream) && field.description
+                  ? { description: field.description }
+                  : {}),
               } as SchemaField);
             },
-          },
-        ];
+          });
+        }
         break;
       case 'unmapped':
-        actions = [
-          viewFieldAction,
-          {
-            name: i18n.translate('xpack.streams.actions.mapFieldLabel', {
-              defaultMessage: 'Map field',
+        actions = [viewFieldAction];
+        // Only show "Edit field" if the parent doesn't have a real ES mapping (type !== 'unmapped')
+        // If the parent has a real mapping, the child can't map it differently
+        if (!hasRealMappingInParent) {
+          actions.push({
+            name: i18n.translate('xpack.streams.actions.editFieldLabel', {
+              defaultMessage: 'Edit field',
             }),
             onClick: () => openFlyout({ isEditingByDefault: true }),
-          },
-        ];
+          });
+        } else {
+          // If parent has real mapping, only allow editing description
+          actions.push(editFieldAction);
+        }
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
 
-        if (enableGeoPointSuggestions !== false) {
+        if (enableGeoPointSuggestions !== false && !hasRealMappingInParent) {
           const geoSuggestion = getGeoPointSuggestion({
             fieldName: field.name,
             fields,
@@ -148,7 +182,10 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         }
         break;
       case 'inherited':
-        actions = [viewFieldAction];
+        actions = [viewFieldAction, editFieldAction];
+        if (field.description) {
+          actions.push(clearDescriptionAction);
+        }
         break;
     }
 

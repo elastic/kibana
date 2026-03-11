@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from '../../types';
@@ -22,30 +22,25 @@ export class StreamsService {
     private readonly isDev: boolean
   ) {}
 
-  async getClientWithRequest({
-    request,
+  async getClient({
     attachmentClient,
     queryClient,
     featureClient,
+    esClient,
+    esClientAsInternalUser,
     uiSettingsClient,
   }: {
-    request: KibanaRequest;
     attachmentClient: AttachmentClient;
     queryClient: QueryClient;
     featureClient: FeatureClient;
+    esClient: ElasticsearchClient;
+    esClientAsInternalUser: ElasticsearchClient;
     uiSettingsClient: IUiSettingsClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
-    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
-    //   Review and choose one of the following options:
-    //   A) Still unsure? Leave this comment as-is.
-    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
-    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
-    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
-    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request, { projectRouting: 'origin-only' });
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
     const isWiredStreamViewsEnabled = await uiSettingsClient.get<boolean>(
       OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
@@ -56,10 +51,10 @@ export class StreamsService {
       queryClient,
       logger,
       featureClient,
-      scopedClusterClient,
+      esClient,
+      esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
-      request,
+      storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
       isWiredStreamViewsEnabled,
       isDev: this.isDev,
