@@ -18,7 +18,10 @@ import type { TransformListRow } from '../../../../common';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 import type { TransformState } from '../../../../../../common/constants';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
-import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import {
+  isManagedTransform,
+  isDeletionProtectedTransform,
+} from '../../../../common/managed_transforms_utils';
 
 export const deleteActionNameText = i18n.translate(
   'xpack.transform.transformList.deleteActionNameText',
@@ -38,7 +41,8 @@ export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: 
     forceDisable === true ||
     disabled ||
     missingTransformStats(items) ||
-    items.some(isManagedTransform)
+    items.some(isManagedTransform) ||
+    items.some(isDeletionProtectedTransform)
   );
 };
 
@@ -61,7 +65,7 @@ export const getDeleteActionDisabledMessage = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  if (items.some(isManagedTransform)) {
+  if (items.some(isManagedTransform) || items.some(isDeletionProtectedTransform)) {
     return isBulkAction
       ? i18n.translate(
           'xpack.transform.transformList.deleteManagedBulkActionDisabledToolTipContent',
