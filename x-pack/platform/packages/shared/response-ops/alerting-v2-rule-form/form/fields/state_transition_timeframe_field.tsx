@@ -11,8 +11,8 @@ import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { DurationInput } from './duration_input';
 
-const TIMEFRAME_UNIT_LABEL = i18n.translate(
-  'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitLabel',
+const TIMEFRAME_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitAriaLabel',
   { defaultMessage: 'Time unit' }
 );
 
@@ -51,7 +51,7 @@ export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFie
           onChange={onChange}
           errors={error?.message}
           numberLabel={numberPrependLabel}
-          unitLabel={TIMEFRAME_UNIT_LABEL}
+          unitAriaLabel={TIMEFRAME_UNIT_ARIA_LABEL}
           dataTestSubj="stateTransitionTimeframe"
           idPrefix="stateTransitionTimeframe"
         />

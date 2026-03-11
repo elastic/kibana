@@ -17,7 +17,7 @@ export interface DurationInputProps {
   fallback?: string;
   errors?: string;
   numberLabel: string;
-  unitLabel: string;
+  unitAriaLabel: string;
   dataTestSubj: string;
   idPrefix: string;
 }
@@ -31,7 +31,10 @@ export interface DurationInputProps {
  * restored to the last valid form value.
  */
 export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
-  ({ value, onChange, fallback, errors, numberLabel, unitLabel, dataTestSubj, idPrefix }, ref) => {
+  (
+    { value, onChange, fallback, errors, numberLabel, unitAriaLabel, dataTestSubj, idPrefix },
+    ref
+  ) => {
     const effectiveValue = value || fallback || '1m';
 
     const intervalNumber = useMemo(() => {
@@ -86,7 +89,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
               options={getTimeOptions(intervalNumber ?? 1)}
               onChange={onIntervalUnitChange}
               data-test-subj={`${idPrefix}UnitInput`}
-              aria-label={unitLabel}
+              aria-label={unitAriaLabel}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
