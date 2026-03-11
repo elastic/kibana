@@ -32,8 +32,10 @@ const createMockClient = (): jest.Mocked<SkillClient> => ({
   get: jest.fn(),
   list: jest.fn(),
   create: jest.fn(),
+  bulkCreate: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+  deleteByPluginId: jest.fn(),
 });
 
 describe('createPersistedSkillProvider', () => {

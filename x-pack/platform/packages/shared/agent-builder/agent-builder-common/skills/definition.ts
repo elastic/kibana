@@ -51,6 +51,10 @@ export interface PublicSkillDefinition {
    * Whether this skill is built-in (readonly) or user-created.
    */
   readonly: boolean;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }
 
 /**
@@ -89,6 +93,10 @@ export interface PersistedSkillCreateRequest {
    * Tool IDs from the tool registry.
    */
   tool_ids: string[];
+  /**
+   * If this skill is managed by a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }
 
 /**

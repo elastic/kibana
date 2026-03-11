@@ -19,6 +19,7 @@ export interface SkillPersistedDefinition {
   referenced_content?: SkillReferencedContent[];
   tool_ids: string[];
   referenced_content_count: number;
+  plugin_id?: string;
   created_at: string;
   updated_at: string;
 }
