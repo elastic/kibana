@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "a35c7c3221ef18a-1855290e5760b14",
+      "title": "dashboard save modal - no access control for anonymous user save modal does not show access control and request omits access_control",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout_access_control/ui/tests/save_modal_no_access_control.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    }
+  ]
+}
