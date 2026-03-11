@@ -214,4 +214,16 @@ describe('Legend Settings', () => {
     expect(screen.getByRole('spinbutton', { name: 'Pixel limit' })).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton', { name: 'Line limit' })).toBeNull();
   });
+
+  it('should show pixel truncation input when inside legend is selected', async () => {
+    await renderLegendSettingsPopover({
+      position: Position.Bottom,
+      location: 'inside',
+      layout: LegendLayout.List,
+      onLayoutChange: jest.fn(),
+    });
+
+    expect(screen.getByRole('spinbutton', { name: 'Line limit' })).toBeInTheDocument();
+    expect(screen.queryByRole('spinbutton', { name: 'Pixel limit' })).toBeNull();
+  });
 });

@@ -262,11 +262,9 @@ const legendTitleStrings = {
   }),
   getDataTestSubj: () => `lnsLegendTableSeriesHeader`,
 };
-
-export function shouldDisplayTable(legendValues: LegendValue[]) {
-  return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
-}
-
+const labelTruncationLabel = i18n.translate('xpack.lens.shared.labelTruncation', {
+  defaultMessage: 'Label truncation',
+});
 const legendLayoutButtonOptions: Array<{ id: string; label: string; layout?: LegendLayout }> = [
   {
     id: 'legend_layout_list',
@@ -283,6 +281,10 @@ const legendLayoutButtonOptions: Array<{ id: string; label: string; layout?: Leg
     layout: undefined,
   },
 ];
+
+export function shouldDisplayTable(legendValues: LegendValue[]) {
+  return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
+}
 
 export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegendValue>(
   props: LegendSettingsProps<LegendStats>
@@ -350,14 +352,10 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
       allowedLegendStats[0].value === LegendValue.Value);
 
   const isHorizontalLegend = position === Position.Top || position === Position.Bottom;
-  const isTableLayout =
-    layout === LegendLayout.Table || (layout === undefined && shouldDisplayTable(legendStats));
+  const isTableLayout = layout === undefined && shouldDisplayTable(legendStats);
   const showsLegendLayoutSetting =
     isLegendNotHidden && location !== 'inside' && isHorizontalLegend && Boolean(onLayoutChange);
-  const usesWidthLimitTruncation = layout === LegendLayout.List;
-  const labelTruncationLabel = i18n.translate('xpack.lens.shared.labelTruncation', {
-    defaultMessage: 'Label truncation',
-  });
+  const usesWidthLimitTruncation = location !== 'inside' && layout === LegendLayout.List;
 
   const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
 
@@ -521,7 +519,7 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
             align-items: center;
           `}
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 id="lensLegendTruncateSwitch"

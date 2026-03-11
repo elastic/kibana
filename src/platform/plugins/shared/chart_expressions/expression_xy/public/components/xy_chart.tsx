@@ -862,12 +862,12 @@ export function XYChart({
                   legend: {
                     labelOptions: legend.shouldTruncate
                       ? {
-                          maxLines: 0,
-                          widthLimit: 0,
-                        }
-                      : {
                           maxLines: legend?.maxLines ?? 1,
                           widthLimit: legend.widthLimit ?? 250,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
                         },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
