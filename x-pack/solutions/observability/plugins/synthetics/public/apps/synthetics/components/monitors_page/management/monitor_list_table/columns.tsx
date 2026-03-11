@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -38,11 +38,10 @@ import type {
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
-import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
-import { getStatusLabel } from '../../../common/hooks/status_labels';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { UnhealthyTooltip } from './unhealthy_tooltip';
 
 export function useMonitorListColumns({
   loading,
@@ -60,8 +59,7 @@ export function useMonitorListColumns({
   const { isServiceAllowed } = useEnablement();
   const { space } = useKibanaSpace();
 
-  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { isUnhealthy: hasMissingIntegrations, getUnhealthyLocationStatuses: getMissingStatuses } = useMonitorIntegrationHealth();
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();  
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -87,50 +85,27 @@ export function useMonitorListColumns({
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
         const configId = monitor[ConfigKey.CONFIG_ID];
-        const isMissing = hasMissingIntegrations(configId);
-        const missingStatuses = getMissingStatuses(configId);
-        const tooltipContent =
-          missingStatuses.length > 0
-            ? missingStatuses
-                .map(
-                  (s) =>
-                    `${s.locationLabel}: ${getStatusLabel(s.status) ?? MISSING_INTEGRATION_BADGE}`
-                )
-                .join('\n')
-            : MISSING_INTEGRATION_BADGE;
 
         return (
-          <span>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <MonitorDetailsLink monitor={monitor} />
-            {isMissing && (
-              <>
-                {' '}
-                <EuiToolTip content={tooltipContent}>
-                  <EuiIcon
-                    type="warning"
-                    color="warning"
-                    data-test-subj="syntheticsMissingIntegrationBadge"
-                    aria-label={MISSING_INTEGRATION_BADGE}
-                  />
-                </EuiToolTip>
-              </>
-            )}
-          </span>
+            <UnhealthyTooltip configId={configId} />
+          </EuiFlexGroup>
         );
       },
     },
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
       ? [
-          {
-            align: 'left' as const,
-            field: ConfigKey.PROJECT_ID as string,
-            name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
-              defaultMessage: 'Project ID',
-            }),
-            sortable: true,
-          },
-        ]
+        {
+          align: 'left' as const,
+          field: ConfigKey.PROJECT_ID as string,
+          name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+            defaultMessage: 'Project ID',
+          }),
+          sortable: true,
+        },
+      ]
       : []),
     {
       align: 'left' as const,
@@ -205,7 +180,7 @@ export function useMonitorListColumns({
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
-          reloadPage={() => {}}
+          reloadPage={() => { }}
           isSwitchable={!loading}
         />
       ),
@@ -338,13 +313,13 @@ export function useMonitorListColumns({
               aria-label={
                 isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
                   ? i18n.translate('xpack.synthetics.management.monitorList.disableAlert', {
-                      defaultMessage: 'Disable alert for {monitorName}',
-                      values: { monitorName: fields[ConfigKey.NAME] },
-                    })
+                    defaultMessage: 'Disable alert for {monitorName}',
+                    values: { monitorName: fields[ConfigKey.NAME] },
+                  })
                   : i18n.translate('xpack.synthetics.management.monitorList.enableAlert', {
-                      defaultMessage: 'Enable alert for {monitorName}',
-                      values: { monitorName: fields[ConfigKey.NAME] },
-                    })
+                    defaultMessage: 'Enable alert for {monitorName}',
+                    values: { monitorName: fields[ConfigKey.NAME] },
+                  })
               }
             >
               {isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
@@ -397,11 +372,4 @@ export function useMonitorListColumns({
 
   return columns;
 }
-
-const MISSING_INTEGRATION_BADGE = i18n.translate(
-  'xpack.synthetics.management.monitorList.missingIntegration.badge',
-  {
-    defaultMessage: 'Missing integration',
-  }
-);
 
