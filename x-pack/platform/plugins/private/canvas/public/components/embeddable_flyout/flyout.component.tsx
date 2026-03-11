@@ -60,7 +60,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
       const libraryType = getAddFromLibraryType(type);
       if (!libraryType) {
         getCanvasNotifyService().warning(
-          i18n.translate('canvas.addPanel.typeNotFound', {
+          i18n.translate('xpack.canvas.addPanel.typeNotFound', {
             defaultMessage: 'Unable to load type: {type}',
             values: { type },
           })
