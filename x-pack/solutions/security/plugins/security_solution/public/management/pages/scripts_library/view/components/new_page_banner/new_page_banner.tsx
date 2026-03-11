@@ -26,9 +26,9 @@ interface NewPageBannerProps {
   'data-test-subj'?: string;
 }
 
-export const Icon = () => {
+const Icon = () => {
   const isDarkMode = useKibanaIsDarkMode();
-  return <ScriptIcon fill={isDarkMode ? '#fff' : undefined} height={24} />;
+  return <ScriptIcon isDarkMode={isDarkMode} height={24} />;
 };
 
 export const NewPageBanner: React.FC<NewPageBannerProps> = ({
