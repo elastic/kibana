@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { createFormWrapper } from '../../test_utils';
 
