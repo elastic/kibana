@@ -16,7 +16,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Forbid specific testSubj locators in Scout tests',
+      description: 'Restrict specific testSubj locators in Scout tests',
       category: 'Best Practices',
     },
     fixable: null,
@@ -24,7 +24,7 @@ module.exports = {
       {
         type: 'object',
         properties: {
-          forbidden: {
+          restricted: {
             type: 'array',
             items: { type: 'string' },
             uniqueItems: true,
@@ -37,8 +37,8 @@ module.exports = {
 
   create(context) {
     const options = context.options[0] || {};
-    const forbidden = new Set(options.forbidden || []);
-    if (forbidden.size === 0) return {};
+    const restricted = new Set(options.restricted || []);
+    if (restricted.size === 0) return {};
 
     return {
       CallExpression(node) {
@@ -59,11 +59,11 @@ module.exports = {
         const firstArg = node.arguments[0];
         if (!firstArg || firstArg.type !== 'Literal' || typeof firstArg.value !== 'string') return;
 
-        if (forbidden.has(firstArg.value)) {
+        if (restricted.has(firstArg.value)) {
           const method = callee.property.name;
           context.report({
             node,
-            message: `The locator \`testSubj.{{method}}('{{name}}')\` is forbidden. Tests should not depend on this element.`,
+            message: `The locator \`testSubj.{{method}}('{{name}}')\` is restricted. Tests should not use this element for app loading state management.`,
             data: { method, name: firstArg.value },
           });
         }

@@ -18,7 +18,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-const options = [{ forbidden: ['globalLoadingIndicator'] }];
+const options = [{ restricted: ['globalLoadingIndicator'] }];
 
 ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
   valid: [
@@ -36,7 +36,7 @@ ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
     },
     {
       code: `page.testSubj.locator('globalLoadingIndicator');`,
-      options: [{ forbidden: [] }],
+      options: [{ restricted: [] }],
     },
   ],
 
@@ -46,7 +46,7 @@ ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
       options,
       errors: [
         {
-          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is forbidden. Tests should not depend on this element.`,
+          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is restricted. Tests should not use this element for app loading state management.`,
         },
       ],
     },
@@ -55,7 +55,7 @@ ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
       options,
       errors: [
         {
-          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is forbidden. Tests should not depend on this element.`,
+          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is restricted. Tests should not use this element for app loading state management.`,
         },
       ],
     },
@@ -64,7 +64,7 @@ ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
       options,
       errors: [
         {
-          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is forbidden. Tests should not depend on this element.`,
+          message: `The locator \`testSubj.locator('globalLoadingIndicator')\` is restricted. Tests should not use this element for app loading state management.`,
         },
       ],
     },
@@ -73,7 +73,7 @@ ruleTester.run('@kbn/eslint/scout_no_locators', rule, {
       options,
       errors: [
         {
-          message: `The locator \`testSubj.waitForSelector('globalLoadingIndicator')\` is forbidden. Tests should not depend on this element.`,
+          message: `The locator \`testSubj.waitForSelector('globalLoadingIndicator')\` is restricted. Tests should not use this element for app loading state management.`,
         },
       ],
     },
