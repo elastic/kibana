@@ -59,6 +59,7 @@ export {
   isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isPluginNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
   isWorkflowAbortedError,
@@ -71,6 +72,7 @@ export {
   createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createPluginNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
   createWorkflowAbortedError,
@@ -81,6 +83,7 @@ export {
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
+  type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderWorkflowAbortedError,
@@ -198,3 +201,14 @@ export {
   type VersionedAttachment,
   type UpdateOriginResponse,
 } from './attachments';
+export {
+  type PluginManifestAuthor,
+  type PluginManifest,
+  type ParsedSkillMeta,
+  type ParsedSkillFile,
+  type ParsedSkillReferencedFile,
+  type UnmanagedPluginAssets,
+  type ParsedPluginArchive,
+  type PluginManifestMetadata,
+  type PluginDefinition,
+} from './plugins';

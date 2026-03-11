@@ -59,4 +59,8 @@ export interface InternalSkillDefinition {
    * Only available for builtin skills.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }

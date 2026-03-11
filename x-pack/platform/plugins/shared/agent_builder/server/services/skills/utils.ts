@@ -26,4 +26,5 @@ export const internalToPublicDefinition = async (
   })),
   tool_ids: await skill.getRegistryTools(),
   readonly: skill.readonly,
+  plugin_id: skill.plugin_id,
 });
