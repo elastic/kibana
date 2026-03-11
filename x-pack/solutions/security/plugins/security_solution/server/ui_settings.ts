@@ -199,28 +199,7 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
-    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer',
-        {
-          defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
-        }
-      ),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
-        {
-          defaultMessage:
-            '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
-          values: { p: (chunks) => `<p>${chunks}</p>` },
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-    },
+    ...getDefaultColdAndFrozenTiersSettings(),
     ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
       [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
         name: i18n.translate(
