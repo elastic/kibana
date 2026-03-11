@@ -58,7 +58,15 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={isScheduled ? (timestamp ? 'absolute' : undefined) : lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
+      mode={
+        isScheduled
+          ? timestamp
+            ? 'absolute'
+            : undefined
+          : lastResultsData?.lastResultTime
+          ? 'absolute'
+          : 'relative'
+      }
       scheduleId={scheduleId}
       executionCount={executionCount}
     />
