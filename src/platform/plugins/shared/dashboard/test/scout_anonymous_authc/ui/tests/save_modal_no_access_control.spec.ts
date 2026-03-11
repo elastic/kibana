@@ -56,7 +56,7 @@ test.describe(
       page,
     }) => {
       // Intercept the POST to /internal/dashboards/app to capture the request body
-      await page.route('**/internal/dashboards/app*', async (route) => {
+      await page.route('**/api/dashboards*', async (route) => {
         const request = route.request();
         if (request.method() === 'POST') {
           capturedRequestBody = request.postDataJSON();
@@ -82,7 +82,7 @@ test.describe(
       expect(capturedRequestBody).not.toHaveProperty('access_control');
 
       // Cleanup route interception
-      await page.unroute('**/internal/dashboards/app*');
+      await page.unroute('**/api/dashboards*');
     });
   }
 );
