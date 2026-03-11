@@ -74,9 +74,16 @@ const createPackagePolicy = (
 const buildRouteContext = (overrides: {
   monitorConfigRepository?: { get: jest.Mock };
   fleetGetByIDs?: jest.Mock;
+  fleetAgentPolicyGetByIds?: jest.Mock;
 }): RouteContext => {
   const fleetGetByIDs =
     overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
+
+  const fleetAgentPolicyGetByIds =
+    overrides.fleetAgentPolicyGetByIds ??
+    jest.fn().mockImplementation(async (_soClient: any, ids: string[]) =>
+      ids.map((id) => ({ id }))
+    );
 
   return {
     savedObjectsClient: {} as any,
@@ -90,6 +97,9 @@ const buildRouteContext = (overrides: {
       fleet: {
         packagePolicyService: {
           getByIDs: fleetGetByIDs,
+        },
+        agentPolicyService: {
+          getByIds: fleetAgentPolicyGetByIds,
         },
       },
     },
@@ -287,6 +297,63 @@ describe('getMonitorsIntegrationHealth', () => {
       const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
 
       expect(result.monitors[0].locations[0].locationLabel).toBe('gone-loc');
+    });
+  });
+
+  describe('missing agent policy', () => {
+    it('returns MissingAgentPolicy when the agent policy referenced by the private location no longer exists', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'deleted-agent-policy');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([]);
+      const routeContext = buildRouteContext({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetAgentPolicyGetByIds,
+      });
+
+      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+
+      const locStatus = result.monitors[0].locations[0];
+      expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isMissingIntegration).toBe(true);
+    });
+
+    it('correctly distinguishes between existing and missing agent policies across locations', async () => {
+      const privateLoc1 = createPrivateLocation('loc-1', 'existing-agent', 'Location 1');
+      const privateLoc2 = createPrivateLocation('loc-2', 'deleted-agent', 'Location 2');
+
+      const so = createMonitorSO('mon-1', {
+        locations: [
+          { id: 'loc-1', label: 'Location 1', isServiceManaged: false },
+          { id: 'loc-2', label: 'Location 2', isServiceManaged: false },
+        ],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
+
+      const expectedPolicyId1 = `mon-1-loc-1-${SPACE_ID}`;
+      const fleetGetByIDs = jest
+        .fn()
+        .mockResolvedValue([createPackagePolicy(expectedPolicyId1, ['existing-agent'])]);
+      const fleetAgentPolicyGetByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'existing-agent' }]);
+
+      const routeContext = buildRouteContext({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetAgentPolicyGetByIds,
+      });
+
+      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+
+      expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
+      expect(result.monitors[0].locations[1].status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
     });
   });
 

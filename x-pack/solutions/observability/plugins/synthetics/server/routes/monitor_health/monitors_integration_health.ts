@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
   LocationHealthStatusValue,
@@ -126,6 +126,23 @@ const getExistingPackagePoliciesMap = async (
 }
 
 
+const getExistingAgentPoliciesMap = async (
+  agentPolicyIds: string[],
+  server: SyntheticsServerSetup
+) => {
+  if (agentPolicyIds.length === 0) {
+    return new Map<string, AgentPolicy>();
+  }
+
+  const internalSoClient = server.coreStart.savedObjects.createInternalRepository();
+  const existingAgentPolicies = await server.fleet.agentPolicyService.getByIds(
+    internalSoClient,
+    agentPolicyIds,
+    { ignoreMissing: true, withPackagePolicies: false }
+  );
+  return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
+};
+
 export const getMonitorsIntegrationHealth = async (
   monitorIds: string[],
   routeContext: RouteContext
@@ -145,9 +162,18 @@ export const getMonitorsIntegrationHealth = async (
 
   const privateLocationAPI = new SyntheticsPrivateLocation(server);
 
-  const expectedPackagePolicyIds = getExpectedPackagePolicies(foundMonitors, privateLocationAPI, spaceId)
-    .map(({ policyId }) => policyId);
-  const existingPacakagePoliciesMap = await getExistingPackagePoliciesMap(expectedPackagePolicyIds, server);
+  const referencedAgentPolicyIds = [
+    ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
+  ];
+  const [existingPacakagePoliciesMap, existingAgentPoliciesMap] = await Promise.all([
+    getExistingPackagePoliciesMap(
+      getExpectedPackagePolicies(foundMonitors, privateLocationAPI, spaceId).map(
+        ({ policyId }) => policyId
+      ),
+      server
+    ),
+    getExistingAgentPoliciesMap(referencedAgentPolicyIds, server),
+  ]);
 
   const monitorsHealthStatuses: MonitorHealthStatus[] = foundMonitors.map(({ so }) => {
     const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
@@ -169,6 +195,15 @@ export const getMonitorsIntegrationHealth = async (
           loc.id,
           loc.label ?? loc.id,
           LocationHealthStatusValue.MissingLocation,
+          expectedPackagePolicyId
+        );
+      }
+
+      if (!existingAgentPoliciesMap.has(existingPrivateLocation.agentPolicyId)) {
+        return buildLocationStatus(
+          loc.id,
+          existingPrivateLocation.label,
+          LocationHealthStatusValue.MissingAgentPolicy,
           expectedPackagePolicyId
         );
       }
