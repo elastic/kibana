@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
-import { getSecurityMlJobsTool } from './inline_tools';
+import { extractEuidFromMlDataTool, getSecurityMlJobsTool } from './inline_tools';
 export interface SecurityMlJobsSkillsContext {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
@@ -94,5 +94,5 @@ Steps:
 7. Summarize the findings in a table format and provide key insights based on the anomalies found.
 `,
     getRegistryTools: () => ['platform.core.execute_esql', 'platform.core.generate_esql'],
-    getInlineTools: () => [getSecurityMlJobsTool(ctx)],
+    getInlineTools: () => [getSecurityMlJobsTool(ctx), extractEuidFromMlDataTool(ctx)],
   });
