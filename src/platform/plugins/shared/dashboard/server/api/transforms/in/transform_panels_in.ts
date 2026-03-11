@@ -65,10 +65,13 @@ function transformPanelIn(
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
-  // Temporary escape hatch for lens as code
-  // TODO remove when lens as code transforms are ready for production
+  // Temporary escape hatch for as-code embeddable transforms
+  // TODO remove when all as-code transforms are ready for production
+  const ESCAPE_HATCH_TYPES = ['lens', 'search'];
   const transformType =
-    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+    ESCAPE_HATCH_TYPES.includes(panel.type) && isDashboardAppRequest
+      ? `${panel.type}-dashboard-app`
+      : panel.type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

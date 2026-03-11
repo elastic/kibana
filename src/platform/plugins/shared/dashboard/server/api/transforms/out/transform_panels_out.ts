@@ -77,9 +77,11 @@ function transformPanelProperties(
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  // Temporary escape hatch for lens as code
-  // TODO remove when lens as code transforms are ready for production
-  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  // Temporary escape hatch for as-code embeddable transforms
+  // TODO remove when all as-code transforms are ready for production
+  const ESCAPE_HATCH_TYPES = ['lens', 'search'];
+  const transformType =
+    ESCAPE_HATCH_TYPES.includes(type) && isDashboardAppRequest ? `${type}-dashboard-app` : type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   let transformedPanelConfig;

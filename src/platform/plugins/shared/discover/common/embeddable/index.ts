@@ -8,3 +8,7 @@
  */
 
 export { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
+export {
+  getSearchEmbeddableAsCodeTransforms,
+  SEARCH_EMBEDDABLE_DASHBOARD_APP_TYPE,
+} from './as_code_transforms';
