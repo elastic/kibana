@@ -123,7 +123,6 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
-import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { getAgentsByKuery } from './agents';
 import {
   getPackagePolicySavedObjectType,
@@ -1270,33 +1269,6 @@ class AgentPolicyService {
             prerelease: true,
           });
           versionCondition = pkgInfo.conditions?.agent?.version;
-
-          // Also scan .hbs templates for {{#semverSatisfies _meta.agent.version "..."}} conditions
-          // to support packages that embed version requirements in Handlebars templates rather
-          // than the manifest-level conditions.agent.version field.
-          if (!versionCondition) {
-            const assetsMap = await getAgentTemplateAssetsMap({
-              savedObjectsClient: soClient,
-              packageInfo: pkgInfo,
-              logger: appContextService.getLogger(),
-            });
-            const templateVersionRegex =
-              /\{\{#(?:semver)?[Ss]atisfies\s+_meta\.agent\.version\s+"([^"]+)"\}\}/g;
-            let highestTemplateMin: string | undefined;
-            assetsMap?.forEach((assetBuffer, assetPath) => {
-              if (!assetPath.endsWith('.hbs') || !assetBuffer) return;
-              const content = assetBuffer.toString();
-              let match;
-              templateVersionRegex.lastIndex = 0;
-              while ((match = templateVersionRegex.exec(content)) !== null) {
-                const parsed = minVersion(match[1]);
-                if (parsed && (!highestTemplateMin || gt(parsed.version, highestTemplateMin))) {
-                  highestTemplateMin = parsed.version;
-                  versionCondition = match[1];
-                }
-              }
-            });
-          }
         } catch {
           // ignore — package might not be installed or accessible
         }
