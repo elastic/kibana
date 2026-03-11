@@ -156,7 +156,22 @@ export const buildIntegrationPackage = async (
 
   const zip = new AdmZip();
   addManifestToZip(zip, packageName, manifest);
-  addChangelogToZip(zip, packageName, integration.changelog ?? []);
+
+  const changelog = integration.changelog?.length
+    ? integration.changelog
+    : [
+        {
+          version: manifest.version,
+          changes: [
+            {
+              description: `Initial release of ${manifest.title}`,
+              type: 'enhancement' as const,
+              link: '',
+            },
+          ],
+        },
+      ];
+  addChangelogToZip(zip, packageName, changelog);
 
   for (const dataStream of dataStreams) {
     const dataStreamManifest = createDataStreamManifest(dataStream);
