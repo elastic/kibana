@@ -89,7 +89,7 @@ export function getAggregationTemplate({
     return `${customFunction}(??${placeholderName})`;
   }
 
-  if (isLegacyHistogram({ field_type: [type], metric_type: instrument != null ? [instrument] : [] })) {
+  if (isLegacyHistogram(type, instrument)) {
     return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
   }
 

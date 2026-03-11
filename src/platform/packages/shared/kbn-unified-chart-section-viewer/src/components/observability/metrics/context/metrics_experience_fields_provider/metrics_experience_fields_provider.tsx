@@ -56,14 +56,10 @@ export const MetricsExperienceFieldsProvider = ({
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
   const { metricFields, dimensions } = useMemo(() => {
-    const hasMetricsInfoData =
-      metricsInfo &&
-      (metricsInfo.metricFields.length > 0 || (metricsInfo.allDimensionFields?.length ?? 0) > 0);
-    if (hasMetricsInfoData && metricsInfo) {
-      const allDimensionFields = metricsInfo.allDimensionFields ?? [];
+    if (metricsInfo?.metricFields?.length) {
       return {
         metricFields: metricsInfo.metricFields,
-        dimensions: allDimensionFields.map((name) => ({ name })),
+        dimensions: metricsInfo?.allDimensionFields?.map((name) => ({ name })) ?? [],
       };
     }
 

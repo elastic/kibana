@@ -20,7 +20,7 @@ import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery } from '../../../common/utils';
+import { createESQLQuery, getPrimaryValue } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 
@@ -220,7 +220,7 @@ const ChartItem = React.memo(
     );
 
     const esqlQuery = useMemo(() => {
-      const metricType = metric.fieldtypes?.[0];
+      const metricType = getPrimaryValue(metric.metricTypes);
       const isSupported = metricType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({

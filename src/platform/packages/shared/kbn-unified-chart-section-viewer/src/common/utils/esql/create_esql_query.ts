@@ -37,7 +37,7 @@ export function createESQLQuery({
   const { name: metricField, metricTypes, fieldtypes: fieldTypes, dataStreams } = metric;
   const index = getPrimaryValue(dataStreams) ?? 'unknown';
   const type = getPrimaryValue(fieldTypes);
-  const instrument = metricTypes?.[0];
+  const instrument = getPrimaryValue(metricTypes);
   const source = timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {

@@ -29,6 +29,7 @@ import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useMetricsExperienceFieldsContext } from './context/metrics_experience_fields_provider';
+import { getPrimaryValue } from '../../../common/utils';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -74,7 +75,9 @@ export const MetricsExperienceGridContent = ({
 
   const getUserMessages = useCallback(
     (metric: MetricField) =>
-      isLegacyHistogram(metric) ? LEGACY_HISTOGRAM_USER_MESSAGES : undefined,
+      isLegacyHistogram(getPrimaryValue(metric.fieldtypes), getPrimaryValue(metric.metricTypes))
+        ? LEGACY_HISTOGRAM_USER_MESSAGES
+        : undefined,
     []
   );
 
