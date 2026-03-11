@@ -10,7 +10,14 @@ export {
   createLeadDataClient,
   type LeadDataClient,
   type LeadDataClientDeps,
+  type CreateLeadsParams,
 } from './lead_data_client';
+export {
+  generateLeadContentHash,
+  generateLeadEntityHash,
+  deduplicateLeads,
+  type DeduplicationResult,
+} from './deduplication';
 export { ObservationModuleRegistry, type ObservationEntity } from './observation_modules';
 export { createLeadGenerationEngine } from './engine';
 export {

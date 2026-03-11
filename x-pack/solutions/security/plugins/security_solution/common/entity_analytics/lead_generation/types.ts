@@ -70,6 +70,9 @@ export const leadSchema = z.object({
   observations: z.array(observationSchema),
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
+  contentHash: z.string(),
+  entityHash: z.string(),
+  version: z.number().int().min(1).default(1),
 });
 
 export type Lead = z.infer<typeof leadSchema>;

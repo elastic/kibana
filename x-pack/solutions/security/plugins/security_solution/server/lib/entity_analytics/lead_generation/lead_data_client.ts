@@ -29,7 +29,9 @@ export interface LeadDataClientDeps {
 }
 
 export interface CreateLeadsParams {
-  readonly leads: readonly Lead[];
+  readonly newLeads: readonly Lead[];
+  readonly exactDuplicateHashes: readonly string[];
+  readonly versionCandidates: readonly Lead[];
   readonly executionId: string;
   readonly sourceType: LeadGenerationMode;
 }
@@ -114,6 +116,9 @@ interface EsLeadDoc {
   observations: EsObservationDoc[];
   execution_uuid: string;
   source_type: string;
+  content_hash: string;
+  entity_hash: string;
+  version: number;
 }
 
 const leadToEsDoc = (
@@ -144,6 +149,9 @@ const leadToEsDoc = (
   })),
   execution_uuid: executionId,
   source_type: sourceType,
+  content_hash: lead.contentHash,
+  entity_hash: lead.entityHash,
+  version: lead.version,
 });
 
 const esDocToLead = (doc: Record<string, unknown>): Lead => {
@@ -174,6 +182,9 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     })),
     executionUuid: (doc.execution_uuid as string) ?? '',
     sourceType: (doc.source_type as Lead['sourceType']) ?? 'adhoc',
+    contentHash: (doc.content_hash as string) ?? '',
+    entityHash: (doc.entity_hash as string) ?? '',
+    version: (doc.version as number) ?? 1,
   };
 };
 
@@ -191,25 +202,106 @@ export const createLeadDataClient = ({
   const allIndices = `${adhocIndex},${scheduledIndex}`;
 
   // -----------------------------------------------------------------------
-  // createLeads — bulk index + gap-free stale cleanup
+  // createLeads — dedup-aware persistence with gap-free cleanup
+  //
+  // 1. Touch exact duplicates (update execution_uuid so they survive cleanup)
+  // 2. Version existing leads (update observations, bump version, new hashes)
+  // 3. Bulk index genuinely new leads
+  // 4. Delete stale docs (execution_uuid != current)
   // -----------------------------------------------------------------------
   const createLeads = async ({
-    leads,
+    newLeads,
+    exactDuplicateHashes,
+    versionCandidates,
     executionId,
     sourceType,
   }: CreateLeadsParams): Promise<void> => {
     const indexName = getLeadsIndexName(spaceId, sourceType);
 
     try {
-      if (leads.length > 0) {
-        const bulkBody = leads.flatMap((lead) => [
+      // Step 1: touch exact duplicates so they survive gap-free cleanup
+      if (exactDuplicateHashes.length > 0) {
+        await esClient.updateByQuery({
+          index: indexName,
+          query: { terms: { content_hash: [...exactDuplicateHashes] } },
+          script: {
+            source: `ctx._source['execution_uuid'] = params.executionId`,
+            lang: 'painless',
+            params: { executionId },
+          },
+          refresh: false,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+        logger.debug(
+          `[LeadGeneration] Touched ${exactDuplicateHashes.length} duplicate lead(s) in "${indexName}"`
+        );
+      }
+
+      // Step 2: version existing leads (entity match, content changed)
+      for (const lead of versionCandidates) {
+        await esClient.updateByQuery({
+          index: indexName,
+          query: { term: { entity_hash: lead.entityHash } },
+          script: {
+            source: [
+              `ctx._source['observations'] = params.observations`,
+              `ctx._source['priority'] = params.priority`,
+              `ctx._source['title'] = params.title`,
+              `ctx._source['byline'] = params.byline`,
+              `ctx._source['description'] = params.description`,
+              `ctx._source['tags'] = params.tags`,
+              `ctx._source['chat_recommendations'] = params.chatRecommendations`,
+              `ctx._source['content_hash'] = params.contentHash`,
+              `ctx._source['execution_uuid'] = params.executionId`,
+              `ctx._source['timestamp'] = params.timestamp`,
+              `ctx._source['version'] = (ctx._source['version'] ?: 1) + 1`,
+            ].join('; '),
+            lang: 'painless',
+            params: {
+              observations: lead.observations.map((obs) => ({
+                entity_id: obs.entityId,
+                module_id: obs.moduleId,
+                type: obs.type,
+                score: obs.score,
+                severity: obs.severity,
+                confidence: obs.confidence,
+                description: obs.description,
+                metadata: obs.metadata,
+              })),
+              priority: lead.priority,
+              title: lead.title,
+              byline: lead.byline,
+              description: lead.description,
+              tags: lead.tags,
+              chatRecommendations: lead.chatRecommendations,
+              contentHash: lead.contentHash,
+              executionId,
+              timestamp: lead.timestamp,
+            },
+          },
+          refresh: false,
+          conflicts: 'proceed',
+          ignore_unavailable: true,
+        });
+      }
+      if (versionCandidates.length > 0) {
+        logger.debug(
+          `[LeadGeneration] Versioned ${versionCandidates.length} lead(s) in "${indexName}"`
+        );
+      }
+
+      // Step 3: bulk index genuinely new leads
+      if (newLeads.length > 0) {
+        const bulkBody = newLeads.flatMap((lead) => [
           { index: { _index: indexName, _id: lead.id } },
           leadToEsDoc(lead, executionId, sourceType),
         ]);
         await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
-        logger.debug(`[LeadGeneration] Persisted ${leads.length} leads to "${indexName}"`);
+        logger.debug(`[LeadGeneration] Persisted ${newLeads.length} new lead(s) to "${indexName}"`);
       }
 
+      // Step 4: gap-free cleanup — remove stale docs from previous executions
       await esClient.deleteByQuery({
         index: indexName,
         query: { bool: { must_not: [{ term: { execution_uuid: executionId } }] } },
@@ -292,7 +384,7 @@ export const createLeadDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // updateLead — partial update by doc id
+  // updateLead — partial update by doc id (uses params to avoid injection)
   // -----------------------------------------------------------------------
   const updateLead = async (
     id: string,
@@ -303,10 +395,9 @@ export const createLeadDataClient = ({
         index: allIndices,
         query: { term: { id } },
         script: {
-          source: Object.entries(updates)
-            .map(([key, val]) => `ctx._source['${key}'] = '${val}'`)
-            .join('; '),
+          source: `ctx._source['status'] = params.status`,
           lang: 'painless',
+          params: { status: updates.status },
         },
         refresh: true,
         conflicts: 'proceed',

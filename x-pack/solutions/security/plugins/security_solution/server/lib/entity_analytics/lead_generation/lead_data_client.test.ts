@@ -37,6 +37,9 @@ const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
   ],
   executionUuid: '550e8400-e29b-41d4-a716-446655440000',
   sourceType: 'adhoc',
+  contentHash: 'abc123',
+  entityHash: 'def456',
+  version: 1,
   ...overrides,
 });
 
@@ -58,7 +61,7 @@ describe('LeadDataClient', () => {
   });
 
   describe('createLeads', () => {
-    it('bulk indexes leads with snake_case fields and cleans up stale docs', async () => {
+    it('bulk indexes new leads with snake_case fields including hash fields', async () => {
       esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
       esClient.deleteByQuery.mockResolvedValueOnce({
         deleted: 0,
@@ -70,7 +73,9 @@ describe('LeadDataClient', () => {
 
       const lead = makeTestLead();
       await client.createLeads({
-        leads: [lead],
+        newLeads: [lead],
+        exactDuplicateHashes: [],
+        versionCandidates: [],
         executionId: 'exec-1',
         sourceType: 'adhoc',
       });
@@ -79,14 +84,15 @@ describe('LeadDataClient', () => {
       const [bulkCall] = esClient.bulk.mock.calls;
       const body = bulkCall[0].body as unknown[];
 
-      // Verify the index action targets the adhoc index
       expect(body[0]).toEqual({ index: { _index: adhocIndex, _id: lead.id } });
 
-      // Verify snake_case fields in the document
       const doc = body[1] as Record<string, unknown>;
       expect(doc.chat_recommendations).toEqual(lead.chatRecommendations);
       expect(doc.execution_uuid).toBe('exec-1');
       expect(doc.source_type).toBe('adhoc');
+      expect(doc.content_hash).toBe('abc123');
+      expect(doc.entity_hash).toBe('def456');
+      expect(doc.version).toBe(1);
       expect(doc.observations).toEqual([
         expect.objectContaining({
           entity_id: 'user:admin',
@@ -98,14 +104,130 @@ describe('LeadDataClient', () => {
       expect(doc).not.toHaveProperty('chatRecommendations');
       expect(doc).not.toHaveProperty('executionUuid');
       expect(doc).not.toHaveProperty('sourceType');
+      expect(doc).not.toHaveProperty('contentHash');
+      expect(doc).not.toHaveProperty('entityHash');
 
-      // Verify stale cleanup uses snake_case execution_uuid
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: adhocIndex,
           query: { bool: { must_not: [{ term: { execution_uuid: 'exec-1' } }] } },
         })
       );
+    });
+
+    it('touches exact duplicates by updating their execution_uuid', async () => {
+      esClient.updateByQuery.mockResolvedValueOnce({
+        updated: 2,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 2,
+      });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 0,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 0,
+      });
+
+      await client.createLeads({
+        newLeads: [],
+        exactDuplicateHashes: ['hash-a', 'hash-b'],
+        versionCandidates: [],
+        executionId: 'exec-2',
+        sourceType: 'adhoc',
+      });
+
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+      const [touchCall] = esClient.updateByQuery.mock.calls;
+      expect(touchCall[0].query).toEqual({ terms: { content_hash: ['hash-a', 'hash-b'] } });
+      expect(touchCall[0].script).toEqual(
+        expect.objectContaining({
+          params: { executionId: 'exec-2' },
+        })
+      );
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('versions existing leads by updating observations and bumping version', async () => {
+      esClient.updateByQuery.mockResolvedValue({
+        updated: 1,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 1,
+      });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 0,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 0,
+      });
+
+      const versionedLead = makeTestLead({
+        id: 'lead-versioned',
+        entityHash: 'entity-hash-1',
+        contentHash: 'new-content-hash',
+        priority: 9,
+      });
+
+      await client.createLeads({
+        newLeads: [],
+        exactDuplicateHashes: [],
+        versionCandidates: [versionedLead],
+        executionId: 'exec-3',
+        sourceType: 'adhoc',
+      });
+
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+      const [versionCall] = esClient.updateByQuery.mock.calls;
+      expect(versionCall[0].query).toEqual({ term: { entity_hash: 'entity-hash-1' } });
+      expect(versionCall[0].script).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            contentHash: 'new-content-hash',
+            executionId: 'exec-3',
+            priority: 9,
+          }),
+        })
+      );
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('handles all three buckets in a single call', async () => {
+      // touch (updateByQuery #1) + version (updateByQuery #2) + bulk + cleanup
+      esClient.updateByQuery.mockResolvedValue({
+        updated: 1,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 1,
+      });
+      esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 0,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 0,
+      });
+
+      await client.createLeads({
+        newLeads: [makeTestLead({ id: 'new-1' })],
+        exactDuplicateHashes: ['dup-hash'],
+        versionCandidates: [makeTestLead({ id: 'ver-1', entityHash: 'eh-1' })],
+        executionId: 'exec-4',
+        sourceType: 'adhoc',
+      });
+
+      // touch + version = 2 updateByQuery calls
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
     });
 
     it('uses the scheduled index when sourceType is scheduled', async () => {
@@ -119,8 +241,10 @@ describe('LeadDataClient', () => {
       });
 
       await client.createLeads({
-        leads: [makeTestLead()],
-        executionId: 'exec-2',
+        newLeads: [makeTestLead()],
+        exactDuplicateHashes: [],
+        versionCandidates: [],
+        executionId: 'exec-5',
         sourceType: 'scheduled',
       });
 
@@ -131,7 +255,7 @@ describe('LeadDataClient', () => {
       );
     });
 
-    it('skips bulk indexing when leads array is empty but still cleans up stale docs', async () => {
+    it('skips bulk indexing when newLeads array is empty but still cleans up stale docs', async () => {
       esClient.deleteByQuery.mockResolvedValueOnce({
         deleted: 2,
         failures: [],
@@ -141,8 +265,10 @@ describe('LeadDataClient', () => {
       });
 
       await client.createLeads({
-        leads: [],
-        executionId: 'exec-3',
+        newLeads: [],
+        exactDuplicateHashes: [],
+        versionCandidates: [],
+        executionId: 'exec-6',
         sourceType: 'adhoc',
       });
 
@@ -155,8 +281,10 @@ describe('LeadDataClient', () => {
 
       await expect(
         client.createLeads({
-          leads: [makeTestLead()],
-          executionId: 'exec-4',
+          newLeads: [makeTestLead()],
+          exactDuplicateHashes: [],
+          versionCandidates: [],
+          executionId: 'exec-7',
           sourceType: 'adhoc',
         })
       ).resolves.toBeUndefined();
@@ -193,6 +321,9 @@ describe('LeadDataClient', () => {
         ],
         execution_uuid: 'exec-uuid',
         source_type: 'adhoc',
+        content_hash: 'ch-1',
+        entity_hash: 'eh-1',
+        version: 2,
       };
 
       esClient.search.mockResolvedValueOnce({
@@ -218,11 +349,13 @@ describe('LeadDataClient', () => {
       expect(result.perPage).toBe(10);
       expect(result.leads).toHaveLength(1);
 
-      // Verify camelCase transformation
       const lead = result.leads[0];
       expect(lead.chatRecommendations).toEqual(['Question 1']);
       expect(lead.executionUuid).toBe('exec-uuid');
       expect(lead.sourceType).toBe('adhoc');
+      expect(lead.contentHash).toBe('ch-1');
+      expect(lead.entityHash).toBe('eh-1');
+      expect(lead.version).toBe(2);
       expect(lead.observations[0].entityId).toBe('user:admin');
       expect(lead.observations[0].moduleId).toBe('risk_analysis');
     });
@@ -273,6 +406,9 @@ describe('LeadDataClient', () => {
                 observations: [],
                 execution_uuid: 'e-1',
                 source_type: 'adhoc',
+                content_hash: 'ch',
+                entity_hash: 'eh',
+                version: 1,
               },
             },
           ],
@@ -284,6 +420,9 @@ describe('LeadDataClient', () => {
       expect(lead).not.toBeNull();
       expect(lead!.id).toBe('lead-1');
       expect(lead!.title).toBe('Found Lead');
+      expect(lead!.contentHash).toBe('ch');
+      expect(lead!.entityHash).toBe('eh');
+      expect(lead!.version).toBe(1);
     });
 
     it('returns null when lead is not found', async () => {
@@ -300,6 +439,27 @@ describe('LeadDataClient', () => {
 
       const lead = await client.getLeadById('lead-1');
       expect(lead).toBeNull();
+    });
+  });
+
+  describe('updateLead', () => {
+    it('uses parameterized Painless script (no injection risk)', async () => {
+      esClient.updateByQuery.mockResolvedValueOnce({
+        updated: 1,
+        failures: [],
+        timed_out: false,
+        took: 1,
+        total: 1,
+      });
+
+      await client.updateLead('lead-1', { status: 'dismissed' });
+
+      const [call] = esClient.updateByQuery.mock.calls;
+      expect(call[0].script).toEqual({
+        source: `ctx._source['status'] = params.status`,
+        lang: 'painless',
+        params: { status: 'dismissed' },
+      });
     });
   });
 

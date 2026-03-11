@@ -12,7 +12,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { GENERATE_LEADS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
+import {
+  GENERATE_LEADS_URL,
+  getLeadsIndexName,
+} from '../../../../../common/entity_analytics/lead_generation/constants';
 import { generateLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
@@ -25,6 +28,11 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import { createEntityRetriever } from '../entity_retriever';
 import { createLeadDataClient } from '../lead_data_client';
+import {
+  generateLeadContentHash,
+  generateLeadEntityHash,
+  deduplicateLeads,
+} from '../deduplication';
 
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -128,15 +136,40 @@ export const generateLeadsRoute = (
               const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
               const persistStart = Date.now();
 
-              const leadsWithMeta = leads.map((lead) => ({
+              const candidates = leads.map((lead) => ({
                 ...lead,
                 status: 'active' as const,
                 executionUuid,
                 sourceType: 'adhoc' as const,
+                contentHash: generateLeadContentHash(lead, spaceId),
+                entityHash: generateLeadEntityHash(lead, spaceId),
+                version: 1,
               }));
 
+              const allIndices = [
+                getLeadsIndexName(spaceId, 'adhoc'),
+                getLeadsIndexName(spaceId, 'scheduled'),
+              ].join(',');
+
+              const dedupResult = await deduplicateLeads({
+                candidates,
+                esClient,
+                indexPattern: allIndices,
+                logger,
+                spaceId,
+              });
+
+              logger.info(
+                `[LeadGeneration][Telemetry] Dedup: ${candidates.length} candidates → ` +
+                  `${dedupResult.newLeads.length} new, ` +
+                  `${dedupResult.exactDuplicateHashes.length} duplicates, ` +
+                  `${dedupResult.versionCandidates.length} versioned`
+              );
+
               await leadDataClient.createLeads({
-                leads: leadsWithMeta,
+                newLeads: dedupResult.newLeads,
+                exactDuplicateHashes: dedupResult.exactDuplicateHashes,
+                versionCandidates: dedupResult.versionCandidates,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
               });
