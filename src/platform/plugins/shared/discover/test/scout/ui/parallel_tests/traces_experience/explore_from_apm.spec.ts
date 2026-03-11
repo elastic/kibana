@@ -41,6 +41,39 @@ spaceTest.describe(
     });
 
     spaceTest(
+      'Service Inventory - "Open in Discover" links open correct experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM service inventory', async () => {
+          await page.gotoApp('apm/services', {
+            params: APM_TIME_RANGE,
+          });
+        });
+
+        await spaceTest.step('"Open traces in Discover" opens traces experience', async () => {
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
+            RICH_TRACE.SERVICE_NAME,
+            'apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover'
+          );
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('"Open logs in Discover" opens Discover', async () => {
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
+            RICH_TRACE.SERVICE_NAME,
+            'apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover'
+          );
+          await pageObjects.discover.waitForDocTableRendered();
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
+        });
+      }
+    );
+
+    spaceTest(
       'Service Overview - "Open in Discover" links open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
@@ -299,39 +332,6 @@ spaceTest.describe(
             await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
           await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
-        });
-      }
-    );
-
-    spaceTest(
-      'Service Inventory - "Open in Discover" links open correct experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM service inventory', async () => {
-          await page.gotoApp('apm/services', {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step('"Open traces in Discover" opens traces experience', async () => {
-          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
-            RICH_TRACE.SERVICE_NAME,
-            'apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover'
-          );
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
-          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
-          await page.goBack();
-        });
-
-        await spaceTest.step('"Open logs in Discover" opens Discover', async () => {
-          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
-            RICH_TRACE.SERVICE_NAME,
-            'apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover'
-          );
-          await pageObjects.discover.waitForDocTableRendered();
-          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }
     );
