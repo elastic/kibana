@@ -18,6 +18,7 @@ export interface RuleResponse {
   kind: RuleKind;
   metadata: {
     name: string;
+    description?: string;
     owner?: string;
     labels?: string[];
   };

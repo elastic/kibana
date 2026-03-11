@@ -364,6 +364,7 @@ describe('useCreateRule', () => {
       kind: 'signal',
       metadata: {
         name: 'Complex Rule',
+        description: 'A complex rule',
         labels: ['production', 'critical'],
       },
       time_field: 'event.timestamp',
