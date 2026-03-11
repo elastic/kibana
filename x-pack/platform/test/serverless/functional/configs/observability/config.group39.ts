@@ -14,7 +14,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...baseTestConfig.getAll(),
     testFiles: [require.resolve('../../test_suites/visualizations/group8_part3')],
     junit: {
-      reportName: 'Serverless Observability Functional Tests - Common Group 39 (Visualizations 8 Part 3)',
+      reportName:
+        'Serverless Observability Functional Tests - Common Group 39 (Visualizations 8 Part 3)',
     },
   };
 }
