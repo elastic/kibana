@@ -11,6 +11,14 @@ import supertest from 'supertest';
 import { format as formatUrl } from 'url';
 import { coreWorkerFixtures } from '.';
 
+/**
+ * Normalizes a URL path to ensure it starts with exactly one forward slash.
+ * Handles paths with leading slashes, multiple leading slashes, or no leading slash.
+ */
+export const normalizePathSlashes = (path: string): string => {
+  return '/' + path.replace(/^\/+/, '');
+};
+
 export interface ApiClientOptions {
   headers?: Record<string, string>;
   responseType?: 'json' | 'text';
@@ -55,7 +63,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
           if (!fn) {
             throw new Error(`Unsupported HTTP method: ${method}`);
           }
-          let req = fn(url);
+          let req = fn(normalizePathSlashes(url));
 
           // Apply headers
           if (options.headers) {
