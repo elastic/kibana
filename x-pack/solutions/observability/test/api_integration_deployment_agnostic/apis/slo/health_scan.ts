@@ -447,7 +447,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe.skip('Health Scan with real SLOs', function () {
+    describe('Health Scan with real SLOs', function () {
       before(async () => {
         await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
@@ -513,7 +513,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(results.scan.status).to.eql('completed');
             scanResults = results;
           },
-          { retryCount: 10, retryDelay: 3000 }
+          { retryCount: 30, retryDelay: 4000 }
         );
 
         expect(scanResults.results).to.be.an('array');
