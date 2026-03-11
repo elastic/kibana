@@ -82,7 +82,12 @@ export function DeleteStreamPanel({ definition }: { definition: Streams.all.GetR
             right={
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButton color="danger" fill onClick={() => setShowModal((prev) => !prev)}>
+                  <EuiButton
+                    color="danger"
+                    fill
+                    data-test-subj="deleteQueryStreamButton"
+                    onClick={() => setShowModal((prev) => !prev)}
+                  >
                     {i18n.translate('xpack.streams.streamDeleteModal.deleteStreamButton', {
                       defaultMessage: 'Delete stream',
                     })}
