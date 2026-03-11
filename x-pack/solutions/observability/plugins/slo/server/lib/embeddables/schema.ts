@@ -8,6 +8,7 @@
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
@@ -16,14 +17,13 @@ const SingleOverviewCustomSchema = schema.object({
   slo_id: schema.string({
     meta: { description: 'The ID of the SLO' },
   }),
-  slo_instance_id: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. When * is used, all instances of the specified slo_id are shown.',
-      },
-    })
-  ),
+  slo_instance_id: schema.string({
+    defaultValue: ALL_VALUE,
+    meta: {
+      description:
+        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+    },
+  }),
   remote_name: schema.maybe(
     schema.string({
       meta: { description: 'The name of the remote SLO' },
@@ -36,6 +36,7 @@ const groupBySchema = schema.oneOf([
   schema.literal('slo.tags'),
   schema.literal('status'),
   schema.literal('slo.indicator.type'),
+  schema.literal('_index'), // remote cluster
 ]);
 
 const GroupOverviewCustomSchema = schema.object({

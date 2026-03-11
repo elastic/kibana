@@ -12,17 +12,29 @@ import { useBulkAttackInvestigateInTimelineItems } from './use_bulk_attack_inves
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline');
 jest.mock('../../../../components/alerts_table/actions', () => ({
   buildAlertsKqlFilter: jest.fn().mockReturnValue([]),
 }));
+jest.mock('../../../../../common/lib/kibana');
 
 const mockUseUserPrivileges = useUserPrivileges as jest.MockedFunction<typeof useUserPrivileges>;
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.MockedFunction<
   typeof useInvestigateInTimeline
 >;
+
+const reportEventMock = jest.fn();
+(useKibana as jest.Mock).mockReturnValue({
+  services: {
+    telemetry: {
+      reportEvent: reportEventMock,
+    },
+  },
+});
 
 let queryClient: QueryClient;
 
@@ -33,6 +45,7 @@ function wrapper(props: { children: React.ReactNode }) {
 describe('useBulkAttackInvestigateInTimelineItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    reportEventMock.mockClear();
     queryClient = new QueryClient();
 
     mockUseInvestigateInTimeline.mockReturnValue({
@@ -84,6 +97,40 @@ describe('useBulkAttackInvestigateInTimelineItems', () => {
 
     expect(investigateInTimeline).toHaveBeenCalledTimes(1);
     expect(closePopover).toHaveBeenCalledTimes(1);
+  });
+
+  it('should report TimelineInvestigationOpened event on click', async () => {
+    const investigateInTimeline = jest.fn();
+    mockUseInvestigateInTimeline.mockReturnValue({
+      investigateInTimeline,
+    } as unknown as ReturnType<typeof useInvestigateInTimeline>);
+
+    const { result } = renderHook(
+      () =>
+        useBulkAttackInvestigateInTimelineItems({
+          telemetrySource: 'attacks_page_group_take_action',
+        }),
+      {
+        wrapper,
+      }
+    );
+    await result.current.items[0]?.onClick?.(
+      [
+        {
+          _id: 'attack-1',
+          data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: ['alert-1'] }],
+          ecs: { _id: 'attack-1' },
+        },
+      ],
+      false,
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.TimelineInvestigationOpened, {
+      source: 'attacks_page_group_take_action',
+    });
   });
 
   it('should return empty panels', () => {

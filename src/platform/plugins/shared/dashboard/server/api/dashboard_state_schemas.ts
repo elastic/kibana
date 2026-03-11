@@ -25,6 +25,8 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
 
+const MAX_PANELS = 100;
+
 export const allowUnmappedKeysSchema = schema.boolean({
   defaultValue: false,
   meta: {
@@ -129,6 +131,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
     panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
       meta: { description: 'The panels that belong to the section.' },
       defaultValue: [],
+      maxSize: MAX_PANELS,
     }),
     uid: schema.maybe(
       schema.string({
@@ -208,6 +211,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         ]),
         {
           defaultValue: [],
+          maxSize: MAX_PANELS,
         }
       )
     ),
@@ -216,7 +220,10 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
     refresh_interval: schema.maybe(refreshIntervalSchema),
     tags: schema.maybe(
       schema.arrayOf(
-        schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
+        schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } }),
+        {
+          maxSize: 100,
+        }
       )
     ),
     time_range: schema.maybe(timeRangeSchema),
