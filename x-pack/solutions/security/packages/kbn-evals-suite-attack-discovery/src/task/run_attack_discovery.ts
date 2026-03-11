@@ -19,25 +19,29 @@ import type {
 } from '../types';
 import { AttackDiscoveryGenerationPrompt } from '../prompts/attack_discovery_generation_prompt';
 
-let cachedDefaultPrompt: string | undefined;
-let cachedContinuePrompt: string | undefined;
+let defaultPromptPromise: Promise<string> | undefined;
+let continuePromptPromise: Promise<string> | undefined;
 
-const loadDefaultPrompt = async (): Promise<string> => {
-  if (cachedDefaultPrompt) return cachedDefaultPrompt;
-  cachedDefaultPrompt = await Fs.readFile(
-    Path.resolve(__dirname, '../prompts/attack_discovery_default_prompt.text'),
-    'utf-8'
-  );
-  return cachedDefaultPrompt;
+const loadDefaultPrompt = (): Promise<string> => {
+  if (!defaultPromptPromise) {
+    defaultPromptPromise = Fs.readFile(
+      Path.resolve(__dirname, '../prompts/attack_discovery_default_prompt.text'),
+      'utf-8'
+    );
+  }
+
+  return defaultPromptPromise;
 };
 
-const loadContinuePrompt = async (): Promise<string> => {
-  if (cachedContinuePrompt) return cachedContinuePrompt;
-  cachedContinuePrompt = await Fs.readFile(
-    Path.resolve(__dirname, '../prompts/attack_discovery_continue_prompt.text'),
-    'utf-8'
-  );
-  return cachedContinuePrompt;
+const loadContinuePrompt = (): Promise<string> => {
+  if (!continuePromptPromise) {
+    continuePromptPromise = Fs.readFile(
+      Path.resolve(__dirname, '../prompts/attack_discovery_continue_prompt.text'),
+      'utf-8'
+    );
+  }
+
+  return continuePromptPromise;
 };
 
 const toAlertStrings = (alerts: ReadonlyArray<AnonymizedAlert>): string[] => {
