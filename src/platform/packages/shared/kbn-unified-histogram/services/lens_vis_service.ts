@@ -262,7 +262,7 @@ export class LensVisService {
             });
           }
         } else {
-          if (isOfAggregateQueryType(queryParams.query) && hasInfoCommand(queryParams.query.esql)) {
+          if (hasInfoCommand(queryParams.query.esql)) {
             return {
               currentSuggestionContext: {
                 type: UnifiedHistogramSuggestionType.unsupported,
