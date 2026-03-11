@@ -137,7 +137,6 @@ enabled:
   - x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_api/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_api/config.graph_basic.ts
-  - x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group1/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group2/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/group3/config.ts
