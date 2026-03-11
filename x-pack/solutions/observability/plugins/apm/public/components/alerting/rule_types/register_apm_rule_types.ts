@@ -85,6 +85,9 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
       errors: [],
     }),
     alertDetailsAppSection: lazy(() => import('../ui_components/alert_details_app_section')),
+    alertDetailsTrailingSection: lazy(
+      () => import('../ui_components/alert_details_service_map_section')
+    ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,

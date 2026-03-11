@@ -18,10 +18,11 @@ export interface ServiceMapUrlParams {
 }
 
 /**
- * Builds the URL to the full APM service map page with the same context.
- * Used by the embeddable "View full service map" link.
+ * Builds the path (hash + query) for the APM service map page with the given context.
+ * Use with application.navigateToApp('apm', { path }) for in-app navigation,
+ * or with getServiceMapUrl() for full URLs (e.g. target="_blank").
  */
-export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
+export function getServiceMapPath(params: ServiceMapUrlParams): string {
   const { rangeFrom, rangeTo, environment, kuery, serviceName, serviceGroupId } = params;
   const searchParams = new URLSearchParams();
   searchParams.set('rangeFrom', rangeFrom);
@@ -39,6 +40,13 @@ export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): 
   const hashPath = serviceName
     ? `#/services/${encodeURIComponent(serviceName)}/service-map`
     : '#/service-map';
-  const path = queryString ? `${hashPath}?${queryString}` : hashPath;
-  return core.application.getUrlForApp('apm', { path });
+  return queryString ? `${hashPath}?${queryString}` : hashPath;
+}
+
+/**
+ * Builds the URL to the full APM service map page with the same context.
+ * Used by the embeddable "View full service map" link.
+ */
+export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
+  return core.application.getUrlForApp('apm', { path: getServiceMapPath(params) });
 }

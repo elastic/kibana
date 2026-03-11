@@ -160,6 +160,16 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
   getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  /**
+   * Register a provider for alert details trailing section dependencies (e.g. for rule-type-specific panels).
+   * Plugins that register an alertDetailsTrailingSection on their rule type can register a getDeps callback here.
+   */
+  registerAlertDetailsTrailingSectionDeps: (ruleTypeId: string, getDeps: () => unknown) => void;
+  /**
+   * Get the trailing section deps for a rule type, if registered.
+   * Used by the alert details page to pass context to the trailing section component.
+   */
+  getAlertDetailsTrailingSectionDeps: (ruleTypeId: string) => unknown;
 }
 
 interface PluginsSetup {
@@ -204,6 +214,7 @@ export class Plugin
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
+  private alertDetailsTrailingSectionDeps = new Map<string, () => unknown>();
   private config: TriggersActionsUiConfigType;
   private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
@@ -686,6 +697,12 @@ export class Plugin
           return undefined;
         }
         return this.ruleTypeRegistry.get(ruleTypeId).format;
+      },
+      registerAlertDetailsTrailingSectionDeps: (ruleTypeId: string, getDeps: () => unknown) => {
+        this.alertDetailsTrailingSectionDeps.set(ruleTypeId, getDeps);
+      },
+      getAlertDetailsTrailingSectionDeps: (ruleTypeId: string): unknown => {
+        return this.alertDetailsTrailingSectionDeps.get(ruleTypeId)?.();
       },
     };
   }
