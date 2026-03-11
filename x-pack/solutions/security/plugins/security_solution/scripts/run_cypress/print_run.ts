@@ -356,6 +356,11 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
     });
 
     _.each(runs, (run) => {
+      if (!run) {
+        table2.push(['-', 'MISSING RUN', '-', '-', '-', '-', '-', '-']);
+        return;
+      }
+
       const { spec, stats } = run;
       const ms = durationInMinutes(stats?.duration ?? 0);
       const formattedSpec = formatPath(spec.relative, getWidth(table2, 1));
