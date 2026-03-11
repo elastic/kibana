@@ -9,6 +9,14 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { setupFieldMappingAtScale } from '../synthtrace_data/streams_data';
 
+function getNewFieldName(): string {
+  const phase = (process.env.TEST_PERFORMANCE_PHASE ?? 'local')
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_');
+
+  return `attributes.perf_scale_new_field_${phase}`;
+}
+
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
   beforeSteps: async ({ kibanaServer, log }) => {
@@ -26,8 +34,9 @@ export const journey = new Journey({
   .step('Configure new field mapping', async ({ page, inputDelays }) => {
     const comboBox = page.locator(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
     const comboInput = comboBox.locator('input[role="combobox"]');
+    const fieldName = getNewFieldName();
     await comboInput.click();
-    await comboInput.pressSequentially('attributes.perf_scale_new_field', {
+    await comboInput.pressSequentially(fieldName, {
       delay: inputDelays.TYPING,
     });
     await page.keyboard.press('Enter');
