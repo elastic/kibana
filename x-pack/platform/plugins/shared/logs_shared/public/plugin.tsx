@@ -132,5 +132,5 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
     };
   }
 
-  public stop() { }
+  public stop() {}
 }
