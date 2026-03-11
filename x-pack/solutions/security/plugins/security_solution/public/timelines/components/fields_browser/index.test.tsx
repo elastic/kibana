@@ -84,12 +84,15 @@ const fieldItem: BrowserFieldItem = {
 };
 
 describe('useFieldBrowserOptions', () => {
+  const mockAddDanger = jest.fn();
+
   beforeEach(() => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
     useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
     useKibanaMock().services.data.dataViews.clearInstanceCache = () => undefined;
+    useKibanaMock().services.notifications.toasts.addDanger = mockAddDanger;
 
     useKibanaMock().services.application.capabilities = {
       ...useKibanaMock().services.application.capabilities,

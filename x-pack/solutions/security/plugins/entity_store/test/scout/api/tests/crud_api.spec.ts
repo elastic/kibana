@@ -107,13 +107,10 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   apiTest('Should perform an upsert', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {
-        id: 'this-is-upsert',
+        id: 'host:this-is-upsert',
       },
       host: {
         name: 'this-is-upsert',
-        entity: {
-          id: 'this-is-upsert',
-        },
       },
     };
 
@@ -130,7 +127,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: {
         entity: {
-          id: entityObj.host?.entity?.id,
+          id: entityObj.entity.id,
           name: 'this-is-upsert',
         },
         host: {
@@ -153,7 +150,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(received.entity).toBeUndefined();
     expect(received.host).toMatchObject({
       entity: {
-        id: entityObj.host?.entity?.id,
+        id: entityObj.entity?.id,
       },
       name: 'this-is-upsert',
     });
