@@ -13,8 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/209387
-  describe.skip('Findings Page onboarding', function () {
+  describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledCSP: typeof findings.notInstalledCSP;
@@ -58,17 +57,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
     });
 
-    it('Misconfigurations - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/209387
+    it.skip('Misconfigurations - clicking on the `Third party integrations` prompt action button - `Add Integration`: navigates to the integrations browse page', async () => {
       await findings.navigateToMisconfigurations();
       await navigateToMisconfigurationsWithRetry();
       const element = await thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt.getElement();
       expect(element).to.not.be(null);
 
       await thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt.navigateToAction(
-        '3p-no-misconfigurations-findings-prompt-wiz-integration-button'
+        '3p-no-misconfigurations-findings-prompt-integration-button'
       );
 
-      await PageObjects.common.waitUntilUrlIncludes('fleet/integrations/wiz/add-integration');
+      await PageObjects.common.waitUntilUrlIncludes(
+        'integrations/browse/security/misconfiguration_workflow'
+      );
     });
   });
 };
