@@ -36,6 +36,8 @@ export interface ServiceMapEmbeddableProps {
   serviceName?: string;
   serviceGroupId?: string;
   core: CoreStart;
+  /** Panel padding. Defaults to "none" for dashboard embeddable; use "s" in alert details context. */
+  paddingSize?: 'none' | 's' | 'm' | 'l';
 }
 
 function LoadingSpinner() {
@@ -55,6 +57,7 @@ export function ServiceMapEmbeddable({
   serviceName,
   serviceGroupId,
   core,
+  paddingSize = 'none',
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -206,7 +209,7 @@ export function ServiceMapEmbeddable({
   return (
     <EuiPanel
       hasBorder
-      paddingSize="none"
+      paddingSize={paddingSize}
       style={{
         width: '100%',
         minWidth: EMBEDDABLE_MIN_WIDTH,

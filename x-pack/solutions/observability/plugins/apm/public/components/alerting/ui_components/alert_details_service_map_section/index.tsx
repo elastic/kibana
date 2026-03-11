@@ -202,6 +202,7 @@ export function AlertDetailsServiceMapSection({
                 kuery={kuery}
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
+                paddingSize="s"
               />
             </EuiPanel>
           </EuiFlexItem>
