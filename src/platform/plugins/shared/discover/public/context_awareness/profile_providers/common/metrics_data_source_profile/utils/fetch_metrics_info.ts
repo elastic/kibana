@@ -62,5 +62,6 @@ export async function fetchMetricsInfo({
     variables,
     executionContext: { page: 'metrics_experience' },
   });
+
   return response;
 }
