@@ -11,7 +11,7 @@ import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
-import { InvalidParamsException } from './invalid_params_exception';
+import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { createMemoryHistory } from 'history';
 import { last } from 'lodash';
 
@@ -448,14 +448,14 @@ describe('createRouter', () => {
 
       expect(() => {
         router.getParams('/services', history.location);
-      }).toThrow(InvalidParamsException);
+      }).toThrow(InvalidRouteParamsException);
 
       try {
         router.getParams('/services', history.location);
       } catch (e) {
-        const error = e as InvalidParamsException;
+        const error = e as InvalidRouteParamsException;
         // rangeFrom should be replaced with default, rangeTo and transactionType preserved
-        expect(error.defaults.query).toEqual(
+        expect(error.patched.query).toEqual(
           expect.objectContaining({
             rangeFrom: 'now-30m',
             rangeTo: 'now',
@@ -490,20 +490,20 @@ describe('createRouter', () => {
 
       expect(() => {
         recoverableRouter.getParams('/', history.location);
-      }).toThrow(InvalidParamsException);
+      }).toThrow(InvalidRouteParamsException);
 
       try {
         recoverableRouter.getParams('/', history.location);
       } catch (e) {
-        const error = e as InvalidParamsException;
+        const error = e as InvalidRouteParamsException;
         // page has no default so it should be removed; rangeFrom and rangeTo preserved
-        expect(error.defaults.query).toEqual(
+        expect(error.patched.query).toEqual(
           expect.objectContaining({
             rangeFrom: 'now-15m',
             rangeTo: 'now',
           })
         );
-        expect(error.defaults.query).not.toHaveProperty('page');
+        expect(error.patched.query).not.toHaveProperty('page');
       }
     });
 
@@ -513,7 +513,7 @@ describe('createRouter', () => {
 
       expect(() => {
         router.getParams('/services', history.location);
-      }).not.toThrow(InvalidParamsException);
+      }).not.toThrow(InvalidRouteParamsException);
 
       expect(() => {
         router.getParams('/services', history.location);
@@ -568,14 +568,14 @@ describe('createRouter', () => {
 
       expect(() => {
         parentChildRouter.getParams('/inventory', history.location);
-      }).toThrow(InvalidParamsException);
+      }).toThrow(InvalidRouteParamsException);
 
       try {
         parentChildRouter.getParams('/inventory', history.location);
       } catch (e) {
-        const error = e as InvalidParamsException;
+        const error = e as InvalidRouteParamsException;
         // sortField should be replaced with child's default; parent params preserved in query
-        expect(error.defaults.query).toEqual(
+        expect(error.patched.query).toEqual(
           expect.objectContaining({
             rangeFrom: 'now-15m',
             rangeTo: 'now',
@@ -625,14 +625,14 @@ describe('createRouter', () => {
 
       expect(() => {
         parentChildRouter.getParams('/inventory', history.location);
-      }).toThrow(InvalidParamsException);
+      }).toThrow(InvalidRouteParamsException);
 
       try {
         parentChildRouter.getParams('/inventory', history.location);
       } catch (e) {
-        const error = e as InvalidParamsException;
+        const error = e as InvalidRouteParamsException;
         // Both should be recovered: rangeFrom from parent default, sortField from child default
-        expect(error.defaults.query).toEqual(
+        expect(error.patched.query).toEqual(
           expect.objectContaining({
             rangeFrom: 'now-30m',
             rangeTo: 'now',

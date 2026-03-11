@@ -18,16 +18,11 @@ import type { MatchedRoute, RouteConfig as ReactRouterConfig } from 'react-route
 import { matchRoutes as matchRoutesConfig } from 'react-router-config';
 import type { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
 import { encodePath } from './encode_path';
-import { InvalidParamsException } from './invalid_params_exception';
+import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
+import { NotFoundRouteException } from './errors';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
-}
-
-export class NotFoundRouteException extends Error {
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 function extractFailingQueryKeys(errors: Errors): Set<string> {
@@ -238,7 +233,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
           mergedQuery[key] = value;
         }
       }
-      throw new InvalidParamsException(errorMessages.join('\n'), {
+      throw new InvalidRouteParamsException(errorMessages.join('\n'), {
         path: results[results.length - 1]?.match.params.path ?? {},
         query: mergedQuery,
       });

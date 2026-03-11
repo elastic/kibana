@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { last } from 'lodash';
-import { useMatchRoutes } from './use_match_routes';
-import { useRouter } from './use_router';
-import { NotFoundRouteException } from './errors';
-
-export function useRoutePath() {
-  const lastRouteMatch = last(useMatchRoutes());
-  const router = useRouter();
-  if (!lastRouteMatch) {
-    throw new NotFoundRouteException('No route was matched');
+export class InvalidRouteParamsException extends Error {
+  constructor(
+    message: string,
+    public readonly patched: { path: Record<string, any>; query: Record<string, any> }
+  ) {
+    super(message);
   }
-
-  return router.getRoutePath(lastRouteMatch.route);
 }

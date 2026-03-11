@@ -13,7 +13,7 @@ import qs from 'query-string';
 import { CurrentRouteContextProvider } from './use_current_route';
 import type { RouteMatch } from './types';
 import { useMatchRoutes } from './use_match_routes';
-import { InvalidParamsException } from './invalid_params_exception';
+import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 
 class ErrorCatcher extends React.Component<{
   children: React.ReactNode;
@@ -52,11 +52,11 @@ export function RouteRendererErrorBoundary({ children }: { children: React.React
 
   const handleError = useCallback(
     (error: Error) => {
-      if (error instanceof InvalidParamsException && !retried) {
+      if (error instanceof InvalidRouteParamsException && !retried) {
         setRetried(true);
         history.replace({
           ...location,
-          search: qs.stringify(error.defaults.query),
+          search: qs.stringify(error.patched.query),
         });
       } else {
         throw error;
