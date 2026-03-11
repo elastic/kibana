@@ -9,7 +9,6 @@ import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 
@@ -106,11 +105,10 @@ describe('<PipelinesCreate />', () => {
   });
 
   test('should send the correct payload', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     fireEvent.click(screen.getByTestId('metaToggle'));
     await screen.findByTestId('metaEditor');
@@ -146,11 +144,10 @@ describe('<PipelinesCreate />', () => {
   });
 
   test('should surface API errors from the request', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     const error = {
       statusCode: 409,
@@ -166,11 +163,10 @@ describe('<PipelinesCreate />', () => {
   });
 
   test('displays nested pipeline errors as a flat list', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
       statusCode: 409,
