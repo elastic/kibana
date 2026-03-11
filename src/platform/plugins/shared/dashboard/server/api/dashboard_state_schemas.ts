@@ -199,7 +199,7 @@ export const accessControlSchema = schema.maybe(
 
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    pinned_panels: schema.maybe(pinnedPanelsSchema),
+    pinned_panels: pinnedPanelsSchema,
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),

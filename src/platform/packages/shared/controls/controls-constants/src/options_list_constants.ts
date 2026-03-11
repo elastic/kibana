@@ -7,11 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const OPTIONS_LIST_DEFAULT_SORT = {
-  by: '_count',
-  direction: 'desc',
+import { DEFAULT_PINNED_DATA_CONTROL_STATE } from './controls_group_constants';
+
+export const DEFAULT_DSL_OPTIONS_LIST_STATE = {
+  sort: {
+    by: '_count',
+    direction: 'desc',
+  },
+  search_technique: 'wildcard',
+  single_select: false,
+  exclude: false,
+  exists_selected: false,
+  run_past_timeout: false,
+  selected_options: [] as Array<string | number>,
 } as const;
 
-export const DEFAULT_SEARCH_TECHNIQUE = 'wildcard';
-export const DEFAULT_DSL_SINGLE_SELECT = false;
-export const DEFAULT_ESQL_SINGLE_SELECT = true;
+export const DEFAULT_PINNED_DSL_OPTIONS_LIST_STATE = {
+  ...DEFAULT_PINNED_DATA_CONTROL_STATE,
+  ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+};
+
+export const DEFAULT_ESQL_OPTIONS_LIST_STATE = {
+  single_select: true,
+  selected_options: [],
+} as const;

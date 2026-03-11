@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
@@ -27,9 +27,9 @@ export const dataControlSchema = controlSchema.extends({
     meta: { description: 'The name of the field in the data view that the control is tied to' },
   }),
   use_global_filters: schema.boolean({
-    defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
+    defaultValue: DEFAULT_DATA_CONTROL_STATE.use_global_filters,
   }),
   ignore_validations: schema.boolean({
-    defaultValue: DEFAULT_IGNORE_VALIDATIONS,
+    defaultValue: DEFAULT_DATA_CONTROL_STATE.ignore_validations,
   }),
 });
