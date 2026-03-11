@@ -25,7 +25,10 @@ import {
   findMissingAlertUuids,
   getAlertUuidsFromState,
 } from './get_tracked_alerts';
-import type { RawAlertInstance } from '../../types';
+import type { RawAlertInstance, RuleAlertData } from '../../types';
+import type { SearchResult, TrackedAADAlerts } from '../types';
+
+type TestAlertDoc = TrackedAADAlerts<RuleAlertData>['all'][string];
 
 const logger = loggingSystemMock.create().get();
 const ruleId = 'test-rule-id';
@@ -106,14 +109,20 @@ describe('get_tracked_alerts', () => {
 
     it('get returns alert by uuid', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const mockAlert = { [ALERT_UUID]: 'uuid-1', [ALERT_INSTANCE_ID]: 'id-1' } as any;
+      const mockAlert = {
+        [ALERT_UUID]: 'uuid-1',
+        [ALERT_INSTANCE_ID]: 'id-1',
+      } as unknown as TestAlertDoc;
       tracked.all['uuid-1'] = mockAlert;
       expect(tracked.get('uuid-1')).toBe(mockAlert);
     });
 
     it('getById finds alert by instance id', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      const mockAlert = { [ALERT_UUID]: 'uuid-1', [ALERT_INSTANCE_ID]: 'id-1' } as any;
+      const mockAlert = {
+        [ALERT_UUID]: 'uuid-1',
+        [ALERT_INSTANCE_ID]: 'id-1',
+      } as unknown as TestAlertDoc;
       tracked.all['uuid-1'] = mockAlert;
       expect(tracked.getById('id-1')).toBe(mockAlert);
       expect(tracked.getById('nonexistent')).toBeUndefined();
@@ -130,7 +139,7 @@ describe('get_tracked_alerts', () => {
         executionUuid: 'exec-1',
       });
 
-      populateTrackedAlerts(tracked, [hit as any]);
+      populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
 
       expect(tracked.all['uuid-1']).toBeDefined();
       expect(tracked.active['uuid-1']).toBeDefined();
@@ -149,7 +158,7 @@ describe('get_tracked_alerts', () => {
         executionUuid: 'exec-1',
       });
 
-      populateTrackedAlerts(tracked, [hit as any]);
+      populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
 
       expect(tracked.recovered['uuid-2']).toBeDefined();
       expect(tracked.active['uuid-2']).toBeUndefined();
@@ -164,7 +173,7 @@ describe('get_tracked_alerts', () => {
         executionUuid: 'exec-1',
       });
 
-      populateTrackedAlerts(tracked, [hit as any]);
+      populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
 
       expect(tracked.delayed['uuid-3']).toBeDefined();
       expect(tracked.active['uuid-3']).toBeUndefined();
@@ -190,7 +199,7 @@ describe('get_tracked_alerts', () => {
         }),
       ];
 
-      populateTrackedAlerts(tracked, hits as any);
+      populateTrackedAlerts(tracked, hits as SearchResult<RuleAlertData>['hits']);
 
       expect(Object.keys(tracked.all)).toHaveLength(2);
       expect(Object.keys(tracked.active)).toHaveLength(1);
@@ -201,7 +210,7 @@ describe('get_tracked_alerts', () => {
   describe('findMissingAlertUuids', () => {
     it('returns uuids not present in tracked alerts', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      tracked.all['uuid-1'] = {} as any;
+      tracked.all['uuid-1'] = {} as unknown as TestAlertDoc;
 
       const missing = findMissingAlertUuids(['uuid-1', 'uuid-2', 'uuid-3'], tracked);
       expect(missing).toEqual(['uuid-2', 'uuid-3']);
@@ -209,8 +218,8 @@ describe('get_tracked_alerts', () => {
 
     it('returns empty when all present', () => {
       const tracked = createEmptyTrackedAlerts<{}>();
-      tracked.all['uuid-1'] = {} as any;
-      tracked.all['uuid-2'] = {} as any;
+      tracked.all['uuid-1'] = {} as unknown as TestAlertDoc;
+      tracked.all['uuid-2'] = {} as unknown as TestAlertDoc;
 
       const missing = findMissingAlertUuids(['uuid-1', 'uuid-2'], tracked);
       expect(missing).toEqual([]);
