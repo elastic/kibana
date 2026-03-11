@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-vm-orchestrator
+  name: bk-kibana-vm-build-orchestrator
   description: Build CI agent VM images for Kibana
   links:
-    - url: "https://buildkite.com/elastic/kibana-vm-orchestrator"
+    - url: "https://buildkite.com/elastic/kibana-vm-build-orchestrator"
       title: Pipeline link
 spec:
   type: buildkite-pipeline
