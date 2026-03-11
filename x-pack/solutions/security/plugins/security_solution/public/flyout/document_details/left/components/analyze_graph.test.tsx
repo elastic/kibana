@@ -12,23 +12,19 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
-import {
-  AnalyzeGraph,
-  ANALYZER_PREVIEW_BANNER,
-  DATA_VIEW_ERROR_TEST_ID,
-  DATA_VIEW_LOADING_TEST_ID,
-} from './analyze_graph';
+import { AnalyzeGraph, DATA_VIEW_ERROR_TEST_ID, DATA_VIEW_LOADING_TEST_ID } from './analyze_graph';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { ANALYZER_PREVIEW_BANNER } from '../../../../resolver/view/resolver_without_providers';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -37,9 +33,7 @@ jest.mock('react-router-dom', () => {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../shared/hooks/use_which_flyout');
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
-);
+jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../../../sourcerer/containers');
@@ -65,10 +59,17 @@ const dataView: DataView = createStubDataView({
 });
 const dataViewSpec: DataViewSpec = createStubDataView({ spec: {} }).toSpec();
 
+const searchHit = {
+  _id: 'eventId',
+  _index: 'index',
+  _source: {},
+} as unknown as DocumentDetailsContext['searchHit'];
+
 const renderAnalyzer = (
   contextValue = {
     eventId: 'eventId',
     scopeId: TableId.test,
+    searchHit,
   } as unknown as DocumentDetailsContext
 ) =>
   render(
@@ -87,7 +88,7 @@ describe('<AnalyzeGraph />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({
       status: 'ready',
       dataView: {
@@ -109,12 +110,12 @@ describe('<AnalyzeGraph />', () => {
     });
 
     it('should render no data message when analyzer is not enabled', () => {
-      (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+      (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
       const contextValue = {
         eventId: 'eventId',
         scopeId: TableId.test,
-        dataAsNestedObject: {},
+        searchHit,
       } as unknown as DocumentDetailsContext;
 
       const { container } = renderAnalyzer(contextValue);

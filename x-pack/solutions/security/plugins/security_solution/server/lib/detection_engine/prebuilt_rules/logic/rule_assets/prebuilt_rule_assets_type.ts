@@ -11,6 +11,14 @@ import type { SavedObjectsType } from '@kbn/core/server';
 
 export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 
+/**
+ * Upper bound for the number of tags per prebuilt rule asset.
+ * In practice, prebuilt rule assets typically have fewer than 15 tags.
+ * This limit exists to satisfy the "unbounded-array-in-schema" CodeQL check.
+ * See: https://github.com/elastic/kibana/security/code-scanning/2072
+ */
+const MAX_TAGS_PER_RULE = 100;
+
 const securityRuleV1 = schema.object(
   {
     rule_id: schema.string(),
@@ -22,7 +30,7 @@ const securityRuleV1 = schema.object(
 const securityRuleV2 = securityRuleV1.extends(
   {
     name: schema.string(),
-    tags: schema.maybe(schema.arrayOf(schema.string())),
+    tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_RULE })),
     severity: schema.string(),
     risk_score: schema.number(),
   },

@@ -179,6 +179,64 @@ describe('Template serialization', () => {
           serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
         ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
       });
+
+      test('migrates deprecated mappings._source.mode to index.mapping.source.mode (stored)', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                mode: 'stored',
+                includes: ['foo'],
+                excludes: ['bar'],
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBe('stored');
+        expect(result.template?.mappings?._source).toEqual({
+          includes: ['foo'],
+          excludes: ['bar'],
+        });
+      });
+
+      test('migrates deprecated mappings._source.mode to index.mapping.source.mode (synthetic)', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBe('synthetic');
+        expect(result.template?.mappings?._source?.mode).toBeUndefined();
+      });
+
+      test('does not migrate enabled _source property - it remains represented via _source.enabled', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                enabled: false,
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBeUndefined();
+        expect(result.template?.mappings?._source).toEqual({
+          enabled: false,
+        });
+      });
     });
   });
 });

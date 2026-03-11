@@ -14,6 +14,7 @@ import type { ICommandContext, ISuggestionItem } from '../../../../registry/type
 import { getFunctionDefinition } from '../..';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type { Signature } from '../../../types';
+import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
@@ -144,4 +145,17 @@ export async function getKqlSuggestionsIfApplicable(
   } catch (error) {
     return null;
   }
+}
+
+/** Normalizes preferred expression type option into an array form for downstream checks. */
+export function normalizePreferredExpressionTypes(
+  preferredExpressionType?: PreferredExpressionType | PreferredExpressionType[]
+): PreferredExpressionType[] {
+  if (!preferredExpressionType) {
+    return [];
+  }
+
+  return Array.isArray(preferredExpressionType)
+    ? preferredExpressionType
+    : [preferredExpressionType];
 }

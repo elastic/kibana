@@ -26,6 +26,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
+        '--xpack.anonymization.active=true',
       ],
     },
   };
