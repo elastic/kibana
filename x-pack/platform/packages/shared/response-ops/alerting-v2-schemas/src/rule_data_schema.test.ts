@@ -62,6 +62,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
       });
 
       expect(result).toEqual(
@@ -78,6 +79,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
+          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
         })
       );
     });
@@ -540,6 +542,16 @@ describe('updateRuleDataSchema', () => {
   it('accepts partial updates', () => {
     const result = updateRuleDataSchema.parse({ metadata: { name: 'updated name' } });
     expect(result).toEqual({ metadata: { name: 'updated name' } });
+  });
+
+  it('accepts artifacts in update payload and supports null removal', () => {
+    const withArtifacts = updateRuleDataSchema.parse({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
+    expect(withArtifacts.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+
+    const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
+    expect(nullArtifacts.artifacts).toBeNull();
   });
 
   it('accepts a state_transition object', () => {

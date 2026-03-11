@@ -43,6 +43,12 @@ export interface RecoveryPolicy {
   };
 }
 
+export interface RuleArtifact {
+  id: string;
+  type: string;
+  value: string;
+}
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -65,4 +71,5 @@ export interface FormValues {
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
+  artifacts?: RuleArtifact[];
 }

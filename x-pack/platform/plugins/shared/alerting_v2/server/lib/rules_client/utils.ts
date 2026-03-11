@@ -60,6 +60,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     grouping: data.grouping,
     no_data: data.no_data,
     notification_policies: data.notification_policies,
+    artifacts: data.artifacts,
     ...serverFields,
   };
 }
@@ -100,6 +101,7 @@ export function buildUpdateRuleAttributes(
       updateData.notification_policies,
       existingAttrs.notification_policies
     ),
+    artifacts: nullToUndefined(updateData.artifacts, existingAttrs.artifacts),
     // Server-managed fields — preserved as-is except timestamps and user.
     enabled: existingAttrs.enabled,
     createdBy: existingAttrs.createdBy,
@@ -139,6 +141,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     grouping: attrs.grouping,
     no_data: attrs.no_data,
     notification_policies: attrs.notification_policies,
+    artifacts: attrs.artifacts,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

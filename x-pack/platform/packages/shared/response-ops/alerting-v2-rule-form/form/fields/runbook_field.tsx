@@ -24,6 +24,9 @@ import { useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
+const RUNBOOK_ARTIFACT_TYPE = 'runbook';
+const createRunbookArtifactId = () =>
+  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 export interface RunbookFieldProps {
   isOpen: boolean;
@@ -32,7 +35,9 @@ export interface RunbookFieldProps {
 
 export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) => {
   const { watch, setValue } = useFormContext<FormValues>();
-  const runbookValue = watch('metadata.runbook') ?? '';
+  const artifacts = watch('artifacts') ?? [];
+  const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
+  const runbookValue = runbookArtifact?.value ?? '';
   const [draftRunbook, setDraftRunbook] = useState(runbookValue);
 
   useEffect(() => {
@@ -42,7 +47,22 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
   }, [isOpen, runbookValue]);
 
   const handleSaveRunbook = () => {
-    setValue('metadata.runbook', draftRunbook, {
+    const trimmedRunbook = draftRunbook.trim();
+    const nonRunbookArtifacts = artifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
+    const nextArtifacts = trimmedRunbook
+      ? [
+          ...nonRunbookArtifacts,
+          {
+            id: runbookArtifact?.id ?? createRunbookArtifactId(),
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: trimmedRunbook,
+          },
+        ]
+      : nonRunbookArtifacts;
+
+    setValue('artifacts', nextArtifacts.length ? nextArtifacts : undefined, {
       shouldDirty: true,
       shouldTouch: true,
     });

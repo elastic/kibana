@@ -22,9 +22,13 @@ import { useFormContext } from 'react-hook-form';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
 
+const RUNBOOK_ARTIFACT_TYPE = 'runbook';
+
 export const AttacmentRunbookGroup: React.FC = () => {
-  const { watch, setValue } = useFormContext<FormValues>();
-  const runbookValue = watch('metadata.runbook');
+  const { watch, setValue, getValues } = useFormContext<FormValues>();
+  const artifacts = watch('artifacts') ?? [];
+  const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
+  const runbookValue = runbookArtifact?.value;
   const hasRunbook = Boolean(runbookValue?.trim());
   const runbookTitle = runbookValue
     ?.split('\n')
@@ -56,12 +60,16 @@ export const AttacmentRunbookGroup: React.FC = () => {
   }, []);
 
   const onConfirmDeleteRunbook = useCallback(() => {
-    setValue('metadata.runbook', '', {
+    const currentArtifacts = getValues('artifacts') ?? [];
+    const nextArtifacts = currentArtifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
+    setValue('artifacts', nextArtifacts.length ? nextArtifacts : undefined, {
       shouldDirty: true,
       shouldTouch: true,
     });
     closeDeleteConfirm();
-  }, [closeDeleteConfirm, setValue]);
+  }, [closeDeleteConfirm, getValues, setValue]);
 
   const toggleAttachmentsOpen = useCallback(() => {
     setIsAttachmentsOpen((prev) => !prev);

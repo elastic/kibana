@@ -15,15 +15,17 @@ import { RunbookField } from './runbook_field';
 
 const RunbookValueSpy = () => {
   const { watch } = useFormContext<FormValues>();
-  return <div data-test-subj="runbookValueSpy">{watch('metadata.runbook') ?? ''}</div>;
+  const runbookValue =
+    watch('artifacts')?.find((artifact) => artifact.type === 'runbook')?.value ?? '';
+  return <div data-test-subj="runbookValueSpy">{runbookValue}</div>;
 };
 
 const createDefaultValues = (runbook: string = ''): Partial<FormValues> => ({
   metadata: {
     name: 'Test rule',
     enabled: true,
-    runbook,
   },
+  ...(runbook ? { artifacts: [{ id: 'runbook', type: 'runbook', value: runbook }] } : {}),
 });
 
 describe('RunbookField', () => {
@@ -47,7 +49,7 @@ describe('RunbookField', () => {
     expect(screen.getByRole('button', { name: 'Add Runbook' })).toBeInTheDocument();
   });
 
-  it('prefills editor from metadata.runbook value', () => {
+  it('prefills editor from runbook artifact value', () => {
     render(<RunbookField isOpen={true} onClose={jest.fn()} />, {
       wrapper: createFormWrapper(createDefaultValues('Existing runbook content')),
     });
