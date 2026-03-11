@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseAwsHost, signRequest } from "./aws_credential_helpers";
+import { parseAwsHost, signRequest } from './aws_credential_helpers';
 
 describe('parseAwsHost()', () => {
   it('returns null for non-AWS hostnames', () => {
