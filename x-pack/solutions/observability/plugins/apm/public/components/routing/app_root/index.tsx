@@ -17,8 +17,8 @@ import {
 import { Route } from '@kbn/shared-ux-router';
 import {
   RouteRenderer,
+  RouteSelfHealErrorBoundary,
   RouterProvider,
-  RouteRendererErrorBoundary,
 } from '@kbn/typed-react-router-config';
 import React, { useEffect } from 'react';
 import { EMPTY, skip } from 'rxjs';
@@ -77,7 +77,7 @@ export function ApmAppRoot({
                   <RouterProvider history={history} router={apmRouter as any}>
                     <PerformanceContextProvider>
                       <ApmErrorBoundary>
-                        <RouteRendererErrorBoundary>
+                        <RouteSelfHealErrorBoundary>
                           <RedirectDependenciesToDependenciesInventory>
                             <RedirectWithDefaultEnvironment>
                               <RedirectWithDefaultDateRange>
@@ -103,7 +103,7 @@ export function ApmAppRoot({
                               </RedirectWithDefaultDateRange>
                             </RedirectWithDefaultEnvironment>
                           </RedirectDependenciesToDependenciesInventory>
-                        </RouteRendererErrorBoundary>
+                        </RouteSelfHealErrorBoundary>
                       </ApmErrorBoundary>
                     </PerformanceContextProvider>
                   </RouterProvider>
