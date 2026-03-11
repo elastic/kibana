@@ -25,6 +25,8 @@ export const dataVisualizerFieldHistogramsSchema = schema.object({
   samplerShardSize: schema.number(),
   /** Optional search time runtime fields */
   runtimeMappings: runtimeMappingsSchema,
+  /** Optional project routing */
+  projectRouting: schema.maybe(schema.string()),
 });
 
 export const dataVisualizerFieldStatsSchema = schema.object({
