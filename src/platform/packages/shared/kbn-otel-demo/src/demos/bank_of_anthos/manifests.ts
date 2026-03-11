@@ -10,8 +10,6 @@
 import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
-import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
-
 /**
  * Creates common Kubernetes resources needed by all demos
  */
@@ -284,13 +282,44 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
-  args?: string[];
-  volumeMounts?: Array<{ name: string; mountPath: string }>;
-  volumes?: Array<{ name: string; configMap?: { name: string } }>;
+  mountJwtKeys?: boolean;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
     : [];
+
+  const container: Record<string, unknown> = {
+    name: opts.name,
+    image: opts.image,
+    ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
+    ...(envList.length > 0 && { env: envList }),
+  };
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.mountJwtKeys) {
+    container.volumeMounts = [
+      {
+        name: 'keys',
+        mountPath: '/tmp/.ssh',
+        readOnly: true,
+      },
+    ];
+    podSpec.volumes = [
+      {
+        name: 'keys',
+        secret: {
+          secretName: 'jwt-key',
+          items: [
+            { key: 'jwtRS256.key', path: 'privatekey' },
+            { key: 'jwtRS256.key.pub', path: 'publickey' },
+          ],
+        },
+      },
+    ];
+  }
 
   return {
     apiVersion: 'apps/v1',
@@ -319,19 +348,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [
-            {
-              name: opts.name,
-              image: opts.image,
-              ...(opts.args && { args: opts.args }),
-              ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
-              ...(envList.length > 0 && { env: envList }),
-              ...(opts.volumeMounts && { volumeMounts: opts.volumeMounts }),
-            },
-          ],
-          ...(opts.volumes && { volumes: opts.volumes }),
-        },
+        spec: podSpec,
       },
     },
   };
@@ -358,9 +375,83 @@ function createService(name: string, namespace: string, ports: number[]): object
 }
 
 /**
- * Manifest generator for OpenTelemetry Demo
+ * Creates a ConfigMap for Bank of Anthos environment and service configurations
  */
-export const otelDemoManifests: DemoManifestGenerator = {
+function createConfigMaps(namespace: string): object[] {
+  return [
+    {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'environment-config',
+        namespace,
+      },
+      data: {
+        LOCAL_ROUTING_NUM: '883745000',
+        PUB_KEY_PATH: '/tmp/.ssh/publickey',
+      },
+    },
+    {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'demo-data-config',
+        namespace,
+      },
+      data: {
+        USE_DEMO_DATA: 'True',
+        DEMO_LOGIN_USERNAME: 'testuser',
+        DEMO_LOGIN_PASSWORD: 'bankofanthos',
+      },
+    },
+  ];
+}
+
+/**
+ * Creates a JWT key secret for Bank of Anthos authentication
+ */
+function createJwtSecret(namespace: string): object {
+  // Generated 4096-bit RSA key pair for JWT signing (PKCS#8 format)
+  // Using `data` (base64) instead of `stringData` to avoid YAML serialization issues with multiline PEM content
+  const privateKeyBase64 =
+    'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUpRZ0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQ1N3d2dna29BZ0VBQW9JQ0FRRElWajRPbktOM2FhL3IKV3kyaUpKN1pVU0k4UUQrOGgxdE9HT3ZvNFdDbHVyK2V3SUoxN2lMYkR6RkZ1ZmN0UHBLcnVqVHlyS3d3ZHJLcQpDejlGVHZBME5aTDFHb0p1VnNZb1pQcS95QnZvcit3ZzZDU3R5NmVORFdJY2t0bTZVSGh3WlB5am5hUGlydDJiCk9DNnNsU3p1Szdxb0tIZFYvLzZOc3VHd0VJckxRQlRzYUtuSE56bTRnSE1nU2g0cHhBS2JzZFhkV2ZjZU9NZ2gKWEJ4NUpDQkRCWjBLMzViWUFkZGZUTkxyNjFEN0Jhb0FjT24yb3BRL2tmQjh2ZXpGTFhKUlZpK2Y5UktsQmpMdAo3WUppVjd4akNISThFWlczazVhaW1DVzJBWktQNmVUdzI2bHFaRDFmaEdIeU1hUTF3SWFmejlyRjNTN3BiRDAzCmZ1Z3B2bUo1VlliL1NIUGtGR2VCZjVMWCtlbGtDWlpKT1JlaXFzVlVPNjY5dWZzZ0RWMVNMVUo3NzZZNlhaYTEKejk4U2ZCK3Z4SUcrTVZuRXFQVndiNlBwQzNpNWZXUmlIMUNneHU2Tk1aR1NFWDBUUG44Z2RmcGtxREpnd1kvagpvL1JTckF1Y1NEYSs3UE1hMGE1Q3diR3liczRxRGlSN2VmUVFoWU54SE4yU2hiZlkrUTdCRDUxeFRvN2Myb3RMCnJqanJPSjI5dFh1OVRpbWEyNGg0VlA1SXRLMnlJSkxOT0NIcEZWd3pISXhHWVNqTDZXckwyWXhmZXQ3Q1hFa1MKc0FXWkxBRnhCSU1SL3FlMTMxLzEvcWp1OVRDTGFiV3YyK1pxdFpBbnNkMTVuYnQ2N05JYzRHZ2lLVlZndkNXWApMbnVyTFk4YzNaSlZ6b2NLa0xlSjFkMW9rczJPRndJREFRQUJBb0lDQURzcVZUdUZnVFYwRGhOcEl5bit2TGNiCm9ndS9RZE9RK2lNdmN3U2RBeWtPNVNhaVhpVXNCamxCM0dCbVVweVhIVVFBUTBEa1JCb3dCQVg2T2w1aXVNZ0MKaG50Q3NBQ2NPZnVXRHdQeXVtTlhDVnFTbExxTEtkbWJlVDFORldaVCs2M2Q5VXJ3OUlTdTloMndVd0IvTWZ6SgpCMkJBU3pZbjIyckh5S1Z4elR2SG1pWlRwc2lDQTliOGdJT3B3QXkvcWJHSHJNeXBsRFRsdWgwNEVlU3BDYW9oCmowYTF6OXZOZDJqYXpIUUdWQzArZC8yWFcxR09wRSs5N3hNNEdDUUhqdnA4aEtZdC82cWpFUWw1bW9jbXVDbGIKUmpsOVRBVWlYbHQ0cWJKOTltWHdRci9yYjdaUEVsMFNRTWNCYUNqRHlqNkthV2NFTXFXWFpPRHQ1dXpsSURtRgpEY3N3RWYwL0prckppeVVMNEtLTUZZQ1FQemNRc2hVYnlydG4xVkFVekhRZEV4M1l4VUNCdGxQTjdUQ2oyOG50CmFOcHFPQ1pUTDlFbkRMTmtFcXU0MjRLbzNZZ2hwcnpJaDQ4VmhpWVBaemlOeUJmckxkTUk1OHVCYmpSSkc5RTAKR3RTTzdlaTA3ajNJT3hZOUU2WGpESmxYYk04UjkrUnNoLy9CMENBYng3RVRCdHhQbUdENmkxQzNQak5XWWo2OQpjTE0xbUFtL1hhb256bUtNZmdXek1RZ3VxSXhyYlNOdSs1dERrS2t2TlFKdTh4RzlhV0x5UmhndVUreGtybk90CnRaQVZJTVlsRTl0clRqM25PbHA0Vms0NGhRY3BoMWVESmFWbjd0MUxLMTBSZ2FvTk5TbkhnSVpJZHpkQkd0a2kKdnNzT3REN2liWm4xSFNVa29iTlpBb0lCQVFEMmFZVzdZaGVPM1dOMHVaeGNGNlBYcmRPK1JiSkdPV284RzllKwo4azRncGpSZVhhaUI5N0R1V3E5OEpOeUh3QzZ3aURheW9waTFoSXpTaVh4NTV1YXlrZzRYRmFHMFY0OGJ5VisxCkhRNW5zamdBUVVSMTVTdGNtenZ1QlZETVFMemhON2NOa0hzL1p4eGQ3SllVWTU0anV3T0ZQaWdRVnBTSjI5OWIKZXNyQlN3UllkVDVkMTRkWWJ1NTBCc2VWcDN4VU9kUkg3YmZsQlRUa0ZyVE9IN3J6Vnp4SXFxQW5GL3VoWTgxWgpYcm5hS05RYi9VaVplUEwvUEt1ejdmdUJxZ3dMV1UxYkREOEJRanlvWDlWdUhvYlpWVWRNdUNhdFc3dGJYMWZZCmZIVmt5bWlScWlqbVcxVllHMGZ0RFprQjR0dDh6Uzh2eDNyZDRYRGp5QXNsUDlON0FvSUJBUURRSWNVdXExUWUKVTFqV0t3Z0U5dGg3allmdkl5akFscFBHck45cHFrTzJGU0hJU203dlAzRitzdEdkcWZZSHJad2ZxMzZ5eCsrTgoxU3NhNEdGUTJleVFXQXE1d1RneUdPS0JFa0hmM3RQUWErZXhVNkVQS1hzV3NrZGc4WkJWVW9IQ1pDcGJmMEFhCnJ5Q3lNU09aWTZ0UnpDeFc0RWVGR2JzWG5FbTlGTTdqN0pISktNTmxERDJzelY4cURCNVB6K1dRdU1USy9TbG0KK1FNNFNheW1MR0NoRXd4YlJCVjNib1JnOFVuUE1hTkdsUEZUZlJEUSsxdWl0bEZkOE9FRkx2VEJ6b3djNVk1TwptNkpjUVZVOVEwY0xjK0krOVZmRm5abW9wMnI4TENoVWVqNC93b3J0YVVzUlhzcGE4MXZUTmxuRjdZSDRKK0oyCklocjVHdnViZHc4VkFvSUJBQnJ3akhOaEZReEVmZ1FiNnRGU3NGSDdLaVFxUUlSVzhKdGp1K0dmWWhWRnRvSCsKb1ZhY090YkVTVjA4Tm5RTStjM0pCcG5mRnV6NWNkL3VzaEl0d1ZrU2lNSFRWcHQ5MnlLQmtKb2ZkQnk0S2xFMAowWVJHS3NoMEhFZzRnbzNpSWdSSmNCVG1qK0x0cGZkS3oxbXBUbmUva1hIMnlyQ0dsclMvdWhxcFFST0MzUlhDCnM2L1V5WEpNcG5zKzVvRWhENEd4MU5pTVQ4ZVZHeVE0cTBuQnhGR29YdW5lNWFXQWhMMHZTUnNWTlNKNXhqN04KSVN2T1FsclBTa0pncVZlU3ZNQmM0ZzByT0pRdHBxNE4xQ3EyNGExUEduMXp3SjdCWWFscXNoTDBBRzJsaDJzdApmRTA2L1FpbDZ1WXF6MmlhWWI2eVBBOXdNcW1oWlJNeUlxM08zWk1DZ2dFQU4xUWk1UXNxcTMwZ3FwNTUzVWY1CnVLNmhLbE5BYkNJYldyOXVETnIwY1IwaEErdTFuZWhSdFlxMzZwL2FCYVNEVW0vMm1IUktISHhFbnpweTVGbHEKWjl6ZnpRMnVjTExvMDhNVXUveXlkaitaTWl5M0xoNnEyQmZBbmViWnBiVHZSY3YyN3FmZlZMaWxpbmxCcTI4eApoZWN2Q2xGSThmc3JIMVd1ekpNUmhNbkkzNTcwZ3BKRWV3R0ZnTm9EM05lNWdVVjlHekU5cG1BZ0dRQ000d2Y5CkVCVE9QaHpWVUJDVEpHcEFZdEloUTR3b3N6Y1dGMWdhdmlDVmROR3FJQVNoa0R2bVIzQkc2bUs1UUtrbGpjbXEKdzBLbExITndSOXBqbE5BY3dyakNaK0t2VmFmVDR0VVEzYWREUi9aVnZNcEFCenZpUnlQak1lQlRKMUdpL1dzagpHUUtDQVFFQW9CV2RjMjBiNlArN2NydVc5bTR1bHd2M0MzR01LU0RPL0tiajFBbGM4VldiRnFJV0dla01kWEZHClFVQXc2b3NJZzhoWUttVyt6NWsyZlF3alE2aEZXVTBDUFVIdXVMemM2MVo4QmxNWTdpQmQwSFBJK08xVmJkUWsKczJvZ2pPQUVya3hrSnlIUTZqKzAvbi9tcVgvTldLS2l0SkFXMVpuQmNzNzRRKzRYQzhiWkNPd3pNTUJzNC9KVApqRDN3T0c2NUVnYkkwNDg5blNGekJsbEd3VnhnaTZmb1YwL094TlVWaVh1Y0lGcDUrYnBlUndmcThja3JBOHA3CnZHK2xLWHpwbld4VC9sLzJJZXlSTDJETWs2YUxhbFNqS21wcmxueFB1djkyZ1hPbmY4WDdKMkhvK04wNnpzNWoKeTRNSGQzNndiV3RDMXJtYi8wRnkyU2d1L3BGOTBRPT0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo=';
+
+  const publicKeyBase64 =
+    'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQ0lqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FnOEFNSUlDQ2dLQ0FnRUF5RlkrRHB5amQybXY2MXN0b2lTZQoyVkVpUEVBL3ZJZGJUaGpyNk9GZ3BicS9uc0NDZGU0aTJ3OHhSYm4zTFQ2U3E3bzA4cXlzTUhheXFncy9SVTd3Ck5EV1M5UnFDYmxiR0tHVDZ2OGdiNksvc0lPZ2tyY3VualExaUhKTFp1bEI0Y0dUOG81Mmo0cTdkbXpndXJKVXMKN2l1NnFDaDNWZi8ramJMaHNCQ0t5MEFVN0dpcHh6YzV1SUJ6SUVvZUtjUUNtN0hWM1ZuM0hqaklJVndjZVNRZwpRd1dkQ3QrVzJBSFhYMHpTNit0USt3V3FBSERwOXFLVVA1SHdmTDNzeFMxeVVWWXZuL1VTcFFZeTdlMkNZbGU4Cll3aHlQQkdWdDVPV29wZ2x0Z0dTaituazhOdXBhbVE5WDRSaDhqR2tOY0NHbjgvYXhkMHU2V3c5TjM3b0tiNWkKZVZXRy8waHo1QlJuZ1grUzEvbnBaQW1XU1RrWG9xckZWRHV1dmJuN0lBMWRVaTFDZSsrbU9sMld0Yy9mRW53ZgpyOFNCdmpGWnhLajFjRytqNlF0NHVYMWtZaDlRb01idWpUR1JraEY5RXo1L0lIWDZaS2d5WU1HUDQ2UDBVcXdMCm5FZzJ2dXp6R3RHdVFzR3hzbTdPS2c0a2UzbjBFSVdEY1J6ZGtvVzMyUGtPd1ErZGNVNk8zTnFMUzY0NDZ6aWQKdmJWN3ZVNHBtdHVJZUZUK1NMU3RzaUNTelRnaDZSVmNNeHlNUm1Fb3krbHF5OW1NWDNyZXdseEpFckFGbVN3QgpjUVNERWY2bnRkOWY5ZjZvN3ZVd2kybTFyOXZtYXJXUUo3SGRlWjI3ZXV6U0hPQm9JaWxWWUx3bGx5NTdxeTJQCkhOMlNWYzZIQ3BDM2lkWGRhSkxOamhjQ0F3RUFBUT09Ci0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo=';
+
+  return {
+    apiVersion: 'v1',
+    kind: 'Secret',
+    metadata: {
+      name: 'jwt-key',
+      namespace,
+    },
+    type: 'Opaque',
+    data: {
+      'jwtRS256.key': privateKeyBase64,
+      'jwtRS256.key.pub': publicKeyBase64,
+    },
+  };
+}
+
+/**
+ * Creates a ServiceAccount for Bank of Anthos
+ */
+function createServiceAccount(namespace: string): object {
+  return {
+    apiVersion: 'v1',
+    kind: 'ServiceAccount',
+    metadata: {
+      name: 'bank-of-anthos',
+      namespace,
+    },
+  };
+}
+
+/**
+ * Manifest generator for Bank of Anthos
+ */
+export const bankOfAnthosManifests: DemoManifestGenerator = {
   generate(options: ManifestOptions): string {
     const manifests: object[] = [];
     const namespace = options.config.namespace;
@@ -370,59 +461,27 @@ export const otelDemoManifests: DemoManifestGenerator = {
     // Add common manifests (namespace, collector, etc.)
     manifests.push(...createCommonManifests(options));
 
-    // Flagd ConfigMap
-    manifests.push({
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: 'flagd-config',
-        namespace,
-      },
-      data: {
-        'demo.flagd.json': JSON.stringify(getFlagdConfig(), null, 2),
-      },
-    });
+    // Add Bank of Anthos specific ConfigMaps and Secrets
+    manifests.push(...createConfigMaps(namespace));
+    manifests.push(createJwtSecret(namespace));
+    manifests.push(createServiceAccount(namespace));
 
     // Get all services for this demo
     const services = options.config.getServices(options.version);
 
+    // Services that need JWT keys mounted for authentication
+    const servicesNeedingJwtKeys = new Set([
+      'userservice',
+      'contacts',
+      'ledgerwriter',
+      'balancereader',
+      'transactionhistory',
+      'frontend',
+    ]);
+
     // Deploy each service
     for (const svc of services) {
-      // Special handling for flagd (needs config volume)
-      if (svc.name === 'flagd') {
-        manifests.push(
-          createDeployment({
-            name: svc.name,
-            namespace,
-            demoId,
-            image: svc.image,
-            ports: svc.port ? [svc.port] : [],
-            args: ['start', '--uri', 'file:/etc/flagd/demo.flagd.json', '--port', '8013'],
-            volumeMounts: [{ name: 'config', mountPath: '/etc/flagd' }],
-            volumes: [{ name: 'config', configMap: { name: 'flagd-config' } }],
-          })
-        );
-        manifests.push(createService(svc.name, namespace, svc.port ? [svc.port] : []));
-        continue;
-      }
-
-      // For demo services (not valkey, flagd), add OTLP configuration
-      const isInfraService = ['valkey', 'redis-cart'].includes(svc.name);
-
       let finalEnv = { ...svc.env };
-
-      if (!isInfraService) {
-        // Use HTTP port (4318) for services that don't support gRPC, gRPC port (4317) for others
-        const otlpPort = HTTP_OTLP_SERVICES.has(svc.name) ? '4318' : '4317';
-
-        finalEnv = {
-          ...finalEnv,
-          OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
-          OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
-          OTEL_SERVICE_NAME: svc.name,
-        };
-      }
 
       // Apply scenario overrides (take precedence)
       const serviceEnvOverrides = envOverrides[svc.name] || {};
@@ -436,6 +495,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          mountJwtKeys: servicesNeedingJwtKeys.has(svc.name),
         })
       );
 
@@ -460,7 +520,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           },
           ports: [
             {
-              port: 8080,
+              port: 80,
               targetPort: 8080,
               nodePort: options.config.frontendService.nodePort,
             },
@@ -469,6 +529,6 @@ export const otelDemoManifests: DemoManifestGenerator = {
       });
     }
 
-    return manifests.map((m) => yaml.dump(m)).join('---\n');
+    return manifests.map((m) => yaml.dump(m, { lineWidth: -1 })).join('---\n');
   },
 };

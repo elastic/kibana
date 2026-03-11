@@ -10,8 +10,6 @@
 import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
-import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
-
 /**
  * Creates common Kubernetes resources needed by all demos
  */
@@ -284,13 +282,70 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  command?: string[];
   args?: string[];
+  resources?: {
+    limits?: { memory?: string; cpu?: string };
+    requests?: { memory?: string; cpu?: string };
+  };
+  initContainers?: Array<{
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string[];
+    volumeMounts?: Array<{ name: string; mountPath: string }>;
+  }>;
+  volumes?: Array<{
+    name: string;
+    emptyDir?: Record<string, never>;
+    configMap?: { name: string };
+  }>;
   volumeMounts?: Array<{ name: string; mountPath: string }>;
-  volumes?: Array<{ name: string; configMap?: { name: string } }>;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
     : [];
+
+  const container: Record<string, unknown> = {
+    name: opts.name,
+    image: opts.image,
+  };
+
+  if (opts.ports && opts.ports.length > 0) {
+    container.ports = opts.ports.map((p) => ({ containerPort: p }));
+  }
+
+  if (envList.length > 0) {
+    container.env = envList;
+  }
+
+  if (opts.command) {
+    container.command = opts.command;
+  }
+
+  if (opts.args) {
+    container.args = opts.args;
+  }
+
+  if (opts.resources) {
+    container.resources = opts.resources;
+  }
+
+  if (opts.volumeMounts) {
+    container.volumeMounts = opts.volumeMounts;
+  }
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.initContainers && opts.initContainers.length > 0) {
+    podSpec.initContainers = opts.initContainers;
+  }
+
+  if (opts.volumes && opts.volumes.length > 0) {
+    podSpec.volumes = opts.volumes;
+  }
 
   return {
     apiVersion: 'apps/v1',
@@ -319,19 +374,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [
-            {
-              name: opts.name,
-              image: opts.image,
-              ...(opts.args && { args: opts.args }),
-              ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
-              ...(envList.length > 0 && { env: envList }),
-              ...(opts.volumeMounts && { volumeMounts: opts.volumeMounts }),
-            },
-          ],
-          ...(opts.volumes && { volumes: opts.volumes }),
-        },
+        spec: podSpec,
       },
     },
   };
@@ -358,9 +401,67 @@ function createService(name: string, namespace: string, ports: number[]): object
 }
 
 /**
- * Manifest generator for OpenTelemetry Demo
+ * Creates Kafka deployment with special initialization for KRaft mode
  */
-export const otelDemoManifests: DemoManifestGenerator = {
+function createKafkaDeployment(namespace: string, demoId: string): object {
+  return {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: {
+      name: 'fights-kafka',
+      namespace,
+      labels: {
+        app: 'fights-kafka',
+        'app.kubernetes.io/name': 'fights-kafka',
+        'app.kubernetes.io/part-of': demoId,
+      },
+    },
+    spec: {
+      replicas: 1,
+      selector: {
+        matchLabels: {
+          app: 'fights-kafka',
+        },
+      },
+      template: {
+        metadata: {
+          labels: {
+            app: 'fights-kafka',
+            'app.kubernetes.io/name': 'fights-kafka',
+            'app.kubernetes.io/part-of': demoId,
+          },
+        },
+        spec: {
+          containers: [
+            {
+              name: 'fights-kafka',
+              image: 'quay.io/strimzi/kafka:0.43.0-kafka-3.8.0',
+              command: [
+                'sh',
+                '-c',
+                'export CLUSTER_ID=$(bin/kafka-storage.sh random-uuid) && bin/kafka-storage.sh format -t ${CLUSTER_ID} -c config/kraft/server.properties && bin/kafka-server-start.sh config/kraft/server.properties --override advertised.listeners=${KAFKA_ADVERTISED_LISTENERS}',
+              ],
+              ports: [{ containerPort: 9092 }],
+              env: [
+                { name: 'LOG_DIR', value: '/tmp/logs' },
+                { name: 'KAFKA_ADVERTISED_LISTENERS', value: 'PLAINTEXT://fights-kafka:9092' },
+              ],
+              resources: {
+                limits: { memory: '1Gi', cpu: '1' },
+                requests: { memory: '512Mi', cpu: '0.5' },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+}
+
+/**
+ * Manifest generator for Quarkus Super Heroes
+ */
+export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
   generate(options: ManifestOptions): string {
     const manifests: object[] = [];
     const namespace = options.config.namespace;
@@ -370,26 +471,33 @@ export const otelDemoManifests: DemoManifestGenerator = {
     // Add common manifests (namespace, collector, etc.)
     manifests.push(...createCommonManifests(options));
 
-    // Flagd ConfigMap
-    manifests.push({
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: 'flagd-config',
-        namespace,
-      },
-      data: {
-        'demo.flagd.json': JSON.stringify(getFlagdConfig(), null, 2),
-      },
-    });
-
     // Get all services for this demo
     const services = options.config.getServices(options.version);
 
     // Deploy each service
     for (const svc of services) {
-      // Special handling for flagd (needs config volume)
-      if (svc.name === 'flagd') {
+      let finalEnv = { ...svc.env };
+
+      // Apply scenario overrides (take precedence)
+      const serviceEnvOverrides = envOverrides[svc.name] || {};
+      finalEnv = { ...finalEnv, ...serviceEnvOverrides };
+
+      // Handle Kafka specially - needs custom command for KRaft initialization
+      if (svc.name === 'fights-kafka') {
+        manifests.push(createKafkaDeployment(namespace, demoId));
+      } else {
+        // Standard deployment with resource limits for Quarkus services
+        const resources =
+          svc.name.startsWith('rest-') ||
+          svc.name.startsWith('grpc-') ||
+          svc.name === 'event-statistics' ||
+          svc.name === 'ui-super-heroes'
+            ? {
+                limits: { memory: '1Gi', cpu: '1' },
+                requests: { memory: '256Mi', cpu: '0.5' },
+              }
+            : svc.resources;
+
         manifests.push(
           createDeployment({
             name: svc.name,
@@ -397,54 +505,23 @@ export const otelDemoManifests: DemoManifestGenerator = {
             demoId,
             image: svc.image,
             ports: svc.port ? [svc.port] : [],
-            args: ['start', '--uri', 'file:/etc/flagd/demo.flagd.json', '--port', '8013'],
-            volumeMounts: [{ name: 'config', mountPath: '/etc/flagd' }],
-            volumes: [{ name: 'config', configMap: { name: 'flagd-config' } }],
+            env: finalEnv,
+            command: svc.command,
+            args: svc.args,
+            resources,
+            initContainers: svc.initContainers,
+            volumes: svc.volumes,
+            volumeMounts: svc.volumeMounts,
           })
         );
-        manifests.push(createService(svc.name, namespace, svc.port ? [svc.port] : []));
-        continue;
       }
-
-      // For demo services (not valkey, flagd), add OTLP configuration
-      const isInfraService = ['valkey', 'redis-cart'].includes(svc.name);
-
-      let finalEnv = { ...svc.env };
-
-      if (!isInfraService) {
-        // Use HTTP port (4318) for services that don't support gRPC, gRPC port (4317) for others
-        const otlpPort = HTTP_OTLP_SERVICES.has(svc.name) ? '4318' : '4317';
-
-        finalEnv = {
-          ...finalEnv,
-          OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
-          OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
-          OTEL_SERVICE_NAME: svc.name,
-        };
-      }
-
-      // Apply scenario overrides (take precedence)
-      const serviceEnvOverrides = envOverrides[svc.name] || {};
-      finalEnv = { ...finalEnv, ...serviceEnvOverrides };
-
-      manifests.push(
-        createDeployment({
-          name: svc.name,
-          namespace,
-          demoId,
-          image: svc.image,
-          ports: svc.port ? [svc.port] : [],
-          env: finalEnv,
-        })
-      );
 
       if (svc.port) {
         manifests.push(createService(svc.name, namespace, [svc.port]));
       }
     }
 
-    // Frontend NodePort for external access
+    // Frontend NodePort for external access (UI Super Heroes)
     if (options.config.frontendService) {
       manifests.push({
         apiVersion: 'v1',
@@ -468,6 +545,52 @@ export const otelDemoManifests: DemoManifestGenerator = {
         },
       });
     }
+
+    // Additional NodePort for rest-fights API (for external API testing)
+    manifests.push({
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: 'rest-fights-external',
+        namespace,
+      },
+      spec: {
+        type: 'NodePort',
+        selector: {
+          app: 'rest-fights',
+        },
+        ports: [
+          {
+            port: 8082,
+            targetPort: 8082,
+            nodePort: 30083,
+          },
+        ],
+      },
+    });
+
+    // Event statistics external access
+    manifests.push({
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: 'event-statistics-external',
+        namespace,
+      },
+      spec: {
+        type: 'NodePort',
+        selector: {
+          app: 'event-statistics',
+        },
+        ports: [
+          {
+            port: 8085,
+            targetPort: 8085,
+            nodePort: 30084,
+          },
+        ],
+      },
+    });
 
     return manifests.map((m) => yaml.dump(m)).join('---\n');
   },
