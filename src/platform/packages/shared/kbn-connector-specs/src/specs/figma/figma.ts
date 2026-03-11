@@ -126,14 +126,38 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-team-projects
     listTeamProjects: {
       input: z.object({
-        teamId: z.string().describe('Figma team ID (found in the URL when viewing a team page)'),
+        teamId: z
+          .string()
+          .optional()
+          .describe(
+            'Figma team ID from the team page URL. If you do not have it, use url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
+          ),
+        url: z
+          .string()
+          .optional()
+          .describe(
+            'Figma team page URL. Provide this if teamId is not available; the team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.'
+          ),
       }),
       handler: async (ctx, input: Figma.ListTeamProjectsInput) => {
+        let teamId = input.teamId;
+        if (teamId === undefined && input.url !== undefined) {
+          const parsed = parseFigmaUrlInternal(input.url);
+          if (parsed.error !== undefined) {
+            throw new Error(parsed.error);
+          }
+          teamId = parsed.teamId;
+        }
+        if (teamId === undefined || teamId === '') {
+          throw new Error(
+            'Either teamId or url is required. If you do not have the team ID, ask the user to paste the Figma team page URL.'
+          );
+        }
         const response = await ctx.client.get(
-          `${FIGMA_API_BASE}/v1/teams/${input.teamId}/projects`,
+          `${FIGMA_API_BASE}/v1/teams/${teamId}/projects`,
           {}
         );
-        return response.data;
+        return { ...response.data, teamId };
       },
     },
 
@@ -152,52 +176,6 @@ export const FigmaConnector: ConnectorSpec = {
       },
     },
 
-    parseFigmaUrl: {
-      isTool: false,
-      input: z.object({
-        url: z
-          .string()
-          .describe('A Figma URL (file, team, or project page). Paste from the browser.'),
-      }),
-      handler: async (
-        _ctx,
-        input: Figma.ParseFigmaUrlInput
-      ): Promise<Figma.ParseFigmaUrlResult> => {
-        const result: Figma.ParseFigmaUrlResult = {};
-        try {
-          const url = new URL(input.url.trim());
-          if (!url.hostname.includes('figma.com')) {
-            return { error: 'Not a Figma URL', code: 'NOT_FIGMA' };
-          }
-          const pathSegments = url.pathname.replace(/^\/+|\/+$/g, '').split('/');
-          if (pathSegments.length >= 2 && pathSegments[0] === 'team') {
-            result.teamId = pathSegments[1];
-          }
-          const firstSegment = pathSegments[0];
-          if (
-            pathSegments.length >= 2 &&
-            firstSegment !== undefined &&
-            FILE_PATH_PREFIX_SET.has(firstSegment)
-          ) {
-            const candidate = pathSegments[1];
-            if (candidate && FILE_KEY_REGEX.test(candidate)) {
-              result.fileKey = candidate;
-            }
-          }
-          const nodeIdParam = url.searchParams.get('node-id');
-          if (nodeIdParam) {
-            result.nodeId = nodeIdParam.replace(/-/g, ':');
-          }
-          if (result.fileKey === undefined && result.teamId === undefined) {
-            result.error = 'URL did not match a file or team page';
-            result.code = 'NO_MATCH';
-          }
-        } catch {
-          return { error: 'Invalid URL', code: 'INVALID_URL' };
-        }
-        return result;
-      },
-    },
   },
 
   test: {
@@ -223,3 +201,50 @@ export const FigmaConnector: ConnectorSpec = {
     },
   },
 };
+
+/** Result of parsing a Figma URL (e.g. team page). Used only by parseFigmaUrlInternal. */
+interface ParseFigmaUrlResult {
+  fileKey?: string;
+  teamId?: string;
+  nodeId?: string;
+  error?: string;
+  code?: 'INVALID_URL' | 'NOT_FIGMA' | 'NO_MATCH';
+}
+
+/** Extracts teamId from a Figma team page URL. Used by listTeamProjects when url is provided. */
+function parseFigmaUrlInternal(urlString: string): ParseFigmaUrlResult {
+  const result: ParseFigmaUrlResult = {};
+  try {
+    const url = new URL(urlString.trim());
+    if (!url.hostname.includes('figma.com')) {
+      return { error: 'Not a Figma URL', code: 'NOT_FIGMA' };
+    }
+    const pathSegments = url.pathname.replace(/^\/+|\/+$/g, '').split('/');
+    if (pathSegments.length >= 2 && pathSegments[0] === 'team') {
+      result.teamId = pathSegments[1];
+    }
+    const firstSegment = pathSegments[0];
+    if (
+      pathSegments.length >= 2 &&
+      firstSegment !== undefined &&
+      FILE_PATH_PREFIX_SET.has(firstSegment)
+    ) {
+      const candidate = pathSegments[1];
+      if (candidate && FILE_KEY_REGEX.test(candidate)) {
+        result.fileKey = candidate;
+      }
+    }
+    const nodeIdParam = url.searchParams.get('node-id');
+    if (nodeIdParam) {
+      result.nodeId = nodeIdParam.replace(/-/g, ':');
+    }
+    if (result.fileKey === undefined && result.teamId === undefined) {
+      result.error = 'URL did not match a file or team page';
+      result.code = 'NO_MATCH';
+    }
+  } catch {
+    return { error: 'Invalid URL', code: 'INVALID_URL' };
+  }
+  return result;
+}
+

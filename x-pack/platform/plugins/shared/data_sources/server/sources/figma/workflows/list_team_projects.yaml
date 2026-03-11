@@ -1,9 +1,13 @@
 version: '1'
 name: 'sources.figma.list_team_projects'
 description: >
-  List all projects in a Figma team. Returns project names and IDs. Use the project
-  IDs from the results with the list_project_files tool to browse files within a
-  project. Team IDs can be found in the Figma URL when viewing a team page.
+  List all projects in a Figma team. Returns project names, IDs, and the teamId (so
+  it can be reused in later steps). Use the project IDs with list_project_files to
+  browse files. Team ID can be from the team page URL or passed as url to be extracted.
+  If team ID is not available in the conversation context, ask the user to `Please provide one of the following:
+    - A Figma team URL or team page link
+    - A specific Figma file URL (if you know where one of your retro boards is)
+    - Any Figma URL from your workspace'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -11,11 +15,16 @@ triggers:
 inputs:
   - name: team_id
     type: string
-    required: true
-    description: 'The Figma team ID (found in the URL on the team page)'
+    required: false
+    description: 'The Figma team ID from the team page URL. If you do not have it, provide url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
+  - name: url
+    type: string
+    required: false
+    description: 'Figma team page URL. Use when team_id is not available; the team ID will be extracted. If neither team_id nor url is available, ask the user to paste the team page URL.'
 steps:
   - name: list-team-projects
     type: figma.listTeamProjects
     connector-id: <%= figma-stack-connector-id %>
     with:
       teamId: "${{inputs.team_id}}"
+      url: "${{inputs.url}}"

@@ -155,7 +155,7 @@ describe('FigmaConnector', () => {
   });
 
   describe('listTeamProjects action', () => {
-    it('should list projects in a team', async () => {
+    it('should list projects in a team when teamId is provided', async () => {
       const mockResponse = {
         data: {
           projects: [
@@ -174,7 +174,38 @@ describe('FigmaConnector', () => {
         'https://api.figma.com/v1/teams/team456/projects',
         {}
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({ ...mockResponse.data, teamId: 'team456' });
+    });
+
+    it('should extract teamId from url when teamId is not provided', async () => {
+      const mockResponse = {
+        data: { projects: [{ id: 'p1', name: 'Project Alpha' }] },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await FigmaConnector.actions.listTeamProjects.handler(mockContext, {
+        url: 'https://www.figma.com/team/123456789/Team-Name',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.figma.com/v1/teams/123456789/projects',
+        {}
+      );
+      expect(result).toEqual({ ...mockResponse.data, teamId: '123456789' });
+    });
+
+    it('should throw when neither teamId nor url is provided', async () => {
+      await expect(
+        FigmaConnector.actions.listTeamProjects.handler(mockContext, {})
+      ).rejects.toThrow('Either teamId or url is required');
+    });
+
+    it('should throw when url is invalid or does not contain team ID', async () => {
+      await expect(
+        FigmaConnector.actions.listTeamProjects.handler(mockContext, {
+          url: 'https://www.figma.com/design/ABC123/My-File',
+        })
+      ).rejects.toThrow('URL did not match a file or team page');
     });
   });
 
@@ -199,77 +230,6 @@ describe('FigmaConnector', () => {
         email: 'designer@example.com',
         img_url: 'https://figma.com/avatar.png',
       });
-    });
-  });
-
-  describe('parseFigmaUrl action', () => {
-    it('should extract fileKey from a design URL', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/design/ABC123xyz/My-File',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({ fileKey: 'ABC123xyz' });
-    });
-
-    it('should extract fileKey and nodeId from design URL with node-id query (hyphen normalized to colon)', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/design/ABC123/My-Design?node-id=1-2',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({ fileKey: 'ABC123', nodeId: '1:2' });
-    });
-
-    it('should extract teamId from a team URL', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/team/123456789/Team-Name',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({ teamId: '123456789' });
-    });
-
-    it('should return error object for invalid URL', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'not-a-valid-url',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({ error: 'Invalid URL', code: 'INVALID_URL' });
-    });
-
-    it('should return error object for non-Figma URL', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://example.com/design/ABC123/Name',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({ error: 'Not a Figma URL', code: 'NOT_FIGMA' });
-    });
-
-    it('should return error object when Figma URL does not match file or team page', async () => {
-      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/community',
-      });
-
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        error: 'URL did not match a file or team page',
-        code: 'NO_MATCH',
-      });
-    });
-
-    it('should extract fileKey from file and board URL types', async () => {
-      const fileResult = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/file/XYZ789/Some-File',
-      });
-      expect(fileResult).toEqual({ fileKey: 'XYZ789' });
-
-      const boardResult = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
-        url: 'https://www.figma.com/board/BOARD99/Board-Name',
-      });
-      expect(boardResult).toEqual({ fileKey: 'BOARD99' });
     });
   });
 

@@ -31,13 +31,10 @@ The Figma connector has the following actions:
 Who am I
 :   Get the currently authenticated Figma user. Returns the user's **id**, **handle**, **email**, and **img_url** for the API credentials in use. No parameters.
 
-Parse Figma URL
-:   Parse a Figma URL (file or team page) and return extracted **file_key**, **team_id**, and **node_id** when present. No API call—useful when the user pastes a link so you can then call **Get file**, **List team projects** or **List project files**, or **Render nodes** with the returned IDs. Supported URLs: file links (`figma.com/design/...`, `figma.com/file/...`, `figma.com/board/...`, `figma.com/proto/...`, `figma.com/slides/...`) and team page links (`figma.com/team/TEAM_ID/...`). Node IDs from `?node-id=1-2` are normalized to colon form (`1:2`) for the API. **project_id** is not extracted; use **List team projects** with the returned team_id to get project IDs. On invalid or non-matching URL, the action returns **error** (message) and **code** (`INVALID_URL`, `NOT_FIGMA`, or `NO_MATCH`) instead of file_key/team_id/node_id.
-    - **url** (required): A Figma URL pasted from the browser (file or team page).
-
 List team projects
-:   List all projects in a Figma team. Use the returned project IDs with **List project files** to browse files.
-    - **teamId** (required): The Figma team ID. Find it in the URL when viewing a team page in Figma.
+:   List all projects in a Figma team. Returns **teamId** (for use in later steps) and project list. Use the returned project IDs with **List project files** to browse files. Provide either **teamId** or **url**; if you do not have the team ID, ask the user to paste the team page URL.
+    - **teamId** (optional): The Figma team ID from the team page URL. If not available, use **url** instead or ask the user to paste the team page URL.
+    - **url** (optional): Figma team page URL (e.g. `figma.com/team/123/Team-Name`). The team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.
 
 List project files
 :   List all files in a Figma project. Returns file names, keys, thumbnail URLs, and last modified dates. Use the returned file keys with **Get file** or **Render nodes**.
@@ -58,7 +55,7 @@ Render nodes
 
 ## Discovery model: hierarchy only [figma-discovery-model]
 
-Figma does not provide a full-text search over files. Discovery is **hierarchical**: use **List team projects** (with a team ID), then **List project files** (with a project ID), then **Get file** (and optionally **Render nodes**). When using this connector as a data source in chat or Agent Builder, users navigate by team and project; there is no single "search my Figma files for X" action. The Figma REST API does not offer a global search endpoint.
+Figma does not provide a full-text search over files. Discovery is **hierarchical**: use **List team projects** (with a team ID or team page URL), then **List project files** (with a project ID), then **Get file** (and optionally **Render nodes**). When using this connector as a data source in chat or Agent Builder, users navigate by team and project; there is no single "search my Figma files for X" action. The Figma REST API does not offer a global search endpoint.
 
 ## Connector networking configuration [figma-connector-networking-configuration]
 
