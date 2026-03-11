@@ -22,7 +22,6 @@ import {
   VISUALIZATION_SECTION_TITLE,
 } from '../../../../flyout_v2/document/components/visualizations_section';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'visualizations';
 

@@ -141,8 +141,7 @@ describe('<VisualizationsSection />', () => {
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
 
     const { getByTestId, queryByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
@@ -153,11 +152,11 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the graph preview component when shouldShowGraph is true', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: true,
-      shouldShowUpsell: true,
+      shouldShowUpsell: false,
       eventIds: [],
     });
 
@@ -171,7 +170,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should not render the graph preview component when shouldShowGraph is false', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
 
     const { queryByTestId } = renderVisualizationsSection();
 
@@ -179,7 +178,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the graph upsell when shouldShowUpsell is true and upsell component is available', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
@@ -197,7 +196,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should not render the graph upsell when shouldShowUpsell is false', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(true);
+    mockUseExpandSection.mockReturnValue(true);
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
