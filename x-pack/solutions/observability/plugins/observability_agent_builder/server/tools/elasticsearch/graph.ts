@@ -88,8 +88,7 @@ const isDangerousOperation = (
 };
 
 /**
- * Converts an OpenAPI-based Tool into a LangChain-compatible DynamicStructuredTool,
- * binding the Elasticsearch client to the tool's handler.
+ * Converts an OpenAPI-based Tool into a LangChain-compatible
  */
 const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
   return toTool(async (args) => tool.handler(args as Record<string, unknown>, esClient), {
@@ -114,7 +113,7 @@ const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boole
 
 const parseToolResponse = async (
   toolMessage: BaseMessage,
-  chatModel?: BaseChatModel
+  chatModel: BaseChatModel
 ): Promise<{ name: string; response: unknown; console_request?: string }> => {
   const parsedContent = JSON.parse(toolMessage.content as string);
   if (parsedContent.error) {
@@ -124,7 +123,7 @@ const parseToolResponse = async (
       console_request: parsedContent.consoleRequest,
     };
   }
-  const truncatedContent = await truncateJsonResponse(parsedContent.response, { chatModel });
+  const truncatedContent = await truncateJsonResponse(parsedContent.response, chatModel);
 
   return {
     name: toolMessage.name || 'unknown',
