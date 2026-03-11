@@ -17,6 +17,7 @@ import type {
 } from './types';
 import {
   addAgentStreamToZip,
+  addChangelogToZip,
   addDataStreamToZip,
   addFieldsToZip,
   addIngestPipelineToZip,
@@ -155,6 +156,7 @@ export const buildIntegrationPackage = async (
 
   const zip = new AdmZip();
   addManifestToZip(zip, packageName, manifest);
+  addChangelogToZip(zip, packageName, integration.changelog ?? []);
 
   for (const dataStream of dataStreams) {
     const dataStreamManifest = createDataStreamManifest(dataStream);

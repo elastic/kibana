@@ -12,6 +12,7 @@ import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { DataStreamManifest, IntegrationManifest } from './types';
 import { buildAgentTemplate } from './agent_templates';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
+import type { ChangelogEntry } from '../saved_objects/schemas/types';
 
 export const addManifestToZip = (
   zip: AdmZip,
@@ -174,4 +175,15 @@ export const addFieldsToZip = (
 
   const customFieldsYaml = buildCustomFieldsYaml(fieldMappings);
   zip.addFile(path.join(fieldsDir, 'fields.yml'), Buffer.from(customFieldsYaml));
+};
+
+export const addChangelogToZip = (
+  zip: AdmZip,
+  rootDir: string,
+  changelog: ChangelogEntry[]
+): void => {
+  if (changelog.length === 0) return;
+
+  const yamlContent = dump(changelog, { lineWidth: -1, quotingType: '"', forceQuotes: true });
+  zip.addFile(path.join(rootDir, 'changelog.yml'), Buffer.from(yamlContent));
 };

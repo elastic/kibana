@@ -27,7 +27,11 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { IntegrationResponse, DataStreamResponse, TaskStatus, InputType } from '../../common';
-import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
+import type {
+  IntegrationAttributes,
+  DataStreamAttributes,
+  ChangelogEntry,
+} from './saved_objects/schemas/types';
 import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
@@ -289,6 +293,19 @@ export class AutomaticImportService {
       );
     }
 
+    const title = existing.metadata?.title ?? integrationId;
+    const isInitialRelease = !existing.changelog || existing.changelog.length === 0;
+    const changelogEntry: ChangelogEntry = {
+      version,
+      changes: [
+        {
+          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
+          type: 'enhancement',
+          link: '',
+        },
+      ],
+    };
+
     const updateData: IntegrationAttributes = {
       ...existing,
       last_updated_by: authenticatedUser.username,
@@ -297,9 +314,9 @@ export class AutomaticImportService {
       metadata: {
         ...existing.metadata,
       },
+      changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
 
-    // Bump semantic version (defaults to patch) on approval.
     await this.savedObjectService.updateIntegration(updateData, version);
   }
 
