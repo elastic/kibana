@@ -8,6 +8,7 @@
 import { ALERT_NAMESPACE, ALERT_RULE_NAMESPACE, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 
 export const ALERT_ANCESTORS = `${ALERT_NAMESPACE}.ancestors` as const;
+export const ALERT_ANCESTORS_ID = `${ALERT_NAMESPACE}.ancestors.id` as const;
 export const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
 export const ALERT_DEPTH = `${ALERT_NAMESPACE}.depth` as const;
 export const ALERT_GROUP_ID = `${ALERT_NAMESPACE}.group.id` as const;

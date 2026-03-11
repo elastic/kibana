@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-list-mock-data'
   - '@kbn/content-management-tags'
+  - '@kbn/content-management-favorites-public'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/content-list-toolbar'
