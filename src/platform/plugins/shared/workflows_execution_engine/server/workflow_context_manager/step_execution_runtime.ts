@@ -294,10 +294,15 @@ export class StepExecutionRuntime {
 
     const message = `Step '${stepName}' failed: ${executionError.message}`;
 
+    const tags = ['workflow', 'step', 'fail'];
+    if (executionError.type === 'StepSizeLimitExceeded') {
+      tags.push('response-size-exceeded');
+    }
+
     this.stepLogger?.logError(message, executionError, {
       workflow: { step_id: this.node.stepId, step_execution_id: this.stepExecutionId },
       event: { action: 'step-fail', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'fail'],
+      tags,
       labels: {
         step_type: stepType,
         connector_type: stepType,
