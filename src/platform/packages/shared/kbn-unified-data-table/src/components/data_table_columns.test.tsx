@@ -23,6 +23,24 @@ const columnsWithTimeCol = getVisibleColumns(
   true
 ) as string[];
 
+/**
+ * Helper to sanitize grid columns for snapshot testing by removing
+ * DataView references and function references that bloat snapshots
+ */
+const simplifyGridColumnsForSnapshot = (gridColumns: any[]) => {
+  return gridColumns.map((col) => ({
+    ...col,
+    // Keep only essential properties, exclude functions that bloat snapshots
+    // Keep display but sanitize it to remove DataView props
+    display: col.display
+      ? React.cloneElement(col.display, {
+          ...col.display.props,
+          dataView: col.display.props?.dataView ? '[DataView]' : undefined,
+        })
+      : undefined,
+  }));
+};
+
 describe('Data table columns', function () {
   describe('getEuiGridColumns', () => {
     it('returns eui grid columns showing default columns', async () => {
@@ -46,7 +64,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid columns with time column', async () => {
@@ -70,7 +88,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid with in memory sorting', async () => {
@@ -94,7 +112,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     describe('cell actions', () => {
@@ -181,7 +199,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid columns with tokens for custom column types', async () => {
@@ -206,7 +224,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
   });
 
@@ -395,7 +413,7 @@ describe('Data table columns', function () {
         cellActionsHandling: 'replace',
       });
 
-      expect(customizedGridColumns).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(customizedGridColumns)).toMatchSnapshot();
     });
   });
 
@@ -421,7 +439,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
   });
 
