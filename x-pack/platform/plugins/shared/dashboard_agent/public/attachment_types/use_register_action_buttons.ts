@@ -20,7 +20,7 @@ interface UseRegisterActionButtonsParams {
   timeRange: { from: string; to: string };
   initialDashboardInput: DashboardCanvasInitialInput;
   linkedSavedObjectId: string | undefined;
-  doesSavedDashboardExist: (dashboardId: string | undefined) => Promise<boolean>;
+  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const useRegisterActionButtons = ({
