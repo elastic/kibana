@@ -41,7 +41,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'Service Overview - Latency chart "Open in Discover" opens traces experience',
+      'Service Overview - "Open in Discover" links open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
@@ -49,153 +49,56 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('click Open in Discover on latency chart', async () => {
+        await spaceTest.step('Latency chart opens traces experience', async () => {
           await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-
-        await spaceTest.step('verify Overview tab in document flyout', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
           await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
-        });
-      }
-    );
-
-    spaceTest(
-      'Service Overview - Throughput chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
-            params: APM_TIME_RANGE,
-          });
+          await page.goBack();
         });
 
-        await spaceTest.step('click Open in Discover on throughput chart', async () => {
+        await spaceTest.step('Throughput chart opens traces experience', async () => {
           await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Service Overview - Failed transaction rate chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step(
-          'click Open in Discover on failed transaction rate chart',
-          async () => {
-            await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
-        );
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Service Overview - Transactions table "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
-            params: APM_TIME_RANGE,
-          });
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
         });
 
-        await spaceTest.step('open row actions menu on transaction row', async () => {
+        await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
+          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Transactions table opens traces experience', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          await pageObjects.tracesExperience.clickRowAction(
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
             RICH_TRACE.TRANSACTION_NAME,
+            'apmManagedTableActionsMenuItem-transactionsTable-openInDiscover',
             'transactionsGroupTable'
           );
-        });
-
-        await spaceTest.step('click Open in Discover in actions menu', async () => {
-          await page.testSubj
-            .locator('apmManagedTableActionsMenuItem-transactionsTable-openInDiscover')
-            .click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transactions - Latency chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step('click Open in Discover on latency chart', async () => {
-          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transactions - Throughput chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step('click Open in Discover on throughput chart', async () => {
-          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transactions - Failed transaction rate chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step(
-          'click Open in Discover on failed transaction rate chart',
-          async () => {
-            await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
-        );
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
         });
       }
     );
 
     spaceTest(
-      'Transactions - Transactions table "Open in Discover" opens traces experience',
+      'Transactions page - "Open in Discover" links open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
@@ -203,212 +106,148 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on transaction row', async () => {
+        await spaceTest.step('Latency chart opens traces experience', async () => {
+          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Throughput chart opens traces experience', async () => {
+          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
+          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Transactions table opens traces experience', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          await pageObjects.tracesExperience.clickRowAction(
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
             RICH_TRACE.TRANSACTION_NAME,
+            'apmManagedTableActionsMenuItem-transactionsTable-openInDiscover',
             'transactionsGroupTable'
           );
-        });
-
-        await spaceTest.step('click Open in Discover in actions menu', async () => {
-          await page.testSubj
-            .locator('apmManagedTableActionsMenuItem-transactionsTable-openInDiscover')
-            .click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Latency chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
-        });
-
-        await spaceTest.step('click Open in Discover on latency chart', async () => {
-          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Throughput chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
-        });
-
-        await spaceTest.step('click Open in Discover on throughput chart', async () => {
-          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Failed transaction rate chart "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
-        });
-
-        await spaceTest.step(
-          'click Open in Discover on failed transaction rate chart',
-          async () => {
-            await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
-        );
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
         });
       }
     );
 
     spaceTest(
-      'Transaction Detail - "Open in Discover" button opens traces experience',
+      'Transaction Detail - "Open in Discover" links open traces experience',
       async ({ page, pageObjects }) => {
+        const transactionDetailParams = {
+          ...APM_TIME_RANGE,
+          transactionName: RICH_TRACE.TRANSACTION_NAME,
+          transactionType: 'request',
+        };
+
         await spaceTest.step('navigate to APM transaction detail', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
+            params: transactionDetailParams,
           });
         });
 
-        await spaceTest.step('click Open in Discover button', async () => {
+        await spaceTest.step('Latency chart opens traces experience', async () => {
+          await page.testSubj.locator('apmLatencyChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Throughput chart opens traces experience', async () => {
+          await page.testSubj.locator('apmServiceOverviewThroughputChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
+          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
+        });
+
+        await spaceTest.step('"Open in Discover" button opens traces experience', async () => {
           await page.testSubj.locator('apmWaterfallOpenInDiscoverButton').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-
-        await spaceTest.step('verify Overview tab in document flyout', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
           await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
           await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Span flyout "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
+          await page.goBack();
         });
 
-        await spaceTest.step('click a span in the waterfall to open span flyout', async () => {
-          await pageObjects.tracesExperience.clickWaterfallSpan(RICH_TRACE.DB_SPAN_NAME);
-        });
-
-        await spaceTest.step('click Open in Discover in span flyout', async () => {
+        await spaceTest.step('Span flyout "Open in Discover" opens traces experience', async () => {
+          await pageObjects.tracesExperience.apm.clickWaterfallItem(RICH_TRACE.DB_SPAN_NAME);
           await page.testSubj.locator('spanFlyoutViewSpanInDiscoverLink').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
         });
 
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Latency correlations "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
-        });
-
-        await spaceTest.step('switch to Latency correlations tab', async () => {
+        await spaceTest.step('Latency correlations opens traces experience', async () => {
           await page.testSubj.locator('apmLatencyCorrelationsTabButton').click();
-        });
-
-        await spaceTest.step('click Open in Discover on latency correlations', async () => {
           await page.testSubj.locator('apmLatencyCorrelationsOpenInDiscoverButton').click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Transaction Detail - Failed transactions correlations "Open in Discover" opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
-            params: {
-              ...APM_TIME_RANGE,
-              transactionName: RICH_TRACE.TRANSACTION_NAME,
-              transactionType: 'request',
-            },
-          });
-        });
-
-        await spaceTest.step('switch to Failed transactions correlations tab', async () => {
-          await page.testSubj.locator('apmFailedTransactionsCorrelationsTabButton').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
         });
 
         await spaceTest.step(
-          'click Open in Discover on failed transactions correlations',
+          'Failed transactions correlations opens traces experience',
           async () => {
+            await page.testSubj.locator('apmFailedTransactionsCorrelationsTabButton').click();
             await page.testSubj.locator('apmFailedCorrelationsViewInDiscoverButton').click();
+            await pageObjects.discover.waitForDocTableRendered();
+            for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+              await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+            }
+            await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
           }
         );
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
       }
     );
 
     spaceTest(
-      'Errors - Failed transaction rate chart "Open in Discover" opens traces experience',
+      'Errors page - "Open in Discover" links open traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM errors page', async () => {
           await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/errors`, {
@@ -416,37 +255,21 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step(
-          'click Open in Discover on failed transaction rate chart',
-          async () => {
-            await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+        await spaceTest.step('Failed transaction rate chart opens traces experience', async () => {
+          await page.testSubj.locator('apmFailedTransactionRateChartOpenInDiscover').click();
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
           }
-        );
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Errors - "Open in Discover" from error sample opens traces experience',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM errors page', async () => {
-          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/errors`, {
-            params: APM_TIME_RANGE,
-          });
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
         });
 
-        await spaceTest.step('click into first error group', async () => {
-          await pageObjects.tracesExperience.clickTableLink(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR);
-        });
-
-        await spaceTest.step('click Open in Discover on error sample', async () => {
+        await spaceTest.step('Error sample "Open in Discover" opens Discover', async () => {
+          await pageObjects.tracesExperience.apm.clickDetailLink(
+            RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR
+          );
           await page.testSubj.locator('errorGroupDetailsOpenErrorInDiscoverButton').click();
-        });
-
-        await spaceTest.step('verify Discover loads with data', async () => {
           await pageObjects.discover.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
@@ -465,22 +288,23 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('click into operation detail to view a trace sample', async () => {
-          await pageObjects.tracesExperience.clickTableLink(RICH_TRACE.DB_SPAN_NAME);
-        });
-
-        await spaceTest.step('click Open in Discover button', async () => {
+        await spaceTest.step('open operation detail and click Open in Discover', async () => {
+          await pageObjects.tracesExperience.apm.clickDetailLink(RICH_TRACE.DB_SPAN_NAME);
           await page.testSubj.locator('apmWaterfallOpenInDiscoverButton').click();
         });
 
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
+        await spaceTest.step('verify traces experience loaded', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
         });
       }
     );
 
     spaceTest(
-      'Service Inventory - "Open traces in Discover" opens traces experience',
+      'Service Inventory - "Open in Discover" links open correct experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service inventory', async () => {
           await page.gotoApp('apm/services', {
@@ -488,42 +312,24 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on service row', async () => {
-          await pageObjects.tracesExperience.clickRowAction(RICH_TRACE.SERVICE_NAME);
+        await spaceTest.step('"Open traces in Discover" opens traces experience', async () => {
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
+            RICH_TRACE.SERVICE_NAME,
+            'apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover'
+          );
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+          await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          await page.goBack();
         });
 
-        await spaceTest.step('click Open traces in Discover in actions menu', async () => {
-          await page.testSubj
-            .locator('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
-            .click();
-        });
-
-        await spaceTest.step('verify Discover traces experience columns', async () => {
-          await pageObjects.tracesExperience.expectTracesColumnsVisible(pageObjects.discover);
-        });
-      }
-    );
-
-    spaceTest(
-      'Service Inventory - "Open logs in Discover" opens Discover',
-      async ({ page, pageObjects }) => {
-        await spaceTest.step('navigate to APM service inventory', async () => {
-          await page.gotoApp('apm/services', {
-            params: APM_TIME_RANGE,
-          });
-        });
-
-        await spaceTest.step('open row actions menu on service row', async () => {
-          await pageObjects.tracesExperience.clickRowAction(RICH_TRACE.SERVICE_NAME);
-        });
-
-        await spaceTest.step('click Open logs in Discover in actions menu', async () => {
-          await page.testSubj
-            .locator('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
-            .click();
-        });
-
-        await spaceTest.step('verify Discover loads with data', async () => {
+        await spaceTest.step('"Open logs in Discover" opens Discover', async () => {
+          await pageObjects.tracesExperience.apm.clickManagedTableRowAction(
+            RICH_TRACE.SERVICE_NAME,
+            'apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover'
+          );
           await pageObjects.discover.waitForDocTableRendered();
           await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
