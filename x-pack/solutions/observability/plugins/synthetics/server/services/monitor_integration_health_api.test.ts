@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
+  LocationHealthStatusValue,
   SourceType,
   type EncryptedSyntheticsMonitorAttributes,
-} from '../../../common/runtime_types';
-import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import type { RouteContext } from '../types';
-import {
-  getMonitorsIntegrationHealth,
-  LocationHealthStatusValue,
-} from './monitors_integration_health';
+} from '../../common/runtime_types';
+import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
+import type { SyntheticsServerSetup } from '../types';
+import type { MonitorConfigRepository } from './monitor_config_repository';
+import { MonitorIntegrationHealthApi } from './monitor_integration_health_api';
 
-jest.mock('../../synthetics_service/get_private_locations');
-jest.mock('../../synthetics_service/private_location/synthetics_private_location');
+jest.mock('../synthetics_service/get_private_locations');
+jest.mock('../synthetics_service/private_location/synthetics_private_location');
 
-import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { SyntheticsPrivateLocation } from '../../synthetics_service/private_location/synthetics_private_location';
+import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 
 const mockedGetPrivateLocations = getPrivateLocations as jest.MockedFunction<
   typeof getPrivateLocations
@@ -71,14 +70,13 @@ const createPackagePolicy = (
     policy_ids: agentPolicyIds,
   } as unknown as PackagePolicy);
 
-const buildRouteContext = (overrides: {
+const buildApi = (overrides: {
   monitorConfigRepository?: { get: jest.Mock };
   fleetGetByIDs?: jest.Mock;
   fleetAgentPolicyGetByIds?: jest.Mock;
   fleetGetInstallation?: jest.Mock;
-}): RouteContext => {
-  const fleetGetByIDs =
-    overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
+}): MonitorIntegrationHealthApi => {
+  const fleetGetByIDs = overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
 
   const fleetAgentPolicyGetByIds =
     overrides.fleetAgentPolicyGetByIds ??
@@ -87,36 +85,39 @@ const buildRouteContext = (overrides: {
     );
 
   const fleetGetInstallation =
-    overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
+    overrides.fleetGetInstallation ??
+    jest.fn().mockResolvedValue({ install_status: 'installed' });
 
-  return {
-    savedObjectsClient: {} as any,
-    spaceId: SPACE_ID,
-    server: {
-      coreStart: {
-        savedObjects: {
-          createInternalRepository: jest.fn().mockReturnValue({}),
-        },
-      },
-      fleet: {
-        packagePolicyService: {
-          getByIDs: fleetGetByIDs,
-        },
-        agentPolicyService: {
-          getByIds: fleetAgentPolicyGetByIds,
-        },
-        packageService: {
-          asInternalUser: {
-            getInstallation: fleetGetInstallation,
-          },
-        },
+  const server = {
+    coreStart: {
+      savedObjects: {
+        createInternalRepository: jest.fn().mockReturnValue({}),
       },
     },
-    monitorConfigRepository: overrides.monitorConfigRepository ?? { get: jest.fn() },
-  } as unknown as RouteContext;
+    fleet: {
+      packagePolicyService: { getByIDs: fleetGetByIDs },
+      agentPolicyService: { getByIds: fleetAgentPolicyGetByIds },
+      packageService: {
+        asInternalUser: { getInstallation: fleetGetInstallation },
+      },
+    },
+  } as unknown as SyntheticsServerSetup;
+
+  const savedObjectsClient = {} as SavedObjectsClientContract;
+
+  const monitorConfigRepository = (overrides.monitorConfigRepository ?? {
+    get: jest.fn(),
+  }) as unknown as MonitorConfigRepository;
+
+  return new MonitorIntegrationHealthApi(
+    server,
+    savedObjectsClient,
+    monitorConfigRepository,
+    SPACE_ID
+  );
 };
 
-describe('getMonitorsIntegrationHealth', () => {
+describe('MonitorIntegrationHealthApi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -139,13 +140,13 @@ describe('getMonitorsIntegrationHealth', () => {
 
   describe('monitor fetching and partial errors', () => {
     it('returns empty monitors and errors when all monitors fail to fetch', async () => {
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: {
           get: jest.fn().mockRejectedValue(new Error('Saved object not found')),
         },
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1', 'mon-2'], routeContext);
+      const result = await api.getHealth(['mon-1', 'mon-2']);
 
       expect(result.monitors).toHaveLength(0);
       expect(result.errors).toEqual([
@@ -161,9 +162,9 @@ describe('getMonitorsIntegrationHealth', () => {
         .mockResolvedValueOnce(successSO)
         .mockRejectedValueOnce(new Error('Not found'));
 
-      const routeContext = buildRouteContext({ monitorConfigRepository: { get: getMock } });
+      const api = buildApi({ monitorConfigRepository: { get: getMock } });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1', 'mon-2'], routeContext);
+      const result = await api.getHealth(['mon-1', 'mon-2']);
 
       expect(result.monitors).toHaveLength(1);
       expect(result.monitors[0].configId).toBe('mon-1');
@@ -171,13 +172,13 @@ describe('getMonitorsIntegrationHealth', () => {
     });
 
     it('provides a default error message when rejection has no message', async () => {
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: {
           get: jest.fn().mockRejectedValue({}),
         },
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.errors).toEqual([
         { configId: 'mon-1', error: 'Failed to fetch monitor' },
@@ -191,11 +192,11 @@ describe('getMonitorsIntegrationHealth', () => {
         locations: [{ id: 'us-east-1', label: 'US East', isServiceManaged: true }],
       });
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors).toEqual([
         {
@@ -219,12 +220,12 @@ describe('getMonitorsIntegrationHealth', () => {
       mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
 
       const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetInstallation,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors).toHaveLength(1);
       const locStatus = result.monitors[0].locations[0];
@@ -244,14 +245,14 @@ describe('getMonitorsIntegrationHealth', () => {
       const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
       const fleetGetByIDs = jest.fn();
       const fleetAgentPolicyGetByIds = jest.fn();
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetInstallation,
         fleetGetByIDs,
         fleetAgentPolicyGetByIds,
       });
 
-      await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      await api.getHealth(['mon-1']);
 
       expect(fleetGetByIDs).not.toHaveBeenCalled();
       expect(fleetAgentPolicyGetByIds).not.toHaveBeenCalled();
@@ -275,12 +276,12 @@ describe('getMonitorsIntegrationHealth', () => {
 
       const fleetGetInstallation = jest.fn().mockResolvedValue(undefined);
       const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: getMock },
         fleetGetInstallation,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1', 'mon-2'], routeContext);
+      const result = await api.getHealth(['mon-1', 'mon-2']);
 
       expect(result.monitors).toHaveLength(2);
       for (const monitor of result.monitors) {
@@ -305,12 +306,12 @@ describe('getMonitorsIntegrationHealth', () => {
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors).toEqual([
         {
@@ -340,12 +341,12 @@ describe('getMonitorsIntegrationHealth', () => {
       mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
 
       const fleetGetByIDs = jest.fn().mockResolvedValue([]);
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingPackagePolicy);
@@ -362,11 +363,11 @@ describe('getMonitorsIntegrationHealth', () => {
 
       mockedGetPrivateLocations.mockResolvedValue([]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingLocation);
@@ -382,11 +383,11 @@ describe('getMonitorsIntegrationHealth', () => {
 
       mockedGetPrivateLocations.mockResolvedValue([]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].locationLabel).toBe('gone-loc');
     });
@@ -402,12 +403,12 @@ describe('getMonitorsIntegrationHealth', () => {
       mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
 
       const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([]);
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetAgentPolicyGetByIds,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
@@ -436,16 +437,18 @@ describe('getMonitorsIntegrationHealth', () => {
         .fn()
         .mockResolvedValue([{ id: 'existing-agent' }]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
         fleetAgentPolicyGetByIds,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
-      expect(result.monitors[0].locations[1].status).toBe(LocationHealthStatusValue.MissingAgentPolicy);
+      expect(result.monitors[0].locations[1].status).toBe(
+        LocationHealthStatusValue.MissingAgentPolicy
+      );
     });
   });
 
@@ -462,12 +465,12 @@ describe('getMonitorsIntegrationHealth', () => {
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['wrong-agent-policy']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       const locStatus = result.monitors[0].locations[0];
       expect(locStatus.status).toBe(LocationHealthStatusValue.AgentPolicyMismatch);
@@ -490,12 +493,12 @@ describe('getMonitorsIntegrationHealth', () => {
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0].status).toBe(LocationHealthStatusValue.Healthy);
       expect(result.monitors[0].locations[0].policyId).toBe(expectedPolicyId);
@@ -535,12 +538,12 @@ describe('getMonitorsIntegrationHealth', () => {
         .mockResolvedValueOnce(so1)
         .mockResolvedValueOnce(so2);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: getMock },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1', 'mon-2'], routeContext);
+      const result = await api.getHealth(['mon-1', 'mon-2']);
 
       expect(result.monitors).toHaveLength(2);
 
@@ -571,12 +574,12 @@ describe('getMonitorsIntegrationHealth', () => {
       const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
       const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
 
-      const routeContext = buildRouteContext({
+      const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
         fleetGetByIDs,
       });
 
-      const result = await getMonitorsIntegrationHealth(['mon-1'], routeContext);
+      const result = await api.getHealth(['mon-1']);
 
       expect(result.monitors[0].locations[0]).not.toHaveProperty('reason');
     });

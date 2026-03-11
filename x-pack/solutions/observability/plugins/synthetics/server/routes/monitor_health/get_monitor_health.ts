@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import { getMonitorsIntegrationHealth } from './monitors_integration_health';
 
 export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -21,6 +20,6 @@ export const getMonitorsHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   },
   handler: async (routeContext) => {
     const { monitorIds } = routeContext.request.body;
-    return getMonitorsIntegrationHealth(monitorIds, routeContext);
+    return routeContext.monitorIntegrationHealthApi.getHealth(monitorIds);
   },
 });

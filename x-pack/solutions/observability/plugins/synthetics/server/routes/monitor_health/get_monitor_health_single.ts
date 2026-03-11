@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import { getMonitorsIntegrationHealth } from './monitors_integration_health';
 
 export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -20,7 +19,8 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   },
   handler: async (routeContext) => {
     const { monitorId } = routeContext.request.params;
-    const { monitors, errors } = await getMonitorsIntegrationHealth([monitorId], routeContext);
+    const { monitors, errors } =
+      await routeContext.monitorIntegrationHealthApi.getHealth([monitorId]);
 
     if (monitors.length === 0) {
       const error = errors.find((e) => e.configId === monitorId);
