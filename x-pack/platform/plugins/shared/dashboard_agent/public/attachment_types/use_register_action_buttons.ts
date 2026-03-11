@@ -58,9 +58,8 @@ export const useRegisterActionButtons = ({
       const { locator } = dashboardApi;
       buttons.push({
         label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel', {
-          defaultMessage: 'Edit',
+          defaultMessage: 'Edit in Dashboards',
         }),
-        icon: 'pencil',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
           const soExists = linkedSavedObjectIdRef.current
@@ -78,13 +77,12 @@ export const useRegisterActionButtons = ({
         },
       });
     }
-
     buttons.push({
       label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
         defaultMessage: 'Save',
       }),
       icon: 'save',
-      type: ActionButtonType.SECONDARY,
+      type: ActionButtonType.PRIMARY,
       handler: async () => {
         const result = await dashboardApi.runInteractiveSave();
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
