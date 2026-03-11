@@ -24,8 +24,8 @@ test('generates xy chart config', async () => {
         {
           type: 'series',
           seriesType: 'bar',
-          xAxis: '@timestamp',
-          yAxis: [
+          x_axis: '@timestamp',
+          y_axis: [
             {
               label: 'test',
               value: 'count',
@@ -169,8 +169,8 @@ test('generates xy chart config with legend stats', async () => {
         {
           type: 'series',
           seriesType: 'bar',
-          xAxis: '@timestamp',
-          yAxis: [
+          x_axis: '@timestamp',
+          y_axis: [
             {
               label: 'test',
               value: 'count',
@@ -211,11 +211,11 @@ test('it generates xy chart with multiple reference lines', async () => {
         {
           type: 'series',
           seriesType: 'bar',
-          xAxis: {
+          x_axis: {
             type: 'dateHistogram',
             field: '@timestamp',
           },
-          yAxis: [
+          y_axis: [
             {
               label: 'test',
               value: 'count()',
@@ -224,7 +224,7 @@ test('it generates xy chart with multiple reference lines', async () => {
         },
         {
           type: 'reference',
-          yAxis: [
+          y_axis: [
             {
               seriesColor: 'red',
               lineThickness: 2,
@@ -241,7 +241,7 @@ test('it generates xy chart with multiple reference lines', async () => {
         },
         {
           type: 'reference',
-          yAxis: [
+          y_axis: [
             {
               seriesColor: 'yellow',
               fill: 'none',
@@ -312,8 +312,8 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'line',
-            xAxis: '@timestamp',
-            yAxis: [
+            x_axis: '@timestamp',
+            y_axis: [
               {
                 label: 'test',
                 value: 'count',
@@ -345,9 +345,9 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'line',
-            xAxis: '@timestamp',
+            x_axis: '@timestamp',
             breakdown: 'service.name',
-            yAxis: [
+            y_axis: [
               {
                 label: 'test',
                 value: 'count',
@@ -379,9 +379,9 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'line',
-            xAxis: '@timestamp',
+            x_axis: '@timestamp',
             breakdown: ['host.name'],
-            yAxis: [
+            y_axis: [
               {
                 label: 'test',
                 value: 'count',
@@ -413,9 +413,9 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'line',
-            xAxis: '@timestamp',
+            x_axis: '@timestamp',
             breakdown: ['host.name', 'service.name', 'container.id'],
-            yAxis: [
+            y_axis: [
               {
                 label: 'test',
                 value: 'count',
@@ -451,9 +451,9 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'line',
-            xAxis: '@timestamp',
+            x_axis: '@timestamp',
             breakdown: 'service.name',
-            yAxis: [
+            y_axis: [
               {
                 label: 'test',
                 value: 'count',
@@ -463,9 +463,9 @@ describe('breakdown handling', () => {
           {
             type: 'series',
             seriesType: 'bar',
-            xAxis: '@timestamp',
+            x_axis: '@timestamp',
             breakdown: ['host.name', 'container.id'],
-            yAxis: [
+            y_axis: [
               {
                 label: 'test2',
                 value: 'count',
