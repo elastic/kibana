@@ -39,13 +39,12 @@ export interface EditConfigPanelProps {
   startDependencies: LensPluginStartDependencies;
   /** The attributes of the Lens embeddable */
   attributes: TypedLensSerializedState['attributes'];
-  /** Callback for updating the visualization and datasources state.
-   * When restoring state (e.g. on cancel after datasource conversion), pass the datasource id
-   * that the datasourceState belongs to so it is keyed correctly (formBased vs textBased). */
+  /** Callback for updating the visualization and datasources state. */
   updatePanelState: (
     datasourceState: unknown,
     visualizationState: unknown,
     visualizationId?: string,
+    /** When restoring state (e.g. on cancel), pass the datasource the state belongs to. */
     datasourceId?: 'formBased' | 'textBased'
   ) => void;
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;

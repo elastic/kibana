@@ -26,6 +26,12 @@ export function getStateManagementForInlineEditing(
   datasourceMap: DatasourceMap,
   extractFilterReferences: FilterManager['extract']
 ) {
+  const resolveActiveDatasourceId = (
+    explicit?: 'formBased' | 'textBased'
+  ): 'formBased' | 'textBased' => {
+    return explicit ?? getActiveDatasourceIdFromDoc(getAttributes()) ?? initialDatasourceId;
+  };
+
   const updatePanelState = (
     datasourceState: unknown,
     visualizationState: unknown,
@@ -33,8 +39,7 @@ export function getStateManagementForInlineEditing(
     datasourceId?: 'formBased' | 'textBased'
   ) => {
     const viz = getAttributes();
-    const activeDatasourceId =
-      datasourceId ?? getActiveDatasourceIdFromDoc(viz) ?? initialDatasourceId;
+    const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
         isLoading: false,
