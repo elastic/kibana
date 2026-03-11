@@ -12,6 +12,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { useEventDetails } from './hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutMissingAlertsPrivilege } from '../../shared/components/flyout_missing_alerts_privilege';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details_data';
 import type { DocumentDetailsProps } from './types';
@@ -105,6 +106,7 @@ export const DocumentDetailsProvider = memo(
       dataFormattedForFieldBrowser,
       getFieldsData,
       loading,
+      missingAlertsPrivilege,
       refetchFlyoutData,
       searchHit,
     } = useEventDetails({ eventId: id, indexName });
@@ -156,6 +158,10 @@ export const DocumentDetailsProvider = memo(
 
     if (loading) {
       return <FlyoutLoading />;
+    }
+
+    if (missingAlertsPrivilege) {
+      return <FlyoutMissingAlertsPrivilege />;
     }
 
     if (!contextValue) {

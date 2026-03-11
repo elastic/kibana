@@ -21,6 +21,7 @@ import type { GetFieldsData } from './use_get_fields_data';
 import { useGetFieldsData } from './use_get_fields_data';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 /**
  * The referenced alert _index in the flyout uses the `.internal.` such as `.internal.alerts-security.alerts-spaceId` in the alert page flyout and .internal.preview.alerts-security.alerts-spaceId` in the rule creation preview flyout,
@@ -70,6 +71,10 @@ export interface UseEventDetailsResult {
    */
   loading: boolean;
   /**
+   * True when the flyout is open for an alert but the user lacks Alerts feature (securitySolutionAlertsV1) read privilege
+   */
+  missingAlertsPrivilege: boolean;
+  /**
    * Promise to trigger a data refresh
    */
   refetchFlyoutData: () => Promise<void>;
@@ -109,14 +114,20 @@ export const useEventDetails = ({
     : oldRuntimeMappings;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
+  const { hasAlertsRead } = useAlertsPrivileges();
+  const isAlertsIndex = eventIndex != null && eventIndex.includes(DEFAULT_ALERTS_INDEX);
+  const skipEventDetails = !eventId || (isAlertsIndex && !hasAlertsRead);
+
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =
     useTimelineEventsDetails({
       indexName: eventIndex,
       eventId: eventId ?? '',
       runtimeMappings,
-      skip: !eventId,
+      skip: skipEventDetails,
     });
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
+
+  const missingAlertsPrivilege = isAlertsIndex && !hasAlertsRead;
 
   return {
     browserFields,
@@ -124,6 +135,7 @@ export const useEventDetails = ({
     dataFormattedForFieldBrowser,
     getFieldsData,
     loading,
+    missingAlertsPrivilege,
     refetchFlyoutData,
     searchHit,
   };
