@@ -371,10 +371,9 @@ export function generateEsqlQuery(
 
       if (interval === AUTO_INTERVAL) {
         if (hasDateRange(dateRange)) {
-          const rangeDuration = moment.duration(
-            new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime(),
-            'ms'
-          );
+          const { toDate, fromDate } = absDateRange;
+          const absDate = new Date(toDate).getTime() - new Date(fromDate).getTime();
+          const rangeDuration = moment.duration(absDate, 'ms');
           const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
           intervalInMs = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
         } else {

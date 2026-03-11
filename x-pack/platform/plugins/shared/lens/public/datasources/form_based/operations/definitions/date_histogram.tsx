@@ -213,7 +213,7 @@ export const dateHistogramOperation: OperationDefinition<
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const esqlColumnNode = esql.col(column.sourceField);
 
-    if (interval === 'auto') {
+    if (interval === AUTO_INTERVAL) {
       if (hasDateRange(dateRange)) {
         return {
           template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${T_START}, ${T_END})`,
