@@ -8,7 +8,7 @@
  */
 
 import { sortBy } from 'lodash';
-import Histogram from 'hdr-histogram-js';
+import { build as buildHistogram } from 'hdr-histogram-js';
 import type { Histogram as HdrHistogram } from 'hdr-histogram-js';
 
 const ONE_HOUR_IN_MICRO_SECONDS = 1000 * 1000 * 60 * 60;
@@ -41,7 +41,7 @@ class LosslessHistogram {
       return this.backingHistogram;
     }
 
-    const histogram = Histogram.build({
+    const histogram = buildHistogram({
       lowestDiscernibleValue: this.min,
       highestTrackableValue: this.max,
       useWebAssembly: false,
