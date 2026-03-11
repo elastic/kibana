@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -49,6 +48,7 @@ import {
   FIELD_TYPE_MAP,
   TABLE_COLUMNS,
 } from '../data_management/schema_editor/constants';
+import { FieldType } from '../data_management/schema_editor/field_type';
 import type { TableColumnName } from '../data_management/schema_editor/constants';
 
 interface QueryStreamSchemaEditorProps {
@@ -146,6 +146,13 @@ export const QueryStreamSchemaEditor = ({
     setSelectedField(null);
   }, [closeFlyout]);
 
+  const handleClearDescription = useCallback(
+    (field: SchemaEditorField) => {
+      handleFieldUpdate({ ...field, description: undefined });
+    },
+    [handleFieldUpdate]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
       <EuiCallOut
@@ -165,8 +172,7 @@ export const QueryStreamSchemaEditor = ({
             color="warning"
             title={i18n.translate('xpack.streams.queryStreamSchemaEditor.staleFieldsWarning', {
               defaultMessage:
-                'Some field descriptions reference fields no longer in the query output: {fields}',
-              values: { fields: staleFieldNames.join(', ') },
+                'Some field descriptions reference fields no longer in the query output. Use "Clear description" to remove them.',
             })}
             announceOnMount={false}
             size="s"
@@ -179,6 +185,7 @@ export const QueryStreamSchemaEditor = ({
           fields={fields}
           isLoading={loading || isLoadingFields}
           onFieldClick={handleOpenFlyout}
+          onClearDescription={handleClearDescription}
         />
       </EuiFlexItem>
       {isFlyoutOpen && selectedField && (
@@ -208,7 +215,6 @@ export const QueryStreamFieldDescriptionFlyout = ({
 }: QueryStreamFieldDescriptionFlyoutProps) => {
   const flyoutId = useGeneratedHtmlId({ prefix: 'query-stream-field-description' });
   const [description, setDescription] = useState(field.description ?? '');
-  const [isEditing, { on: startEditing }] = useBoolean(false);
 
   const hasChanges = description !== (field.description ?? '');
 
@@ -239,7 +245,7 @@ export const QueryStreamFieldDescriptionFlyout = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              <EuiBadge color="hollow">{field.type ?? 'unknown'}</EuiBadge>
+              <FieldType type={field.type ?? 'unknown'} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="flexStart">
@@ -253,68 +259,50 @@ export const QueryStreamFieldDescriptionFlyout = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              {isEditing ? (
-                <EuiTextArea
-                  aria-label={i18n.translate(
-                    'xpack.streams.queryStreamSchemaEditor.descriptionAriaLabel',
-                    { defaultMessage: 'Field description' }
-                  )}
-                  data-test-subj="streamsAppQueryStreamFieldDescriptionTextArea"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={i18n.translate(
-                    'xpack.streams.queryStreamSchemaEditor.descriptionPlaceholder',
-                    { defaultMessage: 'Add a description for this field...' }
-                  )}
-                  rows={3}
-                  fullWidth
-                />
-              ) : (
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <span>{field.description || '-----'}</span>
-                  <EuiButtonEmpty
-                    size="s"
-                    iconType="pencil"
-                    onClick={startEditing}
-                    data-test-subj="streamsAppQueryStreamFieldEditDescriptionButton"
-                  >
-                    {i18n.translate('xpack.streams.queryStreamSchemaEditor.editDescription', {
-                      defaultMessage: 'Edit description',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexGroup>
-              )}
+              <EuiTextArea
+                aria-label={i18n.translate(
+                  'xpack.streams.queryStreamSchemaEditor.descriptionAriaLabel',
+                  { defaultMessage: 'Field description' }
+                )}
+                data-test-subj="streamsAppQueryStreamFieldDescriptionTextArea"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={i18n.translate(
+                  'xpack.streams.queryStreamSchemaEditor.descriptionPlaceholder',
+                  { defaultMessage: 'Add a description for this field...' }
+                )}
+                rows={3}
+                fullWidth
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutBody>
-      {isEditing && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiButtonEmpty
-              data-test-subj="streamsAppQueryStreamFieldCancelButton"
-              iconType="cross"
-              onClick={onClose}
-              flush="left"
-            >
-              {i18n.translate('xpack.streams.queryStreamSchemaEditor.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-            <EuiButton
-              data-test-subj="streamsAppQueryStreamFieldSaveButton"
-              onClick={handleSave}
-              isLoading={isSaving}
-              disabled={!hasChanges}
-              fill
-            >
-              {i18n.translate('xpack.streams.queryStreamSchemaEditor.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      )}
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty
+            data-test-subj="streamsAppQueryStreamFieldCancelButton"
+            iconType="cross"
+            onClick={onClose}
+            flush="left"
+          >
+            {i18n.translate('xpack.streams.queryStreamSchemaEditor.cancel', {
+              defaultMessage: 'Cancel',
+            })}
+          </EuiButtonEmpty>
+          <EuiButton
+            data-test-subj="streamsAppQueryStreamFieldSaveButton"
+            onClick={handleSave}
+            isLoading={isSaving}
+            disabled={!hasChanges}
+            fill
+          >
+            {i18n.translate('xpack.streams.queryStreamSchemaEditor.save', {
+              defaultMessage: 'Save',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };
@@ -325,19 +313,21 @@ interface QueryStreamSchemaTableProps {
   fields: SchemaEditorField[];
   isLoading: boolean;
   onFieldClick: (field: SchemaEditorField) => void;
+  onClearDescription: (field: SchemaEditorField) => void;
 }
 
 const QueryStreamSchemaTable = ({
   fields,
   isLoading,
   onFieldClick,
+  onClearDescription,
 }: QueryStreamSchemaTableProps) => {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(QUERY_STREAM_COLUMNS);
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
   const trailingColumns = useMemo(
-    () => [createQueryStreamFieldActionsCellRenderer(fields, onFieldClick)],
-    [fields, onFieldClick]
+    () => [createQueryStreamFieldActionsCellRenderer(fields, onFieldClick, onClearDescription)],
+    [fields, onFieldClick, onClearDescription]
   );
 
   const RenderCellValue = useMemo(() => createQueryStreamCellRenderer(fields), [fields]);
@@ -433,7 +423,8 @@ const createQueryStreamCellRenderer =
 
 const createQueryStreamFieldActionsCellRenderer = (
   fields: SchemaEditorField[],
-  onFieldClick: (field: SchemaEditorField) => void
+  onFieldClick: (field: SchemaEditorField) => void,
+  onClearDescription: (field: SchemaEditorField) => void
 ): EuiDataGridControlColumn => ({
   id: 'field-actions',
   width: 40,
@@ -450,16 +441,27 @@ const createQueryStreamFieldActionsCellRenderer = (
     const field = fields[rowIndex];
     if (!field) return null;
 
-    return <QueryStreamFieldActionsCell field={field} onFieldClick={onFieldClick} />;
+    return (
+      <QueryStreamFieldActionsCell
+        field={field}
+        onFieldClick={onFieldClick}
+        onClearDescription={onClearDescription}
+      />
+    );
   },
 });
 
 interface QueryStreamFieldActionsCellProps {
   field: SchemaEditorField;
   onFieldClick: (field: SchemaEditorField) => void;
+  onClearDescription: (field: SchemaEditorField) => void;
 }
 
-const QueryStreamFieldActionsCell = ({ field, onFieldClick }: QueryStreamFieldActionsCellProps) => {
+const QueryStreamFieldActionsCell = ({
+  field,
+  onFieldClick,
+  onClearDescription,
+}: QueryStreamFieldActionsCellProps) => {
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'queryStreamFieldActionsPopover',
   });
@@ -476,6 +478,20 @@ const QueryStreamFieldActionsCell = ({ field, onFieldClick }: QueryStreamFieldAc
           closePopover();
         },
       },
+      ...(field.description
+        ? [
+            {
+              name: i18n.translate(
+                'xpack.streams.queryStreamSchemaEditor.clearDescriptionAction',
+                { defaultMessage: 'Clear description' }
+              ),
+              onClick: () => {
+                onClearDescription(field);
+                closePopover();
+              },
+            },
+          ]
+        : []),
     ];
 
     return [
@@ -490,7 +506,7 @@ const QueryStreamFieldActionsCell = ({ field, onFieldClick }: QueryStreamFieldAc
         })),
       },
     ];
-  }, [closePopover, field, onFieldClick]);
+  }, [closePopover, field, onClearDescription, onFieldClick]);
 
   return (
     <EuiPopover
@@ -568,8 +584,16 @@ const useQueryStreamSchemaFields = ({
       (fieldName) => !queryFieldNames.has(fieldName)
     );
 
+    const staleFieldEntries: SchemaEditorField[] = staleFields.map((fieldName) => ({
+      name: fieldName,
+      type: undefined,
+      parent: definition.stream.name,
+      status: 'unmapped' as const,
+      description: fieldDescriptions[fieldName],
+    }));
+
     return {
-      fields: activeFields,
+      fields: [...activeFields, ...staleFieldEntries],
       staleFieldNames: staleFields,
     };
   }, [columnsFromQuery, definition.stream.name, fieldDescriptions]);
