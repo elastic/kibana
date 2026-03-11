@@ -9,7 +9,7 @@
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButton, EuiCheckbox, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { TimeRangeBounds } from '../types';
 import { Calendar } from '../calendar';
@@ -210,25 +210,23 @@ export function CalendarPanel() {
           firstDayOfWeek={calendarOptions?.firstDayOfWeek}
         />
       </PanelBody>
-      <PanelFooter>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent={onPresetSave ? 'spaceBetween' : 'flexEnd'}
-        >
-          {onPresetSave && (
-            <EuiCheckbox
-              id={saveAsPresetCheckboxId}
-              label={calendarPanelTexts.saveAsPreset}
-              checked={saveAsPreset}
-              onChange={() => setSaveAsPreset((prev) => !prev)}
-            />
-          )}
-          {isApplyDisabled && !isRangeComplete ? (
+      <PanelFooter
+        primaryAction={
+          isApplyDisabled && !isRangeComplete ? (
             <EuiToolTip content={calendarPanelTexts.selectEndDateTooltip}>{applyButton}</EuiToolTip>
           ) : (
             applyButton
-          )}
-        </EuiFlexGroup>
+          )
+        }
+      >
+        {onPresetSave && (
+          <EuiCheckbox
+            id={saveAsPresetCheckboxId}
+            label={calendarPanelTexts.saveAsPreset}
+            checked={saveAsPreset}
+            onChange={() => setSaveAsPreset((prev) => !prev)}
+          />
+        )}
       </PanelFooter>
     </PanelContainer>
   );
