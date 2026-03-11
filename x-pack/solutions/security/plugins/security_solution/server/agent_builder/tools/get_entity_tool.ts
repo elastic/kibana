@@ -18,7 +18,11 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../common';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  ESSENTIAL_ALERT_FIELDS,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
@@ -344,7 +348,7 @@ export const getEntityTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { attachments, spaceId, esClient }) => {
       logger.debug(
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -378,6 +382,21 @@ export const getEntityTool = (
         const enrichedResults = await Promise.all(
           values.map((row) =>
             enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
+          )
+        );
+
+        await Promise.all(
+          enrichedResults.map((res) =>
+            attachments.add({
+              type: SecurityAgentBuilderAttachments.entity,
+              data: {
+                identifier: 'Camille_Kris',
+                identifierType: 'user',
+                attachmentLabel: 'User',
+                link: '/app/security/users/name/Camille_Kris/events',
+              },
+              description: `User Entity Camille_Kris`,
+            })
           )
         );
 
