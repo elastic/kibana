@@ -10,6 +10,8 @@ import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/for
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
+  EuiTitle,
+  EuiPanel,
   EuiIconTip,
   EuiFieldText,
   EuiFlexGroup,
@@ -42,8 +44,8 @@ import {
   TIMEOUT_TOOLTIP_CONTENT,
   SCRIPT_SELECTION_LABEL,
   SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
-  RUNSCRIPT_CONFIG_LABEL,
   RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
+  RUNSCRIPT_CONFIG_LABEL,
 } from './translations';
 
 const getDefaultRunScriptConfiguration = () => {
@@ -194,66 +196,78 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
   }
 
   return (
-    <EuiFormRow
-      fullWidth
-      label={RUNSCRIPT_CONFIG_LABEL}
-      helpText={RUNSCRIPT_CONFIG_REQUIRES_ONE_OS}
+    <EuiPanel
       data-test-subj={dataTestSubj}
+      color="transparent"
+      hasShadow={false}
+      paddingSize="none"
     >
-      <EuiText size="s">
-        {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
-          (osType, index) => {
-            return (
-              <div key={osType}>
-                <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h5>{RUNSCRIPT_CONFIG_LABEL}</h5>
+      </EuiTitle>
 
-                <RunScriptOsTypeConfig
-                  key={osType}
-                  platform={osType}
-                  showFieldLabels={index === 0}
-                  config={value[osType]}
-                  data-test-subj={getTestId(osType)}
-                  onChange={({ updatedConfig, isValid, errors }) => {
-                    const updatedValidationState: RunscriptOsValidationState = {
-                      ...osValidationState,
-                      [osType]: { isValid, errors },
-                    };
-
-                    setOsValidationState(updatedValidationState);
-                    onChange({
-                      isValid: Object.values(updatedValidationState).every(
-                        ({ isValid: isOsValueValid }) => isOsValueValid
-                      ),
-                      errors: Object.entries(updatedValidationState).reduce(
-                        (acc, [platform, osValidationResult]) => {
-                          if (!osValidationResult.isValid) {
-                            acc.push(
-                              ...(osValidationResult.errors ?? []).map(
-                                (errorMessage) =>
-                                  `${
-                                    OS_TITLES[platform as keyof typeof OS_TITLES]
-                                  }: ${errorMessage}`
-                              )
-                            );
-                          }
-
-                          return acc;
-                        },
-                        [] as string[]
-                      ),
-                    });
-                    emitUseFieldChange({
-                      ...value,
-                      [osType]: updatedConfig,
-                    });
-                  }}
-                />
-              </div>
-            );
-          }
-        )}
+      <EuiText color="subdued" size="s">
+        <p>{RUNSCRIPT_CONFIG_REQUIRES_ONE_OS}</p>
       </EuiText>
-    </EuiFormRow>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel color="subdued" hasShadow={false} paddingSize="m" borderRadius="m" hasBorder>
+        <EuiText size="s">
+          {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
+            (osType, index) => {
+              return (
+                <div key={osType}>
+                  <EuiSpacer size="m" />
+
+                  <RunScriptOsTypeConfig
+                    key={osType}
+                    platform={osType}
+                    showFieldLabels={index === 0}
+                    config={value[osType]}
+                    data-test-subj={getTestId(osType)}
+                    onChange={({ updatedConfig, isValid, errors }) => {
+                      const updatedValidationState: RunscriptOsValidationState = {
+                        ...osValidationState,
+                        [osType]: { isValid, errors },
+                      };
+
+                      setOsValidationState(updatedValidationState);
+                      onChange({
+                        isValid: Object.values(updatedValidationState).every(
+                          ({ isValid: isOsValueValid }) => isOsValueValid
+                        ),
+                        errors: Object.entries(updatedValidationState).reduce(
+                          (acc, [platform, osValidationResult]) => {
+                            if (!osValidationResult.isValid) {
+                              acc.push(
+                                ...(osValidationResult.errors ?? []).map(
+                                  (errorMessage) =>
+                                    `${
+                                      OS_TITLES[platform as keyof typeof OS_TITLES]
+                                    }: ${errorMessage}`
+                                )
+                              );
+                            }
+
+                            return acc;
+                          },
+                          [] as string[]
+                        ),
+                      });
+                      emitUseFieldChange({
+                        ...value,
+                        [osType]: updatedConfig,
+                      });
+                    }}
+                  />
+                </div>
+              );
+            }
+          )}
+        </EuiText>
+      </EuiPanel>
+    </EuiPanel>
   );
 });
 AutomatedRunScriptConfiguration.displayName = 'AutomatedRunScriptConfiguration';
