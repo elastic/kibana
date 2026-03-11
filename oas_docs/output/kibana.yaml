@@ -42304,7 +42304,8 @@ paths:
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
           name: skipDependencyCheck
           required: false
           schema:
