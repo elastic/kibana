@@ -10,7 +10,6 @@
 import React from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
 import { combineLatest, distinctUntilChanged, map, type Observable, shareReplay } from 'rxjs';
-import deepEqual from 'react-fast-compare';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -27,53 +26,6 @@ export interface BreadcrumbsState {
   legacyBadge: State<ChromeBadge | undefined>;
   breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
 }
-
-interface BadgesExtensionRenderModel {
-  badges: ChromeBreadcrumbsBadge[];
-  isFirst: boolean;
-}
-
-const toBadgesExtensionRenderModel = (
-  badges: ChromeBreadcrumbsBadge[],
-  extensionCount: number
-): BadgesExtensionRenderModel | undefined => {
-  if (badges.length === 0) {
-    return undefined;
-  }
-
-  return {
-    badges,
-    isFirst: extensionCount === 0,
-  };
-};
-
-const areBadgesRenderModelsEqual = (
-  prev: BadgesExtensionRenderModel | undefined,
-  next: BadgesExtensionRenderModel | undefined
-) => {
-  if (prev === undefined || next === undefined) {
-    return prev === next;
-  }
-
-  return prev.isFirst === next.isFirst && deepEqual(prev.badges, next.badges);
-};
-
-const toBadgesExtension = (
-  badgesRenderModel: BadgesExtensionRenderModel | undefined
-): ChromeBreadcrumbsAppendExtension | undefined => {
-  if (!badgesRenderModel) {
-    return undefined;
-  }
-
-  return {
-    content: (
-      <HeaderBreadcrumbsBadges
-        badges={badgesRenderModel.badges}
-        isFirst={badgesRenderModel.isFirst}
-      />
-    ),
-  };
-};
 
 const chromeBadgeToBreadcrumbsBadge = (badge: ChromeBadge): ChromeBreadcrumbsBadge => ({
   badgeText: badge.text,
@@ -95,21 +47,32 @@ export const createBreadcrumbsState = (): BreadcrumbsState => {
   const breadcrumbsBadges = createArrayState<ChromeBreadcrumbsBadge>();
   const legacyBadge = createState<ChromeBadge | undefined>(undefined);
 
-  const allBadges$ = combineLatest([breadcrumbsBadges.$, legacyBadge.$]).pipe(
-    map(([badges, legacy]) => {
-      if (!legacy) {
-        return badges;
-      }
-      return [chromeBadgeToBreadcrumbsBadge(legacy), ...badges];
-    }),
-    distinctUntilChanged(deepEqual),
+  const convertedLegacyBadge$ = legacyBadge.$.pipe(
+    map((legacy) => (legacy ? chromeBadgeToBreadcrumbsBadge(legacy) : undefined)),
+    distinctUntilChanged(),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
-  const badgesExtension$ = combineLatest([allBadges$, breadcrumbsAppendExtensions.$]).pipe(
-    map(([badges, extensions]) => toBadgesExtensionRenderModel(badges, extensions.length)),
-    distinctUntilChanged(areBadgesRenderModelsEqual),
-    map(toBadgesExtension),
+  const badgesExtension$ = combineLatest([
+    breadcrumbsAppendExtensions.$,
+    breadcrumbsBadges.$,
+    convertedLegacyBadge$,
+  ]).pipe(
+    map(([extensions, badges, converted]): [boolean, ChromeBreadcrumbsBadge[]] => {
+      const allBadges = converted ? [converted, ...badges] : badges;
+      return [extensions.length === 0, allBadges];
+    }),
+    distinctUntilChanged(([prevIsFirst, prevBadges], [nextIsFirst, nextBadges]) =>
+      prevIsFirst === nextIsFirst && prevBadges === nextBadges
+    ),
+    map(([isFirst, allBadges]): ChromeBreadcrumbsAppendExtension | undefined => {
+      if (allBadges.length === 0) {
+        return undefined;
+      }
+      return {
+        content: <HeaderBreadcrumbsBadges badges={allBadges} isFirst={isFirst} />,
+      };
+    }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
@@ -117,13 +80,9 @@ export const createBreadcrumbsState = (): BreadcrumbsState => {
     breadcrumbsAppendExtensions.$,
     badgesExtension$,
   ]).pipe(
-    map(([extensions, badgesExtension]) => {
-      if (!badgesExtension) {
-        return extensions;
-      }
-
-      return [...extensions, badgesExtension];
-    }),
+    map(([extensions, badgesExt]) =>
+      badgesExt ? [...extensions, badgesExt] : extensions
+    ),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 
