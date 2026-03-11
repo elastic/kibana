@@ -586,6 +586,7 @@ export const LensTopNavMenu = ({
 
     const isComingFromDashboardView =
       incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
       incomingState?.originatingPath &&
       !incomingState.originatingPath.includes('/list/');
 
