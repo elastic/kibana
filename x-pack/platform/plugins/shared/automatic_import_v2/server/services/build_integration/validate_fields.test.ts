@@ -157,15 +157,19 @@ describe('validateFieldMappings', () => {
 
       expect(properties).toEqual({
         my_app: {
+          type: 'object',
           properties: {
             http: {
+              type: 'object',
               properties: {
                 request: {
+                  type: 'object',
                   properties: {
                     method: { type: 'keyword' },
                   },
                 },
                 response: {
+                  type: 'object',
                   properties: {
                     status_code: { type: 'long' },
                   },

@@ -231,8 +231,10 @@ export class TaskManagerService {
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
-      const fieldMapping = generateFieldMappings(
-        (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+      const fieldMapping = await generateFieldMappings(
+        (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
+        fieldsMetadataClient
       );
       this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
 

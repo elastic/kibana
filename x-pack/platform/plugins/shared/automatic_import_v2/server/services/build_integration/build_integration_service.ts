@@ -7,6 +7,7 @@
 
 import AdmZip from 'adm-zip';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { IntegrationAttributes, DataStreamAttributes } from '..';
 import type {
   DataStreamManifest,
@@ -146,7 +147,8 @@ const createManifest = (
 
 export const buildIntegrationPackage = async (
   integration: IntegrationAttributes,
-  dataStreams: DataStreamAttributes[]
+  dataStreams: DataStreamAttributes[],
+  fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<BuildIntegrationPackageResult> => {
   const manifest = createManifest(integration, dataStreams);
   const packageName = `${manifest.name}-${manifest.version}`;
@@ -171,9 +173,10 @@ export const buildIntegrationPackage = async (
 
     const fieldMappings =
       dataStream.result?.field_mapping ??
-      generateFieldMappings(
-        (dataStream.result?.pipeline_docs as Array<Record<string, unknown>>) ?? []
-      );
+      (await generateFieldMappings(
+        (dataStream.result?.pipeline_docs as Array<Record<string, unknown>>) ?? [],
+        fieldsMetadataClient
+      ));
     addFieldsToZip(zip, packageName, dataStream.data_stream_id, manifest.name, fieldMappings);
   }
 

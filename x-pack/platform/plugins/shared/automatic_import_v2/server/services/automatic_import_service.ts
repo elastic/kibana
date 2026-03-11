@@ -25,6 +25,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { IntegrationResponse, DataStreamResponse, TaskStatus, InputType } from '../../common';
 import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
 import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
@@ -303,12 +304,13 @@ export class AutomaticImportService {
   }
 
   public async buildIntegrationPackage(
-    integrationId: string
+    integrationId: string,
+    fieldsMetadataClient: IFieldsMetadataClient
   ): Promise<BuildIntegrationPackageResult> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const integration = await this.savedObjectService.getIntegration(integrationId);
     const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
-    return buildIntegrationPackage(integration, dataStreams);
+    return buildIntegrationPackage(integration, dataStreams, fieldsMetadataClient);
   }
 
   public async createDataStream(
@@ -493,12 +495,13 @@ export class AutomaticImportService {
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
     esClient: ElasticsearchClient;
+    fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, esClient } = params;
+    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -547,7 +550,10 @@ export class AutomaticImportService {
           source !== undefined
       );
 
-    const fieldMapping = generateFieldMappings(pipelineDocs as Array<Record<string, unknown>>);
+    const fieldMapping = await generateFieldMappings(
+      pipelineDocs as Array<Record<string, unknown>>,
+      fieldsMetadataClient
+    );
 
     const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
     if (!validationResult.valid) {

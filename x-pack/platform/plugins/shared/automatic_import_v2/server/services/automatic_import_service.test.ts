@@ -812,6 +812,12 @@ describe('AutomaticImportSetupService', () => {
         inference: {
           getChatModel: jest.fn().mockResolvedValue({}),
         },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
+        },
       };
 
       const coreSetupMock = {
@@ -910,6 +916,12 @@ describe('AutomaticImportSetupService', () => {
       const mockPluginsStart = {
         inference: {
           getChatModel: jest.fn().mockRejectedValue(new Error('Agent invocation failed')),
+        },
+        fieldsMetadata: {
+          getClient: jest.fn().mockResolvedValue({
+            find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
+            getByName: jest.fn(),
+          }),
         },
       };
 

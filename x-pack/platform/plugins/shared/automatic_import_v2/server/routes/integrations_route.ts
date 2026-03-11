@@ -355,7 +355,8 @@ const downloadIntegrationRoute = (
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId } = request.params;
           const { buffer, packageName } = await automaticImportService.buildIntegrationPackage(
-            integrationId
+            integrationId,
+            automaticImportv2.fieldsMetadataClient
           );
 
           return response.ok({

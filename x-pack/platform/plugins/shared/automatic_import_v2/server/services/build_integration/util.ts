@@ -12,7 +12,6 @@ import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { DataStreamManifest, IntegrationManifest } from './types';
 import { buildAgentTemplate } from './agent_templates';
 import type { FieldMappingEntry } from '../saved_objects/saved_objects_service';
-import { ECS_TOP_KEYS } from './fields';
 
 export const addManifestToZip = (
   zip: AdmZip,
@@ -154,9 +153,7 @@ const buildBaseFieldsYaml = (integrationName: string, dataStreamName: string): s
 };
 
 const buildCustomFieldsYaml = (fieldMappings: FieldMappingEntry[]): string => {
-  const customFields = fieldMappings.filter(
-    (f) => !f.is_ecs && !ECS_TOP_KEYS.has(f.name.split('.')[0])
-  );
+  const customFields = fieldMappings.filter((f) => !f.is_ecs);
   if (customFields.length === 0) return dump([], { lineWidth: -1 });
 
   const nested = buildNestedFieldStructure(customFields);

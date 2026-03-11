@@ -5,37 +5,47 @@
  * 2.0.
  */
 
-import { generateFieldMappings, mergeSamples, ECS_TOP_KEYS } from './fields';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import { generateFieldMappings, mergeSamples } from './fields';
+
+const KNOWN_ECS_FIELDS = new Set([
+  '@timestamp',
+  'message',
+  'source.ip',
+  'source.port',
+  'event.category',
+  'event.type',
+  'event.action',
+  'event.dataset',
+  'http.request.method',
+  'http.response.status_code',
+  'http.response.body.bytes',
+  'url.path',
+]);
+
+const createMockFieldsMetadataClient = (): jest.Mocked<IFieldsMetadataClient> => {
+  const mock: jest.Mocked<IFieldsMetadataClient> = {
+    getByName: jest.fn(),
+    find: jest.fn().mockImplementation(({ fieldNames, source }) => {
+      const matchedFields: Record<string, { name: string; source: string }> = {};
+      if (source?.includes('ecs') && fieldNames) {
+        for (const name of fieldNames) {
+          if (KNOWN_ECS_FIELDS.has(name)) {
+            matchedFields[name] = { name, source: 'ecs' };
+          }
+        }
+      }
+      return Promise.resolve({ toPlain: () => matchedFields });
+    }),
+  };
+  return mock;
+};
 
 describe('fields', () => {
-  describe('ECS_TOP_KEYS', () => {
-    it('contains core ECS top-level keys', () => {
-      const expected = [
-        '@timestamp',
-        'agent',
-        'cloud',
-        'container',
-        'data_stream',
-        'ecs',
-        'error',
-        'event',
-        'host',
-        'message',
-        'source',
-        'tags',
-        'url',
-        'user',
-      ];
-      for (const key of expected) {
-        expect(ECS_TOP_KEYS.has(key)).toBe(true);
-      }
-    });
+  let fieldsMetadataClient: jest.Mocked<IFieldsMetadataClient>;
 
-    it('does not contain non-ECS keys', () => {
-      expect(ECS_TOP_KEYS.has('my_custom_field')).toBe(false);
-      expect(ECS_TOP_KEYS.has('apache')).toBe(false);
-      expect(ECS_TOP_KEYS.has('nginx')).toBe(false);
-    });
+  beforeEach(() => {
+    fieldsMetadataClient = createMockFieldsMetadataClient();
   });
 
   describe('mergeSamples', () => {
@@ -91,11 +101,11 @@ describe('fields', () => {
   });
 
   describe('generateFieldMappings', () => {
-    it('returns empty array for empty input', () => {
-      expect(generateFieldMappings([])).toEqual([]);
+    it('returns empty array for empty input', async () => {
+      expect(await generateFieldMappings([], fieldsMetadataClient)).toEqual([]);
     });
 
-    it('generates fields for simple scalar values', () => {
+    it('generates fields for simple scalar values', async () => {
       const docs = [
         {
           my_app: {
@@ -105,7 +115,7 @@ describe('fields', () => {
           },
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toEqual(
         expect.arrayContaining([
@@ -116,7 +126,7 @@ describe('fields', () => {
       );
     });
 
-    it('marks ECS top-level fields as is_ecs: true', () => {
+    it('marks ECS fields as is_ecs: true using fields_metadata', async () => {
       const docs = [
         {
           source: { ip: '10.0.0.1', port: 8080 },
@@ -124,7 +134,7 @@ describe('fields', () => {
           message: 'test log line',
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       const sourceIp = fields.find((f) => f.name === 'source.ip');
       const sourcePort = fields.find((f) => f.name === 'source.port');
@@ -137,21 +147,31 @@ describe('fields', () => {
       expect(message).toEqual({ name: 'message', type: 'keyword', is_ecs: true });
     });
 
-    it('marks custom top-level fields as is_ecs: false', () => {
+    it('calls fieldsMetadataClient.find with correct parameters', async () => {
+      const docs = [{ source: { ip: '10.0.0.1' }, custom: 'value' }];
+      await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fieldsMetadataClient.find).toHaveBeenCalledWith({
+        fieldNames: expect.arrayContaining(['source.ip', 'custom']),
+        source: ['ecs'],
+      });
+    });
+
+    it('marks custom top-level fields as is_ecs: false', async () => {
       const docs = [
         {
           apache: { access: { method: 'GET', response_code: 200 } },
           custom_field: 'value',
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       for (const field of fields) {
         expect(field.is_ecs).toBe(false);
       }
     });
 
-    it('correctly mixes ECS and custom fields', () => {
+    it('correctly mixes ECS and custom fields', async () => {
       const docs = [
         {
           source: { ip: '192.168.1.1' },
@@ -159,7 +179,7 @@ describe('fields', () => {
           my_integration: { user_id: 'u123', request_time: 42 },
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       const ecsFields = fields.filter((f) => f.is_ecs);
       const customFields = fields.filter((f) => !f.is_ecs);
@@ -175,7 +195,7 @@ describe('fields', () => {
       );
     });
 
-    it('handles deeply nested objects', () => {
+    it('handles deeply nested objects', async () => {
       const docs = [
         {
           my_app: {
@@ -189,7 +209,7 @@ describe('fields', () => {
           },
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toContainEqual({
         name: 'my_app.http.request.headers.content_type',
@@ -198,13 +218,13 @@ describe('fields', () => {
       });
     });
 
-    it('handles arrays with object elements by using the first element', () => {
+    it('handles arrays with object elements by using the first element', async () => {
       const docs = [
         {
           items: [{ name: 'item1', count: 5 }],
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toEqual(
         expect.arrayContaining([
@@ -214,32 +234,32 @@ describe('fields', () => {
       );
     });
 
-    it('handles arrays with scalar elements', () => {
+    it('handles arrays with scalar elements', async () => {
       const docs = [{ my_tags: ['web', 'prod'] }];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toContainEqual({ name: 'my_tags', type: 'keyword', is_ecs: false });
     });
 
-    it('handles null values as keyword type', () => {
+    it('handles null values as keyword type', async () => {
       const docs = [{ my_field: null }];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       expect(fields).toContainEqual({ name: 'my_field', type: 'keyword', is_ecs: false });
     });
 
-    it('merges multiple pipeline docs before generating fields', () => {
+    it('merges multiple pipeline docs before generating fields', async () => {
       const docs = [{ my_app: { field_a: 'hello' } }, { my_app: { field_b: 42 } }];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
       const fieldNames = fields.map((f) => f.name);
 
       expect(fieldNames).toContain('my_app.field_a');
       expect(fieldNames).toContain('my_app.field_b');
     });
 
-    it('skips unsafe property names like __proto__', () => {
+    it('skips unsafe property names like __proto__', async () => {
       const docs = [{ safe: 'value', __proto__: { bad: true } }];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
       const fieldNames = fields.map((f) => f.name);
 
       expect(fieldNames).toContain('safe');
@@ -247,7 +267,7 @@ describe('fields', () => {
       expect(fieldNames).not.toContain('__proto__.bad');
     });
 
-    it('produces correct types for a realistic pipeline output', () => {
+    it('produces correct types for a realistic pipeline output', async () => {
       const docs = [
         {
           '@timestamp': '2024-01-01T00:00:00.000Z',
@@ -268,7 +288,7 @@ describe('fields', () => {
           },
         },
       ];
-      const fields = generateFieldMappings(docs);
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
 
       // ECS fields
       expect(fields).toContainEqual({ name: '@timestamp', type: 'keyword', is_ecs: true });
