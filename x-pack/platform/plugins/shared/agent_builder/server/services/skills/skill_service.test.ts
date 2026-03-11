@@ -21,8 +21,17 @@ jest.mock('../runner/store/volumes/skills/utils', () => ({
   getSkillEntryPath: jest.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
 }));
 
-jest.mock('./persisted/client/client', () => ({
-  createClient: jest.fn(),
+jest.mock('./persisted/client', () => ({
+  createClient: jest.fn(() => ({
+    has: jest.fn().mockResolvedValue(false),
+    get: jest.fn().mockRejectedValue(new Error('not found')),
+    list: jest.fn().mockResolvedValue([]),
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    deleteByPluginId: jest.fn(),
+  })),
 }));
 
 jest.mock('../../utils/spaces', () => ({
