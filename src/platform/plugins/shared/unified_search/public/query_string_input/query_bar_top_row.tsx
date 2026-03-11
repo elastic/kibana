@@ -42,6 +42,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  EuiFilterButton,
   EuiIconTip,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
@@ -67,6 +68,10 @@ import { shallowEqual } from '../utils/shallow_equal';
 const BUTTON_MIN_WIDTH = 108;
 
 export const strings = {
+  getFilterToggleTooltip: () =>
+    i18n.translate('unifiedSearch.queryBar.filterPanelToggle.tooltip', {
+      defaultMessage: 'Tip: double click to add filter',
+    }),
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
       defaultMessage: 'Needs updating',
@@ -181,6 +186,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   isFiltersVisible?: boolean;
   onToggleFiltersVisible?: () => void;
   onDoubleClickFilterToggle?: () => void;
+  addFilterOpenFromToggle?: boolean;
+  onAddFilterFromToggleClose?: () => void;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**
@@ -909,44 +916,53 @@ export const QueryBarTopRow = React.memo(
         }
       }
 
+      const filterCount = props.filters?.length ?? 0;
+
       return (
         <EuiFlexItem grow={false}>
           <div css={{ position: 'relative', display: 'inline-flex' }}>
-            <EuiButtonIcon
-              iconType="filter"
-              aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
-                defaultMessage: 'Toggle filters panel',
-              })}
-              onClick={handleFilterToggleClick}
-              size="s"
-              display="base"
-              color="text"
-              data-test-subj="unifiedFilterPanelToggle"
-              css={
-                props.isFiltersVisible
-                  ? css({
-                      backgroundColor: euiTheme.colors.darkShade,
-                      color: euiTheme.colors.ghost,
-                      '&:hover, &:focus': {
-                        backgroundColor: euiTheme.colors.darkShade,
-                      },
-                    })
-                  : undefined
-              }
-            />
-            {hasFilters && (
-              <span
-                aria-hidden="true"
-                css={{
-                  position: 'absolute',
-                  top: 2,
-                  right: 2,
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
-                  backgroundColor: euiTheme.colors.primary,
-                  pointerEvents: 'none',
+            <EuiToolTip
+              position="bottom"
+              content={strings.getFilterToggleTooltip()}
+              delay="long"
+            >
+              <EuiFilterButton
+                iconType="filter"
+                aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
+                  defaultMessage: 'Toggle filters panel',
+                })}
+                onClick={handleFilterToggleClick}
+                size="s"
+                isSelected={props.isFiltersVisible}
+                hasActiveFilters={hasFilters}
+                numActiveFilters={filterCount > 0 ? filterCount : undefined}
+                data-test-subj="unifiedFilterPanelToggle"
+              />
+            </EuiToolTip>
+            {props.addFilterOpenFromToggle !== undefined && (
+              <AddFilterPopover
+                indexPatterns={props.indexPatterns}
+                filters={props.filters ?? []}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
+                onFiltersUpdated={props.onFiltersUpdated}
+                buttonProps={{
+                  size: 's',
+                  display: 'empty',
+                  style: {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                  },
                 }}
+                isDisabled={props.isDisabled}
+                suggestionsAbstraction={props.suggestionsAbstraction}
+                isOpen={props.addFilterOpenFromToggle}
+                onClose={props.onAddFilterFromToggleClose}
               />
             )}
           </div>
