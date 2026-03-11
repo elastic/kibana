@@ -18,13 +18,22 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { useController, useFieldArray, useFormContext } from 'react-hook-form';
+import { FieldNameWithIcon } from '@kbn/react-field';
+import { capitalize } from 'lodash';
+import { jsonExtractTypes } from '@kbn/streamlang';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import type { JsonExtractFormState } from '../../../../types';
+
+const typeOptions = jsonExtractTypes.map((type) => ({
+  value: type,
+  inputDisplay: <FieldNameWithIcon name={capitalize(type)} type={type} />,
+}));
 
 export const JsonExtractProcessorForm = () => {
   const { control } = useFormContext<JsonExtractFormState>();
@@ -44,7 +53,7 @@ export const JsonExtractProcessorForm = () => {
 
   useEffect(() => {
     if (fields.length === 0) {
-      append({ selector: '', target_field: '' });
+      append({ selector: '', target_field: '', type: 'keyword' });
     }
   }, [fields.length, append]);
 
@@ -86,7 +95,7 @@ export const JsonExtractProcessorForm = () => {
           ))}
           <EuiButtonEmpty
             iconType="plusInCircle"
-            onClick={() => append({ selector: '', target_field: '' })}
+            onClick={() => append({ selector: '', target_field: '', type: 'keyword' })}
             size="xs"
             data-test-subj="streamsAppJsonExtractAddExtractionButton"
           >
@@ -165,13 +174,18 @@ const ExtractionField = ({ index, onRemove, canRemove }: ExtractionFieldProps) =
     },
   });
 
+  const { field: typeField } = useController<JsonExtractFormState, `extractions.${number}.type`>({
+    name: `extractions.${index}.type`,
+    defaultValue: 'keyword',
+  });
+
   const { ref: selectorRef, ...selectorInputProps } = selectorField;
   const { ref: targetRef, ...targetInputProps } = targetField;
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false} hasBorder style={{ marginBottom: 8 }}>
       <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={4}>
           <EuiFormRow
             label={i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractSelectorLabel',
@@ -195,7 +209,7 @@ const ExtractionField = ({ index, onRemove, canRemove }: ExtractionFieldProps) =
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={4}>
           <EuiFormRow
             label={i18n.translate(
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTargetFieldLabel',
@@ -216,6 +230,28 @@ const ExtractionField = ({ index, onRemove, canRemove }: ExtractionFieldProps) =
               fullWidth
               compressed
               data-test-subj={`streamsAppJsonExtractTargetFieldInput-${index}`}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTypeLabel',
+              { defaultMessage: 'Type' }
+            )}
+            fullWidth
+          >
+            <EuiSuperSelect
+              options={typeOptions}
+              valueOfSelected={typeField.value ?? 'keyword'}
+              onChange={typeField.onChange}
+              compressed
+              fullWidth
+              data-test-subj={`streamsAppJsonExtractTypeSelect-${index}`}
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.processor.jsonExtractTypeAriaLabel',
+                { defaultMessage: 'Extraction type' }
+              )}
             />
           </EuiFormRow>
         </EuiFlexItem>

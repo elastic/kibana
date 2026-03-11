@@ -195,10 +195,122 @@ apiTest.describe(
       );
     });
 
-    // *** Incompatible / Partially Compatible Cases ***
+    // *** Type Casting Tests ***
 
     apiTest(
-      'should document type preservation difference: Ingest Pipeline preserves types, ES|QL returns keywords',
+      'should correctly cast extracted values to integer type',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'count', target_field: 'count', type: 'integer' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"count": 42}' }];
+        await testBed.ingest('ingest-json-extract-int', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-int');
+
+        await testBed.ingest('esql-json-extract-int', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-int', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ count: 42 }));
+      }
+    );
+
+    apiTest(
+      'should correctly cast extracted values to boolean type',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'active', target_field: 'active', type: 'boolean' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"active": true}' }];
+        await testBed.ingest('ingest-json-extract-bool', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-bool');
+
+        await testBed.ingest('esql-json-extract-bool', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-bool', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ active: true }));
+      }
+    );
+
+    apiTest(
+      'should correctly cast extracted values to double type',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'price', target_field: 'price', type: 'double' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"price": 19.99}' }];
+        await testBed.ingest('ingest-json-extract-double', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-double');
+
+        await testBed.ingest('esql-json-extract-double', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-double', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ price: 19.99 }));
+      }
+    );
+
+    apiTest(
+      'should default to keyword type when no type specified',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'name', target_field: 'name' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"name": "John"}' }];
+        await testBed.ingest('ingest-json-extract-default', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-default');
+
+        await testBed.ingest('esql-json-extract-default', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-default', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ name: 'John' }));
+      }
+    );
+
+    apiTest(
+      'should correctly cast multiple extractions with different types',
       async ({ testBed, esql }) => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -206,8 +318,9 @@ apiTest.describe(
               action: 'json_extract',
               field: 'message',
               extractions: [
-                { selector: 'count', target_field: 'count' },
-                { selector: 'active', target_field: 'active' },
+                { selector: 'count', target_field: 'count', type: 'integer' },
+                { selector: 'active', target_field: 'active', type: 'boolean' },
+                { selector: 'name', target_field: 'name', type: 'keyword' },
               ],
             } as JsonExtractProcessor,
           ],
@@ -216,22 +329,25 @@ apiTest.describe(
         const { processors } = transpileIngestPipeline(streamlangDSL);
         const { query } = transpileEsql(streamlangDSL);
 
-        const docs = [{ message: '{"count": 42, "active": true}' }];
-        await testBed.ingest('ingest-json-extract-types', docs, processors);
-        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-types');
+        const docs = [{ message: '{"count": 42, "active": true, "name": "Test"}' }];
+        await testBed.ingest('ingest-json-extract-multi-types', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-multi-types');
 
-        await testBed.ingest('esql-json-extract-types', docs);
-        const esqlResult = await esql.queryOnIndex('esql-json-extract-types', query);
+        await testBed.ingest('esql-json-extract-multi-types', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-multi-types', query);
 
-        // NOTE: BEHAVIORAL DIFFERENCE - Type preservation
-        // Ingest Pipeline: Preserves original JSON types (number, boolean)
-        // ES|QL: JSON_EXTRACT returns keyword type (strings)
-        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ count: 42, active: true }));
-        expect(esqlResult.documents[0]).toStrictEqual(
-          expect.objectContaining({ count: '42', active: 'true' })
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(
+          expect.objectContaining({
+            count: 42,
+            active: true,
+            name: 'Test',
+          })
         );
       }
     );
+
+    // *** Incompatible / Partially Compatible Cases ***
 
     apiTest(
       'should handle invalid JSON differently between transpilers',

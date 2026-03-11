@@ -1257,6 +1257,17 @@ Object {
                         "minLength": 1,
                         "type": "string",
                       },
+                      "type": Object {
+                        "description": "Data type for the extracted value. Defaults to \\"keyword\\". Ensures consistent types across transpilers.",
+                        "enum": Array [
+                          "keyword",
+                          "integer",
+                          "long",
+                          "double",
+                          "boolean",
+                        ],
+                        "type": "string",
+                      },
                     },
                     "required": Array [
                       "selector",
@@ -3510,6 +3521,17 @@ Object {
                         "target_field": Object {
                           "description": "Target field to store the extracted value",
                           "minLength": 1,
+                          "type": "string",
+                        },
+                        "type": Object {
+                          "description": "Data type for the extracted value. Defaults to \\"keyword\\". Ensures consistent types across transpilers.",
+                          "enum": Array [
+                            "keyword",
+                            "integer",
+                            "long",
+                            "double",
+                            "boolean",
+                          ],
                           "type": "string",
                         },
                       },

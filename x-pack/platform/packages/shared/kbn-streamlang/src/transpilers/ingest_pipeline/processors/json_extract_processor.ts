@@ -6,7 +6,11 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { JsonExtractProcessor, JsonExtraction } from '../../../../types/processors';
+import type {
+  JsonExtractProcessor,
+  JsonExtraction,
+  JsonExtractType,
+} from '../../../../types/processors';
 import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../types/utils';
 
 /**
@@ -114,8 +118,33 @@ function generateTraversalExpression(varName: string, parts: string[]): string {
 }
 
 /**
+ * Generates Painless code to cast a value to the specified type.
+ * Returns an expression that converts the extracted value to the target type.
+ *
+ * @param varName - The variable name holding the extracted value
+ * @param type - The target type (keyword, integer, long, double, boolean)
+ * @returns Painless expression that casts the value
+ */
+function generateTypeCast(varName: string, type: JsonExtractType): string {
+  switch (type) {
+    case 'integer':
+      return `(${varName} instanceof Number ? ((Number)${varName}).intValue() : Integer.parseInt(${varName}.toString()))`;
+    case 'long':
+      return `(${varName} instanceof Number ? ((Number)${varName}).longValue() : Long.parseLong(${varName}.toString()))`;
+    case 'double':
+      return `(${varName} instanceof Number ? ((Number)${varName}).doubleValue() : Double.parseDouble(${varName}.toString()))`;
+    case 'boolean':
+      return `(${varName} instanceof Boolean ? (Boolean)${varName} : Boolean.parseBoolean(${varName}.toString()))`;
+    case 'keyword':
+    default:
+      return `${varName}.toString()`;
+  }
+}
+
+/**
  * Generates the Painless script source for JSON extraction.
  * Uses `Processors.json()` which is available in Painless ingest pipeline context.
+ * Applies type casting to ensure consistent output types.
  */
 function generateJsonExtractScript(
   field: string,
@@ -142,17 +171,13 @@ function generateJsonExtractScript(
     const parts = parseSelector(extraction.selector);
     const traversalExpr = generateTraversalExpression('parsed', parts);
     const targetAssignment = painlessFieldAssignment(extraction.target_field);
+    const varName = `extracted_${parts.join('_').replace(/[^a-zA-Z0-9_]/g, '_')}`;
+    const targetType = extraction.type ?? 'keyword';
 
-    lines.push(
-      `def extracted_${parts.join('_').replace(/[^a-zA-Z0-9_]/g, '_')} = ${traversalExpr};`
-    );
-    lines.push(
-      `if (extracted_${parts
-        .join('_')
-        .replace(/[^a-zA-Z0-9_]/g, '_')} != null) { ${targetAssignment} = extracted_${parts
-        .join('_')
-        .replace(/[^a-zA-Z0-9_]/g, '_')}; }`
-    );
+    lines.push(`def ${varName} = ${traversalExpr};`);
+
+    const typeCastExpr = generateTypeCast(varName, targetType);
+    lines.push(`if (${varName} != null) { ${targetAssignment} = ${typeCastExpr}; }`);
   }
 
   return lines.join('\n');

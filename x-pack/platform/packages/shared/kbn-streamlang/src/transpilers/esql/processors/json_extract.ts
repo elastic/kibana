@@ -6,30 +6,100 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ESQLAstCommand } from '@elastic/esql/types';
-import type { JsonExtractProcessor } from '../../../../types/processors';
+import type { ESQLAstCommand, ESQLAstExpression } from '@elastic/esql/types';
+import type {
+  JsonExtractProcessor,
+  JsonExtraction,
+  JsonExtractType,
+} from '../../../../types/processors';
 import { buildIgnoreMissingFilter } from './common';
 import { conditionToESQLAst } from '../condition_to_esql';
+
+/**
+ * Resolves the ES|QL type conversion function name for a given JsonExtractType.
+ * Since JSON_EXTRACT returns keyword, we need to cast to the desired type.
+ *
+ * @param type - The target type for the extraction
+ * @returns The ES|QL function name for type conversion, or null for keyword (no conversion needed)
+ */
+function resolveTypeConversionFunction(type: JsonExtractType): string | null {
+  switch (type) {
+    case 'integer':
+      return 'TO_INTEGER';
+    case 'long':
+      return 'TO_LONG';
+    case 'double':
+      return 'TO_DOUBLE';
+    case 'boolean':
+      return 'TO_BOOLEAN';
+    case 'keyword':
+    default:
+      return null;
+  }
+}
+
+/**
+ * Wraps a JSON_EXTRACT expression with type conversion if needed.
+ *
+ * @param jsonExtractExpr - The JSON_EXTRACT function expression
+ * @param type - The target type (defaults to 'keyword')
+ * @returns The expression, optionally wrapped in a type conversion function
+ */
+function applyTypeConversion(
+  jsonExtractExpr: ESQLAstExpression,
+  type: JsonExtractType = 'keyword'
+): ESQLAstExpression {
+  const conversionFunc = resolveTypeConversionFunction(type);
+  if (!conversionFunc) {
+    return jsonExtractExpr;
+  }
+  return Builder.expression.func.call(conversionFunc, [jsonExtractExpr]);
+}
+
+/**
+ * Builds the extraction expression for a single extraction configuration.
+ *
+ * @param fromColumn - The source column containing the JSON string
+ * @param extraction - The extraction specification
+ * @returns The expression for extracting and optionally casting the value
+ */
+function buildExtractionExpression(
+  fromColumn: ESQLAstExpression,
+  extraction: JsonExtraction
+): ESQLAstExpression {
+  const selectorLiteral = Builder.expression.literal.string(extraction.selector);
+  const jsonExtractFunction = Builder.expression.func.call('JSON_EXTRACT', [
+    fromColumn,
+    selectorLiteral,
+  ]);
+  return applyTypeConversion(jsonExtractFunction, extraction.type ?? 'keyword');
+}
 
 /**
  * Converts a Streamlang JsonExtractProcessor into a list of ES|QL AST commands.
  *
  * For unconditional extraction (no 'where' or 'where: always'):
- *   Uses EVAL with JSON_EXTRACT() function for each extraction:
- *   EVAL target_field1 = JSON_EXTRACT(field, "selector1"), target_field2 = JSON_EXTRACT(field, "selector2")
+ *   Uses EVAL with JSON_EXTRACT() function for each extraction, wrapped in type conversion:
+ *   EVAL target_field1 = TO_INTEGER(JSON_EXTRACT(field, "selector1")), target_field2 = JSON_EXTRACT(field, "selector2")
  *
  * For conditional extraction (with 'where' condition):
  *   Uses EVAL with CASE for each extraction:
- *   EVAL target_field = CASE(<condition>, JSON_EXTRACT(field, "selector"), NULL)
+ *   EVAL target_field = CASE(<condition>, TO_INTEGER(JSON_EXTRACT(field, "selector")), NULL)
+ *
+ * Type conversion:
+ * - keyword (default): No conversion needed (JSON_EXTRACT returns keyword)
+ * - integer: TO_INTEGER(JSON_EXTRACT(...))
+ * - long: TO_LONG(JSON_EXTRACT(...))
+ * - double: TO_DOUBLE(JSON_EXTRACT(...))
+ * - boolean: TO_BOOLEAN(JSON_EXTRACT(...))
  *
  * Filters applied for Ingest Pipeline parity:
  * - When `ignore_missing: false`: `WHERE NOT(field IS NULL)` filters missing fields
  *
  * Limitations:
- * - ES|QL's JSON_EXTRACT returns keyword type, while Ingest Pipeline preserves types
  * - JSON_EXTRACT does not support wildcards, recursive descent, array slicing, filter expressions, or negative array indices
  *
- * @example Unconditional:
+ * @example Unconditional with type:
  *    ```typescript
  *    const streamlangDSL: StreamlangDSL = {
  *      steps: [
@@ -38,7 +108,7 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *          field: 'message',
  *          extractions: [
  *            { selector: 'user.id', target_field: 'user_id' },
- *            { selector: 'metadata.client.ip', target_field: 'client_ip' },
+ *            { selector: 'count', target_field: 'event_count', type: 'integer' },
  *          ],
  *        } as JsonExtractProcessor,
  *      ],
@@ -47,7 +117,7 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *
  *    Generates:
  *    ```txt
- *    | EVAL `user_id` = JSON_EXTRACT(`message`, "user.id"), `client_ip` = JSON_EXTRACT(`message`, "metadata.client.ip")
+ *    | EVAL `user_id` = JSON_EXTRACT(`message`, "user.id"), `event_count` = TO_INTEGER(JSON_EXTRACT(`message`, "count"))
  *    ```
  *
  * @example Conditional:
@@ -58,7 +128,7 @@ import { conditionToESQLAst } from '../condition_to_esql';
  *          action: 'json_extract',
  *          field: 'message',
  *          extractions: [
- *            { selector: 'user.id', target_field: 'user_id' },
+ *            { selector: 'user.id', target_field: 'user_id', type: 'keyword' },
  *          ],
  *          where: { field: 'status', eq: 'active' },
  *        } as JsonExtractProcessor,
@@ -90,15 +160,11 @@ export function convertJsonExtractProcessorToESQL(
 
     const assignments = extractions.map((extraction) => {
       const targetColumn = Builder.expression.column(extraction.target_field);
-      const selectorLiteral = Builder.expression.literal.string(extraction.selector);
-      const jsonExtractFunction = Builder.expression.func.call('JSON_EXTRACT', [
-        fromColumn,
-        selectorLiteral,
-      ]);
+      const extractionExpr = buildExtractionExpression(fromColumn, extraction);
 
       const caseExpression = Builder.expression.func.call('CASE', [
         conditionExpression,
-        jsonExtractFunction,
+        extractionExpr,
         Builder.expression.literal.nil(),
       ]);
 
@@ -114,13 +180,9 @@ export function convertJsonExtractProcessorToESQL(
   } else {
     const assignments = extractions.map((extraction) => {
       const targetColumn = Builder.expression.column(extraction.target_field);
-      const selectorLiteral = Builder.expression.literal.string(extraction.selector);
-      const jsonExtractFunction = Builder.expression.func.call('JSON_EXTRACT', [
-        fromColumn,
-        selectorLiteral,
-      ]);
+      const extractionExpr = buildExtractionExpression(fromColumn, extraction);
 
-      return Builder.expression.func.binary('=', [targetColumn, jsonExtractFunction]);
+      return Builder.expression.func.binary('=', [targetColumn, extractionExpr]);
     });
 
     const evalCommand = Builder.command({

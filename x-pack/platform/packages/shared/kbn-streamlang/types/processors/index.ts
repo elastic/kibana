@@ -591,9 +591,13 @@ export const sortProcessorSchema = processorBaseWithWhereSchema.extend({
  * Extracts values from JSON strings using JSONPath-like selectors.
  */
 
+export const jsonExtractTypes = ['keyword', 'integer', 'long', 'double', 'boolean'] as const;
+export type JsonExtractType = (typeof jsonExtractTypes)[number];
+
 export interface JsonExtraction {
   selector: string;
   target_field: string;
+  type?: JsonExtractType;
 }
 
 const jsonExtractionSchema = z
@@ -602,6 +606,11 @@ const jsonExtractionSchema = z
       'JSONPath-like selector to extract value (e.g., "user.id", "$.metadata.client.ip", "items[0].name")'
     ),
     target_field: StreamlangTargetField.describe('Target field to store the extracted value'),
+    type: z
+      .optional(z.enum(jsonExtractTypes))
+      .describe(
+        'Data type for the extracted value. Defaults to "keyword". Ensures consistent types across transpilers.'
+      ),
   })
   .describe('A single extraction specification') satisfies z.Schema<JsonExtraction>;
 
