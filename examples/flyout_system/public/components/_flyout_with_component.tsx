@@ -28,6 +28,7 @@ import {
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
+  FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
@@ -36,7 +37,7 @@ interface SessionFlyoutProps {
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
-  childSize?: 's' | 'm' | 'fill';
+  childSize: 's' | 'm' | 'fill';
   childMaxWidth?: number;
 }
 
@@ -62,12 +63,10 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
   const handleOpenChildFlyoutA = () => {
     setIsChildFlyoutAOpen(true);
-    setIsChildFlyoutBOpen(false);
   };
 
   const handleOpenChildFlyoutB = () => {
     setIsChildFlyoutBOpen(true);
-    setIsChildFlyoutAOpen(false);
   };
 
   // Callbacks for state synchronization
@@ -80,11 +79,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
     console.log('activate child flyout A', title); // eslint-disable-line no-console
   }, [title]);
 
+  const childFlyoutBOnActive = useCallback(() => {
+    console.log('activate child flyout B', title); // eslint-disable-line no-console
+  }, [title]);
+
   const handleCloseFlyout = useCallback(() => {
     console.log('close main flyout', title); // eslint-disable-line no-console
     setIsFlyoutOpen(false);
-    setIsChildFlyoutAOpen(false);
-    setIsChildFlyoutBOpen(false);
 
     // Return focus to main trigger button after closing main flyout
     // TODO: clean this up if EUI adds internal support for returning focus to the trigger element on close
@@ -157,6 +158,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           aria-labelledby="sessionFlyoutTitle"
           size={mainSize}
           maxWidth={mainMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
+          resizable
           type={flyoutType}
           ownFocus={flyoutOwnFocus}
           pushAnimation={true}
@@ -187,13 +190,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiSpacer size="m" />
             <EuiText>
               <p>
-                Below is some filler content to demonstrate scrolling behavior.
-                {childSize && (
-                  <>
-                    {' '}
-                    Scroll down to see the button to <strong>open the child flyout</strong>.
-                  </>
-                )}
+                Below is some filler content to demonstrate scrolling behavior. Scroll down to see
+                the button to <strong>open the child flyout</strong>.
               </p>
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
@@ -227,25 +225,21 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 viverra est a, bibendum metus.
               </p>
             </EuiText>
-            {childSize && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiButton
-                  buttonRef={childTriggerARef}
-                  onClick={handleOpenChildFlyoutA}
-                  disabled={isChildFlyoutAOpen}
-                >
-                  Open child flyout A
-                </EuiButton>{' '}
-                <EuiButton
-                  buttonRef={childTriggerBRef}
-                  onClick={handleOpenChildFlyoutB}
-                  disabled={isChildFlyoutBOpen}
-                >
-                  Open child flyout B
-                </EuiButton>
-              </>
-            )}
+            <EuiSpacer size="m" />
+            <EuiButton
+              buttonRef={childTriggerARef}
+              onClick={handleOpenChildFlyoutA}
+              disabled={isChildFlyoutAOpen}
+            >
+              Open child flyout A
+            </EuiButton>{' '}
+            <EuiButton
+              buttonRef={childTriggerBRef}
+              onClick={handleOpenChildFlyoutB}
+              disabled={isChildFlyoutBOpen}
+            >
+              Open child flyout B
+            </EuiButton>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
@@ -264,6 +258,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           session="inherit"
           aria-labelledby="childFlyoutATitle"
           size={childSize}
+          hasChildBackground={true}
           maxWidth={childMaxWidth}
           onActive={childFlyoutAOnActive}
           onClose={handleCloseChildFlyoutA}
@@ -301,12 +296,14 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       )}
       {isChildFlyoutBOpen && (
         <EuiFlyout
-          id={`childFlyout-${title}-a`}
+          id={`childFlyout-${title}-b`}
           session="inherit"
           aria-labelledby="childFlyoutBTitle"
           size={childSize}
+          hasChildBackground={true}
           maxWidth={childMaxWidth}
-          onActive={childFlyoutAOnActive}
+          minWidth={FLYOUT_MIN_WIDTH}
+          onActive={childFlyoutBOnActive}
           onClose={handleCloseChildFlyoutB}
           flyoutMenuProps={{
             title: `${title} - Child B`,
@@ -470,8 +467,8 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <SessionFlyout title="Session K" mainSize="m" childSize="s" />,
           },
           {
-            title: 'Session L: main size = fill',
-            description: <SessionFlyout title="Session L" mainSize="fill" />,
+            title: 'Session L: main size = m, child size = fill',
+            description: <SessionFlyout title="Session L" mainSize="m" childSize="fill" />,
           },
         ]}
       />
