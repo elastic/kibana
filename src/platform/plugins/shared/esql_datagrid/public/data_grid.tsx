@@ -29,7 +29,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
@@ -65,6 +65,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   // Create an enriched data view with fields from ES|QL columns
   const enrichedDataView = useMemo(() => {
+    if (props.columns.length === 0) {
+      return props.dataView;
+    }
+
     return cloneDataViewAndUseEsqlColumnsAsFields(props.dataView, props.columns, {
       fieldFormats: props.fieldFormats,
     });

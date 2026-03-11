@@ -563,6 +563,42 @@ describe('convertValueToString', () => {
     expect(result.withFormula).toBe(true);
   });
 
+  it('should use type override from enriched DataView for ES|QL', () => {
+    // Create a DataView where 'number_price' is treated as a string (simulating ES|QL type override)
+    const enrichedDataView = {
+      ...dataTableContextComplexMock.dataView,
+      getFieldByName: (fieldName: string) => {
+        if (fieldName === 'number_price') {
+          // Return a field with string type instead of number (ES|QL override)
+          return {
+            name: 'number_price',
+            type: 'string',
+            esTypes: ['keyword'],
+            searchable: true,
+            aggregatable: true,
+            format: dataTableContextComplexMock.dataView.fieldFormatMap?.number_price,
+          };
+        }
+        return dataTableContextComplexMock.dataView.getFieldByName(fieldName);
+      },
+      fields: dataTableContextComplexMock.dataView.fields,
+    };
+
+    const result = convertValueToString({
+      rows: dataTableContextComplexRowsMock,
+      dataView: enrichedDataView as any,
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: 'number_price',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: true,
+      },
+    });
+
+    // Should still be formatted as number (type override affects rendering, not CSV conversion)
+    expect(result.formattedString).toBe('10.99');
+  });
+
   it('should return a formatted name', () => {
     const result = convertNameToString('test');
 

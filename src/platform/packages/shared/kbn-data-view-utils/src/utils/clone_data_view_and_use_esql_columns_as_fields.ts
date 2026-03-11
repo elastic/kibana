@@ -7,56 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
-export interface CloneDataViewAndUseEsqlColumnsAsFieldsDeps {
-  fieldFormats: FieldFormatsStartCommon;
-}
-
 /**
- * Clones a DataView and uses ES|QL query columns as its fields.
- * This is a package-level utility that can be used from both plugins and packages.
+ * Creates an enriched DataViewSpec with fields derived from ES|QL query columns.
+ * This is a package-level utility that works with DataViewSpec (not DataView instances).
  *
- * The cloned DataView contains ONLY the fields from the ES|QL response, replacing all
- * fields from the original DataView. ES|QL columns may include:
+ * The enriched spec contains ONLY the fields from the ES|QL response, replacing all
+ * fields from the original spec. ES|QL columns may include:
  * - Computed fields that don't exist in the original index pattern
  * - Type overrides for existing fields (e.g., treating a number field as a keyword)
  * - Subset of fields from the original index (only columns in the ES|QL query)
  *
- * This utility reuses configuration from the base DataView:
- * - metaFields: Taken directly from the base DataView (e.g., _source, _id)
- * - shortDotsEnable: Taken directly from the base DataView
- *
- * @param baseDataView - The original DataView to clone
+ * @param baseSpec - The original DataViewSpec to enrich
  * @param esqlQueryColumns - The columns returned from the ES|QL query response
- * @param deps - Dependencies: fieldFormats
- * @returns A new DataView instance with fields derived from esqlQueryColumns
+ * @returns An enriched DataViewSpec with fields derived from esqlQueryColumns
  *
  * @example
  * ```typescript
- * const baseDataView = await dataViews.get('my-index-pattern');
+ * const baseSpec = baseDataView.toSpec(false);
  * const esqlQueryColumns: DatatableColumn[] = [
  *   { id: 'message', name: 'message', meta: { type: 'string', esType: 'keyword' } },
  *   { id: 'computed', name: 'computed', meta: { type: 'number' }, isComputedColumn: true }
  * ];
  *
- * const clonedDataView = cloneDataViewAndUseEsqlColumnsAsFields(
- *   baseDataView,
- *   esqlQueryColumns,
- *   { fieldFormats: fieldFormatsService }
- * );
- * // clonedDataView.fields now contains only 'message' and 'computed'
+ * const enrichedSpec = createEnrichedEsqlDataViewSpec(baseSpec, esqlQueryColumns);
+ * // enrichedSpec.fields now contains only 'message' and 'computed'
+ *
+ * // Construct a DataView from the spec:
+ * const enrichedDataView = new DataView({
+ *   spec: enrichedSpec,
+ *   fieldFormats,
+ *   shortDotsEnable: baseDataView.shortDotsEnable,
+ *   metaFields: baseDataView.metaFields,
+ * });
  * ```
  */
-export function cloneDataViewAndUseEsqlColumnsAsFields(
-  baseDataView: DataView,
-  esqlQueryColumns: DatatableColumn[],
-  deps: CloneDataViewAndUseEsqlColumnsAsFieldsDeps
-): DataView {
+export function createEnrichedEsqlDataViewSpec(
+  baseSpec: DataViewSpec,
+  esqlQueryColumns: DatatableColumn[]
+): DataViewSpec {
   // Convert ES|QL columns to FieldSpec objects
   const fields: Record<string, FieldSpec> = {};
   for (const column of esqlQueryColumns) {
@@ -64,18 +56,9 @@ export function cloneDataViewAndUseEsqlColumnsAsFields(
     fields[column.name] = fieldSpec;
   }
 
-  // Clone the base DataView spec and replace fields with ES|QL columns
-  const baseSpec = baseDataView.toSpec(false);
-  const enrichedSpec = {
+  // Clone the base spec and replace fields with ES|QL columns
+  return {
     ...baseSpec,
     fields,
   };
-
-  // Create new DataView with enriched spec
-  return new DataView({
-    spec: enrichedSpec,
-    fieldFormats: deps.fieldFormats,
-    shortDotsEnable: baseDataView.shortDotsEnable,
-    metaFields: baseDataView.metaFields,
-  });
 }

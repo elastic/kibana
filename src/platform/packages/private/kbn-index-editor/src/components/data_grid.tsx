@@ -26,7 +26,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/data-view-utils';
+import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import type { EditLookupIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';

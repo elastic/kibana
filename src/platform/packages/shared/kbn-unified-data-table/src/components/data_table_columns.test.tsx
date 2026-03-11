@@ -363,6 +363,51 @@ describe('Data table columns', function () {
       expect(gridColumns[0].isSortable).toBe(true);
     });
 
+    it('should use type override from enriched DataView for ES|QL (e.g., IP field)', async () => {
+      // Create an enriched DataView where 'clientip' is an IP field (specialized ES|QL type)
+      const enrichedDataView = {
+        ...dataViewWithTimefieldMock,
+        getFieldByName: (fieldName: string) => {
+          if (fieldName === 'clientip') {
+            return {
+              name: 'clientip',
+              type: 'ip',
+              esTypes: ['ip'],
+              searchable: true,
+              aggregatable: true,
+            };
+          }
+          return dataViewWithTimefieldMock.getFieldByName(fieldName);
+        },
+        fields: dataViewWithTimefieldMock.fields,
+      };
+
+      const gridColumns = getEuiGridColumns({
+        columns: ['clientip'],
+        settings: {},
+        dataView: enrichedDataView as any,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      // IP fields should be sortable and use 'numeric' schema (see getSchemaByKbnType)
+      expect(gridColumns[0].schema).toBe('numeric');
+      expect(gridColumns[0].isSortable).toBe(true);
+    });
+
     it('returns columns in correct format when column customisation is provided', async () => {
       const gridColumns = getEuiGridColumns({
         columns,

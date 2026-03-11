@@ -28,7 +28,7 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 jest.mock('./fetch_documents', () => ({
@@ -274,6 +274,7 @@ describe('test fetchAll', () => {
         interceptedWarnings: [],
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        esqlDataView: expect.any(DataView),
         query,
       },
     ]);
