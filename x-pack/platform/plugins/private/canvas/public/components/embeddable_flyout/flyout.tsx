@@ -15,7 +15,7 @@ import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import type { State } from '../../../types';
-import { CanAddNewPanel, PanelPackage } from '@kbn/presentation-publishing';
+import type { CanAddNewPanel, PanelPackage } from '@kbn/presentation-publishing';
 
 type AddEmbeddable = (pageId: string, partialElement: { expression: string }) => void;
 
