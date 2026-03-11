@@ -112,7 +112,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
-        "lineNumber": 56,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -136,7 +136,7 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
-            "lineNumber": 57,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -169,7 +169,7 @@
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-        "lineNumber": 205,
+        "lineNumber": 207,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -187,7 +187,7 @@
               "FetchHistogramsForFieldsParams"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
-            "lineNumber": 205,
+            "lineNumber": 207,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -1643,7 +1643,7 @@
               },
               "[]; samplerShardSize: number; runtimeMappings?: ",
               "MappingRuntimeFields",
-              " | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
+              " | undefined; projectRouting?: string | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
             "lineNumber": 32,
