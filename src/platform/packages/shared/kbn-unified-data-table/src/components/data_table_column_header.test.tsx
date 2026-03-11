@@ -81,12 +81,6 @@ describe('DataTableColumnHeader', function () {
       <DataTableColumnHeader
         columnName="bytes"
         columnDisplayName="bytesDisplayName"
-        columnsMeta={{
-          bytes: {
-            type: 'string',
-            esType: 'keyword',
-          },
-        }}
         dataView={stubLogstashDataView}
         showColumnTokens
       />

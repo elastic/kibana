@@ -24,7 +24,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 
 import {
   isOfAggregateQueryType,
@@ -148,7 +148,6 @@ export const initializeSearchEmbeddableApi = async (
 
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
-  const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const esqlDataView$ = new BehaviorSubject<DataView | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
   const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
@@ -159,7 +158,6 @@ export const initializeSearchEmbeddableApi = async (
    */
   const stateManager: SearchEmbeddableStateManager = {
     columns: columns$,
-    columnsMeta: columnsMeta$,
     esqlDataView: esqlDataView$,
     grid: grid$,
     headerRowHeight: headerRowHeight$,

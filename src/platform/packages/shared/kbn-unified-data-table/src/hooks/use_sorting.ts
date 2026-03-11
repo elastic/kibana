@@ -14,14 +14,12 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
-import type { DataTableColumnsMeta } from '../types';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
 
 export const useSorting = ({
   rows,
   visibleColumns,
-  columnsMeta,
   sort,
   dataView,
   isPlainRecord,
@@ -31,7 +29,6 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  columnsMeta: DataTableColumnsMeta | undefined;
   sort: SortOrder[];
   dataView: DataView;
   isPlainRecord: boolean;
@@ -55,7 +52,7 @@ export const useSorting = ({
         const field = getDataViewFieldOrCreateFromColumnMeta({
           dataView,
           fieldName: id,
-          columnMeta: columnsMeta?.[id],
+          columnMeta: undefined,
         });
 
         if (!field) {
@@ -70,7 +67,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isPlainRecord, rows, sortingColumns]);
+  }, [dataView, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

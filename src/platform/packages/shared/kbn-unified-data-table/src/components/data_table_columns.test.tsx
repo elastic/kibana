@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -92,11 +91,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-          timestamp: { type: 'date', esType: 'dateTime' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -123,11 +117,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'replace',
@@ -154,11 +143,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'append',
@@ -203,10 +187,6 @@ describe('Data table columns', function () {
     it('returns eui grid columns with tokens for custom column types', async () => {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -254,9 +234,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -282,9 +259,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          'geo.coordinates': { type: 'geo_point' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -310,9 +284,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          stack_version: { type: 'version' as DatatableColumnType },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -338,9 +309,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          ip_address: { type: 'ip' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -371,9 +339,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          var_test: { type: 'number' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -399,10 +364,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -431,10 +392,6 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });

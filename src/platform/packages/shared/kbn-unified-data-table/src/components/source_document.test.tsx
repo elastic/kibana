@@ -10,7 +10,6 @@
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
   createFormatFieldValueSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -56,7 +55,6 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => false}
         maxEntries={100}
         isPlainRecord={true}
-        columnsMeta={undefined}
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
@@ -87,7 +85,6 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => true}
         maxEntries={100}
         isPlainRecord={true}
-        columnsMeta={undefined}
       />
     );
 
@@ -120,7 +117,6 @@ describe('Unified data table source document cell rendering', function () {
           shouldShowFieldHandler={() => true}
           maxEntries={100}
           isPlainRecord={true}
-          columnsMeta={undefined}
         />
       );
 
@@ -152,7 +148,6 @@ describe('Unified data table source document cell rendering', function () {
           shouldShowFieldHandler={() => true}
           maxEntries={100}
           isPlainRecord={true}
-          columnsMeta={columnsMetaOverridingBytesType}
         />
       );
 

@@ -33,8 +33,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -297,14 +295,6 @@ function DiscoverDocumentsComponent({
     [uiSettings]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
-
   // Use enriched ES|QL DataView with fields from query columns when available.
   // This allows the grid and doc viewer to use dataView.fields directly
   // instead of relying on columnsMeta for field information.
@@ -375,8 +365,7 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
-      customColumnsMeta?: DataTableColumnsMeta
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc']
     ) => (
       <DiscoverGridFlyout
         dataView={gridDataView}
@@ -384,7 +373,6 @@ function DiscoverDocumentsComponent({
         hits={displayedRows}
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
         savedSearchId={persistedDiscoverSession?.id!}
         query={query}
         initialTabId={initialDocViewerTabId}
@@ -564,7 +552,6 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
             expandedDoc={expandedDoc}
             dataView={gridDataView}
             loadingState={

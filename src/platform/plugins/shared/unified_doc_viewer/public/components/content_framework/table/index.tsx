@@ -45,7 +45,6 @@ export interface ContentFrameworkTableProps
     DocViewRenderProps,
     | 'hit'
     | 'dataView'
-    | 'columnsMeta'
     | 'textBasedHits'
     | 'filter'
     | 'onAddColumn'
@@ -130,7 +129,6 @@ export function ContentFrameworkTable({
               dataView,
               fieldFormats,
               isPinned: false,
-              columnsMeta: {},
             })
           );
 

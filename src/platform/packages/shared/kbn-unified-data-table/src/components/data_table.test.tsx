@@ -41,7 +41,6 @@ import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
@@ -895,7 +894,6 @@ describe('UnifiedDataTable', () => {
         },
         flattened: { test: jest.fn() },
       };
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
       ));
@@ -906,7 +904,6 @@ describe('UnifiedDataTable', () => {
         ...getProps(),
         expandedDoc,
         setExpandedDoc: setExpandedDocMock,
-        columnsMeta: columnsMetaOverride,
         renderDocumentView: renderDocumentViewMock,
         externalControlColumns: [testLeadingControlColumn],
       });
@@ -917,8 +914,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        setExpandedDocMock,
-        columnsMetaOverride
+        setExpandedDocMock
       );
     },
     EXTENDED_JEST_TIMEOUT

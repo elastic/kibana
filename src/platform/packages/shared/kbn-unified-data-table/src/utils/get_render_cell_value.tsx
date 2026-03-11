@@ -15,7 +15,6 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
@@ -40,7 +39,6 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
   isCompressed = true,
-  columnsMeta,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -51,7 +49,6 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -66,7 +63,7 @@ export const getRenderCellValueFn = ({
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
       fieldName: columnId,
-      columnMeta: columnsMeta?.[columnId],
+      columnMeta: undefined,
     });
     const ctx = useContext(UnifiedDataTableContext);
 
@@ -107,7 +104,6 @@ export const getRenderCellValueFn = ({
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
-            columnsMeta={columnsMeta}
           />
         </span>
       );
@@ -150,7 +146,6 @@ export const getRenderCellValueFn = ({
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          columnsMeta={columnsMeta}
         />
       );
     }

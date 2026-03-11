@@ -26,10 +26,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
   createFormatFieldValueSpy,
   expectFieldCallToMatch,
+  buildDataViewMock,
 } from '@kbn/discover-utils/src/__mocks__';
+import { fieldList } from '@kbn/data-views-plugin/common';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
@@ -70,7 +71,6 @@ const getSummaryProps = (
   rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
-  columnsMeta: undefined,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
   isTracesSummary: false,
@@ -282,8 +282,8 @@ describe('SummaryCellPopover', () => {
   });
 });
 
-describe('SummaryColumn with columnsMeta', () => {
-  it('should use data view field type when columnsMeta is undefined', () => {
+describe('SummaryColumn with enriched DataView', () => {
+  it('should use data view field type', () => {
     const formatFieldValueSpy = createFormatFieldValueSpy();
     const testDataView = createDataViewWithBytesField();
 
@@ -301,7 +301,6 @@ describe('SummaryColumn with columnsMeta', () => {
       <SummaryColumn
         {...getSummaryProps(record, {
           dataView: testDataView,
-          columnsMeta: undefined,
         })}
       />
     );
@@ -310,9 +309,29 @@ describe('SummaryColumn with columnsMeta', () => {
     formatFieldValueSpy.mockRestore();
   });
 
-  it('should use columnsMeta type instead of data view field type when provided', () => {
+  it('should use enriched DataView field type (ES|QL mode)', () => {
     const formatFieldValueSpy = createFormatFieldValueSpy();
-    const testDataView = createDataViewWithBytesField();
+    // Create enriched DataView with bytes field as string/keyword (as ES|QL would provide)
+    const enrichedDataView = buildDataViewMock({
+      name: 'test-data-view',
+      fields: fieldList([
+        {
+          name: '_index',
+          type: 'string',
+          scripted: false,
+          searchable: true,
+          aggregatable: false,
+        },
+        {
+          name: 'bytes',
+          type: 'string',
+          esTypes: ['keyword'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+      ]),
+    });
 
     const record = buildDataTableRecord(
       {
@@ -321,14 +340,13 @@ describe('SummaryColumn with columnsMeta', () => {
           bytes: ['100'],
         },
       },
-      testDataView
+      enrichedDataView
     );
 
     render(
       <SummaryColumn
         {...getSummaryProps(record, {
-          dataView: testDataView,
-          columnsMeta: columnsMetaOverridingBytesType,
+          dataView: enrichedDataView,
         })}
       />
     );

@@ -113,7 +113,6 @@ const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, stor
 
 const InternalDocViewerTable = ({
   columns,
-  columnsMeta,
   hit,
   dataView,
   textBasedHits,
@@ -206,10 +205,9 @@ const InternalDocViewerTable = ({
         dataView,
         fieldFormats,
         isPinned,
-        columnsMeta,
       });
     },
-    [dataView, hit, columnsMeta, flattened, fieldFormats]
+    [dataView, hit, flattened, fieldFormats]
   );
 
   const fieldsFromColumns = useMemo(
@@ -232,7 +230,7 @@ const InternalDocViewerTable = ({
         canPrependTimeFieldColumn(
           columns,
           dataView.timeFieldName,
-          columnsMeta,
+          dataView,
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
           isEsqlMode
         )
@@ -252,7 +250,6 @@ const InternalDocViewerTable = ({
     mapping,
     dataView,
     columns,
-    columnsMeta,
     isEsqlMode,
     uiSettings,
   ]);

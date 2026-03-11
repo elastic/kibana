@@ -16,7 +16,6 @@ import type {
   ShouldShowFieldInTableHandler,
   FormattedHit,
   EsHitRecord,
-  DataTableColumnsMeta,
 } from '../types';
 import { formatFieldValue } from './format_value';
 
@@ -39,19 +38,17 @@ const formattedHitCache = new WeakMap<
  * The value returned in each pair is an HTML string which is safe to be applied to the DOM, since
  * it's formatted using field formatters.
  * @param hit
- * @param dataView
+ * @param dataView - enriched DataView containing ES|QL fields if applicable
  * @param shouldShowFieldHandler
  * @param maxEntries
  * @param fieldFormats
- * @param columnsMeta
  */
 export function formatHit(
   hit: DataTableRecord,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
 
@@ -72,7 +69,7 @@ export function formatHit(
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
       fieldName: key,
-      columnMeta: columnsMeta?.[key],
+      columnMeta: undefined,
     });
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
@@ -113,7 +110,7 @@ export function formatHit(
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
       fieldName: key,
-      columnMeta: columnsMeta?.[key],
+      columnMeta: undefined,
     });
     pair[1] = formatFieldValue(flattened[key], hit.raw, fieldFormats, dataView, field);
   }

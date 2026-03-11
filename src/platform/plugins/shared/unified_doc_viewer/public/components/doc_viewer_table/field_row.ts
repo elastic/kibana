@@ -8,7 +8,7 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
@@ -17,7 +17,7 @@ import {
   isNestedFieldParent,
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { getFieldIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 export class FieldRow {
@@ -26,7 +26,6 @@ export class FieldRow {
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
-  readonly columnsMeta: DataTableColumnsMeta | undefined;
 
   readonly #hit: DataTableRecord;
   readonly #dataView: DataView;
@@ -48,7 +47,6 @@ export class FieldRow {
     dataView,
     fieldFormats,
     isPinned,
-    columnsMeta,
   }: {
     name: string;
     displayNameOverride?: string;
@@ -57,7 +55,6 @@ export class FieldRow {
     dataView: DataView;
     fieldFormats: FieldFormatsStart;
     isPinned: boolean;
-    columnsMeta: DataTableColumnsMeta | undefined;
   }) {
     this.#hit = hit;
     this.#dataView = dataView;
@@ -71,10 +68,9 @@ export class FieldRow {
     this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
       fieldName: name,
-      columnMeta: columnsMeta?.[name],
+      columnMeta: undefined, // TODO: remove getDataViewFieldOrCreateFromColumnMeta call,
     });
     this.isPinned = isPinned;
-    this.columnsMeta = columnsMeta;
   }
 
   // format as html in a lazy way
@@ -115,11 +111,7 @@ export class FieldRow {
 
   public get fieldType(): string | undefined {
     if (!this.#fieldType) {
-      const columnMeta = this.columnsMeta?.[this.name];
-      const columnIconType = getTextBasedColumnIconType(columnMeta);
-      const fieldType = columnIconType
-        ? columnIconType // for text-based results types come separately
-        : isNestedFieldParent(this.name, this.#dataView)
+      const fieldType = isNestedFieldParent(this.name, this.#dataView)
         ? 'nested'
         : this.dataViewField
         ? getFieldIconType(this.dataViewField)

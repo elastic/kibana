@@ -50,8 +50,15 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
+// TODO: remove
 /**
  * Custom column types per column name
+ *
+ * @deprecated This type is being phased out. For ES|QL queries, use enriched DataView instances
+ * that contain the field information directly instead of passing columnsMeta separately.
+ * See `createEsqlDataViewWithColumns` for creating enriched DataViews.
+ *
+ * This will be removed in a future version once all consumers are updated to use enriched DataViews.
  */
 export type DataTableColumnsMeta = Record<
   string,

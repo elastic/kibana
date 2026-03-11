@@ -8,19 +8,17 @@
  */
 import { useMemo } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
 interface UseFieldTypesProps {
   fields: string[];
   dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
 }
 
+// TODO: remove?
 export const useDataViewFields = ({
   fields,
   dataView,
-  columnsMeta,
 }: UseFieldTypesProps): { dataViewFields: Record<string, DataViewField | undefined> } => {
   const dataViewFields = useMemo(
     () =>
@@ -28,12 +26,12 @@ export const useDataViewFields = ({
         acc[fieldName] = getDataViewFieldOrCreateFromColumnMeta({
           fieldName,
           dataView,
-          columnMeta: columnsMeta?.[fieldName],
+          columnMeta: undefined,
         });
 
         return acc;
       }, {} as Record<string, DataViewField | undefined>),
-    [fields, dataView, columnsMeta]
+    [fields, dataView]
   );
 
   return { dataViewFields };

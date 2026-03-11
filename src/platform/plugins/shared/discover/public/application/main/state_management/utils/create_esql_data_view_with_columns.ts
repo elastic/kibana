@@ -8,7 +8,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { enrichDataViewSpecWithEsqlColumns } from '@kbn/data-view-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
@@ -32,16 +32,11 @@ export function createEsqlDataViewWithColumns(
   esqlQueryColumns: DatatableColumn[],
   deps: CreateEsqlDataViewDeps
 ): DataView {
-  const spec = baseDataView.toSpec(false);
-  spec.fields = {};
-
-  for (const column of esqlQueryColumns) {
-    const fieldSpec = convertDatatableColumnToDataViewFieldSpec(column);
-    spec.fields[column.name] = fieldSpec;
-  }
+  const baseSpec = baseDataView.toSpec(false);
+  const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, esqlQueryColumns);
 
   return new DataView({
-    spec,
+    spec: enrichedSpec,
     fieldFormats: deps.fieldFormats,
     shortDotsEnable: deps.shortDotsEnable,
     metaFields: deps.metaFields,

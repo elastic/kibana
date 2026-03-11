@@ -24,11 +24,12 @@ import type { ESQLRow } from '@kbn/es-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { enrichDataViewSpecWithEsqlColumns } from '@kbn/data-view-utils';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
@@ -62,6 +63,19 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
+  // Create an enriched data view with fields from ES|QL columns
+  const enrichedDataView = useMemo(() => {
+    const baseSpec = props.dataView.toSpec(false);
+    const enrichedSpec = enrichDataViewSpecWithEsqlColumns(baseSpec, props.columns);
+
+    return new DataView({
+      spec: enrichedSpec,
+      fieldFormats: props.fieldFormats,
+      shortDotsEnable: props.core.uiSettings.get('shortDots:enable'),
+      metaFields: props.core.uiSettings.get('metaFields'),
+    });
+  }, [props.dataView, props.columns, props.fieldFormats, props.core.uiSettings]);
+
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
@@ -71,17 +85,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: ComponentProps<typeof RowViewer>['setExpandedDoc'],
-      customColumnsMeta?: DataTableColumnsMeta
+      expandedDocSetter: ComponentProps<typeof RowViewer>['setExpandedDoc']
     ) => (
       <RowViewer
-        dataView={props.dataView}
+        dataView={enrichedDataView}
         notifications={props.core.notifications}
         chrome={props.core.chrome}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
         flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
@@ -93,18 +105,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         setExpandedDoc={expandedDocSetter}
       />
     ),
-    [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
+    [activeColumns, enrichedDataView, props.core.notifications, props.core.chrome, props.flyoutType]
   );
-
-  const columnsMeta = useMemo(() => {
-    return props.columns.reduce((acc, column) => {
-      acc[column.id] = {
-        type: column.meta?.type,
-        esType: column.meta?.esType ?? column.meta?.type,
-      };
-      return acc;
-    }, {} as DataTableColumnsMeta);
-  }, [props.columns]);
 
   const rows: DataTableRecord[] = useMemo(() => {
     const columnNames = props.columns?.map(({ name }) => name);
@@ -145,7 +147,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const renderToolbar = useCallback(
     (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
       const discoverLink = discoverLocator?.getRedirectUrl({
-        dataViewSpec: props.dataView.toSpec(),
+        dataViewSpec: enrichedDataView.toSpec(),
         timeRange: props.data.query.timefilter.timefilter.getTime(),
         query: props.query,
         columns: activeColumns,
@@ -190,8 +192,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [
       activeColumns,
       discoverLocator,
+      enrichedDataView,
       props.data.query.timefilter.timefilter,
-      props.dataView,
       props.query,
     ]
   );
@@ -205,13 +207,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         }
       `}
       rows={rows}
-      columnsMeta={columnsMeta}
       services={services}
       enableInTableSearch
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
-      dataView={props.dataView}
+      dataView={enrichedDataView}
       sampleSizeState={rows.length}
       rowsPerPageState={rowsPerPage}
       rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}

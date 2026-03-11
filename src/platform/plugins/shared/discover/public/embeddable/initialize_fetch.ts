@@ -35,7 +35,6 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { createEsqlDataViewWithColumns } from '../application/main/state_management/utils/create_esql_data_view_with_columns';
@@ -239,9 +238,6 @@ export function initializeFetch({
             }
 
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
               esqlDataView,
               rows: result.records,
               hitCount: result.records.length,
@@ -307,9 +303,6 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'columnsMeta')) {
-        stateManager.columnsMeta.next(next.columnsMeta);
-      }
       if (Object.hasOwn(next, 'esqlDataView')) {
         stateManager.esqlDataView.next(next.esqlDataView);
       }

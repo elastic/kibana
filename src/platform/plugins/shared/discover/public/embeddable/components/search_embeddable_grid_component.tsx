@@ -79,7 +79,6 @@ export function SearchEmbeddableGridComponent({
     fetchContext,
     rows,
     totalHitCount,
-    columnsMeta,
     esqlDataView,
     grid,
     panelTitle,
@@ -97,7 +96,6 @@ export function SearchEmbeddableGridComponent({
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
-    stateManager.columnsMeta,
     stateManager.esqlDataView,
     stateManager.grid,
     api.title$,
@@ -125,11 +123,11 @@ export function SearchEmbeddableGridComponent({
   const originalColumns = useMemo(() => {
     return replaceColumnsWithVariableDriven(
       savedSearch.columns,
-      columnsMeta,
+      esqlDataView,
       esqlVariables,
       isEsql
     );
-  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
+  }, [esqlDataView, isEsql, esqlVariables, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -251,7 +249,6 @@ export function SearchEmbeddableGridComponent({
       }
       cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
       cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
-      columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}

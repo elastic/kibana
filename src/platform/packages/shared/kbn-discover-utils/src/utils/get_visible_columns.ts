@@ -8,12 +8,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '../types';
 
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
-  columnsMeta: DataTableColumnsMeta | undefined,
+  dataView: DataView,
   showTimeCol: boolean, // based on Advanced Settings `doc_table:hideTimeColumn`
   isESQLMode: boolean
 ) {
@@ -22,9 +21,9 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isESQLMode) {
-    return (
-      !!columns && !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source')
-    );
+    // In ES|QL mode, check if the time field exists in the DataView fields
+    // (the DataView should be enriched with ES|QL columns)
+    return !!columns && !!dataView.getFieldByName(timeFieldName) && columns.includes('_source');
   }
 
   return true;

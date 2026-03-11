@@ -24,7 +24,7 @@ import type { AttributeField } from './attributes_overview';
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
-    'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
+    'hit' | 'dataView' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
   fields: AttributeField[];
   searchTerm: string;
@@ -34,7 +34,6 @@ interface AttributesTableProps
 export const AttributesTable = ({
   hit,
   dataView,
-  columnsMeta,
   fields,
   searchTerm,
   columns,
@@ -71,10 +70,9 @@ export const AttributesTable = ({
             dataView,
             fieldFormats,
             isPinned: false,
-            columnsMeta,
           })
       ),
-    [fields, flattened, hit, dataView, fieldFormats, columnsMeta]
+    [fields, flattened, hit, dataView, fieldFormats]
   );
 
   const fieldCellActions = useMemo(
