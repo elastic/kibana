@@ -45,6 +45,7 @@ import { HistoryFilters, DEFAULT_START_DATE, DEFAULT_END_DATE } from './componen
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
+const EMPTY_TAGS: string[] = [];
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const PACKS_CONFIG = { isLive: false } as const;
@@ -297,7 +298,7 @@ const UnifiedHistoryTableComponent = () => {
       return <>{'\u2014'}</>;
     }
 
-    return <TagsColumn tags={row.tags ?? []} />;
+    return <TagsColumn tags={row.tags ?? EMPTY_TAGS} />;
   }, []);
 
   const renderRunByColumn = useCallback(

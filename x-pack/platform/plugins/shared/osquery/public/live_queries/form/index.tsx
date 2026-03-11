@@ -58,6 +58,7 @@ interface DefaultLiveQueryFormFields {
 }
 
 type FormType = 'simple' | 'steps';
+const EMPTY_TAGS: string[] = [];
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
@@ -333,7 +334,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           )}
           {isHistoryEnabled && (
             <EuiFlexItem>
-              <TagsEditor tags={watchedValues.tags ?? []} onChange={handleTagsChange} />
+              <TagsEditor tags={watchedValues.tags ?? EMPTY_TAGS} onChange={handleTagsChange} />
             </EuiFlexItem>
           )}
           {queryType === 'pack' ? (

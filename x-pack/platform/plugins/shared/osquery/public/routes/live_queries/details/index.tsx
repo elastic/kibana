@@ -22,6 +22,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_fe
 const tableWrapperCss = {
   paddingLeft: '10px',
 };
+const EMPTY_TAGS: string[] = [];
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
@@ -86,7 +87,7 @@ const LiveQueryDetailsPageComponent = () => {
       {isHistoryEnabled && data && (
         <EuiFlexItem css={tableWrapperCss}>
           <TagsEditor
-            tags={data.tags ?? []}
+            tags={data.tags ?? EMPTY_TAGS}
             onChange={handleTagsChange}
             isDisabled={!canEditTags}
           />
