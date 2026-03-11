@@ -74,7 +74,6 @@ const fetchMonitors = async (monitorIds: string[], routeContext: RouteContext) =
   return { foundMonitors, errors };
 }
 
-// ToDo: is this the right name? 
 const getExpectedPackagePolicies = (
   foundMonitors: Array<{
     id: string;
@@ -84,13 +83,12 @@ const getExpectedPackagePolicies = (
   spaceId: string
 ) => {
   const expectedPolicies: Array<{
-    monitorIndex: number;
+    monitorId: string;
     locationId: string;
     policyId: string;
   }> = [];
 
-  for (let mIdx = 0; mIdx < foundMonitors.length; mIdx++) {
-    const { so } = foundMonitors[mIdx];
+  foundMonitors.forEach(({ so }, mIdx) => {
     const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
     const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
@@ -103,9 +101,9 @@ const getExpectedPackagePolicies = (
         loc.id,
         spaceId
       );
-      expectedPolicies.push({ monitorIndex: mIdx, locationId: loc.id, policyId });
+      expectedPolicies.push({ monitorId: so.attributes[ConfigKey.CONFIG_ID], locationId: loc.id, policyId });
     }
-  }
+  });
 
   return expectedPolicies;
 }
