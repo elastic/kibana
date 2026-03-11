@@ -130,7 +130,9 @@ export class Server {
       env.packageInfo.buildFlavor === 'serverless'
         ? env.packageInfo.buildShaShort
         : env.packageInfo.version;
-    this.loggingSystem.setGlobalContext({ service: { version: serviceVersion } });
+    this.loggingSystem.setGlobalContext({
+      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+    });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
@@ -322,6 +324,7 @@ export class Server {
       http: httpSetup,
       executionContext: executionContextSetup,
       security: securitySetup,
+      loggingSystem: this.loggingSystem,
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
@@ -373,6 +376,7 @@ export class Server {
       httpRateLimiter: httpRateLimiterSetup,
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
+      loggingSystem: this.loggingSystem,
     });
 
     const customBrandingSetup = this.customBranding.setup();
