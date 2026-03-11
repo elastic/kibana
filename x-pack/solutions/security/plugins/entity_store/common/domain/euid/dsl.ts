@@ -17,7 +17,12 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
 } from './commons';
-import { applyFieldEvaluations } from './field_evaluations';
+import {
+  applyFieldEvaluations,
+  getSourceMatchSpec,
+  type SourceMatchSpec,
+} from './field_evaluations';
+import type { FieldEvaluation, FieldEvaluationSource } from '../definitions/entity_schema';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
@@ -136,5 +141,68 @@ export function getEuidDslFilterBasedOnDocument(
     };
   }
 
+  if (identityField.fieldEvaluations?.length) {
+    const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
+    for (const evaluation of identityField.fieldEvaluations) {
+      const spec = getSourceMatchSpec(doc, evaluation);
+      filterList.push(buildSourceClauseDsl(evaluation, spec) as QueryDslQueryContainer);
+    }
+    dsl.bool = { ...dsl.bool, filter: filterList };
+  }
+
   return dsl;
+}
+
+function getSourceFieldNames(sources: FieldEvaluationSource[]): {
+  exactMatchFields: string[];
+  prefixMatchFields: string[];
+} {
+  const exactMatchFields: string[] = [];
+  const prefixMatchFields: string[] = [];
+  for (const source of sources) {
+    if ('field' in source) {
+      exactMatchFields.push(source.field);
+    } else {
+      prefixMatchFields.push(source.firstChunkOfField);
+    }
+  }
+  return { exactMatchFields, prefixMatchFields };
+}
+
+function buildSourceClauseDsl(
+  evaluation: FieldEvaluation,
+  spec: SourceMatchSpec
+): QueryDslQueryContainer {
+  const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+  const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
+
+  if (spec.type === 'unknown') {
+    const mustNotExistOrEmpty = allSourceFields.map((field) => ({
+      bool: {
+        should: [{ bool: { must_not: [{ exists: { field } }] } }, { term: { [field]: '' } }],
+        minimum_should_match: 1,
+      },
+    }));
+    return {
+      bool: {
+        must: mustNotExistOrEmpty,
+      },
+    };
+  }
+
+  const should: QueryDslQueryContainer[] = [];
+  for (const v of spec.values) {
+    for (const field of exactMatchFields) {
+      should.push({ term: { [field]: v } });
+    }
+    for (const field of prefixMatchFields) {
+      should.push({ prefix: { [field]: v } });
+    }
+  }
+  return {
+    bool: {
+      should,
+      minimum_should_match: 1,
+    },
+  };
 }
