@@ -37,11 +37,20 @@ export const calendarStyles = (euiThemeContext: UseEuiTheme) => {
   const todayButton = css`
     background: ${euiTheme.colors.backgroundBasePlain};
     bottom: ${euiTheme.size.s};
-    box-shadow: ${euiTheme.shadows.l.down};
+    box-shadow: ${euiTheme.shadows.m.down};
     left: 50%;
     position: absolute;
     transform: translateX(-50%);
     z-index: ${euiTheme.levels.mask};
+
+    &:hover {
+      box-shadow: ${euiTheme.shadows.l.down};
+    }
+
+    &&:hover::before,
+    &&:active::before {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
   `;
 
   return { container, todayButton };
