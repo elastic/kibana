@@ -21,9 +21,9 @@ export class DiscoverActions {
   }
 
   async runRecommendedEsqlQuery(queryLabel: string) {
-    await this.openRecommendedQueriesPanel();
+    const panel = await this.openRecommendedQueriesPanel();
 
-    const queryOption = this.menuPopover.getByRole('button', {
+    const queryOption = panel.getByRole('button', {
       exact: true,
       name: queryLabel,
     });
@@ -33,7 +33,7 @@ export class DiscoverActions {
     await this.discover.waitUntilSearchingHasFinished();
   }
 
-  async openRecommendedQueriesPanel() {
+  async openRecommendedQueriesPanel(): Promise<Locator> {
     if (!(await this.menuPopover.isVisible())) {
       await this.page.testSubj.click('esql-help-popover-button');
     }
@@ -41,13 +41,15 @@ export class DiscoverActions {
     await expect(this.menuPopover).toBeVisible();
     const selectedPanelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
     if (await selectedPanelTitleButton.isVisible()) {
-      return;
+      return this.menuPopover;
     }
 
     const recommendedQueriesCategoryButton = this.page.testSubj.locator('esql-recommended-queries');
     await expect(recommendedQueriesCategoryButton).toBeVisible();
     await recommendedQueriesCategoryButton.click();
     await expect(selectedPanelTitleButton).toBeVisible();
+
+    return this.menuPopover;
   }
 
   async addBreakdownFieldFromSidebar(field: string) {
