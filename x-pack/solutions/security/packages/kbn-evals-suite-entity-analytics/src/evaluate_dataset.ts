@@ -192,30 +192,30 @@ export function createEvaluateDataset({
           let correctnessResult: { metadata?: unknown } | undefined;
           let groundednessResult: { metadata?: unknown } | undefined;
 
-          try {
-            const [correctness, groundedness] = await Promise.all([
-              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-                evaluators.correctnessAnalysis().evaluate({
-                  input,
-                  expected: output,
-                  output: response,
-                  metadata,
-                })
-              ),
-              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-                evaluators.groundednessAnalysis().evaluate({
-                  input,
-                  expected: output,
-                  output: response,
-                  metadata,
-                })
-              ),
-            ]);
-            correctnessResult = correctness;
-            groundednessResult = groundedness;
-          } catch (err) {
-            // Judge model may return invalid tool call args (toolValidationError); continue without
-            // analysis so quantitative evaluators report "unavailable" instead of failing the test.
+          const result = await Promise.all([
+            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+              evaluators.correctnessAnalysis().evaluate({
+                input,
+                expected: output,
+                output: response,
+                metadata,
+              })
+            ),
+            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+              evaluators.groundednessAnalysis().evaluate({
+                input,
+                expected: output,
+                output: response,
+                metadata,
+              })
+            ),
+          ]).catch(() => {
+            // Catch cases where these optional evaluators fail so that entire evaluation doesn't fail
+          });
+
+          if (result) {
+            correctnessResult = result[0];
+            groundednessResult = result[1];
           }
 
           return {
