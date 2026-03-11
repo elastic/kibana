@@ -6,6 +6,7 @@
  */
 
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
+import { encode } from '../../../common/lib/embeddable_dataurl';
 
 const input = {
   id: 'embeddableId',
@@ -15,16 +16,18 @@ const input = {
 
 describe('embeddableInputToExpression', () => {
   it('converts input to a generic embeddable expression', () => {
-    const expression = embeddableInputToExpression(input, 'lens');
-    expect(expression).toMatch(/^embeddable config=".*" type="lens" \| render$/);
+    const lensExpression = embeddableInputToExpression(input, 'lens');
+    expect(lensExpression).toEqual(`embeddable config="${encode(input)}" type="lens" | render`);
 
-    const expression = embeddableInputToExpression(input, 'visualization');
-    expect(expression).toMatch(/^embeddable config=".*" type="visualization" \| render$/);
+    const visualizationExpression = embeddableInputToExpression(input, 'visualization');
+    expect(visualizationExpression).toEqual(
+      `embeddable config="${encode(input)}" type="visualization" | render`
+    );
 
-    const expression = embeddableInputToExpression(input, 'map');
-    expect(expression).toMatch(/^embeddable config=".*" type="map" \| render$/);
+    const mapExpression = embeddableInputToExpression(input, 'map');
+    expect(mapExpression).toEqual(`embeddable config="${encode(input)}" type="map" | render`);
 
-    const expression = embeddableInputToExpression(input, 'search');
-    expect(expression).toMatch(/^embeddable config=".*" type="search" \| render$/);
+    const searchExpression = embeddableInputToExpression(input, 'search');
+    expect(searchExpression).toEqual(`embeddable config="${encode(input)}" type="search" | render`);
   });
 });
