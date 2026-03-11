@@ -56,6 +56,10 @@ export interface CorrelationsDetailsAlertsTableProps {
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
+  /**
+   * Optional index to query alerts from
+   */
+  indexName?: string;
 }
 
 /**
@@ -69,6 +73,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   eventId,
   noItemsMessage,
   'data-test-subj': dataTestSubj,
+  indexName,
 }) => {
   const {
     setPagination,
@@ -78,7 +83,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     paginationConfig,
     sorting,
     error,
-  } = usePaginatedAlerts(alertIds || []);
+  } = usePaginatedAlerts(alertIds || [], indexName);
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
