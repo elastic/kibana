@@ -29,7 +29,7 @@ import { IntegrationSelectablePopover } from '../../../components/integrations_s
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getDetectionRules } = useSiemReadinessApi();
 
   const allRules = useMemo(
     () => getDetectionRules.data?.data || [],
@@ -180,7 +180,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
   );
 
-  const isLoading = getIntegrations.isLoading || getDetectionRules.isLoading;
+  const isLoading = getDetectionRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [
       {

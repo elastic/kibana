@@ -44,6 +44,7 @@ export { synthtraceFixture } from './fixtures/scope/worker/synthtrace';
 
 // Other worker types
 export type {
+  LinkedProjectFixture,
   SamlAuth,
   SynthtraceFixture,
   RequestAuthFixture,
