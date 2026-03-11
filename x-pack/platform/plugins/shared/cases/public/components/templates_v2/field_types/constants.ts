@@ -28,10 +28,6 @@ category: General
 # tags are optional
 tags:
   - example
-# severity is optional (low, medium, high, critical)
-severity: low
-# category is optional
-category: general
 fields:
   - name: summary
     control: INPUT_TEXT
