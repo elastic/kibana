@@ -38,8 +38,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const PFX: AuthTypeSpec<AuthSchemaType> = {
   id: 'pfx_certificate',
   schema: authSchema,
-  getHeaders: async (): Promise<Record<string, string>> => {
-    // PFX auth uses TLS client certificates, not HTTP headers.
+  authenticate: async (): Promise<Record<string, string>> => {
     return {};
   },
   configure: async (

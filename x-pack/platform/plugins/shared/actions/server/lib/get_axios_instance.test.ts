@@ -87,7 +87,8 @@ describe('getAxiosInstance', () => {
     });
 
     expect(result).not.toBeUndefined();
-    expect(result!.defaults.auth).toEqual({ username: 'user', password: 'pass' });
+    const encoded = Buffer.from('user:pass').toString('base64');
+    expect(result!.defaults.headers.common.Authorization).toEqual(`Basic ${encoded}`);
 
     // @ts-expect-error
     expect(result!.interceptors.request.handlers.length).toBe(1);

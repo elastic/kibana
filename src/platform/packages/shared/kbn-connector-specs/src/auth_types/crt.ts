@@ -39,8 +39,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const CRT: AuthTypeSpec<AuthSchemaType> = {
   id: 'crt_certificate',
   schema: authSchema,
-  getHeaders: async (): Promise<Record<string, string>> => {
-    // CRT auth uses TLS client certificates, not HTTP headers.
+  authenticate: async (): Promise<Record<string, string>> => {
     return {};
   },
   configure: async (

@@ -12,14 +12,31 @@ import { createConnectorTypeFromSpec } from './create_connector_from_spec';
 import { WorkflowsConnectorFeatureId } from '../../../common';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { ClientTypeRegistry } from '../../client_types';
 
 describe('createConnectorTypeFromSpec', () => {
   const mockGetAxiosInstanceWithAuth = jest.fn();
   const mockActionsConfigUtils = actionsConfigMock.create();
 
+  const createMockClientTypeRegistry = () => {
+    const registry = new ClientTypeRegistry();
+    registry.register({
+      id: 'http',
+      supportedAuthTypes: '*',
+      create: jest.fn(),
+    });
+    registry.register({
+      id: 'mcp',
+      supportedAuthTypes: ['bearer', 'basic', 'api_key_header', 'none', 'oauth_client_credentials'],
+      create: jest.fn(),
+    });
+    return registry;
+  };
+
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+    getClientTypeRegistry: () => createMockClientTypeRegistry(),
   } as unknown as ActionsPluginSetupContract;
 
   const createMockSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
@@ -35,6 +52,7 @@ describe('createConnectorTypeFromSpec', () => {
       auth: overrides.auth || {
         types: ['none'],
       },
+      clients: overrides.clients,
       actions: overrides.actions || {
         testAction: {
           input: z4.object({ test: z4.string() }),
@@ -373,6 +391,64 @@ describe('createConnectorTypeFromSpec', () => {
       expect(connectorType.validate.config.schema.parse(configWithAuthType)).toEqual(
         configWithAuthType
       );
+    });
+  });
+
+  describe('client auth compatibility validation', () => {
+    it('passes when declared client supports all connector auth types', () => {
+      const spec = createMockSpec({
+        auth: { types: ['bearer'] },
+        clients: { mcp: { urlField: 'serverUrl' } },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).not.toThrow();
+    });
+
+    it('passes when declared client supports wildcard auth types', () => {
+      const spec = createMockSpec({
+        auth: { types: ['bearer', 'basic', 'api_key_header'] },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).not.toThrow();
+    });
+
+    it('throws when declared client does not support a connector auth type', () => {
+      const spec = createMockSpec({
+        auth: { types: ['aws_sig_v4'] },
+        clients: { mcp: { urlField: 'serverUrl' } },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        'client type "mcp" does not support auth type "aws_sig_v4"'
+      );
+    });
+
+    it('throws when any auth type is unsupported across multiple', () => {
+      const spec = createMockSpec({
+        auth: { types: ['bearer', 'aws_sig_v4'] },
+        clients: { mcp: { urlField: 'serverUrl' } },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(
+        'client type "mcp" does not support auth type "aws_sig_v4"'
+      );
+    });
+
+    it('throws for unregistered client type', () => {
+      const spec = createMockSpec({
+        clients: { redis: {} },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).toThrow(/not registered/);
+    });
+
+    it('defaults to auth type "none" when no auth types are declared', () => {
+      const spec = createMockSpec({
+        auth: { types: [] },
+        clients: { mcp: { urlField: 'serverUrl' } },
+      });
+
+      expect(() => createConnectorTypeFromSpec(spec, mockActionsPlugin)).not.toThrow();
     });
   });
 });

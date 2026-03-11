@@ -53,6 +53,7 @@ import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
+import { ClientTypeRegistry, registerClientTypes } from './client_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -131,6 +132,8 @@ export interface PluginSetupContract {
   getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
 
   createMcpClient(opts: CreateMcpClientFnOpts): Promise<McpClient>;
+
+  getClientTypeRegistry: () => ClientTypeRegistry;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -232,6 +235,7 @@ export class ActionsPlugin
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private authTypeRegistry?: AuthTypeRegistry;
+  private clientTypeRegistry?: ClientTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
@@ -328,6 +332,13 @@ export class ActionsPlugin
 
     this.authTypeRegistry = new AuthTypeRegistry();
     registerAuthTypes(this.authTypeRegistry);
+
+    this.clientTypeRegistry = new ClientTypeRegistry();
+    registerClientTypes({
+      registry: this.clientTypeRegistry,
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+      createMcpClient: this.createMcpClientHelper(actionsConfigUtils),
+    });
 
     setupSavedObjects(
       core.savedObjects,
@@ -463,6 +474,7 @@ export class ActionsPlugin
           );
         }
       },
+      getClientTypeRegistry: () => this.clientTypeRegistry!,
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },

@@ -96,8 +96,10 @@ export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
-  getHeaders: (ctx: AuthContext, secret: T) => Promise<Record<string, string>>;
+  /** Primary, transport-agnostic auth contract. Returns headers to attach to requests. */
+  authenticate: (ctx: AuthContext, secret: T) => Promise<Record<string, string>>;
+  /** Optional transport-specific setup (e.g. TLS client certificates). When absent, consumers apply authenticate() headers. */
+  configure?: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -173,14 +175,8 @@ export interface ConnectorPolicies {
 }
 
 // ============================================================================
-// MCP CLIENT
+// MCP CLIENT TYPES
 // ============================================================================
-
-/** Spec-level declaration that a connector requires an MCP client. */
-export interface McpClientConfig {
-  /** The config field name that contains the MCP server URL (e.g. 'serverUrl'). */
-  urlField: string;
-}
 
 /** Tool descriptor returned by an MCP server. */
 export interface McpTool {
@@ -226,9 +222,21 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   supportsStreaming?: boolean;
 }
 
+/**
+ * Maps well-known client type IDs to their instance types.
+ * Handlers access clients via `ctx.clients.mcp!.listTools()` etc.
+ * Third-party client types registered at runtime require casting.
+ */
+export interface ClientTypeMap {
+  http: AxiosInstance;
+  mcp: ConnectorMcpClient;
+}
+
 export interface ActionContext {
+  /** HTTP (Axios) client — backward-compat alias for `clients.http`. */
   client: AxiosInstance;
-  mcpClient?: ConnectorMcpClient;
+  /** All clients created for this connector, keyed by client type ID. */
+  clients: Partial<ClientTypeMap>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -298,7 +306,13 @@ export interface ConnectorSpec {
 
   policies?: ConnectorPolicies;
 
-  mcp?: McpClientConfig;
+  /**
+   * Declares additional client types this connector needs beyond the implicit
+   * HTTP (Axios) client. Each key is a registered client type ID, each value
+   * is per-client-type configuration (e.g. `{ mcp: { urlField: 'serverUrl' } }`).
+   * HTTP is always created implicitly — no need to declare it here.
+   */
+  clients?: Record<string, Record<string, unknown>>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;

@@ -91,7 +91,7 @@ export const getMcpClientFactory = ({
         sslSettings: configurationUtilities.getSSLSettings(),
       };
 
-      const authHeaders = await authType.getHeaders(authContext, secrets);
+      const authHeaders = await authType.authenticate(authContext, secrets);
 
       const headers: Record<string, string> = { ...authHeaders };
       if (additionalHeaders) {

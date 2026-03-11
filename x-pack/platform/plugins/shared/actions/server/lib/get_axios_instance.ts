@@ -127,8 +127,15 @@ export const getAxiosInstanceWithAuth = ({
         sslSettings: configurationUtilities.getSSLSettings(),
       };
 
-      // use the registered auth type to configure authentication for the axios instance
-      return await authType.configure(configureCtx, axiosInstance, secrets);
+      if (authType.configure) {
+        return await authType.configure(configureCtx, axiosInstance, secrets);
+      }
+
+      const authHeaders = await authType.authenticate(configureCtx, secrets);
+      for (const [key, value] of Object.entries(authHeaders)) {
+        axiosInstance.defaults.headers.common[key] = value;
+      }
+      return axiosInstance;
     } catch (err) {
       logger.error(
         `Error getting configured axios instance configured for auth type "${
