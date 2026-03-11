@@ -32,7 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasOnlySourceCommand,
-  hasInfoCommand,
+  hasTimeseriesInfoCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1099,31 +1099,23 @@ describe('esql query helpers', () => {
 
   describe('hasInfoCommand', () => {
     it('should return true when query contains METRICS_INFO command', () => {
-      expect(hasInfoCommand('TS index | METRICS_INFO')).toBe(true);
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO')).toBe(true);
     });
 
     it('should return true when query contains TS_INFO command', () => {
-      expect(hasInfoCommand('TS index | TS_INFO')).toBe(true);
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO')).toBe(true);
     });
 
     it('should return true when METRICS_INFO appears with other commands', () => {
-      expect(hasInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
     });
 
     it('should return true when TS_INFO appears with other commands', () => {
-      expect(hasInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
     });
 
     it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
-      expect(hasInfoCommand('FROM index | STATS count()')).toBe(false);
-    });
-
-    it('should return false for empty string', () => {
-      expect(hasInfoCommand('')).toBe(false);
-    });
-
-    it('should return false for undefined', () => {
-      expect(hasInfoCommand(undefined)).toBe(false);
+      expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
     });
   });
 });

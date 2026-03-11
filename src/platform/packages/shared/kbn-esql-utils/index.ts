@@ -64,7 +64,7 @@ export {
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
-  hasInfoCommand,
+  hasTimeseriesInfoCommand,
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,

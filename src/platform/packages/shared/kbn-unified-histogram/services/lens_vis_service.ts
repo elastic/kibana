@@ -16,7 +16,7 @@ import {
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
-  hasInfoCommand,
+  hasTimeseriesInfoCommand,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -261,7 +261,7 @@ export class LensVisService {
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }
-        } else if (hasInfoCommand(queryParams.query.esql)) {
+        } else if (hasTimeseriesInfoCommand(queryParams.query.esql)) {
           // skip chart suggestions for info commands
           return {
             currentSuggestionContext: {

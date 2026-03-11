@@ -614,12 +614,12 @@ export const hasOnlySourceCommand = (query: string): boolean => {
 };
 
 /**
- * Determines if an ES|QL query contains the INFO commands.
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
  *
  * @param esql - The ES|QL query string to analyze
- * @returns true if the query contains the INFO commands, false otherwise
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
  */
-export const hasInfoCommand = (esql?: string): boolean => {
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
   if (!esql) return false;
   const { root } = Parser.parse(esql);
   return root.commands.some(
