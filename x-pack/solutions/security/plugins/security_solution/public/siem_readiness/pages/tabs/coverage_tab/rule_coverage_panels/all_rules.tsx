@@ -158,26 +158,25 @@ export const AllRuleCoveragePanel: React.FC = () => {
     },
   ];
 
-  const installedIntegrationAssociatedRulesCount =
-    ruleIntegrationCoverage?.coveredRules?.length || 0;
+  const enabledIntegrationRulesCount = ruleIntegrationCoverage?.coveredRules?.length || 0;
 
-  const missingIntegrationAssociatedRulesCount =
-    (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
+  const missingOrDisabledIntegrationRulesCount =
+    (getDetectionRules.data?.data?.length || 0) - enabledIntegrationRulesCount;
 
   const RULE_STATS_DATA = useMemo(
     () => [
       {
         status: 'Enabled integrations',
-        numberOfRulesAssociated: installedIntegrationAssociatedRulesCount || 0,
+        numberOfRulesAssociated: enabledIntegrationRulesCount || 0,
         actions: '',
       },
       {
         status: 'Missing or Disabled Integrations',
-        numberOfRulesAssociated: missingIntegrationAssociatedRulesCount || 0,
+        numberOfRulesAssociated: missingOrDisabledIntegrationRulesCount || 0,
         actions: '',
       },
     ],
-    [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
+    [enabledIntegrationRulesCount, missingOrDisabledIntegrationRulesCount]
   );
 
   const isLoading = getDetectionRules.isLoading;
@@ -185,16 +184,14 @@ export const AllRuleCoveragePanel: React.FC = () => {
     () => [
       {
         status: 'Rules with enabled integrations',
-        count: installedIntegrationAssociatedRulesCount || 0,
+        count: enabledIntegrationRulesCount || 0,
       },
       {
         status: 'Rules with missing or disabled integrations',
-        count:
-          (getDetectionRules.data?.data?.length || 0) -
-          (installedIntegrationAssociatedRulesCount || 0),
+        count: (getDetectionRules.data?.data?.length || 0) - (enabledIntegrationRulesCount || 0),
       },
     ],
-    [getDetectionRules.data?.data?.length, installedIntegrationAssociatedRulesCount]
+    [getDetectionRules.data?.data?.length, enabledIntegrationRulesCount]
   );
   return (
     <>
