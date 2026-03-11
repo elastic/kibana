@@ -9,7 +9,7 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 1. A GitHub issue is labeled **`needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
 2. You open Cursor and type: `/test-plan-generator generate test plan for issue #1234`
 3. The agent reads the issue, navigates the parent epic (if any), explores all sub-issues, fetches linked Figma designs and images, and generates a structured test plan
-4. The test plan is saved locally as a draft at `.cursor/tmp/test-plan-#<issue_number>.md` for you to review and edit
+4. The test plan is saved locally as a draft at `.agents/tmp/test-plan-#<issue_number>.md` for you to review and edit
 5. When you're happy with it, you run: `/test-plan-generator publish test plan for issue #1234`
 6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
@@ -170,7 +170,7 @@ The skill and its reference files were added to the repository by the Engineerin
 
 The files live at:
 ```
-x-pack/solutions/security/.agent/skills/test-plan-generator/
+x-pack/solutions/security/.agents/skills/test-plan-generator/
 ├── SKILL.md                              # Agent instructions
 └── references/
     ├── document-structure.md             # Test plan template and structure
@@ -207,7 +207,7 @@ Since the skill uses `disable-model-invocation: true`, it is **not** applied aut
 ```
    Replace `1234` with a real issue number that has a description, acceptance criteria, and ideally some sub-issues.
 5. Watch the agent work through the steps — it will show what it reads from GitHub (via `gh` CLI), Figma, and any linked content
-6. When finished, open `.cursor/tmp/test-plan-#1234.md` in the editor to review the draft
+6. When finished, open `.agents/tmp/test-plan-#1234.md` in the editor to review the draft
 7. When happy with it, run: `/test-plan-generator publish test plan for issue #1234`
 8. Check the GitHub issue — the test plan should appear as a new comment posted with your account
 
@@ -232,9 +232,9 @@ If the issue changes and you need to update the plan:
 /test-plan-generator update test plan for issue #1234
 ```
 
-The agent fetches the published comment as the current state, re-reads the issue to detect what changed, applies only the differences, and saves the result as a new draft for you to review before publishing.
+The agent fetches the published comment as the current state, re-reads the issue to detect what changed, and automatically checks all linked PRs for new activity since the plan was published — re-reading any PR that has had new commits or review comments. It applies only the differences and saves the result as a new draft for you to review before publishing.
 
-If you also need to refresh PR context (e.g., new commits were pushed):
+If you want to force a full re-read of all linked PRs regardless of activity:
 ```
 /test-plan-generator update test plan for issue #1234 including PRs
 ```
@@ -293,7 +293,7 @@ This is most commonly caused by the GitHub MCP being enabled at the same time th
 
 If the GitHub MCP is already disabled and you still see hangs, it is likely due to the issue having many sub-issues and PRs with large diffs. In that case, split the work:
 
-**For `update` mode:** avoid adding "including PRs" to the command unless necessary. The default update mode re-reads the issue body, sub-issues, and comments to detect changes — but skips PRs, which are the heaviest part. If you need to refresh PR context, do it as a separate step: `/test-plan-generator update test plan for issue #1234 including PRs`.
+**For `update` mode:** the agent automatically checks all linked PRs for activity since the plan was published and only re-reads the ones that changed, so PR context is refreshed without extra effort. If you still see hangs, try running the update without the issue having too many concurrent open PRs.
 
 **For `generate` mode:** if it hangs, split the work into two commands. First: `/test-plan-generator generate test plan for issue #1234, only read the issue and sub-issues, skip PRs`. Once that finishes: `/test-plan-generator update test plan for issue #1234 including PRs`.
 
@@ -329,7 +329,7 @@ The agent will detect the existing test plan and ask whether you want to check i
 No — `gh` CLI is the primary and recommended method. The GitHub MCP is optional and in practice causes hanging issues when enabled during complex agent sessions. Install and authenticate `gh` CLI (Step 4) and you will have everything you need. The GitHub MCP can be left disabled.
 
 **Who maintains the skill?**
-The skill files live in the repository under `x-pack/solutions/security/.agent/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
+The skill files live in the repository under `x-pack/solutions/security/.agents/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.
