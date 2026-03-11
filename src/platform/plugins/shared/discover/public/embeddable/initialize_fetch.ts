@@ -150,6 +150,7 @@ export function initializeFetch({
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
+      debounceTime(0), // debounce to batch updates in the same tick
       tap(([fetchContext, savedSearch, dataViews]) => {
         // abort any in-progress requests
         if (abortController) {
