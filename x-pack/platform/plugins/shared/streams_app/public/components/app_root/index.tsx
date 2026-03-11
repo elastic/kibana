@@ -11,6 +11,7 @@ import {
   BreadcrumbsContextProvider,
   RouteRenderer,
   RouterProvider,
+  RouteSelfHealErrorBoundary,
 } from '@kbn/typed-react-router-config';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -55,17 +56,19 @@ export function AppRoot({
         <QueryClientProvider client={queryClient}>
           {/* @ts-expect-error upgrade typescript v5.4.5 */}
           <RouterProvider history={history} router={streamsAppRouter}>
-            <DiscoverySettingsProvider>
-              <DateRangeRedirect>
-                <PerformanceContextProvider>
-                  <KbnUrlStateStorageFromRouterProvider>
-                    <BreadcrumbsContextProvider>
-                      <RouteRenderer />
-                    </BreadcrumbsContextProvider>
-                  </KbnUrlStateStorageFromRouterProvider>
-                </PerformanceContextProvider>
-              </DateRangeRedirect>
-            </DiscoverySettingsProvider>
+            <RouteSelfHealErrorBoundary>
+              <DiscoverySettingsProvider>
+                <DateRangeRedirect>
+                  <PerformanceContextProvider>
+                    <KbnUrlStateStorageFromRouterProvider>
+                      <BreadcrumbsContextProvider>
+                        <RouteRenderer />
+                      </BreadcrumbsContextProvider>
+                    </KbnUrlStateStorageFromRouterProvider>
+                  </PerformanceContextProvider>
+                </DateRangeRedirect>
+              </DiscoverySettingsProvider>
+            </RouteSelfHealErrorBoundary>
           </RouterProvider>
         </QueryClientProvider>
       </StreamsTourProvider>

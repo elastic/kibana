@@ -8,7 +8,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+import {
+  RouteSelfHealErrorBoundary,
+  RouterProvider,
+  createRouter,
+} from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -151,16 +155,18 @@ export function UXAppRoot({
                 }}
               >
                 <RouterProvider history={history} router={uxRouter}>
-                  <DatePickerContextProvider>
-                    <InspectorContextProvider>
-                      <UrlParamsProvider>
-                        <CsmSharedContextProvider>
-                          <UxApp />
-                        </CsmSharedContextProvider>
-                        <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
-                      </UrlParamsProvider>
-                    </InspectorContextProvider>
-                  </DatePickerContextProvider>
+                  <RouteSelfHealErrorBoundary>
+                    <DatePickerContextProvider>
+                      <InspectorContextProvider>
+                        <UrlParamsProvider>
+                          <CsmSharedContextProvider>
+                            <UxApp />
+                          </CsmSharedContextProvider>
+                          <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
+                        </UrlParamsProvider>
+                      </InspectorContextProvider>
+                    </DatePickerContextProvider>
+                  </RouteSelfHealErrorBoundary>
                 </RouterProvider>
               </PluginContext.Provider>
             </KibanaThemeProvider>

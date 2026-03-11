@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  RouteRenderer,
+  RouterProvider,
+  RouteSelfHealErrorBoundary,
+} from '@kbn/typed-react-router-config';
 import type { History } from 'history';
 import React from 'react';
 import type { Observable } from 'rxjs';
@@ -38,7 +42,9 @@ export function Application({
     >
       {/* @ts-expect-error upgrade typescript v5.4.5 */}
       <RouterProvider history={history} router={observabilityAIAssistantRouter}>
-        <RouteRenderer />
+        <RouteSelfHealErrorBoundary>
+          <RouteRenderer />
+        </RouteSelfHealErrorBoundary>
       </RouterProvider>
     </SharedProviders>
   );
