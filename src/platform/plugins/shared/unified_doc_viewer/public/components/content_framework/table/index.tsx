@@ -43,13 +43,7 @@ export interface TableFieldConfiguration {
 export interface ContentFrameworkTableProps
   extends Pick<
     DocViewRenderProps,
-    | 'hit'
-    | 'dataView'
-    | 'textBasedHits'
-    | 'filter'
-    | 'onAddColumn'
-    | 'onRemoveColumn'
-    | 'columns'
+    'hit' | 'dataView' | 'textBasedHits' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
