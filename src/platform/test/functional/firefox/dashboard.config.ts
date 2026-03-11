@@ -21,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../apps/dashboard/group4/dashboard_save'),
       require.resolve('../apps/dashboard_elements/controls/common/index_1'),
       require.resolve('../apps/dashboard_elements/controls/common/index_2'),
+      require.resolve('../apps/dashboard_elements/controls/common/index_3'),
       require.resolve('../apps/dashboard_elements/controls/options_list/index_1'),
       require.resolve('../apps/dashboard_elements/controls/options_list/index_2'),
       require.resolve('../apps/dashboard_elements/image_embeddable'),
