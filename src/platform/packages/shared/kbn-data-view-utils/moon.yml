@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/expressions-plugin'
+  - '@kbn/field-formats-plugin'
 tags:
   - shared-common
   - package
