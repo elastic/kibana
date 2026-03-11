@@ -118,7 +118,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
         )}
       </EuiFlexGroup>
     ),
-    [historyNavProps, data, formattedTimestamp, packNavProps, executionCount, scheduleId]
+    [historyNavProps, data, formattedTimestamp, packNavProps, executionCount]
   );
 
   if (!isValid) {
