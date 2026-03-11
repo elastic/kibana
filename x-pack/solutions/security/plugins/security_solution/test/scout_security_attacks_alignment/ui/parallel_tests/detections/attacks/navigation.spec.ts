@@ -10,12 +10,13 @@ import { expect } from '@kbn/scout-security/ui';
 
 const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
   'securitySolution:enableAlertsAndAttacksAlignment';
+
 spaceTest.describe(
   'Attacks navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsT1Analyst();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
