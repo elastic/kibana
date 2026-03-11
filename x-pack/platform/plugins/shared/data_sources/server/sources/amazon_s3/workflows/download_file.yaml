@@ -29,7 +29,7 @@ steps:
       maximumDownloadSizeBytes: ${{ inputs.maximumDownloadSizeBytes }}
   - name: extract_content
     type: if
-    condition: "${{ steps.downloadFile.output.content }}"
+    condition: "${{steps.downloadFile.output.hasContent}}"
     steps:
       - name: perform_extract_content
         type: elasticsearch.request
@@ -52,8 +52,8 @@ steps:
       - name: return_presigned_url
         type: data.stringifyJson
         source: {
-          contentUrl: "${{ steps.downloadFile.output.contentUrl }}",
-          message: "${{ steps.downloadFile.output.message }}"
+          contentUrl: "${{steps.downloadFile.output.contentUrl}}",
+          message: "${{steps.downloadFile.output.message}}"
         }
         with:
           {pretty: true}

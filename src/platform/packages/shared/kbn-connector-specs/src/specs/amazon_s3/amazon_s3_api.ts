@@ -345,6 +345,7 @@ export async function downloadAmazonS3BucketObject(
       contentLength: parseInt(response.headers['content-length'] || '0', 10),
       lastModified: response.headers['last-modified'],
       etag: response.headers.ETag || response.headers.etag,
+      hasContent: true,
       content: base64Content,
       encoding: 'base64',
     };

@@ -21,6 +21,8 @@ import type {
   ActionDownloadFileInput,
   ActionListBucketObjectsInput,
   ActionListBucketsInput,
+  AmazonS3BucketObjectListing,
+  AmazonS3Object,
 } from './amazon_s3_types';
 
 /**
@@ -123,7 +125,7 @@ export const AmazonS3: ConnectorSpec = {
           input.prefix,
           input.maxKeys,
           input.continuationToken
-        );
+        ) as AmazonS3BucketObjectListing;
       },
     },
 
@@ -159,16 +161,17 @@ export const AmazonS3: ConnectorSpec = {
           return {
             bucket: input.bucket,
             key: input.key,
-            contentType,
+            contentType: contentType,
             contentLength: metadata.contentLength,
             lastModified: metadata.lastModified,
             etag: metadata.eTag,
+            hasContent: false,
             contentUrl: urlString,
             message: `File size (${metadata.contentLength} bytes) exceeds maximum downloadable size (${maxSize} bytes). Access the file using the provided link.`,
-          };
+          } as AmazonS3Object;
         }
 
-        return await downloadAmazonS3BucketObject(ctx, input.bucket, input.key);
+        return await downloadAmazonS3BucketObject(ctx, input.bucket, input.key) as AmazonS3Object;
       },
     },
   },

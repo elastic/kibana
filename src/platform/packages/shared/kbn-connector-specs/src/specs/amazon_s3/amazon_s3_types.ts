@@ -59,6 +59,7 @@ export interface AmazonS3Object {
   contentLength: number;
   lastModified: string;
   etag: string;
+  hasContent: boolean;
   content?: string;
   encoding: string;
   contentUrl?: string;
