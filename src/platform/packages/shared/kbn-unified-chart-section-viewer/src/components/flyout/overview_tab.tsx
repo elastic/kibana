@@ -294,7 +294,13 @@ const MetricTypeBadge = ({ instrument }: { instrument: string }) => {
 
   return (
     <EuiToolTip content={tooltipDescription}>
-      <EuiBadge tabIndex={0} title="">
+      <EuiBadge
+        tabIndex={0}
+        title=""
+        css={css`
+          cursor: pointer;
+        `}
+      >
         {instrument}
       </EuiBadge>
     </EuiToolTip>
