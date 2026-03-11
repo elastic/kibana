@@ -15,7 +15,7 @@ export const resetSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory = ()
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET,
   validate: {
     body: schema.object({
-      ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+      ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 500 }),
     }),
   },
   handler: async (routeContext): Promise<any> => {
