@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -26,7 +27,8 @@ export const validateWorkflowInputs = async (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
   executionId: string,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  logger: Logger
 ): Promise<boolean> => {
   const inputsDef = workflow.definition?.inputs;
   if (!inputsDef) {
@@ -36,7 +38,10 @@ export const validateWorkflowInputs = async (
   if (!normalizedSchema?.properties) {
     return true;
   }
-  const providedInputs = context.inputs as Record<string, unknown> | undefined;
+  const providedInputs: Record<string, unknown> | undefined =
+    typeof context.inputs === 'object' && context.inputs !== null
+      ? (context.inputs as Record<string, unknown>)
+      : undefined;
   const inputsWithDefaults = applyInputDefaults(providedInputs, normalizedSchema);
   const validator = makeWorkflowInputsValidator(inputsDef);
   const result = validator.safeParse(inputsWithDefaults ?? {});
@@ -45,14 +50,20 @@ export const validateWorkflowInputs = async (
       .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
       .join('; ');
 
-    await workflowExecutionRepository.updateWorkflowExecution({
-      id: executionId,
-      status: ExecutionStatus.FAILED,
-      error: {
-        type: 'InputValidationError',
-        message: `Workflow input validation failed: ${issues}`,
-      },
-    });
+    try {
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: executionId,
+        status: ExecutionStatus.FAILED,
+        error: {
+          type: 'InputValidationError',
+          message: `Workflow input validation failed: ${issues}`,
+        },
+      });
+    } catch (updateError) {
+      logger.error(
+        `Failed to mark execution ${executionId} as FAILED after input validation error: ${updateError}`
+      );
+    }
 
     return false;
   }

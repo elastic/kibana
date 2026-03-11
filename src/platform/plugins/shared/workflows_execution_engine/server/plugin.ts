@@ -606,15 +606,21 @@ export class WorkflowsExecutionEnginePlugin
         request
       );
 
+      const executionId = workflowExecution.id;
+      if (!executionId) {
+        throw new Error('Workflow execution ID is required');
+      }
+
       const inputsValid = await validateWorkflowInputs(
         workflow,
         context,
-        workflowExecution.id as string,
-        workflowExecutionRepository
+        executionId,
+        workflowExecutionRepository,
+        this.logger
       );
       if (!inputsValid) {
         return {
-          workflowExecutionId: workflowExecution.id as string,
+          workflowExecutionId: executionId,
         };
       }
 
@@ -623,7 +629,7 @@ export class WorkflowsExecutionEnginePlugin
       if (!canProceed) {
         // Execution was dropped due to concurrency limit, return execution ID
         return {
-          workflowExecutionId: workflowExecution.id as string,
+          workflowExecutionId: executionId,
         };
       }
 
@@ -639,7 +645,7 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id as string,
+          workflowRunId: executionId,
           spaceId: workflowExecution.spaceId || 'default',
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
@@ -661,7 +667,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       return {
-        workflowExecutionId: workflowExecution.id as string,
+        workflowExecutionId: executionId,
       };
     };
 

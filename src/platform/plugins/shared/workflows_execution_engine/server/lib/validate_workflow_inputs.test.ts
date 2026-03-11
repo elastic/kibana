@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
@@ -15,6 +16,7 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 describe('validateWorkflowInputs', () => {
   const executionId = 'exec-123';
   let mockRepository: jest.Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
+  let mockLogger: jest.Mocked<Pick<Logger, 'error'>>;
 
   const makeWorkflow = (inputs?: Record<string, unknown>): WorkflowExecutionEngineModel => ({
     id: 'workflow-1',
@@ -36,12 +38,16 @@ describe('validateWorkflowInputs', () => {
       workflow,
       context,
       executionId,
-      mockRepository as unknown as WorkflowExecutionRepository
+      mockRepository as unknown as WorkflowExecutionRepository,
+      mockLogger as unknown as Logger
     );
 
   beforeEach(() => {
     mockRepository = {
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    };
+    mockLogger = {
+      error: jest.fn(),
     };
   });
 
@@ -185,6 +191,24 @@ describe('validateWorkflowInputs', () => {
     const result = await callValidate(workflow, { inputs: { name: 'test' } });
 
     expect(result).toBe(true);
+  });
+
+  it('should return false and log error when updateWorkflowExecution fails', async () => {
+    mockRepository.updateWorkflowExecution.mockRejectedValueOnce(new Error('ES unavailable'));
+
+    const workflow = makeWorkflow({
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+
+    const result = await callValidate(workflow, { inputs: {} });
+
+    expect(result).toBe(false);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`Failed to mark execution ${executionId} as FAILED`)
+    );
   });
 
   it('should return true when context.inputs is missing', async () => {
