@@ -216,7 +216,7 @@ export function ScanResultsPanel({ scanId }: Props) {
         <EuiFlexItem>
           <EuiStat
             title={data?.scan.problematic}
-            titleColor={data?.scan.problematic ?? 0 > 0 ? 'danger' : 'success'}
+            titleColor={(data?.scan.problematic ?? 0) > 0 ? 'danger' : 'success'}
             description={i18n.translate('xpack.slo.healthScanFlyout.scanResults.problematic', {
               defaultMessage: 'Issues found',
             })}
