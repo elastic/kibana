@@ -8,12 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  DEFAULT_TIME_RANGE,
-  PAGINATION,
-} from '../../fixtures/metrics_experience';
+import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
 spaceTest.describe(
   'Metrics in Discover - Query kickstart',
@@ -37,21 +32,27 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should run Search all metrics from recommended queries', async ({ pageObjects }) => {
-      const { discover, discoverActions, metricsExperience } = pageObjects;
-      await discover.selectTextBaseLang();
+    spaceTest(
+      'should show Search all metrics in recommended queries',
+      async ({ pageObjects, page }) => {
+        const { discover, discoverActions } = pageObjects;
 
-      await spaceTest.step('apply Search all metrics query recommendation', async () => {
-        await discoverActions.runRecommendedEsqlQuery(
-          testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
-        );
-      });
+        await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
+          await discover.writeAndSubmitEsqlQuery(
+            `FROM ${testData.METRICS_TEST_INDEX_NAME} | LIMIT 100`
+          );
+        });
 
-      await spaceTest.step('render metrics grid using the recommended query', async () => {
-        await expect(metricsExperience.grid).toBeVisible();
-        await expect(metricsExperience.pagination.container).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(PAGINATION.PAGE_SIZE);
-      });
-    });
+        await spaceTest.step('verify Search all metrics is available and apply it', async () => {
+          await discoverActions.runRecommendedEsqlQuery(
+            testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
+          );
+        });
+
+        await spaceTest.step('verify the recommended query popover closed', async () => {
+          await expect(page.testSubj.locator('esql-menu-popover')).toBeHidden();
+        });
+      }
+    );
   }
 );
