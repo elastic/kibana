@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export class InvalidParamsException extends Error {
-  constructor(
-    message: string,
-    public readonly defaults: { path: Record<string, any>; query: Record<string, any> }
-  ) {
-    super(message);
-  }
-}
+export * from './invalid_route_params_exception';
+export * from './not_found_route_exception';
