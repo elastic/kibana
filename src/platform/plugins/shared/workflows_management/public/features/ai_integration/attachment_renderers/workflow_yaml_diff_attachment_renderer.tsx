@@ -7,32 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import {
-  acceptProposal,
-  declineProposal,
-  getProposalRecord,
-  subscribeToProposals,
-} from '../proposal_status_bridge';
-
-type DiffStatus = 'pending' | 'accepted' | 'declined';
 
 interface WorkflowYamlDiffData {
   beforeYaml: string;
   afterYaml: string;
   proposalId: string;
-  status: DiffStatus;
   workflowId?: string;
   name?: string;
 }
@@ -44,49 +28,6 @@ interface WorkflowYamlDiffAttachment {
 }
 
 const DIFF_EDITOR_HEIGHT = 200;
-
-const STATUS_LABELS: Record<DiffStatus, string> = {
-  pending: i18n.translate('workflowsManagement.attachmentRenderers.diff.statusPending', {
-    defaultMessage: 'Pending',
-  }),
-  accepted: i18n.translate('workflowsManagement.attachmentRenderers.diff.statusAccepted', {
-    defaultMessage: 'Accepted',
-  }),
-  declined: i18n.translate('workflowsManagement.attachmentRenderers.diff.statusDeclined', {
-    defaultMessage: 'Declined',
-  }),
-};
-
-const STATUS_COLORS: Record<DiffStatus, string> = {
-  pending: 'warning',
-  accepted: 'success',
-  declined: 'danger',
-};
-
-const DiffStatusBadge: React.FC<{ status: DiffStatus }> = ({ status }) => (
-  <EuiBadge color={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</EuiBadge>
-);
-
-/**
- * Subscribes to the client-side proposal status bridge so the attachment
- * renderer can reflect accept/decline state without a server round-trip.
- */
-const useProposalStatus = (proposalId: string, serverStatus: DiffStatus): DiffStatus => {
-  const [status, setStatus] = useState<DiffStatus>(() => {
-    const record = getProposalRecord(proposalId);
-    return record?.status ?? serverStatus;
-  });
-
-  useEffect(() => {
-    const unsubscribe = subscribeToProposals(() => {
-      const record = getProposalRecord(proposalId);
-      setStatus(record?.status ?? serverStatus);
-    });
-    return unsubscribe;
-  }, [proposalId, serverStatus]);
-
-  return status;
-};
 
 const findFirstChangedLine = (beforeYaml: string, afterYaml: string): number => {
   const beforeLines = beforeYaml.split('\n');
@@ -215,21 +156,9 @@ const MonacoDiffViewer: React.FC<{
 
 const DiffInlineContent: React.FC<{
   attachment: WorkflowYamlDiffAttachment;
-  updateData?: (data: unknown) => Promise<unknown>;
-}> = ({ attachment, updateData }) => {
+}> = ({ attachment }) => {
   const { euiTheme } = useEuiTheme();
-  const { beforeYaml, afterYaml, proposalId, status: serverStatus } = attachment.data;
-  const status = useProposalStatus(proposalId, serverStatus);
-
-  const handleAccept = useCallback(async () => {
-    await acceptProposal(proposalId);
-    updateData?.({ ...attachment.data, status: 'accepted' });
-  }, [proposalId, updateData, attachment.data]);
-
-  const handleDecline = useCallback(async () => {
-    await declineProposal(proposalId);
-    updateData?.({ ...attachment.data, status: 'declined' });
-  }, [proposalId, updateData, attachment.data]);
+  const { beforeYaml, afterYaml } = attachment.data;
 
   const headerStyles = css`
     padding: ${euiTheme.size.s};
@@ -267,31 +196,6 @@ const DiffInlineContent: React.FC<{
             })}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {status === 'pending' && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" color="success" iconType="check" onClick={handleAccept}>
-                    {i18n.translate('workflowsManagement.attachmentRenderers.diff.accept', {
-                      defaultMessage: 'Accept',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" color="danger" iconType="cross" onClick={handleDecline}>
-                    {i18n.translate('workflowsManagement.attachmentRenderers.diff.decline', {
-                      defaultMessage: 'Decline',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </>
-            )}
-            <EuiFlexItem grow={false}>
-              <DiffStatusBadge status={status} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
       </EuiFlexGroup>
       <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />
     </div>
@@ -309,11 +213,7 @@ export const workflowYamlDiffAttachmentUiDefinition = {
           defaultMessage: 'Workflow changes',
         }),
   getIcon: () => 'merge',
-  renderInlineContent: ({
-    attachment,
-    updateData,
-  }: {
-    attachment: WorkflowYamlDiffAttachment;
-    updateData?: (data: unknown) => Promise<unknown>;
-  }) => <DiffInlineContent attachment={attachment} updateData={updateData} />,
+  renderInlineContent: ({ attachment }: { attachment: WorkflowYamlDiffAttachment }) => (
+    <DiffInlineContent attachment={attachment} />
+  ),
 };
