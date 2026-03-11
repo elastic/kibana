@@ -84,6 +84,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess_1.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess_2.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess_2.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/ess_basic_license.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
