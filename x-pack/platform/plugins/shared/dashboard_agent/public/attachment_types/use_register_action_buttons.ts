@@ -62,9 +62,8 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const soExists = linkedSavedObjectIdRef.current
-            ? await doesSavedDashboardExist(linkedSavedObjectIdRef.current)
-            : false;
+          const linkedId = linkedSavedObjectIdRef.current;
+          const soExists = linkedId ? await doesSavedDashboardExist(linkedId) : false;
           const { title, description, panels } = initialDashboardInputRef.current;
           await locator.navigate({
             dashboardId: soExists ? linkedSavedObjectIdRef.current : undefined,
