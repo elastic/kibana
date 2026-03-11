@@ -33,6 +33,7 @@ import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
+import type { CasesEventBus, CasesEventMetadata } from '../events';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -67,6 +68,8 @@ export interface CasesClientArgs {
   readonly fileService: FileServiceStart;
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
+  readonly casesEventBus?: CasesEventBus;
+  readonly casesEventMetadata: CasesEventMetadata;
 }
 
 export type CasesSearchParams = Partial<

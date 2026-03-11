@@ -21,6 +21,7 @@ import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
+import type { CasesEventBus } from '../../events';
 
 describe('update', () => {
   const cases = {
@@ -70,6 +71,20 @@ describe('update', () => {
           },
         },
       ]);
+    });
+
+    it('emits caseUpdated events for updated cases', async () => {
+      const emitCaseUpdated = jest.fn();
+      clientArgs.casesEventBus = { emitCaseUpdated } as unknown as CasesEventBus;
+
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.casesEventMetadata,
+        expect.objectContaining({
+          case: expect.objectContaining({ id: mockCases[0].id }),
+        })
+      );
     });
 
     it('does not notify if the case does not exist', async () => {

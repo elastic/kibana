@@ -7,6 +7,7 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import {
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   securityServiceMock,
@@ -254,6 +255,11 @@ export const createCasesClientMockArgs = () => {
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
     config: ConfigSchema.validate({}),
+    casesEventMetadata: {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      source: 'api' as const,
+    },
   };
 };
 
@@ -281,6 +287,7 @@ export const createCasesClientFactoryMockArgs = () => {
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
+    casesEventBus: undefined,
   };
 };
 

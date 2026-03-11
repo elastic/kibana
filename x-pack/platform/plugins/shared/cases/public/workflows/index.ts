@@ -7,6 +7,7 @@
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import type { CasesPublicSetupDependencies } from '../types';
+import { registerCasesTriggerDefinitions } from './triggers';
 
 export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
@@ -33,4 +34,10 @@ export function registerCasesSteps(
 
   // Leaving this in for now. We need to get support for reflective value lookup first.
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
+}
+
+export function registerCasesWorkflowTriggers(
+  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
+) {
+  registerCasesTriggerDefinitions(workflowsExtensions);
 }

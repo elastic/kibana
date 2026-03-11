@@ -20,7 +20,6 @@ import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { getCaseOwner } from './utils';
 import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
-
 /**
  * Create an attachment to a case.
  *
@@ -79,7 +78,14 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       owner,
     });
 
-    return await updatedModel.encodeWithComments();
+    const updatedCase = await updatedModel.encodeWithComments();
+
+    clientArgs.casesEventBus?.emitCommentAdded(clientArgs.casesEventMetadata, {
+      case: updatedCase as unknown as Record<string, unknown>,
+      commentType: query.type,
+    });
+
+    return updatedCase;
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,
