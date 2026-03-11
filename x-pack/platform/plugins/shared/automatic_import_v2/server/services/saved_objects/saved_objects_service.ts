@@ -79,7 +79,7 @@ export class AutomaticImportSavedObjectService {
           description: integrationParams.description,
           logo: integrationParams.logo,
           created_at: new Date().toISOString(),
-          version: '0.0.0',
+          version: '0.1.0',
         },
       };
 
