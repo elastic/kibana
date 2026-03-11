@@ -62,6 +62,7 @@ import {
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { customTimeRangePanelTexts } from '../translations';
 
+/** Options for relative time unit/direction selection */
 const UNIT_DIRECTION_OPTIONS = [
   ...Object.entries(UNIT_SHORT_TO_FULL_MAP).map(([short, full]) => ({
     value: `${short}_past`,
@@ -74,69 +75,13 @@ const UNIT_DIRECTION_OPTIONS = [
   })),
 ];
 
+/** Default date offset value to show on the relative selection part */
+const DEFAULT_RELATIVE: DateOffset = { count: -15, unit: 'm' };
+
 interface DatePartState {
   type: DateType;
   relativeOffset: DateOffset;
   absoluteText: string;
-}
-
-const DEFAULT_RELATIVE: DateOffset = { count: -15, unit: 'm' };
-
-/** Derives the initial state for one side (start or end) from the context time range. */
-function deriveInitialState(
-  dateString: string,
-  date: Date | null,
-  dateType: DateType
-): DatePartState {
-  // TODO: temporary default format, will be refactored
-  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(DEFAULT_DATE_FORMAT);
-
-  if (dateType === DATE_TYPE_NOW) {
-    return {
-      type: DATE_TYPE_NOW,
-      relativeOffset: DEFAULT_RELATIVE,
-      absoluteText: formatAbsolute(null),
-    };
-  }
-
-  if (dateType === DATE_TYPE_RELATIVE) {
-    const parts = dateMathToRelativeParts(dateString);
-    if (parts) {
-      return {
-        type: DATE_TYPE_RELATIVE,
-        relativeOffset: {
-          count: parts.isFuture ? parts.count : -parts.count,
-          unit: parts.unit as TimeUnit,
-          roundTo: parts.round as TimeUnit | undefined,
-        },
-        absoluteText: formatAbsolute(date),
-      };
-    }
-  }
-
-  return {
-    type: DATE_TYPE_ABSOLUTE,
-    relativeOffset: DEFAULT_RELATIVE,
-    absoluteText: date
-      ? moment(date).format(DEFAULT_DATE_FORMAT)
-      : dateString || formatAbsolute(null),
-  };
-}
-
-/** Builds a datemath string from a single date part's local state. */
-function stateToDateMath(state: DatePartState): string {
-  switch (state.type) {
-    case DATE_TYPE_NOW:
-      return 'now';
-    case DATE_TYPE_RELATIVE: {
-      const { count, unit, roundTo } = state.relativeOffset;
-      const operator = count >= 0 ? '+' : '-';
-      const round = roundTo ? `/${roundTo}` : '';
-      return `now${operator}${Math.abs(count)}${unit}${round}`;
-    }
-    case DATE_TYPE_ABSOLUTE:
-      return state.absoluteText;
-  }
 }
 
 interface DatePartPickerProps {
@@ -354,7 +299,9 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
   );
 };
 
-/** Panel for specifying a custom absolute or relative time range. */
+/**
+ * Panel for specifying a custom absolute or relative time range.
+ */
 export function CustomTimeRangePanel() {
   const { timeRange, text, setText, applyRange, onPresetSave } = useDateRangePickerContext();
   const formId = useGeneratedHtmlId({ prefix: 'customTimeRangeForm' });
@@ -371,8 +318,8 @@ export function CustomTimeRangePanel() {
     deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1])
   );
 
-  const startDateString = useMemo(() => stateToDateMath(startState), [startState]);
-  const endDateString = useMemo(() => stateToDateMath(endState), [endState]);
+  const startDateString = useMemo(() => datePartStateToDateString(startState), [startState]);
+  const endDateString = useMemo(() => datePartStateToDateString(endState), [endState]);
 
   const inputText = useMemo(
     () => getOptionInputText({ start: startDateString, end: endDateString }),
@@ -473,3 +420,59 @@ export function CustomTimeRangePanel() {
   );
 }
 CustomTimeRangePanel.PANEL_ID = 'custom-time-range-panel';
+
+/** Derives the initial state for one side (start or end) from the context time range. */
+function deriveInitialState(
+  dateString: string,
+  date: Date | null,
+  dateType: DateType
+): DatePartState {
+  // TODO: temporary default format, will be refactored
+  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(DEFAULT_DATE_FORMAT);
+
+  if (dateType === DATE_TYPE_NOW) {
+    return {
+      type: DATE_TYPE_NOW,
+      relativeOffset: DEFAULT_RELATIVE,
+      absoluteText: formatAbsolute(null),
+    };
+  }
+
+  if (dateType === DATE_TYPE_RELATIVE) {
+    const parts = dateMathToRelativeParts(dateString);
+    if (parts) {
+      return {
+        type: DATE_TYPE_RELATIVE,
+        relativeOffset: {
+          count: parts.isFuture ? parts.count : -parts.count,
+          unit: parts.unit as TimeUnit,
+          roundTo: parts.round as TimeUnit | undefined,
+        },
+        absoluteText: formatAbsolute(date),
+      };
+    }
+  }
+
+  return {
+    type: DATE_TYPE_ABSOLUTE,
+    relativeOffset: DEFAULT_RELATIVE,
+    absoluteText: date
+      ? moment(date).format(DEFAULT_DATE_FORMAT)
+      : dateString || formatAbsolute(null),
+  };
+}
+
+function datePartStateToDateString(state: DatePartState): string {
+  switch (state.type) {
+    case DATE_TYPE_NOW:
+      return 'now';
+    case DATE_TYPE_RELATIVE: {
+      const { count, unit, roundTo } = state.relativeOffset;
+      const operator = count >= 0 ? '+' : '-';
+      const round = roundTo ? `/${roundTo}` : '';
+      return `now${operator}${Math.abs(count)}${unit}${round}`;
+    }
+    case DATE_TYPE_ABSOLUTE:
+      return state.absoluteText;
+  }
+}

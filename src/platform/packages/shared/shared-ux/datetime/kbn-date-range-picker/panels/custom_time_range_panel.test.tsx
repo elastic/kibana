@@ -11,20 +11,74 @@ import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
-import { DateRangePicker, type DateRangePickerProps } from '../date_range_picker';
+import type { DateRangePickerProps } from '../date_range_picker';
+import { DateRangePickerProvider, useDateRangePickerContext } from '../date_range_picker_context';
+import {
+  DateRangePickerPanel,
+  DateRangePickerPanelNavigationProvider,
+  useDateRangePickerPanelNavigation,
+} from '../date_range_picker_panel_navigation';
 import { customTimeRangePanelTexts } from '../translations';
+import { CustomTimeRangePanel } from './custom_time_range_panel';
 
-const defaultProps: DateRangePickerProps = {
-  defaultValue: '-15m',
-  onChange: () => {},
+interface RenderPanelProps {
+  defaultValue?: string;
+  onChange?: DateRangePickerProps['onChange'];
+  onPresetSave?: DateRangePickerProps['onPresetSave'];
+}
+
+const OpenCustomPanelButton = () => {
+  const { navigateTo } = useDateRangePickerPanelNavigation();
+
+  return (
+    <button
+      type="button"
+      data-test-subj="openCustomTimeRangePanelButton"
+      onClick={() => navigateTo(CustomTimeRangePanel.PANEL_ID)}
+    >
+      Open custom panel
+    </button>
+  );
+};
+
+const CurrentTextProbe = () => {
+  const { text } = useDateRangePickerContext();
+
+  return <output data-test-subj="currentDateRangeText">{text}</output>;
+};
+
+const TestHarness = ({
+  defaultValue = '-15m',
+  onChange = () => {},
+  onPresetSave,
+}: RenderPanelProps) => {
+  return (
+    <DateRangePickerProvider
+      defaultValue={defaultValue}
+      onChange={onChange}
+      onPresetSave={onPresetSave}
+    >
+      <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
+        <CurrentTextProbe />
+        <DateRangePickerPanel id="main">
+          <OpenCustomPanelButton />
+        </DateRangePickerPanel>
+        <DateRangePickerPanel id={CustomTimeRangePanel.PANEL_ID}>
+          <div role="dialog">
+            <CustomTimeRangePanel />
+          </div>
+        </DateRangePickerPanel>
+      </DateRangePickerPanelNavigationProvider>
+    </DateRangePickerProvider>
+  );
+};
+
+const renderCustomTimeRangePanel = (props?: RenderPanelProps) => {
+  renderWithEuiTheme(<TestHarness {...props} />);
 };
 
 const openCustomPanel = () => {
-  fireEvent.click(screen.getByTestId('dateRangePickerControlButton'));
-  const input = screen.getByTestId('dateRangePickerInput');
-  fireEvent.keyDown(input, { key: 'ArrowDown' });
-  const dialog = screen.getByRole('dialog');
-  fireEvent.click(within(dialog).getByText('Custom time range'));
+  fireEvent.click(screen.getByTestId('openCustomTimeRangePanelButton'));
 };
 
 const getFieldset = (name: string) => {
@@ -37,7 +91,7 @@ const getEndFieldset = () => getFieldset('End date');
 describe('CustomTimeRangePanel', () => {
   describe('initial state', () => {
     it('derives start/end from the current time range', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="-15m" />);
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
       openCustomPanel();
 
       expect(within(getStartFieldset()).getByLabelText('Count')).toHaveValue(15);
@@ -47,9 +101,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('shows absolute tab with a non-empty value for absolute dates', () => {
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} defaultValue="2025-01-01 to 2025-06-01" />
-      );
+      renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to 2025-06-01' });
       openCustomPanel();
 
       const startInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
@@ -60,7 +112,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('relative controls', () => {
     it('updates count via the number input', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       const countInput = within(getStartFieldset()).getByLabelText('Count');
@@ -70,7 +122,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('switches unit and direction via the select', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       const select = within(getStartFieldset()).getByLabelText('Unit and direction');
@@ -82,7 +134,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('tab switching', () => {
     it('switches from Relative to Absolute and shows a text input', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       const startFieldset = getStartFieldset();
@@ -92,7 +144,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('switches from Relative to Now and shows help text', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
@@ -105,7 +157,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('absolute text editing', () => {
     it('does not clobber the other date part when typing', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       fireEvent.click(within(getStartFieldset()).getByText('Absolute'));
@@ -120,9 +172,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('validation', () => {
     it('shows end-before-start error and disables Apply when end < start', () => {
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} defaultValue="2025-06-01 to 2025-01-01" />
-      );
+      renderCustomTimeRangePanel({ defaultValue: '2025-06-01 to 2025-01-01' });
       openCustomPanel();
 
       const dialog = screen.getByRole('dialog');
@@ -135,7 +185,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('does not show error for a valid range', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       const dialog = screen.getByRole('dialog');
@@ -150,7 +200,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('shorthand display', () => {
     it('shows a shorthand value for a valid relative range', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="-15m" />);
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
       openCustomPanel();
 
       const shorthandInput = screen.getByLabelText('Shorthand');
@@ -158,9 +208,7 @@ describe('CustomTimeRangePanel', () => {
     });
 
     it('shows "(not available)" when the range is invalid', () => {
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} defaultValue="2025-06-01 to 2025-01-01" />
-      );
+      renderCustomTimeRangePanel({ defaultValue: '2025-06-01 to 2025-01-01' });
       openCustomPanel();
 
       const shorthandInput = screen.getByLabelText('Shorthand');
@@ -171,7 +219,7 @@ describe('CustomTimeRangePanel', () => {
   describe('apply', () => {
     it('calls onChange when the form is submitted', () => {
       const onChange = jest.fn();
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
+      renderCustomTimeRangePanel({ onChange });
       openCustomPanel();
 
       const dialog = screen.getByRole('dialog');
@@ -183,7 +231,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('save as preset', () => {
     it('does not show the checkbox when onPresetSave is not provided', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+      renderCustomTimeRangePanel();
       openCustomPanel();
 
       expect(screen.queryByLabelText('Save as preset')).not.toBeInTheDocument();
@@ -191,9 +239,7 @@ describe('CustomTimeRangePanel', () => {
 
     it('calls onPresetSave when checkbox is checked and Apply is clicked', () => {
       const onPresetSave = jest.fn();
-      renderWithEuiTheme(
-        <DateRangePicker {...defaultProps} onPresetSave={onPresetSave} onChange={() => {}} />
-      );
+      renderCustomTimeRangePanel({ onPresetSave });
       openCustomPanel();
 
       const dialog = screen.getByRole('dialog');
@@ -209,7 +255,7 @@ describe('CustomTimeRangePanel', () => {
 
   describe('go back', () => {
     it('restores original input text when going back without applying', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="-15m" />);
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
       openCustomPanel();
 
       const countInput = within(getStartFieldset()).getByLabelText('Count');
@@ -218,8 +264,7 @@ describe('CustomTimeRangePanel', () => {
       const dialog = screen.getByRole('dialog');
       fireEvent.click(within(dialog).getByText('Custom time range'));
 
-      const input = screen.getByTestId('dateRangePickerInput');
-      expect(input).toHaveValue('-15m');
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m');
     });
   });
 });
