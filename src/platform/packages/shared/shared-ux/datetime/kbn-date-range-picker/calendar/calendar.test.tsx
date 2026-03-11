@@ -14,8 +14,6 @@ import type { DateRange } from 'react-day-picker';
 
 import { Calendar } from './calendar';
 
-const mockScrollToIndex = jest.fn();
-
 jest.mock('./calendar_view', () => ({
   CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
     const monthNum = String(monthIndex + 1).padStart(2, '0');
@@ -29,48 +27,66 @@ jest.mock('./calendar_view', () => ({
   },
 }));
 
-jest.mock('react-virtuoso', () => {
-  const mockReact = jest.requireActual('react');
-  const { TODAY_INDEX } = jest.requireActual('./calendar.constants');
+const TEST_MONTH_HEIGHT = 280;
+const TEST_VIEWPORT_MONTHS = 3;
+const TEST_TOP_SCROLL = 160;
+const TEST_BOTTOM_OFFSET = 160;
 
-  const VISIBLE_RANGE = {
-    PAST_MONTHS: { startIndex: TODAY_INDEX - 10, endIndex: TODAY_INDEX - 5 },
-    TODAY_VISIBLE: { startIndex: TODAY_INDEX - 1, endIndex: TODAY_INDEX + 1 },
-    FUTURE_MONTHS: { startIndex: TODAY_INDEX + 5, endIndex: TODAY_INDEX + 10 },
-  };
+function mockScrollerLayout() {
+  const scroller = screen.getByTestId('calendar-scroller');
+  const monthItems = Array.from(scroller.querySelectorAll<HTMLElement>('[data-month-index]'));
+  const totalHeight = monthItems.length * TEST_MONTH_HEIGHT;
+  let scrollTop = TEST_MONTH_HEIGHT * 17;
+
+  Object.defineProperty(scroller, 'clientHeight', {
+    configurable: true,
+    get: () => TEST_MONTH_HEIGHT * TEST_VIEWPORT_MONTHS,
+  });
+  Object.defineProperty(scroller, 'scrollHeight', {
+    configurable: true,
+    get: () => totalHeight,
+  });
+  Object.defineProperty(scroller, 'scrollTop', {
+    configurable: true,
+    get: () => scrollTop,
+    set: (value: number) => {
+      scrollTop = value;
+    },
+  });
+
+  monthItems.forEach((monthItem, index) => {
+    Object.defineProperty(monthItem, 'offsetTop', {
+      configurable: true,
+      get: () => index * TEST_MONTH_HEIGHT,
+    });
+    Object.defineProperty(monthItem, 'offsetHeight', {
+      configurable: true,
+      get: () => TEST_MONTH_HEIGHT,
+    });
+  });
+
+  const scrollToSpy = jest.fn(({ top }: { top?: number }) => {
+    if (typeof top === 'number') {
+      scrollTop = top;
+    }
+  });
+  Object.defineProperty(scroller, 'scrollTo', {
+    configurable: true,
+    value: scrollToSpy,
+  });
+
+  fireEvent.scroll(scroller);
 
   return {
-    Virtuoso: mockReact.forwardRef(function MockVirtuoso(
-      props: {
-        itemContent: (index: number) => React.ReactNode;
-        rangeChanged?: (range: { startIndex: number; endIndex: number }) => void;
-      },
-      ref: React.Ref<unknown>
-    ) {
-      mockReact.useImperativeHandle(ref, () => ({
-        scrollToIndex: (...args: unknown[]) => mockScrollToIndex(...args),
-      }));
-
-      return (
-        <div data-test-subj="virtuoso">
-          {props.itemContent(TODAY_INDEX)}
-          <button
-            data-test-subj="simulate-scroll-future"
-            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.FUTURE_MONTHS)}
-          />
-          <button
-            data-test-subj="simulate-scroll-past"
-            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.PAST_MONTHS)}
-          />
-          <button
-            data-test-subj="simulate-scroll-today"
-            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.TODAY_VISIBLE)}
-          />
-        </div>
-      );
-    }),
+    scroller,
+    monthItemsCount: monthItems.length,
+    getScrollTop: () => scrollTop,
+    setScrollTop: (nextTop: number) => {
+      scrollTop = nextTop;
+    },
+    scrollToSpy,
   };
-});
+}
 
 describe('Calendar', () => {
   const defaultProps: { range: DateRange | undefined; onRangeChange: jest.Mock } = {
@@ -82,67 +98,80 @@ describe('Calendar', () => {
     jest.clearAllMocks();
   });
 
-  it('renders for the current month', () => {
+  it('renders the current month inside the mounted window', () => {
     renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-    const calendarView = screen.getByTestId('calendar-view');
-
-    expect(calendarView).toBeInTheDocument();
-
+    const calendarViews = screen.getAllByTestId('calendar-view');
     const now = new Date();
     const expectedMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    expect(calendarView).toHaveAttribute('data-month', expectedMonth);
+    expect(
+      calendarViews.some(
+        (calendarView) => calendarView.getAttribute('data-month') === expectedMonth
+      )
+    ).toBe(true);
   });
 
   describe('"Today" button', () => {
     describe('visibility', () => {
       it('does not show Today button when today is visible', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        mockScrollerLayout();
 
         expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
       });
 
       it('shows Today button when scrolled into future months', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, monthItemsCount, setScrollTop } = mockScrollerLayout();
+        const viewportHeight = TEST_MONTH_HEIGHT * TEST_VIEWPORT_MONTHS;
+        const bottomScrollTop =
+          monthItemsCount * TEST_MONTH_HEIGHT - viewportHeight - TEST_BOTTOM_OFFSET;
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-future'));
+        setScrollTop(bottomScrollTop);
+        fireEvent.scroll(scroller);
 
         expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
       });
 
       it('shows Today button when scrolled into past months', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, setScrollTop } = mockScrollerLayout();
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        setScrollTop(TEST_TOP_SCROLL);
+        fireEvent.scroll(scroller);
 
         expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
       });
 
       it('hides Today button when scrolling back to today', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, setScrollTop } = mockScrollerLayout();
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        setScrollTop(TEST_TOP_SCROLL);
+        fireEvent.scroll(scroller);
 
         expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-today'));
+        setScrollTop(TEST_MONTH_HEIGHT * 17);
+        fireEvent.scroll(scroller);
 
         expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
       });
     });
 
     describe('interaction', () => {
-      it('calls scrollToIndex when Today button is clicked', () => {
+      it('scrolls to today when Today button is clicked', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, setScrollTop, scrollToSpy } = mockScrollerLayout();
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        setScrollTop(TEST_TOP_SCROLL);
+        fireEvent.scroll(scroller);
         fireEvent.click(screen.getByRole('button', { name: 'Today' }));
 
-        expect(mockScrollToIndex).toHaveBeenCalledWith(
+        expect(scrollToSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             behavior: 'auto',
-            align: 'center',
           })
         );
       });
@@ -151,8 +180,13 @@ describe('Calendar', () => {
     describe('icon direction', () => {
       it('shows `sortUp` icon when viewing future months (scroll backward to reach today)', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, monthItemsCount, setScrollTop } = mockScrollerLayout();
+        const viewportHeight = TEST_MONTH_HEIGHT * TEST_VIEWPORT_MONTHS;
+        const bottomScrollTop =
+          monthItemsCount * TEST_MONTH_HEIGHT - viewportHeight - TEST_BOTTOM_OFFSET;
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-future'));
+        setScrollTop(bottomScrollTop);
+        fireEvent.scroll(scroller);
 
         const todayButton = screen.getByRole('button', { name: 'Today' });
         const icon = todayButton.querySelector('[data-euiicon-type="sortUp"]');
@@ -162,8 +196,10 @@ describe('Calendar', () => {
 
       it('shows `sortDown` icon when viewing past months (scroll forward to reach today)', () => {
         renderWithEuiTheme(<Calendar {...defaultProps} />);
+        const { scroller, setScrollTop } = mockScrollerLayout();
 
-        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        setScrollTop(TEST_TOP_SCROLL);
+        fireEvent.scroll(scroller);
 
         const todayButton = screen.getByRole('button', { name: 'Today' });
         const icon = todayButton.querySelector('[data-euiicon-type="sortDown"]');

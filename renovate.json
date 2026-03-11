@@ -2681,19 +2681,6 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "react-virtuoso",
-      "matchDepNames": ["react-virtuoso"],
-      "reviewers": ["team:eui-team"],
-      "matchBaseBranches": ["main"],
-      "labels": [
-        "Team:EUI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
       "reviewers": ["team:eui-team"],

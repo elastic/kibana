@@ -48,6 +48,7 @@ export const CalendarView = function CalendarView({
       css={styles.dayPicker}
       disableNavigation
       hideNavigation
+      fixedWeeks
       mode="range"
       month={new Date(year, monthIndex, 1)}
       onSelect={setRange}
