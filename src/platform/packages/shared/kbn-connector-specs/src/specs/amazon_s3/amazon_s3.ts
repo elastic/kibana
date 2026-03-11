@@ -65,17 +65,15 @@ export const AmazonS3: ConnectorSpec = {
         region: z.string().optional().describe('The optional AWS region to list buckets from'),
         prefix: z.string().optional().describe('The prefix to filter buckets by'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as ActionListBucketsInput;
-
+      handler: async (ctx, input: ActionListBucketsInput) => {
         let buckets: { name?: string; creationDate?: string }[] = [];
 
         let continuationToken: string | undefined;
         while (true) {
           const response = await listAmazonS3Buckets(
             ctx,
-            typedInput.region,
-            typedInput.prefix,
+            input.region,
+            input.prefix,
             undefined,
             continuationToken
           );
@@ -117,16 +115,14 @@ export const AmazonS3: ConnectorSpec = {
           )
           .default(1000),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as ActionListBucketObjectsInput;
-
+      handler: async (ctx, input: ActionListBucketObjectsInput) => {
         return await listAmazonS3BucketObjects(
           ctx,
-          typedInput.bucket,
-          typedInput.region,
-          typedInput.prefix,
-          typedInput.maxKeys,
-          typedInput.continuationToken
+          input.bucket,
+          input.region,
+          input.prefix,
+          input.maxKeys,
+          input.continuationToken
         );
       },
     },
@@ -144,9 +140,7 @@ export const AmazonS3: ConnectorSpec = {
             'Maximum file size in bytes that can be downloaded for the file content. If the file exceeds this size, a pre-signed URL will be returned instead of the content.'
           ),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as ActionDownloadFileInput;
-
+      handler: async (ctx, input: ActionDownloadFileInput) => {
         const metadata = await getAmazonS3BucketObjectMetadata(
           ctx,
           typedInput.bucket,
