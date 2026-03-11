@@ -37,6 +37,7 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-security-server-internal",
     "@kbn/core-security-server-mocks",
+    "@kbn/core-logging-server-internal",
   ],
   "exclude": [
     "target/**/*",
