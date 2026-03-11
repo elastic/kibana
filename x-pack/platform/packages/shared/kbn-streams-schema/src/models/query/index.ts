@@ -51,6 +51,7 @@ export namespace QueryStream {
 
   export interface Definition extends BaseStream.Definition {
     query: QueryWithEsql;
+    field_descriptions?: Record<string, string>;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -73,6 +74,7 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
     Source: z.object({}),
     Definition: z.object({
       query: QueryWithEsql.right,
+      field_descriptions: z.record(z.string(), z.string()).optional(),
     }),
     GetResponse: z.object({
       inherited_fields: inheritedFieldDefinitionSchema,
@@ -81,6 +83,7 @@ export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> =
       stream: z
         .object({
           query: QueryWithEsql.right,
+          field_descriptions: z.record(z.string(), z.string()).optional(),
         })
         .passthrough(),
     }),
