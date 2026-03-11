@@ -957,6 +957,7 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sha
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
+x-pack/platform/packages/shared/ai-infra/anonymization-ui @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra

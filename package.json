@@ -219,6 +219,7 @@
     "@kbn/analytics-plugin-a-plugin": "link:src/platform/test/analytics/plugins/analytics_plugin_a",
     "@kbn/anonymization-common": "link:x-pack/platform/packages/shared/ai-infra/anonymization-common",
     "@kbn/anonymization-plugin": "link:x-pack/platform/plugins/shared/anonymization",
+    "@kbn/anonymization-ui": "link:x-pack/platform/packages/shared/ai-infra/anonymization-ui",
     "@kbn/apm-config-loader": "link:src/platform/packages/private/kbn-apm-config-loader",
     "@kbn/apm-data-access-plugin": "link:x-pack/solutions/observability/plugins/apm_data_access",
     "@kbn/apm-data-view": "link:src/platform/packages/shared/kbn-apm-data-view",
