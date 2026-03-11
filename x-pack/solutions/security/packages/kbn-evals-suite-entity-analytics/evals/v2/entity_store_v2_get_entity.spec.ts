@@ -76,7 +76,8 @@ evaluate.describe(
             },
             {
               input: {
-                question: "Show me user jsmith123's full profile including their last 30 days of risk history",
+                question:
+                  "Show me user jsmith123's full profile including their last 30 days of risk history",
               },
               output: {
                 criteria: [
@@ -143,7 +144,7 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Retrieve jsmith123\'s entity profile including the alert inputs that contributed to the risk score, or clearly state no risk score or alert data is available.',
+                  "Retrieve jsmith123's entity profile including the alert inputs that contributed to the risk score, or clearly state no risk score or alert data is available.",
                   'Summarise the contributing alerts where available (e.g. rule names, severity).',
                   'Do not fabricate alert or risk data.',
                 ],
