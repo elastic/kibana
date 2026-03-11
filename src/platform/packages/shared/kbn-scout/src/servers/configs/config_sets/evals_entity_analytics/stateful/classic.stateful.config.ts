@@ -22,7 +22,7 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--xpack.actions.responseTimeout=120s', // 1 hour
+      '--xpack.actions.responseTimeout=120s',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,
     ],
