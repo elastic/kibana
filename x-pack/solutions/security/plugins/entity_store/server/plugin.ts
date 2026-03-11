@@ -24,6 +24,7 @@ import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { CRUDClient } from './domain/crud';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 
 export class EntityStorePlugin
   implements
@@ -66,6 +67,14 @@ export class EntityStorePlugin
     );
 
     registerTasks(plugins.taskManager, this.logger, core);
+
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: automatedResolutionMaintainerConfig,
+      core,
+    });
+
     this.logger.debug('Registering routes');
     registerRoutes(router);
 
