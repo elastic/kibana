@@ -24,6 +24,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -45,6 +46,7 @@ interface HostPanelContentProps {
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
   /** When using Entity Store v2: save criticality via entity store API. */
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  entityStoreEntityId?: string;
 }
 
 export const HostPanelContent = ({
@@ -61,6 +63,7 @@ export const HostPanelContent = ({
   entityRecord,
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
+  entityStoreEntityId,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -90,6 +93,16 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
       <AssetCriticalityAccordion
         entity={{ identifiers: entityIdentifiers, name: hostName, type: EntityType.host }}
         onChange={onAssetCriticalityChange}

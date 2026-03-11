@@ -23,6 +23,7 @@ interface UseNavigateToHostDetailsParams {
   hasNonClosedAlerts: boolean;
   isPreviewMode: boolean;
   contextID: string;
+  entityStoreEntityId?: string;
 }
 
 export const useNavigateToHostDetails = ({
@@ -34,6 +35,7 @@ export const useNavigateToHostDetails = ({
   hasNonClosedAlerts,
   isPreviewMode,
   contextID,
+  entityStoreEntityId,
 }: UseNavigateToHostDetailsParams): ((path: EntityDetailsPath) => void) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
@@ -54,6 +56,7 @@ export const useNavigateToHostDetails = ({
           hasMisconfigurationFindings,
           hasVulnerabilitiesFindings,
           hasNonClosedAlerts,
+          entityStoreEntityId,
         },
       };
 
@@ -83,6 +86,7 @@ export const useNavigateToHostDetails = ({
       hasVulnerabilitiesFindings,
       hasNonClosedAlerts,
       contextID,
+      entityStoreEntityId,
     ]
   );
 };

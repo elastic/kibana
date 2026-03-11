@@ -24,6 +24,7 @@ import { EntityInsight } from '../../../cloud_security_posture/components/entity
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 
@@ -40,6 +41,7 @@ interface UserPanelContentProps {
   entityRecord?: Entity;
   criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
   onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  entityStoreEntityId?: string;
 }
 
 export const UserPanelContent = ({
@@ -55,6 +57,7 @@ export const UserPanelContent = ({
   entityRecord,
   criticalityFromEntityStore,
   onSaveAssetCriticalityViaEntityStore,
+  entityStoreEntityId,
 }: UserPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
@@ -79,6 +82,16 @@ export const UserPanelContent = ({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityType={EntityType.user}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
+      {entityStoreEntityId && !isPreviewMode && (
+        <>
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>

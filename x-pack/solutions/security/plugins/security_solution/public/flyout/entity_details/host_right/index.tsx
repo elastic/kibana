@@ -194,6 +194,10 @@ export const HostPanel = ({
     [upsertEntity, observedHost, calculateEntityRiskScore]
   );
 
+  const entityStoreEntityId = entityStoreV2Enabled
+    ? observedHost.entityRecord?.entity?.id
+    : undefined;
+
   const openDetailsPanel = useNavigateToHostDetails({
     entityIdentifiers,
     scopeId,
@@ -203,6 +207,7 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID: safeContextID,
+    entityStoreEntityId,
   });
 
   const openDefaultPanel = useCallback(
@@ -210,9 +215,17 @@ export const HostPanel = ({
       openDetailsPanel({
         tab: isRiskScoreExist
           ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+          : hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
+          ? EntityDetailsLeftPanelTab.CSP_INSIGHTS
+          : EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
       }),
-    [isRiskScoreExist, openDetailsPanel]
+    [
+      isRiskScoreExist,
+      hasMisconfigurationFindings,
+      hasVulnerabilitiesFindings,
+      hasNonClosedAlerts,
+      openDetailsPanel,
+    ]
   );
 
   return (
@@ -222,7 +235,8 @@ export const HostPanel = ({
           isRiskScoreExist ||
           hasMisconfigurationFindings ||
           hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
         }
         expandDetails={openDefaultPanel}
         isPreviewMode={isPreviewMode}
@@ -255,6 +269,7 @@ export const HostPanel = ({
             ? handleSaveAssetCriticalityViaEntityStore
             : undefined
         }
+        entityStoreEntityId={entityStoreEntityId}
       />
       {isPreviewMode && (
         <HostPreviewPanelFooter
