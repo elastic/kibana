@@ -50,16 +50,6 @@ export interface GetLogsResult {
   topValues: Record<string, Array<{ value: string; count: number }>>;
 }
 
-const EMPTY_RESULT: GetLogsResult = {
-  histogram: [],
-  totalCount: 0,
-  samples: [],
-  categories: [],
-  topValues: {},
-};
-
-const MAX_GROUP_BY_VALUES = 10;
-
 export async function getLogsHandler({
   esClient,
   params,
@@ -91,7 +81,7 @@ export async function getLogsHandler({
   const totalCount = getTotalHits(countResponse);
 
   if (totalCount === 0) {
-    return EMPTY_RESULT;
+    return { histogram: [], totalCount: 0, samples: [], categories: [], topValues: {} };
   }
 
   const samplingProbability = computeSamplingProbability({
@@ -152,29 +142,6 @@ async function searchLogs(
     },
   });
 
-  const topValueAggs = Object.fromEntries(
-    FACET_FIELDS.map((field) => [field, { terms: { field, size: 10 } }])
-  );
-
-  const histogramAgg = groupByField
-    ? {
-        date_histogram: {
-          field: '@timestamp' as const,
-          fixed_interval: bucketSize,
-          min_doc_count: 0,
-        },
-        aggs: {
-          groups: { terms: { field: groupByField, size: MAX_GROUP_BY_VALUES } },
-        },
-      }
-    : {
-        date_histogram: {
-          field: '@timestamp' as const,
-          fixed_interval: bucketSize,
-          min_doc_count: 0,
-        },
-      };
-
   return searchClient({
     index,
     size: limit,
@@ -184,7 +151,14 @@ async function searchLogs(
     sort: [{ '@timestamp': { order: 'desc' as const } }],
     query: { bool: { filter: baseFilter } },
     aggregations: {
-      histogram: histogramAgg,
+      histogram: {
+        date_histogram: {
+          field: '@timestamp' as const,
+          fixed_interval: bucketSize,
+          min_doc_count: 0,
+        },
+        ...(groupByField ? { aggs: { groups: { terms: { field: groupByField, size: 10 } } } } : {}),
+      },
       sampler: {
         random_sampler: { probability: samplingProbability, seed: 1 },
         aggs: {
@@ -207,7 +181,7 @@ async function searchLogs(
           },
         },
       },
-      ...(topValueAggs as {}),
+      ...Object.fromEntries(FACET_FIELDS.map((field) => [field, { terms: { field, size: 10 } }])),
     },
   });
 }
@@ -220,10 +194,12 @@ function parseHistogram(response: LogSearchResponse) {
   return buckets.flatMap((b) => {
     const groupBuckets = b.groups?.buckets ?? [];
 
+    // no `groupBy` supplied
     if (!groupBuckets.length) {
       return [{ bucket: b.key_as_string, count: b.doc_count }];
     }
 
+    // `groupBy` supplied
     const entries = groupBuckets.map((gb) => ({
       bucket: b.key_as_string,
       count: gb.doc_count,
