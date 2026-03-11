@@ -20,7 +20,6 @@ import { SyntheticsPrivateLocation } from '../../synthetics_service/private_loca
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import type { RouteContext } from '../types';
-import { server } from 'typescript';
 import { SyntheticsServerSetup } from '../../types';
 
 export {
