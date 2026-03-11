@@ -27,6 +27,8 @@ export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
  * euid.getEuidFromObject('host', doc);
  * euid.getEuidPainlessEvaluation('user');
  */
+import * as euidModule from './domain/euid';
+
 export const euid = {
   getEuidFromObject: euidModule.getEuidFromObject,
   getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
@@ -40,13 +42,10 @@ export const euid = {
   getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
 };
 
-export type { EntityType } from './domain/definitions/entity_schema';
 export {
   buildEntityFiltersFromEntityIdentifiers,
   buildGenericEntityFlyoutPreviewQuery,
 } from './domain/euid';
-export type { IdentitySourceFields } from './domain/euid';
-export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
