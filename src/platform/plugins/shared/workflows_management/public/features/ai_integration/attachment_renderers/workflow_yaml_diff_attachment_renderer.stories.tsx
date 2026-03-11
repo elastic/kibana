@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiSplitPanel } from '@elastic/eui';
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { EuiSplitPanel } from '@elastic/eui';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
 
 const BEFORE_YAML = `name: Open PRs Report for Team One Workflow
