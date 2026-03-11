@@ -11,6 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/zod",
     "@kbn/core-http-server",

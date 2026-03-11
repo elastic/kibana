@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
+import type { SavedObjectsType, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 
 export const USER_STORAGE_SO_TYPE = 'user-storage';
 export const USER_STORAGE_GLOBAL_SO_TYPE = 'user-storage-global';
@@ -16,6 +17,21 @@ const USER_STORAGE_MAPPINGS = {
   dynamic: false as const,
   properties: {
     userId: { type: 'keyword' as const },
+  },
+};
+
+const userStorageAttributesSchemaV1 = schema.object({
+  userId: schema.string(),
+  data: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+
+const USER_STORAGE_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
+  1: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: userStorageAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: userStorageAttributesSchemaV1,
+    },
   },
 };
 
@@ -31,6 +47,7 @@ export const userStorageType: SavedObjectsType = {
   hidden: true,
   namespaceType: 'single',
   mappings: USER_STORAGE_MAPPINGS,
+  modelVersions: USER_STORAGE_MODEL_VERSIONS,
 };
 
 /**
@@ -44,4 +61,5 @@ export const userStorageGlobalType: SavedObjectsType = {
   hidden: true,
   namespaceType: 'agnostic',
   mappings: USER_STORAGE_MAPPINGS,
+  modelVersions: USER_STORAGE_MODEL_VERSIONS,
 };
