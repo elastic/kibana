@@ -145,6 +145,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "task|8",
         "task|7",
         "task|6",
         "task|5",
