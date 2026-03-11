@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { v4 } from 'uuid';
@@ -162,6 +162,10 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<EuiToolTip>(null);
 
+  const handleTooltipMouseOut = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
+  }, []);
+
   const buttonLabel = i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
     defaultMessage: 'AI Assistant',
   });
@@ -202,7 +206,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+        <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
           <AiButton
             buttonRef={buttonRef}
             variant={variant}
@@ -218,7 +222,11 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+        <EuiToolTip
+          content={fullTooltipContent}
+          ref={tooltipRef}
+          onMouseOut={handleTooltipMouseOut}
+        >
           <AiButton
             buttonRef={buttonRef}
             iconOnly

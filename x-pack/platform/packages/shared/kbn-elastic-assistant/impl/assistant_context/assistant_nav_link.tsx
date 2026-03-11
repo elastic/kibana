@@ -49,6 +49,10 @@ export const AssistantNavLink: FC = () => {
   } = useAssistantContext();
   const tooltipRef = useRef<EuiToolTip>(null);
 
+  const handleTooltipMouseOut = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
+  }, []);
+
   const toggleOverlay = useCallback(() => {
     tooltipRef.current?.hideToolTip();
     showAssistantOverlay({ showOverlay: !isOverlayOpen });
@@ -78,7 +82,7 @@ export const AssistantNavLink: FC = () => {
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef}>
+        <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
           <AiButton
             variant={variant}
             size="s"
@@ -92,7 +96,11 @@ export const AssistantNavLink: FC = () => {
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip content={FULL_TOOLTIP_CONTENT} ref={tooltipRef}>
+        <EuiToolTip
+          content={FULL_TOOLTIP_CONTENT}
+          ref={tooltipRef}
+          onMouseOut={handleTooltipMouseOut}
+        >
           <AiButton
             iconOnly
             variant={variant}

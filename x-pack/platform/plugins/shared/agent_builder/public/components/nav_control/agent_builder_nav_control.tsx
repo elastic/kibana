@@ -32,6 +32,10 @@ export function AgentBuilderNavControl() {
   const tooltipRef = useRef<EuiToolTip>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const handleTooltipMouseOut = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
+  }, []);
+
   const sidebarOptions = useCallback(
     () => ({
       onClose: () => {
@@ -96,7 +100,7 @@ export function AgentBuilderNavControl() {
     return (
       <>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
             <AiButton
               buttonRef={buttonRef}
               variant={variant}
@@ -114,7 +118,11 @@ export function AgentBuilderNavControl() {
         </EuiShowFor>
 
         <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+          <EuiToolTip
+            content={fullTooltipContent}
+            ref={tooltipRef}
+            onMouseOut={handleTooltipMouseOut}
+          >
             <AiButton
               buttonRef={buttonRef}
               iconOnly
