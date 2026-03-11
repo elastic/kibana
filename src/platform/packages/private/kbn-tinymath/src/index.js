@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { get } = require('lodash');
-const memoizeOneImport = require('memoize-one');
-const memoizeOne = memoizeOneImport.default ?? memoizeOneImport;
-const { functions: includedFunctions } = require('./functions');
-const { parse: parseFn } = require('./grammar.peggy');
+import { get } from 'lodash';
+import memoizeOne from 'memoize-one';
+import { functions as includedFunctions } from './functions';
+import { parse as parseFn } from './grammar.peggy';
 
 function parse(input, options) {
   if (input == null) {
@@ -82,4 +81,4 @@ function isOperable(args) {
   });
 }
 
-module.exports = { parse: memoizedParse, evaluate, interpret };
+export { memoizedParse as parse, evaluate, interpret };
