@@ -13,7 +13,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 
-import { IconSparkles } from '../../../../../common/icons/sparkles';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
 import { TagsBadge } from './tags_badge';
@@ -31,7 +30,6 @@ export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
 export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
 export const ATTACK_STATUS_TEST_ID_SUFFIX = '-status' as const;
 export const ATTACK_ASSIGNEES_TEST_ID_SUFFIX = '-assignees' as const;
-export const ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX = '-sparkles-icon' as const;
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface AttackGroupContentProps {
@@ -88,11 +86,6 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
                   >
                     <h5>{title}</h5>
                   </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <IconSparkles
-                    data-test-subj={`${dataTestSubj}${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`}
-                  />
                 </EuiFlexItem>
                 <EuiFlexItem
                   grow={false}
