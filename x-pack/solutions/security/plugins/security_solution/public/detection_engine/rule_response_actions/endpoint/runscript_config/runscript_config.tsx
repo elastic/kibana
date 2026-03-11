@@ -20,16 +20,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useTestIdGenerator } from '../../../management/hooks/use_test_id_generator';
-import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
-import type { AutomatedRunScriptConfig, EndpointScript } from '../../../../common/endpoint/types';
-import type { EndpointRunscriptScriptSelectorProps } from '../../../management/components/endpoint_runscript_script_selector';
-import { EndpointRunscriptScriptSelector } from '../../../management/components/endpoint_runscript_script_selector';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { CONSOLE_COMMANDS, OS_TITLES } from '../../../management/common/translations';
-import { PlatformIcon } from '../../../management/components/endpoint_responder/components/header_info/platforms';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { SupportedHostOsType } from '../../../../common/endpoint/constants';
+import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
+import type { EndpointRunScriptActionRequestParams } from '../../../../../common/api/endpoint';
+import type {
+  AutomatedRunScriptConfig,
+  EndpointScript,
+} from '../../../../../common/endpoint/types';
+import type { EndpointRunscriptScriptSelectorProps } from '../../../../management/components/endpoint_runscript_script_selector';
+import { EndpointRunscriptScriptSelector } from '../../../../management/components/endpoint_runscript_script_selector';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { CONSOLE_COMMANDS, OS_TITLES } from '../../../../management/common/translations';
+import { PlatformIcon } from '../../../../management/components/endpoint_responder/components/header_info/platforms';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 
 interface ValidationState {
   isValid: boolean;
