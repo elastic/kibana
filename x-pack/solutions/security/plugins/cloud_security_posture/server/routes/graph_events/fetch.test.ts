@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { fetchEvents } from './fetch';
 
 describe('fetchEvents', () => {
@@ -50,10 +51,16 @@ describe('fetchEvents', () => {
     });
 
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0][0];
+    const filter = esqlCallArgs.filter as {
+      bool?: {
+        filter?: QueryDslQueryContainer[];
+      };
+    };
+
     expect(esqlCallArgs.query).toContain('BY docId, eventId, index');
     expect(esqlCallArgs.query).not.toContain('eventId = MIN(eventId)');
     expect(esqlCallArgs.params).toEqual([{ doc_id0: 'doc-1' }, { doc_id1: 'doc-2' }]);
-    expect(esqlCallArgs.filter.bool.filter[1]).toEqual({
+    expect(Array.isArray(filter.bool?.filter) ? filter.bool.filter[1] : undefined).toEqual({
       terms: {
         _id: ['doc-1', 'doc-2'],
       },

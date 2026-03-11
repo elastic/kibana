@@ -15,8 +15,11 @@ describe('defineGraphEventsRoute', () => {
     defineGraphEventsRoute(router as any);
 
     const [config] = router.versioned.post.mock.calls[0];
+    const authz = config.security?.authz;
 
     expect(config.path).toBe('/internal/cloud_security_posture/graph/events');
-    expect(config.security?.authz?.requiredPrivileges).toEqual(['securitySolution']);
+    expect(authz && 'requiredPrivileges' in authz ? authz.requiredPrivileges : undefined).toEqual([
+      'securitySolution',
+    ]);
   });
 });
