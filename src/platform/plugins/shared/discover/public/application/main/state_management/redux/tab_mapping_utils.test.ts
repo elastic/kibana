@@ -146,6 +146,7 @@ describe('tab mapping utils', () => {
           },
           "resetDefaultProfileState": Object {
             "fields": "none",
+            "previousStateSnapshotsByProfileId": Object {},
             "resetId": "",
           },
           "uiState": Object {},
@@ -236,6 +237,7 @@ describe('tab mapping utils', () => {
           },
           "resetDefaultProfileState": Object {
             "fields": "none",
+            "previousStateSnapshotsByProfileId": Object {},
             "resetId": "",
           },
           "uiState": Object {},

@@ -110,6 +110,83 @@ describe('InternalStateStore', () => {
     );
   });
 
+  it('should preserve previousStateSnapshotsByProfileId when updating reset state', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const profileId = 'test-profile-id';
+
+    store.dispatch(
+      internalStateActions.setPreviousStateSnapshot({
+        tabId,
+        profileId,
+        previousStateSnapshot: {
+          columns: ['field1'],
+          rowHeight: 3,
+        },
+      })
+    );
+
+    const prevResetId = selectTab(store.getState(), tabId).resetDefaultProfileState.resetId;
+
+    store.dispatch(
+      internalStateActions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: 'all',
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).resetDefaultProfileState).toEqual({
+      resetId: expect.any(String),
+      fields: 'all',
+      previousStateSnapshotsByProfileId: {
+        [profileId]: {
+          columns: ['field1'],
+          rowHeight: 3,
+        },
+      },
+    });
+    expect(selectTab(store.getState(), tabId).resetDefaultProfileState.resetId).not.toBe(
+      prevResetId
+    );
+  });
+
+  it('should only update previousStateSnapshotsByProfileId', async () => {
+    const { store } = await createTestStore();
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    const profileId = 'test-profile-id';
+
+    store.dispatch(
+      internalStateActions.setResetDefaultProfileState({
+        tabId,
+        resetDefaultProfileState: ['columns'],
+      })
+    );
+
+    const prevResetDefaultProfileState = selectTab(
+      store.getState(),
+      tabId
+    ).resetDefaultProfileState;
+
+    store.dispatch(
+      internalStateActions.setPreviousStateSnapshot({
+        tabId,
+        profileId,
+        previousStateSnapshot: {
+          columns: ['field1'],
+        },
+      })
+    );
+
+    expect(selectTab(store.getState(), tabId).resetDefaultProfileState).toEqual({
+      ...prevResetDefaultProfileState,
+      previousStateSnapshotsByProfileId: {
+        [profileId]: {
+          columns: ['field1'],
+        },
+      },
+    });
+  });
+
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
     const { store } = await createTestStore();
     const initialTabId = store.getState().tabs.unsafeCurrentId;

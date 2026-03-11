@@ -32,6 +32,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['breakdownField'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -43,6 +44,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['breakdownField'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -55,6 +57,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['hideChart'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -66,6 +69,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: 'none',
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -80,6 +84,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['columns'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -104,6 +109,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['columns'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -131,6 +137,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: ['rowHeight'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -148,6 +155,7 @@ describe('getDefaultProfileState', () => {
         resetDefaultProfileState: {
           resetId: 'test',
           fields: 'none',
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

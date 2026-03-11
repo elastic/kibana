@@ -65,6 +65,7 @@ describe('tab_state actions', () => {
       expect(prevResetDefaultProfileState).toEqual({
         resetId: expect.any(String),
         fields: 'none',
+        previousStateSnapshotsByProfileId: {},
       });
 
       // Transition to data view mode
@@ -93,6 +94,7 @@ describe('tab_state actions', () => {
       expect(tab.resetDefaultProfileState).toEqual({
         resetId: expect.any(String),
         fields: 'all',
+        previousStateSnapshotsByProfileId: {},
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
@@ -150,6 +152,7 @@ describe('tab_state actions', () => {
       expect(prevResetDefaultProfileState).toEqual({
         resetId: expect.any(String),
         fields: 'none',
+        previousStateSnapshotsByProfileId: {},
       });
 
       // Transition to ES|QL mode
@@ -178,6 +181,7 @@ describe('tab_state actions', () => {
       expect(tab.resetDefaultProfileState).toEqual({
         resetId: expect.any(String),
         fields: 'all',
+        previousStateSnapshotsByProfileId: {},
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId

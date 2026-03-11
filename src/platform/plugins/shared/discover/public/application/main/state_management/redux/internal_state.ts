@@ -40,6 +40,7 @@ import {
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
+  type PreviousStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -316,11 +317,36 @@ export const internalStateSlice = createSlice({
           },
         },
       }),
-      reducer: (state, action: TabAction<Pick<TabState, 'resetDefaultProfileState'>>) =>
+      reducer: (
+        state,
+        action: TabAction<{
+          resetDefaultProfileState: Pick<
+            TabState['resetDefaultProfileState'],
+            'fields' | 'resetId'
+          >;
+        }>
+      ) =>
         withTab(state, action.payload, (tab) => {
-          tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
+          tab.resetDefaultProfileState = {
+            ...tab.resetDefaultProfileState,
+            ...action.payload.resetDefaultProfileState,
+          };
         }),
     },
+
+    setPreviousStateSnapshot: (
+      state,
+      action: TabAction<{
+        profileId: string;
+        previousStateSnapshot: PreviousStateSnapshot | undefined;
+      }>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.resetDefaultProfileState.previousStateSnapshotsByProfileId = {
+          ...tab.resetDefaultProfileState.previousStateSnapshotsByProfileId,
+          [action.payload.profileId]: action.payload.previousStateSnapshot,
+        };
+      }),
 
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
