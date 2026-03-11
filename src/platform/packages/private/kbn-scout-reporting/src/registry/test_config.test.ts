@@ -145,7 +145,7 @@ describe('test_config module', () => {
             name: moduleName,
             group: expected.moduleGroup,
             type: expected.moduleType,
-            visibility: expected.moduleVisibility,
+            visibility: expected.moduleVisibility || 'private',
             root: moduleRoot,
           },
           manifest: {
