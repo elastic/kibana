@@ -189,6 +189,9 @@ export function getDashboardApi({
     getSerializedState: () => ({
       attributes: getState(),
     }),
+    reinitialize: (state: DashboardState) => {
+      unsavedChangesManager.internalApi.reinitialize(state);
+    },
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
 

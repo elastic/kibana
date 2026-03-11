@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
@@ -54,14 +55,33 @@ export const useRegisterActionButtons = ({
           const linkedId = linkedSavedObjectIdRef.current;
           const soExists = linkedId ? await doesSavedDashboardExist(linkedId) : false;
           const { title, description, panels } = initialDashboardInputRef.current;
-          await locator.navigate({
-            dashboardId: soExists ? linkedSavedObjectIdRef.current : undefined,
+          const targetDashboardId = soExists ? linkedSavedObjectIdRef.current : undefined;
+          const locatorParams = {
+            dashboardId: targetDashboardId,
             title,
             description,
             panels,
             time_range: timeRangeRef.current,
-            viewMode: 'edit',
-          });
+            viewMode: 'edit' as const,
+          };
+
+          const isAlreadyOnThisDashboard =
+            targetDashboardId !== undefined &&
+            dashboardApi.savedObjectId$.value === targetDashboardId;
+          if (isAlreadyOnThisDashboard) {
+            const currentState = dashboardApi.getSerializedState().attributes;
+            const nextState: DashboardState = {
+              ...currentState,
+              title: title ?? currentState.title,
+              description: description ?? currentState.description,
+              panels,
+              time_range: timeRangeRef.current,
+            };
+            dashboardApi.setViewMode('edit');
+            dashboardApi.reinitialize(nextState);
+          } else {
+            await locator.navigate(locatorParams);
+          }
         },
       });
     }

@@ -58,6 +58,7 @@ export function initializeUnsavedChangesManager({
   internalApi: {
     getLastSavedState: () => DashboardState;
     onSave: (savedState: DashboardState) => void;
+    reinitialize: (state: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
@@ -98,19 +99,22 @@ export function initializeUnsavedChangesManager({
   const getLastSavedStateForChild = (childId: string) =>
     layoutManager.internalApi.getLastSavedStateForPanel(childId);
 
+  const applyStateToManagers = (state: DashboardState) => {
+    layoutManager.internalApi.reset(state);
+    unifiedSearchManager.internalApi.reset(state);
+    projectRoutingManager?.internalApi.reset(state);
+    settingsManager.internalApi.reset(state);
+
+    // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
+    if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
+      forcePublishOnReset$.next();
+    }
+  };
+
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset();
-        unifiedSearchManager.internalApi.reset(savedState);
-        projectRoutingManager?.internalApi.reset(savedState);
-        settingsManager.internalApi.reset(savedState);
-
-        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
-        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-          forcePublishOnReset$.next();
-        }
+        applyStateToManagers(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -125,6 +129,7 @@ export function initializeUnsavedChangesManager({
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
       },
+      reinitialize: (state: DashboardState) => applyStateToManagers(state),
     },
   };
 }
