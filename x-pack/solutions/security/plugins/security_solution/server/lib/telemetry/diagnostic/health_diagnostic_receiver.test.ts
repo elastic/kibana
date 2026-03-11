@@ -157,6 +157,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       { _source: { '@timestamp': '2023-01-01T00:01:00Z', event: { action: 'logout' } } },
     ];
 
+    beforeEach(() => {
+      mockEsClient.indices.get.mockResolvedValue({ 'test-index': {} });
+      mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
+    });
+
     test('should run EQL query with events successfully', (done) => {
       const query = createMockQuery(QueryType.EQL, {
         query: 'process where process.name == "cmd.exe"',
@@ -232,6 +237,11 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
   });
 
   describe('ES|QL queries', () => {
+    beforeEach(() => {
+      mockEsClient.indices.get.mockResolvedValue({ 'test-index': {} });
+      mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
+    });
+
     test('should run ES|QL query successfully', (done) => {
       const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
       const circuitBreaker = createMockCircuitBreaker(true);
@@ -562,6 +572,80 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
             expect(mockEsClient.closePointInTime).not.toHaveBeenCalled();
             done();
           }, 10);
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('should throw PermissionError for EQL when index does not exist', (done) => {
+      const query = createMockQuery(QueryType.EQL);
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      mockEsClient.indices.get.mockResolvedValue({});
+
+      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => {},
+        error: (error) => {
+          expect(error).toBeInstanceOf(PermissionError);
+          expect(error.message).toContain('Error accessing index');
+          expect(mockEsClient.eql.search).not.toHaveBeenCalled();
+          done();
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('should throw PermissionError for EQL when missing read privileges', (done) => {
+      const query = createMockQuery(QueryType.EQL);
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      mockEsClient.indices.get.mockResolvedValue({ 'test-index': {} });
+      mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => {},
+        error: (error) => {
+          expect(error).toBeInstanceOf(PermissionError);
+          expect(error.message).toContain('Error checking privileges');
+          expect(mockEsClient.eql.search).not.toHaveBeenCalled();
+          done();
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('should throw PermissionError for ESQL when index does not exist', (done) => {
+      const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      mockEsClient.indices.get.mockResolvedValue({});
+
+      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => {},
+        error: (error) => {
+          expect(error).toBeInstanceOf(PermissionError);
+          expect(error.message).toContain('Error accessing index');
+          expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+          done();
+        },
+        complete: () => done(new Error('Should not complete successfully')),
+      });
+    });
+
+    test('should throw PermissionError for ESQL when missing read privileges', (done) => {
+      const query = createMockQuery(QueryType.ESQL, { query: 'stats count() by user.name' });
+      const circuitBreaker = createMockCircuitBreaker(true);
+
+      mockEsClient.indices.get.mockResolvedValue({ 'test-index': {} });
+      mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
+
+      queryExecutor.search({ query, circuitBreakers: [circuitBreaker] }).subscribe({
+        next: () => {},
+        error: (error) => {
+          expect(error).toBeInstanceOf(PermissionError);
+          expect(error.message).toContain('Error checking privileges');
+          expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+          done();
         },
         complete: () => done(new Error('Should not complete successfully')),
       });

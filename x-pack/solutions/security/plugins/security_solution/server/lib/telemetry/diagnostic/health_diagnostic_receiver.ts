@@ -70,45 +70,55 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const regex = /^[\s\r\n]*FROM/;
 
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
-        const query = regex.test(diagnosticQuery.query)
-          ? diagnosticQuery.query
-          : `FROM ${index} | ${diagnosticQuery.query}`;
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            const query = regex.test(diagnosticQuery.query)
+              ? diagnosticQuery.query
+              : `FROM ${index} | ${diagnosticQuery.query}`;
 
-        return from(this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()).pipe(
-          mergeMap((resp) => {
-            return resp.records.map((r) => r as T);
+            return from(
+              this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()
+            ).pipe(
+              mergeMap((resp) => {
+                return resp.records.map((r) => r as T);
+              })
+            );
           })
-        );
-      })
+        )
+      )
     );
   }
 
   streamEql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
-        const request: EqlSearchRequest = {
-          index,
-          query: diagnosticQuery.query,
-          size: diagnosticQuery.size,
-        };
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            const request: EqlSearchRequest = {
+              index,
+              query: diagnosticQuery.query,
+              size: diagnosticQuery.size,
+            };
 
-        return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
-          mergeMap((resp) => {
-            if (resp.hits.events) {
-              return resp.hits.events.map((h) => h._source as T);
-            } else if (resp.hits.sequences) {
-              return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
-            } else {
-              this.logger.warn(
-                '>> Neither hits.events nor hits.sequences found in the response for query',
-                { queryName: diagnosticQuery.name } as LogMeta
-              );
-              return [];
-            }
+            return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
+              mergeMap((resp) => {
+                if (resp.hits.events) {
+                  return resp.hits.events.map((h) => h._source as T);
+                } else if (resp.hits.sequences) {
+                  return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
+                } else {
+                  this.logger.warn(
+                    '>> Neither hits.events nor hits.sequences found in the response for query',
+                    { queryName: diagnosticQuery.name } as LogMeta
+                  );
+                  return [];
+                }
+              })
+            );
           })
-        );
-      })
+        )
+      )
     );
   }
 
