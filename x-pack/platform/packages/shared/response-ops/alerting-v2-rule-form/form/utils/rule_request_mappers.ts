@@ -139,7 +139,6 @@ export interface RuleRequestCommon {
     recovering_count?: number;
     recovering_timeframe?: string;
   };
-  state_transition?: { pending_count?: number; pending_timeframe?: string };
   artifacts?: RuleArtifactPayload;
 }
 

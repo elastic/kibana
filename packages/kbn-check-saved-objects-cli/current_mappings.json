@@ -301,166 +301,6 @@
       }
     }
   },
-  "alerting_notification_policy": {
-    "dynamic": false,
-    "properties": {
-      "auth": {
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "createdBy": {
-        "type": "keyword"
-      },
-      "description": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "destinations": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "updatedAt": {
-        "type": "date"
-      },
-      "updatedBy": {
-        "type": "keyword"
-      }
-    }
-  },
-  "alerting_rule": {
-    "dynamic": false,
-    "properties": {
-      "artifacts": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
-          },
-          "value": {
-            "type": "keyword"
-          }
-        },
-        "type": "nested"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "createdBy": {
-        "type": "keyword"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "evaluation": {
-        "properties": {
-          "query": {
-            "properties": {
-              "base": {
-                "type": "text"
-              },
-              "condition": {
-                "type": "text"
-              }
-            }
-          }
-        }
-      },
-      "grouping": {
-        "properties": {
-          "fields": {
-            "type": "keyword"
-          }
-        }
-      },
-      "kind": {
-        "type": "keyword"
-      },
-      "metadata": {
-        "properties": {
-          "labels": {
-            "type": "keyword"
-          },
-          "name": {
-            "type": "text"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        }
-      },
-      "no_data": {
-        "enabled": false,
-        "type": "object"
-      },
-      "notification_policies": {
-        "enabled": false,
-        "type": "object"
-      },
-      "recovery_policy": {
-        "enabled": false,
-        "type": "object"
-      },
-      "schedule": {
-        "properties": {
-          "every": {
-            "type": "keyword"
-          },
-          "lookback": {
-            "type": "keyword"
-          }
-        }
-      },
-      "state_transition": {
-        "enabled": false,
-        "type": "object"
-      },
-      "time_field": {
-        "type": "keyword"
-      },
-      "updatedAt": {
-        "type": "date"
-      },
-      "updatedBy": {
-        "type": "keyword"
-      }
-    }
-  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
@@ -483,6 +323,10 @@
         "type": "keyword"
       }
     }
+  },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
   },
   "api_key_pending_invalidation": {
     "properties": {
@@ -774,6 +618,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -855,6 +702,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1573,6 +1431,10 @@
       }
     }
   },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
@@ -1662,6 +1524,10 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -4559,6 +4425,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"
