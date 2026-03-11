@@ -288,6 +288,10 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     },
     schema: z.boolean().default(false),
     example_value: false,
+    checkboxLabel: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksCheckboxLabel',
+      { defaultMessage: 'Disable' }
+    ),
   },
   {
     name: 'agent.internal',
