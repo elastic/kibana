@@ -20,7 +20,7 @@ const toWatchlistFormValues = (watchlist: GetWatchlistResponse): WatchlistFormVa
   managed: watchlist.managed ?? false,
 });
 
-export const useGetWatchlist = (watchlistId?: string) => {
+export const useGetWatchlistFormData = (watchlistId?: string) => {
   const { getWatchlist } = useEntityAnalyticsRoutes();
 
   const query = useQuery<GetWatchlistResponse>({

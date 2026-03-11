@@ -31,13 +31,14 @@ import { SUPPORTED_FILE_TYPES } from './constants';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
+  isNameInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
 }
 
-export const WatchlistForm = ({ watchlist, onFieldChange }: WatchlistFormProps) => {
+export const WatchlistForm = ({ watchlist, isNameInvalid, onFieldChange }: WatchlistFormProps) => {
   const {
     services: { data },
   } = useKibana();
@@ -83,11 +84,28 @@ export const WatchlistForm = ({ watchlist, onFieldChange }: WatchlistFormProps) 
 
   return (
     <EuiForm component="form" fullWidth>
-      <EuiFormRow label="Name">
+      <EuiFormRow
+        label="Name"
+        isInvalid={isNameInvalid}
+        error={
+          isNameInvalid
+            ? [
+                i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid',
+                  {
+                    defaultMessage:
+                      'Use lowercase letters, numbers, ".", "_" or "-" and start with a letter or number.',
+                  }
+                ),
+              ]
+            : undefined
+        }
+      >
         <EuiFieldText
           name="Enter Watchlist Name"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
+          isInvalid={isNameInvalid}
         />
       </EuiFormRow>
       <EuiFormRow

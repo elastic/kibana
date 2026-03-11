@@ -6,5 +6,18 @@
  */
 
 export { useCreateWatchlist } from './use_create_watchlist';
-export { useGetWatchlist } from './use_get_watchlist';
+export { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 export { useUpdateWatchlist } from './use_update_watchlist';
+export { useWatchlistFormState } from './use_watchlist_form_state';
+export { useWatchlistMutations } from './use_watchlist_mutations';
+export {
+  useCreateWatchlistFormState,
+} from './use_watchlist_form_state_create';
+export {
+  useEditWatchlistFormState,
+} from './use_watchlist_form_state_edit';
+export {
+  getDefaultWatchlist,
+  getWatchlistNameValidation,
+  useResetEditsOnFlyoutOpen,
+} from './use_watchlist_form_state_shared';

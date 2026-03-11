@@ -51,7 +51,6 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
           params: {
             mode: 'edit',
             watchlistId: record.id,
-            watchlistName: record.name,
             spaceId,
           },
         },
