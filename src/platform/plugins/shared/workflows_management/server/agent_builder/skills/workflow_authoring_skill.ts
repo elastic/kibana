@@ -30,13 +30,17 @@ export const workflowAuthoringSkill = defineSkillType({
   basePath: 'skills/platform/workflows',
   description:
     'Create, modify, and validate Elastic workflow YAML definitions using natural language. Covers step types, triggers, Liquid templating, connector integrations, and validation.',
-  content: `## When to Use This Skill
+  content: `## Auto-Loading Note
+
+When a \`workflow.yaml\` attachment is present, all workflow tools are already available and
+validation results are shown in the attachment. You do NOT need to load this skill to access tools
+or see validation errors — skip the \`filestore.read\` call.
+
+## When to Use This Skill
 
 Use this skill when the user wants to:
-- Create a new workflow YAML definition
-- Modify or extend an existing workflow
-- Understand available step types, triggers, or connector integrations
-- Fix workflow validation errors
+- Create a new workflow YAML definition (no \`workflow.yaml\` attachment present)
+- Understand advanced step types, triggers, or connector integrations
 - Learn workflow YAML syntax, Liquid templating, or best practices
 
 ## Available Tools
@@ -46,7 +50,7 @@ Use this skill when the user wants to:
 - **get_trigger_definitions**: Look up available trigger types and their schemas
 - **get_examples**: Search the bundled example library for working workflow YAML patterns
 - **get_connectors**: Find connector instances configured in the user's environment
-- **validate_workflow**: Validate a complete workflow YAML string against all rules
+- **validate_workflow**: Validate a complete workflow YAML string against all rules. When validation fails, step definitions for referenced step types are automatically included.
 - **list_workflows**: List workflows in the user's environment
 - **get_workflow**: Retrieve a specific workflow by ID
 
@@ -60,11 +64,11 @@ Use this skill when the user wants to:
 
 ## Core Instructions
 
-### CRITICAL: Always Search Examples First
+### Search Examples Before Writing Step YAML
 
-Before generating any workflow YAML, ALWAYS use \`get_examples\` to find similar examples.
-This ensures you use the correct syntax and available step types. The example library contains
-real, working workflows that demonstrate the proper way to use each step type.
+Before writing new steps or modifying step types you haven't seen in this conversation,
+use \`get_examples\` to find similar working patterns. This applies to both new workflows
+and adding/changing steps in existing ones.
 
 ### Workflow YAML Structure
 
@@ -193,14 +197,13 @@ Skip validation for trivial changes where the risk of errors is low.
 
 ### Fixing Validation Errors
 
-When the user asks you to fix a validation error:
+When fixing validation errors:
 
-1. **ALWAYS call \`get_step_definitions\` FIRST** to get the list of all valid step types
-2. Analyze the error and identify the problematic step
-3. Compare the step type with valid step types from get_step_definitions
-4. If the step type exists: check the step definition for correct usage
-5. If the step type does NOT exist: tell the user and list similar alternatives
-6. NEVER guess or replace a step type with something unrelated
+1. Call \`validate_workflow\` — it automatically includes step definitions for all referenced step types when validation fails
+2. Analyze the errors and identify the problematic steps
+3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
+4. Use edit tools to fix the issues, then check the \`validation\` field in the edit tool response to confirm the fix
+5. NEVER guess or replace a step type with something unrelated
 
 ### Proposing Changes (Edit Tools)
 

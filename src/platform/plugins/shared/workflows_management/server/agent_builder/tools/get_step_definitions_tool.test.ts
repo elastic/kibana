@@ -17,6 +17,7 @@ const mockAddDynamicConnectorsToCache = jest.fn();
 jest.mock('../../../common/schema', () => ({
   getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
   addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
+  getCachedAllConnectorsMap: () => null,
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>

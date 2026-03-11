@@ -19,7 +19,11 @@ import {
 } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
-import { addDynamicConnectorsToCache, getAllConnectors } from '../../../common/schema';
+import {
+  addDynamicConnectorsToCache,
+  getAllConnectors,
+  getCachedAllConnectorsMap,
+} from '../../../common/schema';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
@@ -35,6 +39,24 @@ interface StepDefinitionForAgent {
   configParams?: StepParamSummary[];
   examples?: string[];
   stepSchema?: unknown;
+}
+
+export type { StepDefinitionForAgent };
+
+export async function resolveConnectors(
+  api: WorkflowsManagementApi,
+  spaceId: string,
+  request: unknown
+): Promise<{ all: ConnectorContractUnion[]; byType: Map<string, ConnectorContractUnion> }> {
+  const { connectorsByType } = await api.getAvailableConnectors(spaceId, request as never);
+  const enabledConnectorTypes = Object.fromEntries(
+    Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
+  );
+  addDynamicConnectorsToCache(enabledConnectorTypes);
+  return {
+    all: getAllConnectors(),
+    byType: getCachedAllConnectorsMap() ?? new Map(),
+  };
 }
 
 function categorizeConnectorType(type: string): StepCategory {
@@ -57,7 +79,7 @@ function zodToJsonSchemaSafe(schema: z.ZodType): unknown {
   }
 }
 
-function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAgent {
+export function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAgent {
   const inputParams = buildStepParamsSummary(step.inputSchema);
   const configParams = step.configSchema ? buildStepParamsSummary(step.configSchema) : undefined;
 
@@ -73,7 +95,7 @@ function formatBuiltInStep(step: BaseStepDefinition): StepDefinitionForAgent {
   };
 }
 
-function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
+export function formatConnectorStep(connector: ConnectorContractUnion): StepDefinitionForAgent {
   const connectorId = connector.hasConnectorId || 'none';
   const inputParams = buildStepParamsSummary(connector.paramsSchema);
   const configParams = connector.configSchema
@@ -155,14 +177,7 @@ Set includeFullSchema=true to get the full JSON Schema for input params (use spa
     },
     handler: async ({ stepType, search, category, includeFullSchema }, { spaceId, request }) => {
       const builtInTypes = new Set(builtInStepDefinitions.map((s) => s.id));
-      const { connectorsByType } = await api.getAvailableConnectors(spaceId, request);
-      const enabledConnectorTypes = Object.fromEntries(
-        Object.entries(connectorsByType).filter(([, info]) => info.enabled !== false)
-      );
-
-      addDynamicConnectorsToCache(enabledConnectorTypes);
-
-      const allConnectors = getAllConnectors();
+      const { all: allConnectors } = await resolveConnectors(api, spaceId, request);
 
       const connectorDefinitions = allConnectors
         .filter((connector) => !builtInTypes.has(connector.type))

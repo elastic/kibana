@@ -43,7 +43,7 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
 
-  registerWorkflowEditTools(agentBuilder);
+  registerWorkflowEditTools(agentBuilder, api);
 
   registerWorkflowYamlAttachment(agentBuilder, api);
   registerWorkflowYamlDiffAttachment(agentBuilder);

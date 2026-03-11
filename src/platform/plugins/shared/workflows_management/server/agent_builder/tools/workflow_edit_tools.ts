@@ -20,6 +20,7 @@ import {
   modifyWorkflowProperty,
 } from './yaml_edit_utils';
 import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_attachment';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_diff_attachment';
 
@@ -116,6 +117,30 @@ const emitDiffAndUpdateYaml = async (
   return diffAttachment.id;
 };
 
+interface CompactValidation {
+  valid: boolean;
+  errors?: string[];
+}
+
+const runCompactValidation = async (
+  yaml: string,
+  api: WorkflowsManagementApi,
+  context: ToolHandlerContext
+): Promise<CompactValidation | undefined> => {
+  try {
+    const result = await api.validateWorkflow(yaml, context.spaceId, context.request);
+    if (result.valid) {
+      return { valid: true };
+    }
+    const errors = result.diagnostics
+      .filter((d) => d.severity === 'error')
+      .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
+    return { valid: false, errors };
+  } catch {
+    return undefined;
+  }
+};
+
 const handleEditResult = async (
   result: EditResult,
   context: ToolHandlerContext,
@@ -125,7 +150,8 @@ const handleEditResult = async (
   description: string | undefined,
   workflowId: string | undefined,
   workflowName: string | undefined,
-  toolId: string
+  toolId: string,
+  api: WorkflowsManagementApi
 ) => {
   if (!result.success) {
     return {
@@ -149,6 +175,8 @@ const handleEditResult = async (
     workflowName
   );
 
+  const validation = await runCompactValidation(result.yaml, api, context);
+
   return {
     results: [
       {
@@ -159,13 +187,17 @@ const handleEditResult = async (
           diffAttachmentId,
           toolId,
           description: description ?? 'Change proposed successfully',
+          ...(validation ? { validation } : {}),
         },
       },
     ],
   };
 };
 
-export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupContract): void {
+export function registerWorkflowEditTools(
+  agentBuilder: AgentBuilderPluginSetupContract,
+  api: WorkflowsManagementApi
+): void {
   agentBuilder.tools.register({
     id: WORKFLOW_INSERT_STEP_TOOL_ID,
     type: ToolType.builtin,
@@ -194,7 +226,9 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        WORKFLOW_INSERT_STEP_TOOL_ID,
+        api
       );
     },
   });
@@ -228,7 +262,9 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        WORKFLOW_MODIFY_STEP_TOOL_ID,
+        api
       );
     },
   });
@@ -263,7 +299,9 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+        api
       );
     },
   });
@@ -299,7 +337,9 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+        api
       );
     },
   });
@@ -332,7 +372,9 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         proposalId,
         description,
         attachment.workflowId,
-        attachment.name
+        attachment.name,
+        WORKFLOW_DELETE_STEP_TOOL_ID,
+        api
       );
     },
   });
@@ -367,6 +409,8 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
         attachment.name
       );
 
+      const validation = await runCompactValidation(yaml, api, context);
+
       return {
         results: [
           {
@@ -377,6 +421,7 @@ export function registerWorkflowEditTools(agentBuilder: AgentBuilderPluginSetupC
               diffAttachmentId,
               toolId: WORKFLOW_REPLACE_YAML_TOOL_ID,
               description: description ?? 'Full YAML replacement proposed',
+              ...(validation ? { validation } : {}),
             },
           },
         ],

@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentFormatContext,
+  AttachmentResolveContext,
+} from '@kbn/agent-builder-server/attachments';
 import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
+import { GET_CONNECTORS_TOOL_ID } from '../tools/get_connectors_tool';
+import { GET_EXAMPLES_TOOL_ID } from '../tools/get_examples_tool';
+import { GET_STEP_DEFINITIONS_TOOL_ID } from '../tools/get_step_definitions_tool';
+import { GET_TRIGGER_DEFINITIONS_TOOL_ID } from '../tools/get_trigger_definitions_tool';
+import { GET_WORKFLOW_TOOL_ID } from '../tools/get_workflow_tool';
+import { LIST_WORKFLOWS_TOOL_ID } from '../tools/list_workflows_tool';
+import { VALIDATE_WORKFLOW_TOOL_ID } from '../tools/validate_workflow_tool';
 import {
   WORKFLOW_DELETE_STEP_TOOL_ID,
   WORKFLOW_INSERT_STEP_TOOL_ID,
@@ -38,6 +48,7 @@ type WorkflowYamlOrigin = z.infer<typeof workflowYamlOriginSchema>;
 
 const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  isReadonly: true,
   validate: (input: unknown) => {
     const parseResult = workflowYamlDataSchema.safeParse(input);
     if (parseResult.success) {
@@ -60,13 +71,53 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     if (!workflow) return undefined;
     return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
-  format: (attachment: { data: WorkflowYamlData }) => {
+  format: (attachment: { data: WorkflowYamlData }, context: AttachmentFormatContext) => {
     const { data } = attachment;
     return {
-      getRepresentation: () => ({
-        type: 'text' as const,
-        value: `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`\n\nUse the workflow edit tools (workflow_insert_step, workflow_modify_step, workflow_modify_step_property, workflow_modify_property, workflow_delete_step, workflow_replace_yaml) to modify this workflow.\nWhen inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\nEach edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
-      }),
+      getRepresentation: async (): Promise<{ type: 'text'; value: string }> => {
+        let validationSection = '';
+        try {
+          const result = await api.validateWorkflow(data.yaml, context.spaceId, context.request);
+          if (result.valid) {
+            validationSection = '\n\nValidation: valid';
+          } else {
+            const errors = result.diagnostics.filter(
+              (d: { severity: string }) => d.severity === 'error'
+            );
+            const warnings = result.diagnostics.filter(
+              (d: { severity: string }) => d.severity === 'warning'
+            );
+            const errorLines = errors
+              .map(
+                (d: { source: string; message: string; path?: Array<string | number> }) =>
+                  `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
+              )
+              .join('\n');
+            validationSection = `\n\nValidation errors (${errors.length}):\n${errorLines}`;
+            if (warnings.length > 0) {
+              const warningLines = warnings
+                .map(
+                  (d: { source: string; message: string; path?: Array<string | number> }) =>
+                    `- [${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`
+                )
+                .join('\n');
+              validationSection += `\n\nValidation warnings (${warnings.length}):\n${warningLines}`;
+            }
+          }
+        } catch {
+          // Validation service unavailable; LLM can use validate_workflow tool.
+        }
+
+        return {
+          type: 'text' as const,
+          value:
+            `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
+            `${validationSection}\n\n` +
+            `Use the workflow edit tools (workflow_insert_step, workflow_modify_step, workflow_modify_step_property, workflow_modify_property, workflow_delete_step, workflow_replace_yaml) to modify this workflow.\n` +
+            `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
+            `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
+        };
+      },
     };
   },
   getTools: () => [
@@ -76,11 +127,35 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
     WORKFLOW_DELETE_STEP_TOOL_ID,
     WORKFLOW_REPLACE_YAML_TOOL_ID,
+    GET_STEP_DEFINITIONS_TOOL_ID,
+    GET_TRIGGER_DEFINITIONS_TOOL_ID,
+    GET_EXAMPLES_TOOL_ID,
+    GET_CONNECTORS_TOOL_ID,
+    VALIDATE_WORKFLOW_TOOL_ID,
+    LIST_WORKFLOWS_TOOL_ID,
+    GET_WORKFLOW_TOOL_ID,
   ],
   getAgentDescription: () =>
     `workflow.yaml attachments represent the current state of an Elastic Workflow YAML document.\n` +
-    `Do NOT paste the full YAML into your response text — the user already sees it in the editor.\n` +
-    `Use the workflow edit tools to modify the workflow. Each tool returns a diffAttachmentId that you must render.`,
+    `All workflow authoring tools are already available — do NOT load the workflow-authoring skill via filestore.read.\n` +
+    `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
+    `## Editing Rules\n\n` +
+    `- Use edit tools to propose changes. NEVER paste full YAML into your response text.\n` +
+    `- Each edit tool returns a diffAttachmentId — render it with <render_attachment id="{diffAttachmentId}"/>\n` +
+    `- Edit tools auto-validate the result and return a \`validation\` field — no need to call validate_workflow separately after edits.\n` +
+    `- Prefer surgical edits (workflow_modify_step, workflow_modify_step_property) over workflow_replace_yaml\n` +
+    `- Use get_step_definitions to look up step type schemas when needed\n` +
+    `- Use get_examples to find working workflow patterns\n\n` +
+    `## Workflow YAML Structure\n\n` +
+    `\`\`\`yaml\nversion: '1'\nname: Workflow Name\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: step_name\n    type: step_type\n    with:\n      param1: value1\n\`\`\`\n\n` +
+    `## Common Fixes\n\n` +
+    `- Liquid expressions must be quoted in YAML: \`"{{ steps.name.output.field }}"\`\n` +
+    `- ES|QL params must be an array of positional values (\`?\` placeholder), not a named map\n` +
+    `- All workflows need \`version: '1'\` at the root\n` +
+    `- Each step needs a unique \`name\` and valid \`type\`\n` +
+    `- Step input parameters go in the \`with\` block\n` +
+    `- Config params (condition, foreach, steps, else) are step-level fields outside \`with\`\n` +
+    `- Connector-based steps require a \`connector-id\` field`,
 });
 
 export function registerWorkflowYamlAttachment(
