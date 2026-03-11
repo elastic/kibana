@@ -481,10 +481,9 @@ const QueryStreamFieldActionsCell = ({
       ...(field.description
         ? [
             {
-              name: i18n.translate(
-                'xpack.streams.queryStreamSchemaEditor.clearDescriptionAction',
-                { defaultMessage: 'Clear description' }
-              ),
+              name: i18n.translate('xpack.streams.queryStreamSchemaEditor.clearDescriptionAction', {
+                defaultMessage: 'Clear description',
+              }),
               onClick: () => {
                 onClearDescription(field);
                 closePopover();
