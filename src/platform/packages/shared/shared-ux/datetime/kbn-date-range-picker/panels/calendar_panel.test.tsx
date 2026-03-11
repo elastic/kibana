@@ -26,7 +26,18 @@ jest.mock('../date_range_picker_panel_ui', () => ({
   PanelContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   PanelHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   PanelBody: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  PanelFooter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  PanelFooter: ({
+    children,
+    primaryAction,
+  }: {
+    children: React.ReactNode;
+    primaryAction?: React.ReactNode;
+  }) => (
+    <>
+      {primaryAction}
+      {children}
+    </>
+  ),
   SubPanelHeading: ({
     children,
     onGoBack,
@@ -217,7 +228,7 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
@@ -296,9 +307,9 @@ describe('CalendarPanel', () => {
       expect(applyRange).toHaveBeenCalledWith(
         {
           start: feb2026Local(10, 0, 0),
-          end: feb2026Local(15, 23, 59),
+          end: feb2026Local(15, 23, 59, 59, 999),
         },
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
       );
     });
 
