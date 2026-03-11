@@ -38,6 +38,18 @@ jest.mock('./field_groups/alert_conditions_field_group', () => ({
   ),
 }));
 
+jest.mock('./field_groups/state_transition_field_group', () => ({
+  StateTransitionFieldGroup: () => (
+    <div data-test-subj="mockStateTransitionFieldGroup">State Transition Field Group</div>
+  ),
+}));
+
+jest.mock('./field_groups/attachment_runbook_group', () => ({
+  AttacmentRunbookGroup: () => (
+    <div data-test-subj="mockAttachmentRunbookGroup">Attachment Runbook Group</div>
+  ),
+}));
+
 jest.mock('../flyout/error_callout', () => ({
   ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
 }));
@@ -83,6 +95,18 @@ describe('GuiRuleForm', () => {
 
       expect(screen.getByTestId('mockRuleExecutionFieldGroup')).toBeInTheDocument();
     });
+
+    it('renders StateTransitionFieldGroup', () => {
+      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockStateTransitionFieldGroup')).toBeInTheDocument();
+    });
+
+    it('renders AttacmentRunbookGroup', () => {
+      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
+
+      expect(screen.getByTestId('mockAttachmentRunbookGroup')).toBeInTheDocument();
+    });
   });
 
   describe('includeQueryEditor prop', () => {
@@ -113,7 +137,7 @@ describe('GuiRuleForm', () => {
   });
 
   describe('field group ordering', () => {
-    it('renders field groups in correct order: ErrorCallOut, Details, Condition, Execution, AlertConditions', () => {
+    it('renders field groups in correct order', () => {
       const { container } = render(<GuiRuleForm {...defaultProps} includeQueryEditor />, {
         wrapper: createFormWrapper(),
       });
@@ -126,7 +150,9 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockStateTransitionFieldGroup',
         'mockAlertConditionsFieldGroup',
+        'mockAttachmentRunbookGroup',
       ]);
     });
 
@@ -143,7 +169,9 @@ describe('GuiRuleForm', () => {
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
+        'mockStateTransitionFieldGroup',
         'mockAlertConditionsFieldGroup',
+        'mockAttachmentRunbookGroup',
       ]);
     });
   });

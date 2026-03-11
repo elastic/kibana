@@ -16,6 +16,7 @@ import { StateTransitionFieldGroup } from './field_groups/state_transition_field
 import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
+import { AttacmentRunbookGroup } from './field_groups/attachment_runbook_group';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -53,6 +54,8 @@ export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
       <StateTransitionFieldGroup />
       <EuiSpacer size="m" />
       <AlertConditionsFieldGroup />
+      <EuiSpacer size="m" />
+      <AttacmentRunbookGroup />
     </EuiForm>
   );
 };

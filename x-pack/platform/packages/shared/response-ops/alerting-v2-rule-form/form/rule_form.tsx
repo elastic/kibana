@@ -12,17 +12,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
-import { RuleFormServicesProvider, useRuleFormServices, type RuleFormServices } from './contexts';
+import { useRuleFormServices } from './contexts';
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
-import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
-import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
-import { ErrorCallOut } from '../flyout/error_callout';
 import { RuleFormServicesProvider, type RuleFormServices } from './contexts';
-import { AttacmentRunbookGroup } from './field_groups/attachment_runbook_group';
 
 export type { RuleFormServices } from './contexts';
 

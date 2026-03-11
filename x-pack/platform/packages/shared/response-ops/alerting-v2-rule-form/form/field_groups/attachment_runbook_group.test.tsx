@@ -22,9 +22,21 @@ const getRunbookModal = () => {
   return modal as HTMLElement;
 };
 
+const openAttachmentsSection = async () => {
+  const isContentVisible =
+    !!screen.queryByTestId('addRunbookButton') ||
+    !!screen.queryByLabelText('Edit Runbook') ||
+    !!screen.queryByLabelText('Delete Runbook');
+
+  if (!isContentVisible) {
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle attachments' }));
+  }
+};
+
 const addRunbookText = async (text: string) => {
   const user = userEvent.setup();
 
+  await openAttachmentsSection();
   await user.click(screen.getByTestId('addRunbookButton'));
 
   const modal = getRunbookModal();
@@ -34,11 +46,11 @@ const addRunbookText = async (text: string) => {
 };
 
 describe('AttacmentRunbookGroup', () => {
-  it('renders attachments title and add runbook button initially', () => {
+  it('renders attachments title and keeps section closed initially', () => {
     render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     expect(screen.getByText('Attachments')).toBeInTheDocument();
-    expect(screen.getByTestId('addRunbookButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('addRunbookButton')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Edit Runbook')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Delete Runbook')).not.toBeInTheDocument();
   });
@@ -47,6 +59,7 @@ describe('AttacmentRunbookGroup', () => {
     const user = userEvent.setup();
     render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
+    await openAttachmentsSection();
     await user.click(screen.getByTestId('addRunbookButton'));
     expect(screen.getByRole('heading', { name: 'Add Runbook' })).toBeInTheDocument();
 
