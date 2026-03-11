@@ -14,6 +14,7 @@ import {
   normalizeInputsToJsonSchema,
 } from './input_conversion';
 import type { WorkflowInputSchema } from '../schema';
+import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 
 describe('convertLegacyInputsToJsonSchema', () => {
   it('should convert array of legacy inputs to JSON Schema object format', () => {
@@ -149,7 +150,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
 
 describe('normalizeInputsToJsonSchema', () => {
   it('should return new format inputs as-is', () => {
-    const inputs = {
+    const inputs: JsonModelSchemaType = {
       properties: {
         username: {
           type: 'string',
@@ -275,7 +276,7 @@ describe('normalizeInputsToJsonSchema', () => {
   });
 
   it('should handle nested object example from requirements', () => {
-    const inputs = {
+    const inputs: JsonModelSchemaType = {
       properties: {
         customer: {
           type: 'object',
@@ -408,7 +409,7 @@ describe('applyInputDefaults', () => {
         },
       },
       additionalProperties: false,
-    });
+    } as JsonModelSchemaType);
 
     const result = applyInputDefaults(undefined, inputsSchema);
     expect(result).toEqual({

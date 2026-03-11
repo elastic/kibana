@@ -294,7 +294,7 @@
               "(spaceId: string) => Promise<string>"
             ],
             "path": "x-pack/solutions/security/packages/data-stream-adapter/src/data_stream_spaces_adapter.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -310,7 +310,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/data-stream-adapter/src/data_stream_spaces_adapter.ts",
-                "lineNumber": 50,
+                "lineNumber": 51,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -330,7 +330,7 @@
               "(spaceId: string) => Promise<string | undefined>"
             ],
             "path": "x-pack/solutions/security/packages/data-stream-adapter/src/data_stream_spaces_adapter.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -346,7 +346,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/data-stream-adapter/src/data_stream_spaces_adapter.ts",
-                "lineNumber": 55,
+                "lineNumber": 56,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -956,7 +956,7 @@
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
-        "lineNumber": 70,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1077,7 +1077,7 @@
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
-        "lineNumber": 49,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

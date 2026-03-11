@@ -123,3 +123,12 @@ export const testUserStartPrivilegesResponse = {
     canManageIndex: true,
   },
 };
+
+export const testIndexDocumentsSampleResponse = {
+  results: [
+    {
+      _id: '1',
+      _source: { field: 'value' },
+    },
+  ],
+};

@@ -7,12 +7,12 @@
 
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
   EuiFieldText,
+  EuiFormAppend,
+  EuiFormPrepend,
   EuiHorizontalRule,
   EuiPopover,
   EuiSpacer,
@@ -46,13 +46,13 @@ export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props
       append={
         <EuiCopy textToCopy={value}>
           {(copyText) => (
-            <EuiButtonIcon
+            <EuiFormAppend
+              element="button"
+              iconLeft="copyClipboard"
+              onClick={copyText}
               aria-label={i18n.translate('xpack.security.copyTokenField.copyButton', {
                 defaultMessage: 'Copy to clipboard',
               })}
-              iconType="copyClipboard"
-              color="accentSecondary"
-              onClick={copyText}
             />
           )}
         </EuiCopy>
@@ -93,16 +93,13 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
       prepend={
         <EuiPopover
           button={
-            <EuiButtonEmpty
+            <EuiFormPrepend
+              element="button"
+              label={selectedOption.label}
+              iconRight="arrowDown"
               data-test-subj="selectableTokenFieldButton"
-              size="xs"
-              iconType="arrowDown"
-              iconSide="right"
-              color="success"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            >
-              {selectedOption.label}
-            </EuiButtonEmpty>
+            />
           }
           isOpen={isPopoverOpen}
           panelPaddingSize="none"

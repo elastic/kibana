@@ -35,7 +35,7 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
-import { seedTestUser } from './cosmos_db_seeder';
+import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
@@ -292,7 +292,7 @@ export function generateCosmosDBApiRequestHeaders(
   };
 }
 
-async function createUiamSessionTokens({
+export async function createUiamSessionTokens({
   username,
   organizationId,
   projectType,
@@ -318,7 +318,7 @@ async function createUiamSessionTokens({
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
   const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
 
-  await seedTestUser({
+  const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
     roleId: 'cloud-role-id',
@@ -328,6 +328,15 @@ async function createUiamSessionTokens({
     firstName: givenName,
     lastName: familyName,
   });
+  if (!userSeedResult.success) {
+    throw userSeedResult.response;
+  }
+
+  // Seed an org admin UIAM API key to simplify testing of API key authentication in UIAM.
+  const apiKeySeedResult = await seedTestApiKey({ creator: username, organizationId });
+  if (!apiKeySeedResult.success) {
+    throw apiKeySeedResult.response;
+  }
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({

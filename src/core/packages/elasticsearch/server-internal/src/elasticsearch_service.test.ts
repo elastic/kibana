@@ -72,6 +72,7 @@ beforeEach(() => {
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createInternalSetup(),
+    loggingSystem: loggingSystemMock.create(),
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -103,7 +104,7 @@ beforeEach(() => {
 
   isScriptingEnabledMock.mockResolvedValue(true);
 
-  getClusterInfoMock.mockReturnValue(of({}));
+  getClusterInfoMock.mockReturnValue(of({ cluster_uuid: 'test-cluster-uuid' }));
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
@@ -267,6 +268,16 @@ describe('#setup', () => {
     tick();
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+  });
+
+  it("should inject the cluster's ID in the logging system", async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    await firstValueFrom(setupContract.clusterInfo$);
+
+    expect(setupDeps.loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+      service: { id: 'test-cluster-uuid' },
+    });
   });
 });
 
@@ -521,16 +532,16 @@ describe('#stop', () => {
   });
 });
 
-describe('CPS onRequest handler', () => {
-  it('passes onRequest to ClusterClient in non-serverless mode', async () => {
+describe('CPS onRequestHandlerFactory', () => {
+  it('passes onRequestHandlerFactory to ClusterClient in non-serverless mode', async () => {
     await elasticsearchService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
   });
 
-  it('passes onRequest to ClusterClient in serverless mode when CPS is enabled', async () => {
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is enabled', async () => {
     configService.atPath.mockImplementation((path) => {
       if (path === 'elasticsearch') return mockConfig$;
       if (path === 'cps') return new BehaviorSubject({ cpsEnabled: true });
@@ -549,12 +560,12 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });
 
-  it('passes onRequest to ClusterClient in serverless mode when CPS is disabled', async () => {
+  it('passes onRequestHandlerFactory to ClusterClient in serverless mode when CPS is disabled', async () => {
     configService.atPath.mockImplementation((path) => {
       if (path === 'elasticsearch') return mockConfig$;
       if (path === 'cps') return new BehaviorSubject({ cpsEnabled: false });
@@ -573,7 +584,7 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });
@@ -597,7 +608,7 @@ describe('CPS onRequest handler', () => {
     await serverlessService.setup(setupDeps);
 
     expect(MockClusterClient).toHaveBeenCalledWith(
-      expect.objectContaining({ onRequest: expect.any(Function) })
+      expect.objectContaining({ onRequestHandlerFactory: expect.any(Function) })
     );
     await serverlessService.stop();
   });

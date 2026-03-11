@@ -21,7 +21,7 @@ import type {
   EdgeDataModel,
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { isEntityNode, isLabelNode } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
@@ -207,6 +207,19 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(result(400, logger));
       });
+
+      it('should return 400 when pinnedIds exceeds max size', async () => {
+        const pinnedIds = Array.from({ length: 1025 }, (_, idx) => `id-${idx}`);
+
+        await postGraph(supertest, {
+          query: {
+            pinnedIds,
+            originEventIds: [],
+            start: 'now-1d/d',
+            end: 'now/d',
+          },
+        }).expect(result(400, logger));
+      });
     });
 
     describe('Happy flows', () => {
@@ -218,6 +231,12 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
+
+        try {
+          await spacesService.delete('foo');
+        } catch (e) {
+          // Ignore if the space does not exist yet.
+        }
 
         await spacesService.create({
           id: 'foo',
@@ -261,6 +280,420 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('nodes').length(0);
         expect(response.body).to.have.property('edges').length(0);
         expect(response.body).not.to.have.property('messages');
+      });
+
+      describe('Pinning', () => {
+        const groupAction = 'test.pin.group';
+        const soloAction = 'test.pin.solo';
+        const groupEventIds = [
+          'group-evt-1',
+          'group-evt-2',
+          'group-evt-3',
+          'group-evt-4',
+          'group-evt-5',
+          'group-evt-6',
+        ];
+        const soloEventId = 'solo-evt-1';
+        const pinTestOriginEventIds = [...groupEventIds, soloEventId].map((id) => ({
+          id,
+          isAlert: false,
+        }));
+        const groupedActorIds = [
+          'group-actor-1@example.com',
+          'group-actor-2@example.com',
+          'group-actor-3@example.com',
+          'group-actor-4@example.com',
+          'group-actor-5@example.com',
+          'group-actor-6@example.com',
+        ];
+        const groupedTargetIds = [
+          'group-target-1',
+          'group-target-2',
+          'group-target-3',
+          'group-target-4',
+          'group-target-5',
+        ];
+        const soloActorId = 'solo-actor@example.com';
+        const soloTargetId = 'solo-target';
+        const groupActionQuery = {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [],
+                        filter: [
+                          {
+                            match_phrase: {
+                              'event.action': groupAction,
+                            },
+                          },
+                        ],
+                        should: [],
+                        must_not: [],
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        };
+        const groupAndSoloQuery = {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        must: [],
+                        filter: [
+                          {
+                            match_phrase: {
+                              'event.action': groupAction,
+                            },
+                          },
+                        ],
+                        should: [],
+                        must_not: [],
+                      },
+                    },
+                    {
+                      bool: {
+                        must: [],
+                        filter: [
+                          {
+                            match_phrase: {
+                              'event.action': soloAction,
+                            },
+                          },
+                        ],
+                        should: [],
+                        must_not: [],
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        };
+
+        it('should keep grouped and single entities without pinning', async () => {
+          // Render: actor group of 6 + solo actor; target group of 5 + solo target.
+          const response = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['logs-*'],
+              originEventIds: pinTestOriginEventIds,
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+            },
+          }).expect(result(200));
+
+          const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
+          const actorNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
+          );
+          const targetNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
+          );
+
+          expect(actorNodes).to.have.length(2);
+          expect(targetNodes).to.have.length(2);
+
+          const actorGroupNode = actorNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === groupedActorIds.length
+          )!;
+          const actorGroupIds = (actorGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(actorGroupIds).to.eql([...groupedActorIds].sort());
+
+          const soloActorNode = actorNodes.find((node) => (node.documentsData?.length ?? 0) === 1)!;
+          const soloActorIds = (soloActorNode.documentsData ?? []).map((doc) => doc.id);
+          expect(soloActorIds).to.eql([soloActorId]);
+
+          const targetGroupNode = targetNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === groupedTargetIds.length
+          )!;
+          const targetGroupIds = (targetGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(targetGroupIds).to.eql([...groupedTargetIds].sort());
+
+          const soloTargetNode = targetNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === 1
+          )!;
+          const soloTargetIds = (soloTargetNode.documentsData ?? []).map((doc) => doc.id);
+          expect(soloTargetIds).to.eql([soloTargetId]);
+        });
+
+        it('should treat empty pinnedIds the same as missing pinnedIds', async () => {
+          const baseResponse = await postGraph(supertest, {
+            query: {
+              indexPatterns: ['logs-*'],
+              originEventIds: pinTestOriginEventIds,
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+            },
+          }).expect(result(200));
+
+          const emptyPinnedResponse = await postGraph(supertest, {
+            query: {
+              pinnedIds: [],
+              indexPatterns: ['logs-*'],
+              originEventIds: pinTestOriginEventIds,
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+            },
+          }).expect(result(200));
+
+          const normalizeNodes = (nodes: NodeDataModel[]) =>
+            [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+          const normalizeEdges = (edges: EdgeDataModel[]) =>
+            [...edges].sort((a, b) => a.id.localeCompare(b.id));
+
+          expect(normalizeNodes(emptyPinnedResponse.body.nodes)).to.eql(
+            normalizeNodes(baseResponse.body.nodes)
+          );
+          expect(normalizeEdges(emptyPinnedResponse.body.edges)).to.eql(
+            normalizeEdges(baseResponse.body.edges)
+          );
+          expect(emptyPinnedResponse.body.messages).to.eql(baseResponse.body.messages);
+        });
+
+        it('should extract pinned actors and targets from grouped nodes', async () => {
+          // Render: 3 single actors + 1 actor group; 3 single targets + 1 target group.
+          const response = await postGraph(supertest, {
+            query: {
+              pinnedIds: [
+                'group-actor-1@example.com',
+                'group-actor-2@example.com',
+                'group-target-3',
+              ],
+              indexPatterns: ['logs-*'],
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: groupActionQuery,
+            },
+          }).expect(result(200));
+
+          const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
+          const actorNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
+          );
+          const targetNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
+          );
+
+          expect(actorNodes).to.have.length(4);
+          expect(targetNodes).to.have.length(4);
+
+          const actorGroupNode = actorNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === 3
+          )!;
+          const actorGroupIds = (actorGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(actorGroupIds).to.eql(
+            [
+              'group-actor-4@example.com',
+              'group-actor-5@example.com',
+              'group-actor-6@example.com',
+            ].sort()
+          );
+
+          const targetGroupNode = targetNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === 2
+          )!;
+          const targetGroupIds = (targetGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(targetGroupIds).to.eql(['group-target-4', 'group-target-5']);
+
+          const actorSingleIds = actorNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+          const targetSingleIds = targetNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+
+          expect(actorSingleIds).to.eql(
+            [
+              'group-actor-1@example.com',
+              'group-actor-2@example.com',
+              'group-actor-3@example.com',
+            ].sort()
+          );
+          expect(targetSingleIds).to.eql(
+            ['group-target-1', 'group-target-2', 'group-target-3'].sort()
+          );
+
+          const actorGroupIndex = response.body.nodes.indexOf(actorGroupNode);
+          const targetGroupIndex = response.body.nodes.indexOf(targetGroupNode);
+          const actorSingleIndexes = actorNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => response.body.nodes.indexOf(node));
+          const targetSingleIndexes = targetNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => response.body.nodes.indexOf(node));
+
+          // Verify pinned singles are returned before their remaining group node.
+          expect(Math.max(...actorSingleIndexes)).to.be.lessThan(actorGroupIndex);
+          expect(Math.max(...targetSingleIndexes)).to.be.lessThan(targetGroupIndex);
+        });
+
+        it('should not change already single entities when pinned alongside grouped ones', async () => {
+          // Render: solo actor + pinned actor + grouped actors (5); solo target + pinned target + grouped targets (4).
+          const response = await postGraph(supertest, {
+            query: {
+              pinnedIds: ['solo-actor@example.com', 'group-actor-1@example.com'],
+              indexPatterns: ['logs-*'],
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: groupAndSoloQuery,
+            },
+          }).expect(result(200));
+
+          const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
+          const actorNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
+          );
+          const targetNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
+          );
+
+          expect(actorNodes).to.have.length(3);
+          expect(targetNodes).to.have.length(3);
+
+          const actorGroupNode = actorNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === 5
+          )!;
+          const actorGroupIds = (actorGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(actorGroupIds).to.eql(
+            [
+              'group-actor-2@example.com',
+              'group-actor-3@example.com',
+              'group-actor-4@example.com',
+              'group-actor-5@example.com',
+              'group-actor-6@example.com',
+            ].sort()
+          );
+
+          const targetGroupNode = targetNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === 4
+          )!;
+          const targetGroupIds = (targetGroupNode.documentsData ?? []).map((doc) => doc.id).sort();
+          expect(targetGroupIds).to.eql(
+            ['group-target-2', 'group-target-3', 'group-target-4', 'group-target-5'].sort()
+          );
+
+          const actorSingleIds = actorNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+          const targetSingleIds = targetNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+
+          expect(actorSingleIds).to.eql([soloActorId, 'group-actor-1@example.com'].sort());
+          expect(targetSingleIds).to.eql([soloTargetId, 'group-target-1'].sort());
+        });
+
+        it('should pin an event by document id and pin related entities', async () => {
+          // Render: event is pinned by doc id, so its actor/target become single nodes; remaining entities stay grouped.
+          const response = await postGraph(supertest, {
+            query: {
+              pinnedIds: ['group-doc-1'],
+              indexPatterns: ['logs-*'],
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: groupActionQuery,
+            },
+          }).expect(result(200));
+
+          const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
+          const actorNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
+          );
+          const targetNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
+          );
+
+          expect(actorNodes).to.have.length(2);
+          expect(targetNodes).to.have.length(2);
+
+          const actorSingleIds = actorNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+          const targetSingleIds = targetNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => node.documentsData?.[0]?.id)
+            .sort();
+
+          expect(actorSingleIds).to.eql(['group-actor-1@example.com']);
+          expect(targetSingleIds).to.eql(['group-target-1']);
+
+          const actorGroupNode = actorNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === groupedActorIds.length - 1
+          )!;
+          const targetGroupNode = targetNodes.find(
+            (node) => (node.documentsData?.length ?? 0) === groupedTargetIds.length - 1
+          )!;
+          const actorGroupIndex = response.body.nodes.indexOf(actorGroupNode);
+          const targetGroupIndex = response.body.nodes.indexOf(targetGroupNode);
+          const actorSingleIndexes = actorNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => response.body.nodes.indexOf(node));
+          const targetSingleIndexes = targetNodes
+            .filter((node) => (node.documentsData?.length ?? 0) === 1)
+            .map((node) => response.body.nodes.indexOf(node));
+
+          // Verify pinned singles are returned before their remaining group node.
+          expect(Math.max(...actorSingleIndexes)).to.be.lessThan(actorGroupIndex);
+          expect(Math.max(...targetSingleIndexes)).to.be.lessThan(targetGroupIndex);
+        });
+
+        it('should ignore pinnedIds that do not exist', async () => {
+          // Render: actor group of 6 + target group of 5 (no extra singles).
+          const response = await postGraph(supertest, {
+            query: {
+              pinnedIds: ['non-existent-entity-id'],
+              indexPatterns: ['logs-*'],
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: groupActionQuery,
+            },
+          }).expect(result(200));
+
+          const entityNodes = response.body.nodes.filter(isEntityNode) as EntityNodeDataModel[];
+          const actorNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'user'
+          );
+          const targetNodes = entityNodes.filter(
+            (node) => node.documentsData?.[0]?.entity?.ecsParentField === 'entity'
+          );
+
+          expect(actorNodes).to.have.length(1);
+          expect(targetNodes).to.have.length(1);
+
+          const actorGroupIds = (actorNodes[0].documentsData ?? []).map((doc) => doc.id).sort();
+          const targetGroupIds = (targetNodes[0].documentsData ?? []).map((doc) => doc.id).sort();
+
+          expect(actorGroupIds).to.eql([...groupedActorIds].sort());
+          expect(targetGroupIds).to.eql([...groupedTargetIds].sort());
+        });
       });
 
       it('should return a graph with nodes and edges by actor', async () => {

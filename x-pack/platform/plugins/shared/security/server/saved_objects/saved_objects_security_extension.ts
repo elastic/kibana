@@ -1266,11 +1266,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objectsRequiringPrivilegeCheck,
         authorizationResult,
         currentSpace: namespaceString,
-        addAuditEventFn: (types: string[]) => {
-          const errMessage = `Unable to ${authzAction} for types ${types.join(', ')}`;
+        addAuditEventFn: (errMessage: string, types: string[]) => {
           const err = new Error(errMessage);
-          this.addAuditEvent({
+          this.auditHelper({
             action: auditAction!,
+            objects,
             error: err,
             unauthorizedTypes: types,
             unauthorizedSpaces: [...spacesToAuthorize],

@@ -22,10 +22,6 @@ export type ActionOutput = DefaultItemAction<ContentListItem>;
 
 /**
  * Context passed to action builder functions.
- *
- * Extends {@link BuilderContext} with action-specific fields. Today it is
- * identical to the base; the Delete Orchestration PR will add
- * `onRequestDelete` and related callbacks here.
  */
 export type ActionBuilderContext = BuilderContext;
 

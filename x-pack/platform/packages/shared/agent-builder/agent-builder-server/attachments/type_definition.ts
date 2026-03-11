@@ -67,7 +67,7 @@ export interface AttachmentTypeDefinition<
    */
   getAgentDescription?: () => string;
   /**
-   * Whether attachments of this type are read-only. Defaults to true.
+   * Whether attachments of this type are read-only. Defaults to false.
    */
   isReadonly?: boolean;
 }

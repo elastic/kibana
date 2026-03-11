@@ -35,7 +35,9 @@ export const createSecurityDocumentProfileProviders = (
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              render: (props) => <EnhancedAlertEventOverviewLazy {...props} />,
+              render: (props) => (
+                <EnhancedAlertEventOverviewLazy {...props} providerServices={providerServices} />
+              ),
             });
 
             return prevDocViewer.docViewsRegistry(registry);

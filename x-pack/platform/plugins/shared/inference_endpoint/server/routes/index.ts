@@ -223,15 +223,22 @@ export const getInferenceServicesRoute = (
             ...(config?.headers ? { headers: config.headers } : {}),
           };
 
-          // Currently update API only allows 'api_key' and 'num_allocations'
+          const adaptiveAllocations = config?.providerConfig?.adaptive_allocations;
+          const numAllocations = config?.providerConfig?.num_allocations;
+
+          let allocationSettings = {};
+          if (adaptiveAllocations) {
+            allocationSettings = { adaptive_allocations: adaptiveAllocations };
+          } else if (numAllocations) {
+            allocationSettings = { num_allocations: numAllocations };
+          }
+
           const body = {
             service_settings: {
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
               }),
-              ...(config?.providerConfig?.num_allocations !== undefined && {
-                num_allocations: config.providerConfig.num_allocations,
-              }),
+              ...allocationSettings,
             },
             ...(Object.keys(taskSettingsWithHeaders).length
               ? { task_settings: taskSettingsWithHeaders }

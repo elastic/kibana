@@ -60,7 +60,7 @@ export function handleEuiFullScreenChanges({
     });
   });
 
-  mutationObserver.observe(body, { attributes: true });
+  mutationObserver.observe(body, { attributes: true, attributeFilter: ['class'] });
 
   stop$.pipe(take(1)).subscribe(() => {
     mutationObserver.disconnect();

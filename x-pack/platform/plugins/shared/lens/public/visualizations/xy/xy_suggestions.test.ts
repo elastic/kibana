@@ -704,6 +704,82 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('defaults X axis title to hidden for date histogram when no existing state', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    // X axis title should be hidden by default for date histogram
+    // to reduce redundant information (timestamp per bucket size is shown in the chart)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: false,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
+  test('defaults X axis title to visible for non-date histogram when no existing state', () => {
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [strCol('category'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    // X axis title should be visible for non-date histogram (ordinal scale)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
+  test('preserves existing X axis title setting for date histogram when state exists', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar',
+          splitAccessors: undefined,
+          xAccessor: 'date',
+        },
+      ],
+    };
+
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+    });
+
+    // Should preserve the existing user preference (x: true)
+    expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+      x: true,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
   test('passes annotation layer for date histogram data layer', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',
@@ -947,7 +1023,7 @@ describe('xy_suggestions', () => {
     expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
-  test('suggests bar if changeType is initial and date column is involved', () => {
+  test('suggests line if changeType is initial and date column is involved for formBased datasource', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       valueLabels: 'hide',
@@ -973,6 +1049,43 @@ describe('xy_suggestions', () => {
       },
       state: currentState,
       keptLayerIds: ['first'],
+      datasourceId: 'formBased',
+    });
+
+    expect(suggestions).toHaveLength(1);
+
+    expect(suggestions[0].hide).toEqual(false);
+    expect(suggestions[0].state.preferredSeriesType).toEqual('line');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
+  });
+
+  test('suggests bar_stacked if changeType is initial and date column is involved for textBased datasource', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      fittingFunction: 'None',
+      preferredSeriesType: 'bar_stacked',
+      layers: [
+        {
+          accessors: [],
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          seriesType: 'bar_stacked',
+          splitAccessors: undefined,
+          xAccessor: '',
+        },
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'initial',
+      },
+      state: currentState,
+      keptLayerIds: ['first'],
+      datasourceId: 'textBased',
     });
 
     expect(suggestions).toHaveLength(1);
@@ -1553,11 +1666,11 @@ describe('xy_suggestions', () => {
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
     });
 
-    test('suggests bar_stacked when no query is passed (changeType initial with date)', () => {
+    test('suggests bar_stacked when no query is passed (changeType initial with string)', () => {
       const suggestions = getSuggestions({
         table: {
           isMultiRow: true,
-          columns: [numCol('col0'), dateCol('step')],
+          columns: [numCol('col0'), strCol('category')],
           layerId: 'first',
           changeType: 'initial',
         },

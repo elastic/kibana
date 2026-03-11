@@ -432,7 +432,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
             ],
             "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
             "lineNumber": 89,
@@ -869,7 +869,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"expired\" | \"unavailable\""
         ],
         "path": "src/platform/packages/shared/kbn-licensing-types/src/types.ts",
         "lineNumber": 10,

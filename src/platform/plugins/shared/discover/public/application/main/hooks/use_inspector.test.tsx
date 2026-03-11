@@ -8,32 +8,36 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import { useInspector } from './use_inspector';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { internalStateActions } from '../state_management/redux';
 import React from 'react';
-import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
+    const services = createDiscoverServicesMock();
     let adapters: Adapters | undefined;
-    jest.spyOn(discoverServiceMock.inspector, 'open').mockImplementation((localAdapters) => {
+    jest.spyOn(services.inspector, 'open').mockImplementation((localAdapters) => {
       adapters = localAdapters;
       return { close: jest.fn() } as unknown as OverlayRef;
     });
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const currentTabId = stateContainer.internalState.getState().tabs.unsafeCurrentId;
-    stateContainer.internalState.dispatch(
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+    toolkit.internalState.dispatch(
       internalStateActions.setExpandedDoc({
-        tabId: currentTabId,
+        tabId: toolkit.getCurrentTab().id,
         expandedDoc: {} as unknown as DataTableRecord,
       })
     );
@@ -41,12 +45,12 @@ describe('test useInspector', () => {
       () => {
         return useInspector({
           stateContainer,
-          inspector: discoverServiceMock.inspector,
+          inspector: services.inspector,
         });
       },
       {
         wrapper: ({ children }) => (
-          <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
+          <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
         ),
       }
     );
@@ -54,14 +58,12 @@ describe('test useInspector', () => {
       result.current();
     });
 
-    expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
+    expect(services.inspector.open).toHaveBeenCalled();
     expect(adapters?.requests).toBeInstanceOf(AggregateRequestAdapter);
     expect(adapters?.requests?.getRequests()).toEqual([
       ...requests.getRequests(),
       ...lensRequests.getRequests(),
     ]);
-    const state = stateContainer.internalState.getState();
-    const tab = state.tabs.byId[currentTabId];
-    expect(tab.expandedDoc).toBe(undefined);
+    expect(toolkit.getCurrentTab().expandedDoc).toBe(undefined);
   });
 });

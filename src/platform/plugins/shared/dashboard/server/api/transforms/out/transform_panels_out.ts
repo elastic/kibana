@@ -8,7 +8,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
@@ -18,7 +19,8 @@ import { panelBwc } from './panel_bwc';
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  containerReferences?: SavedObjectReference[]
+  containerReferences?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
 ): DashboardState['panels'] {
   const topLevelPanels: DashboardPanel[] = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -36,12 +38,22 @@ export function transformPanelsOut(
   JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const panelReferences = getPanelReferences(containerReferences ?? [], panel);
     const { sectionId } = panel.gridData;
+    const panelProperties = transformPanelProperties(
+      panel,
+      panelReferences,
+      containerReferences,
+      isDashboardAppRequest
+    );
+
     if (sectionId) {
-      sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences)
-      );
+      if (!sectionsMap[sectionId]) {
+        logger?.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
+        topLevelPanels.push(panelProperties);
+      } else {
+        sectionsMap[sectionId].panels.push(panelProperties);
+      }
     } else {
-      topLevelPanels.push(transformPanelProperties(panel, panelReferences, containerReferences));
+      topLevelPanels.push(panelProperties);
     }
   });
   return [...topLevelPanels, ...Object.values(sectionsMap)];
@@ -49,19 +61,26 @@ export function transformPanelsOut(
 
 const defaultTransform = (
   config: SavedDashboardPanel['embeddableConfig']
-): SavedDashboardPanel['embeddableConfig'] => transformTitlesOut(config);
+): SavedDashboardPanel['embeddableConfig'] => {
+  const transformsFlow = flow(transformTitlesOut, transformTimeRangeOut);
+  return transformsFlow(config);
+};
 
 function transformPanelProperties(
   storedPanel: SavedDashboardPanel,
   storedPanelReferences?: SavedObjectReference[],
-  containerReferences?: SavedObjectReference[]
+  containerReferences?: SavedObjectReference[],
+  isDashboardAppRequest: boolean = false
 ) {
   const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
-  const { embeddableConfig, gridData, panelIndex, type, version } = panel;
+  const { embeddableConfig, gridData, panelIndex, type } = panel;
 
   const { sectionId, i, ...restOfGrid } = gridData;
 
-  const transforms = embeddableService?.getTransforms(type);
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
+  const transformType = type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : type;
+  const transforms = embeddableService?.getTransforms(transformType);
 
   let transformedPanelConfig;
   try {
@@ -80,6 +99,5 @@ function transformPanelProperties(
     config: transformedPanelConfig ? transformedPanelConfig : embeddableConfig,
     uid: panelIndex,
     type,
-    ...(version && { version }),
   };
 }

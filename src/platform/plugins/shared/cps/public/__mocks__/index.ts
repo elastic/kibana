@@ -28,6 +28,7 @@ export const cpsServiceMock = {
       }
       return mockProjectRoutingSubject;
     }),
+    registerAppAccess: jest.fn(),
   },
 };
 

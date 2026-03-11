@@ -454,7 +454,7 @@ export const getDatatableVisualization = ({
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           isMetricDimension: true,
-          requiredMinDimensionCount: 1,
+          requiredMinDimensionCount: isTextBasedLanguage ? 0 : 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
         },

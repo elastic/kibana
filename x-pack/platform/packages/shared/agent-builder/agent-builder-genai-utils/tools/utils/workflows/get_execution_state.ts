@@ -36,7 +36,9 @@ export const getExecutionState = async ({
   spaceId: string;
   workflowApi: WorkflowApi;
 }): Promise<WorkflowExecutionState | null> => {
-  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId);
+  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
+    includeOutput: true,
+  });
   if (!execution) {
     return null;
   }

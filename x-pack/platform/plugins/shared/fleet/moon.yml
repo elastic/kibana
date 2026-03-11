@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/automatic-import-plugin'
+  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
@@ -119,6 +120,10 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod

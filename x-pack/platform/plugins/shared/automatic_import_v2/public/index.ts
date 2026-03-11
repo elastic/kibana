@@ -6,9 +6,9 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { AutomaticImportPlugin } from './plugin';
-export type { AutomaticImportPluginSetup, AutomaticImportPluginStart } from './types';
+import { AutomaticImportV2Plugin } from './plugin';
+export type { AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new AutomaticImportPlugin(initializerContext);
+  return new AutomaticImportV2Plugin(initializerContext);
 }

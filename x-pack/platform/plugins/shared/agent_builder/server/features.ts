@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -14,6 +15,7 @@ import {
   AGENTBUILDER_FEATURE_NAME,
   uiPrivileges,
   apiPrivileges,
+  subFeaturePrivilegeIds,
 } from '../common/features';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
@@ -30,7 +32,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         app: ['kibana', AGENTBUILDER_APP_ID],
         api: [
           apiPrivileges.readAgentBuilder,
-          apiPrivileges.manageAgentBuilder,
+          apiPrivileges.writeAgentBuilder,
           ApiPrivileges.manage('llm_product_doc'),
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
@@ -38,12 +40,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           all: [],
           read: [],
         },
-        ui: [
-          uiPrivileges.show,
-          uiPrivileges.showManagement,
-          uiPrivileges.manageTools,
-          uiPrivileges.manageAgents,
-        ],
+        ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
         app: ['kibana', AGENTBUILDER_APP_ID],
@@ -56,5 +53,41 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [uiPrivileges.show],
       },
     },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.agentBuilder.featureRegistry.subFeatures.management', {
+          defaultMessage: 'Management',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: subFeaturePrivilegeIds.manageAgents,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.manageAgents.privilege',
+                  { defaultMessage: 'Create and edit agents' }
+                ),
+                includeIn: 'all',
+                api: [apiPrivileges.manageAgents],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.manageAgents],
+              },
+              {
+                id: subFeaturePrivilegeIds.manageTools,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.manageTools.privilege',
+                  { defaultMessage: 'Create and edit custom tools' }
+                ),
+                includeIn: 'all',
+                api: [apiPrivileges.manageTools],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.manageTools],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   });
 };

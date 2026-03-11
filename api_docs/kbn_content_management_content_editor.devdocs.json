@@ -186,7 +186,7 @@
         "signature": [
           "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
           "Item",
-          "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
+          "; entityName: string; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; customValidators?: ",
           "CustomValidators",
           " | undefined; appendRows?: React.ReactNode; }"
         ],

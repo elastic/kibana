@@ -12,6 +12,7 @@ import React from 'react';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import { addBuildingBlockStyle, getPageRowIndex } from '@kbn/securitysolution-data-table';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type {
   BrowserFields,
   TimelineItem,
@@ -49,6 +50,7 @@ export interface TransformColumnsProps {
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  rawEvents: Array<EsHitRecord>;
 }
 
 export const transformControlColumns = ({
@@ -71,6 +73,7 @@ export const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
+  rawEvents,
 }: TransformColumnsProps): EuiDataGridControlColumn[] => {
   return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
@@ -116,6 +119,14 @@ export const transformControlColumns = ({
           setCellProps({ style: { display: 'none' } });
         }
 
+        // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
+        // This way we can use the same flyout content code between Security Solution and Discover.
+        const esHitRecord: EsHitRecord = {
+          _id: rawEvents[pageRowIndex]?._id,
+          _index: rawEvents[pageRowIndex]?._index,
+          _source: rawEvents[pageRowIndex]?.fields,
+        };
+
         return (
           <RowAction
             columnId={columnId ?? ''}
@@ -123,6 +134,7 @@ export const transformControlColumns = ({
             controlColumn={controlColumns[i]}
             data={data[pageRowIndex]}
             disabled={false}
+            esHitRecord={esHitRecord}
             index={i}
             isDetails={isDetails}
             isExpanded={isExpanded}

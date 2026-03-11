@@ -30,7 +30,7 @@ import {
   NON_ENRICHED_ENTITY_TYPE_PLURAL,
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
-import { transformEntityTypeToIconAndShape } from './utils';
+import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
 
 interface ConnectorEdges {
   source: string;
@@ -449,16 +449,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
     }
   }
 
-  // Sort connector nodes: relationship before label, then alphabetical by label
-  connectorNodes.sort((a, b) => {
-    // Primary sort: relationship before label
-    if (a.shape === 'relationship' && b.shape === 'label') return -1;
-    if (a.shape === 'label' && b.shape === 'relationship') return 1;
-    // Secondary sort: alphabetical by label
-    const labelA = ('label' in a && a.label) || '';
-    const labelB = ('label' in b && b.label) || '';
-    return labelA.localeCompare(labelB);
-  });
+  connectorNodes.sort(compareConnectorNodes);
 
   return [...groupNodes, ...connectorNodes, ...otherNodes];
 };

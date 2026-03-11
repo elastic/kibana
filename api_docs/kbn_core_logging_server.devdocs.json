@@ -215,7 +215,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
+              "\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
             ],
             "path": "src/core/packages/logging/server/src/logger.ts",
             "lineNumber": 20,

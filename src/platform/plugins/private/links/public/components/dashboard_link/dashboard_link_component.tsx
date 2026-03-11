@@ -190,13 +190,16 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
 
     // vertical layout - current dashboard link styles
-    '.verticalLayoutWrapper &.linkCurrent::before': {
-      // add left border for current dashboard
-      content: "''",
-      position: 'absolute',
-      height: '75%',
-      width: `calc(.5 * ${euiTheme.size.xs})`,
-      backgroundColor: euiTheme.colors.primary,
+    '.verticalLayoutWrapper &.linkCurrent': {
+      paddingLeft: euiTheme.size.s,
+      '&::before': {
+        // add left border for current dashboard
+        content: "''",
+        position: 'absolute',
+        height: '75%',
+        width: `calc(.5 * ${euiTheme.size.xs})`,
+        backgroundColor: euiTheme.colors.primary,
+      },
     },
 
     // horizontal layout - current dashboard link styles
