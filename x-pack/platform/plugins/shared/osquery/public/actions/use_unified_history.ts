@@ -69,7 +69,7 @@ export const useUnifiedHistory = ({
             ? { sourceFilters: sourceFilters.join(',') }
             : {}),
           ...(userIds && userIds.length > 0 ? { userIds: userIds.join(',') } : {}),
-          ...(tags && tags.length > 0 ? { tags: tags.join(',') } : {}),
+          ...(tags && tags.length > 0 ? { tags: JSON.stringify(tags) } : {}),
           ...(startDate ? { startDate } : {}),
           ...(endDate ? { endDate } : {}),
         },

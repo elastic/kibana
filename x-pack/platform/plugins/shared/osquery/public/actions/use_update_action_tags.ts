@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryKey } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS } from '../../common/constants';
@@ -17,12 +18,22 @@ interface UpdateActionTagsParams {
   tags: string[];
 }
 
+interface UpdateTagsMutationContext {
+  previous?: { data: LiveQueryDetailsItem };
+  queryKey: QueryKey;
+}
+
 export const useUpdateActionTags = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
   const queryClient = useQueryClient();
 
-  return useMutation<{ data: { tags: string[] } }, Error, UpdateActionTagsParams>(
+  return useMutation<
+    { data: { tags: string[] } },
+    Error,
+    UpdateActionTagsParams,
+    UpdateTagsMutationContext
+  >(
     ({ actionId, tags }) =>
       http.put(`/api/osquery/history/${actionId}/tags`, {
         version: API_VERSIONS.public.v1,
@@ -30,7 +41,10 @@ export const useUpdateActionTags = () => {
       }),
     {
       onMutate: async (variables) => {
-        const queryKey = ['liveQueries', { actionId: variables.actionId }];
+        const queryKey: QueryKey = [
+          'liveQueries',
+          { actionId: variables.actionId, kuery: undefined, queryIds: undefined },
+        ];
 
         await queryClient.cancelQueries(queryKey);
 
@@ -49,12 +63,12 @@ export const useUpdateActionTags = () => {
         setErrorToast();
         queryClient.invalidateQueries(['liveQueries', { actionId: variables.actionId }]);
         queryClient.invalidateQueries(['actions']);
+        queryClient.invalidateQueries(['unifiedHistory']);
         queryClient.invalidateQueries(['historyTags']);
       },
       onError: (error, _variables, context) => {
-        const ctx = context as { previous?: { data: LiveQueryDetailsItem }; queryKey: string[] };
-        if (ctx?.previous && ctx?.queryKey) {
-          queryClient.setQueryData(ctx.queryKey, ctx.previous);
+        if (context?.previous && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previous);
         }
 
         setErrorToast(error, {

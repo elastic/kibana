@@ -159,6 +159,129 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(400);
       });
+
+      it('deduplicates tags before persisting', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: ['dup', 'dup', 'unique'] });
+
+        expect(response.status).to.be(200);
+        expect(response.body.data.tags).to.eql(['dup', 'unique']);
+      });
+
+      it('accepts exactly 20 tags', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: maxTags });
+
+        expect(response.status).to.be(200);
+        expect(response.body.data.tags).to.eql(maxTags);
+      });
+
+      it('accepts a tag at exactly 256 characters', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const maxLengthTag = 'a'.repeat(256);
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: [maxLengthTag] });
+
+        expect(response.status).to.be(200);
+        expect(response.body.data.tags).to.eql([maxLengthTag]);
+      });
+
+      it('updated tags are visible via details API', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: ['round-trip'] })
+          .expect(200);
+
+        const detailsResponse = await supertest
+          .get(`/api/osquery/live_queries/${actionId}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion);
+
+        expect(detailsResponse.status).to.be(200);
+        expect(detailsResponse.body.data.tags).to.eql(['round-trip']);
+      });
+
+      it('rejects request with missing tags field', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({});
+
+        expect(response.status).to.be(400);
+      });
+
+      it('rejects request with non-array tags', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: 'not-an-array' });
+
+        expect(response.status).to.be(400);
+      });
+
+      it('rejects request with non-string tag values', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        const response = await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: [123, true] });
+
+        expect(response.status).to.be(400);
+      });
+
+      it('updated tags appear in the tags aggregation', async () => {
+        const actionId = await createActionDoc();
+        actionIds.push(actionId);
+
+        await supertest
+          .put(`/api/osquery/history/${actionId}/tags`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryPublicApiVersion)
+          .send({ tags: ['agg-test-unique'] })
+          .expect(200);
+
+        const tagsResponse = await supertest
+          .get('/internal/osquery/history/tags')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', osqueryInternalApiVersion);
+
+        expect(tagsResponse.status).to.be(200);
+        expect(tagsResponse.body.data).to.contain('agg-test-unique');
+      });
     });
 
     describe('GET /internal/osquery/history/tags', () => {
@@ -179,7 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.data).to.contain('gamma');
       });
 
-      it('returns empty array when no tags exist', async () => {
+      it('returns a valid array response', async () => {
         const response = await supertest
           .get('/internal/osquery/history/tags')
           .set('kbn-xsrf', 'true')
@@ -204,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.data.tags).to.eql(['detail-tag']);
       });
 
-      it('returns empty tags for actions without tags', async () => {
+      it('returns undefined tags for actions without tags', async () => {
         const actionId = await createActionDoc();
         actionIds.push(actionId);
 
@@ -214,6 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('elastic-api-version', osqueryPublicApiVersion);
 
         expect(response.status).to.be(200);
+        expect(response.body.data.tags).to.be(undefined);
       });
     });
   });

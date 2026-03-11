@@ -160,19 +160,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           ? replaceParamsQuery(values.query, alertAttachmentContext).result
           : values.query;
 
-      const serializedData = pickBy(
-        {
-          agentSelection: values.agentSelection,
-          saved_query_id: values.savedQueryId,
-          query,
-          alert_ids: values.alertIds,
-          pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
-          ecs_mapping: values.ecs_mapping,
-          ...(queryType === 'query' ? { timeout: values.timeout } : {}),
-          tags: values.tags,
-        },
-        (value) => !isEmpty(value) || isNumber(value)
-      ) as unknown as LiveQueryFormFields;
+      const serializedData = {
+        ...pickBy(
+          {
+            agentSelection: values.agentSelection,
+            saved_query_id: values.savedQueryId,
+            query,
+            alert_ids: values.alertIds,
+            pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
+            ecs_mapping: values.ecs_mapping,
+            ...(queryType === 'query' ? { timeout: values.timeout } : {}),
+          },
+          (value) => !isEmpty(value) || isNumber(value)
+        ),
+        tags: values.tags,
+      } as unknown as LiveQueryFormFields;
       await mutateAsync(serializedData);
     },
     [alertAttachmentContext, mutateAsync, queryType]

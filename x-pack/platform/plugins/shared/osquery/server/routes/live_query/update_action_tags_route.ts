@@ -11,12 +11,14 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  ACTIONS_INDEX,
+  MAX_TAGS_PER_ACTION,
+  MAX_TAG_LENGTH,
+} from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-
-const MAX_TAGS = 20;
-const MAX_TAG_LENGTH = 256;
 
 const updateActionTagsRequestParamsSchema = t.type({
   id: t.string,
@@ -63,11 +65,11 @@ export const updateActionTagsRoute = (
       },
       async (_, request, response) => {
         try {
-          const { tags } = request.body;
+          const tags = [...new Set(request.body.tags)];
 
-          if (tags.length > MAX_TAGS) {
+          if (tags.length > MAX_TAGS_PER_ACTION) {
             return response.badRequest({
-              body: { message: `Cannot have more than ${MAX_TAGS} tags` },
+              body: { message: `Cannot have more than ${MAX_TAGS_PER_ACTION} tags` },
             });
           }
 

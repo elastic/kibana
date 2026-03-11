@@ -9,10 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MAX_TAGS_PER_ACTION, MAX_TAG_LENGTH } from '../../../common/constants';
 import { useHistoryTags } from '../use_history_tags';
-
-const MAX_TAGS = 20;
-const MAX_TAG_LENGTH = 256;
 
 const TAGS_LABEL = i18n.translate('xpack.osquery.tagsEditor.label', {
   defaultMessage: 'Tags',
@@ -63,7 +61,7 @@ const TagsEditorComponent: React.FC<TagsEditorProps> = ({
   const handleCreateOption = useCallback(
     (value: string) => {
       const trimmed = value.trim();
-      if (!trimmed || trimmed.length > MAX_TAG_LENGTH || tags.length >= MAX_TAGS) {
+      if (!trimmed || trimmed.length > MAX_TAG_LENGTH || tags.length >= MAX_TAGS_PER_ACTION) {
         return false;
       }
 

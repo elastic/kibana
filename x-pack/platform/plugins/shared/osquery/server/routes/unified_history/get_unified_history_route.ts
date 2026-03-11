@@ -101,7 +101,14 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           const decoded = decodeCursor(nextPage);
           const userIds = userIdsRaw ? userIdsRaw.split(',').filter(Boolean) : undefined;
-          const tags = tagsRaw ? tagsRaw.split(',').filter(Boolean) : undefined;
+          let tags: string[] | undefined;
+          if (tagsRaw) {
+            try {
+              tags = JSON.parse(tagsRaw);
+            } catch {
+              tags = tagsRaw.split(',').filter(Boolean);
+            }
+          }
 
           const activeFilters: Set<SourceFilter> | undefined = sourceFiltersRaw
             ? new Set(sourceFiltersRaw.split(',').filter(Boolean) as SourceFilter[])
@@ -111,6 +118,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           const hasTagsFilter = tags && tags.length > 0;
           const includeLive =
             !activeFilters || activeFilters.has('live') || activeFilters.has('rule');
+          // Scheduled queries are excluded when user or tags filters are active because
+          // scheduled execution docs don't carry user_id or tags fields.
           const includeScheduled =
             (!activeFilters || activeFilters.has('scheduled')) && !hasUserFilter && !hasTagsFilter;
 
