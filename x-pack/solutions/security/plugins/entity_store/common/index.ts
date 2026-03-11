@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+/**
+ * Public API for the entity_store plugin.
+ * Exports only constants and types needed on every load (including browser).
+ * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
+ */
+
 import { z } from '@kbn/zod/v4';
-import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
@@ -84,3 +89,18 @@ export const getErrorMessage = (error: unknown): string => {
   }
   return String(error);
 };
+
+// Entity types (slim definitions; for EUID translation use common/euid_helpers)
+export type EntityType = z.infer<typeof EntityType>;
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+
+export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
+
+export interface IdentitySourceFields {
+  /** Fields that participate in identity (EUID composition). */
+  requiresOneOf: string[];
+  /** All field names used in EUID composition, deduplicated. */
+  identitySourceFields: string[];
+}
+
+export type { Entity } from './domain/definitions/entity.gen';
