@@ -163,9 +163,8 @@ export const buildIntegrationPackage = async (
     addDataStreamToZip(zip, packageName, dataStream.data_stream_id, dataStreamManifest);
 
     if (dataStream.result?.ingest_pipeline) {
-      const { processors, on_failure, name: pipelineName } = dataStream.result.ingest_pipeline;
+      const { processors, on_failure } = dataStream.result.ingest_pipeline;
       addIngestPipelineToZip(zip, packageName, dataStream.data_stream_id, {
-        name: pipelineName ?? `${dataStream.data_stream_id}-default`,
         processors: processors as Pipeline['processors'],
         on_failure: on_failure as Pipeline['on_failure'],
       });

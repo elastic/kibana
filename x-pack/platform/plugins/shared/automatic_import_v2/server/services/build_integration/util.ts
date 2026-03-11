@@ -38,7 +38,7 @@ export const addIngestPipelineToZip = (
   zip: AdmZip,
   rootDir: string,
   dataStreamName: string,
-  pipeline: Pipeline
+  pipeline: Omit<Pipeline, 'name'>
 ): void => {
   const pipelinePath = path.join(
     rootDir,
