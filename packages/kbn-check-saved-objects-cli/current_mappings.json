@@ -345,6 +345,12 @@
           }
         }
       },
+      "enabled": {
+        "type": "boolean"
+      },
+      "snoozedUntil": {
+        "type": "date"
+      },
       "auth": {
         "type": "object",
         "properties": {
@@ -358,6 +364,9 @@
             "type": "keyword"
           }
         }
+      },
+      "rule_labels": {
+        "type": "keyword"
       }
     }
   },
@@ -411,10 +420,6 @@
         }
       },
       "no_data": {
-        "enabled": false,
-        "type": "object"
-      },
-      "notification_policies": {
         "enabled": false,
         "type": "object"
       },

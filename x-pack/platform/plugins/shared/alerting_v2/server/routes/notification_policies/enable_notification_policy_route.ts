@@ -6,52 +6,44 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import type { TypeOf } from '@kbn/config-schema';
+import { Logger } from '@kbn/core-di';
+import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import type { Logger as KibanaLogger } from '@kbn/logging';
+import { z } from '@kbn/zod';
 import { inject, injectable } from 'inversify';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-const sortFieldSchema = schema.oneOf([
-  schema.literal('name'),
-  schema.literal('createdAt'),
-  schema.literal('createdBy'),
-]);
-
-const listNotificationPoliciesQuerySchema = schema.object({
-  page: schema.maybe(schema.number({ min: 1 })),
-  perPage: schema.maybe(schema.number({ min: 1, max: 100 })),
-  search: schema.maybe(schema.string()),
-  destinationType: schema.maybe(schema.string()),
-  createdBy: schema.maybe(schema.string()),
-  sortField: schema.maybe(sortFieldSchema),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+const enableNotificationPolicyParamsSchema = z.object({
+  id: z.string(),
 });
 
 @injectable()
-export class ListNotificationPoliciesRoute {
-  static method = 'get' as const;
-  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}`;
+export class EnableNotificationPolicyRoute implements RouteHandler {
+  static method = 'post' as const;
+  static path = `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/{id}/_enable`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.notificationPolicies.write],
     },
   };
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      query: listNotificationPoliciesQuerySchema,
+      params: buildRouteValidationWithZod(enableNotificationPolicyParamsSchema),
     },
   } as const;
 
   constructor(
+    @inject(Logger) private readonly logger: KibanaLogger,
     @inject(Request)
     private readonly request: KibanaRequest<
+      z.infer<typeof enableNotificationPolicyParamsSchema>,
       unknown,
-      TypeOf<typeof listNotificationPoliciesQuerySchema>,
       unknown
     >,
     @inject(Response) private readonly response: KibanaResponseFactory,
@@ -61,20 +53,14 @@ export class ListNotificationPoliciesRoute {
 
   async handle() {
     try {
-      const { page, perPage, search, destinationType, createdBy, sortField, sortOrder } =
-        this.request.query ?? {};
-      const result = await this.notificationPolicyClient.findNotificationPolicies({
-        page,
-        perPage,
-        search,
-        destinationType,
-        createdBy,
-        sortField,
-        sortOrder,
+      const result = await this.notificationPolicyClient.enableNotificationPolicy({
+        id: this.request.params.id,
       });
+
       return this.response.ok({ body: result });
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
+      this.logger.debug(`enable notification policy route error: ${boom.message}`);
       return this.response.customError({
         statusCode: boom.output.statusCode,
         body: boom.output.payload,

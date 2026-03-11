@@ -101,7 +101,10 @@
     "destinations",
     "destinations.id",
     "destinations.type",
+    "enabled",
     "name",
+    "rule_labels",
+    "snoozedUntil",
     "updatedAt",
     "updatedBy"
   ],
@@ -121,7 +124,6 @@
     "metadata.name",
     "metadata.owner",
     "no_data",
-    "notification_policies",
     "recovery_policy",
     "schedule",
     "schedule.every",

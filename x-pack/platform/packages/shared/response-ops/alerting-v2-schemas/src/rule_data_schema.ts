@@ -159,14 +159,6 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
-/** Notification policies (optional) */
-
-const notificationPolicyRefSchema = z
-  .object({
-    ref: z.string().min(1).describe('Reference to notification policy.'),
-  })
-  .strict();
-
 /** Create rule API schema */
 
 /**
@@ -189,7 +181,6 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
-    notification_policies: z.array(notificationPolicyRefSchema).optional(),
   })
   .strip();
 
@@ -249,7 +240,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
-    notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
   })
   .strip();
 

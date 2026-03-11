@@ -12,13 +12,13 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { nodeBuilder } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
+import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
 export type NotificationPolicySavedObjectBulkGetItem =
@@ -31,6 +31,10 @@ export type NotificationPolicySavedObjectBulkGetItem =
       id: string;
       error: SavedObjectError;
     };
+
+export type NotificationPolicySavedObjectBulkUpdateItem =
+  | { id: string; version?: string }
+  | { id: string; error: SavedObjectError };
 
 export interface NotificationPolicySavedObjectServiceContract {
   create(params: {
@@ -47,12 +51,25 @@ export interface NotificationPolicySavedObjectServiceContract {
   ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }>;
-  bulkGetDecryptedByIds(ids: string[]): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
+  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
+  bulkUpdate(params: {
+    objects: Array<{
+      id: string;
+      attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    }>;
+  }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
   delete(params: { id: string }): Promise<void>;
-  find(params: { page: number; perPage: number }): Promise<{
+  find(params: {
+    page: number;
+    perPage: number;
+    search?: string;
+    filter?: KueryNode;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{
     saved_objects: Array<{
       id: string;
       attributes: NotificationPolicySavedObjectAttributes;
@@ -124,17 +141,45 @@ export class NotificationPolicySavedObjectService
     version,
   }: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }> {
     const result = await this.client.update<NotificationPolicySavedObjectAttributes>(
       NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       id,
       attrs,
-      { version }
+      version ? { version } : undefined
     );
 
     return { id: result.id, version: result.version };
+  }
+
+  public async bulkUpdate({
+    objects,
+  }: {
+    objects: Array<{
+      id: string;
+      attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    }>;
+  }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]> {
+    if (objects.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkUpdate<NotificationPolicySavedObjectAttributes>(
+      objects.map(({ id, attrs }) => ({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        id,
+        attributes: attrs,
+      }))
+    );
+
+    return result.saved_objects.map((savedObject) => {
+      if ('error' in savedObject && savedObject.error) {
+        return { id: savedObject.id, error: savedObject.error };
+      }
+      return { id: savedObject.id, version: savedObject.version };
+    });
   }
 
   public async bulkGetByIds(
@@ -164,25 +209,10 @@ export class NotificationPolicySavedObjectService
     });
   }
 
-  public async bulkGetDecryptedByIds(
-    ids: string[]
-  ): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
-    if (ids.length === 0) {
-      return [];
-    }
-
-    const filter = nodeBuilder.or(
-      ids.map((id) =>
-        nodeBuilder.is(
-          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.id`,
-          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}:${id}`
-        )
-      )
-    );
-
+  public async findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, filter }
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE }
       );
 
     const results: NotificationPolicySavedObjectBulkGetItem[] = [];
@@ -206,13 +236,30 @@ export class NotificationPolicySavedObjectService
     await this.client.delete(NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id);
   }
 
-  public async find({ page, perPage }: { page: number; perPage: number }) {
+  public async find({
+    page,
+    perPage,
+    search,
+    filter,
+    sortField = 'updatedAt',
+    sortOrder = 'desc',
+  }: {
+    page: number;
+    perPage: number;
+    search?: string;
+    filter?: KueryNode;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
     return this.client.find<NotificationPolicySavedObjectAttributes>({
       type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      sortField: 'updatedAt',
-      sortOrder: 'desc',
+      search,
+      searchFields: search ? ['name', 'description', 'destinations.id'] : undefined,
+      filter,
+      sortField,
+      sortOrder,
     });
   }
 }
