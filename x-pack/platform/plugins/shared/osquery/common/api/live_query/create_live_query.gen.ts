@@ -63,6 +63,10 @@ export const CreateLiveQueryRequestBody = z.object({
    * Custom metadata object associated with the live query.
    */
   metadata: z.object({}).nullable().optional(),
+  /**
+   * A list of tags to associate with the live query.
+   */
+  tags: z.array(z.string().max(256)).max(20).optional(),
 });
 
 export type CreateLiveQueryResponse = z.infer<typeof CreateLiveQueryResponse>;
