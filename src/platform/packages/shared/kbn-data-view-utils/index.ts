@@ -11,4 +11,3 @@ export * from './src/constants';
 export { convertDatatableColumnToDataViewFieldSpec } from './src/utils/convert_to_data_view_field_spec';
 export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
 export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';
-export { createEnrichedEsqlDataViewSpec } from './src/utils/clone_data_view_and_use_esql_columns_as_fields';

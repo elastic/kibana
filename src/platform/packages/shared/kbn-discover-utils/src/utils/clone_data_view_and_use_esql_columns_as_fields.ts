@@ -10,7 +10,8 @@
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { createEnrichedEsqlDataViewSpec } from '@kbn/data-view-utils';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 
 export interface CloneDataViewAndUseEsqlColumnsAsFieldsDeps {
   fieldFormats: FieldFormatsStartCommon;
@@ -56,9 +57,19 @@ export function cloneDataViewAndUseEsqlColumnsAsFields(
   esqlQueryColumns: DatatableColumn[],
   deps: CloneDataViewAndUseEsqlColumnsAsFieldsDeps
 ): DataView {
-  // Create enriched spec using package-level utility
+  // Convert ES|QL columns to FieldSpec objects
+  const fields: Record<string, FieldSpec> = {};
+  for (const column of esqlQueryColumns) {
+    const fieldSpec = convertDatatableColumnToDataViewFieldSpec(column);
+    fields[column.name] = fieldSpec;
+  }
+
+  // Clone the base DataView spec and replace fields with ES|QL columns
   const baseSpec = baseDataView.toSpec(false);
-  const enrichedSpec = createEnrichedEsqlDataViewSpec(baseSpec, esqlQueryColumns);
+  const enrichedSpec = {
+    ...baseSpec,
+    fields,
+  };
 
   // Create new DataView with enriched spec
   return new DataView({
