@@ -143,26 +143,26 @@ export const AmazonS3: ConnectorSpec = {
       handler: async (ctx, input: ActionDownloadFileInput) => {
         const metadata = await getAmazonS3BucketObjectMetadata(
           ctx,
-          typedInput.bucket,
-          typedInput.key
+          input.bucket,
+          input.key
         );
         if (!metadata) {
           throw new Error('Failed to retrieve file metadata');
         }
 
         const contentType = metadata.contentType || 'application/octet-stream';
-        const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
+        const maxSize = input.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
         if (metadata.contentLength && metadata.contentLength > maxSize) {
           const urlString = await generateAmazonS3BucketObjectPresignedUrl(
             ctx,
-            typedInput.bucket,
-            typedInput.key,
+            input.bucket,
+            input.key,
             300
           );
 
           return {
-            bucket: typedInput.bucket,
-            key: typedInput.key,
+            bucket: input.bucket,
+            key: input.key,
             contentType,
             contentLength: metadata.contentLength,
             lastModified: metadata.lastModified,
@@ -172,7 +172,7 @@ export const AmazonS3: ConnectorSpec = {
           };
         }
 
-        return await downloadAmazonS3BucketObject(ctx, typedInput.bucket, typedInput.key);
+        return await downloadAmazonS3BucketObject(ctx, input.bucket, input.key);
       },
     },
   },
