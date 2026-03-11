@@ -11,10 +11,13 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { labels } from '../../utils/i18n';
+import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { AgentBuilderPluginsTable } from './plugins_table';
+import { InstallPluginButton } from './install_plugin_button';
 
 export const AgentBuilderPlugins = () => {
   const { euiTheme } = useEuiTheme();
+  const { manageTools } = useUiPrivileges();
 
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderPluginsPage">
@@ -22,12 +25,13 @@ export const AgentBuilderPlugins = () => {
         pageTitle={labels.plugins.title}
         description={i18n.translate('xpack.agentBuilder.plugins.pluginsDescription', {
           defaultMessage:
-            'Plugins are installable packages that bundle agent capabilities such as skills, following the Claude agent plugin specification. Plugins are installed via the API.',
+            'Plugins are installable packages that bundle agent capabilities such as skills, following the Claude agent plugin specification.',
         })}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
           border-block-end: none;
         `}
+        rightSideItems={[manageTools && <InstallPluginButton key="install-plugin-button" />]}
       />
       <KibanaPageTemplate.Section>
         <AgentBuilderPluginsTable />

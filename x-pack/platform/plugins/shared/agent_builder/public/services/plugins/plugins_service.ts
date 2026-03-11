@@ -10,8 +10,9 @@ import type {
   ListPluginsResponse,
   GetPluginResponse,
   DeletePluginResponse,
+  InstallPluginResponse,
 } from '../../../common/http_api/plugins';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 
 export class PluginsService {
   private readonly http: HttpSetup;
@@ -31,5 +32,23 @@ export class PluginsService {
 
   async delete({ pluginId }: { pluginId: string }) {
     return await this.http.delete<DeletePluginResponse>(`${publicApiPath}/plugins/${pluginId}`, {});
+  }
+
+  async installFromUrl({ url, pluginName }: { url: string; pluginName?: string }) {
+    return await this.http.post<InstallPluginResponse>(`${publicApiPath}/plugins/install`, {
+      body: JSON.stringify({ url, plugin_name: pluginName }),
+    });
+  }
+
+  async upload({ file, pluginName }: { file: File; pluginName?: string }) {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (pluginName) {
+      formData.append('plugin_name', pluginName);
+    }
+    return await this.http.post<InstallPluginResponse>(`${internalApiPath}/plugins/upload`, {
+      body: formData,
+      headers: { 'Content-Type': undefined },
+    });
   }
 }

@@ -704,6 +704,55 @@ export const labels = {
     deletePluginButtonLabel: i18n.translate('xpack.agentBuilder.plugins.deletePluginButtonLabel', {
       defaultMessage: 'Delete',
     }),
+    installPluginButton: i18n.translate('xpack.agentBuilder.plugins.installPluginButton', {
+      defaultMessage: 'Install plugin',
+    }),
+    installFromUrlMenuItem: i18n.translate('xpack.agentBuilder.plugins.installFromUrlMenuItem', {
+      defaultMessage: 'Install from URL',
+    }),
+    uploadMenuItem: i18n.translate('xpack.agentBuilder.plugins.uploadMenuItem', {
+      defaultMessage: 'Upload ZIP',
+    }),
+    installFromUrlModalTitle: i18n.translate(
+      'xpack.agentBuilder.plugins.installFromUrlModalTitle',
+      {
+        defaultMessage: 'Install plugin from URL',
+      }
+    ),
+    uploadPluginModalTitle: i18n.translate('xpack.agentBuilder.plugins.uploadPluginModalTitle', {
+      defaultMessage: 'Upload plugin',
+    }),
+    urlFieldLabel: i18n.translate('xpack.agentBuilder.plugins.urlFieldLabel', {
+      defaultMessage: 'Plugin URL',
+    }),
+    urlFieldPlaceholder: i18n.translate('xpack.agentBuilder.plugins.urlFieldPlaceholder', {
+      defaultMessage: 'https://github.com/...',
+    }),
+    fileFieldLabel: i18n.translate('xpack.agentBuilder.plugins.fileFieldLabel', {
+      defaultMessage: 'Plugin ZIP file',
+    }),
+    installButton: i18n.translate('xpack.agentBuilder.plugins.installButton', {
+      defaultMessage: 'Install',
+    }),
+    cancelButton: i18n.translate('xpack.agentBuilder.plugins.cancelButton', {
+      defaultMessage: 'Cancel',
+    }),
+    installPluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.installPluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" installed',
+        values: { pluginName },
+      }),
+    installPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.installPluginErrorToast', {
+      defaultMessage: 'Failed to install plugin',
+    }),
+    uploadPluginSuccessToast: (pluginName: string) =>
+      i18n.translate('xpack.agentBuilder.plugins.uploadPluginSuccessToast', {
+        defaultMessage: 'Plugin "{pluginName}" installed',
+        values: { pluginName },
+      }),
+    uploadPluginErrorToast: i18n.translate('xpack.agentBuilder.plugins.uploadPluginErrorToast', {
+      defaultMessage: 'Failed to upload plugin',
+    }),
   },
   agents: {
     title: i18n.translate('xpack.agentBuilder.agents.list.title', { defaultMessage: 'Agents' }),
