@@ -62,7 +62,7 @@ export interface AgentBuilderPluginStartContract {
   events: {
     chat$: import('rxjs').Observable<AgentBuilderChatEvent>;
   };
-  addAttachment: (attachment: { type: string; data: Record<string, unknown> }) => void;
+  addAttachment: (attachment: { id?: string; type: string; data: Record<string, unknown> }) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

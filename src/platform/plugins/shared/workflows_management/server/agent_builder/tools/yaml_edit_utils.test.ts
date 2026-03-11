@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parseDocument } from 'yaml';
+
 import {
   deleteStep,
   insertStep,
@@ -443,6 +445,79 @@ steps:
       const result = deleteStep(SAMPLE_WORKFLOW, 'ghost');
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');
+    });
+  });
+
+  describe('modifyWorkflowProperty with complex array values', () => {
+    it('produces valid YAML when replacing triggers with a complex rrule schedule', () => {
+      const yamlWithTrigger = `version: "1"
+name: My Workflow
+triggers:
+  - type: scheduled
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        byhour:
+          - 9
+        byminute:
+          - 0
+        tzid: UTC
+
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+
+      const result = modifyWorkflowProperty(yamlWithTrigger, 'triggers', [
+        {
+          type: 'scheduled',
+          with: {
+            rrule: {
+              freq: 'WEEKLY',
+              interval: 1,
+              byday: ['MO', 'TH'],
+              byhour: [9],
+              byminute: [0],
+              tzid: 'UTC',
+            },
+          },
+        },
+      ]);
+
+      expect(result.success).toBe(true);
+
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+
+      const parsed = doc.toJSON();
+      expect(parsed.triggers).toHaveLength(1);
+      expect(parsed.triggers[0].type).toBe('scheduled');
+      expect(parsed.triggers[0].with.rrule.freq).toBe('WEEKLY');
+      expect(parsed.triggers[0].with.rrule.byday).toEqual(['MO', 'TH']);
+
+      // Steps must be untouched
+      expect(result.yaml).toContain('  - name: step1');
+      expect(result.yaml).toContain('      message: hello');
+    });
+
+    it('preserves indentation when modifying tags array', () => {
+      const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, 'tags', [
+        'production',
+        'alerts',
+        'weekly',
+      ]);
+
+      expect(result.success).toBe(true);
+
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+
+      const parsed = doc.toJSON();
+      expect(parsed.tags).toEqual(['production', 'alerts', 'weekly']);
+      expect(parsed.steps).toHaveLength(2);
     });
   });
 

@@ -89,6 +89,7 @@ export const useAgentBuilderIntegration = ({
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let modelListener: monaco.IDisposable | null = null;
+    const attachmentId = workflowId ?? 'new-workflow';
     const model = editor.getModel();
     if (model) {
       modelListener = model.onDidChangeContent(() => {
@@ -96,6 +97,7 @@ export const useAgentBuilderIntegration = ({
         debounceTimer = setTimeout(() => {
           const currentYaml = model.getValue();
           agentBuilder.addAttachment({
+            id: attachmentId,
             type: 'workflow.yaml',
             data: {
               yaml: currentYaml,

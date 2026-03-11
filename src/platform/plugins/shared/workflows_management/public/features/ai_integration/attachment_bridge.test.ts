@@ -7,7 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { computeMinimalChange } from './attachment_bridge';
+import { collapseChainedDiffs, computeMinimalChange } from './attachment_bridge';
+
+describe('collapseChainedDiffs', () => {
+  it('collapses two chained diffs into a single net change', () => {
+    const original = 'line1\nline2\n';
+    const intermediate = 'line1\nchanged\n';
+    const final = 'line1\nfinal\n';
+
+    const diffs = [
+      {
+        beforeYaml: original,
+        afterYaml: intermediate,
+        proposalId: 'p1',
+        status: 'pending' as const,
+      },
+      { beforeYaml: intermediate, afterYaml: final, proposalId: 'p2', status: 'pending' as const },
+    ];
+
+    const result = collapseChainedDiffs(diffs);
+    expect(result).toHaveLength(1);
+    expect(result[0].beforeYaml).toBe(original);
+    expect(result[0].afterYaml).toBe(final);
+    expect(result[0].proposalId).toBe('p2');
+  });
+
+  it('returns unchanged diffs when no chain exists', () => {
+    const diffs = [
+      { beforeYaml: 'a', afterYaml: 'b', proposalId: 'p1', status: 'pending' as const },
+      { beforeYaml: 'c', afterYaml: 'd', proposalId: 'p2', status: 'pending' as const },
+    ];
+
+    const result = collapseChainedDiffs(diffs);
+    expect(result).toHaveLength(2);
+  });
+
+  it('collapses a chain of three diffs into one', () => {
+    const diffs = [
+      { beforeYaml: 'a', afterYaml: 'b', proposalId: 'p1', status: 'pending' as const },
+      { beforeYaml: 'b', afterYaml: 'c', proposalId: 'p2', status: 'pending' as const },
+      { beforeYaml: 'c', afterYaml: 'd', proposalId: 'p3', status: 'pending' as const },
+    ];
+
+    const result = collapseChainedDiffs(diffs);
+    expect(result).toHaveLength(1);
+    expect(result[0].beforeYaml).toBe('a');
+    expect(result[0].afterYaml).toBe('d');
+    expect(result[0].proposalId).toBe('p3');
+  });
+
+  it('handles a single diff with no chaining', () => {
+    const diffs = [
+      { beforeYaml: 'x', afterYaml: 'y', proposalId: 'p1', status: 'pending' as const },
+    ];
+
+    const result = collapseChainedDiffs(diffs);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(diffs[0]);
+  });
+
+  it('handles empty array', () => {
+    expect(collapseChainedDiffs([])).toEqual([]);
+  });
+
+  it('collapses only the chained portion and leaves independent diffs alone', () => {
+    const diffs = [
+      { beforeYaml: 'a', afterYaml: 'b', proposalId: 'p1', status: 'pending' as const },
+      { beforeYaml: 'b', afterYaml: 'c', proposalId: 'p2', status: 'pending' as const },
+      { beforeYaml: 'x', afterYaml: 'y', proposalId: 'p3', status: 'pending' as const },
+    ];
+
+    const result = collapseChainedDiffs(diffs);
+    expect(result).toHaveLength(2);
+    expect(result[0].beforeYaml).toBe('a');
+    expect(result[0].afterYaml).toBe('c');
+    expect(result[0].proposalId).toBe('p2');
+    expect(result[1]).toEqual(diffs[2]);
+  });
+});
 
 describe('computeMinimalChange', () => {
   it('returns null when before and after are identical', () => {

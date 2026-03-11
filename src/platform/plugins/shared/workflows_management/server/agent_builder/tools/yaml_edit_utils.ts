@@ -285,7 +285,11 @@ export const modifyWorkflowProperty = (
   if (pair && pair.value && (pair.value as { range?: unknown }).range) {
     const valRange = nodeRange(pair.value as { range?: [number, number, number] | null });
     if (valRange) {
-      const valStr = stringifyValue(value, indentUnit, 0).trimEnd();
+      const leadingWs = yaml.slice(Math.max(0, valRange[0] - 40), valRange[0]);
+      const nl = leadingWs.lastIndexOf('\n');
+      const valueIndent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
+      const depth = Math.round(valueIndent / indentUnit);
+      const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
       return { success: true, yaml: spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`) };
     }
   }

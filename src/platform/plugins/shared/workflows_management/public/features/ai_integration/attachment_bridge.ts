@@ -55,6 +55,34 @@ const extractPendingDiffs = (attachments: VersionedAttachment[]): WorkflowYamlDi
 };
 
 /**
+ * Collapse chained diffs where one diff's afterYaml matches the next diff's
+ * beforeYaml. This happens when the LLM retries after a validation failure,
+ * producing multiple incremental edits. The user should only see the net
+ * change from original to final state.
+ */
+export const collapseChainedDiffs = (diffs: WorkflowYamlDiffData[]): WorkflowYamlDiffData[] => {
+  if (diffs.length <= 1) return diffs;
+
+  const result: WorkflowYamlDiffData[] = [];
+
+  let i = 0;
+  while (i < diffs.length) {
+    let current = diffs[i];
+    while (i + 1 < diffs.length && current.afterYaml === diffs[i + 1].beforeYaml) {
+      current = {
+        ...diffs[i + 1],
+        beforeYaml: current.beforeYaml,
+      };
+      i++;
+    }
+    result.push(current);
+    i++;
+  }
+
+  return result;
+};
+
+/**
  * Compute a minimal ProposedChange by comparing beforeYaml and afterYaml
  * line-by-line. Finds the common prefix/suffix to narrow the change to only
  * the lines that actually differ, producing a single contained hunk.
@@ -182,7 +210,7 @@ export class AttachmentBridge {
     const model = editor.getModel();
     if (!model) return;
 
-    const pendingDiffs = extractPendingDiffs(attachments);
+    const pendingDiffs = collapseChainedDiffs(extractPendingDiffs(attachments));
 
     for (const diff of pendingDiffs) {
       if (!this.processedProposals.has(diff.proposalId)) {
