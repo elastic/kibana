@@ -42,6 +42,7 @@ describe('bedrockClaudeAdapter', () => {
       connectorId: 'test-connector-id',
       config: {},
       capabilities: {},
+      isInferenceEndpoint: false,
     });
   });
 
