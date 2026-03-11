@@ -1541,6 +1541,10 @@
         "dynamic": false,
         "properties": {}
       },
+      "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
       "previous_version": {
         "type": "keyword"
       },
@@ -4435,6 +4439,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"

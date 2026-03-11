@@ -112,6 +112,10 @@ export interface UpdatePackageResponse {
   item: PackageInfo;
 }
 
+export interface ReviewUpgradeResponse {
+  success: boolean;
+}
+
 export interface GetStatsRequest {
   params: {
     pkgname: string;

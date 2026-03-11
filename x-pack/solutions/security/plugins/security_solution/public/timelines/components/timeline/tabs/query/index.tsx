@@ -212,23 +212,25 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { augmentedColumnHeaders, defaultColumns, timelineQueryFieldsFromColumns } =
     useTimelineColumns(columns);
 
-  const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId: dataViewId ?? '',
-      endDate: end,
-      fields: timelineQueryFieldsFromColumns,
-      filterQuery: combinedQueries?.filterQuery,
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: kqlQuery.language,
-      limit: sampleSize,
-      runtimeMappings,
-      skip: !canQueryTimeline,
-      sort: timelineQuerySortField,
-      startDate: start,
-      timerangeKind,
-      dateRangeField: experimentalDataView.getTimeField()?.name ?? '@timestamp',
-    });
+  const [
+    dataLoadingState,
+    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId: dataViewId ?? '',
+    endDate: end,
+    fields: timelineQueryFieldsFromColumns,
+    filterQuery: combinedQueries?.filterQuery,
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: kqlQuery.language,
+    limit: sampleSize,
+    runtimeMappings,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+    startDate: start,
+    timerangeKind,
+    dateRangeField: experimentalDataView.getTimeField()?.name ?? '@timestamp',
+  });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -296,6 +298,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timelineId,
     refetch,
     events,
+    rawEvents,
     eventIdToNoteIds,
     onToggleShowNotes,
   });
