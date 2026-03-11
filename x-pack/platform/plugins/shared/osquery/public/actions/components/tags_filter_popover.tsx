@@ -8,12 +8,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistoryTags } from '../use_history_tags';
@@ -28,6 +30,10 @@ const SEARCH_TAGS_PLACEHOLDER = i18n.translate(
   'xpack.osquery.historyFilters.searchTagsPlaceholder',
   { defaultMessage: 'Search tags' }
 );
+
+const CLEAR_FILTER_LABEL = i18n.translate('xpack.osquery.historyFilters.clearTagsFilter', {
+  defaultMessage: 'Clear filter',
+});
 
 const PANEL_PROPS = { 'data-test-subj': 'history-tags-filter-popover' };
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
@@ -48,12 +54,13 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
   const { tags: availableTags, isLoading } = useHistoryTags({ enabled: isOpen });
 
   const selectableOptions = useMemo(() => {
-    const allTags = caseInsensitiveSort(
-      Array.from(new Set([...availableTags, ...selectedTags]))
-    );
     const selectedSet = new Set(selectedTags);
+    const allTags = Array.from(new Set([...availableTags, ...selectedTags]));
 
-    return allTags.map((label) => ({
+    const selected = caseInsensitiveSort(allTags.filter((tag) => selectedSet.has(tag)));
+    const unselected = caseInsensitiveSort(allTags.filter((tag) => !selectedSet.has(tag)));
+
+    return [...selected, ...unselected].map((label) => ({
       label,
       checked: selectedSet.has(label) ? ('on' as const) : undefined,
     }));
@@ -74,6 +81,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
     [selectedTags, onSelectedTagsChanged]
   );
 
+  const handleClearAll = useCallback(() => onSelectedTagsChanged([]), [onSelectedTagsChanged]);
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
@@ -118,9 +126,34 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
         {(list, search) => (
           <div css={POPOVER_CONTENT_STYLE}>
             <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem>{search}</EuiFlexItem>
-              </EuiFlexGroup>
+              {search}
+              {selectedTags.length > 0 && (
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.osquery.historyFilters.selectedTagsCount', {
+                        defaultMessage: '{count} selected',
+                        values: { count: selectedTags.length },
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="right"
+                      onClick={handleClearAll}
+                      data-test-subj="history-tags-filter-clear"
+                    >
+                      {CLEAR_FILTER_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiPopoverTitle>
             {list}
           </div>

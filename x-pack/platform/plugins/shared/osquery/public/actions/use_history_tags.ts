@@ -41,7 +41,7 @@ export const useHistoryTags = ({ enabled = true }: UseHistoryTagsConfig = {}) =>
 
   return {
     tags: data ?? [],
-    isLoading,
+    isLoading: isLoading && enabled,
     isFetching,
   };
 };
