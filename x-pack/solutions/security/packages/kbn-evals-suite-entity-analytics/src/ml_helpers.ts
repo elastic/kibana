@@ -23,10 +23,10 @@ import { isJobStarted } from '@kbn/security-solution-plugin/common/machine_learn
 // Security Authentication ML module
 export const securityAuthModule = 'security_auth';
 export const securityAuthJobIds = [
-  'auth_rare_source_ip_for_a_user',
-  'suspicious_login_activity',
-  'auth_rare_user',
-  'auth_rare_hour_for_a_user',
+  'auth_rare_source_ip_for_a_user_ea',
+  'suspicious_login_activity_ea',
+  'auth_rare_user_ea',
+  'auth_rare_hour_for_a_user_ea',
 ];
 
 // Privileged Access Detection (PAD) ML module
@@ -45,7 +45,7 @@ export const lmdJobIds = [
 
 // Security PacketBeat ML module
 export const securityPacketBeatModule = 'security_packetbeat';
-export const securityPacketBeatJobIds = ['packetbeat_rare_server_domain'];
+export const securityPacketBeatJobIds = ['packetbeat_rare_server_domain_ea'];
 
 // Data Exfiltration Detection (DED) ML module
 export const dedModule = 'ded-ml';
