@@ -14,6 +14,7 @@ export interface ScoutServerConfig {
   servers: {
     kibana: UrlParts;
     elasticsearch: UrlParts;
+    linkedElasticsearch?: UrlParts;
     fleet?: UrlParts;
   };
   dockerServers: any;
@@ -24,7 +25,7 @@ export interface ScoutServerConfig {
     serverArgs: string[];
     ssl: boolean;
   };
-  esServerlessOptions?: { uiam: boolean };
+  esServerlessOptions?: { uiam: boolean; cps?: boolean };
   kbnTestServer: {
     env: any;
     buildArgs: string[];
