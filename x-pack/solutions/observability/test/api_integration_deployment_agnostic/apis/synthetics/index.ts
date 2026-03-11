@@ -39,5 +39,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./reset_monitor'));
     loadTestFile(require.resolve('./reset_monitor_bulk'));
     loadTestFile(require.resolve('./clean_up_extra_package_policies'));
+    loadTestFile(require.resolve('./migrate_legacy_policies'));
   });
 }
