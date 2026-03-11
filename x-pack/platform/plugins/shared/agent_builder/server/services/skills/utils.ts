@@ -41,5 +41,6 @@ export const internalToPublicSummary = async (
   description: skill.description,
   tool_ids: await skill.getRegistryTools(),
   readonly: skill.readonly,
+  plugin_id: skill.plugin_id,
   referenced_content_count: skill.referencedContentCount,
 });
