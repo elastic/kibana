@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 
-// see https://github.com/elastic/kibana/issues/256614
-export const TS_INFO_FIELDS: ESQLFieldWithMetadata[] = [
+export const TS_INFO_FIELDS: ESQLColumnData[] = [
   {
     name: 'metric_name',
     type: 'keyword',

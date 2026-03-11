@@ -115,6 +115,7 @@ export async function suggest(
         return hasLicenseAccess && hasObservabilityAccess;
       })
       .filter((command) => {
+        // Commands that require a TS source are only suggested when the source command is TS
         if (command.metadata?.requiresTimeseriesSource) {
           return (
             astContext.astForContext.commands.length > 0 &&
@@ -124,12 +125,16 @@ export async function suggest(
         return true;
       })
       .filter((command) => {
-        const notAfter = command.metadata?.notAfterCommands;
-        if (notAfter?.length && astContext.astForContext.commands.length > 0) {
-          const lastCommand =
-            astContext.astForContext.commands[astContext.astForContext.commands.length - 1];
-          const lastCommandName = lastCommand?.name;
-          if (lastCommandName && notAfter.includes(lastCommandName)) {
+        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        const hiddenAfter = command.metadata?.hiddenAfterCommands;
+        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
+          const commandNamesInPipeline = new Set(
+            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
+          );
+          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
+            commandNamesInPipeline.has(name)
+          );
+          if (hasHiddenCommandInPipeline) {
             return false;
           }
         }

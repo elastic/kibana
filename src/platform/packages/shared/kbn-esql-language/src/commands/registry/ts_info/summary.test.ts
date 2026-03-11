@@ -17,9 +17,7 @@ describe('TS_INFO > summary', () => {
   it('returns exactly the fixed set of ts info columns', () => {
     const { newColumns } = summary(mockCommand);
 
-    expect(newColumns).toEqual(
-      new Set(TS_INFO_FIELDS.map(({ name }) => name))
-    );
+    expect(newColumns).toEqual(new Set(TS_INFO_FIELDS.map(({ name }) => name)));
   });
 
   it('does not return renamedColumnsPairs, metadataColumns, aggregates, or grouping', () => {

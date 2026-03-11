@@ -32,6 +32,6 @@ export const tsInfoCommand: ICommand = {
     examples: ['TS index | TS_INFO'],
     preview: true,
     requiresTimeseriesSource: true,
-    notAfterCommands: ['stats', 'inline stats'],
+    hiddenAfterCommands: [Commands.STATS, Commands.INLINE_STATS],
   },
 };
