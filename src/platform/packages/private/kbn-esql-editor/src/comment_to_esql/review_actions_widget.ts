@@ -11,13 +11,13 @@ import { monaco } from '@kbn/monaco';
 import { css } from '@emotion/css';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 
 const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
 
 interface ReviewActionsCallbacks {
   onAccept: () => void;
   onReject: () => void;
-  onRegenerate: () => void;
 }
 
 export class ReviewActionsWidget implements monaco.editor.IContentWidget {
@@ -62,6 +62,13 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
   private buildDom(): HTMLElement {
     const container = document.createElement('div');
+    container.setAttribute('role', 'toolbar');
+    container.setAttribute(
+      'aria-label',
+      i18n.translate('esqlEditor.commentReview.toolbar', {
+        defaultMessage: 'Review generated code',
+      })
+    );
     container.className = css`
       display: flex;
       flex-direction: row;
@@ -73,7 +80,10 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
     container.appendChild(
       this.createButton(
-        i18n.translate('esqlEditor.commentReview.accept', { defaultMessage: 'Accept' }),
+        i18n.translate('esqlEditor.commentReview.accept', {
+          defaultMessage: 'Accept ({shortcut})',
+          values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
+        }),
         'success',
         this.callbacks.onAccept
       )
@@ -81,17 +91,12 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
     container.appendChild(
       this.createButton(
-        i18n.translate('esqlEditor.commentReview.reject', { defaultMessage: 'Reject' }),
+        i18n.translate('esqlEditor.commentReview.reject', {
+          defaultMessage: 'Reject ({shortcut})',
+          values: { shortcut: isMac ? '⌘⇧⌫' : 'Ctrl+Shift+Backspace' },
+        }),
         'danger',
         this.callbacks.onReject
-      )
-    );
-
-    container.appendChild(
-      this.createButton(
-        i18n.translate('esqlEditor.commentReview.regenerate', { defaultMessage: 'Regenerate' }),
-        'neutral',
-        this.callbacks.onRegenerate
       )
     );
 
@@ -100,7 +105,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
   private createButton(
     label: string,
-    variant: 'success' | 'danger' | 'neutral',
+    variant: 'success' | 'danger',
     onClick: () => void
   ): HTMLButtonElement {
     const colors: Record<
@@ -118,12 +123,6 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
         text: this.euiTheme.colors.textDanger,
         hoverBg: this.euiTheme.colors.backgroundFilledDanger,
         hoverText: this.euiTheme.colors.textInverse,
-      },
-      neutral: {
-        bg: this.euiTheme.colors.backgroundBaseSubdued,
-        text: this.euiTheme.colors.textSubdued,
-        hoverBg: this.euiTheme.colors.backgroundBaseDisabled,
-        hoverText: this.euiTheme.colors.textParagraph,
       },
     };
 

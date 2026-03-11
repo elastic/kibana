@@ -57,7 +57,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
-import { useGhostLineHint } from './use_ghost_line_hint';
+import { useGhostLineHint } from './comment_to_esql/use_ghost_line_hint';
 import { useCommentToEsql } from './comment_to_esql';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';

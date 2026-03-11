@@ -22,14 +22,14 @@ const COMMENT_REMOVED_CLASS = 'esqlCommentRemoved';
 const CODE_ADDED_CLASS = 'esqlCodeAdded';
 
 interface CommentReviewState {
+  // The line number of the comment which generated the code
   commentLineNumber: number;
-  nlInstruction: string;
-  generatedText: string;
+  // The line number of the first line of the generated code that was inserted
   generatedLineStart: number;
+  // The line number of the last line of the generated code that was inserted
   generatedLineEnd: number;
+  // The line number of the line that was replaced by the generated code, if any
   replacedLineNumber: number | null;
-  isSurgical: boolean;
-  sources: string[] | undefined;
 }
 
 interface UseCommentToEsqlParams {
@@ -138,8 +138,10 @@ export const useCommentToEsql = ({
   const reviewStateRef = useRef<CommentReviewState | null>(null);
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
-  const regenerateRef = useRef<() => Promise<void>>();
+  const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
+  const actionDisposablesRef = useRef<monaco.IDisposable[]>([]);
 
+  // Diff styles for the comment and the generated code
   const commentToEsqlStyle = useMemo(
     () => css`
       .${COMMENT_REMOVED_CLASS} {
@@ -162,6 +164,9 @@ export const useCommentToEsql = ({
       widgetRef.current = undefined;
     }
 
+    actionDisposablesRef.current.forEach((d) => d.dispose());
+    actionDisposablesRef.current = [];
+    contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
   }, []);
 
@@ -262,8 +267,31 @@ export const useCommentToEsql = ({
       widgetRef.current = new ReviewActionsWidget(euiTheme, editor, state.generatedLineEnd, {
         onAccept: acceptChange,
         onReject: rejectChange,
-        onRegenerate: () => regenerateRef.current?.(),
       });
+
+      if (!contextKeyRef.current) {
+        contextKeyRef.current = editor.createContextKey('esqlCommentReviewActive', false);
+      }
+      contextKeyRef.current.set(true);
+
+      actionDisposablesRef.current = [
+        editor.addAction({
+          id: 'esql.commentReview.reject',
+          label: 'Reject generated code',
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Backspace],
+          precondition: 'esqlCommentReviewActive',
+          run: () => rejectChange(),
+        }),
+        editor.addAction({
+          id: 'esql.commentReview.accept',
+          label: 'Accept generated code',
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+          precondition: 'esqlCommentReviewActive',
+          run: () => acceptChange(),
+        }),
+      ];
     },
     [editorRef, euiTheme, acceptChange, rejectChange]
   );
@@ -352,65 +380,11 @@ export const useCommentToEsql = ({
 
     showReview({
       commentLineNumber: targetComment.lineNumber,
-      nlInstruction,
-      generatedText,
-      generatedLineStart,
-      generatedLineEnd,
-      replacedLineNumber,
-      isSurgical,
-      sources,
-    });
-  }, [editorRef, editorModel, cleanup, callRoute, showReview]);
-
-  const regenerate = useCallback(async () => {
-    const state = reviewStateRef.current;
-    const editor = editorRef.current;
-    const model = editorModel.current;
-    if (!state || !editor || !model) return;
-
-    cleanup();
-
-    editor.executeEdits('nl-to-esql-regen-cleanup', [
-      {
-        range: new monaco.Range(state.generatedLineStart, 1, state.generatedLineEnd + 1, 1),
-        text: null,
-      },
-    ]);
-
-    const fullText = model.getValue();
-    const queryForRoute = state.isSurgical
-      ? markCommentInQuery(fullText, state.commentLineNumber)
-      : fullText;
-
-    const generatedText = await callRoute(
-      state.nlInstruction,
-      state.sources,
-      state.isSurgical,
-      queryForRoute
-    );
-    if (!generatedText) return;
-
-    if (!isModelStillValid(editorModel.current, state.commentLineNumber)) return;
-
-    const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
-      editor,
-      model,
-      state.commentLineNumber,
-      generatedText
-    );
-
-    const replacedLineNumber = detectReplacedLine(model, generatedLineStart, generatedLineEnd);
-
-    showReview({
-      ...state,
-      generatedText,
       generatedLineStart,
       generatedLineEnd,
       replacedLineNumber,
     });
   }, [editorRef, editorModel, cleanup, callRoute, showReview]);
-
-  regenerateRef.current = regenerate;
 
   return {
     commentToEsqlStyle,
