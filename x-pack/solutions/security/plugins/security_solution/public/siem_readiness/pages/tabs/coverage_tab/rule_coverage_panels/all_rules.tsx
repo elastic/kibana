@@ -24,7 +24,6 @@ import {
   useIntegrationDisplayNames,
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
-import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
 export const AllRuleCoveragePanel: React.FC = () => {
@@ -37,16 +36,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [getDetectionRules.data?.data]
   );
 
-  const getEnabledIntegrations = useMemo(() => {
-    return (
-      getIntegrations?.data?.items?.filter(
-        (pkg: SiemReadinessPackageInfo) =>
-          pkg.status === 'installed' && (pkg.packagePoliciesInfo?.count ?? 0) > 0
-      ) || []
-    );
-  }, [getIntegrations?.data?.items]);
-
-  const installedIntegrationRules = useDetectionRulesByIntegration();
+  const { ruleIntegrationCoverage, enabledPackagesSet } = useDetectionRulesByIntegration();
 
   const integrationDisplayNames = useIntegrationDisplayNames();
 
@@ -55,12 +45,6 @@ export const AllRuleCoveragePanel: React.FC = () => {
       return integrationDisplayNames.data?.get(packageName) || packageName;
     },
     [integrationDisplayNames.data]
-  );
-
-  // Create a Set for O(1) lookups instead of O(n) with .includes()
-  const enabledIntegrationSet = useMemo(
-    () => new Set(getEnabledIntegrations.map((item) => item.name)),
-    [getEnabledIntegrations]
   );
 
   // Get enabled rules from all rules
@@ -83,15 +67,15 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const enabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
-      .filter((name) => enabledIntegrationSet.has(name))
+      .filter((name) => enabledPackagesSet.has(name))
       .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
-  }, [relatedIntegrationNames, enabledIntegrationSet, getIntegrationDisplayName]);
+  }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
 
   const missingOrDisabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
-      .filter((name) => !enabledIntegrationSet.has(name))
+      .filter((name) => !enabledPackagesSet.has(name))
       .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
-  }, [relatedIntegrationNames, enabledIntegrationSet, getIntegrationDisplayName]);
+  }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
 
   const chartBaseTheme = useMemo(
     () => ({
@@ -175,7 +159,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
   ];
 
   const installedIntegrationAssociatedRulesCount =
-    installedIntegrationRules.ruleIntegrationCoverage?.coveredRules?.length || 0;
+    ruleIntegrationCoverage?.coveredRules?.length || 0;
 
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;

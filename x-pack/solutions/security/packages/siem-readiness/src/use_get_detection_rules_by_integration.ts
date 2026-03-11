@@ -98,7 +98,11 @@ export const useDetectionRulesByIntegration = (integrationPackages?: string | st
     return getRuleIntegrationCoverage(enabledRulesQuery.data.data, enabledPackages);
   }, [enabledRulesQuery.data?.data, enabledPackages]);
 
+  const enabledPackagesSet = useMemo(() => new Set(enabledPackages), [enabledPackages]);
+
   return {
     ruleIntegrationCoverage,
+    enabledPackages,
+    enabledPackagesSet,
   };
 };
