@@ -730,8 +730,13 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
+      const resolvedStepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
+      const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateUuid(),
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
@@ -743,8 +748,8 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
-        stepExecutionsIndex: await stepExecutionRepo.resolveWriteIndex(),
-        executionsIndex: await workflowExecutionRepository.resolveWriteIndex(),
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
