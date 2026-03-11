@@ -15,7 +15,11 @@ import {
   InspectorContextProvider,
 } from '@kbn/observability-shared-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  RouteRenderer,
+  RouterProvider,
+  RouteRendererErrorBoundary,
+} from '@kbn/typed-react-router-config';
 import React, { useEffect } from 'react';
 import { EMPTY, skip } from 'rxjs';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -73,31 +77,33 @@ export function ApmAppRoot({
                   <RouterProvider history={history} router={apmRouter as any}>
                     <PerformanceContextProvider>
                       <ApmErrorBoundary>
-                        <RedirectDependenciesToDependenciesInventory>
-                          <RedirectWithDefaultEnvironment>
-                            <RedirectWithDefaultDateRange>
-                              <RedirectWithOffset>
-                                <TrackPageview>
-                                  <UpdateExecutionContextOnRouteChange>
-                                    <BreadcrumbsContextProvider>
-                                      <UrlParamsProvider>
-                                        <LicenseProvider>
-                                          <AnomalyDetectionJobsContextProvider>
-                                            <InspectorContextProvider>
-                                              <MountApmHeaderActionMenu />
-                                              <Route component={ScrollToTopOnPathChange} />
-                                              <RouteRenderer />
-                                            </InspectorContextProvider>
-                                          </AnomalyDetectionJobsContextProvider>
-                                        </LicenseProvider>
-                                      </UrlParamsProvider>
-                                    </BreadcrumbsContextProvider>
-                                  </UpdateExecutionContextOnRouteChange>
-                                </TrackPageview>
-                              </RedirectWithOffset>
-                            </RedirectWithDefaultDateRange>
-                          </RedirectWithDefaultEnvironment>
-                        </RedirectDependenciesToDependenciesInventory>
+                        <RouteRendererErrorBoundary>
+                          <RedirectDependenciesToDependenciesInventory>
+                            <RedirectWithDefaultEnvironment>
+                              <RedirectWithDefaultDateRange>
+                                <RedirectWithOffset>
+                                  <TrackPageview>
+                                    <UpdateExecutionContextOnRouteChange>
+                                      <BreadcrumbsContextProvider>
+                                        <UrlParamsProvider>
+                                          <LicenseProvider>
+                                            <AnomalyDetectionJobsContextProvider>
+                                              <InspectorContextProvider>
+                                                <MountApmHeaderActionMenu />
+                                                <Route component={ScrollToTopOnPathChange} />
+                                                <RouteRenderer />
+                                              </InspectorContextProvider>
+                                            </AnomalyDetectionJobsContextProvider>
+                                          </LicenseProvider>
+                                        </UrlParamsProvider>
+                                      </BreadcrumbsContextProvider>
+                                    </UpdateExecutionContextOnRouteChange>
+                                  </TrackPageview>
+                                </RedirectWithOffset>
+                              </RedirectWithDefaultDateRange>
+                            </RedirectWithDefaultEnvironment>
+                          </RedirectDependenciesToDependenciesInventory>
+                        </RouteRendererErrorBoundary>
                       </ApmErrorBoundary>
                     </PerformanceContextProvider>
                   </RouterProvider>
