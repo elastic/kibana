@@ -8,7 +8,6 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
 
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
@@ -63,16 +62,3 @@ export const DIMENSION_TYPES = [
 
 // Metric instrument types allowed in the Metrics experience.
 export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];
-
-export const METRIC_TYPE_DESCRIPTIONS: Record<string, string> = {
-  gauge: i18n.translate('metricsExperience.metricTypeDescription.gauge', {
-    defaultMessage: 'Represents a value that can go up or down, such as memory usage.',
-  }),
-  counter: i18n.translate('metricsExperience.metricTypeDescription.counter', {
-    defaultMessage: 'A value that only increases, such as number of requests received.',
-  }),
-  histogram: i18n.translate('metricsExperience.metricTypeDescription.histogram', {
-    defaultMessage:
-      'Samples observations, such as request durations, and counts them in configurable buckets.',
-  }),
-};

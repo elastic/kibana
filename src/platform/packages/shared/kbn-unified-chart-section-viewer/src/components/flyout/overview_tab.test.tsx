@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { METRIC_TYPE_DESCRIPTIONS } from '../../common/constants';
+import { METRIC_TYPE_DESCRIPTIONS } from './metric_type_badge';
 
 jest.mock('../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -124,7 +124,7 @@ describe('Metric Flyout Overview Tab', () => {
 
         await waitFor(() => {
           expect(screen.getByRole('tooltip')).toHaveTextContent(
-            METRIC_TYPE_DESCRIPTIONS[instrument]
+            METRIC_TYPE_DESCRIPTIONS[instrument]!
           );
         });
       }

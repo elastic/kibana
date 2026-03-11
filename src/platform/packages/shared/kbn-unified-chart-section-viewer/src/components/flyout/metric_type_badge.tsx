@@ -11,7 +11,20 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-import { METRIC_TYPE_DESCRIPTIONS } from '../../common/constants';
+import { i18n } from '@kbn/i18n';
+
+export const METRIC_TYPE_DESCRIPTIONS: Partial<Record<MappingTimeSeriesMetricType, string>> = {
+  gauge: i18n.translate('metricsExperience.metricTypeDescription.gauge', {
+    defaultMessage: 'Represents a value that can go up or down, such as memory usage.',
+  }),
+  counter: i18n.translate('metricsExperience.metricTypeDescription.counter', {
+    defaultMessage: 'A value that only increases, such as number of requests received.',
+  }),
+  histogram: i18n.translate('metricsExperience.metricTypeDescription.histogram', {
+    defaultMessage:
+      'Samples observations, such as request durations, and counts them in configurable buckets.',
+  }),
+};
 
 interface MetricTypeBadgeProps {
   instrument: MappingTimeSeriesMetricType;
