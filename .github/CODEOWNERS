@@ -345,6 +345,7 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/packages/user-storage/common @elastic/appex-sharedux
 src/core/packages/user-storage/server @elastic/appex-sharedux
 src/core/packages/user-storage/server-internal @elastic/appex-sharedux
+src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/packages/user-storage/test/plugins/user_storage_test @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
