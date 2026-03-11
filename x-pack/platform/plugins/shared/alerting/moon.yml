@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/scout'
+  - '@kbn/change-history'
 tags:
   - plugin
   - prod
