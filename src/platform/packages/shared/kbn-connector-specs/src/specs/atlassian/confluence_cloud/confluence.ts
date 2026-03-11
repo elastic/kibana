@@ -10,7 +10,19 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
+import {
+  ListPagesInputSchema,
+  GetPageInputSchema,
+  ListSpacesInputSchema,
+  GetSpaceInputSchema,
+} from './types';
+import type { ListPagesInput, GetPageInput, ListSpacesInput, GetSpaceInput } from './types';
 
+/**
+ * Builds the Confluence Cloud base URL from the connector config.
+ * Subdomain is required by the connector schema and enforced by the front-end form;
+ * no extra validation here so agents don't add redundant checks.
+ */
 const buildBaseUrl = (ctx: ActionContext) =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.atlassian.net`;
 
@@ -73,39 +85,20 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
   actions: {
     listPages: {
       isTool: false,
-      input: z.object({
-        limit: z.number().optional(),
-        cursor: z.string().optional(),
-        spaceId: z.union([z.string(), z.array(z.string())]).optional(),
-        title: z.string().optional(),
-        status: z.union([z.string(), z.array(z.string())]).optional(),
-        bodyFormat: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          cursor?: string;
-          spaceId?: string | string[];
-          title?: string;
-          status?: string | string[];
-          bodyFormat?: string;
-        };
+      input: ListPagesInputSchema,
+      handler: async (ctx, input: ListPagesInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, unknown> = {};
-        if (typedInput.limit != null) params.limit = typedInput.limit;
-        if (typedInput.cursor != null) params.cursor = typedInput.cursor;
-        if (typedInput.spaceId != null) {
-          params['space-id'] = Array.isArray(typedInput.spaceId)
-            ? typedInput.spaceId
-            : [typedInput.spaceId];
+        if (input.limit != null) params.limit = input.limit;
+        if (input.cursor != null) params.cursor = input.cursor;
+        if (input.spaceId != null) {
+          params['space-id'] = Array.isArray(input.spaceId) ? input.spaceId : [input.spaceId];
         }
-        if (typedInput.title != null) params.title = typedInput.title;
-        if (typedInput.status != null) {
-          params.status = Array.isArray(typedInput.status)
-            ? typedInput.status
-            : [typedInput.status];
+        if (input.title != null) params.title = input.title;
+        if (input.status != null) {
+          params.status = Array.isArray(input.status) ? input.status : [input.status];
         }
-        if (typedInput.bodyFormat != null) params['body-format'] = typedInput.bodyFormat;
+        if (input.bodyFormat != null) params['body-format'] = input.bodyFormat;
         const response = await ctx.client.get(
           `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages`,
           Object.keys(params).length > 0 ? { params } : undefined
@@ -115,17 +108,13 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     },
     getPage: {
       isTool: false,
-      input: z.object({
-        id: z.string(),
-        bodyFormat: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as { id: string; bodyFormat?: string };
+      input: GetPageInputSchema,
+      handler: async (ctx, input: GetPageInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, unknown> = {};
-        if (typedInput.bodyFormat != null) params['body-format'] = typedInput.bodyFormat;
+        if (input.bodyFormat != null) params['body-format'] = input.bodyFormat;
         const response = await ctx.client.get(
-          `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages/${typedInput.id}`,
+          `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages/${input.id}`,
           Object.keys(params).length > 0 ? { params } : undefined
         );
         return response.data;
@@ -133,35 +122,20 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     },
     listSpaces: {
       isTool: false,
-      input: z.object({
-        limit: z.number().optional(),
-        cursor: z.string().optional(),
-        ids: z.union([z.string(), z.array(z.string())]).optional(),
-        keys: z.union([z.string(), z.array(z.string())]).optional(),
-        type: z.string().optional(),
-        status: z.string().optional(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          cursor?: string;
-          ids?: string | string[];
-          keys?: string | string[];
-          type?: string;
-          status?: string;
-        };
+      input: ListSpacesInputSchema,
+      handler: async (ctx, input: ListSpacesInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const params: Record<string, unknown> = {};
-        if (typedInput.limit != null) params.limit = typedInput.limit;
-        if (typedInput.cursor != null) params.cursor = typedInput.cursor;
-        if (typedInput.ids != null) {
-          params.ids = Array.isArray(typedInput.ids) ? typedInput.ids : [typedInput.ids];
+        if (input.limit != null) params.limit = input.limit;
+        if (input.cursor != null) params.cursor = input.cursor;
+        if (input.ids != null) {
+          params.ids = Array.isArray(input.ids) ? input.ids : [input.ids];
         }
-        if (typedInput.keys != null) {
-          params.keys = Array.isArray(typedInput.keys) ? typedInput.keys : [typedInput.keys];
+        if (input.keys != null) {
+          params.keys = Array.isArray(input.keys) ? input.keys : [input.keys];
         }
-        if (typedInput.type != null) params.type = typedInput.type;
-        if (typedInput.status != null) params.status = typedInput.status;
+        if (input.type != null) params.type = input.type;
+        if (input.status != null) params.status = input.status;
         const response = await ctx.client.get(
           `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces`,
           Object.keys(params).length > 0 ? { params } : undefined
@@ -171,14 +145,11 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     },
     getSpace: {
       isTool: false,
-      input: z.object({
-        id: z.string(),
-      }),
-      handler: async (ctx, input) => {
-        const typedInput = input as { id: string };
+      input: GetSpaceInputSchema,
+      handler: async (ctx, input: GetSpaceInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces/${typedInput.id}`
+          `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces/${input.id}`
         );
         return response.data;
       },
