@@ -82,7 +82,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Required for telemetry e2e tests
         `--plugin-path=${resolve(
           __dirname,
-          '../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+          '../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
         )}`,
       ],
     },
