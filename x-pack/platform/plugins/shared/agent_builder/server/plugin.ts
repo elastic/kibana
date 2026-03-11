@@ -43,9 +43,8 @@ export class AgentBuilderPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
-  private serviceManager = new ServiceManager();
+  private serviceManager: ServiceManager;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -53,6 +52,7 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.serviceManager = new ServiceManager(this.config);
   }
 
   setup(
@@ -84,6 +84,8 @@ export class AgentBuilderPlugin
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
       trackingService: this.trackingService,
+      cloud: setupDeps.cloud,
+      usageApi: setupDeps.usageApi,
     });
 
     registerTaskDefinitions({

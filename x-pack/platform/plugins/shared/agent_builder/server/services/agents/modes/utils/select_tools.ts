@@ -164,6 +164,7 @@ const builtinToolToExecutable = ({
     configuration: {},
     readonly: true,
     getSchema: () => tool.schema,
+    summarizeToolReturn: tool.summarizeToolReturn,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,

@@ -4254,80 +4254,11 @@
         "label": "MapsStorage",
         "description": [],
         "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-        "lineNumber": 71,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "maps",
-            "id": "def-server.MapsStorage.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 72,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "maps",
-                "id": "def-server.MapsStorage.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{\n    logger,\n    throwOnResultValidationError,\n  }",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 75,
-                "columnNumber": 6,
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-server.MapsStorage.Unnamed.$1.logger",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "logger",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "@kbn/logging",
-                        "scope": "common",
-                        "docId": "kibKbnLoggingPluginApi",
-                        "section": "def-common.Logger",
-                        "text": "Logger"
-                      }
-                    ],
-                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 76,
-                    "columnNumber": 5,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "maps",
-                    "id": "def-server.MapsStorage.Unnamed.$1.throwOnResultValidationError",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "throwOnResultValidationError",
-                    "description": [],
-                    "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 77,
-                    "columnNumber": 5,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
           {
             "parentPluginId": "maps",
             "id": "def-server.MapsStorage.get",
@@ -5309,7 +5240,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 86,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5331,7 +5262,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 86,
+                "lineNumber": 71,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5348,7 +5279,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 86,
+                "lineNumber": 71,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5368,7 +5299,7 @@
               "() => Promise<never>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 125,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7318,7 +7249,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 130,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7340,7 +7271,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 131,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8319,7 +8250,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 132,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8336,7 +8267,7 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 133,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10288,7 +10219,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>; }>>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 197,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10310,7 +10241,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 198,
+                "lineNumber": 175,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10327,7 +10258,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 199,
+                "lineNumber": 176,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11306,7 +11237,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 200,
+                "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11323,7 +11254,7 @@
                   "Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 201,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11359,7 +11290,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 270,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -11381,7 +11312,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 271,
+                "lineNumber": 244,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11398,7 +11329,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 272,
+                "lineNumber": 245,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11412,7 +11343,7 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 274,
+                "lineNumber": 247,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11425,7 +11356,7 @@
                     "label": "force",
                     "description": [],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 274,
+                    "lineNumber": 247,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -12432,7 +12363,7 @@
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 281,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12454,7 +12385,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 282,
+                "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12477,7 +12408,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 283,
+                "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12494,7 +12425,7 @@
                   "Readonly<{ onlyTitle?: boolean | undefined; } & {}> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 284,
+                "lineNumber": 257,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -12511,7 +12442,7 @@
             "label": "mSearch",
             "description": [],
             "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-            "lineNumber": 335,
+            "lineNumber": 304,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12524,7 +12455,7 @@
                 "label": "savedObjectType",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 336,
+                "lineNumber": 305,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13528,7 +13459,7 @@
                   ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>>"
                 ],
                 "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                "lineNumber": 337,
+                "lineNumber": 306,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -13550,7 +13481,7 @@
                       }
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 337,
+                    "lineNumber": 306,
                     "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -13576,7 +13507,7 @@
                       ">"
                     ],
                     "path": "x-pack/platform/plugins/shared/maps/server/content_management/maps_storage.ts",
-                    "lineNumber": 337,
+                    "lineNumber": 306,
                     "columnNumber": 41,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -20163,13 +20094,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -20215,13 +20146,13 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/presentation-publishing",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.SerializedTimeRange",
-            "text": "SerializedTimeRange"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          " & ",
+          "<Readonly<{ time_range?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; } & {}>> & ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

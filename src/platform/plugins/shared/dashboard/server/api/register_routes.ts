@@ -17,9 +17,26 @@ import { registerReadRoute } from './read';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
-  registerCreateRoute(versionedRouter);
-  registerReadRoute(versionedRouter);
-  registerUpdateRoute(versionedRouter);
+
+  //
+  // REST API routes
+  // Only allows panel.type value with registered embeddable schema
+  // Validate panel.config at route level
+  //
+  registerCreateRoute(versionedRouter, false);
+  registerReadRoute(versionedRouter, false);
+  registerUpdateRoute(versionedRouter, false);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
+
+  //
+  // Dashboard application specific routes
+  // Allow any panel.type value
+  // Validate panel.config in handler
+  //
+  // TODO remove these routes when all embeddable schemas are registered
+  //
+  registerCreateRoute(versionedRouter, true);
+  registerReadRoute(versionedRouter, true);
+  registerUpdateRoute(versionedRouter, true);
 }
