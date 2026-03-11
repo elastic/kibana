@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: src/core/packages/user-storage/server-internal
 dependsOn:
+  - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/zod'
   - '@kbn/core-http-server'
