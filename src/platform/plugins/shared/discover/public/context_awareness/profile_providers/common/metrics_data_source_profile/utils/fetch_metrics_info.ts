@@ -17,12 +17,6 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 
-export interface MetricsInfoFetchFailedPayload {
-  esqlQuery: string;
-  dataViewId?: string;
-  errorMessage?: string;
-}
-
 export interface FetchMetricsInfoParams {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -32,7 +26,6 @@ export interface FetchMetricsInfoParams {
   filters?: Filter[];
   variables?: ESQLControlVariable[];
   uiSettings: IUiSettingsClient;
-  onFetchFailed?: (payload: MetricsInfoFetchFailedPayload) => void;
 }
 
 /**
@@ -48,7 +41,6 @@ export async function fetchMetricsInfo({
   filters = [],
   variables,
   uiSettings,
-  onFetchFailed,
 }: FetchMetricsInfoParams): Promise<ESQLSearchResponse> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
@@ -61,23 +53,14 @@ export async function fetchMetricsInfo({
       ? buildEsQuery(undefined, [], filtersWithTime, esQueryConfig)
       : undefined;
 
-  try {
-    const { response } = await getESQLResults({
-      esqlQuery,
-      search,
-      signal,
-      filter,
-      timeRange,
-      variables,
-      executionContext: { page: 'metrics_experience' },
-    });
-    return response;
-  } catch (error) {
-    onFetchFailed?.({
-      esqlQuery,
-      dataViewId: dataView?.id,
-      errorMessage: error instanceof Error ? error.message : String(error),
-    });
-    throw error;
-  }
+  const { response } = await getESQLResults({
+    esqlQuery,
+    search,
+    signal,
+    filter,
+    timeRange,
+    variables,
+    executionContext: { page: 'metrics_experience' },
+  });
+  return response;
 }
