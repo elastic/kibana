@@ -101,8 +101,10 @@
     "destinations",
     "destinations.id",
     "destinations.type",
+    "enabled",
     "name",
     "rule_labels",
+    "snoozedUntil",
     "updatedAt",
     "updatedBy"
   ],

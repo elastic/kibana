@@ -7,6 +7,7 @@
 
 import type {
   CreateNotificationPolicyData,
+  NotificationPolicyBulkAction,
   NotificationPolicyResponse,
   UpdateNotificationPolicyData,
 } from '@kbn/alerting-v2-schemas';
@@ -19,6 +20,21 @@ export interface UpdateNotificationPolicyParams {
 export interface CreateNotificationPolicyParams {
   data: CreateNotificationPolicyData;
   options?: { id?: string };
+}
+
+export interface SnoozeNotificationPolicyParams {
+  id: string;
+  snoozedUntil: string;
+}
+
+export interface BulkActionNotificationPoliciesParams {
+  actions: NotificationPolicyBulkAction[];
+}
+
+export interface BulkActionNotificationPoliciesResponse {
+  processed: number;
+  total: number;
+  errors: Array<{ id: string; message: string }>;
 }
 
 export interface FindNotificationPoliciesParams {

@@ -58,6 +58,7 @@ export interface Rule {
 export interface NotificationPolicy {
   id: NotificationPolicyId;
   name: string;
+  enabled: boolean;
   /** KQL expression evaluated against the alert episode context.
    *  An empty matcher matches all episodes (catch-all). */
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
@@ -67,6 +68,7 @@ export interface NotificationPolicy {
   throttle?: {
     interval?: string; // e.g. '1h', '30m', '5m'
   };
+  snoozedUntil?: string;
   /** Target destinations to dispatch matched episodes to */
   destinations: NotificationPolicyDestination[];
   /** Rule labels to scope this policy to specific rules. Empty = applies to all rules. */

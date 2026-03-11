@@ -12,11 +12,13 @@ export interface NotificationPolicyResponse {
   version?: string;
   name: string;
   description: string;
+  enabled: boolean;
   destinations: NotificationPolicyDestination[];
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };
   rule_labels?: string[];
+  snoozedUntil?: string;
   auth: {
     owner: string;
     createdByUser: boolean;

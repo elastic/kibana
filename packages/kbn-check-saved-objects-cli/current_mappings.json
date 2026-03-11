@@ -345,6 +345,12 @@
           }
         }
       },
+      "enabled": {
+        "type": "boolean"
+      },
+      "snoozedUntil": {
+        "type": "date"
+      },
       "auth": {
         "type": "object",
         "properties": {
