@@ -37,3 +37,10 @@ export interface ParseFigmaUrlResult {
   teamId?: string;
   nodeId?: string;
 }
+
+export interface WhoAmIResult {
+  id?: string;
+  handle?: string;
+  email?: string;
+  img_url?: string;
+}

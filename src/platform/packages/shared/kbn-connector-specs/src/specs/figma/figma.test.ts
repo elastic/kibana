@@ -178,6 +178,30 @@ describe('FigmaConnector', () => {
     });
   });
 
+  describe('whoAmI action', () => {
+    it('should return current user id, handle, email, and img_url', async () => {
+      const mockResponse = {
+        data: {
+          id: 'user-123',
+          handle: 'designer',
+          email: 'designer@example.com',
+          img_url: 'https://figma.com/avatar.png',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await FigmaConnector.actions.whoAmI.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.figma.com/v1/me');
+      expect(result).toEqual({
+        id: 'user-123',
+        handle: 'designer',
+        email: 'designer@example.com',
+        img_url: 'https://figma.com/avatar.png',
+      });
+    });
+  });
+
   describe('parseFigmaUrl action', () => {
     it('should extract fileKey from a design URL', async () => {
       const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {

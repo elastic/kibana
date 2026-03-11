@@ -28,8 +28,11 @@ You can test connectors when creating or editing the connector in {{kib}}. The t
 
 The Figma connector has the following actions:
 
+Who am I
+:   Get the currently authenticated Figma user. Returns the user's **id**, **handle**, **email**, and **img_url** for the API credentials in use. No parameters.
+
 Parse Figma URL
-:   Parse a Figma URL (file or team page) and return extracted **file_key**, **team_id**, and **node_id** when present. No API call—useful when the user pastes a link so you can then call **Get file**, **List team projects**, or **Render nodes** with the returned IDs. Supported URLs: file links (`figma.com/design/...`, `figma.com/file/...`, `figma.com/board/...`, `figma.com/proto/...`, `figma.com/slides/...`) and team page links (`figma.com/team/TEAM_ID/...`). Node IDs from `?node-id=1-2` are normalized to colon form (`1:2`) for the API. **project_id** is not extracted; use **List team projects** with the returned team_id to get project IDs.
+:   Parse a Figma URL (file or team page) and return extracted **file_key**, **team_id**, and **node_id** when present. No API call—useful when the user pastes a link so you can then call **Get file**, **List team projects** or **List project files**, or **Render nodes** with the returned IDs. Supported URLs: file links (`figma.com/design/...`, `figma.com/file/...`, `figma.com/board/...`, `figma.com/proto/...`, `figma.com/slides/...`) and team page links (`figma.com/team/TEAM_ID/...`). Node IDs from `?node-id=1-2` are normalized to colon form (`1:2`) for the API. **project_id** is not extracted; use **List team projects** with the returned team_id to get project IDs.
     - **url** (required): A Figma URL pasted from the browser (file or team page).
 
 List team projects
@@ -55,12 +58,13 @@ Render nodes
 
 ## Discovery model: hierarchy only [figma-discovery-model]
 
-Figma does not provide a full-text search over files. Discovery is **hierarchical**: list teams → list projects → list files → get file (and optionally render nodes). When using this connector as a data source in chat or Agent Builder, users navigate by team and project; there is no single "search my Figma files for X" action. The Figma REST API does not offer a global search endpoint.
+Figma does not provide a full-text search over files. Discovery is **hierarchical**: use **List team projects** (with a team ID), then **List project files** (with a project ID), then **Get file** (and optionally **Render nodes**). When using this connector as a data source in chat or Agent Builder, users navigate by team and project; there is no single "search my Figma files for X" action. The Figma REST API does not offer a global search endpoint.
 
 ## Connector networking configuration [figma-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
+<a id="figma-api-credentials"></a>
 ## Get API credentials [figma-api-credentials]
 
 To use the Figma connector, you need a Figma personal access token:

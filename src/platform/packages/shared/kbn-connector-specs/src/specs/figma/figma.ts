@@ -39,7 +39,6 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-file-nodes
     // Response always includes components and styles maps alongside the document tree.
     getFile: {
-      isTool: false,
       input: z.object({
         fileKey: z
           .string()
@@ -79,7 +78,6 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-image
     renderNodes: {
-      isTool: false,
       input: z.object({
         fileKey: z.string().describe('File key from the Figma file URL'),
         nodeIds: z
@@ -113,7 +111,7 @@ export const FigmaConnector: ConnectorSpec = {
     listProjectFiles: {
       isTool: false,
       input: z.object({
-        projectId: z.string().describe('Figma project ID (from list_team_projects or project URL)'),
+        projectId: z.string().describe('Figma project ID (from list with type teamProjects or project URL)'),
       }),
       handler: async (ctx, input: Figma.ListProjectFilesInput) => {
         const response = await ctx.client.get(
@@ -136,6 +134,21 @@ export const FigmaConnector: ConnectorSpec = {
           {}
         );
         return response.data;
+      },
+    },
+
+    // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
+    whoAmI: {
+      input: z.object({}),
+      handler: async (ctx, _): Promise<Figma.WhoAmIResult> => {
+        const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
+        const data = response.data as Figma.WhoAmIResult;
+        return {
+          id: data.id,
+          handle: data.handle,
+          email: data.email,
+          img_url: data.img_url,
+        };
       },
     },
 
