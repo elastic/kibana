@@ -30,7 +30,7 @@ tags:
   - shared-common
   - package
   - dev
-  - group-platform
+  - group-observability
   - private
   - jest-unit-tests
 fileGroups:
