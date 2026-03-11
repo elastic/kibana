@@ -5,49 +5,41 @@
  * 2.0.
  */
 
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolSchemaType,
-  type ToolOptions,
-} from '@kbn/inference-common';
-import type { BedrockToolChoice } from './types';
+import type { Message, ToolSchemaType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, type ToolOptions } from '@kbn/inference-common';
+import type { ToolChoice as ConverseBedRockToolChoice } from '@aws-sdk/client-bedrock-runtime';
 
-export const toolChoiceToBedrock = (
+export const toolChoiceToConverse = (
   toolChoice: ToolOptions['toolChoice']
-): BedrockToolChoice | undefined => {
+): ConverseBedRockToolChoice | undefined => {
   if (toolChoice === ToolChoiceType.required) {
-    return {
-      type: 'any',
-    };
+    return { any: {} };
   } else if (toolChoice === ToolChoiceType.auto) {
-    return {
-      type: 'auto',
-    };
+    return { auto: {} };
   } else if (typeof toolChoice === 'object') {
-    return {
-      type: 'tool',
-      name: toolChoice.function,
-    };
+    return { tool: { name: toolChoice.function } };
   }
   // ToolChoiceType.none is not supported by claude
   // we are adding a directive to the system instructions instead in that case.
   return undefined;
 };
 
-export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
+export const toolsToConverseBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
   if (tools) {
     return Object.entries(tools).map(([toolName, toolDef]) => {
       return {
-        name: toolName,
-        description: toolDef.description,
-        input_schema: fixSchemaArrayProperties(
-          toolDef.schema ?? {
-            type: 'object' as const,
-            properties: {},
-          }
-        ),
+        toolSpec: {
+          name: toolName,
+          description: toolDef.description,
+          inputSchema: {
+            json: fixSchemaArrayProperties(
+              toolDef.schema ?? {
+                type: 'object' as const,
+                properties: {},
+              }
+            ),
+          },
+        },
       };
     });
   }
@@ -61,11 +53,15 @@ export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[])
   if (hasToolUse) {
     return [
       {
-        name: 'do_not_call_this_tool',
-        description: 'Do not call this tool, it is strictly forbidden',
-        input_schema: {
-          type: 'object',
-          properties: {},
+        toolSpec: {
+          name: 'do_not_call_this_tool',
+          description: 'Do not call this tool, it is strictly forbidden',
+          inputSchema: {
+            json: {
+              type: 'object',
+              properties: {},
+            },
+          },
         },
       },
     ];
@@ -73,34 +69,64 @@ export const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[])
 };
 
 /**
+ * Strips JSON Schema keywords that are not supported by the
+ * Bedrock Converse API. According to AWS documentation:
+ *  - `propertyNames` is not supported
+ *  - `additionalProperties` is not supported for object types
+ *  - `$schema` is not supported
+ *
+ * Also ensures object-typed schemas always have a `properties`
+ * field, which the Converse API requires for object types.
+ */
+function stripUnsupportedSchemaKeywords<T extends ToolSchemaType>(schemaPart: T): T {
+  const {
+    propertyNames: _propertyNames,
+    additionalProperties: _additionalProperties,
+    $schema: _$schema,
+    ...rest
+  } = schemaPart as unknown as Record<string, unknown>;
+
+  // Bedrock requires `properties` on object types
+  if (rest.type === 'object' && !rest.properties) {
+    rest.properties = {};
+  }
+
+  return rest as unknown as T;
+}
+
+/**
  * Claude is prone to ignoring the "array" part of an array type,
  * so this function patches it to add a message on each
  * array property to explicitly state that the value should
- * be returned as a json array...
+ * be returned as a json array.
  *
+ * Also strips JSON Schema keywords unsupported by Bedrock
+ * (e.g. `propertyNames`, `additionalProperties`).
  */
 export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T): T {
-  if (schemaPart.type === 'object' && schemaPart.properties) {
+  const cleaned = stripUnsupportedSchemaKeywords(schemaPart);
+
+  if (cleaned.type === 'object' && cleaned.properties) {
     return {
-      ...schemaPart,
+      ...cleaned,
       properties: Object.fromEntries(
-        Object.entries(schemaPart.properties).map(([key, childSchemaPart]) => {
+        Object.entries(cleaned.properties).map(([key, childSchemaPart]) => {
           return [key, fixSchemaArrayProperties(childSchemaPart)];
         })
       ),
     };
   }
 
-  if (schemaPart.type === 'array') {
+  if (cleaned.type === 'array') {
     return {
-      ...schemaPart,
+      ...cleaned,
       // Claude is prone to ignoring the "array" part of an array type
-      description: schemaPart.description
-        ? `${schemaPart.description}. Must be provided as a JSON array`
+      description: cleaned.description
+        ? `${cleaned.description}. Must be provided as a JSON array`
         : 'Must be provided as a JSON array',
-      items: fixSchemaArrayProperties(schemaPart.items),
+      items: cleaned.items ? fixSchemaArrayProperties(cleaned.items) : {},
     };
   }
 
-  return schemaPart;
+  return cleaned;
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { screen, render, fireEvent, within } from '@testing-library/react';
 
 import { OverviewHostStats } from '.';
 import { mockData } from './mock';
@@ -15,50 +15,47 @@ import { TestProviders } from '../../../common/mock/test_providers';
 describe('Overview Host Stat Data', () => {
   describe('rendering', () => {
     test('it renders the default OverviewHostStats', () => {
-      const wrapper = shallow(<OverviewHostStats data={mockData} loading={false} />);
-      expect(wrapper).toMatchSnapshot();
+      render(
+        <TestProviders>
+          <OverviewHostStats data={mockData} loading={false} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('overview-hosts-stats')).toMatchSnapshot();
     });
   });
   describe('loading', () => {
     test('it does NOT show loading indicator when loading is false', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <OverviewHostStats data={mockData} loading={false} />
         </TestProviders>
       );
 
       // click the accordion to expand it
-      wrapper.find('button').first().simulate('click');
-      wrapper.update();
+      fireEvent.click(container.querySelector('button')!);
 
       expect(
-        wrapper
-          .find('[data-test-subj="host-stat-auditbeatAuditd"]')
-          .first()
-          .find('[data-test-subj="stat-value-loading-spinner"]')
-          .first()
-          .exists()
-      ).toBe(false);
+        within(screen.getByTestId('host-stat-auditbeatAuditd')).queryByTestId(
+          'stat-value-loading-spinner'
+        )
+      ).not.toBeInTheDocument();
     });
+
     test('it shows loading indicator when loading is true', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <OverviewHostStats data={mockData} loading={true} />
         </TestProviders>
       );
 
       // click the accordion to expand it
-      wrapper.find('button').first().simulate('click');
-      wrapper.update();
+      fireEvent.click(container.querySelector('button')!);
 
       expect(
-        wrapper
-          .find('[data-test-subj="host-stat-auditbeatAuditd"]')
-          .first()
-          .find('[data-test-subj="stat-value-loading-spinner"]')
-          .first()
-          .exists()
-      ).toBe(true);
+        within(screen.getByTestId('host-stat-auditbeatAuditd')).getByTestId(
+          'stat-value-loading-spinner'
+        )
+      ).toBeInTheDocument();
     });
   });
 });

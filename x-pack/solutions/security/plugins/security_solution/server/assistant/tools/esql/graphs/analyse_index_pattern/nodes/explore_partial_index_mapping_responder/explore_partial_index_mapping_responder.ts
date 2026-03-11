@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { CreateLlmInstance } from '../../../../utils/common';
@@ -18,12 +18,12 @@ const structuredOutput = z.object({
     .describe('Whether the index pattern contains the required fields for the query'),
 });
 
-export const getExplorePartialIndexMappingResponder = ({
+export const getExplorePartialIndexMappingResponder = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { messages } = state;
 

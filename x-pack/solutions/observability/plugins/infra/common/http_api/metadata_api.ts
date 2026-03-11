@@ -87,6 +87,25 @@ export const InfraMetadataAgentRT = rt.partial({
   policy: rt.string,
 });
 
+export const InfraMetadataResourceRT = rt.partial({
+  attributes: rt.partial({
+    host: rt.partial({
+      ip: rt.union([rt.array(rt.string), rt.string]),
+      name: rt.string,
+      mac: rt.union([rt.array(rt.string), rt.string]),
+    }),
+    agent: rt.partial({}),
+    cloud: rt.partial({
+      provider: rt.string,
+      resource_id: rt.string,
+    }),
+    os: rt.partial({
+      name: rt.string,
+      version: rt.string,
+    }),
+  }),
+});
+
 export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
@@ -95,11 +114,16 @@ export const InfraMetadataInfoRT = rt.partial({
   '@timestamp': rt.string,
 });
 
+export const InfraMetadataFieldsRT = rt.partial({
+  fields: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), rt.null, rt.undefined])),
+});
+
 export const InfraMetadataInfoResponseRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
   container: InfraMetadataContainerRT,
   agent: InfraMetadataAgentRT,
+  resource: InfraMetadataResourceRT,
   timestamp: rt.string,
 });
 
@@ -117,6 +141,8 @@ const InfraMetadataOptionalRT = rt.partial({
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
 
 export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
+
+export type InfraMetadataFields = rt.TypeOf<typeof InfraMetadataFieldsRT>;
 
 export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
 

@@ -35,7 +35,7 @@ export const riskEngineScheduleNowRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.public.v1, validate: {} },
-      withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
+      withRiskEnginePrivilegeCheck('run', getStartServices, async (context, request, response) => {
         const securitySolution = await context.securitySolution;
 
         securitySolution.getAuditLogger()?.log({

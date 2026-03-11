@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import * as errorHandlers from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -65,7 +65,16 @@ describe('checkForUnknownDocs', () => {
     // Create a mock client that rejects all methods with a search_phase_execution_exception response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        body: { error: { type: 'search_phase_execution_exception' } },
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            caused_by: {
+              type: 'search_phase_execution_exception',
+              reason:
+                'Search rejected due to missing shards [.kibana_8.0.0]. Consider using `allow_partial_search_results` setting to bypass this error.',
+            },
+          },
+        },
       })
     );
     const client = elasticsearchClientMock.createInternalClient(
@@ -98,10 +107,10 @@ describe('checkForUnknownDocs', () => {
   });
 
   it('should throw because neither handler can retry', async () => {
-    // Create a mock client that rejects all methods with a 502 status code response.
+    // Create a mock client that rejects all methods with a 500 status code response.
     const retryableError = new EsErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        statusCode: 502,
+        statusCode: 500,
         body: { error: { type: 'es_type', reason: 'es_reason' } },
       })
     );

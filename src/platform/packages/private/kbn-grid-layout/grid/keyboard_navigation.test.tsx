@@ -10,7 +10,8 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
-import { GridLayout, GridLayoutProps } from './grid_layout';
+import type { GridLayoutProps } from './grid_layout';
+import { GridLayout } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -45,7 +46,8 @@ const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'd
 
 describe('Keyboard navigation', () => {
   window.HTMLElement.prototype.scrollIntoView = jest.fn();
-  Object.defineProperty(window, 'scrollY', { value: 0, writable: false });
+  window.HTMLElement.prototype.scrollTo = jest.fn();
+  Object.defineProperty(document.documentElement, 'scrollTop', { value: 0, writable: false });
   Object.defineProperty(document.body, 'scrollHeight', { value: 2000, writable: false });
 
   const pressEnter = async () => {
@@ -60,50 +62,36 @@ describe('Keyboard navigation', () => {
     renderGridLayout();
     const panelHandle = getPanelHandle('panel1');
     panelHandle.focus();
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel css-c5ixg-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     await pressEnter();
     await pressKey('[ArrowDown]');
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel kbnGridPanel--active css-c5ixg-initialStyles',
-      { exact: true }
+      'kbnGridPanel--active'
     );
     await pressEnter();
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel css-c5ixg-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
   });
   it('should show the panel active when during interaction for resize handle', async () => {
     renderGridLayout();
     const panelHandle = getPanelHandle('panel5', 'resize');
     panelHandle.focus();
-    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     await pressEnter();
     await pressKey('[ArrowDown]');
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
     expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles kbnGridPanel--active',
-      { exact: true }
+      'kbnGridPanel--active'
     );
     await pressKey('{Escape}');
-    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
   });

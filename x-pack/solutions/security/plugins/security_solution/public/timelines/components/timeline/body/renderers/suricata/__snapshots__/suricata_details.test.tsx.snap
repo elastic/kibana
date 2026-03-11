@@ -3,8 +3,8 @@
 exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = `
 <Details>
   <SuricataSignature
-    contextId="suricata-signature-test-4"
     id="4"
+    scopeId="test"
     signature="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
     signatureId={4}
   />

@@ -10,10 +10,10 @@ import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import type { Capabilities } from '@kbn/core/public';
-import { CASES_FEATURE_ID, CASES_PATH, ONBOARDING_PATH } from '../../common/constants';
+import { CASES_PATH, ONBOARDING_PATH } from '../../common/constants';
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
-import { hasAccessToSecuritySolution } from '../helpers_access';
+import { hasAccessToCases, hasAccessToSecuritySolution } from '../helpers_access';
 
 export interface AppRoutesProps {
   services: StartServices;
@@ -36,7 +36,7 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   if (hasAccessToSecuritySolution(capabilities)) {
     return <Redirect to={ONBOARDING_PATH} />;
   }
-  if (capabilities[CASES_FEATURE_ID].read_cases === true) {
+  if (hasAccessToCases(capabilities)) {
     return <Redirect to={CASES_PATH} />;
   }
   return <NotFoundPage />;

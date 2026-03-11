@@ -22,7 +22,7 @@ export const FleetServerMissingEncryptionKeyCallout: React.FunctionComponent<
   return (
     <EuiCallOut
       data-test-subj="missingEncryptionKeyCallout"
-      iconType="iInCircle"
+      iconType="info"
       color="warning"
       title={
         <FormattedMessage

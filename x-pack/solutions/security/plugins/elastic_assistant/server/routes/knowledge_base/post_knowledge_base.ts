@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { CreateKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   CreateKnowledgeBaseRequestParams,
-  CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   CreateKnowledgeBaseRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 
 // Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
 // Consider just returning if attempt was successful, and switch to client polling
@@ -59,9 +59,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              modelIdOverride: request.query.modelId,
-            });
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }

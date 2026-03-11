@@ -12,14 +12,16 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
-import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
+import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
+import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
+import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
+import { ElasticInferenceServiceCallout } from './elastic_inference_service_callout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -33,10 +35,16 @@ const centerMaxWidthClassName = css`
 export function WelcomeMessage({
   connectors,
   knowledgeBase,
+  showElasticLlmCalloutInChat,
+  showKnowledgeBaseReIndexingCallout,
+  eisCalloutZIndex,
   onSelectPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
+  showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
+  eisCalloutZIndex?: number;
   onSelectPrompt: (prompt: string) => void;
 }) {
   const breakpoint = useCurrentEuiBreakpoint();
@@ -61,13 +69,6 @@ export function WelcomeMessage({
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
-
-    if (
-      !knowledgeBase.status.value ||
-      knowledgeBase.status.value?.kbState === KnowledgeBaseState.NOT_INSTALLED
-    ) {
-      knowledgeBase.install();
-    }
   };
 
   const ConnectorFlyout = useMemo(
@@ -83,23 +84,45 @@ export function WelcomeMessage({
         gutterSize="none"
         className={fullHeightClassName}
       >
+        {showKnowledgeBaseReIndexingCallout ? (
+          <EuiFlexItem grow={false}>
+            <KnowledgeBaseReindexingCallout />
+          </EuiFlexItem>
+        ) : null}
+        {showElasticLlmCalloutInChat ? (
+          <EuiFlexItem grow={false}>
+            <ElasticLlmConversationCallout />
+          </EuiFlexItem>
+        ) : null}
+        {!connectors.loading && !connectors.connectors?.length ? (
+          <>
+            <EuiFlexItem grow={false} style={{ alignSelf: 'stretch' }}>
+              <ElasticInferenceServiceCallout />
+            </EuiFlexItem>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
         <EuiFlexItem grow={false}>
           <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
+          <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'm' : 's'} />
           <WelcomeMessageConnectors
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
           />
           {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
-            <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
+            <WelcomeMessageKnowledgeBase
+              knowledgeBase={knowledgeBase}
+              eisCalloutZIndex={eisCalloutZIndex}
+            />
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StarterPrompts onSelectPrompt={onSelectPrompt} />
           <EuiSpacer size="l" />
           <Disclaimer />
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
 

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { SearchEsListSchema, searchEsListSchema } from './search_es_list_schema';
+import type { SearchEsListSchema } from './search_es_list_schema';
+import { searchEsListSchema } from './search_es_list_schema';
 import { getSearchEsListMock } from './search_es_list_schema.mock';
 
 describe('search_es_list_schema', () => {

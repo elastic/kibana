@@ -7,7 +7,7 @@
 
 import { paramsMock } from './__mocks__/params_match_all';
 
-import { getCategoryCountRequest, getCategoryCountMSearchRequest } from './fetch_category_counts';
+import { getCategoryCountRequest } from './fetch_category_counts';
 
 describe('getCategoryCountRequest', () => {
   it('returns the category count request', () => {
@@ -21,9 +21,10 @@ describe('getCategoryCountRequest', () => {
     const query = getCategoryCountRequest(
       paramsMock,
       'the-field-name',
-      category,
+      [category],
       paramsMock.baselineMin,
-      paramsMock.baselineMax
+      paramsMock.baselineMax,
+      1 // no sampling
     );
 
     expect(query).toEqual({
@@ -32,33 +33,40 @@ describe('getCategoryCountRequest', () => {
         bool: {
           filter: [
             { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
-            {
-              bool: {
-                should: [
-                  {
-                    match: {
-                      'the-field-name': {
-                        auto_generate_synonyms_phrase_query: false,
-                        fuzziness: 0,
-                        operator: 'and',
-                        query: 'runTask ended no files to process',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
           ],
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
+      aggs: {
+        category_counts: {
+          filters: {
+            filters: {
+              category_0: {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'the-field-name': {
+                          auto_generate_synonyms_phrase_query: false,
+                          fuzziness: 0,
+                          operator: 'and',
+                          query: 'runTask ended no files to process',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            other_bucket: false,
+          },
+        },
+      },
     });
   });
-});
 
-describe('getCategoryCountMSearchRequest', () => {
-  it('returns the request body for the msearch request', () => {
+  it('supports multiple categories', () => {
     const categories = [
       {
         key: 'SLO summary transforms installed and started',
@@ -69,71 +77,62 @@ describe('getCategoryCountMSearchRequest', () => {
       { key: 'Trusted Apps', count: 500, examples: ['Trusted Apps: '], regex: '' },
     ];
 
-    const query = getCategoryCountMSearchRequest(
+    const query = getCategoryCountRequest(
       paramsMock,
       'the-field-name',
       categories,
+      1, // no sampling
       paramsMock.baselineMin,
       paramsMock.baselineMax
     );
 
-    expect(query).toEqual([
-      { index: 'the-index' },
-      {
-        query: {
-          bool: {
-            filter: [
-              { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
-              {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'the-field-name': {
-                          auto_generate_synonyms_phrase_query: false,
-                          fuzziness: 0,
-                          operator: 'and',
-                          query: 'SLO summary transforms installed and started',
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        size: 0,
-        track_total_hits: true,
-      },
-      { index: 'the-index' },
-      {
-        query: {
-          bool: {
-            filter: [
-              { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
-              {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'the-field-name': {
-                          auto_generate_synonyms_phrase_query: false,
-                          fuzziness: 0,
-                          operator: 'and',
-                          query: 'Trusted Apps',
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        size: 0,
-        track_total_hits: true,
-      },
-    ]);
+    const filters =
+      (query.aggs?.category_counts as unknown as { filters: { filters: Record<string, unknown> } })
+        ?.filters.filters ?? {};
+
+    expect(Object.keys(filters)).toEqual(['category_0', 'category_1']);
+  });
+
+  describe('with sampling', () => {
+    const category = {
+      key: 'test category',
+      count: 100,
+      examples: ['test example'],
+      regex: '',
+    };
+
+    it('wraps with random_sampler when probability < 1 is provided', () => {
+      const query = getCategoryCountRequest(
+        paramsMock,
+        'the-field-name',
+        [category],
+        paramsMock.baselineMin,
+        paramsMock.baselineMax,
+        0.1
+      );
+
+      expect(query.aggs).toHaveProperty('sample');
+      expect(query.aggs?.sample).toHaveProperty('random_sampler');
+      expect((query.aggs?.sample as Record<string, unknown>).random_sampler).toMatchObject({
+        probability: 0.1,
+      });
+      expect((query.aggs?.sample as Record<string, unknown>).aggs).toHaveProperty(
+        'category_counts'
+      );
+    });
+
+    it('does not wrap when probability is 1 (no sampling)', () => {
+      const query = getCategoryCountRequest(
+        paramsMock,
+        'the-field-name',
+        [category],
+        paramsMock.baselineMin,
+        paramsMock.baselineMax,
+        1
+      );
+
+      expect(query.aggs).not.toHaveProperty('sample');
+      expect(query.aggs).toHaveProperty('category_counts');
+    });
   });
 });

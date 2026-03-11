@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SyntheticEvent } from 'react';
 import React from 'react';
 
-import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { i18n } from '@kbn/i18n';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -27,10 +31,15 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
+  color?: EuiButtonColor;
   showIcon?: boolean;
-  type?: 'link' | 'button' | 'emptyButton';
+  iconType?: string;
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
-  onClick?: () => void;
+  onClick?: (e: SyntheticEvent<Element>) => void;
+  disabled?: boolean;
+  'data-test-subj'?: string;
+  buttonProps?: EuiButtonPropsForButton;
 }
 export const TryInConsoleButton = ({
   request,
@@ -38,10 +47,15 @@ export const TryInConsoleButton = ({
   consolePlugin,
   sharePlugin,
   content = RUN_IN_CONSOLE,
+  color,
   showIcon = true,
+  iconType = 'console',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
+  disabled = false,
+  'data-test-subj': dataTestSubj,
+  buttonProps = {},
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -59,7 +73,7 @@ export const TryInConsoleButton = ({
   );
   if (!consolePreviewLink) return null;
 
-  const onClick = () => {
+  const onClick = (e: SyntheticEvent<Element>) => {
     const embeddedConsoleAvailable =
       (consolePlugin?.openEmbeddedConsole !== undefined &&
         consolePlugin?.isEmbeddedConsoleAvailable?.()) ??
@@ -69,7 +83,7 @@ export const TryInConsoleButton = ({
     } else {
       window.open(consolePreviewLink, '_blank', 'noreferrer');
     }
-    onClickProp?.();
+    onClickProp?.(e);
   };
 
   const getAriaLabel = () => {
@@ -87,26 +101,43 @@ export const TryInConsoleButton = ({
   };
 
   const commonProps = {
-    'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    'data-test-subj': dataTestSubj
+      ? dataTestSubj
+      : type === 'link'
+      ? 'tryInConsoleLink'
+      : type === 'contextMenuItem'
+      ? 'tryInConsoleContextMenuItem'
+      : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
+    disabled,
   };
-  const iconType = showIcon ? 'play' : undefined;
+  const btnIconType = showIcon ? iconType : undefined;
+
+  const noPadding = css({
+    padding: 0,
+  });
 
   switch (type) {
     case 'link':
       return <EuiLink {...commonProps}>{content}</EuiLink>;
     case 'button':
       return (
-        <EuiButton color="primary" iconType={iconType} size="s" {...commonProps}>
+        <EuiButton color={color} iconType={btnIconType} size="s" {...commonProps} {...buttonProps}>
           {content}
         </EuiButton>
+      );
+    case 'contextMenuItem':
+      return (
+        <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
+          {content}
+        </EuiContextMenuItem>
       );
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={btnIconType} color={color} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );

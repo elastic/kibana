@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ContentReference, ContentReferences } from '../schemas';
+import type { ContentReference, ContentReferences } from '../schemas';
 
 export type ContentReferenceId = string;
 export type ContentReferenceTypes = ContentReference['type'];
 export type ContentReferenceBlock = `{reference(${string})}`;
+
+export interface Options {
+  disabled?: boolean;
+}
 
 export interface ContentReferencesStore {
   /**
@@ -28,4 +32,9 @@ export interface ContentReferencesStore {
    * @returns a record that contains all of the ContentReference that have been added .
    */
   getStore: () => ContentReferences;
+
+  /**
+   * Options used to configure the ContentReferencesStore.
+   */
+  options?: Options;
 }

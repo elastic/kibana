@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
 
-import { ConfigKey, Ping, PingsResponse } from '../../../../../common/runtime_types';
+import type { Ping, PingsResponse } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   getMonitorLastRunAction,

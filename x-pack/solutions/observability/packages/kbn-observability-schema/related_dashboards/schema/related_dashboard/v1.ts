@@ -5,18 +5,33 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { relevantPanelSchema } from '../relevant_panel/latest';
+import { z } from '@kbn/zod/v4';
 
-export const relatedDashboardSchema = z.object({
+const commonDashboardSchema = {
   id: z.string(),
   title: z.string(),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+};
+
+export const linkedDashboardSchema = z.object({
+  ...commonDashboardSchema,
+  matchedBy: z.object({
+    fields: z.array(z.string()).optional(),
+    index: z.array(z.string()).optional(),
+    linked: z.boolean().optional(),
+  }),
+});
+
+export const suggestedDashboardSchema = z.object({
+  ...commonDashboardSchema,
   matchedBy: z.object({
     fields: z.array(z.string()).optional(),
     index: z.array(z.string()).optional(),
   }),
-  relevantPanelCount: z.number(),
-  relevantPanels: z.array(relevantPanelSchema),
+  score: z.number(),
 });
 
-export type RelatedDashboard = z.output<typeof relatedDashboardSchema>;
+export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
+export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;
+export type RelatedDashboard = LinkedDashboard | SuggestedDashboard;

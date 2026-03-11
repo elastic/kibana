@@ -15,51 +15,55 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormAppend,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
-  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableProps } from './types';
+import type { BurnRateCustomState } from './types';
 
 interface Props {
-  onCreate: (props: EmbeddableProps) => void;
+  onCreate: (state: BurnRateCustomState) => void;
   onCancel: () => void;
 }
 
 interface SloConfig {
-  sloId: string;
-  sloInstanceId: string;
+  slo_id: string;
+  slo_instance_id: string;
 }
 
 export function Configuration({ onCreate, onCancel }: Props) {
   const [selectedSlo, setSelectedSlo] = useState<SloConfig>();
   const [duration, setDuration] = useState<string>('1h');
   const [hasError, setHasError] = useState(false);
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'burnRateConfigurationFlyout',
+  });
 
   const isDurationValid = duration.match(/^\d+[mhd]$/); // matches 1m, 78m, 1h, 6h, 1d, 24d
 
   const isValid = !!selectedSlo && isDurationValid;
 
   const onConfirmClick = () => {
-    if (isValid) {
+    if (isValid && selectedSlo) {
       onCreate({
-        sloId: selectedSlo.sloId,
-        sloInstanceId: selectedSlo.sloInstanceId,
+        slo_id: selectedSlo.slo_id,
+        slo_instance_id: selectedSlo.slo_instance_id,
         duration,
       });
     }
   };
 
   return (
-    <EuiFlyout onClose={onCancel} style={{ minWidth: 550 }}>
+    <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.burnRateEmbeddable.configuration.headerTitle', {
               defaultMessage: 'Burn rate configuration',
             })}
@@ -75,7 +79,7 @@ export function Configuration({ onCreate, onCancel }: Props) {
               onSelected={(slo) => {
                 setHasError(slo === undefined);
                 if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                  setSelectedSlo({ slo_id: slo.id, slo_instance_id: slo.instanceId });
                 }
               }}
             />
@@ -95,17 +99,18 @@ export function Configuration({ onCreate, onCancel }: Props) {
                 onChange={(e) => setDuration(e.target.value)}
                 isInvalid={!isDurationValid}
                 append={
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
-                      {
-                        defaultMessage:
-                          'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
-                      }
-                    )}
-                  >
-                    <EuiIcon type="questionInCircle" />
-                  </EuiToolTip>
+                  <EuiFormAppend>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
+                        {
+                          defaultMessage:
+                            'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
+                        }
+                      )}
+                      type="question"
+                    />
+                  </EuiFormAppend>
                 }
               />
             </EuiFormRow>

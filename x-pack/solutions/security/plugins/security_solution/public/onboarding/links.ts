@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ONBOARDING_PATH, SecurityPageName, SECURITY_FEATURE_ID } from '../../common/constants';
+import {
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import { ONBOARDING_PATH, SecurityPageName } from '../../common/constants';
 import { GETTING_STARTED } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
@@ -14,7 +18,7 @@ export const onboardingLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: ONBOARDING_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [SECURITY_UI_SHOW_PRIVILEGE, RULES_UI_READ_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',

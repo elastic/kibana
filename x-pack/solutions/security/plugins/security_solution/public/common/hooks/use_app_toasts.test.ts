@@ -30,17 +30,20 @@ describe('useAppToasts', () => {
   let addErrorMock: jest.Mock;
   let addSuccessMock: jest.Mock;
   let addWarningMock: jest.Mock;
+  let addInfoMock: jest.Mock;
   let removeMock: jest.Mock;
 
   beforeEach(() => {
     addErrorMock = jest.fn();
     addSuccessMock = jest.fn();
     addWarningMock = jest.fn();
+    addInfoMock = jest.fn();
     removeMock = jest.fn();
     (useToasts as jest.Mock).mockImplementation(() => ({
       addError: addErrorMock,
       addSuccess: addSuccessMock,
       addWarning: addWarningMock,
+      addInfo: addInfoMock,
       remove: removeMock,
     }));
   });

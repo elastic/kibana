@@ -7,6 +7,11 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+  getDurationFieldForTransactions,
+} from '@kbn/apm-data-access-plugin/server/utils';
 import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
@@ -16,11 +21,6 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import type { Coordinate } from '../../../typings/timeseries';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
-import {
-  calculateFailedTransactionRate,
-  getOutcomeAggregation,
-} from '../../lib/helpers/transaction_error_rate';
 import type { RollupInterval } from '../../../common/rollup';
 
 interface ServiceTransactionGroupDetailedStat {

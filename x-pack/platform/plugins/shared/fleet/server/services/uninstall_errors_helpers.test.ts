@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UninstallFailedAttempt } from '../types';
+import type { FailedAttempt } from '../types';
 
 import { updateUninstallFailedAttempts } from './epm/packages/uninstall_errors_helpers';
 
@@ -20,7 +20,7 @@ const generateFailedAttempt = () => ({
 describe('Uninstall error helpers', () => {
   describe('updateUninstallFailedAttempts', () => {
     it('should only keep 5 errors', () => {
-      const previousFailedAttempts: UninstallFailedAttempt[] = Array(5)
+      const previousFailedAttempts: FailedAttempt[] = Array(5)
         .fill(null)
         .map((_) => generateFailedAttempt());
       const updatedLatestUninstallFailedAttempts = updateUninstallFailedAttempts({

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiProgress,
   EuiText,
   EuiTextBlockTruncate,
-  EuiThemeComputed,
   EuiToolTip,
   makeHighContrastColor,
   useEuiTheme,
@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldTopValuesBucketParams {
@@ -99,64 +100,69 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           min-width: 0;
         `}
       >
-        <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
-          <EuiFlexItem
-            grow={true}
-            data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
-            css={css`
-              overflow-wrap: anywhere;
-            `}
-          >
-            {(formattedFieldValue?.length ?? 0) > 0 ? (
-              <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiTextBlockTruncate lines={3}>
-                  <EuiText size="xs" color={'subdued'} {...textProps}>
-                    {formattedFieldValue}
-                  </EuiText>
-                </EuiTextBlockTruncate>
-              </EuiToolTip>
-            ) : (
-              <EuiText size="xs">
-                {type === 'other'
-                  ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
-                      defaultMessage: 'Other',
-                    })
-                  : formattedFieldValue === ''
-                  ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                      defaultMessage: '(empty)',
-                    })
-                  : '-'}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-
-          <EuiFlexItem
-            grow={false}
-            data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}
-          >
-            <EuiToolTip
-              content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
-                defaultMessage:
-                  '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
-                values: {
-                  formattedPercentage,
-                  count,
-                },
-              })}
-              delay="long"
-            >
-              <EuiText size="xs" textAlign="left" color={getPercentageColor(euiTheme, color)}>
-                {formattedPercentage}
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiProgress
           value={progressValue}
           max={1}
           size="s"
           color={type === 'other' ? 'subdued' : color}
-          aria-label={`${formattedFieldValue} (${formattedPercentage})`}
+          valueText={
+            <div data-test-subj={`${dataTestSubject}-topValues-formattedPercentage`}>
+              <EuiToolTip
+                content={i18n.translate('unifiedFieldList.fieldStats.bucketPercentageTooltip', {
+                  defaultMessage:
+                    '{formattedPercentage} ({count, plural, one {# record} other {# records}})',
+                  values: {
+                    formattedPercentage,
+                    count,
+                  },
+                })}
+                delay="long"
+              >
+                <EuiText
+                  tabIndex={0}
+                  size="xs"
+                  textAlign="left"
+                  color={getPercentageColor(euiTheme, color)}
+                >
+                  {formattedPercentage}
+                </EuiText>
+              </EuiToolTip>
+            </div>
+          }
+          label={
+            <div
+              data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
+              css={css`
+                overflow-wrap: anywhere;
+              `}
+            >
+              {(formattedFieldValue?.length ?? 0) > 0 ? (
+                <EuiToolTip content={formattedFieldValue} delay="long">
+                  <EuiTextBlockTruncate lines={3}>
+                    <EuiText size="xs" color={'subdued'} {...textProps}>
+                      {formattedFieldValue}
+                    </EuiText>
+                  </EuiTextBlockTruncate>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs">
+                  {type === 'other'
+                    ? i18n.translate('unifiedFieldList.fieldStats.otherDocsLabel', {
+                        defaultMessage: 'Other',
+                      })
+                    : formattedFieldValue === ''
+                    ? EMPTY_LABEL
+                    : '-'}
+                </EuiText>
+              )}
+            </div>
+          }
+          labelProps={{
+            title: undefined,
+            css: css`
+              white-space: unset !important;
+            `,
+          }}
         />
       </EuiFlexItem>
       {onAddFilter && field.filterable && (
@@ -169,7 +175,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             />
           ) : (
             <div>
-              <EuiToolTip content={filterForLabel}>
+              <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="plusInCircle"
@@ -186,7 +192,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                   }}
                 />
               </EuiToolTip>
-              <EuiToolTip content={filterOutLabel}>
+              <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
                   iconType="minusInCircle"

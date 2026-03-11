@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export class CorePluginRouteTimeoutsPlugin implements Plugin {
@@ -66,7 +66,7 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
           body: {
             accepts: ['application/json'],
           },
-          timeout: { idleSocket: 5 },
+          timeout: { payload: 30000, idleSocket: 5 },
         },
         path: '/short_idle_socket_timeout',
         security: {

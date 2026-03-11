@@ -20,6 +20,8 @@
           " extends Error"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -31,6 +33,8 @@
             "label": "code",
             "description": [],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,1140 +49,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/incompatible_action_error.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.UiActionsService",
-        "type": "Class",
-        "tags": [],
-        "label": "UiActionsService",
-        "description": [],
-        "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.executionService",
-            "type": "Object",
-            "tags": [],
-            "label": "executionService",
-            "description": [],
-            "signature": [
-              "UiActionsExecutionService"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.triggers",
-            "type": "Object",
-            "tags": [],
-            "label": "triggers",
-            "description": [],
-            "signature": [
-              "Map<string, ",
-              "TriggerInternal",
-              "<object>>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.actions",
-            "type": "Object",
-            "tags": [],
-            "label": "actions",
-            "description": [],
-            "signature": [
-              "Map<string, () => Promise<",
-              "ActionInternal",
-              "<object>>>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.triggerToActions",
-            "type": "Object",
-            "tags": [],
-            "label": "triggerToActions",
-            "description": [],
-            "signature": [
-              "Map<string, string[]>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{\n    triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.UiActionsServiceParams",
-                    "text": "UiActionsServiceParams"
-                  }
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.registerTrigger",
-            "type": "Function",
-            "tags": [],
-            "label": "registerTrigger",
-            "description": [],
-            "signature": [
-              "(trigger: ",
-              {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
-              },
-              ") => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.registerTrigger.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "trigger",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/ui-actions-browser",
-                    "scope": "common",
-                    "docId": "kibKbnUiActionsBrowserPluginApi",
-                    "section": "def-common.Trigger",
-                    "text": "Trigger"
-                  }
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.hasTrigger",
-            "type": "Function",
-            "tags": [],
-            "label": "hasTrigger",
-            "description": [],
-            "signature": [
-              "(triggerId: string) => boolean"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.hasTrigger.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.getTrigger",
-            "type": "Function",
-            "tags": [],
-            "label": "getTrigger",
-            "description": [],
-            "signature": [
-              "(triggerId: string) => ",
-              "TriggerContract",
-              "<object>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getTrigger.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.registerAction",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "registerAction",
-            "description": [],
-            "signature": [
-              "<Context extends object>(definition: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "uiActionsEnhanced",
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/context_awareness/hooks/use_additional_cell_actions.ts"
-              },
-              {
-                "plugin": "imageEmbeddable",
-                "path": "src/platform/plugins/private/image_embeddable/public/actions/create_image_action.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.registerAction.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "definition",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.registerActionAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "registerActionAsync",
-            "description": [],
-            "signature": [
-              "<Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context>>) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.registerActionAsync.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.registerActionAsync.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "getDefinition",
-                "description": [],
-                "signature": [
-                  "() => Promise<",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<Context>>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.unregisterAction",
-            "type": "Function",
-            "tags": [],
-            "label": "unregisterAction",
-            "description": [],
-            "signature": [
-              "(actionId: string) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.unregisterAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.hasAction",
-            "type": "Function",
-            "tags": [],
-            "label": "hasAction",
-            "description": [],
-            "signature": [
-              "(actionId: string) => boolean"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.hasAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.attachAction",
-            "type": "Function",
-            "tags": [],
-            "label": "attachAction",
-            "description": [],
-            "signature": [
-              "(triggerId: string, actionId: string) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.attachAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.attachAction.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.detachAction",
-            "type": "Function",
-            "tags": [],
-            "label": "detachAction",
-            "description": [],
-            "signature": [
-              "(triggerId: string, actionId: string) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.detachAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.detachAction.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.addTriggerAction",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "addTriggerAction",
-            "description": [],
-            "signature": [
-              "(triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any>) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/visualizations/actions/register.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "inputControlVis",
-                "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
-              },
-              {
-                "plugin": "@kbn/test-suites-src",
-                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.addTriggerAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.addTriggerAction.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "action",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<any>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.addTriggerActionAsync",
-            "type": "Function",
-            "tags": [],
-            "label": "addTriggerActionAsync",
-            "description": [
-              "\n`addTriggerAction` is similar to `attachAction` as it attaches action to a\ntrigger, but it also registers the action, if it has not been registered, yet."
-            ],
-            "signature": [
-              "(triggerId: string, actionId: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any>>) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.addTriggerActionAsync.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.addTriggerActionAsync.$2",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.addTriggerActionAsync.$3",
-                "type": "Function",
-                "tags": [],
-                "label": "getDefinition",
-                "description": [],
-                "signature": [
-                  "() => Promise<",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionDefinition",
-                    "text": "ActionDefinition"
-                  },
-                  "<any>>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.getAction",
-            "type": "Function",
-            "tags": [],
-            "label": "getAction",
-            "description": [],
-            "signature": [
-              "(id: string) => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getAction.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.getTriggerActions",
-            "type": "Function",
-            "tags": [],
-            "label": "getTriggerActions",
-            "description": [],
-            "signature": [
-              "(triggerId: string) => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>[]>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getTriggerActions.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.getTriggerCompatibleActions",
-            "type": "Function",
-            "tags": [],
-            "label": "getTriggerCompatibleActions",
-            "description": [],
-            "signature": [
-              "(triggerId: string, context: object) => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<object>[]>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getTriggerCompatibleActions.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger",
-            "type": "Function",
-            "tags": [],
-            "label": "getFrequentlyChangingActionsForTrigger",
-            "description": [],
-            "signature": [
-              "(triggerId: string, context: object) => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.FrequentCompatibilityChangeAction",
-                "text": "FrequentCompatibilityChangeAction"
-              },
-              "<object>[]>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.getFrequentlyChangingActionsForTrigger.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.executeTriggerActions",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "executeTriggerActions",
-            "description": [],
-            "signature": [
-              "(triggerId: string, context: object) => Promise<void>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/utils/table_inspector_view/components/data_table.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
-              },
-              {
-                "plugin": "imageEmbeddable",
-                "path": "src/platform/plugins/private/image_embeddable/public/components/image_embeddable.tsx"
-              }
-            ],
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.executeTriggerActions.$1",
-                "type": "string",
-                "tags": [],
-                "label": "triggerId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.UiActionsService.executeTriggerActions.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.clear",
-            "type": "Function",
-            "tags": [],
-            "label": "clear",
-            "description": [
-              "\nRemoves all registered triggers and actions."
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsService.fork",
-            "type": "Function",
-            "tags": [],
-            "label": "fork",
-            "description": [
-              "\n\"Fork\" a separate instance of `UiActionsService` that inherits all existing\ntriggers and actions, but going forward all new triggers and actions added\nto this instance of `UiActionsService` are only available within this instance."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              }
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1206,6 +78,8 @@
           "[]>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1220,6 +94,8 @@
               "BuildContextMenuParams"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
+            "lineNumber": 123,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1244,7 +120,7 @@
             "section": "def-public.ActionDefinition",
             "text": "ActionDefinition"
           },
-          "<Context>) => ",
+          "<Context, {}>) => ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -1252,16 +128,18 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>"
+          "<Context, object>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActions",
             "id": "def-public.createAction.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "action",
             "description": [],
@@ -1273,9 +151,11 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>"
+              "<Context, {}>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/create_action.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1301,7 +181,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context> extends Partial<",
+          "<Context, ActionExtension> extends Partial<",
           {
             "pluginId": "@kbn/ui-actions-browser",
             "scope": "common",
@@ -1320,6 +200,8 @@
           "<Context>>>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1336,6 +218,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1349,6 +233,8 @@
               "\nA unique identifier for this action instance."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1362,6 +248,8 @@
               "\nThe action type is what determines the context shape."
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1386,6 +274,8 @@
               "<Context>) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1407,6 +297,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1435,6 +327,8 @@
               "<Context>) => string"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1456,6 +350,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 77,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1484,6 +380,8 @@
               "<Context>) => Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1505,6 +403,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 83,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1533,6 +433,8 @@
               "<Context>) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1554,6 +456,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 88,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1582,6 +486,8 @@
               "<Context>) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1603,6 +509,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 95,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1631,6 +539,8 @@
               "<Context>) => Promise<boolean>) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1652,6 +562,8 @@
                   "<Context>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 102,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1672,6 +584,8 @@
               "<undefined> | undefined) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1686,6 +600,8 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 107,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1708,6 +624,8 @@
               "((context: Context) => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1722,6 +640,8 @@
                   "Context"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+                "lineNumber": 114,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1742,6 +662,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,323 +680,26 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.ActionDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "ActionDefinition",
-        "description": [
-          "\nA convenience interface used to register an action."
-        ],
-        "signature": [
-          {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.ActionDefinition",
-            "text": "ActionDefinition"
-          },
-          "<Context> extends Partial<",
-          {
-            "pluginId": "@kbn/ui-actions-browser",
-            "scope": "common",
-            "docId": "kibKbnUiActionsBrowserPluginApi",
-            "section": "def-common.Presentable",
-            "text": "Presentable"
-          },
-          "<",
-          "ActionDefinitionContext",
-          "<Context>>>"
-        ],
-        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nID of the action that uniquely identifies this action in the actions registry."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.type",
-            "type": "string",
+            "id": "def-public.Action.extension",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "type",
-            "description": [
-              "\nID of the factory for this action. Used to construct dynamic actions."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.isCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatible",
-            "description": [
-              "\nReturns a promise that resolves to true if this item is compatible given\nthe context and should be displayed to user, otherwise resolves to false."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.isCompatible.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.execute",
-            "type": "Function",
-            "tags": [],
-            "label": "execute",
-            "description": [
-              "\nExecutes the action."
-            ],
-            "signature": [
-              "(context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<void>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.execute.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.shouldAutoExecute",
-            "type": "Function",
-            "tags": [],
-            "label": "shouldAutoExecute",
-            "description": [
-              "\nDetermines if action should be executed automatically,\nwithout first showing up in context menu.\nfalse by default."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.shouldAutoExecute.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.getHref",
-            "type": "Function",
-            "tags": [],
-            "label": "getHref",
-            "description": [
-              "\nThis method should return a link if this item can be clicked on. The link\nis used to navigate user if user middle-clicks it or Ctrl + clicks or\nright-clicks and selects \"Open in new tab\"."
-            ],
-            "signature": [
-              "((context: ",
-              "ActionDefinitionContext",
-              "<Context>) => Promise<string | undefined>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.getHref.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ActionDefinitionContext",
-                  "<Context>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.disabled",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disabled",
-            "description": [
-              "\naction is disabled or not\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.showNotification",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showNotification",
-            "description": [
-              "\nDetermines if notification should be shown in menu for that action\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.getCompatibilityChangesSubject",
-            "type": "Function",
-            "tags": [],
-            "label": "getCompatibilityChangesSubject",
+            "label": "extension",
             "description": [],
             "signature": [
-              "((context: Context) => ",
-              "Observable",
-              "<undefined> | undefined) | undefined"
+              "ActionExtension | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.getCompatibilityChangesSubject.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": [
-              "an Observable that emits when this action's compatibility should be recalculated."
-            ]
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.ActionDefinition.couldBecomeCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "couldBecomeCompatible",
-            "description": [
-              "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
-            ],
-            "signature": [
-              "((context: Context) => boolean) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActions",
-                "id": "def-public.ActionDefinition.couldBecomeCompatible.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2089,6 +714,8 @@
           "\nDuring action execution we can provide additional information,\nfor example, trigger, that caused the action execution"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2103,14 +730,34 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.ActionExecutionMeta.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [
+              "\nThe event that caused the action to execute (e.g., mouse click, keyboard event)"
+            ],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent> | undefined"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2135,6 +782,8 @@
           "<Context>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2156,6 +805,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2182,6 +833,8 @@
           "<Context>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2195,6 +848,8 @@
               "\nID that uniquely identifies this object."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2208,6 +863,8 @@
               "\nDetermines the display order in relation to other items. Higher numbers are\ndisplayed first."
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2224,6 +881,8 @@
               "React.FC<{ context: Context; }> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2240,6 +899,8 @@
               "(context: Context) => string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2254,6 +915,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 36,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2274,6 +937,8 @@
               "(context: Context) => string"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2288,6 +953,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 41,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2308,6 +975,8 @@
               "((context: Context) => string) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2322,6 +991,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 47,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2342,6 +1013,8 @@
               "((context: Context) => Promise<string | undefined>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2356,6 +1029,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 54,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2376,6 +1051,8 @@
               "(context: Context) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2390,6 +1067,8 @@
                   "Context"
                 ],
                 "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+                "lineNumber": 60,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2417,6 +1096,8 @@
               "<Context> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2449,6 +1130,8 @@
           "<Context>, \"order\" | \"getIconType\" | \"getDisplayName\" | \"getDisplayNameTooltip\">>"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2460,6 +1143,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2472,10 +1157,10 @@
         "type": "Interface",
         "tags": [],
         "label": "Trigger",
-        "description": [
-          "\nThis is a convenience interface used to register a *trigger*.\n\n`Trigger` specifies a named anchor to which `Action` can be attached. When\n`Trigger` is being *called* it creates a `Context` object and passes it to\nthe `execute` method of an `Action`.\n\nMore than one action can be attached to a single trigger, in which case when\ntrigger is *called* it first displays a context menu for user to pick a\nsingle action to execute."
-        ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+        "description": [],
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2488,7 +1173,9 @@
             "description": [
               "\nUnique name of the trigger as identified in `ui_actions` plugin trigger registry."
             ],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2504,7 +1191,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2520,68 +1209,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.UiActionsServiceParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "UiActionsServiceParams",
-        "description": [],
-        "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsServiceParams.triggers",
-            "type": "Object",
-            "tags": [],
-            "label": "triggers",
-            "description": [],
-            "signature": [
-              "TriggerRegistry",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsServiceParams.actions",
-            "type": "Object",
-            "tags": [],
-            "label": "actions",
-            "description": [],
-            "signature": [
-              "ActionRegistry",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.UiActionsServiceParams.triggerToActions",
-            "type": "Object",
-            "tags": [],
-            "label": "triggerToActions",
-            "description": [
-              "\nA 1-to-N mapping from `Trigger` to zero or more `Action`."
-            ],
-            "signature": [
-              "TriggerToActionsRegistry",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions/public/service/ui_actions_service.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2596,6 +1226,8 @@
         "label": "VisualizeFieldContext",
         "description": [],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2607,6 +1239,8 @@
             "label": "fieldName",
             "description": [],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2668,9 +1302,11 @@
               },
               "> | undefined; fieldAttrs?: ",
               "FieldAttrsAsObject",
-              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; }"
+              " | undefined; allowNoIndex?: boolean | undefined; namespaces?: string[] | undefined; name?: string | undefined; allowHidden?: boolean | undefined; managed?: boolean | undefined; }"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2685,6 +1321,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2706,6 +1344,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2720,6 +1360,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2741,6 +1383,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2761,6 +1405,8 @@
           "\"ACTION_VISUALIZE_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2776,6 +1422,8 @@
           "\"ACTION_VISUALIZE_GEO_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2791,6 +1439,47 @@
           "\"ACTION_VISUALIZE_LENS_FIELD\""
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActions",
+        "id": "def-public.ActionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionDefinition",
+        "description": [
+          "\nA convenience interface used to register an action."
+        ],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
+            "text": "Presentable"
+          },
+          "<",
+          "ActionDefinitionContext",
+          "<Context>>> & { extension?: ActionExtension | undefined; } & { readonly id: string; readonly type?: string | undefined; isCompatible?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<boolean>; execute(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<void>; shouldAutoExecute?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<boolean>; getHref?(context: ",
+          "ActionDefinitionContext",
+          "<Context>): Promise<string | undefined>; disabled?: boolean | undefined; showNotification?: boolean | undefined; getCompatibilityChangesSubject?: ((context: Context) => ",
+          "Observable",
+          "<undefined> | undefined) | undefined; couldBecomeCompatible?: ((context: Context) => boolean) | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2815,21 +1504,8 @@
           }
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.ADD_PANEL_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "ADD_PANEL_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"ADD_PANEL_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2849,7 +1525,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context> & Required<Pick<",
+          "<Context, object> & Required<Pick<",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -2857,9 +1533,11 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<Context>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
+          "<Context, object>, \"getCompatibilityChangesSubject\" | \"couldBecomeCompatible\">>"
         ],
         "path": "src/platform/plugins/shared/ui_actions/public/actions/action.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2882,21 +1560,8 @@
           "<Context>[]"
         ],
         "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/types/presentable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.ROW_CLICK_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "ROW_CLICK_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"ROW_CLICK_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2912,9 +1577,9 @@
           "Partial<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           "> & { data: { rowIndex: number; table: ",
@@ -2927,37 +1592,9 @@
           },
           "; columns?: string[] | undefined; }; }"
         ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.VISUALIZE_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"VISUALIZE_FIELD_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.VISUALIZE_GEO_FIELD_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZE_GEO_FIELD_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"VISUALIZE_GEO_FIELD_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2966,188 +1603,1976 @@
     "objects": [
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.addPanelMenuTrigger",
+        "id": "def-public.triggers",
         "type": "Object",
         "tags": [],
-        "label": "addPanelMenuTrigger",
+        "label": "triggers",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+        "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.addPanelMenuTrigger.id",
-            "type": "string",
+            "id": "def-public.triggers.ON_CLICK_VALUE",
+            "type": "Object",
             "tags": [],
-            "label": "id",
+            "label": "[ON_CLICK_VALUE]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_VALUE.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_VALUE.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_VALUE.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.addPanelMenuTrigger.title",
-            "type": "string",
+            "id": "def-public.triggers.ON_CLICK_IMAGE",
+            "type": "Object",
             "tags": [],
-            "label": "title",
+            "label": "[ON_CLICK_IMAGE]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_IMAGE.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 66,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_IMAGE.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 67,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_IMAGE.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 70,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.addPanelMenuTrigger.description",
-            "type": "string",
+            "id": "def-public.triggers.ON_CLICK_ROW",
+            "type": "Object",
             "tags": [],
-            "label": "description",
+            "label": "[ON_CLICK_ROW]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/dashboard_app_panel_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.rowClickTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "rowClickTrigger",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.rowClickTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_ROW.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_ROW.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 76,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_CLICK_ROW.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.rowClickTrigger.title",
-            "type": "string",
+            "id": "def-public.triggers.ON_SELECT_RANGE",
+            "type": "Object",
             "tags": [],
-            "label": "title",
+            "label": "[ON_SELECT_RANGE]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_SELECT_RANGE.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 84,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_SELECT_RANGE.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_SELECT_RANGE.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 88,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.rowClickTrigger.description",
-            "type": "string",
+            "id": "def-public.triggers.ON_APPLY_FILTER",
+            "type": "Object",
             "tags": [],
-            "label": "description",
+            "label": "[ON_APPLY_FILTER]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.visualizeFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "visualizeFieldTrigger",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.visualizeFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_APPLY_FILTER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 93,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_APPLY_FILTER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_APPLY_FILTER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 97,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.visualizeFieldTrigger.title",
-            "type": "string",
+            "id": "def-public.triggers.ON_OPEN_PANEL_MENU",
+            "type": "Object",
             "tags": [],
-            "label": "title",
+            "label": "[ON_OPEN_PANEL_MENU]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_OPEN_PANEL_MENU.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 102,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_OPEN_PANEL_MENU.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ON_OPEN_PANEL_MENU.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 106,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.visualizeFieldTrigger.description",
-            "type": "string",
+            "id": "def-public.triggers.ADD_PANEL_TRIGGER",
+            "type": "Object",
             "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
+            "label": "[ADD_PANEL_TRIGGER]",
+            "description": [
+              "// Legacy triggers below this line"
+            ],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
-        "id": "def-public.visualizeGeoFieldTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "visualizeGeoFieldTrigger",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActions",
-            "id": "def-public.visualizeGeoFieldTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_PANEL_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 112,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_PANEL_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 113,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_PANEL_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 116,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.visualizeGeoFieldTrigger.title",
-            "type": "string",
+            "id": "def-public.triggers.ALERT_RULE_TRIGGER",
+            "type": "Object",
             "tags": [],
-            "label": "title",
+            "label": "[ALERT_RULE_TRIGGER]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ALERT_RULE_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 121,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ALERT_RULE_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ALERT_RULE_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 125,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActions",
-            "id": "def-public.visualizeGeoFieldTrigger.description",
-            "type": "string",
+            "id": "def-public.triggers.VISUALIZE_FIELD_TRIGGER",
+            "type": "Object",
             "tags": [],
-            "label": "description",
+            "label": "[VISUALIZE_FIELD_TRIGGER]",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_FIELD_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 130,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_FIELD_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_FIELD_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.VISUALIZE_GEO_FIELD_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[VISUALIZE_GEO_FIELD_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_GEO_FIELD_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 135,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_GEO_FIELD_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 136,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_GEO_FIELD_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 137,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.CONTROL_HOVER_TRIGGER_ID",
+            "type": "Object",
+            "tags": [],
+            "label": "[CONTROL_HOVER_TRIGGER_ID]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_HOVER_TRIGGER_ID.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 140,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_HOVER_TRIGGER_ID.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 141,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_HOVER_TRIGGER_ID.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 144,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.CONTROL_MENU_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[CONTROL_MENU_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_MENU_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 149,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_MENU_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 150,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CONTROL_MENU_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 153,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
+            "type": "Object",
+            "tags": [],
+            "label": "[EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 158,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 159,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 160,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
+            "type": "Object",
+            "tags": [],
+            "label": "[SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 163,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 164,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 165,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.PANEL_BADGE_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[PANEL_BADGE_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_BADGE_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 169,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_BADGE_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 170,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_BADGE_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 173,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.PANEL_NOTIFICATION_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[PANEL_NOTIFICATION_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 177,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_NOTIFICATION_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 178,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_NOTIFICATION_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 179,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.PANEL_NOTIFICATION_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 182,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.MULTI_VALUE_CLICK_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[MULTI_VALUE_CLICK_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.MULTI_VALUE_CLICK_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 187,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.MULTI_VALUE_CLICK_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 188,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.MULTI_VALUE_CLICK_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 191,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.CELL_VALUE_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[CELL_VALUE_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CELL_VALUE_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 196,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CELL_VALUE_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 197,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CELL_VALUE_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 200,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.ESQL_CONTROL_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[ESQL_CONTROL_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ESQL_CONTROL_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 205,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ESQL_CONTROL_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 206,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ESQL_CONTROL_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 209,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.UPDATE_ESQL_QUERY_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[UPDATE_ESQL_QUERY_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_ESQL_QUERY_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 214,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_ESQL_QUERY_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 215,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_ESQL_QUERY_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 218,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.UPDATE_FILTER_REFERENCES_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[UPDATE_FILTER_REFERENCES_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_FILTER_REFERENCES_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 223,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_FILTER_REFERENCES_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 224,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.UPDATE_FILTER_REFERENCES_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 227,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.VISUALIZE_EDITOR_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[VISUALIZE_EDITOR_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_EDITOR_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 232,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_EDITOR_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 233,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.VISUALIZE_EDITOR_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 234,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.AGG_BASED_VISUALIZATION_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[AGG_BASED_VISUALIZATION_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.AGG_BASED_VISUALIZATION_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 237,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.AGG_BASED_VISUALIZATION_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 238,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.AGG_BASED_VISUALIZATION_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 239,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[DASHBOARD_VISUALIZATION_PANEL_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 241,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.DASHBOARD_VISUALIZATION_PANEL_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 242,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.DASHBOARD_VISUALIZATION_PANEL_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 243,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.DASHBOARD_VISUALIZATION_PANEL_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 244,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.ADD_CANVAS_ELEMENT_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[ADD_CANVAS_ELEMENT_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_CANVAS_ELEMENT_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 247,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_CANVAS_ELEMENT_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 248,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.ADD_CANVAS_ELEMENT_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 251,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.OPEN_FILE_UPLOAD_LITE_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[OPEN_FILE_UPLOAD_LITE_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.OPEN_FILE_UPLOAD_LITE_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 256,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.OPEN_FILE_UPLOAD_LITE_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 257,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.OPEN_FILE_UPLOAD_LITE_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 260,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.CATEGORIZE_FIELD_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[CATEGORIZE_FIELD_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 264,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CATEGORIZE_FIELD_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 265,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CATEGORIZE_FIELD_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 266,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CATEGORIZE_FIELD_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 269,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.IN_APP_EMBEDDABLE_EDIT_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[IN_APP_EMBEDDABLE_EDIT_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 273,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.IN_APP_EMBEDDABLE_EDIT_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 274,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.IN_APP_EMBEDDABLE_EDIT_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 275,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.IN_APP_EMBEDDABLE_EDIT_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 278,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 283,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 284,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 287,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SWIM_LANE_SELECTION_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[SWIM_LANE_SELECTION_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 291,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SWIM_LANE_SELECTION_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 292,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SWIM_LANE_SELECTION_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [
+                  "// This is empty string to hide title of ui_actions context menu that appears\n// when this trigger is executed."
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 295,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SWIM_LANE_SELECTION_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 296,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 299,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [
+                  "// This is empty string to hide title of ui_actions context menu that appears\n// when this trigger is executed."
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 302,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 303,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 305,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 306,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [
+                  "// This is empty string to hide title of ui_actions context menu that appears\n// when this trigger is executed."
+                ],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 309,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 310,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.DISCOVER_CELL_ACTIONS_TRIGGER_ID",
+            "type": "Object",
+            "tags": [],
+            "label": "[DISCOVER_CELL_ACTIONS_TRIGGER_ID]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 312,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.DISCOVER_CELL_ACTIONS_TRIGGER_ID.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 312,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 313,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 313,
+                "columnNumber": 50,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 314,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 314,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER",
+            "type": "Object",
+            "tags": [],
+            "label": "[SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 315,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SECURITY_ESQL_IN_TIMELINE_HISTOGRAM_TRIGGER.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 316,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SECURITY_CELL_ACTIONS_DEFAULT",
+            "type": "Object",
+            "tags": [],
+            "label": "[SECURITY_CELL_ACTIONS_DEFAULT]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 318,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SECURITY_CELL_ACTIONS_DEFAULT.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 318,
+                "columnNumber": 38,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SECURITY_CELL_ACTIONS_DETAILS_FLYOUT",
+            "type": "Object",
+            "tags": [],
+            "label": "[SECURITY_CELL_ACTIONS_DETAILS_FLYOUT]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SECURITY_CELL_ACTIONS_DETAILS_FLYOUT.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 319,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SECURITY_CELL_ACTIONS_ALERTS_COUNT",
+            "type": "Object",
+            "tags": [],
+            "label": "[SECURITY_CELL_ACTIONS_ALERTS_COUNT]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 320,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SECURITY_CELL_ACTIONS_ALERTS_COUNT.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 320,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.triggers.SECURITY_CELL_ACTIONS_CASE_EVENTS",
+            "type": "Object",
+            "tags": [],
+            "label": "[SECURITY_CELL_ACTIONS_CASE_EVENTS]",
+            "description": [],
+            "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+            "lineNumber": 321,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "uiActions",
+                "id": "def-public.triggers.SECURITY_CELL_ACTIONS_CASE_EVENTS.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "src/platform/plugins/shared/ui_actions/public/triggers.ts",
+                "lineNumber": 321,
+                "columnNumber": 42,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3161,15 +3586,7 @@
       "label": "UiActionsPublicSetup",
       "description": [],
       "signature": [
-        "{ readonly registerTrigger: (trigger: ",
-        {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
-          "text": "Trigger"
-        },
-        ") => void; readonly registerAction: <Context extends object>(definition: ",
+        "{ readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3177,7 +3594,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>) => ",
+        "<Context, {}>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3185,7 +3602,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3193,7 +3610,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3201,7 +3618,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3209,9 +3626,11 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>>) => void; }"
+        "<any, {}>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -3225,17 +3644,15 @@
       "label": "UiActionsPublicStart",
       "description": [],
       "signature": [
-        "{ readonly registerTrigger: (trigger: ",
+        "{ readonly getTrigger: (triggerId: string) => ",
         {
-          "pluginId": "@kbn/ui-actions-browser",
-          "scope": "common",
-          "docId": "kibKbnUiActionsBrowserPluginApi",
-          "section": "def-common.Trigger",
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.Trigger",
           "text": "Trigger"
         },
-        ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-        "TriggerContract",
-        "<object>; readonly registerAction: <Context extends object>(definition: ",
+        "; readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3243,7 +3660,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>) => ",
+        "<Context, {}>) => ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3251,7 +3668,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3259,7 +3676,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3267,7 +3684,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3275,7 +3692,7 @@
           "section": "def-public.ActionDefinition",
           "text": "ActionDefinition"
         },
-        "<any>>) => void; readonly getAction: (id: string) => Promise<",
+        "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3283,7 +3700,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+        "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3291,7 +3708,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+        "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3299,7 +3716,7 @@
           "section": "def-public.Action",
           "text": "Action"
         },
-        "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+        "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
         {
           "pluginId": "uiActions",
           "scope": "public",
@@ -3307,17 +3724,13 @@
           "section": "def-public.FrequentCompatibilityChangeAction",
           "text": "FrequentCompatibilityChangeAction"
         },
-        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-        {
-          "pluginId": "uiActions",
-          "scope": "public",
-          "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsService",
-          "text": "UiActionsService"
-        },
+        "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+        "UiActionsService",
         "; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions/public/plugin.ts",
+      "lineNumber": 26,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

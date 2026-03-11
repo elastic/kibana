@@ -5,110 +5,75 @@
  * 2.0.
  */
 
-import {
+import type {
   Criteria,
   DefaultItemAction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
+import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE, type SLODefinitionResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useState } from 'react';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import { SLO_MODEL_VERSION } from '../../../../common/constants';
+import { useActionModal } from '../../../context/action_modal';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { useResetSlo } from '../../../hooks/use_reset_slo';
-import { useEnableSlo } from '../../../hooks/use_enable_slo';
-import { useDisableSlo } from '../../../hooks/use_disable_slo';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { sloPaths } from '../../../../common';
-import { paths } from '../../../../common/locators/paths';
+import { useBulkOperation } from '../context/bulk_operation';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
+import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
-import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SLO_MODEL_VERSION } from '../../../../common/constants';
-import { useUrlSearchState } from './hooks/use_url_search_state';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
   const { search, page, perPage, tags, includeOutdatedOnly } = state;
-  const { services } = useKibana();
-
   const {
-    http,
-    application: { navigateToUrl },
-  } = services;
+    services: {
+      http,
+      application: { navigateToUrl },
+    },
+  } = useKibana();
+  const { triggerAction } = useActionModal();
 
+  const { data: permissions } = usePermissions();
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
     page: page + 1,
     perPage,
     name: search,
     tags,
     includeOutdatedOnly,
+    includeHealth: true,
   });
+  const { tasks } = useBulkOperation();
 
-  const { data: permissions } = usePermissions();
+  const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
 
-  const [sloToDelete, setSloToDelete] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToReset, setSloToReset] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToEnable, setSloToEnable] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToDisable, setSloToDisable] = useState<SLODefinitionResponse | undefined>(undefined);
-
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
-
-  const handleDeleteConfirm = () => {
-    setSloToDelete(undefined);
+  const onSelectionChange = (items: SLODefinitionResponse[]) => {
+    setSelectedItems(items);
   };
 
-  const handleDeleteCancel = () => {
-    setSloToDelete(undefined);
+  const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    selected: selectedItems,
+    selectable: (item: SLODefinitionResponse) => {
+      return !tasks.find(
+        (task) => task.status === 'in-progress' && task.items.some((i) => i.id === item.id)
+      );
+    },
+    onSelectionChange,
   };
-
-  const handleResetConfirm = () => {
-    if (sloToReset) {
-      resetSlo({ id: sloToReset.id, name: sloToReset.name });
-      setSloToReset(undefined);
-    }
-  };
-
-  const handleResetCancel = () => {
-    setSloToReset(undefined);
-  };
-
-  const handleEnableConfirm = async () => {
-    if (sloToEnable) {
-      enableSlo({ id: sloToEnable.id, name: sloToEnable.name });
-      setSloToEnable(undefined);
-    }
-  };
-
-  const handleEnableCancel = () => {
-    setSloToEnable(undefined);
-  };
-
-  const handleDisableConfirm = async () => {
-    if (sloToDisable) {
-      disableSlo({ id: sloToDisable.id, name: sloToDisable.name });
-      setSloToDisable(undefined);
-    }
-  };
-
-  const handleDisableCancel = () => {
-    setSloToDisable(undefined);
-  };
-
-  const navigateToClone = useCloneSlo();
 
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
     {
@@ -135,10 +100,9 @@ export function SloManagementTable() {
       description: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
+      enabled: () => !!permissions?.hasAllWriteRequested,
       'data-test-subj': 'sloActionsClone',
-      onClick: (slo: SLODefinitionResponse) => {
-        navigateToClone(slo);
-      },
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'clone' }),
     },
     {
       type: 'icon',
@@ -163,12 +127,7 @@ export function SloManagementTable() {
       enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         const isEnabled = slo.enabled;
-
-        if (isEnabled) {
-          setSloToDisable(slo);
-        } else {
-          setSloToEnable(slo);
-        }
+        triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
       },
     },
     {
@@ -181,12 +140,22 @@ export function SloManagementTable() {
         defaultMessage: 'Delete',
       }),
       'data-test-subj': 'sloActionsDelete',
-      enabled: (slo: SLODefinitionResponse) => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
-        setSloToDelete(slo);
-      },
+      enabled: () => !!permissions?.hasAllWriteRequested,
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'delete' }),
     },
-
+    {
+      type: 'icon',
+      icon: 'logstashOutput',
+      name: i18n.translate('xpack.slo.item.actions.purge', {
+        defaultMessage: 'Purge rollup data',
+      }),
+      description: i18n.translate('xpack.slo.item.actions.purge', {
+        defaultMessage: 'Purge rollup data',
+      }),
+      'data-test-subj': 'sloActionsPurge',
+      enabled: () => !!permissions?.hasAllWriteRequested,
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge_rollup' }),
+    },
     {
       type: 'icon',
       icon: 'refresh',
@@ -198,9 +167,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsReset',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
-        setSloToReset(slo);
-      },
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'reset' }),
     },
   ];
 
@@ -214,7 +181,7 @@ export function SloManagementTable() {
         return (
           <EuiLink
             data-test-subj="sloDetailsLink"
-            href={http.basePath.prepend(sloPaths.sloDetails(slo.id, ALL_VALUE))}
+            href={http.basePath.prepend(paths.sloDetails(slo.id, ALL_VALUE))}
             target="_blank"
           >
             {slo.name}
@@ -228,8 +195,8 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
         defaultMessage: 'Version',
       }),
-      render: (item: SLODefinitionResponse['version']) => {
-        return item < SLO_MODEL_VERSION ? (
+      render: (value: SLODefinitionResponse['version']) => {
+        return value < SLO_MODEL_VERSION ? (
           <EuiText size="s">
             {i18n.translate('xpack.slo.sloManagementTable.version.outdated', {
               defaultMessage: 'Outdated',
@@ -249,10 +216,10 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.tagsLabel', {
         defaultMessage: 'Tags',
       }),
-      render: (item: SLODefinitionResponse['tags']) => {
+      render: (value: SLODefinitionResponse['tags']) => {
         return (
           <EuiFlexGroup gutterSize="xs" wrap responsive>
-            {item.map((tag) => (
+            {value.map((tag) => (
               <EuiFlexItem key={tag} grow={false}>
                 <EuiBadge>{tag}</EuiBadge>
               </EuiFlexItem>
@@ -262,8 +229,79 @@ export function SloManagementTable() {
       },
     },
     {
+      field: 'state',
+      width: '15%',
+      name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
+        defaultMessage: 'State',
+      }),
+      render: (_, item: SLODefinitionResponse) => {
+        const color = item.enabled ? 'success' : 'subdued';
+        const label = item.enabled ? 'Enabled' : 'Disabled';
+
+        return <EuiHealth color={color}>{label}</EuiHealth>;
+      },
+    },
+    {
+      field: 'health',
+      width: '15%',
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.slo.sloManagementTable.columns.health', {
+              defaultMessage: 'Health',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiIconTip
+              position="top"
+              content={
+                <>
+                  {i18n.translate('xpack.slo.sloManagementTable.columns.stateTooltipEnabled', {
+                    defaultMessage:
+                      'An SLO needs attention when its transforms are not operating as expected.',
+                  })}
+                </>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      render: (_, item: SLODefinitionResponse) => {
+        if (item.health === undefined) {
+          return (
+            <EuiHealth color="subdued">
+              {i18n.translate('xpack.slo.sloManagementTable.columns.health.noInformation', {
+                defaultMessage: 'N/A',
+              })}
+            </EuiHealth>
+          );
+        }
+
+        return !item.health.isProblematic ? (
+          <EuiHealth color="success">
+            {i18n.translate('xpack.slo.sloManagementTable.columns.health.healthy', {
+              defaultMessage: 'Healthy',
+            })}
+          </EuiHealth>
+        ) : (
+          <EuiHealth color="danger">
+            <EuiLink
+              data-test-subj="sloDetailsLink"
+              href={http.basePath.prepend(paths.sloDetails(item.id, ALL_VALUE))}
+              target="_blank"
+              color="danger"
+            >
+              {i18n.translate('xpack.slo.sloManagementTable.columns.health.needsAttention', {
+                defaultMessage: 'Needs attention',
+              })}
+            </EuiLink>
+          </EuiHealth>
+        );
+      },
+    },
+    {
       name: 'Actions',
-      width: '5%',
+      width: '10%',
       actions,
     },
   ];
@@ -289,62 +327,44 @@ export function SloManagementTable() {
   };
 
   return (
-    <>
-      <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar onRefresh={refetch} />
-        <EuiSpacer size="m" />
-        <EuiBasicTable<SLODefinitionResponse>
-          tableCaption={TABLE_CAPTION}
-          error={
-            isError
-              ? i18n.translate('xpack.slo.sloManagementTable.error', {
-                  defaultMessage: 'An error occurred while retrieving SLO definitions',
-                })
-              : undefined
-          }
-          items={data?.results ?? []}
-          rowHeader="name"
-          columns={columns}
-          pagination={pagination}
-          onChange={onTableChange}
-          loading={isLoading}
-        />
-      </EuiPanel>
-      {sloToDelete ? (
-        <SloDeleteModal
-          slo={sloToDelete}
-          onCancel={handleDeleteCancel}
-          onSuccess={handleDeleteConfirm}
-        />
-      ) : null}
+    <EuiPanel hasBorder={true}>
+      <SloManagementSearchBar onRefresh={refetch} />
+      <EuiSpacer size="m" />
 
-      {sloToReset ? (
-        <SloResetConfirmationModal
-          slo={sloToReset}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
-        />
-      ) : null}
+      {!selectedItems.length ? (
+        <EuiText size="xs">
+          {i18n.translate('xpack.slo.sloManagementTable.itemCount', {
+            defaultMessage: 'Showing {count} of {total} SLOs',
+            values: {
+              count: data?.results.length ?? 0,
+              total: data?.total ?? 0,
+            },
+          })}
+        </EuiText>
+      ) : (
+        <SloManagementBulkActions items={selectedItems} setSelectedItems={onSelectionChange} />
+      )}
 
-      {sloToEnable ? (
-        <SloEnableConfirmationModal
-          slo={sloToEnable}
-          onCancel={handleEnableCancel}
-          onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
-        />
-      ) : null}
-
-      {sloToDisable ? (
-        <SloDisableConfirmationModal
-          slo={sloToDisable}
-          onCancel={handleDisableCancel}
-          onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
-        />
-      ) : null}
-    </>
+      <EuiSpacer size="s" />
+      <EuiBasicTable<SLODefinitionResponse>
+        tableCaption={TABLE_CAPTION}
+        error={
+          isError
+            ? i18n.translate('xpack.slo.sloManagementTable.error', {
+                defaultMessage: 'An error occurred while retrieving SLO definitions',
+              })
+            : undefined
+        }
+        items={data?.results ?? []}
+        rowHeader="name"
+        columns={columns}
+        itemId="id"
+        pagination={pagination}
+        onChange={onTableChange}
+        loading={isLoading}
+        selection={permissions?.hasAllWriteRequested ? selection : undefined}
+      />
+    </EuiPanel>
   );
 }
 

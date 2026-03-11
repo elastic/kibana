@@ -67,11 +67,8 @@ Props description:
 Usage example:
 
 ```
-    // Memoize unified data table to avoid the unnecessary re-renderings
-    const DataTableMemoized = React.memo(UnifiedDataTable);
-
-   // Add memoized component with all needed props
-    <DataTableMemoized
+    // Add memoized component with all needed props
+    <DataTable
       ariaLabelledBy="timelineDocumentsAriaLabel"
       className={'unifiedDataTableTimeline'}
       columns={['event.category', 'event.action', 'host.name', 'user.name']}

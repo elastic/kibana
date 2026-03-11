@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/event-log-fixture-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "eventLogFixture",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "eventLog"
+    ]
+  }
+}

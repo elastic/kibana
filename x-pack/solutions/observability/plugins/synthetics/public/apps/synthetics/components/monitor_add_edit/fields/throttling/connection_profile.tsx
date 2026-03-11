@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { PROFILE_VALUES_ENUM } from '../../../../../../../common/constants/monitor_defaults';
-import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
+import type { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 
 export const ConnectionProfile = ({
   throttling,

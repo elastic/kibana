@@ -28,7 +28,7 @@ paths:
         '403':
           description: If a draft Timeline was not found and we attempted to create one, it indicates that the user does not have the required permissions to create a draft Timeline.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -39,7 +39,7 @@ paths:
         '409':
           description: This should never happen, but if a draft Timeline was not found and we attempted to create one, it indicates that there is already a draft Timeline with the given `timelineId`.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:

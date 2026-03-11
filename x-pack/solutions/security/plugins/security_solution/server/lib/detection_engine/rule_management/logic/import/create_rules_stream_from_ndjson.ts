@@ -21,7 +21,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { RuleToImportInput } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   RuleToImport,
@@ -125,6 +125,17 @@ export const migrateLegacyInvestigationFields = (): Transform => {
   });
 };
 
+export const stripActionConnectorOriginIds = (): Transform => {
+  return createMapStream((obj) => {
+    if (obj != null && typeof obj === 'object' && 'originId' in obj) {
+      const { originId, ...rest } = obj;
+      return rest;
+    } else {
+      return obj;
+    }
+  });
+};
+
 // TODO: Capture both the line number and the rule_id if you have that information for the error message
 // eventually and then pass it down so we can give error messages on the line number
 
@@ -134,6 +145,7 @@ export const createRulesAndExceptionsStreamFromNdJson = (ruleLimit: number) => {
     parseNdjsonStrings(),
     filterExportedCounts(),
     migrateLegacyInvestigationFields(),
+    stripActionConnectorOriginIds(),
     sortImports(),
     validateRulesStream(),
     createRulesLimitStream(ruleLimit),

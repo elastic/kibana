@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityServiceStart, IBasePath } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {
@@ -39,6 +39,11 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
+export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
+  const user = security.authc.getCurrentUser(request);
+  return (user && isRequestApiKeyType(user)) || request.isFakeRequest;
+};
+
 export const getApiKeyFromRequest = (request: KibanaRequest) => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {
@@ -55,32 +60,24 @@ export const getApiKeyFromRequest = (request: KibanaRequest) => {
 export const createApiKey = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
   security: SecurityServiceStart
 ) => {
-  if (!canEncryptSo) {
-    throw Error(
-      'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
-    );
-  }
-
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     throw Error('API keys are not enabled, cannot create API key.');
   }
 
   const user = security.authc.getCurrentUser(request);
-  if (!user) {
-    throw Error('Cannot authenticate current user.');
-  }
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
 
-  // If the user passed in their own API key, simply return it
-  if (isRequestApiKeyType(user)) {
+  // If the user passed in their own API key or the request is a fake request, use the API key from the request
+  if (requestHasApiKey(security, request)) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
-      throw Error('Could not create API key.');
+      throw Error(
+        `Could not extract API key from ${request.isFakeRequest ? 'fake' : 'user'} request header.`
+      );
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
@@ -100,8 +97,10 @@ export const createApiKey = async (
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
 
   for (const taskType of taskTypes) {
+    const apiKeyNamePrefix = `TaskManager: ${taskType}`;
+    const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
     const apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
-      name: truncate(`TaskManager: ${taskType} - ${user.username}`, { length: 256 }),
+      name: truncate(apiKeyName, { length: 256 }),
       role_descriptors: {},
       metadata: { managed: true },
     });
@@ -132,13 +131,13 @@ export const createApiKey = async (
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  canEncryptSo: boolean,
   security: SecurityServiceStart,
-  spaces?: SpacesPluginStart
+  basePath: IBasePath
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, canEncryptSo, security);
-  const space = await spaces?.spacesService.getActiveSpace(request);
-  const user = security.authc.getCurrentUser(request);
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
+
+  const requestBasePath = basePath.get(request);
+  const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
 
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 
@@ -149,10 +148,10 @@ export const getApiKeyAndUserScope = async (
         apiKey: encodedApiKeyResult.apiKey,
         userScope: {
           apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId: space?.id || 'default',
-          // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
+          spaceId: space?.spaceId || 'default',
+          // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
           // not want to invalidate a specific API key that was not created by the task manager
-          apiKeyCreatedByUser: isRequestApiKeyType(user),
+          apiKeyCreatedByUser: requestHasApiKey(security, request),
         },
       });
     }

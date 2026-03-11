@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { MissingResultsPrivilegesPrompt } from '../../../components/logging/log_analysis_setup';
@@ -46,12 +45,10 @@ export const LogEntryRatePage = () => {
   }
 
   return (
-    <EuiErrorBoundary>
-      <LogMlJobIdFormatsShimProvider>
-        <LogEntryRatePageProviders>
-          <LogEntryRatePageContent />
-        </LogEntryRatePageProviders>
-      </LogMlJobIdFormatsShimProvider>
-    </EuiErrorBoundary>
+    <LogMlJobIdFormatsShimProvider>
+      <LogEntryRatePageProviders>
+        <LogEntryRatePageContent />
+      </LogEntryRatePageProviders>
+    </LogMlJobIdFormatsShimProvider>
   );
 };

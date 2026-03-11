@@ -8,6 +8,8 @@
 import { copyAllowlistedFields } from '.';
 import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
 import type { AllowlistFields } from './types';
+import { unflatten } from '../helpers';
+import { createDefaultExternalRuleSource } from '../../detection_engine/rule_management/logic/detection_rules_client/mergers/rule_source/create_default_external_rule_source';
 
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
@@ -352,6 +354,285 @@ describe('Security Telemetry filters', () => {
           },
         },
       });
+    });
+
+    it('copies over rule source field', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        'kibana.alert.rule.parameters': {
+          rule_source: createDefaultExternalRuleSource(),
+        },
+      };
+      expect(copyAllowlistedFields(prebuiltRuleAllowlistFields, event)).toStrictEqual({
+        'kibana.alert.rule.parameters': {
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
+          },
+        },
+      });
+    });
+  });
+  describe('when passing in unflattened args', () => {
+    test('should preserve flattened fields in event with nested filterlist key:value', () => {
+      const originalEvent = {
+        'a.b.c': 1,
+      };
+      const filterList = {
+        a: {
+          b: true,
+        },
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: 1,
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve flattened fields in event with flattened filterlist key:value', () => {
+      const originalEvent = {
+        'a.b.c': 1,
+      };
+      const filterList = {
+        'a.b': true,
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: 1,
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve nested flattened fields in event with nested filterlist key:value', () => {
+      const originalEvent = {
+        'a.b.c': {
+          'd.e': 1,
+        },
+      };
+      const filterList = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: true,
+              },
+            },
+          },
+        },
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve nested flattened fields in event with flattened filterlist key:value', () => {
+      const originalEvent = {
+        'a.b.c': {
+          'd.e': 1,
+        },
+      };
+      const filterList = {
+        'a.b.c.d.e': true,
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve nested fields in event with nested filterlist key:value', () => {
+      const originalEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+        f: 1,
+      };
+      const filterList = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: true,
+              },
+            },
+          },
+        },
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve nested fields in event with flattened filterlist key:value', () => {
+      const originalEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+        f: 1,
+      };
+      const filterList = {
+        'a.b.c.d.e': true,
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: 1,
+              },
+            },
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve flattened fields in obj of an array in event', () => {
+      const originalEvent = {
+        a: {
+          b: [
+            {
+              'c.d.e': 1,
+            },
+          ],
+        },
+        f: 1,
+      };
+      const filterListNested = {
+        a: {
+          b: {
+            c: {
+              d: {
+                e: true,
+              },
+            },
+          },
+        },
+      };
+      const filterListFlattened = {
+        'a.b.c': true,
+      };
+      const filteredEventWithFlNested = copyAllowlistedFields(
+        unflatten(filterListNested),
+        unflatten(originalEvent)
+      );
+      const filteredEventWithFlFlattened = copyAllowlistedFields(
+        unflatten(filterListFlattened),
+        unflatten(originalEvent)
+      );
+      const expectedEvent = {
+        a: {
+          b: [
+            {
+              c: {
+                d: {
+                  e: 1,
+                },
+              },
+            },
+          ],
+        },
+      };
+      expect(filteredEventWithFlNested).toStrictEqual(expectedEvent);
+      expect(filteredEventWithFlFlattened).toStrictEqual(expectedEvent);
+    });
+    test('should preserve and pass non-pojo object fields(e.g. Date)', () => {
+      const date = new Date();
+      const originalEvent = {
+        a: {
+          b: date,
+        },
+        f: {
+          g: 1,
+        },
+      };
+      const filterList = {
+        a: {
+          b: true,
+        },
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: date,
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
+    });
+    test('should preserve field names that have dots in non-path representations', () => {
+      const originalEvent = {
+        a: {
+          b: {
+            '..c.e.f.': 1,
+            g: 1,
+          },
+        },
+        h: {
+          i: 1,
+        },
+      };
+      const filterList = {
+        a: {
+          b: true,
+        },
+      };
+      const filteredEvent = copyAllowlistedFields(unflatten(filterList), unflatten(originalEvent));
+      const expectedEvent = {
+        a: {
+          b: {
+            '..c.e.f.': 1,
+            g: 1,
+          },
+        },
+      };
+      expect(filteredEvent).toStrictEqual(expectedEvent);
     });
   });
 });

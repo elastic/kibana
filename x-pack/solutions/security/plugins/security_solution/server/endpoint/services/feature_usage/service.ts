@@ -19,9 +19,13 @@ export class FeatureUsageService {
   }
 
   public setup(licensingPluginSetup: LicensingPluginSetup): void {
-    Object.values(FEATURE_KEYS).map((featureValue) =>
-      licensingPluginSetup.featureUsage.register(featureValue, 'platinum')
-    );
+    Object.values(FEATURE_KEYS).map((featureValue) => {
+      if (featureValue === FEATURE_KEYS.TRUSTED_DEVICE_BY_POLICY) {
+        return licensingPluginSetup.featureUsage.register(featureValue, 'enterprise');
+      } else {
+        return licensingPluginSetup.featureUsage.register(featureValue, 'platinum');
+      }
+    });
   }
 
   public start(licensingPluginStart: LicensingPluginStart): void {

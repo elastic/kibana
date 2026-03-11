@@ -25,30 +25,30 @@ import {
   euiFocusRing,
   useEuiFontSize,
   euiTextTruncate,
-  transparentize,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import {
+import type {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { CoreStart } from '@kbn/core/public';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import chroma from 'chroma-js';
+import type {
   Datasource,
   Visualization,
   FramePublicAPI,
   DatasourceMap,
-  VisualizationMap,
-  DatasourceLayers,
   UserMessagesGetter,
-} from '../../types';
+  DatasourceLayers,
+  DatasourceStates,
+} from '@kbn/lens-common';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
@@ -61,7 +61,6 @@ import {
   useLensSelector,
   selectCurrentVisualization,
   selectCurrentDatasourceStates,
-  DatasourceStates,
   selectIsFullscreenDatasource,
   selectSearchSessionId,
   selectActiveDatasourceId,
@@ -72,6 +71,7 @@ import {
   selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { useEditorFrameService } from '../editor_frame_service_context';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';
@@ -103,8 +103,6 @@ const configurationsValid = (
 };
 
 export interface SuggestionPanelProps {
-  datasourceMap: DatasourceMap;
-  visualizationMap: VisualizationMap;
   ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   getUserMessages?: UserMessagesGetter;
@@ -132,7 +130,7 @@ const PreviewRenderer = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon(euiThemeContext)} data-test-subj="lnsSuggestionPanel__error">
       <EuiIconTip
         size="xl"
         color="danger"
@@ -308,8 +306,6 @@ export const SuggestionPanelWrapper = (props: SuggestionPanelProps) => {
 };
 
 export function SuggestionPanel({
-  datasourceMap,
-  visualizationMap,
   frame,
   ExpressionRenderer: ExpressionRendererComponent,
   getUserMessages,
@@ -320,6 +316,7 @@ export function SuggestionPanel({
   toggleAccordionCb,
   isAccordionOpen,
 }: SuggestionPanelProps) {
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const activeData = useLensSelector(selectStagedActiveData);
@@ -608,6 +605,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
+  const dangerAlpha10 = chroma(euiTheme.colors.danger).alpha(0.1).css();
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -616,7 +614,7 @@ export function SuggestionPanel({
         paddingSize: wrapSuggestions ? 'm' : 's',
       }}
       css={css`
-        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+        padding-bottom: ${wrapSuggestions ? 0 : euiTheme.size.s};
         .euiAccordion__buttonContent {
           width: 100%;
         }
@@ -672,10 +670,10 @@ export function SuggestionPanel({
           padding-top: ${euiTheme.size.xs};
           mask-image: linear-gradient(
             to right,
-            ${transparentize(euiTheme.colors.danger, 0.1)} 0%,
+            ${dangerAlpha10} 0%,
             ${euiTheme.colors.danger} 5px,
             ${euiTheme.colors.danger} calc(100% - 5px),
-            ${transparentize(euiTheme.colors.danger, 0.1)} 100%
+            ${dangerAlpha10} 100%
           );
         `}
       >
@@ -729,9 +727,9 @@ function getPreviewExpression(
             indexPatterns: frame.dataViews.indexPatterns,
           });
         }
+        suggestionFrameApi.datasourceLayers[layerId] = updatedLayerApis[layerId];
       });
     }
-
     const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
       datasources,
       datasourceStates,
@@ -743,7 +741,7 @@ function getPreviewExpression(
     return visualization.toPreviewExpression(
       visualizableState.visualizationState,
       suggestionFrameApi.datasourceLayers,
-      datasourceExpressionsByLayers ?? undefined
+      datasourceExpressionsByLayers
     );
   } catch (error) {
     showMemoizedErrorNotification(error);

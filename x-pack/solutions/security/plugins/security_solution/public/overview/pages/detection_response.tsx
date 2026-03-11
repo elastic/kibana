@@ -32,16 +32,32 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
-  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+
+  const {
+    indicesExist: oldIndicesExist,
+    loading: oldIsSourcererLoading,
+    sourcererDataView: oldSourcererDataViewSpec,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView, status } = useDataView();
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
+
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
@@ -49,12 +65,20 @@ const DetectionResponseComponent = () => {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
+
   return (
     <>
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar
+              dataView={experimentalDataView}
+              id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+            />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE} />

@@ -6,6 +6,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';
@@ -18,6 +22,31 @@ import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
 
+const mainStyles = {
+  container: css({
+    // The panel's container should adopt the height of the main container
+    height: '100%',
+  }),
+  leftPane: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingTop: euiTheme.size.m,
+      backgroundColor: euiTheme.colors.emptyShade,
+    }),
+  mainContainer: ({ euiTheme }: UseEuiTheme) => {
+    /**
+     * This is a very brittle way of preventing the editor and other content from disappearing
+     * behind the bottom bar.
+     */
+    const bottomBarHeight = `(${euiTheme.size.base} * 3)`;
+
+    // adding dev tool top bar + bottom bar height to the body offset
+    // (they're both the same height, hence the x2)
+    const bodyOffset = `(${bottomBarHeight} * 2)`;
+
+    return kbnFullBodyHeightCss(bodyOffset);
+  },
+};
+
 export const Main: React.FunctionComponent = () => {
   const {
     store: { payload, validation },
@@ -26,6 +55,7 @@ export const Main: React.FunctionComponent = () => {
     links,
   } = useAppContext();
 
+  const styles = useMemoCss(mainStyles);
   const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const { inProgress, response, submit } = useSubmitCode(http);
 
@@ -41,9 +71,9 @@ export const Main: React.FunctionComponent = () => {
   };
 
   return (
-    <div className="painlessLabMainContainer">
-      <EuiFlexGroup className="painlessLabPanelsContainer" responsive={false} gutterSize="none">
-        <EuiFlexItem className="painlessLabLeftPane">
+    <div css={styles.mainContainer}>
+      <EuiFlexGroup responsive={false} gutterSize="none" css={styles.container}>
+        <EuiFlexItem css={styles.leftPane}>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
               {i18n.translate('xpack.painlessLab.title', {

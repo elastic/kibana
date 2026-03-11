@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '../../../helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
+import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    downsample?: DownsampleStep[];
   };
 }
 
@@ -40,24 +41,48 @@ export type IngestStreamLifecycle =
   | IngestStreamLifecycleILM
   | IngestStreamLifecycleInherit;
 
-export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from: string };
+export type WiredIngestStreamEffectiveLifecycle = (
+  | IngestStreamLifecycleDSL
+  | IngestStreamLifecycleILM
+) & { from: string };
 
-export type UnwiredIngestStreamEffectiveLifecycle =
+export type ClassicIngestStreamEffectiveLifecycle =
+  | IngestStreamLifecycle
+  | IngestStreamLifecycleError
+  | IngestStreamLifecycleDisabled;
+
+export type IngestStreamLifecycleAll =
   | IngestStreamLifecycle
   | IngestStreamLifecycleError
   | IngestStreamLifecycleDisabled;
 
 export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
-  | UnwiredIngestStreamEffectiveLifecycle;
+  | ClassicIngestStreamEffectiveLifecycle;
+
+const downsampleStepSchema = z.object({
+  after: NonEmptyString,
+  fixed_interval: NonEmptyString,
+});
 
 const dslLifecycleSchema = z.object({
-  dsl: z.object({ data_retention: z.optional(NonEmptyString) }),
+  dsl: z.object({
+    data_retention: z.optional(NonEmptyString),
+    downsample: z.optional(z.array(downsampleStepSchema)),
+  }),
 });
-const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
+const ilmLifecycleSchema = z.object({
+  ilm: z.object({
+    policy: NonEmptyString,
+  }),
+});
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
-const errorLifecycleSchema = z.object({ error: z.strictObject({ message: NonEmptyString }) });
+const errorLifecycleSchema = z.object({
+  error: z.strictObject({
+    message: NonEmptyString,
+  }),
+});
 
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
   dslLifecycleSchema,
@@ -65,14 +90,17 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
   inheritLifecycleSchema,
 ]);
 
-export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
+export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
   z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
+  z.union([
+    dslLifecycleSchema.extend({ from: NonEmptyString }),
+    ilmLifecycleSchema.extend({ from: NonEmptyString }),
+  ]);
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
-  z.union([unwiredIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
+  z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);
 
 export const isDslLifecycle = createIsNarrowSchema(
   ingestStreamEffectiveLifecycleSchema,
@@ -80,7 +108,7 @@ export const isDslLifecycle = createIsNarrowSchema(
 );
 
 export const isErrorLifecycle = createIsNarrowSchema(
-  unwiredIngestStreamEffectiveLifecycleSchema,
+  classicIngestStreamEffectiveLifecycleSchema,
   errorLifecycleSchema
 );
 
@@ -101,10 +129,18 @@ export const isDisabledLifecycle = createIsNarrowSchema(
 
 export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
+export interface DownsampleStep {
+  after: string;
+  fixed_interval: string;
+}
+
 export interface IlmPolicyPhase {
   name: PhaseName;
   size_in_bytes: number;
   min_age?: string;
+  downsample?: DownsampleStep;
+  readonly?: boolean;
+  searchable_snapshot?: string;
 }
 
 export interface IlmPolicyHotPhase extends IlmPolicyPhase {
@@ -121,6 +157,7 @@ export interface IlmPolicyHotPhase extends IlmPolicyPhase {
 export interface IlmPolicyDeletePhase {
   name: 'delete';
   min_age: string;
+  delete_searchable_snapshot?: boolean;
 }
 
 export interface IlmPolicyPhases {
@@ -130,3 +167,18 @@ export interface IlmPolicyPhases {
   frozen?: IlmPolicyPhase;
   delete?: IlmPolicyDeletePhase;
 }
+
+export interface IlmPolicy {
+  name: string;
+  phases: IlmPolicyPhases;
+  meta?: Record<string, unknown>;
+  deprecated?: boolean;
+}
+
+export interface IlmPolicyUsage {
+  in_use_by: {
+    data_streams: string[];
+    indices: string[];
+  };
+}
+export type IlmPolicyWithUsage = IlmPolicy & IlmPolicyUsage;

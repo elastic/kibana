@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryFilterListArtifact } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -13,7 +13,7 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { filterList } from '../filterlists';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
   const taskName = 'Security Solution Telemetry Filter List Artifact Task';
@@ -36,7 +36,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       const log = newTelemetryLogger(logger.get('filterlists'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const artifactName = 'telemetry-filterlists-v1';
@@ -48,16 +48,16 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         }
 
         const artifact = manifest.data as unknown as TelemetryFilterListArtifact;
-        log.l('New filterlist artifact', { artifact });
+        log.debug('New filterlist artifact', { artifact } as LogMeta);
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
         await taskMetricsService.end(trace);
         return 0;
-      } catch (err) {
-        log.l('Failed to set telemetry filterlist artifact', { error: err.message });
+      } catch (error) {
+        log.warn('Failed to set telemetry filterlist artifact', withErrorMessage(error));
         filterList.resetAllToDefault();
-        await taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

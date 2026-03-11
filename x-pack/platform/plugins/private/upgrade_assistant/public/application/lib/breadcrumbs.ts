@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
@@ -17,9 +17,6 @@ const i18nTexts = {
     }),
     esDeprecations: i18n.translate('xpack.upgradeAssistant.breadcrumb.esDeprecationsLabel', {
       defaultMessage: 'Elasticsearch deprecation issues',
-    }),
-    esDeprecationLogs: i18n.translate('xpack.upgradeAssistant.breadcrumb.esDeprecationLogsLabel', {
-      defaultMessage: 'Elasticsearch deprecation logs',
     }),
     kibanaDeprecations: i18n.translate(
       'xpack.upgradeAssistant.breadcrumb.kibanaDeprecationsLabel',
@@ -51,15 +48,6 @@ export class BreadcrumbService {
         text: i18nTexts.breadcrumbs.esDeprecations,
       },
     ],
-    esDeprecationLogs: [
-      {
-        text: i18nTexts.breadcrumbs.overview,
-        href: '/',
-      },
-      {
-        text: i18nTexts.breadcrumbs.esDeprecationLogs,
-      },
-    ],
     kibanaDeprecations: [
       {
         text: i18nTexts.breadcrumbs.overview,
@@ -77,9 +65,7 @@ export class BreadcrumbService {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
   }
 
-  public setBreadcrumbs(
-    type: 'overview' | 'esDeprecations' | 'esDeprecationLogs' | 'kibanaDeprecations'
-  ): void {
+  public setBreadcrumbs(type: 'overview' | 'esDeprecations' | 'kibanaDeprecations'): void {
     if (!this.setBreadcrumbsHandler) {
       throw new Error('Breadcrumb service has not been initialized');
     }

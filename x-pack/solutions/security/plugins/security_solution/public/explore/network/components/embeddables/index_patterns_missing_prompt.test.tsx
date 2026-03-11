@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { IndexPatternsMissingPromptComponent } from './index_patterns_missing_prompt';
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('IndexPatternsMissingPrompt', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<IndexPatternsMissingPromptComponent />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <TestProviders>
+        <IndexPatternsMissingPromptComponent />
+      </TestProviders>
+    );
+    expect(container.children[0]).toMatchSnapshot();
   });
 });

@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
@@ -25,13 +26,12 @@ import {
   EuiMarkdownFormat,
   getDefaultEuiMarkdownPlugins,
   useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-
-import './_deprecation_details_flyout.scss';
 
 export interface DeprecationDetailsFlyoutProps {
   deprecation: KibanaDeprecationDetails;
@@ -168,11 +168,12 @@ export const DeprecationDetailsFlyout = ({
   }, [deprecation, resolveDeprecation]);
 
   const { lineHeight: lineHeightMedium } = useEuiFontSize('m');
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.level === 'critical'} isResolved={isResolved} />
+        <DeprecationBadge level={deprecation.level} isResolved={isResolved} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">
@@ -184,6 +185,7 @@ export const DeprecationDetailsFlyout = ({
         {deprecationResolutionState?.resolveDeprecationStatus === 'fail' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.quickResolveErrorTitle}
               color="danger"
               iconType="warning"
@@ -235,9 +237,10 @@ export const DeprecationDetailsFlyout = ({
             {correctiveActions.api && (
               <>
                 <EuiCallOut
+                  announceOnMount={false}
                   title={i18nTexts.quickResolveCalloutTitle}
                   color="primary"
-                  iconType="iInCircle"
+                  iconType="info"
                   data-test-subj="quickResolveCallout"
                 />
 
@@ -262,7 +265,10 @@ export const DeprecationDetailsFlyout = ({
                         <li
                           data-test-subj="manualStepsListItem"
                           key={`step-${stepIndex}`}
-                          className="upgResolveStep eui-textBreakWord"
+                          className="eui-textBreakWord"
+                          css={css`
+                            margin-bottom: ${euiTheme.size.l};
+                          `}
                         >
                           {step}
                         </li>

@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
-import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { usePermissions } from '../../hooks/use_permissions';
-import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../hooks/use_kibana';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { SloManagementContent } from './components/slo_management_content';
+import { ActionModalProvider } from '../../context/action_modal';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useKibana } from '../../hooks/use_kibana';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { LoadingPage } from '../loading_page';
+import { HeaderControl } from './components/header_control/header_control';
+import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
+import { SloManagementTable } from './components/slo_management_table';
+import { BulkOperationProvider } from './context/bulk_operation';
 
 export function SloManagementPage() {
   const {
@@ -61,6 +67,10 @@ export function SloManagementPage() {
     { serverless }
   );
 
+  if (isLoading) {
+    return <LoadingPage dataTestSubj="sloManagementPageLoading" />;
+  }
+
   return (
     <ObservabilityPageTemplate
       data-test-subj="managementPage"
@@ -68,10 +78,24 @@ export function SloManagementPage() {
         pageTitle: i18n.translate('xpack.slo.managementPage.pageTitle', {
           defaultMessage: 'SLO Management',
         }),
+        rightSideItems: !isLoading
+          ? [
+              <ActionModalProvider>
+                <HeaderControl />
+              </ActionModalProvider>,
+            ]
+          : undefined,
       }}
     >
       <HeaderMenu />
-      <SloManagementContent />
+      <BulkOperationProvider>
+        <ActionModalProvider>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <SloOutdatedFilterCallout />
+            <SloManagementTable />
+          </EuiFlexGroup>
+        </ActionModalProvider>
+      </BulkOperationProvider>
     </ObservabilityPageTemplate>
   );
 }

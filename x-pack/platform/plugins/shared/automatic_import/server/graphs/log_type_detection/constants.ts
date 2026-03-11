@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SamplesFormat } from '../../../common';
+import type { SamplesFormat } from '../../../common';
 
 export const EX_ANSWER_LOG_TYPE: SamplesFormat = {
   name: 'csv',

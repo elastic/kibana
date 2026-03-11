@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter, updateFilter } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { updateFilter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { getBooleanRelationType } from '../../utils';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { FilterLocation, Path } from '../types';
+import type { FilterLocation, Path } from '../types';
 
 const PATH_SEPARATOR = '.';
 

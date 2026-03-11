@@ -211,8 +211,20 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
 };
 
 export interface Flapping extends SavedObjectAttributes {
+  enabled?: boolean;
   lookBackWindow: number;
   statusChangeThreshold: number;
+}
+
+export interface Dashboard {
+  id: string;
+}
+
+export interface Artifacts {
+  dashboards?: Dashboard[];
+  investigation_guide?: {
+    blob: string;
+  };
 }
 
 export interface Rule<Params extends RuleTypeParams = never> {
@@ -235,6 +247,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
+  uiamApiKey?: string | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
@@ -251,6 +264,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
   flapping?: Flapping | null;
+  artifacts?: Artifacts | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

@@ -12,7 +12,7 @@ import { microsoftDefenderMock } from '../../../actions/clients/microsoft/defend
 import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { responseActionsClientMock } from '../../../actions/clients/mocks';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
@@ -43,6 +43,7 @@ describe('Microsoft Defender Agent Status client', () => {
     ]);
 
     clientConstructorOptions = {
+      spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
       connectorActionsClient: microsoftDefenderMock.createMsConnectorActionsClient(),
       esClient: endpointAppContextServiceMock.getInternalEsClient(),
@@ -82,12 +83,10 @@ describe('Microsoft Defender Agent Status client', () => {
   it('should retrieve a list of pending response actions with the IDs that were passed in', async () => {
     await msAgentStatusClientMock.getAgentStatuses(['1-2-3', 'foo']);
 
-    expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.anything(),
-      ['1-2-3', 'foo']
-    );
+    expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(expect.anything(), 'default', [
+      '1-2-3',
+      'foo',
+    ]);
   });
 
   it('should return the expected agent status records', async () => {

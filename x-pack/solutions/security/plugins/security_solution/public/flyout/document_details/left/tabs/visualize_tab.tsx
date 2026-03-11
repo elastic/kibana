@@ -15,7 +15,6 @@ import {
   uiMetricService,
   GRAPH_INVESTIGATION,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
@@ -30,7 +29,6 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { METRIC_TYPE } from '../../../../common/lib/telemetry';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -106,30 +104,35 @@ export const VisualizeTab = memo(() => {
     [startTransaction]
   );
 
-  useEffect(() => {
-    if (panels.left?.path?.subTab) {
-      setActiveVisualizationId(panels.left?.path?.subTab);
-
-      if (panels.left?.path?.subTab === GRAPH_ID) {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
-      }
-    }
-  }, [panels.left?.path?.subTab]);
-
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
+  const { shouldShowGraph } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
 
-  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
-
   const options = [...visualizeButtons];
 
-  if (hasGraphRepresentation && graphVisualizationEnabled) {
+  if (shouldShowGraph) {
     options.push(graphVisualizationButton);
   }
+
+  useEffect(() => {
+    if (panels.left?.path?.subTab) {
+      const newId = panels.left.path.subTab;
+
+      // Check if we need to select a different tab when graph is not available
+      if (newId === GRAPH_ID && !shouldShowGraph) {
+        setActiveVisualizationId(SESSION_VIEW_ID);
+      } else {
+        setActiveVisualizationId(newId);
+
+        if (newId === GRAPH_ID) {
+          uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
+        }
+      }
+    }
+  }, [panels.left?.path?.subTab, shouldShowGraph]);
 
   return (
     <>

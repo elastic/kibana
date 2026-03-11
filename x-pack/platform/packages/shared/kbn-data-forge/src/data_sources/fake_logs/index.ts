@@ -6,7 +6,7 @@
  */
 
 import { random, sample } from 'lodash';
-import { GeneratorFunction } from '../../types';
+import type { GeneratorFunction } from '../../types';
 export { indexTemplate } from './ecs';
 
 const createGroupIndex = (index: number) => Math.floor(index / 1000) * 1000;

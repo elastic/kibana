@@ -15,12 +15,9 @@ describe('httpurl.isValidHttpUrl', () => {
     expect(isValidHttpUrl('http://virtual-machine/veggiehamburger.jpg')).toBe(true);
     expect(isValidHttpUrl('https://virtual-machine:44330/veggie.jpg?hamburger')).toBe(true);
     expect(isValidHttpUrl('http://192.168.1.50/veggie/hamburger.jpg')).toBe(true);
-    expect(isValidHttpUrl('https://2600::/veggie/hamburger.jpg')).toBe(true); // ipv6
-    expect(isValidHttpUrl('http://2001:4860:4860::8844/veggie/hamburger.jpg')).toBe(true); // ipv6
   });
   it('rejects non-HTTP URLs', () => {
     expect(isValidHttpUrl('')).toBe(false);
-    expect(isValidHttpUrl('http://server.com')).toBe(false);
     expect(isValidHttpUrl('file:///Users/programmer/Pictures/hamburger.jpeg')).toBe(false);
     expect(isValidHttpUrl('ftp://hostz.com:1111/path/to/image.png')).toBe(false);
     expect(isValidHttpUrl('ftp://user:password@host:1111/path/to/image.png')).toBe(false);

@@ -11,16 +11,11 @@ import { wrapper } from '../../mocks';
 import { useLensAttributes } from '../../use_lens_attributes';
 
 import { getAuthenticationLensAttributes } from './authentication';
+import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('3fd0c5d5-f762-4a27-8c56-14eee0223e13')
-    .mockReturnValueOnce('bef502be-e5ff-442f-9e3e-229f86ca2afa')
-    .mockReturnValueOnce('cded27f7-8ef8-458c-8d9b-70db48ae340d')
-    .mockReturnValueOnce('a3bf9dc1-c8d2-42d6-9e60-31892a4c509e')
-    .mockReturnValueOnce('b41a2958-650b-470a-84c4-c6fd8f0c6d37')
-    .mockReturnValueOnce('5417777d-d9d9-4268-9cdc-eb29b873bd65'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
@@ -43,6 +38,16 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getAuthenticationLensAttributes', () => {
+  beforeAll(() => {
+    const dataView = getMockDataViewWithMatchedIndices(['auditbeat-mytest-*']);
+    dataView.id = 'security-solution-my-test';
+
+    jest.mocked(useDataView).mockReturnValue({
+      dataView,
+      status: 'ready',
+    });
+  });
+
   it('should render', () => {
     const { result } = renderHook(
       () =>

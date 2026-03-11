@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { Required } from 'utility-types';
+import type { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { Required } from 'utility-types';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];
 
@@ -24,6 +24,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'double'
     | 'long'
     | 'object'
+    | 'semantic_text'
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
@@ -73,6 +74,7 @@ const types = {
   byte: createFactory('byte'),
   float: createFactory('float'),
   object: createFactory('object'),
+  semantic_text: createFactory('semantic_text'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
 };
@@ -82,7 +84,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
     ? TEnums extends Array<infer TEnum>
       ? TEnum
       : never
-    : string;
+    : string | string[];
   match_only_text: string;
   text: string;
   boolean: boolean;
@@ -96,6 +98,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }
     : object;
+  semantic_text: string;
 }[TProperty['type']];
 
 export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = PrimitiveOf<TProperty>;

@@ -5,7 +5,31 @@
  * 2.0.
  */
 
-import type { RegistryElasticsearch, RegistryPolicyTemplate, RegistryVarsEntry } from './epm';
+import type {
+  DeprecationInfo,
+  RegistryElasticsearch,
+  RegistryPolicyTemplate,
+  RegistryVarsEntry,
+} from './epm';
+
+export interface RegistryVarGroupOption {
+  name: string;
+  title: string;
+  description?: string;
+  vars: string[];
+  hide_in_deployment_modes?: Array<'default' | 'agentless'>;
+  // Additional properties allowed for feature-specific extensions (e.g., provider, iac_template_url)
+  [key: string]: unknown;
+}
+
+export interface RegistryVarGroup {
+  name: string;
+  title: string;
+  selector_title: string;
+  description?: string;
+  required?: boolean; // When true, all vars in the selected option are treated as required
+  options: RegistryVarGroupOption[];
+}
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {
@@ -27,6 +51,7 @@ export interface PackageSpecManifest {
   policy_templates_behavior?: 'all' | 'combined_policy' | 'individual_policies';
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
+  var_groups?: RegistryVarGroup[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
   elasticsearch?: Pick<
     RegistryElasticsearch,
@@ -40,8 +65,14 @@ export interface PackageSpecManifest {
     fields?: Array<{
       name: string;
     }>;
+    datasets?: DiscoveryDataset[];
   };
+  deprecated?: DeprecationInfo;
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];
@@ -55,6 +86,7 @@ export type PackageSpecCategory =
   | 'analytics_engine'
   | 'application_observability'
   | 'app_search'
+  | 'asset_inventory'
   | 'auditd'
   | 'authentication'
   | 'aws'
@@ -91,11 +123,13 @@ export type PackageSpecCategory =
   | 'languages'
   | 'load_balancer'
   | 'message_queue'
+  | 'misconfiguration_workflow'
   | 'monitoring'
   | 'native_search'
   | 'network'
   | 'network_security'
   | 'notification'
+  | 'opentelemetry'
   | 'observability'
   | 'os_system'
   | 'process_manager'
@@ -113,6 +147,7 @@ export type PackageSpecCategory =
   | 'virtualization'
   | 'vpn_security'
   | 'vulnerability_management'
+  | 'vulnerability_workflow'
   | 'web'
   | 'web_application_firewall'
   | 'websphere'
@@ -120,12 +155,16 @@ export type PackageSpecCategory =
   | 'workplace_search_content_source';
 
 export interface PackageSpecConditions {
+  deprecated?: DeprecationInfo;
   kibana?: {
     version?: string;
   };
   elastic?: {
     subscription?: string;
     capabilities?: string[];
+  };
+  agent?: {
+    version?: string;
   };
 }
 

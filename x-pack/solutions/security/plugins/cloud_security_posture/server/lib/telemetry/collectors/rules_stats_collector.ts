@@ -10,9 +10,9 @@ import type {
   AggregationsMultiBucketBase,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import type { CspmRulesStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface BenchmarkName {
   metrics: { 'rule.benchmark.name': string };
@@ -69,7 +69,7 @@ interface RuleEntity {
 }
 
 const getRulesStatsQuery = (): SearchRequest => ({
-  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   query: {
     match_all: {},
   },
@@ -264,7 +264,7 @@ export const getRulesStats = async (
 ): Promise<CspmRulesStats[]> => {
   try {
     const isIndexExists = await esClient.indices.exists({
-      index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
 
     if (isIndexExists) {

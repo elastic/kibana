@@ -212,6 +212,7 @@ export const MODEL_STATE = {
   DOWNLOADING: 'downloading',
   DOWNLOADED: 'downloaded',
   NOT_DOWNLOADED: 'notDownloaded',
+  DOWNLOADED_IN_DIFFERENT_SPACE: 'downloadedInDifferentSpace',
 } as const;
 
 export type ModelState = (typeof MODEL_STATE)[keyof typeof MODEL_STATE] | null;
@@ -325,6 +326,12 @@ export type InferenceServiceSettings =
         region: string;
         provider: string;
         model: string;
+      };
+    }
+  | {
+      service: 'elastic';
+      service_settings: {
+        model_id: string;
       };
     };
 

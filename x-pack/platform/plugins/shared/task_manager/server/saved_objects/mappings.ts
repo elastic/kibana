@@ -68,6 +68,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
+    cost: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // apiKey: {
     //   type: 'binary',
@@ -97,6 +100,18 @@ export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     last_seen: {
+      type: 'date',
+    },
+  },
+};
+
+export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    apiKeyId: {
+      type: 'keyword',
+    },
+    createdAt: {
       type: 'date',
     },
   },

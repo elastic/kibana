@@ -8,9 +8,10 @@
  */
 
 import moment from 'moment-timezone';
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
-import { DateRange } from '../../../expressions';
-import { IBucketAggConfig } from '../bucket_agg_type';
+import type { RangeFilterParams } from '@kbn/es-query';
+import { buildRangeFilter } from '@kbn/es-query';
+import type { DateRange } from '../../../expressions';
+import type { IBucketAggConfig } from '../bucket_agg_type';
 
 export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRange) => {
   const filter: RangeFilterParams = {};

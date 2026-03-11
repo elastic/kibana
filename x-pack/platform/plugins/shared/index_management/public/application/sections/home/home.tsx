@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -110,7 +110,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           <EuiButtonEmpty
             href={documentationService.getIdxMgmtDocumentationLink()}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

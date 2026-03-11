@@ -12,7 +12,7 @@ import {
   createIndexPatternsStartMock,
   dataViewsService,
 } from '@kbn/data-views-plugin/server/mocks';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { config } from './config';
 import { CloudExperimentsPlugin } from './plugin';
 
@@ -101,6 +101,15 @@ describe('Cloud Experiments server plugin', () => {
           is_elastic_staff: true,
         },
       });
+    });
+
+    test('registers the initial feature flags getter to enable bootstrapping', async () => {
+      const coreSetupMock = coreMock.createSetup();
+      plugin.setup(coreSetupMock, {
+        cloud: cloudMock.createSetup(),
+        usageCollection: usageCollectionPluginMock.createSetupContract(),
+      });
+      expect(coreSetupMock.featureFlags.setInitialFeatureFlagsGetter).toHaveBeenCalledTimes(1);
     });
   });
 

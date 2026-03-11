@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import { Key } from 'selenium-webdriver';
 import { INPUT_TEST_SUBJ } from '@kbn/data-grid-in-table-search';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -57,6 +57,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
+    });
+
+    afterEach(async function () {
+      await discover.resetQueryMode();
     });
 
     it('should show highlights for in-table search', async () => {

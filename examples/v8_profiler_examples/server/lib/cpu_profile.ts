@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Session } from './session';
+import type { Session } from './session';
 
 interface StartProfilingArgs {
   interval: number;

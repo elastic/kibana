@@ -7,321 +7,76 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Schema,
-  z,
-  ZodAny,
-  ZodEffects,
-  ZodFirstPartySchemaTypes,
-  ZodFirstPartyTypeKind,
-  ZodIssueCode,
-  ZodTypeAny,
-} from '@kbn/zod';
-import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
+import { z, ZodIssueCode } from '@kbn/zod';
+import { difference, isArray, isPlainObject } from 'lodash';
 
-/**
- * These types are not unpackable, they mark a property as handled,
- * but any nested keys will result in runtime failures
- */
-const primitiveTypes = [
-  ZodFirstPartyTypeKind.ZodString,
-  ZodFirstPartyTypeKind.ZodBoolean,
-  ZodFirstPartyTypeKind.ZodNull,
-  ZodFirstPartyTypeKind.ZodUndefined,
-  ZodFirstPartyTypeKind.ZodNumber,
-  ZodFirstPartyTypeKind.ZodNaN,
-  ZodFirstPartyTypeKind.ZodLiteral,
-  ZodFirstPartyTypeKind.ZodEnum,
-  ZodFirstPartyTypeKind.ZodNativeEnum,
-  ZodFirstPartyTypeKind.ZodDate,
-] as const;
-
-/**
- * any() and unknown() will result in warnings,
- * as we don't really know what to do with them
- * and they can lead to unexpected behavior at
- * runtime, such as failing on excess keys for
- * objects
- */
-const dangerousTypes = [ZodFirstPartyTypeKind.ZodAny, ZodFirstPartyTypeKind.ZodUnknown] as const;
-
-const typeNames = [
-  ZodFirstPartyTypeKind.ZodObject,
-  ZodFirstPartyTypeKind.ZodArray,
-  ZodFirstPartyTypeKind.ZodUnion,
-  ZodFirstPartyTypeKind.ZodDiscriminatedUnion,
-  ZodFirstPartyTypeKind.ZodIntersection,
-  ZodFirstPartyTypeKind.ZodOptional,
-  ZodFirstPartyTypeKind.ZodEffects,
-  ZodFirstPartyTypeKind.ZodRecord,
-  ZodFirstPartyTypeKind.ZodDefault,
-  ZodFirstPartyTypeKind.ZodLazy,
-  ZodFirstPartyTypeKind.ZodNullable,
-  ZodFirstPartyTypeKind.ZodPipeline,
-  ...primitiveTypes,
-  ...dangerousTypes,
-] as const;
-
-type ParsableType = (typeof typeNames)[number];
-
-type PrimitiveParsableType = (typeof primitiveTypes)[number];
-type DangerousParsableType = (typeof dangerousTypes)[number];
-
-type ParsableSchema = Extract<ZodFirstPartySchemaTypes, { _def: { typeName: ParsableType } }>;
-type PrimitiveParsableSchema = Extract<
-  ZodFirstPartySchemaTypes,
-  { _def: { typeName: PrimitiveParsableType } }
->;
-
-type DangerousParsableSchema =
-  | Extract<ZodFirstPartySchemaTypes, { _def: { typeName: DangerousParsableType } }>
-  | ZodEffects<ZodTypeAny>;
-
-function getTypeName(schema: z.Schema): string | undefined {
-  const typeName =
-    'typeName' in schema._def && typeof schema._def.typeName === 'string'
-      ? schema._def.typeName
-      : undefined;
-
-  return typeName;
-}
-
-function isParsableSchema(schema: z.Schema): schema is ParsableSchema {
-  const typeName = getTypeName(schema);
-  return !!typeName && typeNames.includes(typeName as ParsableType);
-}
-
-function assertIsParsableSchema(schema: z.Schema, key: string): asserts schema is ParsableSchema {
-  if (isParsableSchema(schema)) {
-    return;
+function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
+  if (isPlainObject(obj)) {
+    Object.entries(obj as Record<string, any>).forEach(([key, value]) => {
+      getFlattenedKeys(value, parentKey ? `${parentKey}.${key}` : key, keys);
+    });
+  } else if (isArray(obj)) {
+    obj.forEach((value) => {
+      getFlattenedKeys(value, parentKey, keys);
+    });
   }
-
-  throw new Error(
-    `Unsupported schema at ${key}: ${
-      'typeName' in schema._def ? schema._def.typeName : 'unknown type'
-    }`
-  );
-}
-
-function isPrimitiveParsableSchema(schema: z.Schema): schema is PrimitiveParsableSchema {
-  const typeName = getTypeName(schema);
-  return !!typeName && primitiveTypes.includes(typeName as PrimitiveParsableType);
-}
-
-function isDangerousParsableSchema(
-  schema: z.Schema
-): schema is Exclude<DangerousParsableSchema, ZodEffects<z.ZodAny>> {
-  const typeName = getTypeName(schema);
-  return !!typeName && dangerousTypes.includes(typeName as DangerousParsableType);
-}
-/**
- * Asserts that the schema is recursively parsable (ie, it is
- * composed entirely of parsable schemas)
- */
-export function assertAllParsableSchemas(
-  outerSchema: z.Schema
-): Set<{ key: string; schema: DangerousParsableSchema }> {
-  // track processed schemas, to prevent self-referencing schemas
-  // instantiated with z.lazy() to create recursion errors
-  const processed: Set<Schema> = new Set();
-  // track dangerous schemas and their path
-  const dangerous: Set<{ key: string; schema: DangerousParsableSchema }> = new Set();
-
-  innerAssertAllParsableSchemas(outerSchema, '');
-
-  return dangerous;
-
-  function innerAssertAllParsableSchemas(schema: z.Schema, key: string): void {
-    assertIsParsableSchema(schema, key);
-
-    if (processed.has(schema)) {
-      return;
-    }
-
-    processed.add(schema);
-
-    if (isPrimitiveParsableSchema(schema)) {
-      return;
-    }
-
-    if (isDangerousParsableSchema(schema)) {
-      dangerous.add({ key, schema });
-      return;
-    }
-
-    const def = schema._def;
-
-    switch (def.typeName) {
-      case ZodFirstPartyTypeKind.ZodObject:
-        return Object.entries(def.shape()).forEach(([prop, innerSchema]) =>
-          innerAssertAllParsableSchemas(innerSchema as z.Schema, key ? `${key}.${prop}` : prop)
-        );
-      case ZodFirstPartyTypeKind.ZodOptional:
-        return innerAssertAllParsableSchemas(def.innerType, key);
-      case ZodFirstPartyTypeKind.ZodArray:
-        return innerAssertAllParsableSchemas(def.type, key);
-
-      case ZodFirstPartyTypeKind.ZodUnion:
-      case ZodFirstPartyTypeKind.ZodDiscriminatedUnion:
-        const schemas: z.Schema[] = def.options;
-        return schemas.forEach((innerSchema) => innerAssertAllParsableSchemas(innerSchema, key));
-
-      case z.ZodFirstPartyTypeKind.ZodIntersection:
-        innerAssertAllParsableSchemas(def.left, key);
-        innerAssertAllParsableSchemas(def.right, key);
-        return;
-
-      case z.ZodFirstPartyTypeKind.ZodEffects:
-        if (def.effect.type === 'transform') {
-          dangerous.add({ key, schema: schema as ZodEffects<ZodAny> });
-        }
-        return innerAssertAllParsableSchemas(def.schema, key);
-
-      case z.ZodFirstPartyTypeKind.ZodRecord:
-        return innerAssertAllParsableSchemas(def.valueType, key);
-
-      case ZodFirstPartyTypeKind.ZodDefault:
-        return innerAssertAllParsableSchemas(def.innerType, key);
-
-      case ZodFirstPartyTypeKind.ZodLazy:
-        return innerAssertAllParsableSchemas(def.getter(), key);
-
-      case ZodFirstPartyTypeKind.ZodNullable:
-        return innerAssertAllParsableSchemas(def.innerType, key);
-    }
-  }
-}
-
-function getHandlingSchemas(schema: z.Schema, key: string, value: object): z.Schema[] {
-  assertIsParsableSchema(schema, key);
-
-  if (isPrimitiveParsableSchema(schema) || isDangerousParsableSchema(schema)) {
-    return [];
-  }
-
-  const def = schema._def;
-
-  switch (def.typeName) {
-    case ZodFirstPartyTypeKind.ZodObject:
-      return [def.shape()[key] as z.Schema];
-    case ZodFirstPartyTypeKind.ZodOptional:
-      return getHandlingSchemas(def.innerType, key, value);
-    case ZodFirstPartyTypeKind.ZodArray:
-      return [def.type as z.Schema];
-
-    case ZodFirstPartyTypeKind.ZodUnion:
-    case ZodFirstPartyTypeKind.ZodDiscriminatedUnion:
-      const types: z.Schema[] = def.options;
-      // for union types, we should only return the first matching union type
-      // to make sure unmatching union types don't mark a key as handled
-      const matched = types.find((type) => type.safeParse(value).success);
-      return matched ? getHandlingSchemas(matched, key, value) : [];
-
-    case z.ZodFirstPartyTypeKind.ZodIntersection:
-      return [
-        ...getHandlingSchemas(def.left, key, value),
-        ...getHandlingSchemas(def.right, key, value),
-      ];
-
-    case z.ZodFirstPartyTypeKind.ZodEffects:
-      return [def.schema];
-
-    case z.ZodFirstPartyTypeKind.ZodRecord:
-      return [def.valueType];
-
-    case ZodFirstPartyTypeKind.ZodDefault:
-      return [def.innerType];
-
-    case ZodFirstPartyTypeKind.ZodLazy:
-      return [def.getter()];
-
-    case ZodFirstPartyTypeKind.ZodNullable:
-      return [def.innerType];
-
-    case ZodFirstPartyTypeKind.ZodPipeline:
-      return [def.in];
-  }
-}
-
-function getHandledKeys<T extends Record<string, unknown>>(
-  type: z.Schema,
-  object: T,
-  prefix: string = ''
-): { handled: Set<string>; all: Set<string> } {
-  const keys: {
-    handled: Set<string>;
-    all: Set<string>;
-  } = {
-    handled: new Set(),
-    all: new Set(),
-  };
-
-  forEach(object, (value, key) => {
-    const ownPrefix = prefix ? `${prefix}.${key}` : key;
-    keys.all.add(ownPrefix);
-
-    const handlingTypes = getHandlingSchemas(type, key, object).filter(Boolean);
-
-    if (handlingTypes.length) {
-      keys.handled.add(ownPrefix);
-    }
-
-    const processObject = (typeForObject: z.Schema, objectToProcess: Record<string, unknown>) => {
-      const nextKeys = getHandledKeys(typeForObject, objectToProcess, ownPrefix);
-      nextKeys.all.forEach((k) => keys.all.add(k));
-      nextKeys.handled.forEach((k) => keys.handled.add(k));
-    };
-
-    if (isPlainObject(value)) {
-      handlingTypes.forEach((typeAtIndex) => {
-        processObject(typeAtIndex, value as Record<string, unknown>);
-      });
-    }
-
-    if (isArray(value)) {
-      handlingTypes.forEach((typeAtIndex) => {
-        if (
-          !isParsableSchema(typeAtIndex) ||
-          typeAtIndex._def.typeName !== ZodFirstPartyTypeKind.ZodArray
-        ) {
-          return;
-        }
-
-        const innerType = typeAtIndex._def.type;
-
-        castArray(value).forEach((valueAtIndex) => {
-          if (isPlainObject(valueAtIndex)) {
-            processObject(innerType, valueAtIndex as Record<string, unknown>);
-          }
-        });
-      });
-    }
-  });
-
+  keys.add(parentKey);
   return keys;
 }
 
+function parseStrict<TSchema extends z.Schema>(
+  source: z.Schema,
+  input: z.ParseInput
+): z.ParseReturnType<z.output<TSchema>> {
+  const next = source._parse(input);
+  if (!z.isValid(next)) {
+    return next;
+  }
+
+  const allInputKeys = Array.from(getFlattenedKeys(input.data));
+  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>));
+
+  const excessKeys = difference(allInputKeys, allOutputKeys);
+
+  if (excessKeys.length) {
+    input.parent.common.issues.push({
+      code: ZodIssueCode.unrecognized_keys,
+      keys: excessKeys,
+      message: `Excess keys are not allowed`,
+      path: input.path,
+    });
+    return z.INVALID;
+  }
+  return next;
+}
+
 export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
-  assertAllParsableSchemas(schema);
+  // We really only want to override _parse, but:
+  // - it should not have the same identity as the wrapped schema
+  // - all methods should be bound to the original schema
+  // if we use { ..., _parse: overrideParse } it won't work because Zod
+  // explicitly binds all properties in the constructor.
+  // so what we do is:
+  // - get the prototype of the schema
+  // - wrap the schema in a proxy
+  // - if there's a function being accessed, return one that is bound
+  // to the proxy receiver
+  // - if _parse is being accessed, override with our parseStrict fn
+  const proto = Object.getPrototypeOf(schema);
+  const proxy = new Proxy(schema, {
+    get(target, accessor, receiver) {
+      if (accessor === '_parse') {
+        return parseStrict.bind(null, schema);
+      }
 
-  /**
-   * We use preprocess and not superRefine because unknown keys are
-   * stripped before the latter is called, meaning we can no longer
-   * validate. There is a catch here: if any types do any transformation,
-   * we might match the wrong union type.
-   */
-  return z.preprocess((value, context) => {
-    const keys = getHandledKeys(schema, value as Record<string, unknown>);
+      const original = Reflect.getOwnPropertyDescriptor(target, accessor)?.value;
 
-    const excessKeys = difference([...keys.all], [...keys.handled]);
+      if (typeof original === 'function') {
+        return proto[accessor].bind(receiver);
+      }
 
-    if (excessKeys.length) {
-      context.addIssue({
-        code: ZodIssueCode.unrecognized_keys,
-        keys: excessKeys,
-        message: `Excess keys are not allowed`,
-      });
-    }
-    return value;
-  }, schema);
+      return Reflect.get(target, accessor, receiver);
+    },
+  });
+  return proxy;
 }

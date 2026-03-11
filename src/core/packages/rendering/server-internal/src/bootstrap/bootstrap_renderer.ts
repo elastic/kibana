@@ -8,8 +8,8 @@
  */
 
 import { createHash } from 'crypto';
-import { BehaviorSubject } from 'rxjs';
-import { PackageInfo } from '@kbn/config';
+import type { BehaviorSubject } from 'rxjs';
+import type { PackageInfo } from '@kbn/config';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import {
   type DarkModeValue,
@@ -18,8 +18,7 @@ import {
 } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
-import { getThemeTag } from '../theme';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
@@ -83,15 +82,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       // just use the default values in case of connectivity issues with ES
     }
 
-    // keeping legacy themeTag support - note that the browser is now overriding it during setup.
-    if (darkMode === 'system') {
-      darkMode = false;
-    }
-
-    const themeTag = getThemeTag({
-      name: themeName,
-      darkMode,
-    });
+    const colorMode = darkMode === false ? 'light' : darkMode === true ? 'dark' : 'system';
+    const themeTagName = themeName;
     const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
@@ -115,12 +107,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     });
 
     const body = renderTemplate({
-      themeTag,
+      colorMode,
+      themeTagName,
       jsDependencyPaths,
       publicPathMap,
     });
 
-    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+    const hash = createHash('sha256');
     hash.update(body);
     const etag = hash.digest('hex');
 

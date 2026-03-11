@@ -7,41 +7,76 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
+import { MultiFieldKey, serializeField } from '@kbn/data-plugin/common';
+import { getValueKey } from '@kbn/coloring';
 
 /**
- * Get the stringified version of all the categories that needs to be colored in the chart.
- * Multifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string.
+ * Returns all serialized categories of the dataset for color matching.
+ * All non-serializable fields will be as a plain unformatted string.
  *
  * Note: This does **NOT** support transposed columns
  */
 export function getColorCategories(
   rows: DatatableRow[] = [],
-  accessor?: string,
-  exclude?: any[]
-): Array<string | string[]> {
-  if (!accessor) return [];
+  accessors: string[] = [],
+  exclude?: RawValue[],
+  legacyMode: boolean = false // stringifies raw values
+): SerializedValue[] {
+  if (accessors.length === 0) return [];
 
-  return rows
-    .filter(({ [accessor]: v }) => !(v === undefined || exclude?.includes(v)))
-    .map((r) => {
-      const v = r[accessor];
-      // The categories needs to be stringified in their unformatted version.
-      // We can't distinguish between a number and a string from a text input and the match should
-      // work with both numeric field values and string values.
-      const key = (isMultiFieldKey(v) ? v.keys : [v]).map(String);
-      const stringifiedKeys = key.join(',');
-      return { key, stringifiedKeys };
-    })
-    .reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
-      (acc, { key, stringifiedKeys }) => {
-        if (!acc.keys.has(stringifiedKeys)) {
-          acc.keys.add(stringifiedKeys);
-          acc.categories.push(key.length === 1 ? key[0] : key);
+  const seen = new Set<unknown>();
+  return rows.reduce<SerializedValue[]>((acc, row) => {
+    if (accessors.length > 1) {
+      // this happens only in ESQL where we can setup multiple splitAccessors.
+      // In this case we build a category as a MultiFieldKey containing every values reachable from the accessors.
+      const multiKeys = accessors.reduce<string[]>((keys, accessor) => {
+        const hasValue = Object.hasOwn(row, accessor);
+        if (!hasValue) {
+          keys.push(getValueKey(null));
+        } else {
+          const rawValue: RawValue = row[accessor];
+          const key = getValueKey(rawValue);
+          keys.push(key);
         }
-        return acc;
-      },
-      { keys: new Set(), categories: [] }
-    ).categories;
+        return keys;
+      }, []);
+
+      const value = new MultiFieldKey({
+        key: multiKeys,
+      });
+      const serializedValue = value.serialize();
+      if (!seen.has(value.toString())) {
+        // TODO is passing the right legacy move value?
+        acc.push(legacyMode ? value : serializedValue);
+        seen.add(value.toString());
+      }
+    } else {
+      const accessor = accessors[0];
+      const hasValue = Object.hasOwn(row, accessor);
+      const rawValue: RawValue = row[accessor];
+      const key = getValueKey(rawValue);
+
+      if (hasValue && !exclude?.includes(rawValue) && !seen.has(key)) {
+        const value = serializeField(rawValue);
+        seen.add(key);
+        acc.push(legacyMode ? key : value);
+      }
+    }
+    return acc;
+  }, []);
+}
+
+/**
+ * Returns all *stringified* categories of the dataset for color matching.
+ *
+ * Should **only** be used with legacy `palettes`
+ */
+export function getLegacyColorCategories(
+  rows?: DatatableRow[],
+  accessors?: string[],
+  exclude?: RawValue[]
+): string[] {
+  return getColorCategories(rows, accessors, exclude, true).map(String);
 }

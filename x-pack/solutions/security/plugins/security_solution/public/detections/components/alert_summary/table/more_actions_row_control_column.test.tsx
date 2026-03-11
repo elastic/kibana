@@ -15,12 +15,13 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 
 describe('MoreActionsRowControlColumn', () => {
-  it('should render component with all options', () => {
+  it('should render component with all options', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -32,6 +33,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -49,14 +51,14 @@ describe('MoreActionsRowControlColumn', () => {
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('add-to-existing-case-action')).toBeInTheDocument();
     expect(getByTestId('add-to-new-case-action')).toBeInTheDocument();
     expect(getByTestId('alert-tags-context-menu-item')).toBeInTheDocument();
   });
 
-  it('should not show cases actions if user is not authorized', () => {
+  it('should not show cases actions if user is not authorized', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -68,6 +70,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: false,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -87,13 +90,13 @@ describe('MoreActionsRowControlColumn', () => {
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(queryByTestId('add-to-existing-case-action')).not.toBeInTheDocument();
     expect(queryByTestId('add-to-new-case-action')).not.toBeInTheDocument();
   });
 
-  it('should not show tags actions if user is not authorized', () => {
+  it('should not show tags actions if user is not authorized', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -105,6 +108,7 @@ describe('MoreActionsRowControlColumn', () => {
               createComment: true,
             }),
             getRuleIdFromEvent: jest.fn(),
+            getObservablesFromEcs: jest.fn().mockReturnValue([]),
           },
         },
       },
@@ -124,7 +128,7 @@ describe('MoreActionsRowControlColumn', () => {
     const button = getByTestId(MORE_ACTIONS_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(queryByTestId('alert-tags-context-menu-item')).not.toBeInTheDocument();
   });

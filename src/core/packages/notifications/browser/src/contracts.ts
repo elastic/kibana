@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IToasts } from './types';
+import type { IToasts, NotificationCoordinator } from './types';
+import type { FeedbackStart } from './feedback_types';
+import type { ToursStart } from './tours_types';
 
 /**
  * {@link IToasts}
@@ -25,6 +27,10 @@ export type ToastsStart = IToasts;
 export interface NotificationsSetup {
   /** {@link ToastsSetup} */
   toasts: ToastsSetup;
+  /**
+   * {@link NotificationCoordinator}
+   */
+  coordinator: NotificationCoordinator;
 }
 
 /** @public */
@@ -32,4 +38,15 @@ export interface NotificationsStart {
   /** {@link ToastsStart} */
   toasts: ToastsStart;
   showErrorDialog: (options: { title: string; error: Error }) => void;
+  /**
+   * Controls visibility of feedback elements
+   * @public
+   */
+  feedback: FeedbackStart;
+
+  /**
+   * Controls visibility of guided tours
+   * @public
+   */
+  tours: ToursStart;
 }

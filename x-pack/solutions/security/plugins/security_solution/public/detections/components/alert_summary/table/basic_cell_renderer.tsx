@@ -7,8 +7,13 @@
 
 import React, { memo, useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
+import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { getAlertFieldValueAsStringOrNull } from '../../../utils/type_utils';
+
+export const BASIC_CELL_RENDERER_TRUNCATE_TEST_ID =
+  'alert-summary-table-basic-call-rendered-truncate';
 
 export interface BasicCellRendererProps {
   /**
@@ -23,7 +28,7 @@ export interface BasicCellRendererProps {
 
 /**
  * Renders all the basic table cell values.
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  */
 export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps) => {
   const displayValue: string | null = useMemo(
@@ -31,7 +36,25 @@ export const BasicCellRenderer = memo(({ alert, field }: BasicCellRendererProps)
     [alert, field]
   );
 
-  return <>{getOrEmptyTagFromValue(displayValue)}</>;
+  return (
+    <TruncatableText dataTestSubj={BASIC_CELL_RENDERER_TRUNCATE_TEST_ID}>
+      <EuiToolTip
+        position="bottom"
+        content={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <span>{field}</span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span>{displayValue}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <span tabIndex={0}>{getOrEmptyTagFromValue(displayValue)}</span>
+      </EuiToolTip>
+    </TruncatableText>
+  );
 });
 
 BasicCellRenderer.displayName = 'BasicCellRenderer';

@@ -12,7 +12,8 @@ import {
   getDefaultSecurityImplementationMock,
 } from './security_service.test.mocks';
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
@@ -70,6 +71,38 @@ describe('SecurityService', function () {
             expect(fips.isEnabled()).toBe(true);
           }
         });
+      });
+    });
+
+    describe('#uiam', () => {
+      it('should be set to `null` if UIAM is not configured ', () => {
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should be set to `null` if UIAM is not enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: { security: { uiam: { enabled: false, sharedSecret: 'some-secret' } } },
+              },
+            }),
+          })
+        );
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should return shared secret if UIAM is enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: { security: { uiam: { enabled: true, sharedSecret: 'some-secret' } } },
+              },
+            }),
+          })
+        );
+        expect(service.setup().uiam?.sharedSecret).toBe('some-secret');
       });
     });
   });

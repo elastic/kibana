@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
-import { EmptyStringArray, EmptyStringArrayEncoded } from '.';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
+import type { EmptyStringArrayEncoded } from '.';
+import { EmptyStringArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('empty_string_array', () => {

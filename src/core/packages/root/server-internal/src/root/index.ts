@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectableObservable, Subscription } from 'rxjs';
+import type { ConnectableObservable, Subscription } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap, distinctUntilChanged } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
-import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import { LoggingSystem } from '@kbn/core-logging-server-internal';
 import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
+import { setDiagLogger } from '@kbn/telemetry';
 import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
 import { MIGRATION_EXCEPTION_CODE } from '../constants';
@@ -45,6 +47,7 @@ export class Root {
     try {
       this.server.setupCoreConfig();
       this.setupApmLabelSync();
+
       await this.setupLogging();
 
       this.log.debug('prebooting root');
@@ -135,6 +138,10 @@ export class Root {
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
+      tap((config) => {
+        const telemetry = config.loggers?.find((loggerConfig) => loggerConfig.name === 'telemetry');
+        setDiagLogger(this.loggingSystem.get('telemetry'), telemetry?.level);
+      }),
       concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

@@ -14,6 +14,8 @@
           "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,39 +30,8 @@
               "ConnectorIconProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.DecorativeHorizontalStepper",
-        "type": "Function",
-        "tags": [],
-        "label": "DecorativeHorizontalStepper",
-        "description": [],
-        "signature": [
-          "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.DecorativeHorizontalStepper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  stepCount = 2,\n}",
-            "description": [],
-            "signature": [
-              "DecorativeHorizontalStepperProps"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+            "lineNumber": 18,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -77,9 +48,11 @@
         "label": "FormInfoField",
         "description": [],
         "signature": [
-          "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
+          "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, maxWidth, minWidth, }: FormInfoFieldProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,12 +61,14 @@
             "id": "def-public.FormInfoField.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actions = [],\n  label,\n  value,\n  copyValue,\n  dataTestSubj,\n  copyValueDataTestSubj,\n}",
+            "label": "{\n  actions = [],\n  label,\n  value,\n  copyValue,\n  dataTestSubj,\n  copyValueDataTestSubj,\n  maxWidth,\n  minWidth,\n}",
             "description": [],
             "signature": [
               "FormInfoFieldProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+            "lineNumber": 34,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -113,6 +88,8 @@
           "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,6 +104,8 @@
               "SearchEmptyPromptProps"
             ],
             "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+            "lineNumber": 35,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -141,6 +120,74 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ELASTIC_LLM_COST_TOUR_SKIP_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_LLM_COST_TOUR_SKIP_KEY",
+        "description": [],
+        "signature": [
+          "\"search_elastic_llm_cost_info_skip\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ELASTICSEARCH_URL_PLACEHOLDER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTICSEARCH_URL_PLACEHOLDER",
+        "description": [],
+        "signature": [
+          "\"https://your_deployment_url\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.GETTING_STARTED_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GETTING_STARTED_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"gettingStartedVisited\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_EMPTY_STATE_SKIP_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_global_empty_state_skip\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
         "type": "string",
         "tags": [],
@@ -150,6 +197,8 @@
           "\"search_onboarding_workflow\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -162,9 +211,11 @@
         "label": "WorkflowId",
         "description": [],
         "signature": [
-          "\"default\" | \"vector\" | \"semantic\""
+          "\"semantic\" | \"default\" | \"vector\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

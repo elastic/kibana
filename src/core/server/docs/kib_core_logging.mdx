@@ -129,7 +129,7 @@ There are two types of layout supported at the moment: `pattern` and `json`.
 ### Pattern layout
 With `pattern` layout it's possible to define a string pattern with special placeholders `%conversion_pattern` (see the table below) that
 will be replaced with data from the actual log message. By default the following pattern is used:
-`[%date][%level][%logger] %message`. Also `highlight` option can be enabled for `pattern` layout so that
+`[%date][%level][%logger] %message %error`. Also `highlight` option can be enabled for `pattern` layout so that
 some parts of the log message are highlighted with different colors that may be quite handy if log messages are forwarded
 to the terminal with color support.
 `pattern` layout uses a sub-set of [log4j2 pattern syntax](https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout)

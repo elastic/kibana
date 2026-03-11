@@ -6,50 +6,109 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { DataViewManagerScopeName } from '../../constants';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SourcererUrlState } from '../../../sourcerer/store/model';
+import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DATA_VIEW_PICKER_TEST_ID } from './constants';
-import { useManagedDataViews } from '../../hooks/use_managed_data_views';
+import { PageScope } from '../../constants';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
+import { LOADING } from './translations';
+import { DATA_VIEW_PICKER_TEST_ID } from './constants';
+import { useDataView } from '../../hooks/use_data_view';
 
-export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
+interface DataViewPickerProps {
+  /**
+   * The scope of the data view picker
+   */
+  scope: PageScope;
+  /**
+   * Optional callback when the data view picker is closed
+   */
+  onClosePopover?: () => void;
+  /**
+   * Force disable picker
+   */
+  disabled?: boolean;
+}
+
+export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataViewPickerProps) => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, notifications },
   } = useKibana();
-  const closeDataViewEditor = useRef<() => void | undefined>();
+
+  const canEditDataView = useMemo(
+    () => Boolean(dataViewEditor?.userPermissions.editDataView()),
+    [dataViewEditor]
+  );
+
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(props.scope);
+  const { dataView, status } = useDataView(scope);
 
-  const dataViewId = dataViewSpec?.id;
+  const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
+    useSelector(sharedStateSelector);
+  const adhocDataViews = useMemo(() => {
+    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
+  }, [adhocDataViewSpecs, fieldFormats]);
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (newDataView) => {
-        dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
-        selectDataView({ id: newDataView.id, scope: [props.scope] });
-      },
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, dispatch, props.scope, selectDataView]);
+  const savedDataViews = useSavedDataViews();
 
+  const isDefaultSourcerer = scope === PageScope.default;
+  const isExploreSourcerer = scope === PageScope.explore;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
+
+  const dataViewId = dataView?.id;
+
+  // NOTE: this function is called in response to user interaction with the picker,
+  // hence - it is the only place where we should update the url param for the data view selection.
   const handleChangeDataView = useCallback(
-    (id: string) => {
-      selectDataView({ id, scope: [props.scope] });
+    (id: string, indexPattern: string = '') => {
+      selectDataView({ id, scope });
+
+      if (isDefaultSourcerer) {
+        updateUrlParam({
+          [PageScope.default]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
+
+      if (isExploreSourcerer) {
+        updateUrlParam({
+          [PageScope.explore]: {
+            id,
+            // NOTE: Boolean filter for removing empty patterns
+            selectedPatterns: indexPattern.split(',').filter(Boolean),
+          },
+        });
+      }
     },
-    [props.scope, selectDataView]
+    [isDefaultSourcerer, isExploreSourcerer, scope, selectDataView, updateUrlParam]
+  );
+
+  const handleCreateNewDataView = useCallback(
+    (newDataView: DataView) => {
+      if (!newDataView.id) {
+        return;
+      }
+
+      dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
+      handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
+    },
+    [dispatch, handleChangeDataView]
   );
 
   const editField = useCallback(
@@ -58,75 +117,95 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
         return;
       }
 
-      const dataViewInstance = await data.dataViews.get(dataViewId);
+      // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+      try {
+        const dataViewInstance = await data.dataViews.get(dataViewId);
+        // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+        if (dataViewInstance.isPersisted?.()) {
+          data.dataViews.clearInstanceCache(dataViewId);
+        }
 
-      closeFieldEditor.current = await dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: dataViewInstance,
-        },
-        fieldName,
-        onSave: async () => {
-          if (!dataViewInstance.id) {
-            return;
-          }
+        closeFieldEditor.current = await dataViewFieldEditor.openEditor({
+          ctx: {
+            dataView: dataViewInstance,
+          },
+          fieldName,
+          onSave: async () => {
+            if (!dataViewInstance.id) {
+              return;
+            }
 
-          handleChangeDataView(dataViewInstance.id);
-        },
-      });
+            handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
+          },
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: 'Error retrieving data view',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
+      }
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView, notifications]
   );
 
-  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
+  const getDataViewHelpText = useCallback(
+    (dv: DataView) =>
+      dv.id === defaultDataViewId ? (
+        <FormattedMessage
+          id="xpack.securitySolution.dataViewManager.getDataViewHelpText"
+          defaultMessage="Changes made here won't be saved permanently. To update the default Security indices, edit {code} in Stack Management > Advanced Settings."
+          values={{
+            code: <EuiCode>{'securitySolution:defaultIndex'}</EuiCode>,
+          }}
+        />
+      ) : undefined,
+    [defaultDataViewId]
+  );
 
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
-  const handleDataViewModified = useCallback(
-    (updatedDataView: DataView) => {
-      selectDataView({ id: updatedDataView.id, scope: [props.scope] });
-    },
-    [props.scope, selectDataView]
+  const handleDataViewModified = useMemo(() => {
+    if (!canEditDataView) {
+      return undefined;
+    }
+    return (updatedDataView: DataView) => {
+      if (!updatedDataView.id) {
+        return;
+      }
+      handleChangeDataView(updatedDataView.id, updatedDataView.getIndexPattern());
+    };
+  }, [canEditDataView, handleChangeDataView]);
+
+  const handleAddField = useMemo(
+    () => (canEditDataView ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
   );
 
   const triggerConfig = useMemo(() => {
     if (status === 'loading') {
-      return { label: 'Loading' };
-    }
-
-    if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
-      return {
-        label: 'Default Security Data View',
-      };
+      return { label: LOADING };
     }
 
     return {
-      label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
+      label: dataView?.name || dataView?.id || 'Data view',
     };
-  }, [dataViewSpec.id, dataViewSpec?.name, status]);
-
-  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
-
-  const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
-  }, [adhocDataViewSpecs, fieldFormats]);
-
-  const managedDataViews = useManagedDataViews();
-  const savedDataViews = useSavedDataViews();
+  }, [dataView?.id, dataView?.name, status]);
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
       <UnifiedDataViewPicker
-        isDisabled={status !== 'ready'}
-        currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
+        isDisabled={status !== 'ready' || disabled}
+        currentDataViewId={dataViewId || (defaultDataViewId ?? undefined)}
         trigger={triggerConfig}
         onChangeDataView={handleChangeDataView}
         onEditDataView={handleDataViewModified}
         onAddField={handleAddField}
-        onDataViewCreated={createNewDataView}
+        onDataViewCreated={handleCreateNewDataView}
         adHocDataViews={adhocDataViews}
         savedDataViews={savedDataViews}
-        managedDataViews={managedDataViews}
+        onClosePopover={onClosePopover}
+        getDataViewHelpText={getDataViewHelpText}
       />
     </div>
   );

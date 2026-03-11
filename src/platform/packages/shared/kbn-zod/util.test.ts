@@ -8,6 +8,7 @@
  */
 
 import { z } from '.';
+import { z as z4 } from './v4';
 import { isZod } from './util';
 
 describe('isZod', () => {
@@ -27,7 +28,21 @@ describe('isZod', () => {
     [z.object({}), true],
     [z.union([z.string(), z.number()]), true],
     [z.literal('yes').optional(), true],
-  ])('"is" correctly identifies %#', (value, result) => {
+  ])('"is" correctly identifies v3 schemas %#', (value, result) => {
+    expect(isZod(value)).toBe(result);
+  });
+
+  test.each([
+    [z4.string(), true],
+    [z4.number(), true],
+    [z4.boolean(), true],
+    [z4.array(z4.string()), true],
+    [z4.object({}), true],
+    [z4.union([z4.string(), z4.number()]), true],
+    [z4.literal('yes').optional(), true],
+    [z4.record(z4.string(), z4.number()), true],
+    [z4.any(), true],
+  ])('"is" correctly identifies v4 schemas %#', (value, result) => {
     expect(isZod(value)).toBe(result);
   });
 });

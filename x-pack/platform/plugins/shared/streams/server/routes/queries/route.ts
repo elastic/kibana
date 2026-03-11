@@ -4,17 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
-import {
-  StreamQuery,
-  streamQuerySchema,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
+
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }
@@ -47,23 +45,22 @@ const listQueriesRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { queryClient, streamsClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
-    const queryAssets = await assetClient.getAssetLinks(streamName, ['query']);
+    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
-      queries: queryAssets.map((queryAsset) => queryAsset.query),
+      queries: queryLinks.map((queryLink) => queryLink.query),
     };
   },
 });
@@ -80,12 +77,9 @@ const upsertQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-
   params: z.object({
     path: z.object({
       name: z.string(),
@@ -94,24 +88,20 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
+    await assertEnterpriseLicense(licensing);
 
-    await streamsClient.ensureStream(streamName);
-
-    await assetClient.linkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-      query: {
-        id: queryId,
-        title: body.title,
-        kql: {
-          query: body.kql.query,
-        },
-      },
+    const definition = await streamsClient.getStream(streamName);
+    await queryClient.upsert(definition, {
+      id: queryId,
+      title: body.title,
+      esql: body.esql,
+      severity_score: body.severity_score,
+      evidence: body.evidence,
     });
 
     return {
@@ -132,9 +122,7 @@ const deleteQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -143,19 +131,26 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, queryClient, licensing } = await getScopedClients({
+      request,
+    });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { queryId, name: streamName },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
-    await assetClient.unlinkAsset(streamName, {
-      [ASSET_TYPE]: 'query',
-      [ASSET_ID]: queryId,
-    });
+    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
+    await queryClient.delete(definition, queryId);
+
+    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -175,9 +170,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -203,48 +196,23 @@ const bulkQueriesRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { name: streamName },
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
+    const definition = await streamsClient.getStream(streamName);
 
-    const result = await assetClient.bulk(
-      streamName,
-      operations.map((operation) => {
-        if ('index' in operation) {
-          return {
-            index: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.index.id,
-                query: {
-                  id: operation.index.id,
-                  title: operation.index.title,
-                  kql: { query: operation.index.kql.query },
-                },
-              },
-            },
-          };
-        }
-        return {
-          delete: {
-            asset: {
-              [ASSET_TYPE]: 'query',
-              [ASSET_ID]: operation.delete.id,
-            },
-          },
-        };
-      })
-    );
+    await queryClient.bulk(definition, operations);
 
-    if (result.errors) {
-      logger.error(`Error indexing some items`);
-      throw internal(`Could not index all items`, { errors: result.errors });
-    }
+    logger
+      .get('significant_events')
+      .debug(
+        `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
+      );
 
     return { acknowledged: true };
   },

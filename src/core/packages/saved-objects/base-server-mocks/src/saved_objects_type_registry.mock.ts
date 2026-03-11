@@ -7,32 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 
-const createRegistryMock = (): jest.Mocked<
-  ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
-> => {
-  const mock = {
+const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => {
+  const mock = lazyObject({
     registerType: jest.fn(),
+    getLegacyTypes: jest.fn().mockReturnValue([]),
     getType: jest.fn(),
-    getVisibleTypes: jest.fn(),
-    getVisibleToHttpApisTypes: jest.fn(),
-    getAllTypes: jest.fn(),
-    getImportableAndExportableTypes: jest.fn(),
-    isNamespaceAgnostic: jest.fn(),
-    isSingleNamespace: jest.fn(),
-    isMultiNamespace: jest.fn(),
-    isShareable: jest.fn(),
-    isHidden: jest.fn(),
+    getVisibleTypes: jest.fn().mockReturnValue([]),
+    getVisibleToHttpApisTypes: jest.fn().mockReturnValue(false),
+    getAllTypes: jest.fn().mockReturnValue([]),
+    getImportableAndExportableTypes: jest.fn().mockReturnValue([]),
+    isNamespaceAgnostic: jest.fn().mockImplementation((type: string) => type === 'global'),
+    isSingleNamespace: jest
+      .fn()
+      .mockImplementation((type: string) => type !== 'global' && type !== 'shared'),
+    isMultiNamespace: jest.fn().mockImplementation((type: string) => type === 'shared'),
+    isShareable: jest.fn().mockImplementation((type: string) => type === 'shared'),
+    isHidden: jest.fn().mockReturnValue(false),
     isHiddenFromHttpApis: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
-  };
+    supportsAccessControl: jest.fn(),
+    isAccessControlEnabled: jest.fn(),
+    setAccessControlEnabled: jest.fn(),
+  });
 
   mock.getVisibleTypes.mockReturnValue([]);
   mock.getAllTypes.mockReturnValue([]);
+  mock.getLegacyTypes.mockReturnValue([]);
   mock.getImportableAndExportableTypes.mockReturnValue([]);
   mock.getIndex.mockReturnValue('.kibana-test');
   mock.getIndex.mockReturnValue('.kibana-test');
@@ -47,6 +52,8 @@ const createRegistryMock = (): jest.Mocked<
   mock.isImportableAndExportable.mockReturnValue(true);
   mock.getVisibleToHttpApisTypes.mockReturnValue(false);
   mock.getNameAttribute.mockReturnValue(undefined);
+  mock.supportsAccessControl.mockReturnValue(false);
+  mock.isAccessControlEnabled.mockReturnValue(true);
 
   return mock;
 };

@@ -10,10 +10,11 @@
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
 import rison from '@kbn/rison';
-import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/content_management/constants';
-import type { SharedDashboardState } from '@kbn/dashboard-plugin/public/dashboard_app/url/url_utils';
+import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/common/constants';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, discover, visChart, share, timePicker, unifiedFieldList } =
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const updateAppStateQueryParam = (
     url: string,
-    setAppState: (appState: Partial<SharedDashboardState>) => Partial<SharedDashboardState>
+    setAppState: (appState: Partial<DashboardLocatorParams>) => Partial<DashboardLocatorParams>
   ) => {
     log.debug(`updateAppStateQueryParam, before url: ${url}`);
 
@@ -52,8 +53,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
     const urlBeforeClientQueryParams = url.substring(0, clientQueryParamsStartIndex);
     const urlParams = new URLSearchParams(url.substring(clientQueryParamsStartIndex + 1));
-    const appState: Partial<SharedDashboardState> = urlParams.has('_a')
-      ? (rison.decode(urlParams.get('_a')!) as Partial<SharedDashboardState>)
+    const appState: Partial<DashboardLocatorParams> = urlParams.has('_a')
+      ? (rison.decode(urlParams.get('_a')!) as Partial<DashboardLocatorParams>)
       : {};
     const newAppState = {
       ...appState,
@@ -104,7 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard(dashboardName, { saveAsNew: false });
 
-      await dashboard.gotoDashboardLandingPage();
       await dashboard.loadSavedDashboard(dashboardName);
 
       await enableNewChartLibraryDebug(true);
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUrl = await getUrlFromShare();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
-          (appState: Partial<SharedDashboardState>) => {
+          (appState: Partial<DashboardLocatorParams>) => {
             return {
               query: {
                 language: 'kuery',
@@ -228,18 +228,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentPanelDimensions = await dashboard.getPanelDimensions();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
-          (appState: Partial<SharedDashboardState>) => {
+          (appState: Partial<DashboardLocatorParams>) => {
             log.debug(JSON.stringify(appState, null, ' '));
             return {
-              panels: (appState.panels ?? []).map((panel) => {
+              panels: (appState.panels ?? []).map((widget) => {
+                const panel = widget as DashboardPanel;
                 return {
                   ...panel,
                   gridData: {
-                    ...panel.gridData,
+                    ...panel.grid,
                     w:
-                      panel.gridData.w === DEFAULT_PANEL_WIDTH
-                        ? DEFAULT_PANEL_WIDTH * 2
-                        : panel.gridData.w,
+                      panel.grid.w === DEFAULT_PANEL_WIDTH ? DEFAULT_PANEL_WIDTH * 2 : panel.grid.w,
                   },
                 };
               }),
@@ -271,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUrl = (await getUrlFromShare()) ?? '';
         const newUrl = updateAppStateQueryParam(
           currentUrl,
-          (appState: Partial<SharedDashboardState>) => {
+          (appState: Partial<DashboardLocatorParams>) => {
             return {
               panels: [],
             };
@@ -304,17 +303,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const currentUrl = await getUrlFromShare();
           const newUrl = updateAppStateQueryParam(
             currentUrl,
-            (appState: Partial<SharedDashboardState>) => {
+            (appState: Partial<DashboardLocatorParams>) => {
               return {
-                panels: (appState.panels ?? []).map((panel) => {
+                panels: (appState.panels ?? []).map((widget) => {
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
-                    panelConfig: {
-                      ...(panel.panelConfig ?? {}),
+                    config: {
+                      ...(panel.config ?? {}),
                       vis: {
-                        ...((panel.panelConfig?.vis as object) ?? {}),
+                        ...((panel.config?.vis as object) ?? {}),
                         colors: {
-                          ...((panel.panelConfig?.vis as { colors: object })?.colors ?? {}),
+                          ...((panel.config?.vis as { colors: object })?.colors ?? {}),
                           ['80000']: 'FFFFFF',
                         },
                       },
@@ -348,15 +348,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const currentUrl = await getUrlFromShare();
           const newUrl = updateAppStateQueryParam(
             currentUrl,
-            (appState: Partial<SharedDashboardState>) => {
+            (appState: Partial<DashboardLocatorParams>) => {
               return {
-                panels: (appState.panels ?? []).map((panel) => {
+                panels: (appState.panels ?? []).map((widget) => {
+                  const panel = widget as DashboardPanel & { config: Record<string, unknown> };
                   return {
                     ...panel,
-                    panelConfig: {
-                      ...(panel.panelConfig ?? {}),
+                    config: {
+                      ...(panel.config ?? {}),
                       vis: {
-                        ...((panel.panelConfig?.vis as object) ?? {}),
+                        ...((panel.config?.vis as object) ?? {}),
                         colors: {},
                       },
                     },

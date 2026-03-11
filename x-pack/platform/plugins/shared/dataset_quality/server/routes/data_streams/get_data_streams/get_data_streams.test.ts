@@ -12,9 +12,18 @@ import { getDataStreams } from '.';
 
 const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
 const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
-  canRead: true,
-  canMonitor: true,
-  canViewIntegrations: true,
+  datasetsPrivilages: {
+    'logs-*-*': {
+      canRead: true,
+      canMonitor: true,
+      canReadFailureStore: true,
+    },
+    'metrics-*-*': {
+      canRead: true,
+      canMonitor: true,
+      canReadFailureStore: true,
+    },
+  },
 }));
 const mockGetMockDataStreamPrivileges = jest.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
 
@@ -48,7 +57,8 @@ describe('getDataStreams', () => {
       'logs-*-*,metrics-*-*'
     );
 
-    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['metrics-*-*'].canMonitor).toBe(true);
   });
 
   it('Passes datasetQuery parameter to the DataStreamService', async () => {
@@ -63,7 +73,7 @@ describe('getDataStreams', () => {
       'logs-nginx-*'
     );
 
-    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
+    expect(result.datasetUserPrivileges.datasetsPrivilages['logs-*-*'].canMonitor).toBe(true);
   });
 
   describe('uncategorized only option', () => {

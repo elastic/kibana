@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
+import type { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';
 

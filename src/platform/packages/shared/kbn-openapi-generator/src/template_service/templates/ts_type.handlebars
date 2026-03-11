@@ -3,28 +3,28 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{referenceName}}
+  {{transformSchemaName referenceName}}
   {{~#if nullable}} | null {{/if~}}
 {{~/if~}}
 
 {{~#if allOf~}}
   {{~#each allOf~}}
     {{~> ts_type ~}}
-    {{~#unless @last~}}&{{~/unless~}} 
+    {{~#unless @last~}}&{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
 {{~#if anyOf~}}
   {{~#each anyOf~}}
     {{~> ts_type ~}}
-    {{~#unless @last~}}|{{~/unless~}} 
+    {{~#unless @last~}}|{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
 {{~#if oneOf~}}
   {{~#each oneOf~}}
     {{~> ts_type ~}}
-    {{~#unless @last~}}|{{~/unless~}} 
+    {{~#unless @last~}}|{{~/unless~}}
   {{~/each~}}
 {{~/if~}}
 
@@ -54,8 +54,8 @@ unknown
   {
     {{#each properties}}
       {{#if description}}
-      /** 
-      * {{{description}}} 
+      /**
+      * {{{description}}}
       */
       {{/if}}
       '{{@key}}'{{~#unless (or (includes ../required @key) (defined default))}}?{{/unless~}}: {{> ts_type }};
@@ -76,7 +76,7 @@ unknown
   {{~#if enum~}}
     {{~#each enum~}}
       '{{.}}'
-      {{~#unless @last~}}|{{~/unless~}} 
+      {{~#unless @last~}}|{{~/unless~}}
     {{~/each~}}
   {{~else~}}
   string

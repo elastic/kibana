@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { SerializedSearchSourceFields } from './types';
+import type { SerializedSearchSourceFields } from './types';
 
 import { injectReferences } from './inject_references';
 

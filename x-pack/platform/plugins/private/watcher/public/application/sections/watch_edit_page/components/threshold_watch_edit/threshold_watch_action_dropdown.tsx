@@ -16,6 +16,7 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,6 +24,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Action } from '../../../../models/action';
 import { ACTION_TYPES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
+
+const styles = {
+  watcherTresholdActionContextMenuItem: css`
+    align-self: center;
+  `,
+};
 
 const disabledMessage = i18n.translate(
   'xpack.watcher.sections.watchEdit.actions.disabledOptionLabel',
@@ -106,7 +113,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
               }}
             >
               <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false} className="watcherThresholdWatchActionContextMenuItem">
+                <EuiFlexItem grow={false} css={styles.watcherTresholdActionContextMenuItem}>
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

@@ -51,7 +51,7 @@ export const importRule = async ({
     throw createRuleImportErrorObject({
       ruleId: existingRule.rule_id,
       type: 'conflict',
-      message: `rule_id: "${existingRule.rule_id}" already exists`,
+      message: 'Rule with this rule_id already exists',
     });
   }
 

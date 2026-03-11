@@ -38,6 +38,18 @@ export const EMPTY_EXECUTION_KPI_RESULT = {
   triggeredActions: 0,
 };
 
+export const EMPTY_EXECUTION_SUMMARY_RESULT = {
+  executions: {
+    total: 0,
+    success: 0,
+  },
+  latestExecutionSummary: {
+    success: 0,
+    failure: 0,
+    warning: 0,
+  },
+};
+
 export type ExecutionLogSortFields = (typeof executionLogSortableColumns)[number];
 
 export type ActionErrorLogSortFields = (typeof actionErrorLogSortableColumns)[number];

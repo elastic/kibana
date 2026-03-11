@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Entity Analytics Migrations API
+  description: These APIs allow us to run API integration tests on the Entity Analytics migrations.
+paths:
+  /internal/entity_analytics/migrations/run:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: RunEntityAnalyticsMigrations
+      summary: Run Entity Analytics migrations
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean

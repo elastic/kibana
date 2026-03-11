@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
-  EuiPopoverProps,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
@@ -62,6 +62,13 @@ const flappingOffContentSettings = i18n.translate(
   }
 );
 
+const alertFlappingTitleInfo = i18n.translate(
+  'alertsUIShared.ruleSettingsFlappingTitleTooltip.alertFlappingTitleInfo',
+  {
+    defaultMessage: 'Rule settings flapping title info',
+  }
+);
+
 interface RuleSettingsFlappingTitleTooltipProps {
   isOpen: boolean;
   setIsPopoverOpen: (isOpen: boolean) => void;
@@ -86,8 +93,8 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
             data-test-subj="ruleSettingsFlappingTitleTooltipButton"
             display="empty"
             color="primary"
-            iconType="questionInCircle"
-            aria-label="Flapping title info"
+            iconType="question"
+            aria-label={alertFlappingTitleInfo}
             onClick={() => setIsPopoverOpen(!isOpen)}
           />
         }

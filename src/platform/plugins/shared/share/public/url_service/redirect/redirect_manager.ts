@@ -13,11 +13,10 @@ import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { Location } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
-import {
-  LEGACY_SHORT_URL_LOCATOR_ID,
-  LegacyShortUrlLocatorParams,
-} from '../../../common/url_service/locators/legacy_short_url_locator';
-import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
+import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../common/url_service/locators/legacy_short_url_locator';
+import type { RedirectOptions } from '../../../common/url_service/locators/redirect';
+import { parseSearchParams } from '../../../common/url_service/locators/redirect';
 import { getHomeHref } from '../../lib/get_home_href';
 
 export interface RedirectManagerDependencies {
@@ -87,7 +86,12 @@ export class RedirectManager {
           const { hashUrl } = await import('@kbn/kibana-utils-plugin/public');
           redirectUrl = hashUrl(redirectUrl);
         }
+
         const url = core.http.basePath.prepend(redirectUrl);
+        if (!core.http.externalUrl.isInternalUrl(url)) {
+          throw new Error(`Can not redirect to external URL: ${url}`);
+        }
+
         location.href = url;
         return () => {};
       },

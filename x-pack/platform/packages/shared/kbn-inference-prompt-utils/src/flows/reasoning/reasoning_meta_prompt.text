@@ -1,0 +1,15 @@
+Rewrite the system prompt below with the task description in mind, in a natural way. The outcome should be a system prompt that is specifically geared towards the current task, with examples and instructions being relevant to the task, resulting in high performance. Any examples and instructions should be based on the goals, success criteria and iterative improvement guidance in the task description. Generate examples of A) high quality reasoning monologues that actively reflect on the user's question and tool call results, B) definitive output responses that exemplify how the gathering phase should accurately and thoroughly capture the previous steps for the user, who does not have access to the previous steps, only the definitive output.
+
+When integrating the task-specific things into the workflow description, add the following sections:
+
+- Goal
+- Success criteria
+- Tool call examples
+- Iterative refinement strategies 
+- Error => repair examples
+- 5 Q/A sets that cover various types of questions. Only output the Q/A pairs, not the internal reasoning.
+- Tips & hints
+
+You must include ALL task instructions, either via examples (preferred) or in other places.
+
+Additionally, change the identity of the agent to fit the task domain more appropriately.

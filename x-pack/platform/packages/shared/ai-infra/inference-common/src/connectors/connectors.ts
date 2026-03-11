@@ -32,6 +32,22 @@ export interface InferenceConnector {
    * the list of properties depends on the connector type (and subtype for inference)
    */
   config: Record<string, any>;
+  /**
+   * Capabilities of this connector.
+   */
+  capabilities: InferenceConnectorCapabilities;
+  /**
+   * When true, this entry represents an Elasticsearch inference endpoint
+   * rather than a Kibana stack connector. `connectorId` holds the inference endpoint ID.
+   */
+  isInferenceEndpoint: boolean;
+}
+
+export interface InferenceConnectorCapabilities {
+  /**
+   * The context window size for this connector, if the information is available.
+   */
+  contextWindowSize?: number;
 }
 
 /**

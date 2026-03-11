@@ -24,6 +24,8 @@ export interface PackSavedObject {
     timeout?: number;
     snapshot?: boolean;
     removed?: boolean;
+    schedule_id?: string;
+    start_date?: string;
     ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;
@@ -33,6 +35,7 @@ export interface PackSavedObject {
   updated_at: string;
   updated_by: string | undefined;
   policy_ids?: string[];
+  read_only?: boolean;
   shards: SOShard;
   references: Array<{ name: string; type: string; id: string }>;
 }

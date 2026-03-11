@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment-timezone';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { has, unset, some, mapKeys } from 'lodash';
+import { has, unset, some, mapKeys, mapValues } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -15,6 +16,9 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { CreatePackRequestBodySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -27,11 +31,15 @@ import {
   convertPackQueriesToSO,
   findMatchingShards,
   getInitialPolicies,
+  makePackKey,
 } from './utils';
-import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
+import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
+import type { PackQueryInput } from './utils';
 import { createPackRequestBodySchema } from '../../../common/api';
+import { getUserInfo } from '../../lib/get_user_info';
+import { escapeFilterValue } from '../utils/generate_copy_name';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -61,20 +69,45 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       async (context, request, response) => {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-          osqueryContext.getStartServices
+
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
+
+        const spaceId = osqueryContext?.service?.getActiveSpace
+          ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+          : DEFAULT_SPACE_ID;
+
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
-        const conflictingEntries = await savedObjectsClient.find({
+        const currentUser = await getUserInfo({
+          request,
+          security: osqueryContext.security,
+          logger: osqueryContext.logFactory.get('pack'),
+        });
+        const username = currentUser?.username ?? undefined;
+
+        const {
+          name,
+          description,
+          queries: rawQueries,
+          enabled,
+          policy_ids,
+          shards = {},
+        } = request.body;
+
+        const now = moment().toISOString();
+        const queries = mapValues(rawQueries, (queryData) => ({
+          ...queryData,
+          schedule_id: uuidv4(),
+          start_date: now,
+        })) as Record<string, PackQueryInput>;
+        const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
-          filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+          filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
         });
 
         if (
@@ -84,14 +117,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(
-          internalSavedObjectsClient,
-          {
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-            perPage: 1000,
-            page: 1,
-          }
-        )) ?? { items: [] };
+        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        })) ?? { items: [] };
 
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
@@ -104,10 +134,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           });
         }
 
-        const agentPolicies = await agentPolicyService?.getByIds(
-          internalSavedObjectsClient,
-          policiesList
-        );
+        const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, policiesList);
 
         const policyShards = findMatchingShards(agentPolicies, shards);
 
@@ -119,7 +146,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         }));
 
-        const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
+        const packSO = await spaceScopedClient.create<PackSavedObjectLimited>(
           packSavedObjectType,
           {
             name,
@@ -127,9 +154,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             queries: convertPackQueriesToSO(queries),
             enabled,
             created_at: moment().toISOString(),
-            created_by: currentUser,
+            created_by: username,
             updated_at: moment().toISOString(),
-            updated_by: currentUser,
+            updated_by: username,
             shards: convertShardsToArray(shards),
           },
           {
@@ -146,7 +173,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               );
               if (packagePolicy) {
                 return packagePolicyService?.update(
-                  internalSavedObjectsClient,
+                  spaceScopedClient,
                   esClient,
                   packagePolicy.id,
                   produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -155,9 +182,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       set(draft, 'inputs[0].streams', []);
                     }
 
-                    set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
+                    const packKey = makePackKey(packSO.attributes.name, spaceId);
+                    set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
                       shard: policyShards[agentPolicyId] ?? 100,
-                      queries: convertSOQueriesToPackConfig(queries),
+                      pack_id: packSO.id,
+                      queries: convertSOQueriesToPackConfig(queries, spaceId),
                     });
 
                     return draft;

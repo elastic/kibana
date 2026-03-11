@@ -6,11 +6,11 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { INVOKE_LLM_CLIENT_TIMEOUT, PromptIds, Replacements } from '@kbn/elastic-assistant-common';
-import { HttpFetchQuery } from '@kbn/core-http-browser';
-import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
+import type { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import type { HttpFetchQuery } from '@kbn/core-http-browser';
+import type { ChatCompleteResponse } from './post_chat_complete';
+import { postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
-import { FETCH_MESSAGE_TIMEOUT_ERROR } from '../../use_send_message/translations';
 
 interface SendMessageProps {
   message: string;
@@ -27,10 +27,10 @@ interface UseChatComplete {
 // useChatComplete uses the same api as useSendMessage (post_actions_connector_execute) but without requiring conversationId/apiConfig
 // it is meant to be used for one-off messages that don't require a conversation
 export const useChatComplete = ({ connectorId }: { connectorId: string }): UseChatComplete => {
-  const { alertsIndexPattern, http, traceOptions } = useAssistantContext();
+  const { alertsIndexPattern, http, traceOptions, settings } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
-  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true });
+  const { data: connectors } = useLoadConnectors({ http, inferenceEnabled: true, settings });
   const actionTypeId = useMemo(
     () => connectors?.find(({ id }) => id === connectorId)?.actionTypeId ?? '.gen-ai',
     [connectors, connectorId]
@@ -38,11 +38,6 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
   const sendMessage = useCallback(
     async ({ message, promptIds, replacements, query }: SendMessageProps) => {
       setIsLoading(true);
-
-      const timeoutId = setTimeout(() => {
-        abortController.current.abort(FETCH_MESSAGE_TIMEOUT_ERROR);
-        abortController.current = new AbortController();
-      }, INVOKE_LLM_CLIENT_TIMEOUT);
 
       try {
         return await postChatComplete({
@@ -58,7 +53,6 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
           traceOptions,
         });
       } finally {
-        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     },

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { DeleteListItemSchema, deleteListItemSchema } from '.';
+import type { DeleteListItemSchema } from '.';
+import { deleteListItemSchema } from '.';
 import { getDeleteListItemSchemaMock } from './index.mock';
 
 describe('delete_list_item_schema', () => {

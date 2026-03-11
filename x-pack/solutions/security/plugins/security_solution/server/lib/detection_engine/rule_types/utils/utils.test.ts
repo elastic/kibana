@@ -8,6 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -57,7 +58,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 
 describe('utils', () => {
@@ -350,6 +351,23 @@ describe('utils', () => {
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
     });
+
+    test('should return originalFrom and originalTo in response', async () => {
+      const { originalFrom, originalTo } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+
+      expect(originalFrom).toBeDefined();
+      expect(originalTo).toBeDefined();
+      expect(moment.duration(originalTo.diff(originalFrom)).asSeconds()).toEqual(30);
+    });
   });
 
   describe('calculateFromValue', () => {
@@ -409,12 +427,13 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client,
         lists: getListArrayMock(),
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ['list_id_single', 'endpoint_list'],
-          namespaceType: ['single', 'agnostic'],
+          listId: ['list_id_single'],
+          namespaceType: ['single'],
           perPage: 1_000,
           filter: [],
           maxSize: undefined,
@@ -436,6 +455,7 @@ describe('utils', () => {
         getExceptions({
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
+          shouldFilterOutEndpointExceptions: true,
         })
       ).rejects.toThrowError(
         'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
@@ -451,6 +471,7 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
         lists: [],
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(exceptions).toEqual([]);
@@ -460,8 +481,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -486,10 +506,9 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
@@ -503,8 +522,7 @@ describe('utils', () => {
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -529,10 +547,9 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
@@ -541,71 +558,6 @@ describe('utils', () => {
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
-      });
-    });
-
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'Endpoint Security',
-      });
-
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
-      });
-    });
-
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
-      // SUT uses rule execution logger's context to check the rule name
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'NOT Endpoint Security',
-      });
-
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });
@@ -1037,6 +989,7 @@ describe('utils', () => {
         warning: false,
         warningMessages: [],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1092,6 +1045,7 @@ describe('utils', () => {
         warning: true,
         warningMessages: ['warning1', 'warning2'],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1100,7 +1054,7 @@ describe('utils', () => {
   describe('addToSearchAfterReturn', () => {
     test('merges the values from bulk create response into search after return type', () => {
       const current = createSearchAfterReturnType();
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: false,
         bulkCreateDuration: '100',
         enrichmentDuration: '0',
@@ -1118,7 +1072,7 @@ describe('utils', () => {
 
     test('does not duplicate error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',
@@ -1134,7 +1088,7 @@ describe('utils', () => {
 
     test('adds new error messages', () => {
       const current = createSearchAfterReturnType({ errors: ['error 1'] });
-      const next: GenericBulkCreateResponse<BaseFieldsLatest> = {
+      const next: GenericBulkCreateResponse<DetectionAlertLatest> = {
         success: true,
         bulkCreateDuration: '0',
         enrichmentDuration: '0',

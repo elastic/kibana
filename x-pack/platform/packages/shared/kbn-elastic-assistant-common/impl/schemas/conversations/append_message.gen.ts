@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { ConversationMessageCreateProps, ConversationResponse } from './common_attributes.gen';
@@ -24,7 +24,7 @@ export type AppendConversationMessageRequestParams = z.infer<
 >;
 export const AppendConversationMessageRequestParams = z.object({
   /**
-   * The conversation's `id` value.
+   * The unique identifier (`id`) of the conversation to which the message will be appended.
    */
   id: NonEmptyString,
 });

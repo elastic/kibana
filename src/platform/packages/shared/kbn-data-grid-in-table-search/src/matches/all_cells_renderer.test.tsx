@@ -42,6 +42,7 @@ describe('AllCellsRenderer', () => {
 
     await waitFor(() => {
       expect(onFinish).toHaveBeenCalledWith({
+        term: 'cell',
         matchesList: testData.map((rowData, rowIndex) => ({
           rowIndex,
           rowMatchesCount: 2,
@@ -70,6 +71,7 @@ describe('AllCellsRenderer', () => {
 
     await waitFor(() => {
       expect(onFinish).toHaveBeenCalledWith({
+        term: '-',
         matchesList: testData.map((rowData, rowIndex) => ({
           rowIndex,
           rowMatchesCount: 10,
@@ -98,6 +100,7 @@ describe('AllCellsRenderer', () => {
 
     await waitFor(() => {
       expect(onFinish).toHaveBeenCalledWith({
+        term: 'cell-in-row-10-col-0',
         matchesList: testData
           .map((rowData, rowIndex) => {
             if (!rowData[0].startsWith(inTableSearchTerm)) {
@@ -134,6 +137,7 @@ describe('AllCellsRenderer', () => {
 
     await waitFor(() => {
       expect(onFinish).toHaveBeenCalledWith({
+        term: '50',
         matchesList: [
           {
             rowIndex: 50,

@@ -6,13 +6,14 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { MockRouter } from '../__mocks__/router.mock';
 import { ConversationalChain } from './lib/conversational_chain';
 import { getChatParams } from './lib/get_chat_params';
 import { parseElasticsearchQuery, defineRoutes } from './routes';
 import { ContextLimitError } from './lib/errors';
+import { ContextModelLimitError } from '../common';
 
 jest.mock('./lib/get_chat_params', () => ({
   getChatParams: jest.fn(),
@@ -123,9 +124,7 @@ describe('Search Playground routes', () => {
         return {
           stream: jest
             .fn()
-            .mockRejectedValue(
-              new ContextLimitError('Context exceeds the model limit', 16385, 24000)
-            ),
+            .mockRejectedValue(new ContextLimitError(ContextModelLimitError, 16385, 24000)),
         };
       });
 

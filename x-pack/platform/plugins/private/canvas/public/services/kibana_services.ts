@@ -43,13 +43,17 @@ export const setKibanaServices = (
   kibanaVersion = initContext.env.packageInfo.version;
 
   coreServices = kibanaCore;
+  const capabilities = kibanaCore.application.capabilities;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
   embeddableService = deps.embeddable;
   expressionsService = deps.expressions;
   presentationUtilService = deps.presentationUtil;
-  reportingService = Boolean(kibanaCore.application.capabilities.canvas?.generatePdf)
+  reportingService = Boolean(
+    capabilities.canvas?.generatePdf === true ||
+      capabilities.reportingLegacy?.generateReport === true
+  )
     ? deps.reporting
     : undefined;
   spacesService = deps.spaces;

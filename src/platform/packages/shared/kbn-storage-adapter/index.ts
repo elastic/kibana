@@ -18,8 +18,8 @@ import type {
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { StorageFieldTypeOf, StorageMappingProperty } from './types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
 
 interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;
@@ -55,12 +55,21 @@ export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
     }
   | { delete: { _id: string } };
 
+export interface StorageClientBulkOptions {
+  /**
+   * If true, throws BulkOperationError when any operation in the bulk request fails.
+   * If false (default), returns the response with errors field populated, similar to Promise.allSettled behavior.
+   * @default false
+   */
+  throwOnFail?: boolean;
+}
+
 export type StorageClientBulkRequest<TDocument extends { _id?: string }> = Omit<
   BulkRequest,
   'operations' | 'index'
 > & {
   operations: Array<StorageClientBulkOperation<TDocument>>;
-};
+} & StorageClientBulkOptions;
 export type StorageClientBulkResponse = BulkResponse;
 
 export type StorageClientDeleteRequest = Omit<DeleteRequest, 'index'>;
@@ -91,6 +100,13 @@ export type StorageClientSearch<TDocumentType = never> = <
   request: TSearchRequest
 ) => Promise<StorageClientSearchResponse<TDocumentType, TSearchRequest>>;
 
+/**
+ * Performs bulk operations on documents.
+ *
+ * By default, behaves similar to Promise.allSettled - individual operation failures
+ * are returned in the response without throwing an error. Set `throwOnFail: true`
+ * to throw a BulkOperationError when any operation fails.
+ */
 export type StorageClientBulk<TDocumentType extends { _id?: string } = never> = (
   request: StorageClientBulkRequest<TDocumentType>
 ) => Promise<StorageClientBulkResponse>;
@@ -128,6 +144,9 @@ type Exact<T, U> = T extends U
     : false
   : false;
 
+type MissingKeysError<T extends string> = Error &
+  `The following keys are missing from the schema: ${T}`;
+
 // The storage settings need to support the application payload type, but it's OK if the
 // storage document can hold more fields than the application document.
 // To keep the type safety of the application type in the consuming code, both the storage
@@ -140,7 +159,7 @@ export type IStorageClient<
   TApplicationType extends StorageDocumentOf<TSchema>
 > = Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
   ? InternalIStorageClient<TApplicationType>
-  : never;
+  : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
 
 export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
   TStorageSettings,
@@ -155,5 +174,7 @@ export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partia
 >;
 
 export { StorageIndexAdapter } from './src/index_adapter';
+
+export { BulkOperationError } from './src/errors';
 
 export { types } from './types';

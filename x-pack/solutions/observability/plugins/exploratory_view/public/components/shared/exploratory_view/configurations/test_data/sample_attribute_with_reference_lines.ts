@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { mockDataView } from '../../rtl_helpers';
-import { RECORDS_FIELD } from '../constants';
 
 export const sampleAttributeWithReferenceLines = {
   description: '',
@@ -33,14 +32,7 @@ export const sampleAttributeWithReferenceLines = {
       formBased: {
         layers: {
           layer0: {
-            columnOrder: [
-              'x-axis-column-layer0',
-              'y-axis-column-layer0-0',
-              'y-axis-column-layer0X0',
-              'y-axis-column-layer0X1',
-              'y-axis-column-layer0X2',
-              'y-axis-column-layer0X3',
-            ],
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0-0'],
             columns: {
               'x-axis-column-layer0': {
                 dataType: 'number',
@@ -58,7 +50,6 @@ export const sampleAttributeWithReferenceLines = {
                   ],
                   type: 'histogram',
                 },
-                scale: 'interval',
                 sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0-0': {
@@ -83,76 +74,7 @@ export const sampleAttributeWithReferenceLines = {
                     "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'))",
                   isFormulaBroken: false,
                 },
-                references: ['y-axis-column-layer0X3'],
-              },
-              'y-axis-column-layer0X0': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
-                },
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                scale: 'ratio',
-                sourceField: RECORDS_FIELD,
-                timeScale: undefined,
-                timeShift: undefined,
-              },
-              'y-axis-column-layer0X1': {
-                customLabel: true,
-                dataType: 'number',
-                filter: {
-                  language: 'kuery',
-                  query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
-                },
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'count',
-                params: {
-                  emptyAsNull: false,
-                },
-                scale: 'ratio',
-                sourceField: RECORDS_FIELD,
-                timeScale: undefined,
-                timeShift: undefined,
-              },
-              'y-axis-column-layer0X2': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'overall_sum',
-                params: undefined,
-                references: ['y-axis-column-layer0X1'],
-                scale: 'ratio',
-              },
-              'y-axis-column-layer0X3': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of Pages loaded',
-                operationType: 'math',
-                params: {
-                  tinymathAst: {
-                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-                    location: {
-                      max: 288,
-                      min: 0,
-                    },
-                    name: 'divide',
-                    text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'))",
-                    type: 'function',
-                  },
-                },
-                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-                scale: 'ratio',
+                references: [],
               },
             },
             incompleteColumns: {},
@@ -175,7 +97,6 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   percentile: 50,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '75th-percentile-reference-line-layer0-reference-lines': {
@@ -187,7 +108,6 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   percentile: 75,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '90th-percentile-reference-line-layer0-reference-lines': {
@@ -199,7 +119,6 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   percentile: 90,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '95th-percentile-reference-line-layer0-reference-lines': {
@@ -211,7 +130,6 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   percentile: 95,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
               '99th-percentile-reference-line-layer0-reference-lines': {
@@ -223,7 +141,6 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   percentile: 99,
                 },
-                scale: 'ratio',
                 sourceField: 'transaction.duration.us',
               },
             },

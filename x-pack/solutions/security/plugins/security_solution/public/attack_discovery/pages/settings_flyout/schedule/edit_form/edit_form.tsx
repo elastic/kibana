@@ -8,6 +8,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { getSchema } from './schema';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
@@ -17,6 +20,7 @@ import { useSettingsView } from '../../hooks/use_settings_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
 import type { FormHook } from '../../../../../shared_imports';
 import {
   Field,
@@ -26,6 +30,7 @@ import {
   useForm,
   useFormData,
 } from '../../../../../shared_imports';
+import { getMessageVariables } from './message_variables';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -38,21 +43,29 @@ export interface FormState {
 export interface FormProps {
   initialValue: AttackDiscoveryScheduleSchema;
   onChange: (state: FormState) => void;
+  onFormMutated?: () => void;
 }
 
 export const EditForm: React.FC<FormProps> = React.memo((props) => {
-  const { initialValue, onChange } = props;
+  const { initialValue, onChange, onFormMutated } = props;
   const {
     triggersActionsUi: { actionTypeRegistry },
+    http,
   } = useKibana().services;
+  const { connectors, setCurrentConnector } = useConnectors({ http });
+
+  const schema = useMemo(
+    () => getSchema({ actionTypeRegistry, connectors }),
+    [actionTypeRegistry, connectors]
+  );
 
   const { form } = useForm<AttackDiscoveryScheduleSchema>({
     defaultValue: initialValue,
     options: { stripEmptyFields: false },
-    schema: getSchema({ actionTypeRegistry }),
+    schema,
   });
 
-  const [{ value }] = useFormData({ form });
+  const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
   const { isValid, setFieldValue, submit } = form;
 
   useEffect(() => {
@@ -71,11 +84,10 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (newSettings: AlertsSelectionSettings) => {
       setSettings(newSettings);
       setFieldValue('alertsSelectionSettings', newSettings);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
-
-  const { settingsView } = useSettingsView({ settings, onSettingsChanged });
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
     initialValue?.connectorId
@@ -85,16 +97,21 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (selectedConnectorId: string) => {
       setConnectorId(selectedConnectorId);
       setFieldValue('connectorId', selectedConnectorId);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
 
+  const { settingsView } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsChanged,
+    settings,
+    showConnectorSelector: false,
+  });
+
   const messageVariables = useMemo(() => {
-    return {
-      state: [],
-      params: [],
-      context: [],
-    };
+    return getMessageVariables();
   }, []);
 
   return (
@@ -133,8 +150,14 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
             path="actions"
             component={RuleActionsField}
             componentProps={{
+              ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
               messageVariables,
-              summaryMessageVariables: messageVariables,
+              defaultRuleFrequency: {
+                notifyWhen: RuleNotifyWhen.ACTIVE,
+                throttle: null,
+                summary: false,
+              },
+              onNewConnectorCreated: (connector: ActionConnector) => setCurrentConnector(connector),
             }}
           />
         </EuiFlexItem>

@@ -6,7 +6,7 @@
  */
 
 import type { Document } from '@langchain/core/documents';
-import {
+import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   KibanaRequest,
@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
+import type {
   ApiConfig,
   ContentReferencesStore,
   DefendInsightGenerationInterval,
@@ -22,24 +22,28 @@ import {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+} from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Moment } from 'moment';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import moment from 'moment';
+import { ActionsClientLlm } from '@kbn/langchain/server';
+import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
-  DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import moment, { Moment } from 'moment';
-import { ActionsClientLlm } from '@kbn/langchain/server';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
-import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
-import type { GetRegisteredTools } from '../../services/app_context';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../ai_assistant_data_clients/knowledge_base';
+import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
+import type { CallbackIds, GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
-import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import { appContextService } from '../../services/app_context';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
   DEFEND_INSIGHT_SUCCESS_EVENT,
@@ -49,6 +53,10 @@ import { DEFEND_INSIGHTS_GRAPH_RUN_NAME } from '../../lib/defend_insights/graphs
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { getLlmType } from '../utils';
 import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';
+
+const KB_REQUIRED_TYPES: Set<DefendInsightType> = new Set([
+  DefendInsightType.enum.policy_response_failure,
+]);
 
 function addGenerationInterval(
   generationIntervals: DefendInsightGenerationInterval[],
@@ -64,7 +72,7 @@ function addGenerationInterval(
   return newGenerationIntervals;
 }
 
-export function isDefendInsightsEnabled({
+export function isDefendInsightsPolicyResponseFailureEnabled({
   request,
   logger,
   assistantContext,
@@ -79,7 +87,7 @@ export function isDefendInsightsEnabled({
     defaultPluginName: DEFAULT_PLUGIN_NAME,
   });
 
-  return assistantContext.getRegisteredFeatures(pluginName).defendInsights;
+  return assistantContext.getRegisteredFeatures(pluginName).defendInsightsPolicyResponseFailure;
 }
 
 export function getAssistantTool(
@@ -205,13 +213,13 @@ export async function handleToolError({
       authenticatedUser,
     });
 
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,
@@ -252,7 +260,7 @@ export async function createDefendInsight(
       insightType,
       apiConfig,
       insights: [],
-      status: DefendInsightStatus.Enum.running,
+      status: DefendInsightStatus.enum.running,
     },
     authenticatedUser,
   });
@@ -272,7 +280,9 @@ const extractInsightsForTelemetryReporting = (
   insights: DefendInsights
 ): string[] => {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
+      return insights.map((insight) => insight.group);
+    case DefendInsightType.enum.policy_response_failure:
       return insights.map((insight) => insight.group);
     default:
       return [];
@@ -309,7 +319,7 @@ export async function updateDefendInsights({
       id: defendInsightId,
       authenticatedUser,
     });
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     const endTime = moment();
@@ -318,7 +328,7 @@ export async function updateDefendInsights({
     const updateProps = {
       eventsContextCount,
       insights: insights ?? undefined,
-      status: DefendInsightStatus.Enum.succeeded,
+      status: DefendInsightStatus.enum.succeeded,
       ...(!eventsContextCount || !insights
         ? {}
         : {
@@ -363,18 +373,14 @@ export async function updateDefendInsights({
 }
 
 export async function updateDefendInsightsLastViewedAt({
-  params,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  params: DefendInsightsGetRequestQuery;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse[]> {
-  const defendInsights = await dataClient.findDefendInsightsByParams({
-    params,
-    authenticatedUser,
-  });
   if (!defendInsights.length) {
     return [];
   }
@@ -394,16 +400,20 @@ export async function updateDefendInsightsLastViewedAt({
 }
 
 export async function updateDefendInsightLastViewedAt({
-  id,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  id: string;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse | undefined> {
   return (
-    await updateDefendInsightsLastViewedAt({ params: { ids: [id] }, authenticatedUser, dataClient })
+    await updateDefendInsightsLastViewedAt({
+      defendInsights,
+      authenticatedUser,
+      dataClient,
+    })
   )[0];
 }
 
@@ -424,6 +434,7 @@ export const invokeDefendInsightsGraph = async ({
   start,
   end,
   savedObjectsClient,
+  kbDataClient,
 }: {
   insightType: DefendInsightType;
   endpointIds: string[];
@@ -441,10 +452,15 @@ export const invokeDefendInsightsGraph = async ({
   start?: string;
   end?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
 }): Promise<{
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
 }> => {
+  if (KB_REQUIRED_TYPES.has(insightType)) {
+    await waitForKB(kbDataClient);
+  }
+
   const llmType = getLlmType(apiConfig.actionTypeId);
   const model = apiConfig.model;
   const tags = [DEFEND_INSIGHTS_ID, llmType, model].flatMap((tag) => tag ?? []);
@@ -491,6 +507,7 @@ export const invokeDefendInsightsGraph = async ({
     endpointIds,
     anonymizationFields,
     esClient,
+    kbDataClient,
     llm,
     logger,
     onNewReplacements,
@@ -503,17 +520,17 @@ export const invokeDefendInsightsGraph = async ({
 
   logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
 
-  const result: GraphState = (await graph.invoke(
+  const result: DefendInsightsGraphState = (await graph.invoke(
     {},
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  )) as GraphState;
+  )) as unknown as DefendInsightsGraphState;
   const {
     insights,
-    anonymizedEvents,
+    anonymizedDocuments: anonymizedEvents,
     errors,
     generationAttempts,
     hallucinationFailures,
@@ -567,7 +584,7 @@ export const handleGraphError = async ({
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,
@@ -590,6 +607,14 @@ export const handleGraphError = async ({
       provider: apiConfig.provider,
     });
   }
+};
+
+export const runExternalCallbacks = async (
+  callback: CallbackIds,
+  ...args: [KibanaRequest] | [KibanaRequest, unknown]
+) => {
+  const callbacks = appContextService.getRegisteredCallbacks(callback);
+  await Promise.all(callbacks.map((cb) => Promise.resolve(cb(...args))));
 };
 
 export const throwIfErrorCountsExceeded = ({
@@ -625,3 +650,44 @@ export const throwIfErrorCountsExceeded = ({
     throw new Error(generationAttemptsError);
   }
 };
+
+async function waitForKB(kbDataClient: AIAssistantKnowledgeBaseDataClient | null): Promise<void> {
+  if (!kbDataClient) {
+    return Promise.resolve();
+  }
+
+  if (await kbDataClient?.isDefendInsightsDocsLoaded()) {
+    return Promise.resolve();
+  }
+
+  if (kbDataClient?.isSetupInProgress) {
+    return new Promise<void>((resolve, reject) => {
+      const interval = 30000;
+      const maxTimeout = 10 * 60 * 1000;
+      const startTime = Date.now();
+
+      const checkKBStatus = async () => {
+        try {
+          const elapsedTime = Date.now() - startTime;
+
+          if (elapsedTime > maxTimeout) {
+            reject(new Error(`Knowledge base setup timed out after ${maxTimeout / 1000} seconds`));
+            return;
+          }
+
+          if (await kbDataClient.isDefendInsightsDocsLoaded()) {
+            resolve();
+          } else {
+            setTimeout(checkKBStatus, interval);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      void checkKBStatus();
+    });
+  }
+
+  return Promise.resolve();
+}

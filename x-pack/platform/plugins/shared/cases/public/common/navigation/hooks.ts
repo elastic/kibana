@@ -8,11 +8,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { APP_ID, CASES_CONFIGURE_PATH, CASES_CREATE_PATH } from '../../../common/constants';
+import {
+  APP_ID,
+  CASES_CONFIGURE_PATH,
+  CASES_CREATE_PATH,
+  CASES_CREATE_TEMPLATE_PATH,
+  CASES_TEMPLATES_PATH,
+} from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import type { ICasesDeepLinkId } from './deep_links';
-import type { CaseViewPathParams, CaseViewPathSearchParams } from './paths';
-import { generateCaseViewPath } from './paths';
+import type { CaseViewPathParams, CaseViewPathSearchParams, TemplateViewPathParams } from './paths';
+import { generateCaseViewPath, generateTemplateEditPath } from './paths';
 import { stringifyToURL, parseURL } from '../../components/utils';
 import { useApplication } from '../lib/kibana/use_application';
 
@@ -69,6 +75,8 @@ const navigationMapping = {
   all: { path: '/' },
   create: { path: CASES_CREATE_PATH },
   configure: { path: CASES_CONFIGURE_PATH },
+  templates: { path: CASES_TEMPLATES_PATH },
+  createTemplate: { path: CASES_CREATE_TEMPLATE_PATH },
 };
 
 export const useAllCasesNavigation = () => {
@@ -94,6 +102,54 @@ export const useConfigureCasesNavigation = () => {
     deepLinkId: APP_ID,
   });
   return { getConfigureCasesUrl, navigateToConfigureCases };
+};
+
+export const useCasesTemplatesNavigation = () => {
+  const [getCasesTemplatesUrl, navigateToCasesTemplates] = useCasesNavigation({
+    path: navigationMapping.templates.path,
+    deepLinkId: APP_ID,
+  });
+  return { getCasesTemplatesUrl, navigateToCasesTemplates };
+};
+
+export const useCasesCreateTemplateNavigation = () => {
+  const [getCasesCreateTemplateUrl, navigateToCasesCreateTemplate] = useCasesNavigation({
+    path: navigationMapping.createTemplate.path,
+    deepLinkId: APP_ID,
+  });
+  return { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate };
+};
+
+export const useTemplateViewParams = () => useParams<TemplateViewPathParams>();
+
+type GetEditTemplateUrl = (pathParams: TemplateViewPathParams, absolute?: boolean) => string;
+type NavigateToEditTemplate = (pathParams: TemplateViewPathParams) => void;
+
+export const useCasesEditTemplateNavigation = () => {
+  const { appId } = useApplication();
+  const { navigateTo, getAppUrl } = useNavigation(appId);
+  const deepLinkId = APP_ID;
+
+  const getCasesEditTemplateUrl = useCallback<GetEditTemplateUrl>(
+    (pathParams, absolute) =>
+      getAppUrl({
+        deepLinkId,
+        absolute,
+        path: generateTemplateEditPath(pathParams),
+      }),
+    [deepLinkId, getAppUrl]
+  );
+
+  const navigateToCasesEditTemplate = useCallback<NavigateToEditTemplate>(
+    (pathParams) =>
+      navigateTo({
+        deepLinkId,
+        path: generateTemplateEditPath(pathParams),
+      }),
+    [navigateTo, deepLinkId]
+  );
+
+  return { getCasesEditTemplateUrl, navigateToCasesEditTemplate };
 };
 
 type GetCaseViewUrl = (pathParams: CaseViewPathParams, absolute?: boolean) => string;

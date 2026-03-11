@@ -32,6 +32,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "MarkdownProps"
             ],
             "path": "src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx",
+            "lineNumber": 51,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

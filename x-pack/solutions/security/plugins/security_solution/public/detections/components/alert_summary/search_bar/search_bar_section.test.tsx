@@ -9,11 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import {
-  INTEGRATION_BUTTON_LOADING_TEST_ID,
-  SEARCH_BAR_TEST_ID,
-  SearchBarSection,
-} from './search_bar_section';
+import { SEARCH_BAR_TEST_ID, SearchBarSection } from './search_bar_section';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { INTEGRATION_BUTTON_TEST_ID } from './integrations_filter_button';
@@ -39,6 +35,10 @@ const packages: PackageListItem[] = [
 ];
 
 describe('<SearchBarSection />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render all components', () => {
     (useIntegrations as jest.Mock).mockReturnValue({
       isLoading: false,
@@ -48,26 +48,9 @@ describe('<SearchBarSection />', () => {
       services: { data: { query: { filterManager: jest.fn() } } },
     });
 
-    const { getByTestId, queryByTestId } = render(
-      <SearchBarSection dataView={dataView} packages={packages} />
-    );
+    const { getByTestId } = render(<SearchBarSection dataView={dataView} packages={packages} />);
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INTEGRATION_BUTTON_LOADING_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(INTEGRATION_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render a loading skeleton for the integration button while fetching rules', () => {
-    (useIntegrations as jest.Mock).mockReturnValue({
-      isLoading: true,
-      integrations: [],
-    });
-
-    const { getByTestId, queryByTestId } = render(
-      <SearchBarSection dataView={dataView} packages={packages} />
-    );
-
-    expect(getByTestId(INTEGRATION_BUTTON_LOADING_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(INTEGRATION_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

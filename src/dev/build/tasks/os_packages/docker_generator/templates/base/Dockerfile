@@ -20,9 +20,10 @@ RUN apk --no-cache add curl
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  curl --retry 8 -s -L \
+  {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
+  curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-${arch}.tar.gz && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
@@ -44,20 +45,21 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    case "$(arch)" in \
+    {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}}; \
+    case "$arch" in \
         aarch64) \
             TINI_BIN='tini-arm64' ; \
+            TINI_CHECKSUM='07952557df20bfd2a95f9bef198b445e006171969499a1d361bd9e6f8e5e0e81' ; \
             ;; \
         x86_64) \
             TINI_BIN='tini-amd64' ; \
+            TINI_CHECKSUM='93dcc18adc78c65a028a84799ecf8ad40c936fdfc5f2a57b1acda5a8117fa82c' ; \
             ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+        *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
+  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  echo "${TINI_CHECKSUM} ${TINI_BIN}" | sha256sum -c - ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
 {{^serverless}}
@@ -85,17 +87,13 @@ FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}
-RUN for iter in {1..10}; do \
-      microdnf update --setopt=tsflags=nodocs -y && \
-      microdnf install --setopt=tsflags=nodocs -y \
+RUN microdnf install --setopt=tsflags=nodocs -y \
       fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
-      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+      microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+# TODO: Remove pinned shadow version once Wolfi image is updated. Newer releases of shadow require glibc 2.43 which is not available in the current image SHA.
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow=4.19.3-r0 ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}}
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -115,7 +113,7 @@ RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
 {{! Kibana applications may depend on the ELASTIC_CONTAINER value. Screenshotting uses this to conditionally disable the Chromium sandbox when launching Puppeteer. }}
-ENV ELASTIC_CONTAINER true
+ENV ELASTIC_CONTAINER=true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
@@ -146,7 +144,7 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 kibana && \
-    useradd --uid 1000 --gid 1000 -G 0 \
+    useradd --uid 1000 --gid 1000{{^serverless}} -G 0{{/serverless}} \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
 
@@ -179,8 +177,7 @@ LABEL name="Kibana" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
 
-RUN mkdir /licenses && \
-    cp LICENSE.txt /licenses/LICENSE
+RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
 ENTRYPOINT ["/bin/tini", "--"]

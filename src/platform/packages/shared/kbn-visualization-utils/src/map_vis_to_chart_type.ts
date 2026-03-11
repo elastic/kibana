@@ -21,6 +21,7 @@ const lensTypesToChartTypes: LensToChartMap = {
   [LensVisualizationType.Heatmap]: ChartType.Heatmap,
   [LensVisualizationType.Gauge]: ChartType.Gauge,
   [LensVisualizationType.Datatable]: ChartType.Table,
+  [LensVisualizationType.Tagcloud]: ChartType.Tagcloud,
 };
 function isLensVisualizationType(value: string): value is LensVisualizationType {
   return Object.values(LensVisualizationType).includes(value as LensVisualizationType);

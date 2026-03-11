@@ -99,11 +99,9 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
   it('should close menu when a menu item is clicked and call menu item onclick callback', async () => {
     render();
     clickMenuTriggerButton();
-    await act(async () => {
-      const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
-      fireEvent.click(renderResult.getByTestId('menu-item-one'));
-      await menuPanelRemoval;
-    });
+    const menuPanelRemoval = waitForElementToBeRemoved(getContextMenuPanel());
+    fireEvent.click(renderResult.getByTestId('menu-item-one'));
+    await menuPanelRemoval;
 
     expect(getContextMenuPanel()).toBeNull();
   });
@@ -149,6 +147,13 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     });
 
     expect(appTestContext.coreStart.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('should display menu items as text when `isNavigationDisabled` is true', () => {
+    render({ isNavigationDisabled: true });
+    clickMenuTriggerButton();
+
+    expect(renderResult.getByTestId('testMenu-item-1').hasAttribute('href')).toBe(false);
   });
 
   it('should display loading state', () => {

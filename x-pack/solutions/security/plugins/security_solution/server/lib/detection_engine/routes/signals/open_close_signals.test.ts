@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { AlertDefaultClosingReasonValues } from '../../../../../common/types';
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
@@ -19,22 +20,30 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
+import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
 
+    context.core.uiSettings.client.get.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
       getSuccessfulSignalUpdateResponse()
     );
     const telemetrySenderMock = createMockTelemetryEventsSender();
     setSignalsStatusRoute(server.router, logger, telemetrySenderMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status on signal', () => {
@@ -104,6 +113,57 @@ describe('set signal status', () => {
           query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
         })
       );
+    });
+
+    test('returns 400 when closing reason is invalid', async () => {
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByIdsPayload(),
+            reason: 'invalid_reason',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 200 when closing reason is in configured custom reasons', async () => {
+      context.core.uiSettings.client.get.mockResolvedValue(['configured_custom_reason']);
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByIdsPayload(),
+            reason: 'configured_custom_reason',
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+    });
+
+    test('returns 200 when closing reason is in default reasons', async () => {
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            reason: AlertDefaultClosingReasonValues.true_positive,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
     });
   });
 

@@ -10,6 +10,12 @@
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../context';
 
+/**
+ * This should only be used to pass the darkMode to a theme provider which is outside
+ * of the global theme provider scope. For example when used with `EuiThemeProvider`.
+ *
+ * @deprecated
+ */
 export const useDarkMode = (defaultValue?: boolean): boolean => {
   const {
     services: { theme },

@@ -152,6 +152,8 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             {VISIBLE_PLATFORM_OPTIONS.map((option) => (
               <EuiFilterButton
                 key={option.id}
+                isToggle
+                isSelected={platform === option.id}
                 hasActiveFilters={platform === option.id}
                 onClick={() => setPlatform(option.id)}
                 data-test-subj={option['data-test-subj']}
@@ -196,7 +198,10 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
                 css={{ width: 150 }}
                 listProps={{ paddingSize: 'none', onFocusBadge: false }}
               >
@@ -261,6 +266,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             )}
 
             <EuiCodeBlock
+              data-test-subj="enrollmentInstructionsCodeBlock"
               onClick={onTextAreaClick}
               fontSize="m"
               isCopyable={!fullCopyButton}

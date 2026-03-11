@@ -4,22 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { validateBackfillSchedule } from '../../../../..';
 import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../constants';
 import { backfillResponseSchemaV1, errorResponseSchemaV1 } from '../../../response';
 
+export const scheduleBackfillExamples = () =>
+  path.join(__dirname, 'examples_schedule_backfill.yaml');
+
 export const scheduleBodySchema = schema.arrayOf(
   schema.object(
     {
       rule_id: schema.string(),
-      start: schema.string(),
-      end: schema.maybe(schema.string()),
+      ranges: schema.arrayOf(
+        schema.object({
+          start: schema.string(),
+          end: schema.string(),
+        })
+      ),
       run_actions: schema.maybe(schema.boolean()),
     },
     {
-      validate({ start, end }) {
-        return validateBackfillSchedule(start, end);
+      validate({ ranges }) {
+        const errors = ranges
+          .map((range) => validateBackfillSchedule(range.start, range.end))
+          .filter(Boolean);
+        if (errors.length > 0) {
+          return errors.join('\n');
+        }
       },
     }
   ),

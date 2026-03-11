@@ -30,6 +30,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
   beforeEach(() => clock.reset());
   afterAll(() => clock.restore());
 
+  const defaultAdditionalFields = { custom_param: 'value' };
   const getOAuthClientCredentialsAccessTokenOpts = {
     connectorId: '123',
     logger,
@@ -37,7 +38,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     credentials: {
       config: {
         clientId: 'clientId',
-        tenantId: 'tenantId',
+        additionalFields: defaultAdditionalFields,
       },
       secrets: {
         clientSecret: 'clientSecret',
@@ -96,8 +97,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         clientId: 'clientId',
         clientSecret: 'clientSecret',
+        ...defaultAdditionalFields,
       },
-
       configurationUtilities
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
@@ -142,8 +143,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         clientId: 'clientId',
         clientSecret: 'clientSecret',
+        ...defaultAdditionalFields,
       },
-
       configurationUtilities
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
@@ -163,8 +164,47 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     });
   });
 
+  test('passes additionalFields object properties spread into requestOAuthClientCredentialsToken options', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'access_token',
+      accessToken: 'tokenwithfields',
+      expiresIn: 500,
+    });
+
+    const specificAdditionalFields = { another_param: 'test', numeric: 123 };
+    const optsWithSpecificFields = {
+      ...getOAuthClientCredentialsAccessTokenOpts,
+      credentials: {
+        ...getOAuthClientCredentialsAccessTokenOpts.credentials,
+        config: {
+          ...getOAuthClientCredentialsAccessTokenOpts.credentials.config,
+          additionalFields: specificAdditionalFields,
+        },
+      },
+    };
+
+    await getOAuthClientCredentialsAccessToken(optsWithSpecificFields);
+
+    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+      expect.any(String), // tokenUrl
+      expect.any(Object), // logger
+      // Use objectContaining with spread properties
+      expect.objectContaining({
+        clientId: 'clientId',
+        clientSecret: 'clientSecret',
+        scope: 'https://graph.microsoft.com/.default',
+        ...specificAdditionalFields,
+      }),
+      expect.any(Object) // configurationUtilities
+    );
+  });
+
   test('returns null and logs warning if any required fields are missing', async () => {
-    await asyncForEach(['clientId', 'tenantId'], async (configField: string) => {
+    await asyncForEach(['clientId'], async (configField: string) => {
       const accessToken = await getOAuthClientCredentialsAccessToken({
         ...getOAuthClientCredentialsAccessTokenOpts,
         credentials: {
@@ -173,23 +213,6 @@ describe('getOAuthClientCredentialsAccessToken', () => {
             [configField]: null,
           },
           secrets: getOAuthClientCredentialsAccessTokenOpts.credentials.secrets,
-        },
-      });
-      expect(accessToken).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Missing required fields for requesting OAuth Client Credentials access token`
-      );
-    });
-
-    await asyncForEach(['clientSecret'], async (secretsField: string) => {
-      const accessToken = await getOAuthClientCredentialsAccessToken({
-        ...getOAuthClientCredentialsAccessTokenOpts,
-        credentials: {
-          config: getOAuthClientCredentialsAccessTokenOpts.credentials.config,
-          secrets: {
-            ...getOAuthClientCredentialsAccessTokenOpts.credentials.secrets,
-            [secretsField]: null,
-          },
         },
       });
       expect(accessToken).toBeNull();
@@ -249,7 +272,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       credentials: {
         config: {
           clientId: 'clientId',
-          tenantId: 'tenantId',
+          additionalFields: defaultAdditionalFields,
         },
         secrets: {
           clientSecret: 'clientSecret',
@@ -270,8 +293,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         clientId: 'clientId',
         clientSecret: 'clientSecret',
+        ...defaultAdditionalFields,
       },
-
       configurationUtilities
     );
   });
@@ -291,7 +314,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       credentials: {
         config: {
           clientId: 'clientId',
-          tenantId: 'tenantId',
+          additionalFields: defaultAdditionalFields,
         },
         secrets: {
           clientSecret: 'clientSecret',
@@ -311,8 +334,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         clientId: 'clientId',
         clientSecret: 'clientSecret',
+        ...defaultAdditionalFields,
       },
-
       configurationUtilities
     );
   });

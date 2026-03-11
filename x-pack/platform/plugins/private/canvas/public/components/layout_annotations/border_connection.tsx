@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React from 'react';
 import { matrixToCSS } from '../../lib/dom';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   height: number;
@@ -29,9 +29,3 @@ export const BorderConnection: FC<Props> = ({ transformMatrix, width, height }) 
     }}
   />
 );
-
-BorderConnection.propTypes = {
-  height: PropTypes.number.isRequired,
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  width: PropTypes.number.isRequired,
-};

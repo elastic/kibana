@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSplitPanel,
@@ -22,10 +21,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 import { monaco as monacoEditor } from '@kbn/monaco';
 
-import { Controller, useController, useFormContext } from 'react-hook-form';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import { useController, useFormContext } from 'react-hook-form';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 import { FullHeight, QueryViewTitlePanel, PanelFillContainer } from './styles';
 import { formatElasticsearchQueryString } from '../../utils/user_query';
+import { FieldErrorCallout } from '../field_error_callout';
 
 export const ElasticsearchQueryViewer = ({
   executeQuery,
@@ -37,7 +40,9 @@ export const ElasticsearchQueryViewer = ({
   isLoading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext<PlaygroundForm>();
+  const usageTracker = useUsageTracker();
+  const [esQueryFirstEdit, setEsQueryFirtEdit] = useState<boolean>(false);
+  const { trigger } = useFormContext<PlaygroundForm>();
   const {
     field: { value: elasticsearchQuery },
   } = useController<PlaygroundForm, PlaygroundFormFields.elasticsearchQuery>({
@@ -45,13 +50,9 @@ export const ElasticsearchQueryViewer = ({
   });
   const {
     field: { value: userElasticsearchQuery, onChange: onChangeUserQuery },
+    fieldState: { error: userElasticsearchQueryError },
   } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
     name: PlaygroundFormFields.userElasticsearchQuery,
-  });
-  const {
-    field: { value: userElasticsearchQueryValidations },
-  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
-    name: PlaygroundFormFields.userElasticsearchQueryValidations,
   });
   const generatedEsQuery = useMemo(
     () => formatElasticsearchQueryString(elasticsearchQuery),
@@ -66,6 +67,18 @@ export const ElasticsearchQueryViewer = ({
       schemas: [],
     });
   }, []);
+  const onEditorChange = useCallback(
+    (value: string) => {
+      if (esQueryFirstEdit === false && value !== generatedEsQuery) {
+        setEsQueryFirtEdit(true);
+        usageTracker?.count(AnalyticsEvents.editElasticsearchQuery);
+      }
+      onChangeUserQuery(value === generatedEsQuery ? null : value);
+      trigger(PlaygroundFormFields.userElasticsearchQuery);
+    },
+    [esQueryFirstEdit, generatedEsQuery, usageTracker, onChangeUserQuery, trigger]
+  );
+  const userElasticsearchQueryIsCustomized = userElasticsearchQuery !== null;
 
   return (
     <EuiSplitPanel.Outer grow hasBorder css={FullHeight}>
@@ -81,7 +94,7 @@ export const ElasticsearchQueryViewer = ({
                   />
                 </h5>
               </EuiText>
-              {userElasticsearchQueryValidations?.isUserCustomized ? (
+              {userElasticsearchQueryIsCustomized ? (
                 <EuiBadge color="primary">
                   <FormattedMessage
                     id="xpack.searchPlayground.viewQuery.userCustomized.badge"
@@ -98,7 +111,7 @@ export const ElasticsearchQueryViewer = ({
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {userElasticsearchQueryValidations?.isUserCustomized ? (
+          {userElasticsearchQuery !== null ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
@@ -137,39 +150,24 @@ export const ElasticsearchQueryViewer = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
-      {userElasticsearchQueryValidations?.isUserCustomized &&
-      (userElasticsearchQueryValidations?.userQueryErrors?.length ?? 0) > 0 ? (
+      {userElasticsearchQueryIsCustomized && userElasticsearchQueryError !== undefined ? (
         <EuiSplitPanel.Inner grow={false}>
-          {userElasticsearchQueryValidations.userQueryErrors!.map((error, errorIndex) => (
-            <EuiCallOut
-              key={`user.query.error.${errorIndex}`}
-              color="danger"
-              iconType="error"
-              title={error}
-              size="s"
-            />
-          ))}
+          <FieldErrorCallout error={userElasticsearchQueryError} />
         </EuiSplitPanel.Inner>
       ) : null}
       <EuiSplitPanel.Inner paddingSize="none" css={PanelFillContainer}>
-        <Controller
-          control={control}
-          name={PlaygroundFormFields.userElasticsearchQuery}
-          render={({ field }) => (
-            <CodeEditor
-              dataTestSubj="ViewElasticsearchQueryResult"
-              languageId="json"
-              {...field}
-              value={userElasticsearchQuery ?? generatedEsQuery}
-              options={{
-                automaticLayout: true,
-              }}
-              editorDidMount={editorMounted}
-              enableFindAction
-              fullWidth
-              isCopyable
-            />
-          )}
+        <CodeEditor
+          dataTestSubj="ViewElasticsearchQueryResult"
+          languageId="json"
+          onChange={onEditorChange}
+          value={userElasticsearchQuery ?? generatedEsQuery}
+          options={{
+            automaticLayout: true,
+          }}
+          editorDidMount={editorMounted}
+          enableFindAction
+          fullWidth
+          isCopyable
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

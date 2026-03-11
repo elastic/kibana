@@ -17,87 +17,87 @@ export interface PackageInfo {
   binaryChecksum: string;
   binaryRelativePath: string;
   isPreInstalled: boolean;
-  location: 'custom' | 'common';
-  revision: number;
+  location: 'custom' | 'chromeForTesting';
 }
 
 enum BaseUrl {
-  // see https://www.chromium.org/getting-involved/download-chromium
-  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
   // A GCS bucket under the Kibana team
   custom = 'https://storage.googleapis.com/headless_shell',
+  // GCS bucket for headless chrome provided by the chrome team, see
+  // https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints
+  chromeForTesting = 'https://storage.googleapis.com/chrome-for-testing-public',
 }
 
 interface CustomPackageInfo extends PackageInfo {
   location: 'custom';
 }
-interface CommonPackageInfo extends PackageInfo {
-  location: 'common';
+
+interface ChromeForTestingPackageInfo extends PackageInfo {
+  version: string;
+  location: 'chromeForTesting';
   archivePath: string;
 }
 
-function isCommonPackage(p: PackageInfo): p is CommonPackageInfo {
-  return p.location === 'common';
+function isChromeForTestingPackage(p: PackageInfo): p is ChromeForTestingPackageInfo {
+  return p.location === 'chromeForTesting';
 }
 
 export class ChromiumArchivePaths {
-  public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
+  public readonly packages: Array<CustomPackageInfo | ChromeForTestingPackageInfo> = [
     {
       platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '481e48cbe90b1f904594a4658bcd5152e54cb11108cec8e2df08f959f75bdf5d',
-      binaryChecksum: 'a634013f8596f8a35e324acfc48ba7a986b328a5f58ee925d47fa9aee1195ce4',
-      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1415334,
-      location: 'common',
-      archivePath: 'Mac',
+      archiveFilename: 'chrome-headless-shell-mac-x64.zip',
+      archiveChecksum: 'ed68e639d6b3791efef347d5eca4c3f824d3092f423fa27f2240ffc85d40a456',
+      binaryChecksum: '4eaec5719503b65ab00b17755b2a8db5570ff76f44824e50615e901e5d437bfd',
+      binaryRelativePath: 'chrome-headless-shell-mac-x64/chrome-headless-shell',
+      version: '143.0.7499.40',
+      location: 'chromeForTesting',
+      archivePath: 'mac-x64',
       isPreInstalled: false,
     },
     {
       platform: 'darwin',
       architecture: 'arm64',
-      archiveFilename: 'chrome-mac.zip',
-      archiveChecksum: '37d77b21dd0085c845d610d1a63c2bf0e7b07aa75c8cef5bd1a251a6d86411df',
-      binaryChecksum: '35a2b8a456e71f6d1df58a324d983b86944ce60443a1fe24d460a18f88c53216',
-      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
-      revision: 1415336,
-      location: 'common',
-      archivePath: 'Mac_Arm',
+      archiveFilename: 'chrome-headless-shell-mac-arm64.zip',
+      archiveChecksum: 'ac928a69b720d75c7fcf18a1f1dfde2ce37e4c525ba48d8810ef4c51391fd945',
+      binaryChecksum: '567dbbd3fd50ff9f1e6186f839711bf6986ff50fb36af0f80ca58217d42e385e',
+      binaryRelativePath: 'chrome-headless-shell-mac-arm64/chrome-headless-shell',
+      version: '143.0.7499.40',
+      location: 'chromeForTesting',
+      archivePath: 'mac-arm64',
       isPreInstalled: false,
     },
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-ea6ef4c-locales-linux_x64.zip',
-      archiveChecksum: '98db5f4ae704a0cf4d1612721334b0466908bf642ac547798aa303d17105e782',
-      binaryChecksum: '2ed0cbce8358e86b5c44719d1ccd50f711b879088946b6ffdeed22b4ce2e47ea',
+      archiveFilename: 'chromium-c23ff45-locales-linux_x64.zip',
+      archiveChecksum: '8b07f71eea31e80821819e67c99a6fb58417960886a73fe6ae05190bc15bab85',
+      binaryChecksum: 'ac04bf80e70ff0ea431c7da4f471156343b850fca66a28488eb5b6b2703ed96b',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
-      revision: 1415337,
       location: 'custom',
       isPreInstalled: true,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-ea6ef4c-locales-linux_arm64.zip',
-      archiveChecksum: '9b3bf295794f0d4fe5e52813aa31a5ed4ca4389384f7fff2a8465777709174ea',
-      binaryChecksum: '382c7f30a57b1096c7567d3a2cba0353aae80ec11790cd271601fb1b2ebb85cd',
+      archiveFilename: 'chromium-c23ff45-locales-linux_arm64.zip',
+      archiveChecksum: 'f15fd107c568c2efeec9b9bb1ca5d29d70ebe492407ed5df998d0247f96bdabe',
+      binaryChecksum: '4f2943e46128e9af370184ef592b352c7046995564cfbebf55a845c40def8bdb',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
-      revision: 1415337,
       location: 'custom',
       isPreInstalled: true,
     },
     {
       platform: 'win32',
       architecture: 'x64',
-      archiveFilename: 'chrome-win.zip',
-      archiveChecksum: 'b76935f051c3f386372a0dbb79b657f5179430fea3e8014cc054cb44a5c138e0',
-      binaryChecksum: '78d4e3a27130a3589e8bd51f3dc6cce061ccd80ab5bcfc77430ac014f17a9be9',
-      binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
-      revision: 1415337,
-      location: 'common',
-      archivePath: 'Win',
+      archiveFilename: 'chrome-headless-shell-win64.zip',
+      archiveChecksum: '67e48f40c732bff9a7b3e4aec9886e61f8b75b4fee83ac7e179d3344909696e0',
+      binaryChecksum: 'e2080d7b9a2ab39fec90f5f65bdaf546c834dd086d90dd0d9a0400ec77596a8f',
+      binaryRelativePath: path.join('chrome-headless-shell-win64', 'chrome-headless-shell.exe'),
+      version: '143.0.7499.40',
+      location: 'chromeForTesting',
+      archivePath: 'win64',
       isPreInstalled: true,
     },
   ];
@@ -119,11 +119,14 @@ export class ChromiumArchivePaths {
   }
 
   public getDownloadUrl(p: PackageInfo) {
-    if (isCommonPackage(p)) {
-      const { common } = BaseUrl;
-      const { archivePath, revision, archiveFilename } = p;
-      return `${common}/${archivePath}/${revision}/${archiveFilename}`;
+    if (isChromeForTestingPackage(p)) {
+      const { chromeForTesting } = BaseUrl;
+      const { archivePath, version, archiveFilename } = p;
+      // returned string matches download value found at the following endpoint;
+      // https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
+      return `${chromeForTesting}/${version}/${archivePath}/${archiveFilename}`;
     }
+
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 

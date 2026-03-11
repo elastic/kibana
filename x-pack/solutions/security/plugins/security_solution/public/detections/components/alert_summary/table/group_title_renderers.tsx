@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { isArray } from 'lodash/fp';
 import React, { memo } from 'react';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
-import { CardIcon } from '@kbn/fleet-plugin/public';
-import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
+import { RELATED_INTEGRATION } from '../../../constants';
+import { IntegrationIcon } from '../common/integration_icon';
+import { useTableSectionContext } from './table_section_context';
 import { GroupWithIconContent, RuleNameGroupContent } from '../../alerts_table/grouping_settings';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
@@ -18,7 +19,7 @@ import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_saf
 /**
  * Returns renderers to be used in the `buttonContent` property of the EuiAccordion component used within the kbn-grouping package.
  * It handles custom renders for the following fields:
- * - signal.rule.id
+ * - relatedIntegration (a runTime field we're creating and using in the adhoc dataView)
  * - kibana.alert.rule.name
  * - host.name
  * - user.name
@@ -33,7 +34,7 @@ export const groupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> 
   nullGroupMessage
 ) => {
   switch (selectedGroup) {
-    case 'signal.rule.id':
+    case RELATED_INTEGRATION:
       return <IntegrationNameGroupContent title={bucket.key} />;
     case 'kibana.alert.rule.name':
       return isArray(bucket.key) ? (
@@ -75,28 +76,25 @@ export const groupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> 
   }
 };
 
-export const INTEGRATION_GROUP_RENDERER_LOADING_TEST_ID = 'integration-group-renderer-loading';
 export const INTEGRATION_GROUP_RENDERER_TEST_ID = 'integration-group-renderer';
 export const INTEGRATION_GROUP_RENDERER_INTEGRATION_NAME_TEST_ID =
   'integration-group-renderer-integration-name';
-export const INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID =
-  'integration-group-renderer-integration-icon';
-export const SIGNAL_RULE_ID_GROUP_RENDERER_TEST_ID = 'signal-rule-id-group-renderer';
+export const INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID = 'integration-group-renderer';
+export const RELATED_INTEGRATION_GROUP_RENDERER_TEST_ID = 'related-integration-group-renderer';
 
 /**
  * Renders an icon and name of an integration.
+ * This component needs to be used within the TableSectionContext which provides the installed packages.
  */
 export const IntegrationNameGroupContent = memo<{
   title: string | string[];
 }>(({ title }) => {
-  const { integration, isLoading } = useGetIntegrationFromRuleId({ ruleId: title });
+  const { packages } = useTableSectionContext();
+  const integrationName = Array.isArray(title) ? title[0] : title;
+  const integration = packages.find((p) => integrationName === p.name);
 
   return (
-    <EuiSkeletonText
-      data-test-subj={INTEGRATION_GROUP_RENDERER_LOADING_TEST_ID}
-      isLoading={isLoading}
-      lines={1}
-    >
+    <>
       {integration ? (
         <EuiFlexGroup
           data-test-subj={INTEGRATION_GROUP_RENDERER_TEST_ID}
@@ -104,13 +102,10 @@ export const IntegrationNameGroupContent = memo<{
           alignItems="center"
         >
           <EuiFlexItem grow={false}>
-            <CardIcon
+            <IntegrationIcon
               data-test-subj={INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID}
-              icons={integration.icons}
-              integrationName={integration.title}
-              packageName={integration.name}
-              size="xl"
-              version={integration.version}
+              iconSize="xl"
+              integration={integration}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -123,11 +118,11 @@ export const IntegrationNameGroupContent = memo<{
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiTitle data-test-subj={SIGNAL_RULE_ID_GROUP_RENDERER_TEST_ID} size="xs">
-          <h5>{title}</h5>
+        <EuiTitle data-test-subj={RELATED_INTEGRATION_GROUP_RENDERER_TEST_ID} size="xs">
+          <h5>{integrationName}</h5>
         </EuiTitle>
       )}
-    </EuiSkeletonText>
+    </>
   );
 });
 IntegrationNameGroupContent.displayName = 'IntegrationNameGroup';

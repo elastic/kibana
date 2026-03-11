@@ -14,7 +14,7 @@ import {
   cloudInstructions,
   onPremCloudInstructions,
 } from '../instructions/heartbeat_instructions';
-import {
+import type {
   TutorialContext,
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
@@ -57,6 +57,7 @@ export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSc
     previewImagePath: context.staticAssets.getPluginAssetHref('/uptime_monitors/screenshot.webp'),
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(context),
+    omitServerless: true,
     onPremElasticCloud: onPremCloudInstructions(context),
     integrationBrowserCategories: ['observability'],
   };

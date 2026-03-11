@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { LIST_ID } from '../../constants/index.mock';
 
-import { FindListItemSchema, FindListItemSchemaDecoded, findListItemSchema } from '.';
+import type { FindListItemSchema, FindListItemSchemaDecoded } from '.';
+import { findListItemSchema } from '.';
 import { getFindListItemSchemaDecodedMock, getFindListItemSchemaMock } from './index.mock';
 
 describe('find_list_item_schema', () => {

@@ -16,10 +16,18 @@ import { sampleDocNoSortId } from '../__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
-const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
+jest.mock('@kbn/data-views-plugin/server', () => ({
+  ...jest.requireActual('@kbn/data-views-plugin/server'),
+  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
+    getIndexPatternsWithMatches: jest.fn().mockResolvedValue(['some-index']),
+  })),
+}));
+
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
@@ -29,7 +37,12 @@ jest.mock('../utils/utils', () => ({
       warningMessage: undefined,
     };
   }),
-  hasReadIndexPrivileges: jest.fn(async () => undefined),
+  checkForFrozenIndices: jest.fn(async () => []),
+}));
+
+jest.mock('@kbn/alerting-plugin/server', () => ({
+  ...jest.requireActual('@kbn/alerting-plugin/server'),
+  shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('../utils/get_list_client', () => ({
@@ -42,6 +55,7 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const licensing = licensingMock.createSetup();
+  const docLinks = docLinksServiceMock.createSetupContract();
   const publicBaseUrl = 'http://somekibanabaseurl.com';
   const mockedStatusLogger = ruleExecutionLogMock.forExecutors.create();
   const ruleStatusLogger = () => Promise.resolve(mockedStatusLogger);
@@ -53,6 +67,7 @@ describe('Custom Query Alerts', () => {
 
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     actions,
+    docLinks,
     lists,
     logger,
     config: createMockConfig(),
@@ -110,7 +125,9 @@ describe('Custom Query Alerts', () => {
   });
 
   it('short-circuits and writes a warning if no indices are found', async () => {
-    (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
+    (IndexPatternsFetcher as jest.Mock).mockImplementationOnce(() => ({
+      getIndexPatternsWithMatches: jest.fn().mockResolvedValue([]),
+    }));
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
@@ -147,8 +164,9 @@ describe('Custom Query Alerts', () => {
     expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+        message: expect.stringContaining(
+          'Unable to find matching indices for rule ALERT_RULE_NAME. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.'
+        ),
       })
     );
   });
@@ -164,24 +182,6 @@ describe('Custom Query Alerts', () => {
     alerting.registerType(queryAlertType);
 
     const params = getQueryRuleParams();
-
-    // mock field caps so as not to short-circuit on "no indices found"
-    services.scopedClusterClient.asInternalUser.fieldCaps.mockResolvedValueOnce({
-      // @ts-expect-error our fieldCaps mock only seems to use the last value of the overloaded FieldCapsApi
-      body: {
-        indices: params.index!,
-        fields: {
-          _id: {
-            _id: {
-              type: '_id',
-              metadata_field: true,
-              searchable: true,
-              aggregatable: false,
-            },
-          },
-        },
-      },
-    });
 
     services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
@@ -211,6 +211,14 @@ describe('Custom Query Alerts', () => {
     (hasTimestampFields as jest.Mock).mockImplementationOnce(async () => {
       throw Error('hastTimestampFields test error');
     });
+
+    services.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue({
+      indices: ['some-index'],
+      fields: {},
+      // @ts-expect-error body does not exist on FieldCapsResponse but is needed for TransportResult shape used by hasTimestampFields
+      body: { indices: ['some-index'], fields: {} },
+    });
+
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
@@ -250,7 +258,9 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          "Check privileges failed to execute Error: hastTimestampFields test error, The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
+          'Timestamp fields check failed to execute Error: hastTimestampFields test error\n' +
+          '\n' +
+          "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })
     );
   });

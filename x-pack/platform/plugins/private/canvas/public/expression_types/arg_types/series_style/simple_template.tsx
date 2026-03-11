@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
+import type { FunctionComponent } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
-import immutable from 'object-path-immutable';
+import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import { ResolvedArgProps, ResolvedLabels } from '../../arg';
+import type { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
-import { ExpressionAstExpression, CanvasWorkpad } from '../../../../types';
+import type { ExpressionAstExpression, CanvasWorkpad } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
-const { set, del } = immutable;
 const { SeriesStyle: strings } = ArgTypesStrings;
 
 interface Arguments {
@@ -110,14 +109,3 @@ export const SimpleTemplate: FunctionComponent<Props> = (props) => {
 };
 
 SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
-
-SimpleTemplate.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  resolved: PropTypes.shape({
-    labels: PropTypes.array.isRequired,
-  }).isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }).isRequired,
-};

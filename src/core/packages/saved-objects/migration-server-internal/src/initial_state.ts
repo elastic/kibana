@@ -11,19 +11,19 @@ import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import {
-  getLatestMappingsVirtualVersionMap,
+import type {
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getLatestMappingsVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {
   getOutdatedDocumentsQuery,
   type OutdatedDocumentsQueryParams,
 } from './get_outdated_documents_query';
 import type { InitState } from './state';
-import { excludeUnusedTypesQuery } from './core';
+import { buildExcludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
 
 export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
@@ -137,7 +137,7 @@ export const createInitialState = ({
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
-    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
+    excludeOnUpgradeQuery: buildExcludeUnusedTypesQuery(typeRegistry.getLegacyTypes()),
     knownTypes,
     latestMappingsVersions: getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,

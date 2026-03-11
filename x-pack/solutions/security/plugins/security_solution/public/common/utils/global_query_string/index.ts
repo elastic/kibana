@@ -10,11 +10,12 @@ import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 import { encode } from '@kbn/rison';
+import { cloneDeep } from 'lodash';
 import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
-import { getLinkInfo } from '../../links';
+import { useLinkInfo } from '../../links';
 
 /**
  * Adds urlParamKey and the initial value to redux store.
@@ -77,33 +78,39 @@ export const useUpdateUrlParam = <State extends {}>(urlParamKey: string) => {
   return updateUrlParam;
 };
 
-export const useGlobalQueryString = (): string => {
-  const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
-  const globalQueryString = useMemo(() => {
-    const encodedGlobalUrlParam: Record<string, string> = {};
+const encodeGlobalUrlParams = (params: Record<string, unknown>) => {
+  const encoded: Record<string, string> = {};
 
-    if (!globalUrlParam) {
-      return '';
+  Object.keys(params).forEach((paramName) => {
+    const value = params[paramName];
+
+    if (!value || (typeof value === 'object' && isEmpty(value))) {
+      return;
     }
 
-    Object.keys(globalUrlParam).forEach((paramName) => {
-      const value = globalUrlParam[paramName];
+    try {
+      encoded[paramName] = encode(value);
+    } catch {
+      // Just ignore parameters which unable to encode
+    }
+  });
 
-      if (!value || (typeof value === 'object' && isEmpty(value))) {
-        return;
-      }
+  return encodeQueryString(pickBy((value) => !isEmpty(value), encoded));
+};
 
-      try {
-        encodedGlobalUrlParam[paramName] = encode(value);
-      } catch {
-        // Just ignore parameters which unable to encode
+export const useGlobalQueryString = (overrides?: Record<string, unknown>): string => {
+  const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  return useMemo(() => {
+    const merged = { ...(globalUrlParam ?? {}) } as Record<string, unknown>;
+
+    Object.keys(overrides ?? {}).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(merged, key)) {
+        if (overrides) merged[key] = cloneDeep(overrides[key]);
       }
     });
 
-    return encodeQueryString(pickBy((value) => !isEmpty(value), encodedGlobalUrlParam));
-  }, [globalUrlParam]);
-
-  return globalQueryString;
+    return encodeGlobalUrlParams(merged);
+  }, [globalUrlParam, overrides]);
 };
 
 /**
@@ -115,12 +122,13 @@ export const useSyncGlobalQueryString = () => {
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
   const previousGlobalUrlParams = usePrevious(globalUrlParam);
   const replaceUrlParams = useReplaceUrlParams();
+  const linkInfo = useLinkInfo(pageName);
 
   useEffect(() => {
-    const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
+    const { skipUrlState } = linkInfo ?? { skipUrlState: true };
     const paramsToUpdate = { ...globalUrlParam };
 
-    if (linkInfo.skipUrlState) {
+    if (skipUrlState) {
       Object.keys(paramsToUpdate).forEach((key) => {
         paramsToUpdate[key] = null;
       });
@@ -140,5 +148,5 @@ export const useSyncGlobalQueryString = () => {
     if (Object.keys(paramsToUpdate).length > 0) {
       replaceUrlParams(paramsToUpdate);
     }
-  }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams]);
+  }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams, linkInfo]);
 };

@@ -7,12 +7,12 @@
 
 import React from 'react';
 import {
+  EuiButtonIcon,
   EuiPopover,
-  EuiText,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiPopoverFooter,
-  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -24,7 +24,7 @@ import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redi
 import { SecurityPageName } from '../../../../../common/constants';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { isMlRule } from '../../../../../common/detection_engine/utils';
-import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
+import { getCapitalizedStatusText } from '../../../common/components/rule_execution_status/utils';
 import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
@@ -75,7 +75,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       anchorPosition="leftCenter"
     >
       <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
-      <div style={{ width: POPOVER_WIDTH }}>
+      <div css={{ width: POPOVER_WIDTH }}>
         <EuiText size="s">
           <p>{i18n.ML_RULE_JOBS_WARNING_DESCRIPTION}</p>
         </EuiText>

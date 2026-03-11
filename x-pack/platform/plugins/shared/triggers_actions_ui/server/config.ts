@@ -19,6 +19,9 @@ import {
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
+  rules: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enableGeoTrackingThresholdAlert: schema.maybe(schema.boolean({ defaultValue: false })),
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],

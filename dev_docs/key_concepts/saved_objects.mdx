@@ -33,15 +33,21 @@ all the "children" will be automatically included. However, when a "child" is ex
 
 ## Migrations and Backward compatibility
 
-As your plugin evolves, you may need to change your Saved Object 
+As your plugin evolves, you may need to change your Saved Object
 type in a breaking way (for example, changing the type of an attribute, or removing
 an attribute). If that happens, you should write a new model version to upgrade the Saved Objects that existed prior to the change.
 
 <DocLink id="kibDevTutorialSavedObject" section="migrations" text="Defining model versions" />.
 
+If you create or persist raw saved objects outside of Kibana (for example, via the deprecated Saved Objects HTTP CRUD APIs or NDJSON files), preserve `coreMigrationVersion` and `typeMigrationVersion` to retain forwards compatibility across Kibana versions. For more details, refer to the [Saved Objects](https://www.elastic.co/docs/extend/kibana/saved-objects) documentation.
+
 ## Security
 
 Saved Objects can be secured using Kibana's Privileges model, unlike data that comes from data indices, which is secured using Elasticsearch's Privileges model.
+
+### Aggregation security
+
+When using the `find` or `search` methods with aggregations, be aware that certain Elasticsearch aggregation types can bypass query restrictions and return data from documents the user should not have access to. See <DocLink id="kibDevTutorialSavedObjectsSearch" section="security-considerations-for-aggregations" text="Security considerations for aggregations" /> for details on which aggregations to avoid.
 
 ### Space awareness
 
@@ -88,5 +94,5 @@ If you are adding a **new** object type, when you register it:
 3. Use `namespaceType: 'agnostic'` if you want these objects to always exist in all spaces
 
 If you have an **existing** "legacy" object type that is not shareable (using `namespaceType: 'single'`), see the [legacy developer guide
-for Sharing Saved Objects](https://www.elastic.co/guide/en/kibana/master/sharing-saved-objects.html) for details on steps you need to take
+for Sharing Saved Objects](https://www.elastic.co/docs/extend/kibana/saved-objects/share) for details on steps you need to take
 to make sure this is converted to `namespaceType: 'multiple-isolated'` or `namespaceType: 'multiple'` in the 8.0 release.

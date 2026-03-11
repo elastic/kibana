@@ -26,7 +26,7 @@ import type {
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
-} from '../../types';
+} from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -470,6 +470,64 @@ describe('heatmap', () => {
           },
         ],
       });
+    });
+
+    test('ignores xSortPredicate for a time-based horizontal axis', () => {
+      const mockDatasource = createMockDatasource();
+      mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'x-accessor', fields: [] },
+        { columnId: 'value-accessor', fields: [] },
+      ]);
+
+      const timeSeriesXAxisOperation: OperationDescriptor = {
+        label: 'Date histogram',
+        dataType: 'date',
+        scale: 'interval',
+        isBucketed: true,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      };
+      const valueOperation: OperationDescriptor = {
+        label: 'Metric',
+        dataType: 'number',
+        scale: 'ratio',
+        isBucketed: false,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      };
+
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockImplementation((columnId: string) =>
+        columnId === 'x-accessor' ? timeSeriesXAxisOperation : valueOperation
+      );
+
+      datasourceLayers = { first: mockDatasource.publicAPIMock };
+
+      const state: HeatmapVisualizationState = {
+        ...exampleState(),
+        layerId: 'first',
+        xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
+        gridConfig: {
+          ...exampleState().gridConfig,
+          xSortPredicate: 'asc',
+        },
+      };
+
+      const { xSortPredicate: _omit, ...gridConfigWithoutSort } = state.gridConfig;
+      const stateWithoutSortPredicate: HeatmapVisualizationState = {
+        ...state,
+        gridConfig: gridConfigWithoutSort,
+      };
+
+      const heatmapVis = getHeatmapVisualization({ paletteService, theme });
+      const expressionWithSort = heatmapVis.toExpression(state, datasourceLayers);
+      const expressionWithoutSort = heatmapVis.toExpression(
+        stateWithoutSortPredicate,
+        datasourceLayers
+      );
+
+      expect(expressionWithSort).not.toBeNull();
+      expect(expressionWithSort).toEqual(expressionWithoutSort);
     });
 
     test('returns null with a missing value accessor', () => {

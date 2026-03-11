@@ -8,8 +8,9 @@
  */
 
 import { memoize } from 'lodash';
-import { ResolvedLink } from '../types';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE, Link } from '../../common/content_management';
+import type { ResolvedLink } from '../types';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/content_management';
+import type { Link } from '../../server';
 import { validateUrl } from '../components/external_link/external_link_tools';
 import { fetchDashboard } from '../components/dashboard_link/dashboard_link_tools';
 import { DashboardLinkStrings } from '../components/dashboard_link/dashboard_link_strings';
@@ -35,6 +36,18 @@ export const memoizedGetOrderedLinkList = memoize(
   }
 );
 
+export function serializeResolvedLinks(resolvedLinks: ResolvedLink[]) {
+  return resolvedLinks
+    .map(({ title, description, error, ...linkToSave }) => linkToSave)
+    .map(
+      // fiilter out null values which may have been introduced by the session state backup (undefined values are serialized as null).
+      (link) =>
+        Object.fromEntries(
+          Object.entries(link).filter(([key, value]) => value !== null)
+        ) as unknown as Link
+    );
+}
+
 export async function resolveLinks(links: Link[] = []) {
   const resolvedLinkInfos = await Promise.all(
     links.map(async (link) => {
@@ -58,9 +71,7 @@ export async function resolveLinkInfo(
   if (link.type === DASHBOARD_LINK_TYPE) {
     if (!link.destination) return { title: '' };
     try {
-      const {
-        attributes: { title, description },
-      } = await fetchDashboard(link.destination);
+      const { title, description } = await fetchDashboard(link.destination);
       return { label: link.label, title, description };
     } catch (error) {
       return {

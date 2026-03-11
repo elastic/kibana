@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -102,6 +102,9 @@ describe('deleteByQuery', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual({ taskId: '1234' });
+    expect((result as Either.Right<any>).right).toEqual({
+      type: 'delete_by_query_response',
+      taskId: '1234',
+    });
   });
 });

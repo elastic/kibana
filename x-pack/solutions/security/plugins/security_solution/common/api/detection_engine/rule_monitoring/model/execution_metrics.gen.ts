@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type RuleExecutionMetrics = z.infer<typeof RuleExecutionMetrics>;
 export const RuleExecutionMetrics = z.object({
@@ -34,6 +34,10 @@ export const RuleExecutionMetrics = z.object({
    * Duration in seconds of execution gap
    */
   execution_gap_duration_s: z.number().int().min(0).optional(),
+  /**
+   * Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
+   */
+  frozen_indices_queried_count: z.number().int().min(0).optional(),
   /**
    * Range of the execution gap
    */

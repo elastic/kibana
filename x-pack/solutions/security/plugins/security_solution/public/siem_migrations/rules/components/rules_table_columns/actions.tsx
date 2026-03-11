@@ -10,21 +10,22 @@ import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../../common';
-import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import { type TableColumn } from './constants';
-import { TableHeader } from './header';
+import { TableHeader } from '../../../common/components';
+import { InstallRuleActionBtn } from './install';
 
 interface ActionNameProps {
   disableActions?: boolean;
-  migrationRule: RuleMigration;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  migrationRule: RuleMigrationRule;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 const ActionName = ({
@@ -52,17 +53,13 @@ const ActionName = ({
   }
 
   // Installable
-  if (migrationRule.translation_result === RuleTranslationResult.FULL) {
+  if (migrationRule.translation_result === MigrationTranslationResult.FULL) {
     return (
-      <EuiLink
-        disabled={disableActions}
-        onClick={() => {
-          installMigrationRule(migrationRule);
-        }}
-        data-test-subj="installRule"
-      >
-        {i18n.ACTIONS_INSTALL_LABEL}
-      </EuiLink>
+      <InstallRuleActionBtn
+        isDisabled={!!disableActions}
+        migrationRule={migrationRule}
+        installMigrationRule={installMigrationRule}
+      />
     );
   }
 
@@ -82,8 +79,8 @@ const ActionName = ({
 
 interface CreateActionsColumnProps {
   disableActions?: boolean;
-  openMigrationRuleDetails: (migrationRule: RuleMigration) => void;
-  installMigrationRule: (migrationRule: RuleMigration, enable?: boolean) => void;
+  openMigrationRuleDetails: (migrationRule: RuleMigrationRule) => void;
+  installMigrationRule: (migrationRule: RuleMigrationRule, enable?: boolean) => void;
 }
 
 export const createActionsColumn = ({
@@ -121,7 +118,7 @@ export const createActionsColumn = ({
         }
       />
     ),
-    render: (_, rule: RuleMigration) => {
+    render: (_, rule: RuleMigrationRule) => {
       return (
         <ActionName
           disableActions={disableActions}

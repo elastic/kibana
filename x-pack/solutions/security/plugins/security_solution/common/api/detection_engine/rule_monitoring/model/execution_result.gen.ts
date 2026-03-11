@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Rule execution result is an aggregate that groups plain rule execution events by execution UUID. It contains such information as execution UUID, date, status and metrics.
@@ -39,6 +39,7 @@ export const RuleExecutionResult = z.object({
   indexing_duration_ms: z.number().int(),
   search_duration_ms: z.number().int(),
   gap_duration_s: z.number().int(),
+  frozen_indices_queried_count: z.number().int(),
   security_status: z.string(),
   security_message: z.string(),
   /**

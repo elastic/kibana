@@ -13,15 +13,19 @@ import {
   getBasicEmptySearchResponse,
 } from '../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
-import {
-  installPrebuiltRulesAndTimelinesRoute,
-  createPrepackagedRules,
-} from './install_prebuilt_rules_and_timelines_route';
+import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines_route';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../routes/__mocks__/request_context';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
@@ -77,10 +81,13 @@ jest.mock('../../../../timeline/routes/prepackaged_timelines/install_prepackaged
 
 describe('add_prepackaged_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let clients: MockClients;
+  let context: SecuritySolutionRequestHandlerContextMock;
+
   let mockExceptionsClient: ExceptionListClient;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     mockExceptionsClient = listMock.getExceptionListClient();
@@ -100,7 +107,12 @@ describe('add_prepackaged_rules_route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    installPrebuiltRulesAndTimelinesRoute(server.router);
+    installPrebuiltRulesAndTimelinesRoute(server.router, clients.logger);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('status codes', () => {
@@ -235,9 +247,10 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('createPrepackagedRules', () => {
     test('uses exception lists client from context when available', async () => {
-      await createPrepackagedRules(
+      await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        clients.logger,
         mockExceptionsClient
       );
 
@@ -248,9 +261,10 @@ describe('add_prepackaged_rules_route', () => {
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       context.securitySolution.getExceptionListClient.mockImplementation(() => null);
 
-      await createPrepackagedRules(
+      await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        clients.logger,
         mockExceptionsClient
       );
 

@@ -30,6 +30,13 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_COLUMN_ADDED,
+  ASSET_INVENTORY_COLUMN_REMOVED,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -83,12 +90,6 @@ const columnHeaders: Record<string, string> = {
       defaultMessage: 'Type',
     }
   ),
-  [ASSET_FIELDS.ENTITY_SOURCE]: i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.source',
-    {
-      defaultMessage: 'Source',
-    }
-  ),
   [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
     'xpack.securitySolution.assetInventory.allAssets.lastSeen',
     {
@@ -103,10 +104,14 @@ const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
     return <RiskBadge risk={risk} />;
   },
   [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const criticality = rows[rowIndex].flattened[
-      ASSET_FIELDS.ASSET_CRITICALITY
-    ] as CriticalityLevelWithUnassigned;
-    return <AssetCriticalityBadge criticalityLevel={criticality} />;
+    const criticality = rows[rowIndex].flattened[ASSET_FIELDS.ASSET_CRITICALITY] as
+      | CriticalityLevelWithUnassigned
+      | 'deleted';
+    return (
+      <AssetCriticalityBadge
+        criticalityLevel={criticality === 'deleted' ? 'unassigned' : criticality}
+      />
+    );
   },
 });
 
@@ -119,7 +124,6 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
   { id: ASSET_FIELDS.ENTITY_ID },
   { id: ASSET_FIELDS.ENTITY_TYPE },
-  { id: ASSET_FIELDS.ENTITY_SOURCE },
   { id: ASSET_FIELDS.TIMESTAMP },
 ];
 
@@ -160,7 +164,7 @@ export const AssetInventoryDataTable = ({
       setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
         entityDocId: doc.raw._id,
-        entityType: source.entity?.type,
+        entityType: source.entity?.EngineMetadata?.Type,
         entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
@@ -321,14 +325,31 @@ export const AssetInventoryDataTable = ({
     setLocalStorageColumns(defaultColumns.map((c) => c.id));
   };
 
+  const handleAddColumn = (columnId: string) => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.CLICK,
+      ASSET_INVENTORY_COLUMN_ADDED,
+      ASSET_INVENTORY_APP_NAME
+    );
+    onAddColumn(columnId);
+  };
+
+  const handleRemoveColumn = (columnId: string) => {
+    uiMetricService.trackUiMetric(
+      METRIC_TYPE.CLICK,
+      ASSET_INVENTORY_COLUMN_REMOVED,
+      ASSET_INVENTORY_APP_NAME
+    );
+    onRemoveColumn(columnId);
+  };
+
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
-      dataView={dataView}
       title={title}
       columns={currentColumns}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
+      onAddColumn={handleAddColumn}
+      onRemoveColumn={handleRemoveColumn}
       onResetColumns={onResetColumns}
       groupSelectorComponent={groupSelectorComponent}
     />
@@ -348,7 +369,7 @@ export const AssetInventoryDataTable = ({
         <EuiProgress
           size="xs"
           color="accent"
-          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          css={{ opacity: isFetchingGridData ? 1 : 0 }}
           className={styles.gridProgressBar}
         />
         {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (

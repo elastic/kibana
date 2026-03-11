@@ -7,8 +7,8 @@
 
 import sinon from 'sinon';
 import { getLogstashStats, logstashMonitoringInstances } from './get_logstash_stats';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Get Logstash stats', function () {
   const searchMock = sinon.stub();

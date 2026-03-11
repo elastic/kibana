@@ -8,5 +8,7 @@
  */
 
 export { ViewSavedSearchAction } from '../embeddable/actions/view_saved_search_action';
-export { getOnAddSearchEmbeddable } from '../embeddable/get_on_add_search_embeddable';
+export { addPanelFromLibrary } from '../embeddable/utils/add_panel_from_library';
 export { getSearchEmbeddableFactory } from '../embeddable/get_search_embeddable_factory';
+export { getLegacyLogStreamEmbeddableFactory } from '../embeddable/get_legacy_log_stream_embeddable_factory';
+export { getTransformOut } from '../../common/embeddable/get_transform_out';

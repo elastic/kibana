@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
@@ -53,16 +53,4 @@ export const Loading: FC<Props> = ({
       <EuiIcon color={color} type="clock" />
     </div>
   );
-};
-
-Loading.propTypes = {
-  animated: PropTypes.bool,
-  backgroundColor: PropTypes.string,
-  text: PropTypes.string,
-};
-
-Loading.defaultProps = {
-  animated: false,
-  backgroundColor: '#000000',
-  text: '',
 };

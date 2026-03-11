@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
-import { Pagination } from '../../overview/monitor_list';
+import type { Pagination } from '../../overview/monitor_list';
 import { usePingsList } from './use_pings';
 import { PingListHeader } from './ping_list_header';
 import { PingListTable } from './ping_list_table';

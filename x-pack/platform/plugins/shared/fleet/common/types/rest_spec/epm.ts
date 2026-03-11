@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { type TypeOf, schema } from '@kbn/config-schema';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageSpecIcon } from '../models/package_spec';
@@ -41,6 +41,7 @@ export interface GetPackagesRequest {
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
+    type?: string;
   };
 }
 
@@ -109,6 +110,10 @@ export interface UpdatePackageResponse {
   item: PackageInfo;
 }
 
+export interface ReviewUpgradeResponse {
+  success: boolean;
+}
+
 export interface GetStatsRequest {
   params: {
     pkgname: string;
@@ -130,6 +135,7 @@ export interface InstallPackageResponse {
   items: AssetReference[];
   _meta: {
     install_source: InstallSource;
+    name: string;
   };
 }
 
@@ -145,12 +151,13 @@ export interface InstallResult {
   error?: Error;
   installType: InstallType;
   installSource?: InstallSource;
+  pkgName: string;
 }
 
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  result: InstallResult;
+  result: Omit<InstallResult, 'pkgName'>;
 }
 
 export interface BulkInstallPackagesResponse {
@@ -167,6 +174,10 @@ export interface BulkUpgradePackagesRequest {
 export interface BulkUninstallPackagesRequest {
   packages: Array<{ name: string; version: string }>;
   force?: boolean;
+}
+
+export interface BulkRollbackPackagesRequest {
+  packages: Array<{ name: string }>;
 }
 
 export interface BulkOperationPackagesResponse {
@@ -232,3 +243,43 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageDatastreamAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageDatastreamAssetsResponse {
+  success: boolean;
+}
+
+export interface RollbackPackageRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface RollbackPackageResponse {
+  success: boolean;
+  version: string;
+}
+export const RollbackAvailableCheckResponseSchema = schema.object({
+  reason: schema.maybe(schema.string()),
+  isAvailable: schema.boolean(),
+});
+
+export type RollbackAvailableCheckResponse = TypeOf<typeof RollbackAvailableCheckResponseSchema>;
+
+export const BulkRollbackAvailableCheckResponseSchema = schema.recordOf(
+  schema.string(),
+  RollbackAvailableCheckResponseSchema
+);
+
+export type BulkRollbackAvailableCheckResponse = TypeOf<
+  typeof BulkRollbackAvailableCheckResponseSchema
+>;

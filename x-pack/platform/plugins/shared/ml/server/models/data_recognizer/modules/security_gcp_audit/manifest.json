@@ -1,0 +1,66 @@
+{
+  "id": "security_gcp_audit",
+  "title": "Security: GCP Audit",
+  "description": "Detect suspicious activity recorded in GCP Audit logs.",
+  "type": "GCP Audit data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "logs-*,filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "event.dataset": "gcp.audit" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "gcp_audit_rare_method_for_a_city",
+      "file": "gcp_audit_rare_method_for_a_city.json"
+    },
+    {
+      "id": "gcp_audit_rare_method_for_a_country",
+      "file": "gcp_audit_rare_method_for_a_country.json"
+    },
+    {
+      "id": "gcp_audit_rare_method_for_a_client_user_email",
+      "file": "gcp_audit_rare_method_for_a_client_user_email.json"
+    },
+    {
+      "id": "gcp_audit_high_distinct_count_error_message",
+      "file": "gcp_audit_high_distinct_count_error_message.json"
+    },
+    {
+      "id": "gcp_audit_rare_error_code",
+      "file": "gcp_audit_rare_error_code.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-gcp_audit_rare_method_for_a_city",
+      "file": "datafeed_gcp_audit_rare_method_for_a_city.json",
+      "job_id": "gcp_audit_rare_method_for_a_city"
+    },
+    {
+      "id": "datafeed-gcp_audit_rare_method_for_a_country",
+      "file": "datafeed_gcp_audit_rare_method_for_a_country.json",
+      "job_id": "gcp_audit_rare_method_for_a_country"
+    },
+    {
+      "id": "datafeed-gcp_audit_rare_method_for_a_client_user_email",
+      "file": "datafeed_gcp_audit_rare_method_for_a_client_user_email.json",
+      "job_id": "gcp_audit_rare_method_for_a_client_user_email"
+    },
+    {
+      "id": "datafeed-gcp_audit_high_distinct_count_error_message",
+      "file": "datafeed_gcp_audit_high_distinct_count_error_message.json",
+      "job_id": "gcp_audit_high_distinct_count_error_message"
+    },
+    {
+      "id": "datafeed-gcp_audit_rare_error_code",
+      "file": "datafeed_gcp_audit_rare_error_code.json",
+      "job_id": "gcp_audit_rare_error_code"
+    }
+  ],
+  "tags": [
+    "security"
+  ]
+}

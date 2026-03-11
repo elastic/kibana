@@ -12,10 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { RandomSamplerOption } from '@kbn/ml-random-sampler-utils';
+import { RANDOM_SAMPLER_OPTION } from '@kbn/ml-random-sampler-utils';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
-import type { RandomSampler, RandomSamplerOption } from './random_sampler';
+import type { RandomSampler } from './random_sampler';
 import { randomSamplerText } from './random_sampler';
-import { RANDOM_SAMPLER_OPTION, RANDOM_SAMPLER_SELECT_OPTIONS } from './random_sampler';
+import { RANDOM_SAMPLER_SELECT_OPTIONS } from './random_sampler';
 
 interface Props {
   randomSampler: RandomSampler;

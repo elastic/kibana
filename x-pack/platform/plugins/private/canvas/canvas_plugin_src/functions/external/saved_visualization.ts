@@ -6,16 +6,15 @@
  */
 
 import { omit } from 'lodash';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
-import { SavedObjectReference } from '@kbn/core/types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
+
+import type { SavedObjectReference } from '@kbn/core/types';
+import { DEFAULT_TIME_RANGE } from '../../../common/lib';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
+import type { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -25,11 +24,6 @@ interface Arguments {
   hideLegend: boolean | null;
   title: string | null;
 }
-
-const defaultTimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
 
 export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
@@ -96,7 +90,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           savedObjectId: id,
           disableTriggers: true,
           disabledActions: ['ACTION_EDIT_IN_LENS'],
-          timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
+          timeRange: timerange ? omit(timerange, 'type') : DEFAULT_TIME_RANGE,
           filters: getQueryFilters(filters),
           vis: visOptions,
           title: title === null ? undefined : title,

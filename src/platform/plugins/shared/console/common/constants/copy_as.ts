@@ -17,4 +17,6 @@ export const AVAILABLE_LANGUAGES = [
   { value: 'curl', label: 'curl' },
   { value: 'javascript', label: 'JavaScript' },
   { value: 'python', label: 'Python' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
 ];

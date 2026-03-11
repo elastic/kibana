@@ -51,7 +51,6 @@ describe('import timelines', () => {
 
   beforeEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();
@@ -469,7 +468,6 @@ describe('import timeline templates', () => {
   const mockNewTemplateTimelineId = 'new templateTimelineId';
   beforeEach(() => {
     jest.resetModules();
-    jest.resetAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();
@@ -869,7 +867,7 @@ describe('import timeline templates', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        "isImmutable: Expected 'true' | 'false', received number"
+        'isImmutable: Invalid option: expected one of "true"|"false"'
       );
     });
   });

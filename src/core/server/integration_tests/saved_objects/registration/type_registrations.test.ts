@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-server-internal';
 
 // Types should NEVER be removed from this array
 const previouslyRegisteredTypes = [
@@ -16,13 +16,16 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
+  'alerting_rule_template',
   'api_key_pending_invalidation',
+  'api_key_to_invalidate',
   'apm-custom-dashboards',
   'apm-indices',
   'apm-server-schema',
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -33,11 +36,13 @@ const previouslyRegisteredTypes = [
   'canvas-workpad',
   'canvas-workpad-template',
   'cloud',
+  'cloud-connect-api-key',
   'cloud-security-posture-settings',
   'cases',
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -49,14 +54,20 @@ const previouslyRegisteredTypes = [
   'csp-rule-template',
   'csp_rule',
   'dashboard',
+  'data_connector',
   'dynamic-config-overrides', // Added in 8.16 to persist the dynamic config overrides and share it with other nodes
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
+  'entity-analytics-monitoring-entity-source',
+  'watchlist-config',
   'entity-definition',
+  'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -80,11 +91,14 @@ const previouslyRegisteredTypes = [
   'fleet-uninstall-tokens',
   'fleet-setup-lock',
   'fleet-space-settings',
+  'fleet-cloud-connector',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
@@ -103,6 +117,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'markdown',
   'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
@@ -122,12 +137,15 @@ const previouslyRegisteredTypes = [
   'query',
   'rules-settings',
   'sample-data-telemetry',
+  'scheduled_report',
   'search',
   'search-session',
   'search-telemetry',
+  'search_playground',
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',
+  'security:reference-data',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',
@@ -139,9 +157,12 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'slo',
   'slo-settings',
+  'slo_template',
   'space',
   'spaces-usage-stats',
+  'stream-prompts',
   'synthetics-monitor',
+  'synthetics-monitor-multi-space',
   'synthetics-param',
   'synthetics-privates-locations',
   'synthetics-private-location',
@@ -164,6 +185,8 @@ const previouslyRegisteredTypes = [
   'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
+  'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
 ].sort();
 
 describe('SO type registrations', () => {

@@ -14,8 +14,8 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString, ScreenContext, PromptIds } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
@@ -54,7 +54,7 @@ export const ExecuteConnectorRequestBody = z.object({
   langSmithApiKey: z.string().optional(),
   screenContext: ScreenContext.optional(),
   /**
-   * optional system prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
+   * System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
    */
   promptIds: PromptIds.optional(),
 });

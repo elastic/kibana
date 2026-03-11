@@ -20,7 +20,6 @@ const ID = 'anomaliesHistogramQuery';
 const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   deleteQuery,
   endDate,
-  setQuery,
   skip,
   startDate,
   type,
@@ -31,7 +30,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   ip,
   hostName,
   userName,
-  indexNames,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -60,7 +58,6 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         endDate={endDate}
         filterQuery={mergedFilterQuery}
         id={ID}
-        setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}
       />

@@ -4,22 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FindSLOGroupsResponse } from '@kbn/slo-schema';
-import {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-  useQuery,
-} from '@tanstack/react-query';
+import type { FindSLOGroupsResponse } from '@kbn/slo-schema';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import type { GroupByField } from '../pages/slos/types';
-import { SearchState } from '../pages/slos/hooks/use_url_search_state';
+import type { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
 import { useCreateDataView } from './use_create_data_view';

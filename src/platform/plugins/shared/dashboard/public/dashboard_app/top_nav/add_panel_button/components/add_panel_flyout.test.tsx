@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { DashboardApi } from '../../../../dashboard_api/types';
+import type { DashboardApi } from '../../../../dashboard_api/types';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 
@@ -30,7 +30,11 @@ describe('AddPanelFlyout', () => {
     test('displays getMenuItemGroups error', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} />
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
         </IntlProvider>
       );
 
@@ -69,7 +73,11 @@ describe('AddPanelFlyout', () => {
     test('calls item onClick handler when item is clicked', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} />
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
         </IntlProvider>
       );
 
@@ -82,7 +90,11 @@ describe('AddPanelFlyout', () => {
     test('displays not found message when a user searches for an item that is not in the selection list', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout dashboardApi={mockDashboardApi} />
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
         </IntlProvider>
       );
 

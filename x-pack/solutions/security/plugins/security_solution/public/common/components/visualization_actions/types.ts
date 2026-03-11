@@ -18,8 +18,9 @@ import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { EuiThemeComputed } from '@elastic/eui';
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+import type { PageScope } from '../../../data_view_manager/constants';
 import type { InputsModelId } from '../../store/inputs/constants';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
 
 export type ColorSchemas = Record<string, string>;
@@ -29,6 +30,7 @@ export type GetLensAttributes = (params: {
   stackByField?: string;
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
+  esql?: string;
 }) => LensAttributes;
 
 export interface UseLensAttributesProps {
@@ -37,9 +39,14 @@ export interface UseLensAttributesProps {
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   title?: string;
+  esql?: string;
+  /**
+   * Indices to use when fetching the lens componen
+   */
+  signalIndexName?: string | null;
 }
 
 export enum VisualizationContextMenuActions {
@@ -63,7 +70,7 @@ export interface VisualizationActionsProps {
   lensAttributes?: LensAttributes | null;
   onCloseInspect?: () => void;
   queryId: string;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
@@ -71,10 +78,26 @@ export interface VisualizationActionsProps {
   casesAttachmentMetadata?: LensProps['metadata'];
 }
 
+export interface VisualizationTablesWithMeta {
+  tables: TablesAdapter['tables'];
+  meta: {
+    statistics: {
+      totalCount: number;
+    };
+  };
+}
+
+export interface UseVisualizationResponseResponse {
+  searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
+  loading: boolean;
+}
+
 export interface EmbeddableData {
   requests: string[];
   responses: string[];
   isLoading: boolean;
+  tables?: VisualizationTablesWithMeta;
 }
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
@@ -100,9 +123,13 @@ export interface LensEmbeddableComponentProps {
   lensAttributes?: LensAttributes;
   onLoad?: OnEmbeddableLoaded;
   enableLegendActions?: boolean;
-  scopeId?: SourcererScopeName;
+  scopeId?: PageScope;
   stackByField?: string;
   timerange: { from: string; to: string };
+  /**
+   * Indices to use when fetching the lens component
+   */
+  signalIndexName?: string | null;
   width?: string | number;
   withActions?: VisualizationContextMenuActions[];
   /**
@@ -114,6 +141,11 @@ export interface LensEmbeddableComponentProps {
    * Metadata for cases Attachable visualization.
    */
   casesAttachmentMetadata?: LensProps['metadata'];
+
+  /**
+   * When provided it will render an visualization where the query is ESQL.
+   */
+  esql?: string;
 }
 
 export enum RequestStatus {
@@ -166,9 +198,14 @@ export interface ExtraOptions {
 
 export interface VisualizationEmbeddableProps extends LensEmbeddableComponentProps {
   donutTextWrapperClassName?: string;
+  donutTitleLabel?: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   isDonut?: boolean;
   label?: string;
+  /**
+   * Indices to use when fetching the lens component
+   */
+  signalIndexName?: string | null;
 }
 
 export interface VisualizationResponse<Hit = {}, Aggregations = {} | undefined> {

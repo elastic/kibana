@@ -324,13 +324,6 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
   }
 );
 
-export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
-  'xpack.securitySolution.timelines.components.importTimelineModal.overwriteDescription',
-  {
-    defaultMessage: 'Automatically overwrite saved objects with the same timeline ID',
-  }
-);
-
 export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
   i18n.translate(
     'xpack.securitySolution.timelines.components.importTimelineModal.successfullyImportedTimelinesTitle',
@@ -358,11 +351,9 @@ export const IMPORT_TIMELINE = i18n.translate(
   }
 );
 
-export const IMPORT_FAILED_DETAILED = (message: string) =>
-  i18n.translate(
-    'xpack.securitySolution.timelines.components.importTimelineModal.importFailedDetailedTitle',
-    {
-      values: { message },
-      defaultMessage: '{message}',
-    }
-  );
+export const TIMELINE_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.timelines.components.open.timeline.timelines.table.tableCaption',
+  {
+    defaultMessage: 'Timelines Table',
+  }
+);

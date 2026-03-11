@@ -72,7 +72,6 @@ export class TrainedModelsService {
 
   private readonly _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
   private readonly downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
-  private readonly downloadInProgress = new Set<string>();
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
@@ -91,6 +90,7 @@ export class TrainedModelsService {
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
   private deploymentParamsMapper!: DeploymentParamsMapper;
+  private uiInitiatedDownloads = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -162,6 +162,8 @@ export class TrainedModelsService {
 
   public downloadModel(modelId: string) {
     this._isLoading$.next(true);
+    this.uiInitiatedDownloads.add(modelId);
+
     from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId))
       .pipe(
         finalize(() => {
@@ -181,6 +183,7 @@ export class TrainedModelsService {
             model_id: modelId,
             result: 'failure',
           });
+          this.uiInitiatedDownloads.delete(modelId);
         },
       });
   }
@@ -323,9 +326,16 @@ export class TrainedModelsService {
   }) {
     let updated = this._scheduledDeployments$.getValue();
 
-    // If removing by modelId, abort download and filter all deployments for that model.
+    // If removing by modelId, abort currently downloading model and filter all deployments for that model.
     if (modelId) {
-      this.abortDownload(modelId);
+      const model = this.getModel(modelId);
+      const isDownloading =
+        model && isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING;
+
+      if (isDownloading) {
+        this.abortDownload(modelId);
+      }
+
       updated = updated.filter((d) => d.modelId !== modelId);
     }
 
@@ -611,20 +621,27 @@ export class TrainedModelsService {
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
 
-                this.telemetryService.trackTrainedModelsModelDownload({
-                  model_id: item.model_id,
-                  result: 'cancelled',
-                });
+                if (this.uiInitiatedDownloads.has(item.model_id)) {
+                  this.telemetryService.trackTrainedModelsModelDownload({
+                    model_id: item.model_id,
+                    result: 'cancelled',
+                  });
+                  this.uiInitiatedDownloads.delete(item.model_id);
+                }
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
                 // Finished downloading
                 newItem.state = MODEL_STATE.DOWNLOADED;
 
                 // Only track success if the model was downloading
-                if (downloadInProgress.has(item.model_id)) {
+                if (
+                  downloadInProgress.has(item.model_id) &&
+                  this.uiInitiatedDownloads.has(item.model_id)
+                ) {
                   this.telemetryService.trackTrainedModelsModelDownload({
                     model_id: item.model_id,
                     result: 'success',
                   });
+                  this.uiInitiatedDownloads.delete(item.model_id);
                 }
               }
               downloadInProgress.delete(item.model_id);
@@ -651,12 +668,7 @@ export class TrainedModelsService {
           this.stopPolling();
           this.downloadStatusFetchInProgress = false;
 
-          downloadInProgress.forEach((modelId) => {
-            this.telemetryService.trackTrainedModelsModelDownload({
-              model_id: modelId,
-              result: 'failure',
-            });
-          });
+          this.uiInitiatedDownloads.clear();
         },
       });
   }
@@ -670,7 +682,6 @@ export class TrainedModelsService {
 
   private cleanupService() {
     // Clear operation state
-    this.downloadInProgress.clear();
     this.abortedDownloads.clear();
     this.downloadStatusFetchInProgress = false;
 

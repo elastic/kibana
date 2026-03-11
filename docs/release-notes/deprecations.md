@@ -7,7 +7,7 @@ Over time, certain Elastic functionality becomes outdated and is replaced or rem
 
 Review the deprecated functionality for Kibana. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
-% ## Next version [kibana-versionnext-deprecations]
+% ## Next version [kibana-X.X.X-deprecations]
 
 % Use the following template to add entries to this document.
 
@@ -33,6 +33,18 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
+
+## 9.3.0 [kibana-9.3.0-deprecations]
+
+There are no deprecations in this version.
+
+## 9.2.0 [kibana-9.2.0-deprecations]
+
+There are no deprecations in this version.
+
+## 9.1.0 [kibana-9.1.0-deprecations]
+
+There are no deprecations in this version.
 
 ## 9.0.0 [kibana-900-deprecations]
 

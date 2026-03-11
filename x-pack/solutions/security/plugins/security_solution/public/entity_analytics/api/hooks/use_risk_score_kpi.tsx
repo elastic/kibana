@@ -34,7 +34,7 @@ interface RiskScoreKpi {
 interface UseRiskScoreKpiProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: EntityType;
+  riskEntity: EntityType | EntityType[];
   timerange?: { to: string; from: string };
 }
 
@@ -45,7 +45,7 @@ export const useRiskScoreKpi = ({
   timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
-  const defaultIndex = useGetDefaultRiskIndex(riskEntity);
+  const defaultIndex = useGetDefaultRiskIndex();
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,

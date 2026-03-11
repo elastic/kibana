@@ -5,27 +5,46 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import xmlFormatter from 'xml-formatter';
+import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QueryHeader } from './header';
 import { QueryViewer } from './query_viewer';
 import * as i18n from './translations';
 
 interface OriginalRuleQueryProps {
-  ruleMigration: RuleMigration;
+  migrationRule: RuleMigrationRule;
 }
 
 export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(
-  ({ ruleMigration }) => {
+  ({ migrationRule }) => {
+    const { title, tooltip } = useMemo(
+      () => ({
+        title:
+          migrationRule.original_rule.vendor === 'splunk'
+            ? i18n.SPLUNK_QUERY_TITLE
+            : i18n.QRADAR_RULE_TITLE,
+        tooltip:
+          migrationRule.original_rule.vendor === 'splunk'
+            ? i18n.SPLUNK_QUERY_TOOLTIP
+            : i18n.QRADAR_RULE_TITLE_TOOLTIP,
+      }),
+      [migrationRule.original_rule.vendor]
+    );
+
     return (
       <>
-        <QueryHeader title={i18n.SPLUNK_QUERY_TITLE} tooltip={i18n.SPLUNK_QUERY_TOOLTIP} />
-        <EuiHorizontalRule margin="xs" />
+        <QueryHeader title={title} tooltip={tooltip} />
+        <EuiHorizontalRule data-test-subj="queryHorizontalRule" margin="xs" />
         <QueryViewer
-          ruleName={ruleMigration.original_rule.title}
-          query={ruleMigration.original_rule.query}
-          language={ruleMigration.original_rule.query_language}
+          ruleName={migrationRule.original_rule.title}
+          query={
+            migrationRule.original_rule.query_language === 'xml'
+              ? xmlFormatter(migrationRule.original_rule.query)
+              : migrationRule.original_rule.query
+          }
+          language={migrationRule.original_rule.query_language}
         />
       </>
     );

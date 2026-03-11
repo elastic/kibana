@@ -31,6 +31,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -45,9 +46,9 @@ import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
-  BaseFieldsLatest,
-  DetectionAlert,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  DetectionAlert800,
+  WrappedAlert,
 } from '../../../../common/api/detection_engine/model/alerts';
 import type {
   RuleAction,
@@ -69,6 +70,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   warning: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
@@ -142,6 +144,7 @@ export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTyp
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   actions: SetupPlugins['actions'];
+  docLinks: DocLinksServiceSetup;
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
@@ -149,6 +152,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
+  isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
   analytics?: AnalyticsServiceSetup;
@@ -234,7 +238,7 @@ export type SignalSearchResponse<
   TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
 > = estypes.SearchResponse<SignalSource, TAggregations>;
 export type SignalSourceHit = estypes.SearchHit<SignalSource>;
-export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert800>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
@@ -301,7 +305,7 @@ export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
+) => Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>>;
 
 export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
@@ -339,6 +343,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 

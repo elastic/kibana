@@ -12,11 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
-
-const emptyLabel = i18n.translate('fieldFormats.string.emptyLabel', {
-  defaultMessage: '(empty)',
-});
+import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
   {
@@ -110,10 +107,12 @@ export class StringFormat extends FieldFormat {
     });
   }
 
-  textConvert: TextContextTypeConvert = (val: string | number, options) => {
-    if (val === '') {
-      return emptyLabel;
+  textConvert: TextContextTypeConvert = (val, options) => {
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
     }
+
     switch (this.param('transform')) {
       case 'lower':
         return String(val).toLowerCase();
@@ -133,8 +132,9 @@ export class StringFormat extends FieldFormat {
   };
 
   htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
-    if (val === '') {
-      return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
     }
 
     return hit?.highlight?.[field?.name!]

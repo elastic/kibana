@@ -51,8 +51,8 @@ export const initComponent = memoize(
               />
             ),
             description: `${dataFormatter.convert(
-              inputProps.timeRange!.from
-            )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+              inputProps.time_range!.from
+            )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
           },
         ];
 
@@ -68,7 +68,7 @@ export const initComponent = memoize(
           });
         }
 
-        const { jobIds, timeRange, ...rest } = inputProps;
+        const { jobIds, time_range: timeRange, ...rest } = inputProps;
         const selectedJobId = jobIds[0];
 
         return (

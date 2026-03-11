@@ -7,11 +7,12 @@
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
-import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
+import type { SLODefinition } from '../../../../domain/models';
+import { Duration, toDurationUnit } from '../../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';
 import { getSlicesFromDateRange } from '../../../../services/utils/get_slices_from_date_range';
-import { BurnRateRuleParams, WindowSchema } from '../types';
+import type { BurnRateRuleParams, WindowSchema } from '../types';
 
 type BurnRateWindowWithDuration = WindowSchema & {
   longDuration: Duration;
@@ -180,6 +181,17 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
   };
 }
 
+function buildGroupingAgg() {
+  return {
+    groupings: {
+      top_hits: {
+        size: 1,
+        _source: ['slo.groupings'],
+      },
+    },
+  };
+}
+
 export function buildQuery(
   startedAt: Date,
   slo: SLODefinition,
@@ -235,6 +247,7 @@ export function buildQuery(
         aggs: {
           ...buildWindowAggs(startedAt, slo, burnRateWindows, delayInSeconds),
           ...buildEvaluation(burnRateWindows),
+          ...buildGroupingAgg(),
         },
       },
     },

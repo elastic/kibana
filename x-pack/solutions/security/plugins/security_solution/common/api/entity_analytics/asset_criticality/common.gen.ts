@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type IdField = z.infer<typeof IdField>;
 export const IdField = z.enum(['host.name', 'user.name', 'service.name', 'entity.id']);
@@ -81,6 +81,16 @@ export const AssetCriticalityRecordEcsParts = z.object({
   service: z
     .object({
       name: z.string(),
+      asset: z
+        .object({
+          criticality: AssetCriticalityLevel,
+        })
+        .optional(),
+    })
+    .optional(),
+  entity: z
+    .object({
+      id: z.string(),
       asset: z
         .object({
           criticality: AssetCriticalityLevel,

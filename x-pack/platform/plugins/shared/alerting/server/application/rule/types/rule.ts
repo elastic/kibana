@@ -85,6 +85,7 @@ export interface Rule<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
+  artifacts?: RuleSchemaType['artifacts'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -107,6 +108,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   apiKey: RuleDomainSchemaType['apiKey'];
   apiKeyOwner: RuleDomainSchemaType['apiKeyOwner'];
   apiKeyCreatedByUser?: RuleDomainSchemaType['apiKeyCreatedByUser'];
+  uiamApiKey?: RuleDomainSchemaType['uiamApiKey'];
   throttle?: RuleDomainSchemaType['throttle'];
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
@@ -124,4 +126,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
+  artifacts?: RuleDomainSchemaType['artifacts'];
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,7 +43,15 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({ value, field }: { value: string; field: CloudPostureEntityIdentifier }) => {
+  ({
+    value,
+    field,
+    scopeId,
+  }: {
+    value: string;
+    field: CloudPostureEntityIdentifier;
+    scopeId: string;
+  }) => {
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
@@ -74,6 +82,11 @@ export const InsightsTabCsp = memo(
     };
 
     const [activeInsightsId, setActiveInsightsId] = useState(getDefaultTab());
+    useEffect(() => {
+      if (subTab) {
+        setActiveInsightsId(subTab);
+      }
+    }, [subTab]);
 
     const insightsButtons: EuiButtonGroupOptionProps[] = useMemo(() => {
       const buttons: EuiButtonGroupOptionProps[] = [];
@@ -124,8 +137,12 @@ export const InsightsTabCsp = memo(
       panels.left?.params?.hasVulnerabilitiesFindings,
     ]);
 
+    const isSingleOption = insightsButtons.length === 1;
+
     const onTabChange = (id: string) => {
-      setActiveInsightsId(id);
+      if (!isSingleOption) {
+        setActiveInsightsId(id);
+      }
     };
 
     if (insightsButtons.length === 0) {
@@ -147,13 +164,14 @@ export const InsightsTabCsp = memo(
           onChange={onTabChange}
           buttonSize="compressed"
           isFullWidth
+          isDisabled={isSingleOption}
           data-test-subj={'insightButtonGroupsTestId'}
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable field={field} value={value} />
+          <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
-          <VulnerabilitiesFindingsDetailsTable value={value} />
+          <VulnerabilitiesFindingsDetailsTable value={value} scopeId={scopeId} />
         ) : (
           <AlertsDetailsTable field={field} value={value} />
         )}

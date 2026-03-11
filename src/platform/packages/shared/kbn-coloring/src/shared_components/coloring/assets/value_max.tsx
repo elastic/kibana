@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiIconProps } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 
 export const ValueMaxIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg width="16" height="14" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>

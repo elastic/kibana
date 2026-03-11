@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { SignalsByCategory } from './signals_by_category';
@@ -43,9 +43,7 @@ const renderComponent = () =>
 
 describe('SignalsByCategory', () => {
   it('Renders to the page', () => {
-    act(() => {
-      const { getByText } = renderComponent();
-      expect(getByText('Alert trend')).toBeInTheDocument();
-    });
+    const { getByText } = renderComponent();
+    expect(getByText('Alert trend')).toBeInTheDocument();
   });
 });

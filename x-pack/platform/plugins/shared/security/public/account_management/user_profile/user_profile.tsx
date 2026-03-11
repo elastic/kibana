@@ -20,12 +20,9 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
   EuiPopover,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -40,11 +37,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  ContrastKeyPadMenu,
   FormChangesProvider,
   FormField,
   FormLabel,
   FormRow,
   OptionalText,
+  ThemeKeyPadMenu,
   useFormChanges,
   useFormChangesContext,
 } from '@kbn/security-form-components';
@@ -77,9 +76,12 @@ const formRowCSS = css`
 `;
 
 const pageHeaderCSS = css`
-  max-width: 1248px;
-  margin: auto;
   border-bottom: none;
+
+  .euiPageHeaderContent {
+    max-width: 1248px;
+    margin: auto;
+  }
 `;
 
 export interface UserProfileProps {
@@ -204,103 +206,11 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     }
   }
 
-  interface ThemeKeyPadItem {
-    id: string;
-    label: string;
-    icon: string;
-  }
-
-  const themeItem = ({ id, label, icon }: ThemeKeyPadItem) => {
-    return (
-      <EuiKeyPadMenuItem
-        name={id}
-        label={label}
-        data-test-subj={`themeKeyPadItem${id}`}
-        checkable="single"
-        isSelected={colorModeIdSelected === id}
-        isDisabled={isThemeOverridden}
-        onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
-      >
-        <EuiIcon type={icon} size="l" />
-      </EuiKeyPadMenuItem>
-    );
-  };
-
-  const themeMenu = (themeOverridden: boolean) => {
-    const themeKeyPadMenu = (
-      <EuiKeyPadMenu
-        aria-label={i18n.translate(
-          'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
-          {
-            defaultMessage: 'Elastic theme',
-          }
-        )}
-        data-test-subj="themeMenu"
-        checkable={{
-          legend: (
-            <FormLabel for="data.userSettings.darkMode">
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Color mode"
-              />
-            </FormLabel>
-          ),
-        }}
-        css={css`
-          inline-size: 420px; // Allow for 4 items to fit in a row instead of the default 3
-        `}
-      >
-        {themeItem({
-          id: 'system',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.systemModeButton', {
-            defaultMessage: 'System',
-          }),
-          icon: 'desktop',
-        })}
-        {themeItem({
-          id: 'light',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
-            defaultMessage: 'Light',
-          }),
-          icon: 'sun',
-        })}
-        {themeItem({
-          id: 'dark',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
-            defaultMessage: 'Dark',
-          }),
-          icon: 'moon',
-        })}
-        {themeItem({
-          id: 'space_default',
-          label: i18n.translate('xpack.security.accountManagement.userProfile.defaultModeButton', {
-            defaultMessage: 'Space default',
-          }),
-          icon: 'spaces',
-        })}
-      </EuiKeyPadMenu>
-    );
-    return themeOverridden ? (
-      <EuiToolTip
-        data-test-subj="themeOverrideTooltip"
-        content={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.overriddenMessage"
-            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-          />
-        }
-      >
-        {themeKeyPadMenu}
-      </EuiToolTip>
-    ) : (
-      themeKeyPadMenu
-    );
-  };
-
   const deprecatedWarning = colorModeIdSelected === 'space_default' && (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.security.accountManagement.userProfile.deprecatedSpaceDefaultTitle',
           {
@@ -323,71 +233,6 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     </>
   );
 
-  const contrastModeIdSelected = formik.values.data.userSettings.contrastMode;
-  const contrastItem = ({ id, label, icon }: ThemeKeyPadItem) => {
-    return (
-      <EuiKeyPadMenuItem
-        name={id}
-        label={label}
-        data-test-subj={`contrastKeyPadItem${id}`}
-        checkable="single"
-        isSelected={contrastModeIdSelected === id}
-        onChange={() => formik.setFieldValue('data.userSettings.contrastMode', id)}
-      >
-        <EuiIcon type={icon} size="l" />
-      </EuiKeyPadMenuItem>
-    );
-  };
-
-  const contrastModeMenu = () => {
-    return (
-      <EuiKeyPadMenu
-        aria-label={i18n.translate(
-          'xpack.security.accountManagement.userProfile.userSettings.interfaceContrastGroupDescription',
-          {
-            defaultMessage: 'Interface contrast',
-          }
-        )}
-        data-test-subj="contrastMenu"
-        checkable={{
-          legend: (
-            <FormLabel for="data.userSettings.contrastMode">
-              <FormattedMessage
-                id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
-                defaultMessage="Interface contrast"
-              />
-            </FormLabel>
-          ),
-        }}
-      >
-        {contrastItem({
-          id: 'system',
-          label: i18n.translate(
-            'xpack.security.accountManagement.userProfile.contrastModeSystemButton',
-            { defaultMessage: 'System' }
-          ),
-          icon: 'desktop',
-        })}
-        {contrastItem({
-          id: 'standard',
-          label: i18n.translate(
-            'xpack.security.accountManagement.userProfile.contrastModeStandardButton',
-            { defaultMessage: 'Normal' }
-          ),
-          icon: 'contrast',
-        })}
-        {contrastItem({
-          id: 'high',
-          label: i18n.translate(
-            'xpack.security.accountManagement.userProfile.contrastModeHighButton',
-            { defaultMessage: 'High' }
-          ),
-          icon: 'contrastHigh',
-        })}
-      </EuiKeyPadMenu>
-    );
-  };
-
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -409,13 +254,17 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     >
       <FormRow name="data.userSettings.darkMode" fullWidth>
         <>
-          {themeMenu(isThemeOverridden)}
+          <ThemeKeyPadMenu
+            name="data.userSettings.darkMode"
+            isDisabled={isThemeOverridden}
+            isThemeOverridden={isThemeOverridden}
+          />
           {deprecatedWarning}
         </>
       </FormRow>
 
       <FormRow name="data.userSettings.contrastMode" fullWidth>
-        {contrastModeMenu()}
+        <ContrastKeyPadMenu name="data.userSettings.contrastMode" />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -582,7 +431,7 @@ function UserAvatarEditor({
         </FormRow>
       ) : (
         <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 64 }}>
+          <EuiFlexItem grow={false} css={{ width: 64 }}>
             <FormRow
               label={
                 <FormLabel for="data.avatar.initials">
@@ -630,7 +479,7 @@ function UserAvatarEditor({
                     onClick={() => formik.setFieldValue('data.avatar.color', getRandomColor())}
                     size="xs"
                     flush="right"
-                    style={{ height: euiTheme.base }}
+                    css={{ height: euiTheme.base }}
                   >
                     <FormattedMessage
                       id="xpack.security.accountManagement.userProfile.randomizeButton"
@@ -764,7 +613,7 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
         <EuiBadgeGroup
           gutterSize="xs"
           data-test-subj="remainingRoles"
-          style={{
+          css={{
             maxWidth: '200px',
           }}
         >
@@ -1054,7 +903,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   const { count } = useFormChangesContext();
 
   return (
-    <EuiFlexGroup alignItems="center" style={{ width: '100%' }} responsive={false}>
+    <EuiFlexGroup alignItems="center" css={{ width: '100%' }} responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>

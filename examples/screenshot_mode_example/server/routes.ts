@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouteDependencies } from './types';
+import type { RouteDependencies } from './types';
 import { BASE_API_ROUTE } from '../common';
 
 export const registerRoutes = ({ router, log, screenshotMode }: RouteDependencies) => {

@@ -6,11 +6,11 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors';
-import {
+import type {
   Visualization,
   Datasource,
   TableSuggestion,
@@ -21,16 +21,14 @@ import {
   Suggestion,
   DatasourceLayers,
   SuggestionRequest,
-} from '../../types';
-import type { LayerType } from '../../../common/types';
-import {
-  LensDispatch,
-  switchVisualization,
+  LensLayerType as LayerType,
   DatasourceStates,
   VisualizationState,
-  applyChanges,
   DataViewsState,
-} from '../../state_management';
+} from '@kbn/lens-common';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors';
+import type { LensDispatch } from '../../state_management';
+import { switchVisualization, applyChanges } from '../../state_management';
 
 /**
  * This function takes a list of available data tables and a list of visualization
@@ -53,6 +51,7 @@ export function getSuggestions({
   dataViews,
   mainPalette,
   allowMixed,
+  query,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -66,6 +65,8 @@ export function getSuggestions({
   dataViews: DataViewsState;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  /** Optional query (e.g. ES|QL) for context-aware suggestions (e.g. prefer line for time series). */
+  query?: AggregateQuery;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -172,7 +173,8 @@ export function getSuggestions({
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
             allowMixed,
-            datasourceId
+            datasourceId,
+            query
           );
         });
     })
@@ -243,20 +245,24 @@ function getVisualizationSuggestions(
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
   allowMixed?: boolean,
-  datasourceId?: string
+  datasourceId?: string,
+  query?: AggregateQuery
 ) {
   try {
+    const isSubtypeSupported =
+      subVisualizationId && visualization?.isSubtypeSupported?.(subVisualizationId);
     return visualization
       .getSuggestions({
         table,
         state: currentVisualizationState,
         keptLayerIds: datasourceSuggestion.keptLayerIds,
-        subVisualizationId,
+        subVisualizationId: isSubtypeSupported ? subVisualizationId : undefined,
         mainPalette,
         isFromContext,
         activeData,
         allowMixed,
         datasourceId,
+        query,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

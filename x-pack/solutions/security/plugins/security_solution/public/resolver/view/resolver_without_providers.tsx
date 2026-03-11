@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
@@ -17,16 +19,28 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { StyledMapContainer, GraphContainer, StyledPanel } from './styles';
+import { GraphContainer, StyledMapContainer } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
 import type { ResolverProps } from '../types';
-import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
 import { useAutotuneTimerange } from './use_autotune_timerange';
 import type { State } from '../../common/store/types';
+import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+
+export const ANALYZER_PREVIEW_BANNER = {
+  title: i18n.translate(
+    'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
+    {
+      defaultMessage: 'Preview analyzer panel',
+    }
+  ),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+} as const;
+
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
  */
@@ -42,11 +56,10 @@ export const ResolverWithoutProviders = React.memo(
       indices,
       shouldUpdate,
       filters,
-      isSplitPanel = false,
-      showPanelOnClick,
     }: ResolverProps,
     refToForward
   ) {
+    const { openPreviewPanel } = useExpandableFlyoutApi();
     useResolverQueryParamCleaner(resolverComponentInstanceID);
     /**
      * This is responsible for dispatching actions that include any external data.
@@ -108,8 +121,22 @@ export const ResolverWithoutProviders = React.memo(
     );
     const colorMap = useColors();
 
+    const openAnalyzerDetailsPanel = useCallback(() => {
+      openPreviewPanel({
+        id: DocumentDetailsAnalyzerPanelKey,
+        params: {
+          resolverComponentInstanceID,
+          banner: ANALYZER_PREVIEW_BANNER,
+        },
+      });
+    }, [openPreviewPanel, resolverComponentInstanceID]);
+
     return (
-      <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
+      <StyledMapContainer
+        className={className}
+        backgroundColor={colorMap.resolverBackground}
+        windowHeight={window.innerHeight}
+      >
         {isLoading ? (
           <div data-test-subj="resolver:graph:loading" className="loading-container">
             <EuiLoadingSpinner size="xl" />
@@ -160,25 +187,16 @@ export const ResolverWithoutProviders = React.memo(
                     projectionMatrix={projectionMatrix}
                     node={treeNode}
                     timeAtRender={timeAtRender}
-                    onClick={isSplitPanel ? showPanelOnClick : undefined}
+                    onClick={openAnalyzerDetailsPanel}
                   />
                 );
               })}
             </GraphContainer>
-            {!isSplitPanel && (
-              <StyledPanel hasBorder>
-                <PanelRouter id={resolverComponentInstanceID} />
-              </StyledPanel>
-            )}
           </>
         ) : (
           <ResolverNoProcessEvents />
         )}
-        <GraphControls
-          id={resolverComponentInstanceID}
-          isSplitPanel={isSplitPanel}
-          showPanelOnClick={showPanelOnClick}
-        />
+        <GraphControls id={resolverComponentInstanceID} onShowPanel={openAnalyzerDetailsPanel} />
         <SymbolDefinitions id={resolverComponentInstanceID} />
       </StyledMapContainer>
     );

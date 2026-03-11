@@ -8,13 +8,11 @@
 import { sortBy } from 'lodash';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   AuthenticationServiceSetup,
   SecurityNavControlServiceStart,
@@ -109,20 +107,15 @@ export class SecurityNavControlService {
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     core.chrome.navControls.registerRight({
       order: 4000,
-      mount: (element: HTMLElement) => {
-        ReactDOM.render(
-          <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-            <SecurityNavControl
-              editProfileUrl={core.http.basePath.prepend('/security/account')}
-              logoutUrl={this.logoutUrl}
-              userMenuLinks$={this.userMenuLinks$}
-            />
-          </Providers>,
-          element
-        );
-
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
+      content: (
+        <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
+          <SecurityNavControl
+            editProfileUrl={core.http.basePath.prepend('/security/account')}
+            logoutUrl={this.logoutUrl}
+            userMenuLinks$={this.userMenuLinks$}
+          />
+        </Providers>
+      ),
     });
 
     this.navControlRegistered = true;
@@ -145,13 +138,11 @@ export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   securityApiClients,
   children,
 }) => (
-  <KibanaRenderContextProvider {...services}>
-    <KibanaContextProvider services={services}>
-      <AuthenticationProvider authc={authc}>
-        <SecurityApiClientsProvider {...securityApiClients}>
-          <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
-        </SecurityApiClientsProvider>
-      </AuthenticationProvider>
-    </KibanaContextProvider>
-  </KibanaRenderContextProvider>
+  <KibanaContextProvider services={services}>
+    <AuthenticationProvider authc={authc}>
+      <SecurityApiClientsProvider {...securityApiClients}>
+        <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+      </SecurityApiClientsProvider>
+    </AuthenticationProvider>
+  </KibanaContextProvider>
 );

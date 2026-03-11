@@ -2,16 +2,15 @@
 
 exports[`Embeddable it renders 1`] = `
 <section
-  className="siemEmbeddable"
+  class="siemEmbeddable"
   data-test-subj="siemEmbeddable"
 >
-  <Panel
-    hasBorder={true}
-    paddingSize="none"
+  <div
+    class="euiPanel euiPanel--plain e1x7l1i0 emotion-euiPanel-grow-m-plain-hasBorder-Panel"
   >
     <p>
       Test content
     </p>
-  </Panel>
+  </div>
 </section>
 `;

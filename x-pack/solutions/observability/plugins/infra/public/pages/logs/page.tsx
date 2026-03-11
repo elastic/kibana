@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { LogsPageContent } from './page_content';
@@ -13,10 +12,8 @@ import { LogsPageProviders } from './page_providers';
 
 export const LogsPage: React.FunctionComponent<RouteComponentProps> = () => {
   return (
-    <EuiErrorBoundary>
-      <LogsPageProviders>
-        <LogsPageContent />
-      </LogsPageProviders>
-    </EuiErrorBoundary>
+    <LogsPageProviders>
+      <LogsPageContent />
+    </LogsPageProviders>
   );
 };

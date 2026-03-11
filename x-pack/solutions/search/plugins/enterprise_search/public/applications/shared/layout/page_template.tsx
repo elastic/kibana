@@ -14,16 +14,17 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
+import type { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import './page_template.scss';
 import { EndpointsHeaderAction } from './endpoints_header_action';
+import * as Styles from './styles';
 
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
@@ -84,7 +85,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   return (
     <KibanaPageTemplate
       {...pageTemplateProps}
-      className={classNames('enterpriseSearchPageTemplate', className)}
+      className={classNames(Styles.enterpriseSearchPageTemplate, className)}
       mainProps={{
         ...pageTemplateProps.mainProps,
         className: classNames(
@@ -99,6 +100,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       {readOnlyMode && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="lock"
             title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {

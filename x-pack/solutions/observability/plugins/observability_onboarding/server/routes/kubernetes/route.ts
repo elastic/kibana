@@ -10,14 +10,16 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticAgentVersionInfo } from '../../../common/types';
+import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import { IS_MANAGED_OTLP_SERVICE_ENABLED } from '../../../common/feature_flags';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
@@ -47,6 +49,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const { context, request, params, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
+      featureFlags,
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser, true);
@@ -58,14 +61,31 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     }
 
     const fleetPluginStart = await plugins.fleet.start();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetPluginStart);
+
+    if (!hasFleetPrivileges) {
+      throw Boom.forbidden(
+        "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege."
+      );
+    }
+
     const packageClient = fleetPluginStart.packageService.asScoped(request);
+    const managedOtlpServiceUrl = getManagedOtlpServiceUrl(plugins);
+    const isManagedOtlpServiceAvailable =
+      config.serverless.enabled ||
+      ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
+        Boolean(managedOtlpServiceUrl));
+
     const apiKeyPromise =
-      config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
-        ? createManagedOtlpServiceApiKey(
+      isManagedOtlpServiceAvailable && params.body.pkgName === 'kubernetes_otel'
+        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+        : createShipperApiKey(
             client.asCurrentUser,
-            `ingest-otel-k8s-${new Date().toISOString()}`
-          )
-        : createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true);
+            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
+            true
+          );
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
@@ -89,7 +109,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
-      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
+      managedOtlpServiceUrl: getManagedOtlpServiceUrl(plugins),
     };
   },
 });
@@ -113,8 +133,9 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
 
     try {
       const result = await elasticsearch.client.asCurrentUser.search({
-        index: ['logs-*', 'metrics-*'],
+        index: ['logs-*', 'metrics-*', 'logs', 'logs.*'],
         ignore_unavailable: true,
+        allow_partial_search_results: true,
         size: 0,
         terminate_after: 1,
         query: {
@@ -129,6 +150,18 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         hasData: value > 0,
       };
     } catch (error) {
+      const errorType = error?.meta?.body?.error?.type;
+      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
+
+      if (
+        errorType === 'search_phase_execution_exception' &&
+        rootCauseType === 'no_shard_available_action_exception'
+      ) {
+        return {
+          hasData: false,
+        };
+      }
+
       throw Boom.internal(`Elasticsearch responses with an error. ${error.message}`);
     }
   },

@@ -22,6 +22,7 @@ describe('config validation', () => {
           "removalDelay": "1h",
         },
         "rules": Object {
+          "apiKeyType": "es",
           "maxScheduledPerMinute": 32000,
           "minimumScheduleInterval": Object {
             "enforce": false,
@@ -38,6 +39,7 @@ describe('config validation', () => {
         },
         "rulesSettings": Object {
           "cacheInterval": 60000,
+          "enabled": true,
         },
       }
     `);

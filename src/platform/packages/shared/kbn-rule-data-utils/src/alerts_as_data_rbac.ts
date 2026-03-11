@@ -10,6 +10,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsQueryConfig } from '@kbn/es-query';
 
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+
 /**
  * registering a new instance of the rule data client
  * in a new plugin will require updating the below data structure
@@ -21,6 +23,7 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  STREAMS: 'streams',
   SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
@@ -32,6 +35,7 @@ export const AlertConsumers = {
   DISCOVER: 'discover',
 } as const;
 export type AlertConsumers = (typeof AlertConsumers)[keyof typeof AlertConsumers];
+export const DEPRECATED_ALERTING_CONSUMERS = [AlertConsumers.OBSERVABILITY];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
 
 export type ValidFeatureId = AlertConsumers;
@@ -100,4 +104,5 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
  * TODO: Remove when checks for specific rule type ids is not needed
  *in the codebase.
  */
-export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');
+export const isSiemRuleType = (ruleTypeId: string) =>
+  ruleTypeId.startsWith('siem.') || ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;

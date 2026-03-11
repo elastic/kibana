@@ -38,7 +38,6 @@ jest.mock('../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue({
     timelineTitle: mockTimelineModel.title,
     timelineSavedObjectId: mockTimelineModel.savedObjectId,
-    graphEventId: mockTimelineModel.graphEventId,
     timelineId: mockTimelineModel.id,
   }),
 }));

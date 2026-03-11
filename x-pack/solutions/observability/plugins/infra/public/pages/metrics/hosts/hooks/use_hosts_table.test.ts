@@ -7,7 +7,7 @@
 
 import { type HostNodeRow, useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react';
-import type { InfraAssetMetricsItem } from '../../../../../common/http_api';
+import type { InfraEntityMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
@@ -37,7 +37,7 @@ const mockUseKibanaContextForPlugin =
     typeof useKibanaContextForPluginHook.useKibanaContextForPlugin
   >;
 
-const mockHostNode: InfraAssetMetricsItem[] = [
+const mockHostNode: InfraEntityMetricsItem[] = [
   {
     metrics: [
       {

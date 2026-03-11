@@ -12,12 +12,15 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
-import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../../application/main/state_management/redux';
 
 export interface PanelsToggleProps {
-  stateContainer: DiscoverStateContainer;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   renderedFor: 'histogram' | 'prompt' | 'tabs' | 'root';
   isChartAvailable: boolean | undefined; // it will be injected in `DiscoverMainContent` when rendering View mode tabs or in `DiscoverLayout` when rendering No results or Error prompt
@@ -32,16 +35,17 @@ export interface PanelsToggleProps {
  * @constructor
  */
 export const PanelsToggle: React.FC<PanelsToggleProps> = ({
-  stateContainer,
   sidebarToggleState$,
   renderedFor,
   isChartAvailable,
 }) => {
+  const dispatch = useInternalStateDispatch();
+  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onToggleChart = useCallback(() => {
-    stateContainer.appState.update({ hideChart: !isChartHidden });
-  }, [stateContainer, isChartHidden]);
+    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
+  }, [dispatch, isChartHidden, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;

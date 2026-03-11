@@ -14,7 +14,7 @@ import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout'
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
-  defaultMessage: 'Alerts and rules',
+  defaultMessage: 'Alerts',
 });
 const transactionDurationLabel = i18n.translate('xpack.apm.home.alertsMenu.transactionDuration', {
   defaultMessage: 'Latency',
@@ -49,7 +49,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
   } = useApmPluginContext();
   const button = (
     <EuiHeaderLink
-      color="text"
+      color="primary"
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}

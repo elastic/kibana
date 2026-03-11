@@ -230,12 +230,12 @@ describe('UsageCountersService', () => {
       // number of incrementCounter calls + number of retries
       expect(mockIncrementCounter).toBeCalledTimes(2 + retryConst);
       // assert counterA increment error warning logs
-      expect(logger.warn).toHaveBeenNthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `${mockError}, retrying attempt ${retryConst}`
       );
-      expect(logger.warn).toHaveBeenNthCalledWith(3, mockError);
-      expect(logger.debug).toHaveBeenNthCalledWith(1, 'Store counters into savedObjects', {
+      expect(logger.warn).toHaveBeenNthCalledWith(1, mockError);
+      expect(logger.debug).toHaveBeenNthCalledWith(3, 'Store counters into savedObjects', {
         kibana: {
           usageCounters: {
             results: [mockError, 'pass'],

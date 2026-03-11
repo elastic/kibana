@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ColorGradient } from './color_gradient';

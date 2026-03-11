@@ -79,6 +79,7 @@ export class Job {
 
   public readonly queue_time_ms?: Required<ReportFields>['queue_time_ms'][number];
   public readonly execution_time_ms?: Required<ReportFields>['execution_time_ms'][number];
+  public readonly scheduled_report_id?: ReportSource['scheduled_report_id'];
 
   constructor(report: ReportApiJSON) {
     this.id = report.id;
@@ -117,6 +118,7 @@ export class Job {
     this.metrics = report.metrics;
     this.queue_time_ms = report.queue_time_ms;
     this.execution_time_ms = report.execution_time_ms;
+    this.scheduled_report_id = report.scheduled_report_id;
   }
 
   public isSearch() {

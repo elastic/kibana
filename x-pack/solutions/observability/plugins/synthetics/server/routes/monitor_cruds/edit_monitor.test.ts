@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { syncEditedMonitor } from './edit_monitor';
-import { SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import {
+import type { SavedObject } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
-import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
+import { getRouteContextMock } from '../../mocks/route_context_mock';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -24,43 +21,6 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
 }));
 
 describe('syncEditedMonitor', () => {
-  const logger = loggerMock.create();
-
-  const serverMock: SyntheticsServerSetup = {
-    syntheticsEsClient: { search: jest.fn() },
-    stackVersion: null,
-    authSavedObjectsClient: {
-      bulkUpdate: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-      createPointInTimeFinder: jest.fn().mockImplementation(({ perPage, type: soType }) => ({
-        close: jest.fn(async () => {}),
-        find: jest.fn().mockReturnValue({
-          async *[Symbol.asyncIterator]() {
-            yield {
-              saved_objects: [],
-            };
-          },
-        }),
-      })),
-    },
-    logger,
-    config: {
-      service: {
-        username: 'dev',
-        password: '12345',
-      },
-    },
-    fleet: {
-      packagePolicyService: {
-        get: jest.fn().mockReturnValue({}),
-        getByIDs: jest.fn().mockReturnValue([]),
-        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
-      },
-    },
-    encryptedSavedObjects: mockEncryptedSO(),
-  } as unknown as SyntheticsServerSetup;
-
   const editedMonitor = {
     type: 'http',
     enabled: true,
@@ -91,24 +51,20 @@ describe('syncEditedMonitor', () => {
     references: [],
   } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
-  const syntheticsService = new SyntheticsService(serverMock);
-
-  const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
-
+  const { routeContext, syntheticsService, serverMock } = getRouteContextMock();
   syntheticsService.editConfig = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
-      routeContext: {
-        syntheticsMonitorClient,
-        server: serverMock,
-        request: {} as unknown as KibanaRequest,
-        savedObjectsClient:
-          serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
-      } as any,
+      routeContext,
       spaceId: 'test-space',
     });
 
@@ -117,7 +73,9 @@ describe('syncEditedMonitor', () => {
         expect.objectContaining({
           configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
-      ])
+      ]),
+      true,
+      undefined
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
@@ -125,7 +83,70 @@ describe('syncEditedMonitor', () => {
       '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       expect.objectContaining({
         enabled: true,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('passes package policy references when monitor has private locations', async () => {
+    const monitorWithPrivateLocation = {
+      ...editedMonitor,
+      locations: [
+        { id: 'loc-1', label: 'loc-1', agentPolicyId: 'agent-1', isServiceManaged: false },
+      ],
+    } as unknown as SyntheticsMonitor;
+
+    (serverMock.authSavedObjectsClient?.update as jest.Mock).mockResolvedValue({
+      id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      type: 'synthetics-monitor',
+      attributes: {},
+      references: [],
+    });
+
+    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+      failedPolicyUpdates: [],
+      publicSyncErrors: [],
+    });
+
+    await syncEditedMonitor({
+      normalizedMonitor: monitorWithPrivateLocation,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({
+        references: [
+          {
+            id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            name: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
       })
+    );
+  });
+
+  it('does not pass references when monitor has no private locations', async () => {
+    // editedMonitor only has a service-managed (public) location
+    await syncEditedMonitor({
+      normalizedMonitor: editedMonitor,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({ references: undefined })
     );
   });
 });

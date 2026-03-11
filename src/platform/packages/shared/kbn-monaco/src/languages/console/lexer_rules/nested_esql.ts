@@ -12,12 +12,16 @@ import {
   keywords,
   builtinFunctions,
 } from '../../esql/lib/esql_lexer_rules';
+import { languageTolerantRules } from './constants';
+import { remapStringsToNestedState } from './utils/remap_strings_to_nested_state';
+import type { monaco } from '../../../monaco_imports';
+
 /*
  * This rule is used inside json root to start an esql highlighting sequence
  */
-export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
+export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'esql_root') => {
   return [
-    /("query")(\s*?)(:)(\s*?)(""")/,
+    tripleQuotes ? /("query")(\s*?)(:)(\s*?)(""")/ : /("query")(\s*?)(:)(\s*?)(")/,
     [
       'variable',
       'whitespace',
@@ -25,7 +29,7 @@ export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
       'whitespace',
       {
         token: 'punctuation',
-        next: `@${esqlRoot}`,
+        next: tripleQuotes ? `@${esqlRoot}_triple_quotes` : `@${esqlRoot}_single_quotes`,
       },
     ],
   ];
@@ -36,10 +40,17 @@ export const buildEsqlStartRule = (esqlRoot: string = 'esql_root') => {
  * It reuses the lexer rules from the "esql" language, but since not all rules are referenced in the root
  * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
-export const buildEsqlRules = (esqlRoot: string = 'esql_root') => {
-  const { root, comment, numbers, strings } = esqlLexerRules.tokenizer;
+export const buildEsqlRules = (
+  esqlRoot: string = 'esql_root'
+): Record<string, monaco.languages.IMonarchLanguageRule[]> => {
+  const { root, comment, numbers, strings, string: esqlString } = esqlLexerRules.tokenizer;
+
+  // Remap transitions in `strings` to point to `@esql_string` to avoid
+  // conflict with the console's JSON `@string` state.
+  const remappedStrings = remapStringsToNestedState(strings, '@esql_string');
+
   return {
-    [esqlRoot]: [
+    [`${esqlRoot}_triple_quotes`]: [
       // the rule to end esql highlighting and get back to the previous tokenizer state
       [
         /"""/,
@@ -48,9 +59,34 @@ export const buildEsqlRules = (esqlRoot: string = 'esql_root') => {
           next: '@pop',
         },
       ],
+      ...languageTolerantRules,
       ...root,
       ...numbers,
-      ...strings,
+      ...remappedStrings,
+      [/./, 'text'],
+    ],
+    [`${esqlRoot}_single_quotes`]: [
+      [/@escapes/, 'string.escape'],
+      // the rule to end esql highlighting and get back to the previous tokenizer state
+      [
+        /"/, // Unescaped quote
+        {
+          token: 'punctuation',
+          next: '@pop',
+        },
+      ],
+      ...languageTolerantRules,
+      ...root,
+      ...numbers,
+      ...remappedStrings,
+      [/./, 'text'],
+    ],
+    esql_string: [
+      // If we see the JSON boundary closing quote while inside an unclosed ES|QL string,
+      // pop out of the ES|QL string without consuming the quote.
+      [/(?=""")/, { token: '', next: '@pop' }],
+      [/(?=")/, { token: '', next: '@pop' }],
+      ...(Array.isArray(esqlString) ? esqlString : []),
     ],
     comment,
   };

@@ -23,11 +23,10 @@ import {
 } from '@elastic/eui';
 
 import { useServices } from '../../../../app_context';
+import type { UpdateRetentionSettings, ExecuteRetention } from '../../../../components';
 import {
   RetentionSettingsUpdateModalProvider,
-  UpdateRetentionSettings,
   RetentionExecuteModalProvider,
-  ExecuteRetention,
 } from '../../../../components';
 
 interface Props {
@@ -79,6 +78,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                             defaultMessage="Run retention now"
                           />
                         }
+                        disableScreenReaderOutput
                       >
                         <EuiButtonIcon
                           iconType="play"
@@ -108,6 +108,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                             defaultMessage="Edit retention schedule"
                           />
                         }
+                        disableScreenReaderOutput
                       >
                         <EuiButtonIcon
                           iconType="pencil"
@@ -248,12 +249,14 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleTitle"
               defaultMessage="Error fetching retention schedule"
             />
           }
+          role="alert"
           color="danger"
           iconType="warning"
         >

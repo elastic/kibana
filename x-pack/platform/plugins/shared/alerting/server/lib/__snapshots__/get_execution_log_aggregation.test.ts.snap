@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getExecutionSummaryAggregation should correctly generate the aggregation 1`] = `
+Object {
+  "executionsCount": Object {
+    "filter": Object {
+      "exists": Object {
+        "field": "event.outcome",
+      },
+    },
+  },
+  "latestExecutionOutcome": Object {
+    "aggs": Object {
+      "by_rule_id": Object {
+        "aggs": Object {
+          "latest_execution": Object {
+            "top_hits": Object {
+              "_source": Object {
+                "includes": Array [
+                  "event.outcome",
+                ],
+              },
+              "size": 1,
+              "sort": Array [
+                Object {
+                  "@timestamp": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
+            },
+          },
+        },
+        "terms": Object {
+          "field": "rule.id",
+          "size": 10000,
+        },
+      },
+    },
+    "filter": Object {
+      "exists": Object {
+        "field": "event.outcome",
+      },
+    },
+  },
+  "successfulExecutionsCount": Object {
+    "filter": Object {
+      "term": Object {
+        "event.outcome": "success",
+      },
+    },
+  },
+}
+`;

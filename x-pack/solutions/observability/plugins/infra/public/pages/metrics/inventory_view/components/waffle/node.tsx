@@ -57,7 +57,7 @@ export const Node = ({
 
   const toggleAssetPopover = () => {
     if (isFlyoutMode) {
-      setFlyoutUrlState({ detailsItemId: node.id, assetType: nodeType });
+      setFlyoutUrlState({ detailsItemId: node.id, entityType: nodeType });
     } else {
       togglePopover();
     }
@@ -69,12 +69,13 @@ export const Node = ({
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
-      <div>
+      <div role="listitem">
         <NodeSquare
           squareSize={squareSize}
           togglePopover={toggleAssetPopover}
           color={color}
           nodeName={node.name}
+          nodeMetric={metric ? metric.name : ''}
           value={value}
           showBorder={detailsItemId === node.id || isPopoverOpen}
         />

@@ -8,10 +8,13 @@
  */
 
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
-import { scoutPlaywrightReporter, scoutFailedTestsReporter } from '@kbn/scout-reporting';
-import { createPlaywrightConfig } from './create_config';
+import {
+  generateTestRunId,
+  scoutFailedTestsReporter,
+  scoutPlaywrightReporter,
+} from '@kbn/scout-reporting';
 import { VALID_CONFIG_MARKER } from '../types';
-import { generateTestRunId } from '@kbn/scout-reporting';
+import { createPlaywrightConfig } from './create_config';
 
 jest.mock('@kbn/scout-reporting', () => ({
   ...jest.requireActual('@kbn/scout-reporting'),
@@ -54,18 +57,19 @@ describe('createPlaywrightConfig', () => {
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',
+      timezoneId: 'GMT',
     });
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();
     expect(config.reporter).toEqual([
-      ['html', { open: 'never', outputFolder: './output/reports' }],
-      ['json', { outputFile: './output/reports/test-results.json' }],
+      ['html', { open: 'never', outputFolder: './.scout/reports' }],
+      ['json', { outputFile: './.scout/reports/test-results.json' }],
       ['null'],
       ['null'],
     ]);
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
-    expect(config.outputDir).toBe('./output/test-artifacts');
+    expect(config.outputDir).toBe('./.scout/test-artifacts');
     expect(config.projects).toHaveLength(3);
     expect(config.projects![0].name).toEqual('local');
   });
@@ -86,8 +90,8 @@ describe('createPlaywrightConfig', () => {
 
     expect(mockGenerateTestRunId).toHaveBeenCalledTimes(1);
     expect(config.reporter).toEqual([
-      ['html', { open: 'never', outputFolder: './output/reports' }],
-      ['json', { outputFile: './output/reports/test-results.json' }],
+      ['html', { open: 'never', outputFolder: './.scout/reports' }],
+      ['json', { outputFile: './.scout/reports/test-results.json' }],
       [
         '@kbn/scout-reporting/src/reporting/playwright/events',
         { name: 'scout-playwright', runId: mockedRunId },
@@ -99,23 +103,43 @@ describe('createPlaywrightConfig', () => {
     ]);
   });
 
-  it(`should override 'workers' count and add 'setup' project dependency`, () => {
+  it(`should override 'workers' count`, () => {
     const testDir = './my_tests';
     const workers = 2;
 
     const config = createPlaywrightConfig({ testDir, workers });
     expect(config.workers).toBe(workers);
 
+    expect(config.projects).toHaveLength(3);
+    expect(config.projects![0].name).toEqual('local');
+    expect(config.projects![1].name).toEqual('ech');
+    expect(config.projects![2].name).toEqual('mki');
+  });
+
+  it('should add global.setup.ts as pre-step when runGlobalSetup is true and apply default timeout', () => {
+    const testDir = './my_tests';
+    const defaultGlobalSetupTimeout = 180000;
+
+    const config = createPlaywrightConfig({ testDir, runGlobalSetup: true });
+    expect(config.workers).toBe(1);
+
     expect(config.projects).toHaveLength(6);
     expect(config.projects![0].name).toEqual('setup-local');
+    expect(config.projects![0].testMatch).toEqual(/global.setup\.ts/);
+    expect(config.projects![0].timeout).toBe(defaultGlobalSetupTimeout);
     expect(config.projects![1].name).toEqual('local');
     expect(config.projects![1]).toHaveProperty('dependencies', ['setup-local']);
+    expect(config.projects![1]).not.toHaveProperty('timeout');
     expect(config.projects![2].name).toEqual('setup-ech');
+    expect(config.projects![2].timeout).toBe(defaultGlobalSetupTimeout);
     expect(config.projects![3].name).toEqual('ech');
     expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
+    expect(config.projects![3]).not.toHaveProperty('timeout');
     expect(config.projects![4].name).toEqual('setup-mki');
+    expect(config.projects![4].timeout).toBe(defaultGlobalSetupTimeout);
     expect(config.projects![5].name).toEqual('mki');
     expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
+    expect(config.projects![5]).not.toHaveProperty('timeout');
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

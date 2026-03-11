@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  preconfigured: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
+  }),
+});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
 
@@ -21,10 +27,5 @@ export type StreamsConfig = TypeOf<typeof configSchema>;
  */
 export const exposeToBrowserConfig = {} as const;
 
-type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
-    ? K
-    : never]: true;
-};
-
-export type StreamsPublicConfig = Pick<StreamsConfig, ValidKeys>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPublicConfig {}

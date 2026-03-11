@@ -9,19 +9,25 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { getEsQueryConfig, getTime } from '@kbn/data-plugin/common';
+import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { DEFAULT_QUERY_STRING, EMPTY_FILTERS } from './constants';
-import { ObservabilityAlertSearchBarProps } from './types';
+import type { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
 
 const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
   defaultMessage: 'Invalid query string',
 });
+
+const getTimeFilter = (timeRange: TimeRange) =>
+  getTime(undefined, timeRange, {
+    fieldName: ALERT_TIME_RANGE,
+  });
 
 export function ObservabilityAlertSearchBar({
   appName,
@@ -37,7 +43,7 @@ export function ObservabilityAlertSearchBar({
   showFilterBar = false,
   controlConfigs,
   filters = EMPTY_FILTERS,
-  filterControls = EMPTY_FILTERS,
+  filterControls,
   savedQuery,
   setSavedQuery,
   kuery,
@@ -57,9 +63,21 @@ export function ObservabilityAlertSearchBar({
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
   const [spaceId, setSpaceId] = useState<string>();
+  const [timeFilter, setTimeFilter] = useState<Filter | undefined>(
+    getTimeFilter({
+      to: rangeTo,
+      from: rangeFrom,
+    })
+  );
   const queryFilter = kuery ? { query: kuery, language: 'kuery' } : undefined;
   const { data: indexNames } = useFetchAlertsIndexNamesQuery({
     http,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  });
+  const { dataView } = useAlertsDataView({
+    http,
+    dataViewsService: dataViews,
+    toasts: notifications.toasts,
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
   });
 
@@ -73,6 +91,21 @@ export function ObservabilityAlertSearchBar({
     [appName, spaceId]
   );
 
+  const dataViewSpec = useMemo(
+    () => ({
+      id: 'observability-unified-alerts-dv',
+      title: indexNames?.join(',') ?? '',
+    }),
+    [indexNames]
+  );
+
+  const aggregatedFilters = useMemo(() => {
+    const _filters = timeFilter
+      ? [timeFilter, ...filters, ...defaultFilters]
+      : [...filters, ...defaultFilters];
+    return _filters.length ? _filters : undefined;
+  }, [timeFilter, filters, defaultFilters]);
+
   const submitQuery = useCallback(() => {
     try {
       onEsQueryChange(
@@ -82,8 +115,15 @@ export function ObservabilityAlertSearchBar({
             from: rangeFrom,
           },
           kuery,
-          filters: [...filters, ...filterControls, ...defaultFilters],
+          filters: [...filters, ...(filterControls ?? []), ...defaultFilters],
           config: getEsQueryConfig(uiSettings),
+          indexPattern: dataView,
+        })
+      );
+      setTimeFilter(
+        getTimeFilter({
+          to: rangeTo,
+          from: rangeFrom,
         })
       );
     } catch (error) {
@@ -103,6 +143,7 @@ export function ObservabilityAlertSearchBar({
     uiSettings,
     toasts,
     onKueryChange,
+    dataView,
   ]);
 
   useEffect(() => {
@@ -166,15 +207,11 @@ export function ObservabilityAlertSearchBar({
       <EuiFlexItem>
         {indexNames && indexNames.length > 0 && (
           <AlertFilterControls
-            dataViewSpec={{
-              id: 'observability-unified-alerts-dv',
-              title: indexNames.join(','),
-            }}
+            dataViewSpec={dataViewSpec}
             spaceId={spaceId}
-            chainingSystem="HIERARCHICAL"
             controlsUrlState={controlConfigs}
             setControlsUrlState={onControlConfigsChange}
-            filters={[...filters, ...defaultFilters]}
+            filters={aggregatedFilters}
             onFiltersChange={onFilterControlsChange}
             storageKey={filterControlsStorageKey}
             disableLocalStorageSync={disableLocalStorageSync}
@@ -185,7 +222,6 @@ export function ObservabilityAlertSearchBar({
               dataViews,
               storage: Storage,
             }}
-            ControlGroupRenderer={ControlGroupRenderer}
             onInit={onControlApiAvailable}
           />
         )}

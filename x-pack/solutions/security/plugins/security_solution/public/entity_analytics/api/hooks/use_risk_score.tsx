@@ -20,7 +20,7 @@ import type {
 import type { ESQuery } from '../../../../common/typed_json';
 import type { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import { isIndexNotFoundError, isAbortError } from '../../../common/utils/exceptions';
 import type { inputsModel } from '../../../common/store';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useGetDefaultRiskIndex } from '../../hooks/use_get_default_risk_index';
@@ -73,7 +73,7 @@ export const useRiskScore = <T extends EntityType>({
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const defaultIndex = useGetDefaultRiskIndex(riskEntity, onlyLatest);
+  const defaultIndex = useGetDefaultRiskIndex(onlyLatest);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
@@ -96,7 +96,7 @@ export const useRiskScore = <T extends EntityType>({
   } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
-    abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
+    abort: skip,
     showErrorToast: false,
   });
 
@@ -170,7 +170,7 @@ export const useRiskScore = <T extends EntityType>({
 
   useEffect(() => {
     if (error) {
-      if (!isIndexNotFoundError(error)) {
+      if (!isIndexNotFoundError(error) && !isAbortError(error)) {
         addError(error, {
           title: i18n.translate('xpack.securitySolution.riskScore.failSearchDescription', {
             defaultMessage: `Failed to run search on risk score`,

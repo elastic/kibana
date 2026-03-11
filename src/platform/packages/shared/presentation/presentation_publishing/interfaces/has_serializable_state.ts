@@ -7,43 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-
-/**
- * A package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any
- * strategy, this is the format that should be used.
- */
-export interface SerializedPanelState<RawStateType extends object = object> {
-  references?: Reference[];
-  rawState: RawStateType;
-}
-
-export interface HasSerializableState<State extends object = object> {
+export interface HasSerializableState<SerializedState extends object = object> {
   /**
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
-  serializeState: () => SerializedPanelState<State>;
+  serializeState: () => SerializedState;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
   return Boolean((api as HasSerializableState)?.serializeState);
-};
-
-/**
- * @deprecated use HasSerializableState instead
- */
-export interface HasSnapshottableState<RuntimeState extends object = object> {
-  /**
-   * Serializes all runtime state exactly as it appears. This can be used
-   * to rehydrate a component's state without needing to serialize then deserialize it.
-   */
-  snapshotRuntimeState: () => RuntimeState;
-}
-
-/**
- * @deprecated use apiHasSerializableState instead
- */
-export const apiHasSnapshottableState = (api: unknown | null): api is HasSnapshottableState => {
-  return Boolean((api as HasSnapshottableState)?.snapshotRuntimeState);
 };

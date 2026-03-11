@@ -6,24 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Logger } from '@kbn/logging';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
-import { sendMessageEvent, SendMessageEventData } from './analytics/events';
+import type { SendMessageEventData } from './analytics/events';
+import { sendMessageEvent } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
-import {
-  APIRoutes,
+import type {
+  DefineRoutesOptions,
   ElasticsearchRetrieverContentField,
   QueryTestResponse,
-  SearchPlaygroundPluginStart,
-  SearchPlaygroundPluginStartDependencies,
 } from './types';
+import { APIRoutes } from './types';
 import { getChatParams } from './lib/get_chat_params';
 import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
@@ -32,6 +30,7 @@ import { ContextLimitError } from './lib/errors';
 import { contextDocumentHitMapper } from './utils/context_document_mapper';
 import { parseSourceFields } from './utils/parse_source_fields';
 import { getErrorMessage } from '../common/errors';
+import { defineSavedPlaygroundRoutes } from './routes/saved_playgrounds';
 
 const EMPTY_INDICES_ERROR_MESSAGE = i18n.translate(
   'xpack.searchPlayground.serverErrors.emptyIndices',
@@ -60,18 +59,9 @@ export function parseElasticsearchQuery(esQuery: string) {
   };
 }
 
-export function defineRoutes({
-  logger,
-  router,
-  getStartServices,
-}: {
-  logger: Logger;
-  router: IRouter;
-  getStartServices: StartServicesAccessor<
-    SearchPlaygroundPluginStartDependencies,
-    SearchPlaygroundPluginStart
-  >;
-}) {
+export function defineRoutes(routeOptions: DefineRoutesOptions) {
+  const { logger, router, getStartServices } = routeOptions;
+
   router.post(
     {
       path: APIRoutes.POST_QUERY_SOURCE_FIELDS,
@@ -85,7 +75,7 @@ export function defineRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -136,15 +126,16 @@ export function defineRoutes({
         es_client: client.asCurrentUser,
       });
       const { messages, data } = request.body;
-      const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
-        {
-          connectorId: data.connector_id,
-          model: data.summarization_model,
-          citations: data.citations,
-          prompt: data.prompt,
-        },
-        { actions, inference, logger, request }
-      );
+      const { chatModel, chatPrompt, questionRewritePrompt, connector, summarizationModel } =
+        await getChatParams(
+          {
+            connectorId: data.connector_id,
+            model: data.summarization_model,
+            citations: data.citations,
+            prompt: data.prompt,
+          },
+          { actions, inference, logger, request }
+        );
 
       let sourceFields: ElasticsearchRetrieverContentField;
 
@@ -155,7 +146,7 @@ export function defineRoutes({
         throw Error(e);
       }
 
-      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const model = MODELS.find((m) => m.model === summarizationModel);
       const modelPromptLimit = model?.promptTokenLimit;
 
       const chain = ConversationalChain({
@@ -178,7 +169,7 @@ export function defineRoutes({
           connectorType:
             connector.actionTypeId +
             (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-          model: data.summarization_model ?? '',
+          model: summarizationModel ?? '',
           isCitationsEnabled: data.citations,
         });
 
@@ -236,7 +227,7 @@ export function defineRoutes({
       validate: {
         query: schema.object({
           search_query: schema.maybe(schema.string()),
-          size: schema.number({ defaultValue: 10, min: 0 }),
+          size: schema.number({ defaultValue: 10, min: 0, max: 1000 }),
           exact: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
@@ -274,8 +265,8 @@ export function defineRoutes({
         body: schema.object({
           search_query: schema.string(),
           elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 100 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
         }),
       },
@@ -357,7 +348,7 @@ export function defineRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
         }),
       },
     },
@@ -410,8 +401,8 @@ export function defineRoutes({
         body: schema.object({
           query: schema.string(),
           elasticsearch_query: schema.string(),
-          indices: schema.arrayOf(schema.string()),
-          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          indices: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0, max: 100 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
           chat_context: schema.maybe(
             schema.object({
@@ -496,4 +487,6 @@ export function defineRoutes({
       }
     })
   );
+
+  defineSavedPlaygroundRoutes(routeOptions);
 }

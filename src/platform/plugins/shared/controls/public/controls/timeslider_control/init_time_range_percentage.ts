@@ -7,37 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StateComparators } from '@kbn/presentation-publishing';
-import { debounce } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import { TimeRangeMeta } from './get_time_range_meta';
+import { BehaviorSubject, map, merge } from 'rxjs';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
+import type { TimeRangeMeta } from './get_time_range_meta';
 import { FROM_INDEX, TO_INDEX } from './time_utils';
-import { Timeslice, TimesliderControlState } from './types';
+
+export const timeRangePercentageComparators: StateComparators<
+  Pick<TimeSliderControlState, 'start_percentage_of_time_range' | 'end_percentage_of_time_range'>
+> = {
+  start_percentage_of_time_range: 'referenceEquality',
+  end_percentage_of_time_range: 'referenceEquality',
+};
 
 export function initTimeRangePercentage(
-  state: TimesliderControlState,
+  state: TimeSliderControlState,
   onReset: (
     timesliceStartAsPercentageOfTimeRange: number | undefined,
     timesliceEndAsPercentageOfTimeRange: number | undefined
   ) => void
 ) {
   const timesliceStartAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
-    state.timesliceStartAsPercentageOfTimeRange
+    state.start_percentage_of_time_range
   );
   const timesliceEndAsPercentageOfTimeRange$ = new BehaviorSubject<number | undefined>(
-    state.timesliceEndAsPercentageOfTimeRange
+    state.end_percentage_of_time_range
   );
 
-  // debounce to avoid calling 'resetTimeslice' on each comparator reset
-  const debouncedOnReset = debounce(() => {
-    onReset(
-      timesliceStartAsPercentageOfTimeRange$.value,
-      timesliceEndAsPercentageOfTimeRange$.value
-    );
-  }, 0);
-
   return {
-    setTimeRangePercentage(timeslice: Timeslice | undefined, timeRangeMeta: TimeRangeMeta) {
+    setTimeRangePercentage(timeslice: TimeSlice | undefined, timeRangeMeta: TimeRangeMeta) {
       let timesliceStartAsPercentageOfTimeRange: number | undefined;
       let timesliceEndAsPercentageOfTimeRange: number | undefined;
       if (timeslice) {
@@ -51,32 +49,20 @@ export function initTimeRangePercentage(
       timesliceStartAsPercentageOfTimeRange$.next(timesliceStartAsPercentageOfTimeRange);
       timesliceEndAsPercentageOfTimeRange$.next(timesliceEndAsPercentageOfTimeRange);
     },
-    serializeState: () => {
+    getLatestState: () => {
       return {
-        timesliceStartAsPercentageOfTimeRange: timesliceStartAsPercentageOfTimeRange$.value,
-        timesliceEndAsPercentageOfTimeRange: timesliceEndAsPercentageOfTimeRange$.value,
+        start_percentage_of_time_range: timesliceStartAsPercentageOfTimeRange$.value,
+        end_percentage_of_time_range: timesliceEndAsPercentageOfTimeRange$.value,
       };
     },
-    comparators: {
-      timesliceStartAsPercentageOfTimeRange: [
-        timesliceStartAsPercentageOfTimeRange$,
-        (value: number | undefined) => {
-          timesliceStartAsPercentageOfTimeRange$.next(value);
-          debouncedOnReset();
-        },
-      ],
-      timesliceEndAsPercentageOfTimeRange: [
-        timesliceEndAsPercentageOfTimeRange$,
-        (value: number | undefined) => {
-          timesliceEndAsPercentageOfTimeRange$.next(value);
-          debouncedOnReset();
-        },
-      ],
-    } as StateComparators<
-      Pick<
-        TimesliderControlState,
-        'timesliceStartAsPercentageOfTimeRange' | 'timesliceEndAsPercentageOfTimeRange'
-      >
-    >,
+    anyStateChange$: merge(
+      timesliceStartAsPercentageOfTimeRange$,
+      timesliceEndAsPercentageOfTimeRange$
+    ).pipe(map(() => undefined)),
+    reinitializeState: (lastSaved?: TimeSliderControlState) => {
+      timesliceStartAsPercentageOfTimeRange$.next(lastSaved?.start_percentage_of_time_range);
+      timesliceEndAsPercentageOfTimeRange$.next(lastSaved?.end_percentage_of_time_range);
+      onReset(lastSaved?.start_percentage_of_time_range, lastSaved?.end_percentage_of_time_range);
+    },
   };
 }

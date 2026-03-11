@@ -7,7 +7,7 @@
 
 import { loadESQLAttributes } from './esql';
 import { makeEmbeddableServices } from './mocks';
-import { LensEmbeddableStartServices } from './types';
+import type { LensEmbeddableStartServices } from './types';
 import { coreMock } from '@kbn/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import * as suggestionModule from '../lens_suggestions_api';
@@ -29,7 +29,7 @@ describe('ES|QL attributes creation', () => {
     return {
       ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
         visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'form_based' },
+        dataOverrides: { id: 'formBased' },
       }),
       uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
       ...servicesOverrides,
@@ -60,7 +60,7 @@ describe('ES|QL attributes creation', () => {
       {
         title: 'MyTitle',
         visualizationId: 'lnsXY',
-        datasourceId: 'form_based',
+        datasourceId: 'formBased',
         datasourceState: {},
         visualizationState: {},
         columns: 1,

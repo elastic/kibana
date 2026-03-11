@@ -28,13 +28,12 @@ export async function getHealthIndicators(
     ]
       .filter(isStatusNotGreen)
       .flatMap(({ status, symptom, impacts, diagnosis }) => {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         return (diagnosis || []).map(({ cause, action, help_url }) => ({
           type: 'health_indicator',
           details: symptom,
           message: cause,
           url: help_url,
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           resolveDuringUpgrade: false,
           correctiveAction: { type: 'healthIndicator', cause, action, impacts },
         }));
@@ -44,7 +43,7 @@ export async function getHealthIndicators(
       .flatMap(({ status, symptom, details }) => {
         return {
           type: 'health_indicator',
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           ...getShardCapacityDeprecationInfo({ symptom, details }),
         };
       }),

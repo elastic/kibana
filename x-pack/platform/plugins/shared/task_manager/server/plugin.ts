@@ -23,7 +23,9 @@ import type {
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -34,7 +36,12 @@ import type { TaskManagerConfig } from './config';
 import type { Middleware } from './lib/middleware';
 import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
-import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
+import {
+  setupSavedObjects,
+  BACKGROUND_TASK_NODE_SO_NAME,
+  TASK_SO_NAME,
+  INVALIDATE_API_KEY_SO_NAME,
+} from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
@@ -59,6 +66,12 @@ import {
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
+import { LicenseSubscriber } from './license_subscriber';
+import type { ApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
+import {
+  registerInvalidateApiKeyTask,
+  scheduleInvalidateApiKeyTask,
+} from './invalidate_api_keys/invalidate_api_keys_task';
 
 export interface TaskManagerSetupContract {
   /**
@@ -85,17 +98,18 @@ export type TaskManagerStartContract = Pick<
   | 'bulkSchedule'
   | 'bulkUpdateState'
 > &
-  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
+  Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'bulkGet' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
     registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
+    registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
   };
 
 export interface TaskManagerPluginsStart {
+  licensing: LicensingPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -134,6 +148,8 @@ export class TaskManagerPlugin
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
+  private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
+  private invalidateApiKeyFn?: ApiKeyInvalidationFn;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -150,6 +166,12 @@ export class TaskManagerPlugin
   isNodeBackgroundTasksOnly() {
     const { backgroundTasks, migrator, ui } = this.nodeRoles;
     return backgroundTasks && !migrator && !ui;
+  }
+
+  private invalidateApiKey(params: InvalidateAPIKeysParams) {
+    if (this.invalidateApiKeyFn) {
+      return this.invalidateApiKeyFn(params);
+    }
   }
 
   public setup(
@@ -174,7 +196,7 @@ export class TaskManagerPlugin
         this.heapSizeLimit = metrics.process.memory.heap.size_limit;
       });
 
-    setupSavedObjects(core.savedObjects, this.config);
+    setupSavedObjects(core.savedObjects);
 
     this.taskManagerId = this.initContext.env.instanceUuid;
 
@@ -251,6 +273,14 @@ export class TaskManagerPlugin
     }
 
     registerDeleteInactiveNodesTaskDefinition(this.logger, core.getStartServices, this.definitions);
+    registerInvalidateApiKeyTask({
+      configInterval: this.config.invalidate_api_key_task.interval,
+      coreStartServices: core.getStartServices,
+      invalidateApiKeyFn: this.invalidateApiKey.bind(this),
+      logger: this.logger,
+      removalDelay: this.config.invalidate_api_key_task.removalDelay,
+      taskTypeDictionary: this.definitions,
+    });
     registerMarkRemovedTasksAsUnrecognizedDefinition(
       this.logger,
       core.getStartServices,
@@ -288,11 +318,14 @@ export class TaskManagerPlugin
 
   public start(
     { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
-    { cloud, spaces }: TaskManagerPluginsStart
+    { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
+      INVALIDATE_API_KEY_SO_NAME,
     ]);
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
@@ -322,7 +355,9 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
-      spaces,
+      getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
+      basePath: http.basePath,
+      executionContext,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -405,9 +440,15 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
+      taskPollingLifecycle: this.taskPollingLifecycle,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
+    scheduleInvalidateApiKeyTask(
+      this.logger,
+      taskScheduling,
+      this.config.invalidate_api_key_task.interval
+    ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
@@ -415,6 +456,7 @@ export class TaskManagerPlugin
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
+      bulkGet: (...args) => taskStore.bulkGet(...args),
       remove: (id: string) => taskStore.remove(id),
       bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
@@ -430,10 +472,15 @@ export class TaskManagerPlugin
       registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
         taskStore.registerEncryptedSavedObjectsClient(client);
       },
+      registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
+        this.invalidateApiKeyFn = fn;
+      },
     };
   }
 
   public async stop() {
+    this.licenseSubscriber?.cleanup();
+
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();

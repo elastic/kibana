@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { IndexMgmtUIPlugin } from './plugin';
 
 /** @public */
@@ -24,3 +24,5 @@ export { getIndexListUri, getTemplateDetailsLink } from './application/services/
 
 export type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 export { INDEX_MANAGEMENT_LOCATOR_ID } from './locator';
+
+export { formatBytes } from './application/lib/format_bytes';

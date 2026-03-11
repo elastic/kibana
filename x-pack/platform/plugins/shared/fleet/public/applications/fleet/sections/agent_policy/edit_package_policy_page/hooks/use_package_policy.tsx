@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 
 import type {
   GetOnePackagePolicyResponse,
@@ -98,10 +98,15 @@ export function usePackagePolicyWithRelatedData(
     setFormState('LOADING');
     const {
       policy: { elasticsearch, ...restPackagePolicy },
-    } = await prepareInputPackagePolicyDataset({
-      ...packagePolicy,
-      ...(packagePolicyOverride ?? {}),
-    });
+    } = await prepareInputPackagePolicyDataset(
+      omit(
+        {
+          ...packagePolicy,
+          ...(packagePolicyOverride ?? {}),
+        },
+        'spaceIds'
+      )
+    );
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
 
     setFormState('SUBMITTED');
@@ -236,13 +241,11 @@ export function usePackagePolicyWithRelatedData(
             revision,
             inputs,
             vars,
-            /* eslint-disable @typescript-eslint/naming-convention */
             created_by,
             created_at,
             updated_by,
             updated_at,
             secret_references,
-            /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackagePolicy
           } = basePolicy;
 
@@ -280,7 +283,6 @@ export function usePackagePolicyWithRelatedData(
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),

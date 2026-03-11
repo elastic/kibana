@@ -13,24 +13,22 @@ import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,
 } from '@kbn/actions-plugin/server/feature';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
-  CROWDSTRIKE_TITLE,
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
   SUB_ACTION,
-} from '../../../common/crowdstrike/constants';
-import {
   CrowdstrikeConfigSchema,
   CrowdstrikeSecretsSchema,
-} from '../../../common/crowdstrike/schema';
-import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '../../../common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
+import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '@kbn/connector-schemas/crowdstrike';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CrowdstrikeConnector } from './crowdstrike';
 
 export const getCrowdstrikeConnectorType = (
   experimentalFeatures: ExperimentalFeatures
 ): SubActionConnectorType<CrowdstrikeConfig, CrowdstrikeSecrets> => ({
-  id: CROWDSTRIKE_CONNECTOR_ID,
-  name: CROWDSTRIKE_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new CrowdstrikeConnector(params, experimentalFeatures),
   schema: {
     config: CrowdstrikeConfigSchema,

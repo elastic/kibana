@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UniversalEntityPanelExpandableFlyoutProps } from '../universal_right';
+import type { GenericEntityPanelExpandableFlyoutProps } from '../generic_right';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { ServicePanelExpandableFlyoutProps } from '../service_right';
@@ -13,23 +13,13 @@ import type { UserPanelExpandableFlyoutProps } from '../user_right';
 
 export const ONE_WEEK_IN_HOURS = 24 * 7;
 
-export const getEntraUserIndex = (spaceId: string = 'default') =>
-  `logs-entityanalytics_entra_id.user-${spaceId}`;
-
-export const ENTRA_ID_PACKAGE_NAME = 'entityanalytics_entra_id';
-
-export const getOktaUserIndex = (spaceId: string = 'default') =>
-  `logs-entityanalytics_okta.user-${spaceId}`;
-
-export const OKTA_PACKAGE_NAME = 'entityanalytics_okta';
-
 export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';
 
 export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
 export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const ServicePanelKey: ServicePanelExpandableFlyoutProps['key'] = 'service-panel';
-export const UniversalEntityPanelKey: UniversalEntityPanelExpandableFlyoutProps['key'] =
-  'universal-entity-panel';
+export const GenericEntityPanelKey: GenericEntityPanelExpandableFlyoutProps['key'] =
+  'generic-entity-panel';
 
 export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,

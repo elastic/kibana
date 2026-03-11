@@ -12,11 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { getKbnPalettes, KbnPalette, type IKbnPalette } from '@kbn/palettes';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { createColorPalette as createLegacyColorPalette } from '../..';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 import { decreaseOpacity } from './decrease_opacity';
+
+export const COMPATIBILITY_PALETTE_ID = 'kibana_palette';
 
 function buildRoundRobinCategoricalWithMappedColors(
   id: string,
@@ -224,6 +226,14 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
         kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
       ),
     },
+    [KbnPalette.ElasticLineOptimized]: {
+      title: kbnPalettes.get(KbnPalette.ElasticLineOptimized).name,
+      ...buildRoundRobinCategoricalWithMappedColors(
+        KbnPalette.ElasticLineOptimized,
+        kbnPalettes.get(KbnPalette.ElasticLineOptimized).colors(),
+        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
+      ),
+    },
     status: buildGradient('status', kbnPalettes.get('status')),
     temperature: buildGradient('temperature', kbnPalettes.get('temperature')),
     complementary: buildGradient('complementary', kbnPalettes.get('complementary')),
@@ -232,11 +242,14 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
     cool: buildGradient('cool', kbnPalettes.get('cool')),
     warm: buildGradient('warm', kbnPalettes.get('warm')),
     gray: buildGradient('gray', kbnPalettes.get('gray')),
-    kibana_palette: {
+    [COMPATIBILITY_PALETTE_ID]: {
       title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
         defaultMessage: 'Compatibility',
       }),
-      ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
+      ...buildRoundRobinCategoricalWithMappedColors(
+        COMPATIBILITY_PALETTE_ID,
+        createLegacyColorPalette(20)
+      ),
     },
     custom: buildCustomPalette(),
   };

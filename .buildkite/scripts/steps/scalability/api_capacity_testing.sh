@@ -22,7 +22,7 @@ checkout_and_compile_load_runner
 
 echo "--- Run single apis capacity tests"
 cd "$KIBANA_DIR"
-node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/test/scalability/apis"
+node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/platform/test/scalability/apis"
 
 echo "--- Upload test results"
 upload_test_results

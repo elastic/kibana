@@ -8,7 +8,7 @@
  */
 
 import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { DataViewSavedObjectConflictError } from '../common';
 

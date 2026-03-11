@@ -14,7 +14,9 @@
         "tags": [],
         "label": "renderingServiceMock",
         "description": [],
-        "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+        "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,9 @@
               "RenderingServiceInternal",
               ">"
             ],
-            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -48,7 +52,9 @@
               "RenderingService",
               ">"
             ],
-            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

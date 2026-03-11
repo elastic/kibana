@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { IntegrationFilterButton } from './integrations_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 
-export const INTEGRATION_BUTTON_LOADING_TEST_ID = 'alert-summary-integration-button-loading';
 export const SEARCH_BAR_TEST_ID = 'alert-summary-search-bar';
-
-const INTEGRATION_BUTTON_LOADING_WIDTH = '120px';
-const INTEGRATION_BUTTON_LOADING_HEIGHT = '40px';
 
 export interface SearchBarSectionProps {
   /**
@@ -26,7 +22,7 @@ export interface SearchBarSectionProps {
    */
   dataView: DataView;
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
@@ -35,33 +31,22 @@ export interface SearchBarSectionProps {
  * KQL bar at the top of the alert summary page.
  * The component leverages the Security Solution SiemSearchBar which has a lot of logic tied to url and redux to store its values.
  * The component also has a filter button to the left of the KQL bar that allows user to select integrations.
- * For the AI for SOC effort, each integration has one rule associated with.
- * This means that deselecting an integration is equivalent to filtering out by the rule for that integration.
  */
 export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
-  const { isLoading, integrations } = useIntegrations({ packages });
-
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
+  const { integrations } = useIntegrations({ packages });
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiSkeletonRectangle
-          data-test-subj={INTEGRATION_BUTTON_LOADING_TEST_ID}
-          isLoading={isLoading}
-          width={INTEGRATION_BUTTON_LOADING_WIDTH}
-          height={INTEGRATION_BUTTON_LOADING_HEIGHT}
-        >
-          <IntegrationFilterButton integrations={integrations} />
-        </EuiSkeletonRectangle>
+        <IntegrationFilterButton integrations={integrations} />
       </EuiFlexItem>
       <EuiFlexItem>
         <SiemSearchBar
           dataTestSubj={SEARCH_BAR_TEST_ID}
+          dataView={dataView}
           hideFilterBar
           hideQueryMenu
           id={InputsModelId.global}
-          sourcererDataView={dataViewSpec}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

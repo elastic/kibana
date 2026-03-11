@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import { ApiConfig, INVOKE_LLM_CLIENT_TIMEOUT, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
-import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
-import * as i18n from './translations';
+import type { FetchConnectorExecuteResponse } from '../api';
+import { fetchConnectorExecuteAction } from '../api';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;
@@ -32,18 +32,13 @@ interface UseSendMessage {
 }
 
 export const useSendMessage = (): UseSendMessage => {
-  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
+  const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions, toasts } =
     useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
     async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
-
-      const timeoutId = setTimeout(() => {
-        abortController.current.abort(i18n.FETCH_MESSAGE_TIMEOUT_ERROR);
-        abortController.current = new AbortController();
-      }, INVOKE_LLM_CLIENT_TIMEOUT);
 
       try {
         return await fetchConnectorExecuteAction({
@@ -60,13 +55,19 @@ export const useSendMessage = (): UseSendMessage => {
           screenContext: {
             timeZone: moment.tz.guess(),
           },
+          toasts,
         });
       } finally {
-        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     },
-    [alertsIndexPattern, assistantStreamingEnabled, knowledgeBase.latestAlerts, traceOptions]
+    [
+      alertsIndexPattern,
+      assistantStreamingEnabled,
+      knowledgeBase.latestAlerts,
+      toasts,
+      traceOptions,
+    ]
   );
 
   const cancelRequest = useCallback(() => {

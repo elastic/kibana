@@ -9,7 +9,9 @@ paths:
       x-labels: [ess, serverless]
       operationId: PerformPromptsBulkAction
       summary: Apply a bulk action to prompts
-      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
+      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts
+        that match the filter or to the list of prompts by their IDs. This action allows
+        for bulk create, update, or delete operations.
       tags:
         - Bulk API
       requestBody:
@@ -19,24 +21,69 @@ paths:
               type: object
               properties:
                 delete:
-                  $ref: '#/components/schemas/BulkActionBase'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
+                  description: Criteria for deleting prompts in bulk.
                 create:
                   type: array
+                  description: List of prompts to be created.
                   items:
                     $ref: '#/components/schemas/PromptCreateProps'
                 update:
                   type: array
+                  description: List of prompts to be updated.
                   items:
                     $ref: '#/components/schemas/PromptUpdateProps'
+            example:
+              create:
+                - name: "New Security Prompt"
+                  promptType: "system"
+                  content: "Please verify the security settings."
+              update:
+                - id: "prompt123"
+                  content: "Updated content for security prompt."
+              delete:
+                ids: ["prompt1", "prompt2"]
       responses:
         200:
-          description: Indicates a successful call.
+          description: Indicates a successful call with the results of the bulk action.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
+              examples:
+                success:
+                  value:
+                    success: true
+                    status_code: 200
+                    message: "Bulk action completed successfully."
+                    prompts_count: 5
+                    attributes:
+                      results:
+                        updated:
+                          - id: "prompt1"
+                            name: "Security Prompt"
+                            promptType: "system"
+                            content: "Updated security settings prompt"
+                        created:
+                          - id: "prompt6"
+                            name: "New Security Prompt"
+                            promptType: "system"
+                            content: "Please verify the security settings."
+                        deleted:
+                          - "prompt2"
+                          - "prompt3"
+                        skipped:
+                          - id: "prompt4"
+                            name: "Security Prompt"
+                            skip_reason: "PROMPT_FIELD_NOT_MODIFIED"
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 4
+                        total: 5
+                      errors: []
         400:
-          description: Generic Error
+          description: Indicates a generic error due to a bad request.
           content:
             application/json:
               schema:
@@ -44,10 +91,16 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: The HTTP status code for the error.
+                    example: 400
                   error:
                     type: string
+                    description: A short error message.
+                    example: "Bad Request"
                   message:
                     type: string
+                    description: A detailed error message.
+                    example: "Invalid prompt ID or missing required fields."
 
 components:
   schemas:
@@ -55,16 +108,20 @@ components:
       type: string
       enum:
         - PROMPT_FIELD_NOT_MODIFIED
+      description: Reason why a prompt was skipped during the bulk action.
 
     PromptsBulkActionSkipResult:
       type: object
       properties:
         id:
           type: string
+          description: The ID of the prompt that was skipped.
         name:
           type: string
+          description: The name of the prompt that was skipped.
         skip_reason:
           $ref: '#/components/schemas/PromptsBulkActionSkipReason'
+          description: The reason for skipping the prompt.
       required:
         - id
         - skip_reason
@@ -74,14 +131,16 @@ components:
       properties:
         id:
           type: string
+          description: The ID of the prompt that encountered an error.
         name:
           type: string
+          description: The name of the prompt that encountered an error.
       required:
         - id
 
     PromptType:
       type: string
-      description: Prompt type
+      description: Type of the prompt (either system or quick).
       enum:
         - system
         - quick
@@ -91,14 +150,18 @@ components:
       properties:
         message:
           type: string
+          description: A message describing the error encountered.
         status_code:
           type: integer
+          description: The HTTP status code associated with the error.
         err_code:
           type: string
+          description: A code representing the error type.
         prompts:
           type: array
           items:
             $ref: '#/components/schemas/PromptDetailsInError'
+          description: List of prompts that encountered errors.
       required:
         - message
         - status_code
@@ -114,41 +177,54 @@ components:
       properties:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-        'timestamp':
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         name:
           type: string
+          description: The name of the prompt.
         promptType:
           $ref: '#/components/schemas/PromptType'
+          description: The type of the prompt.
         content:
           type: string
+          description: The content of the prompt.
         categories:
           type: array
           items:
             type: string
+          description: Categories associated with the prompt.
         color:
           type: string
+          description: The color associated with the prompt.
         isNewConversationDefault:
           type: boolean
+          description: Whether this prompt is the default for new conversations.
         isDefault:
           type: boolean
+          description: Whether this prompt is the default.
         consumer:
           type: string
+          description: The consumer that the prompt is associated with.
         updatedAt:
           type: string
+          description: The timestamp of when the prompt was last updated.
         updatedBy:
           type: string
+          description: The user who last updated the prompt.
         createdAt:
           type: string
+          description: The timestamp of when the prompt was created.
         createdBy:
           type: string
+          description: The user who created the prompt.
         users:
           type: array
           items:
             $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+          description: List of users associated with the prompt.
         namespace:
           type: string
-          description: Kibana space
+          description: Kibana space where the prompt is located.
 
     PromptsBulkCrudActionResults:
       type: object
@@ -157,59 +233,54 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PromptResponse'
+          description: List of prompts that were updated.
         created:
           type: array
           items:
             $ref: '#/components/schemas/PromptResponse'
+          description: List of prompts that were created.
         deleted:
           type: array
           items:
             type: string
+          description: List of IDs of prompts that were deleted.
         skipped:
           type: array
           items:
             $ref: '#/components/schemas/PromptsBulkActionSkipResult'
+          description: List of prompts that were skipped.
       required:
         - updated
         - created
         - deleted
         - skipped
 
-    BulkCrudActionSummary:
-      type: object
-      properties:
-        failed:
-          type: integer
-        skipped:
-          type: integer
-        succeeded:
-          type: integer
-        total:
-          type: integer
-      required:
-        - failed
-        - skipped
-        - succeeded
-        - total
-
     PromptsBulkCrudActionResponse:
       type: object
       properties:
         success:
           type: boolean
+          description: Indicates if the bulk action was successful.
+          example: true
         status_code:
           type: integer
+          description: The HTTP status code of the response.
+          example: 200
         message:
           type: string
+          description: A message describing the result of the bulk action.
+          example: "Bulk action completed successfully."
         prompts_count:
           type: integer
+          description: The number of prompts processed in the bulk action.
+          example: 6
         attributes:
           type: object
           properties:
             results:
               $ref: '#/components/schemas/PromptsBulkCrudActionResults'
             summary:
-              $ref: '#/components/schemas/BulkCrudActionSummary'
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
             errors:
               type: array
               items:
@@ -220,20 +291,6 @@ components:
       required:
         - attributes
 
-    BulkActionBase:
-      x-inline: true
-      type: object
-      properties:
-        query:
-          type: string
-          description: Query to filter promps
-        ids:
-          type: array
-          description: Array of prompts IDs
-          minItems: 1
-          items:
-            type: string
-
     PromptCreateProps:
       type: object
       required:
@@ -243,22 +300,38 @@ components:
       properties:
         name:
           type: string
+          description: The name of the prompt.
+          example: "New Security Prompt"
         promptType:
           $ref: '#/components/schemas/PromptType'
+          description: The type of the prompt.
+          example: "system"
         content:
           type: string
+          description: The content of the prompt.
+          example: "Please verify the security settings."
         color:
           type: string
+          description: The color associated with the prompt.
+          example: "blue"
         categories:
           type: array
           items:
             type: string
+          description: List of categories for the prompt.
+          example: ["security", "verification"]
         isNewConversationDefault:
           type: boolean
+          description: Whether this prompt should be the default for new conversations.
+          example: true
         isDefault:
           type: boolean
+          description: Whether this prompt should be the default.
+          example: false
         consumer:
           type: string
+          description: The consumer associated with the prompt.
+          example: "admin"
 
     PromptUpdateProps:
       type: object
@@ -267,17 +340,31 @@ components:
       properties:
         id:
           type: string
+          description: The ID of the prompt to update.
+          example: "prompt123"
         content:
           type: string
+          description: The updated content for the prompt.
+          example: "Updated content for security prompt."
         color:
           type: string
+          description: The updated color associated with the prompt.
+          example: "green"
         categories:
           type: array
           items:
             type: string
+          description: The updated categories for the prompt.
+          example: ["security", "alert"]
         isNewConversationDefault:
           type: boolean
+          description: Whether the prompt should be the default for new conversations.
+          example: false
         isDefault:
           type: boolean
+          description: Whether this prompt should be the default.
+          example: true
         consumer:
           type: string
+          description: The updated consumer for the prompt.
+          example: "user123"

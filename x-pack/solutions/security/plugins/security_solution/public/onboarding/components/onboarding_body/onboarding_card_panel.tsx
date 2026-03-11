@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { OnboardingCardId } from '../../constants';
 import type { CheckCompleteResult, CardBadge } from '../../types';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
@@ -55,7 +55,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
       'onboardingCardPanel-expanded': isExpanded,
       'onboardingCardPanel-completed': isComplete,
     });
-    const isDarkMode = useDarkMode();
+    const isDarkMode = useKibanaIsDarkMode();
     const iconType = useMemo(
       () => (iconDark && isDarkMode ? iconDark : icon),
       [isDarkMode, iconDark, icon]

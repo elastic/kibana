@@ -33,6 +33,7 @@ describe('Ensure indices exists for policies migration', () => {
     expect(fleetServicesMock.packagePolicy.listIds).toHaveBeenCalledWith(expect.anything(), {
       kuery: fleetServicesMock.endpointPolicyKuery,
       perPage: 10000,
+      spaceIds: ['*'],
     });
   });
 

@@ -8,9 +8,12 @@
  */
 
 import * as React from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '../types';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
@@ -57,7 +60,7 @@ const onClick =
         event.preventDefault();
         action.execute(context);
       }
-    } else action.execute(context);
+    } else action.execute({ ...context, event });
     close();
   };
 

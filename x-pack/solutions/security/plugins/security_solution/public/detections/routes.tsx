@@ -10,20 +10,38 @@ import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { AlertSummaryContainer } from './pages/alert_summary';
 import {
+  ALERT_DETECTIONS,
   ALERT_SUMMARY_PATH,
   ALERTS_PATH,
+  ATTACKS_PATH,
   DETECTIONS_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { Alerts } from './pages/alerts';
+import { Attacks } from './pages/attacks';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { AlertDetectionsLandingPage } from './pages/landing';
 
 const AlertsRoutes = () => (
   <PluginTemplateWrapper>
     <Alerts />
   </PluginTemplateWrapper>
 );
+
+const AttacksRoutes = () => (
+  <PluginTemplateWrapper>
+    <Attacks />
+  </PluginTemplateWrapper>
+);
+
+const AlertDetectionsLandingRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <AlertDetectionsLandingPage />
+    </PluginTemplateWrapper>
+  );
+};
 
 const DetectionsRedirects = ({ location }: RouteComponentProps) =>
   location.pathname === DETECTIONS_PATH ? (
@@ -35,20 +53,25 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    render: withSecurityRoutePageWrapper(DetectionsRedirects, SecurityPageName.detections, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(DetectionsRedirects, SecurityPageName.detections),
   },
   {
     path: ALERTS_PATH,
-    component: withSecurityRoutePageWrapper(AlertsRoutes, SecurityPageName.alerts, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(AlertsRoutes, SecurityPageName.alerts),
+  },
+  {
+    path: ATTACKS_PATH,
+    component: withSecurityRoutePageWrapper(AttacksRoutes, SecurityPageName.attacks),
+  },
+  {
+    path: ALERT_DETECTIONS,
+    component: withSecurityRoutePageWrapper(
+      AlertDetectionsLandingRoutes,
+      SecurityPageName.alertDetections
+    ),
   },
   {
     path: ALERT_SUMMARY_PATH,
-    component: withSecurityRoutePageWrapper(AlertSummaryContainer, SecurityPageName.alertSummary, {
-      redirectOnMissing: true,
-    }),
+    component: withSecurityRoutePageWrapper(AlertSummaryContainer, SecurityPageName.alertSummary),
   },
 ];

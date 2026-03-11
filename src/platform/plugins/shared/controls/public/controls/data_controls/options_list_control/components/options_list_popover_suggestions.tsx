@@ -9,12 +9,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -29,12 +32,12 @@ export const OptionsListPopoverSuggestions = ({
   showOnlySelected,
 }: OptionsListPopoverSuggestionsProps) => {
   const {
-    api,
-    stateManager,
-    displaySettings: { hideExists },
+    componentApi,
+    displaySettings: { hide_exists },
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
   const [
     sort,
@@ -48,31 +51,29 @@ export const OptionsListPopoverSuggestions = ({
     totalCardinality,
     loading,
     fieldFormatter,
-    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
-    stateManager.sort,
-    stateManager.searchString,
-    stateManager.existsSelected,
-    stateManager.searchTechnique,
-    stateManager.selectedOptions,
-    stateManager.fieldName,
-    api.invalidSelections$,
-    api.availableOptions$,
-    api.totalCardinality$,
-    api.dataLoading$,
-    api.fieldFormatter,
-    api.parentApi.allowExpensiveQueries$
+    componentApi.sort$,
+    componentApi.searchString$,
+    componentApi.existsSelected$,
+    componentApi.searchTechnique$,
+    componentApi.selectedOptions$,
+    componentApi.fieldName$,
+    componentApi.invalidSelections$,
+    componentApi.availableOptions$,
+    componentApi.totalCardinality$,
+    componentApi.dataLoading$,
+    componentApi.fieldFormatter
   );
 
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo<boolean>(
     () =>
-      allowExpensiveQueries && totalCardinality && !showOnlySelected // && searchString.valid
+      totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
+    [availableOptions, totalCardinality, showOnlySelected]
   );
 
   const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
@@ -80,16 +81,16 @@ export const OptionsListPopoverSuggestions = ({
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+    if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
       checked: existsSelected ? 'on' : undefined,
       label: OptionsListStrings.controlAndPopover.getExists(),
-      className: 'optionsList__existsFilter',
+      css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists]);
+  }, [suggestions, existsSelected, showOnlySelected, hide_exists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -120,16 +121,16 @@ export const OptionsListPopoverSuggestions = ({
       options.push({
         key: 'loading-option',
         'data-test-subj': 'optionslist--canLoadMore',
-        className: 'optionslist--loadingMoreGroupLabel',
         label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
+        css: styles.loadMore,
       });
     } else if (options.length === MAX_OPTIONS_LIST_REQUEST_SIZE) {
       options.push({
         key: 'no-more-option',
-        className: 'optionslist--endOfOptionsGroupLabel',
         label: OptionsListStrings.popover.getAtEndOfOptionsMessage(),
         isGroupLabel: true,
+        css: styles.noMoreOptions,
       });
     }
     setSelectableOptions(existsSelectableOption ? [existsSelectableOption, ...options] : options);
@@ -142,6 +143,7 @@ export const OptionsListPopoverSuggestions = ({
     existsSelectableOption,
     canLoadMoreSuggestions,
     fieldFormatter,
+    styles,
   ]);
 
   const loadMoreOptions = useCallback(() => {
@@ -152,14 +154,14 @@ export const OptionsListPopoverSuggestions = ({
     if (scrollTop + clientHeight >= scrollHeight - parseInt(euiTheme.size.xxl, 10)) {
       // reached the "bottom" of the list, where euiSizeXXL acts as a "margin of error" so that the user doesn't
       // have to scroll **all the way** to the bottom in order to load more options
-      stateManager.requestSize.next(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
-      api.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
+      componentApi.setRequestSize(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+      componentApi.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
     }
-  }, [api.loadMoreSubject, euiTheme.size.xxl, stateManager.requestSize, totalCardinality]);
+  }, [componentApi, euiTheme.size.xxl, totalCardinality]);
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+      if (searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -167,7 +169,7 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    [searchTechnique, allowExpensiveQueries]
+    [searchTechnique]
   );
 
   useEffect(() => {
@@ -199,7 +201,7 @@ export const OptionsListPopoverSuggestions = ({
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
           onChange={(newSuggestions, event, changedOption) => {
-            api.makeSelection(changedOption.key, showOnlySelected);
+            componentApi.makeSelection(changedOption.key, showOnlySelected);
           }}
         >
           {(list) => list}
@@ -207,4 +209,25 @@ export const OptionsListPopoverSuggestions = ({
       </div>
     </>
   );
+};
+
+const optionListPopoverSuggestionsStyles = {
+  optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
+    font-style: italic;
+    font-weight: ${euiTheme.font.weight.medium};
+  `,
+  loadMore: ({ euiTheme }: UseEuiTheme) => css`
+    text-align: center;
+    padding: ${euiTheme.size.m};
+    font-style: italic;
+    height: ${euiTheme.size.xxl} !important;
+  `,
+  noMoreOptions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      textAlign: 'center',
+      fontSize: euiTheme.size.m,
+      height: 'auto !important',
+      color: euiTheme.colors.textSubdued,
+      padding: euiTheme.size.m,
+    }),
 };

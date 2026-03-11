@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -8,5 +8,8 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/charts-theme",
+    "@kbn/apm-types-shared",
+    "@kbn/custom-icons",
   ]
 }

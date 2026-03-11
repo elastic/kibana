@@ -1,0 +1,1393 @@
+{
+  "id": "@kbn/cps-utils",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectPicker",
+        "description": [],
+        "signature": [
+          "({ projectRouting, onProjectRoutingChange, projects, totalProjectCount, isReadonly, settingsComponent, }: ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectPickerProps",
+            "text": "ProjectPickerProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  projects,\n  totalProjectCount,\n  isReadonly = false,\n  settingsComponent,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectPickerProps",
+                "text": "ProjectPickerProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 43,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectPickerContainer",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectPickerContainer",
+        "description": [
+          "\nContainer component that connects ProjectPicker to CPSManager.\nDelegates to ActiveProjectPicker or DisabledProjectPicker based on access level,\nso the fetch hook only runs when the picker is actually active."
+        ],
+        "signature": [
+          "({ cpsManager }: ProjectPickerContainerProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContainer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ cpsManager }",
+            "description": [],
+            "signature": [
+              "ProjectPickerContainerProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
+            "lineNumber": 28,
+            "columnNumber": 79,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectPickerContent",
+        "type": "Function",
+        "tags": [],
+        "label": "ProjectPickerContent",
+        "description": [],
+        "signature": [
+          "({ projectRouting, onProjectRoutingChange, projects, isReadonly, }: ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectPickerContentProps",
+            "text": "ProjectPickerContentProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+        "lineNumber": 51,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  projects,\n  isReadonly = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectPickerContentProps",
+                "text": "ProjectPickerContentProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 51,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.useFetchProjects",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchProjects",
+        "description": [
+          "\nHook for fetching projects data from CPSManager.\nUses a single state object to batch all updates into one re-render per fetch cycle."
+        ],
+        "signature": [
+          "(fetchProjects: (routing?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectsData",
+            "text": "ProjectsData"
+          },
+          " | null>, routing?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.ProjectRouting",
+            "text": "ProjectRouting"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.UseFetchProjectsResult",
+            "text": "UseFetchProjectsResult"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.useFetchProjects.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchProjects",
+            "description": [],
+            "signature": [
+              "(routing?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectsData",
+                "text": "ProjectsData"
+              },
+              " | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.useFetchProjects.$2",
+            "type": "string",
+            "tags": [],
+            "label": "routing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.CPSProject",
+        "type": "Interface",
+        "tags": [],
+        "label": "CPSProject",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._alias",
+            "type": "string",
+            "tags": [],
+            "label": "_alias",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._type",
+            "type": "string",
+            "tags": [],
+            "label": "_type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._organisation",
+            "type": "string",
+            "tags": [],
+            "label": "_organisation",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._csp",
+            "type": "string",
+            "tags": [],
+            "label": "_csp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject._region",
+            "type": "string",
+            "tags": [],
+            "label": "_region",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSProject.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: string | undefined",
+            "description": [],
+            "signature": [
+              "[key: string]:  string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ICPSManager",
+        "type": "Interface",
+        "tags": [],
+        "label": "ICPSManager",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.whenReady",
+            "type": "Function",
+            "tags": [],
+            "label": "whenReady",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.fetchProjects",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchProjects",
+            "description": [],
+            "signature": [
+              "(projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectsData",
+                "text": "ProjectsData"
+              },
+              " | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.fetchProjects.$1",
+                "type": "string",
+                "tags": [],
+                "label": "projectRouting",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 54,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getTotalProjectCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getTotalProjectCount",
+            "description": [],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getProjectRouting$",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectRouting$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.setProjectRouting",
+            "type": "Function",
+            "tags": [],
+            "label": "setProjectRouting",
+            "description": [],
+            "signature": [
+              "(projectRouting: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.setProjectRouting.$1",
+                "type": "string",
+                "tags": [],
+                "label": "projectRouting",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 57,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getProjectRouting",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectRouting",
+            "description": [],
+            "signature": [
+              "(overrideValue?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.getProjectRouting.$1",
+                "type": "string",
+                "tags": [],
+                "label": "overrideValue",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getDefaultProjectRouting",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultProjectRouting",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.updateDefaultProjectRouting",
+            "type": "Function",
+            "tags": [],
+            "label": "updateDefaultProjectRouting",
+            "description": [],
+            "signature": [
+              "(projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.updateDefaultProjectRouting.$1",
+                "type": "string",
+                "tags": [],
+                "label": "projectRouting",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 60,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.getProjectPickerAccess$",
+            "type": "Function",
+            "tags": [],
+            "label": "getProjectPickerAccess$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.ProjectRoutingAccess",
+                "text": "ProjectRoutingAccess"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ICPSManager.registerAppAccess",
+            "type": "Function",
+            "tags": [],
+            "label": "registerAppAccess",
+            "description": [],
+            "signature": [
+              "(appId: string, resolver: ",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSAppAccessResolver",
+                "text": "CPSAppAccessResolver"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.registerAppAccess.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.registerAppAccess.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "resolver",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/cps-utils",
+                    "scope": "public",
+                    "docId": "kibKbnCpsUtilsPluginApi",
+                    "section": "def-public.CPSAppAccessResolver",
+                    "text": "CPSAppAccessResolver"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectPickerContentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectPickerContentProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContentProps.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContentProps.onProjectRoutingChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onProjectRoutingChange",
+            "description": [],
+            "signature": [
+              "(projectRouting: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ProjectPickerContentProps.onProjectRoutingChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "projectRouting",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+                "lineNumber": 33,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContentProps.projects",
+            "type": "Object",
+            "tags": [],
+            "label": "projects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.UseFetchProjectsResult",
+                "text": "UseFetchProjectsResult"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerContentProps.isReadonly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReadonly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_content.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectPickerProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectPickerProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.projectRouting",
+            "type": "string",
+            "tags": [],
+            "label": "projectRouting",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.onProjectRoutingChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onProjectRoutingChange",
+            "description": [],
+            "signature": [
+              "(projectRouting: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ProjectPickerProps.onProjectRoutingChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "projectRouting",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+                "lineNumber": 36,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.projects",
+            "type": "Object",
+            "tags": [],
+            "label": "projects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.UseFetchProjectsResult",
+                "text": "UseFetchProjectsResult"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.totalProjectCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalProjectCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.isReadonly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReadonly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectPickerProps.settingsComponent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "settingsComponent",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectsData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectsData",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectsData.origin",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "origin",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              " | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectsData.linkedProjects",
+            "type": "Array",
+            "tags": [],
+            "label": "linkedProjects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectTagsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProjectTagsResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectTagsResponse.origin",
+            "type": "Object",
+            "tags": [],
+            "label": "origin",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.ProjectTagsResponse.linked_projects",
+            "type": "Object",
+            "tags": [],
+            "label": "linked_projects",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.UseFetchProjectsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseFetchProjectsResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.UseFetchProjectsResult.originProject",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "originProject",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              " | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.UseFetchProjectsResult.linkedProjects",
+            "type": "Array",
+            "tags": [],
+            "label": "linkedProjects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cps-utils",
+                "scope": "public",
+                "docId": "kibKbnCpsUtilsPluginApi",
+                "section": "def-public.CPSProject",
+                "text": "CPSProject"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.UseFetchProjectsResult.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.UseFetchProjectsResult.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "Error | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectRoutingAccess",
+        "type": "Enum",
+        "tags": [],
+        "label": "ProjectRoutingAccess",
+        "description": [
+          "\nAccess levels for project routing picker"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.CPSAppAccessResolver",
+        "type": "Type",
+        "tags": [],
+        "label": "CPSAppAccessResolver",
+        "description": [
+          "\nFunction that determines the project picker access level for a given location.\nApps register one of these via `registerAppAccess` to control picker behavior\nbased on runtime conditions (feature flags, config values, route patterns, etc.)."
+        ],
+        "signature": [
+          "(location: string) => ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectRoutingAccess",
+            "text": "ProjectRoutingAccess"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSAppAccessResolver.$1",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.ProjectRoutingValue",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectRoutingValue",
+        "description": [],
+        "signature": [
+          "\"_alias:*\" | \"_alias:_origin\""
+        ],
+        "path": "src/platform/packages/private/kbn-cps-common/src/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.PROJECT_ROUTING",
+        "type": "Object",
+        "tags": [],
+        "label": "PROJECT_ROUTING",
+        "description": [
+          "\nProject routing constants for Cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
+        ],
+        "signature": [
+          "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"
+        ],
+        "path": "src/platform/packages/private/kbn-cps-common/src/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

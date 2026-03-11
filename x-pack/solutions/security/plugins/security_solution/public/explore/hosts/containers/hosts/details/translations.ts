@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_HOST_OVERVIEW = i18n.translate(
-  'xpack.securitySolution.overviewHost.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on host overview search`,
-  }
-);
-
 export const FAIL_HOST_OVERVIEW = i18n.translate(
   'xpack.securitySolution.overviewHost.failSearchDescription',
   {

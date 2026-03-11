@@ -11,17 +11,18 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
+import type { FieldItemIndexPatternFieldProps } from './field_item';
+import { InnerFieldItem } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IndexPattern } from '../../types';
+import type { IndexPattern } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -156,13 +157,11 @@ describe('Lens Field Item', () => {
     const Wrapper: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
-      return (
-        <KibanaRenderContextProvider {...mockedServices.core}>
-          <KibanaContextProvider services={mockedServices}>
-            <button>close the euiPopover</button>
-            {children}
-          </KibanaContextProvider>
-        </KibanaRenderContextProvider>
+      return mockedServices.core.rendering.addContext(
+        <KibanaContextProvider services={mockedServices}>
+          <button>close the euiPopover</button>
+          {children}
+        </KibanaContextProvider>
       );
     };
 
@@ -396,11 +395,11 @@ describe('Lens Field Item', () => {
     };
 
     render(
-      <KibanaRenderContextProvider {...mockedServices.core}>
+      mockedServices.core.rendering.addContext(
         <KibanaContextProvider services={services}>
           <InnerFieldItem {...defaultProps} />
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>
+      )
     );
     await waitFor(() => {
       expect(screen.getByTestId('field-bytes-showDetails')).toBeInTheDocument();
