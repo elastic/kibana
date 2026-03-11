@@ -77,7 +77,6 @@ export function useMonacoMarkersChangedInterceptor({
           // eslint-disable-next-line no-continue
           continue;
         }
-
         errors.push({
           message: marker.message,
           severity: getSeverityString(marker.severity as MarkerSeverity),

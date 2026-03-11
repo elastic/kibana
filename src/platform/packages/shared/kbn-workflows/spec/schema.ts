@@ -569,50 +569,8 @@ export const WorkflowInputSchema = z.union([
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
 /* --- Outputs --- */
-// Outputs support the same types as inputs
-export const WorkflowOutputTypeEnum = WorkflowInputTypeEnum;
-
-const WorkflowOutputBaseSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  required: z.boolean().optional(),
-});
-
-export const WorkflowOutputStringSchema = WorkflowOutputBaseSchema.extend({
-  type: z.literal('string'),
-});
-export type WorkflowOutputString = z.infer<typeof WorkflowOutputStringSchema>;
-
-export const WorkflowOutputNumberSchema = WorkflowOutputBaseSchema.extend({
-  type: z.literal('number'),
-});
-export type WorkflowOutputNumber = z.infer<typeof WorkflowOutputNumberSchema>;
-
-export const WorkflowOutputBooleanSchema = WorkflowOutputBaseSchema.extend({
-  type: z.literal('boolean'),
-});
-export type WorkflowOutputBoolean = z.infer<typeof WorkflowOutputBooleanSchema>;
-
-export const WorkflowOutputChoiceSchema = WorkflowOutputBaseSchema.extend({
-  type: z.literal('choice'),
-  options: z.array(z.string()),
-});
-export type WorkflowOutputChoice = z.infer<typeof WorkflowOutputChoiceSchema>;
-
-export const WorkflowOutputArraySchema = WorkflowOutputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-});
-export type WorkflowOutputArray = z.infer<typeof WorkflowOutputArraySchema>;
-
-export const WorkflowOutputSchema = z.union([
-  WorkflowOutputStringSchema,
-  WorkflowOutputNumberSchema,
-  WorkflowOutputBooleanSchema,
-  WorkflowOutputChoiceSchema,
-  WorkflowOutputArraySchema,
-]);
+// Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
+export const WorkflowOutputSchema = WorkflowInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
 /* --- Consts --- */
@@ -683,39 +641,24 @@ const WorkflowSchemaBase = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
+/** Normalize inputs or outputs from either JSON Schema or legacy array format to JsonModelSchema. */
+function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSchema> | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'object' && !Array.isArray(value) && 'properties' in value) {
+    return value as z.infer<typeof JsonModelSchema>;
+  }
+  if (Array.isArray(value)) {
+    return convertLegacyFieldsToJsonSchema(value);
+  }
+  return undefined;
+}
+
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  // Transform inputs from legacy array format to JSON Schema format
-  let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-  if (data.inputs) {
-    if (
-      'properties' in data.inputs &&
-      typeof data.inputs === 'object' &&
-      !Array.isArray(data.inputs)
-    ) {
-      normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-    } else if (Array.isArray(data.inputs)) {
-      normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
-    }
-  }
+  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
+  const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  let normalizedOutputs: z.infer<typeof JsonModelSchema> | undefined;
-  if (data.outputs) {
-    if (
-      'properties' in data.outputs &&
-      typeof data.outputs === 'object' &&
-      !Array.isArray(data.outputs)
-    ) {
-      normalizedOutputs = data.outputs as z.infer<typeof JsonModelSchema>;
-    } else if (Array.isArray(data.outputs)) {
-      normalizedOutputs = convertLegacyFieldsToJsonSchema(data.outputs);
-    }
-  }
-
-  // Return the data with normalized inputs and outputs, preserving all other fields as-is
-  // This preserves the optionality of fields since we're not explicitly listing them all
-  // Exclude inputs and outputs from spread to ensure they're always the normalized JSON Schema format (or undefined)
   const { inputs: _, outputs: __, ...rest } = data;
   return {
     ...rest,

@@ -221,6 +221,20 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.updateWorkflowExecution({ status });
   }
 
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
+    this.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
+    });
+  }
+
   public completeAncestorSteps(
     scopeStack: WorkflowScopeStack,
     executionStatus: ExecutionStatus,

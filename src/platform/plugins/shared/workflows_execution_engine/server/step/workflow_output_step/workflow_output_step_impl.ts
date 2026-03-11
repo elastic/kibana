@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
 import type { WorkflowOutputStep } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
-  resolveRef,
 } from '@kbn/workflows/spec/lib/field_conversion';
-import { z } from '@kbn/zod/v4';
-import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -39,48 +36,6 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
-
-  /**
-   * Converts template expressions from {{ }} to ${{ }} format to preserve types.
-   * This is important for workflow outputs that need to maintain their original types
-   * (numbers, booleans, arrays, objects) rather than being converted to strings.
-   *
-   * Only converts when:
-   * 1. The entire value is a template expression (starts with {{ and ends with }})
-   * 2. There are no literal characters outside the template
-   *
-   * Examples:
-   * - "{{ steps.calc.output.count }}" -> "${{ steps.calc.output.count }}" (converted)
-   * - "Result: {{ steps.calc.output.count }}" -> unchanged (has literal text)
-   * - "{{ steps.calc.output.count }} items" -> unchanged (has literal text)
-   */
-  private convertToTypePreservingTemplates(obj: Record<string, unknown>): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-
-    for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'string') {
-        const trimmed = value.trim();
-        // Check if the entire string is a single template expression
-        if (
-          trimmed.startsWith('{{') &&
-          trimmed.endsWith('}}') &&
-          // Ensure there's only one {{ }} pair (no literal text outside)
-          trimmed.indexOf('{{') === 0 &&
-          trimmed.length >= 2 &&
-          trimmed.lastIndexOf('}}') === trimmed.length - 2
-        ) {
-          // Convert to type-preserving syntax
-          result[key] = `$${trimmed}`;
-        } else {
-          result[key] = value;
-        }
-      } else {
-        result[key] = value;
-      }
-    }
-
-    return result;
-  }
 
   /**
    * Completes all ancestor steps in the scope stack with the specified status.
@@ -108,12 +63,9 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
-    // Convert {{ }} to ${{ }} for type preservation in output values
-    // This ensures numbers, booleans, arrays, and objects maintain their types
-    const outputValuesWithPreservedTypes = this.convertToTypePreservingTemplates(step.with);
     // Render template variables in the output values
     const outputValues = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      outputValuesWithPreservedTypes
+      step.with
     ) as Record<string, unknown>;
 
     try {
@@ -126,23 +78,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
       );
 
       if (normalizedOutputs?.properties && Object.keys(normalizedOutputs.properties).length > 0) {
-        const shape: Record<string, z.ZodType> = {};
-        for (const [propName, propSchema] of Object.entries(normalizedOutputs.properties)) {
-          if (propSchema && typeof propSchema === 'object') {
-            const jsonSchema = propSchema as JSONSchema7;
-            const resolvedSchema = jsonSchema.$ref
-              ? resolveRef(jsonSchema.$ref, normalizedOutputs) || jsonSchema
-              : jsonSchema;
-            let zodSchema: z.ZodType =
-              fromJSONSchema(resolvedSchema as Record<string, unknown>) ?? z.any();
-            const isRequired = normalizedOutputs.required?.includes(propName) ?? false;
-            if (!isRequired) {
-              zodSchema = zodSchema.optional();
-            }
-            shape[propName] = zodSchema;
-          }
-        }
-        const validator = z.object(shape);
+        const validator = buildFieldsZodValidator(normalizedOutputs);
         const validationResult = validator.safeParse(outputValues);
 
         if (!validationResult.success) {
@@ -190,12 +126,19 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
           // Complete the step successfully with the output values
           this.stepExecutionRuntime.finishStep(outputValues);
           break;
-        case 'cancelled':
+        case 'cancelled': {
           executionStatus = ExecutionStatus.CANCELLED;
           outcome = 'unknown';
-          // Complete the step successfully with the output values (cancellation is not an error)
+          // User can provide reason/message in with:; otherwise default mentions the step
+          const stepName = this.node.configuration?.name ?? 'workflow.output';
+          const cancellationReason =
+            (typeof outputValues.reason === 'string' && outputValues.reason) ||
+            (typeof outputValues.message === 'string' && outputValues.message) ||
+            `Cancelled by step '${stepName}'`;
+          this.workflowExecutionRuntime.setWorkflowCancelled(cancellationReason);
           this.stepExecutionRuntime.finishStep(outputValues);
           break;
+        }
         case 'failed': {
           executionStatus = ExecutionStatus.FAILED;
           outcome = 'failure';
@@ -243,9 +186,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
       // when workflow.output terminates the workflow mid-execution
       this.completeAncestorSteps(executionStatus);
 
-      // Update the workflow execution status to terminate the workflow
-      // This will cause the execution loop to stop
-      this.workflowExecutionRuntime.setWorkflowStatus(executionStatus);
+      // Update the workflow execution status to terminate the workflow (cancelled already set via setWorkflowCancelled)
+      if (executionStatus !== ExecutionStatus.CANCELLED) {
+        this.workflowExecutionRuntime.setWorkflowStatus(executionStatus);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       const errorObj = error instanceof Error ? error : new Error(errorMessage);
