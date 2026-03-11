@@ -21,7 +21,6 @@ import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
   getCommitDistanceInfo,
-  getGcloudAccessToken,
   getPullRequestNumber,
   isCiEnvironment,
   logArtifactFreshness,
@@ -29,7 +28,6 @@ import {
   readRecentCommitShas,
   resolveCurrentCommitSha,
   resolveUpstreamRemote,
-  withGcsAuth,
 } from './utils';
 
 interface ArtifactsState {
@@ -89,15 +87,12 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
 
     log.info(`Restoring TypeScript build artifacts`);
 
-    // Group 1: kick off all independent operations in parallel.
-    // getGcloudAccessToken doubles as an availability check (~1-2s gcloud CLI
-    // call) and returns the token for direct HTTP requests later, avoiding a
-    // second gcloud invocation.
-    const [currentSha, history, upstreamRemote, accessToken] = await Promise.all([
+    // The GCS bucket is public, so no auth token is needed for read operations.
+    // Kick off all independent operations in parallel.
+    const [currentSha, history, upstreamRemote] = await Promise.all([
       resolveCurrentCommitSha(),
       readRecentCommitShas(MAX_COMMITS_TO_CHECK),
       resolveUpstreamRemote(),
-      isCiEnvironment() ? Promise.resolve(undefined) : getGcloudAccessToken(),
     ]);
 
     const candidateShas = buildCandidateShaList(currentSha, history);
@@ -115,132 +110,121 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
     };
 
     if (isCiEnvironment()) {
-      await withGcsAuth(log, async (token) => {
-        const restoredSha = await new GcsFileSystem(log, token).restoreArchive(restoreOptions);
-        if (restoredSha) {
-          await writeArtifactsState(restoredSha);
-        }
-      });
-
+      // Bucket is public — no auth needed to restore on CI.
+      const restoredSha = await new GcsFileSystem(log).restoreArchive(restoreOptions);
+      if (restoredSha) {
+        await writeArtifactsState(restoredSha);
+      }
       return;
     }
 
-    // Local development: try GCS first (using developer's own gcloud auth),
-    // then fall back to the local file system cache.
-    if (accessToken) {
-      log.info('gcloud auth detected, attempting to restore from GCS...');
-      try {
-        const gcsFs = new GcsFileSystem(log, accessToken);
+    // Local development: bucket is public so always try GCS first, then fall
+    // back to the local file-system cache.
+    try {
+      const gcsFs = new GcsFileSystem(log);
 
-        if (!upstreamRemote) {
+      if (!upstreamRemote) {
+        log.warning(
+          'Could not find a git remote for elastic/kibana. ' +
+            'Add one with: git remote add upstream git@github.com:elastic/kibana.git'
+        );
+      }
+
+      // Fetch upstream main and list GCS archives in parallel.
+      // These are both network calls (~1-3s each) that don't depend on each other.
+      const fetchUpstream = upstreamRemote
+        ? execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], { cwd: REPO_ROOT })
+            .then(() => {
+              log.verbose(`Fetched latest main from ${upstreamRemote}.`);
+            })
+            .catch((fetchError) => {
+              const details = fetchError instanceof Error ? fetchError.message : String(fetchError);
+              log.warning(`Failed to fetch ${upstreamRemote}/main: ${details}`);
+            })
+        : Promise.resolve();
+
+      const gcsListPromise = gcsFs.listAvailableCommitShas();
+
+      const [, availableShas] = await Promise.all([fetchUpstream, gcsListPromise]);
+
+      if (availableShas.size === 0) {
+        log.warning('GCS returned 0 archives. The bucket may be temporarily unavailable.');
+      }
+
+      // Read main branch SHAs (needs fetch to have completed).
+      // CI archives artifacts under the commit SHA of each Buildkite build,
+      // which is the HEAD of the PR branch (not the merge commit on main).
+      // Therefore we search:
+      //   1. HEAD history — includes commits CI built for the current branch
+      //   2. upstream/main history — in case CI also archives main builds
+      const mainShas = upstreamRemote
+        ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK, upstreamRemote)
+        : [];
+      const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
+
+      const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
+
+      if (matchedShas.length > 0) {
+        const bestMatch = matchedShas[0];
+
+        if (currentSha && bestMatch !== currentSha) {
           log.warning(
-            'Could not find a git remote for elastic/kibana. ' +
-              'Add one with: git remote add upstream git@github.com:elastic/kibana.git'
+            `No CI artifacts available yet for HEAD (${currentSha.slice(0, 12)}). ` +
+              `Falling back to the nearest ancestor with a cached archive (${bestMatch.slice(
+                0,
+                12
+              )}). ` +
+              `If type checking is slow, wait for CI to publish artifacts for HEAD and retry with --clean-cache --with-archive.`
           );
         }
 
-        // Group 2: fetch upstream main and list GCS archives in parallel.
-        // These are both network calls (~1-3s each) that don't depend on each other.
-        const fetchUpstream = upstreamRemote
-          ? execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], { cwd: REPO_ROOT })
-              .then(() => {
-                log.verbose(`Fetched latest main from ${upstreamRemote}.`);
+        log.info(
+          `Found ${
+            matchedShas.length
+          } matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
+        );
+
+        const gcsRestoreOptions = {
+          ...restoreOptions,
+          cacheInvalidationFiles: undefined,
+          shas: matchedShas,
+          skipExistenceCheck: true,
+          skipClean: true,
+        };
+
+        // Run the informational freshness check concurrently with the
+        // actual restore so the download starts immediately.
+        const freshnessPromise = currentSha
+          ? getCommitDistanceInfo(currentSha, bestMatch)
+              .then((distanceInfo) => {
+                if (distanceInfo) {
+                  logArtifactFreshness(log, currentSha, bestMatch, distanceInfo);
+                }
               })
-              .catch((fetchError) => {
-                const details =
-                  fetchError instanceof Error ? fetchError.message : String(fetchError);
-                log.warning(`Failed to fetch ${upstreamRemote}/main: ${details}`);
-              })
+              .catch(() => {})
           : Promise.resolve();
 
-        const gcsListPromise = gcsFs.listAvailableCommitShas();
+        const [restored] = await Promise.all([
+          gcsFs.restoreArchive(gcsRestoreOptions),
+          freshnessPromise,
+        ]);
 
-        const [, availableShas] = await Promise.all([fetchUpstream, gcsListPromise]);
-
-        if (availableShas.size === 0) {
-          log.warning(
-            'GCS returned 0 archives. You may not have read access to the bucket. ' +
-              'Ensure you have run: gcloud auth login'
-          );
+        if (restored) {
+          await writeArtifactsState(restored);
+          return;
         }
-
-        // Group 3: read main branch SHAs (needs fetch to have completed).
-        // CI archives artifacts under the commit SHA of each Buildkite build,
-        // which is the HEAD of the PR branch (not the merge commit on main).
-        // Therefore we search:
-        //   1. HEAD history — includes commits CI built for the current branch
-        //   2. upstream/main history — in case CI also archives main builds
-        const mainShas = upstreamRemote
-          ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK, upstreamRemote)
-          : [];
-        const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
-
-        const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
-
-        if (matchedShas.length > 0) {
-          const bestMatch = matchedShas[0];
-
-          if (currentSha && bestMatch !== currentSha) {
-            log.warning(
-              `No CI artifacts available yet for HEAD (${currentSha.slice(0, 12)}). ` +
-                `Falling back to the nearest ancestor with a cached archive (${bestMatch.slice(
-                  0,
-                  12
-                )}). ` +
-                `If type checking is slow, wait for CI to publish artifacts for HEAD and retry with --clean-cache --with-archive.`
-            );
-          }
-
-          log.info(
-            `Found ${
-              matchedShas.length
-            } matching archive(s) in GCS, restoring best match (${bestMatch.slice(0, 12)})...`
-          );
-
-          const gcsRestoreOptions = {
-            ...restoreOptions,
-            cacheInvalidationFiles: undefined,
-            shas: matchedShas,
-            skipExistenceCheck: true,
-            skipClean: true,
-          };
-
-          // Run the informational freshness check concurrently with the
-          // actual restore so the download starts immediately.
-          const freshnessPromise = currentSha
-            ? getCommitDistanceInfo(currentSha, bestMatch)
-                .then((distanceInfo) => {
-                  if (distanceInfo) {
-                    logArtifactFreshness(log, currentSha, bestMatch, distanceInfo);
-                  }
-                })
-                .catch(() => {})
-            : Promise.resolve();
-
-          const [restored] = await Promise.all([
-            gcsFs.restoreArchive(gcsRestoreOptions),
-            freshnessPromise,
-          ]);
-
-          if (restored) {
-            await writeArtifactsState(restored);
-            return;
-          }
-        } else if (availableShas.size > 0) {
-          log.info(
-            `None of the ${gcsCandidateShas.length} candidate commit(s) matched ` +
-              `the ${availableShas.size} archived commit(s) in GCS.`
-          );
-        }
-
-        log.info('Falling back to local cache.');
-      } catch (gcsError) {
-        const gcsErrorDetails = gcsError instanceof Error ? gcsError.message : String(gcsError);
-
-        log.warning(`GCS restore failed (${gcsErrorDetails}), falling back to local cache.`);
+      } else if (availableShas.size > 0) {
+        log.info(
+          `None of the ${gcsCandidateShas.length} candidate commit(s) matched ` +
+            `the ${availableShas.size} archived commit(s) in GCS.`
+        );
       }
-    } else {
-      log.verbose('gcloud CLI not available or not authenticated, using local cache only.');
+
+      log.info('Falling back to local cache.');
+    } catch (gcsError) {
+      const gcsErrorDetails = gcsError instanceof Error ? gcsError.message : String(gcsError);
+
+      log.warning(`GCS restore failed (${gcsErrorDetails}), falling back to local cache.`);
     }
 
     try {

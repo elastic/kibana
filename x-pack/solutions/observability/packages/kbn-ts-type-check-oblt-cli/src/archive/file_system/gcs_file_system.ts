@@ -32,13 +32,14 @@ function formatBytes(bytes: number): string {
 }
 
 export class GcsFileSystem extends AbstractFileSystem {
-  private accessToken: string;
+  private accessToken: string | undefined;
 
   /**
-   * @param accessToken  OAuth2 access token used for all GCS operations via
-   *   native `fetch`.  Obtain one with `getGcloudAccessToken()`.
+   * @param accessToken  OAuth2 access token used for write operations (archive/metadata upload)
+   *   via native `fetch`. Not required for read operations since the bucket is public.
+   *   On CI, obtain one with `getGcloudAccessToken()` after activating the service account.
    */
-  constructor(log: SomeDevLog, accessToken: string) {
+  constructor(log: SomeDevLog, accessToken?: string) {
     super(log);
     this.accessToken = accessToken;
   }
@@ -93,9 +94,7 @@ export class GcsFileSystem extends AbstractFileSystem {
     const start = Date.now();
 
     try {
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-      });
+      const response = await fetch(url);
 
       if (!response.ok || !response.body) {
         throw new Error(`GCS download failed: HTTP ${response.status}`);
@@ -134,9 +133,7 @@ export class GcsFileSystem extends AbstractFileSystem {
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
 
-      throw new Error(
-        `Failed to restore archive from GCS: ${details.replace(this.accessToken, '<redacted>')}`
-      );
+      throw new Error(`Failed to restore archive from GCS: ${details}`);
     }
   }
 
@@ -149,10 +146,7 @@ export class GcsFileSystem extends AbstractFileSystem {
     const start = Date.now();
 
     try {
-      const response = await fetch(url, {
-        method: 'HEAD',
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-      });
+      const response = await fetch(url, { method: 'HEAD' });
 
       this.log.verbose(
         `  hasArchive: ${response.ok ? 'found' : response.status} (${Date.now() - start}ms)`
@@ -173,9 +167,7 @@ export class GcsFileSystem extends AbstractFileSystem {
     const start = Date.now();
 
     try {
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-      });
+      const response = await fetch(url);
 
       if (!response.ok) {
         this.log.verbose(`  readMetadata: ${response.status} (${Date.now() - start}ms)`);
@@ -244,9 +236,7 @@ export class GcsFileSystem extends AbstractFileSystem {
           params.set('pageToken', pageToken);
         }
 
-        const response = await fetch(`${baseUrl}?${params}`, {
-          headers: { Authorization: `Bearer ${this.accessToken}` },
-        });
+        const response = await fetch(`${baseUrl}?${params}`);
 
         if (!response.ok) {
           throw new Error(`GCS API returned ${response.status}`);
@@ -275,11 +265,7 @@ export class GcsFileSystem extends AbstractFileSystem {
       return shas;
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
-      this.log.verbose(
-        `Failed to list GCS archives: ${details.replace(this.accessToken, '<redacted>')} (${
-          Date.now() - start
-        }ms)`
-      );
+      this.log.verbose(`Failed to list GCS archives: ${details} (${Date.now() - start}ms)`);
       return new Set();
     }
   }

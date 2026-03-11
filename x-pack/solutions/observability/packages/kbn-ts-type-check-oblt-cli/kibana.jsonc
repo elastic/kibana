@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/ts-type-check-oblt-cli",
   "owner": "@elastic/observability-ui",
-  "group": "platform",
+  "group": "observability",
   "visibility": "private",
   "devOnly": true
 }

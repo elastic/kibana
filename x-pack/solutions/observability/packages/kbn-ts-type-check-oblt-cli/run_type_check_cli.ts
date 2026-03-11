@@ -128,7 +128,7 @@ run(
 
           if (!isCiEnvironment()) {
             log.info(
-              'Run with --clear-cache --with-archive to attempt to retrieve fresh artifacts from remote for the best type check performance.'
+              'Run with --clean-cache --with-archive to attempt to retrieve fresh artifacts from remote for the best type check performance.'
             );
           }
         }

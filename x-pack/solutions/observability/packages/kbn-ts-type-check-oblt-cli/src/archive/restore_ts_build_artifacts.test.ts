@@ -11,7 +11,6 @@ import { restoreTSBuildArtifacts } from './restore_ts_build_artifacts';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
   buildCandidateShaList,
-  getGcloudAccessToken,
   getPullRequestNumber,
   isCiEnvironment,
   readRecentCommitShas,
@@ -21,18 +20,17 @@ import {
 
 jest.mock('./utils', () => ({
   buildCandidateShaList: jest.fn(),
-  getGcloudAccessToken: jest.fn(),
   getPullRequestNumber: jest.fn(),
   isCiEnvironment: jest.fn(),
   readRecentCommitShas: jest.fn(),
   resolveCurrentCommitSha: jest.fn(),
   resolveUpstreamRemote: jest.fn(),
-  withGcsAuth: jest.fn((_, action: (token: string) => Promise<unknown>) => action('mock-token')),
 }));
 
 jest.mock('./file_system/gcs_file_system', () => ({
   GcsFileSystem: jest.fn().mockImplementation(() => ({
-    restoreArchive: jest.fn(),
+    listAvailableCommitShas: jest.fn().mockResolvedValue(new Set()),
+    restoreArchive: jest.fn().mockResolvedValue(undefined),
   })),
 }));
 
@@ -45,9 +43,6 @@ const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction
 >;
 const mockedGetPullRequestNumber = getPullRequestNumber as jest.MockedFunction<
   typeof getPullRequestNumber
->;
-const mockedGetGcloudAccessToken = getGcloudAccessToken as jest.MockedFunction<
-  typeof getGcloudAccessToken
 >;
 const mockedIsCiEnvironment = isCiEnvironment as jest.MockedFunction<typeof isCiEnvironment>;
 const mockedReadRecentCommitShas = readRecentCommitShas as jest.MockedFunction<
@@ -80,7 +75,6 @@ describe('restoreTSBuildArtifacts', () => {
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedReadRecentCommitShas.mockResolvedValue([]);
     mockedBuildCandidateShaList.mockReturnValue([]);
-    mockedGetGcloudAccessToken.mockResolvedValue(undefined);
     mockedResolveUpstreamRemote.mockResolvedValue(undefined);
     // Mock readFile to return an empty project list for checkForExistingBuildArtifacts,
     // simulating a fresh checkout with no target/types directories.

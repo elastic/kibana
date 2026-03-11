@@ -112,5 +112,11 @@ export async function updateRootRefsConfig(log: ToolingLog) {
 }
 
 export async function cleanupRootRefsConfig() {
-  await Fsp.unlink(ROOT_REFS_CONFIG_PATH);
+  try {
+    await Fsp.unlink(ROOT_REFS_CONFIG_PATH);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
 }
