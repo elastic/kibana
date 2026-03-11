@@ -8,9 +8,7 @@
  */
 
 import yaml from 'js-yaml';
-import type { DemoManifestGenerator, ManifestOptions } from '../../types';
-
-import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
+import type { DemoManifestGenerator, ManifestOptions, ServiceConfig } from '../../types';
 
 /**
  * Creates common Kubernetes resources needed by all demos
@@ -275,7 +273,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
 }
 
 /**
- * Creates a Kubernetes Deployment
+ * Creates a Kubernetes Deployment with optional resource limits
  */
 function createDeployment(opts: {
   name: string;
@@ -284,13 +282,67 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  command?: string[];
   args?: string[];
+  resources?: ServiceConfig['resources'];
+  initContainers?: Array<{
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string[];
+    volumeMounts?: Array<{ name: string; mountPath: string }>;
+  }>;
+  volumes?: Array<{
+    name: string;
+    emptyDir?: Record<string, never>;
+    configMap?: { name: string };
+  }>;
   volumeMounts?: Array<{ name: string; mountPath: string }>;
-  volumes?: Array<{ name: string; configMap?: { name: string } }>;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
     : [];
+
+  const container: Record<string, unknown> = {
+    name: opts.name,
+    image: opts.image,
+  };
+
+  if (opts.ports && opts.ports.length > 0) {
+    container.ports = opts.ports.map((p) => ({ containerPort: p }));
+  }
+
+  if (envList.length > 0) {
+    container.env = envList;
+  }
+
+  if (opts.command) {
+    container.command = opts.command;
+  }
+
+  if (opts.args) {
+    container.args = opts.args;
+  }
+
+  if (opts.resources) {
+    container.resources = opts.resources;
+  }
+
+  if (opts.volumeMounts) {
+    container.volumeMounts = opts.volumeMounts;
+  }
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.initContainers && opts.initContainers.length > 0) {
+    podSpec.initContainers = opts.initContainers;
+  }
+
+  if (opts.volumes && opts.volumes.length > 0) {
+    podSpec.volumes = opts.volumes;
+  }
 
   return {
     apiVersion: 'apps/v1',
@@ -319,19 +371,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [
-            {
-              name: opts.name,
-              image: opts.image,
-              ...(opts.args && { args: opts.args }),
-              ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
-              ...(envList.length > 0 && { env: envList }),
-              ...(opts.volumeMounts && { volumeMounts: opts.volumeMounts }),
-            },
-          ],
-          ...(opts.volumes && { volumes: opts.volumes }),
-        },
+        spec: podSpec,
       },
     },
   };
@@ -358,9 +398,9 @@ function createService(name: string, namespace: string, ports: number[]): object
 }
 
 /**
- * Manifest generator for OpenTelemetry Demo
+ * Manifest generator for AWS Retail Store Sample
  */
-export const otelDemoManifests: DemoManifestGenerator = {
+export const awsRetailStoreManifests: DemoManifestGenerator = {
   generate(options: ManifestOptions): string {
     const manifests: object[] = [];
     const namespace = options.config.namespace;
@@ -370,59 +410,12 @@ export const otelDemoManifests: DemoManifestGenerator = {
     // Add common manifests (namespace, collector, etc.)
     manifests.push(...createCommonManifests(options));
 
-    // Flagd ConfigMap
-    manifests.push({
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: 'flagd-config',
-        namespace,
-      },
-      data: {
-        'demo.flagd.json': JSON.stringify(getFlagdConfig(), null, 2),
-      },
-    });
-
     // Get all services for this demo
     const services = options.config.getServices(options.version);
 
     // Deploy each service
     for (const svc of services) {
-      // Special handling for flagd (needs config volume)
-      if (svc.name === 'flagd') {
-        manifests.push(
-          createDeployment({
-            name: svc.name,
-            namespace,
-            demoId,
-            image: svc.image,
-            ports: svc.port ? [svc.port] : [],
-            args: ['start', '--uri', 'file:/etc/flagd/demo.flagd.json', '--port', '8013'],
-            volumeMounts: [{ name: 'config', mountPath: '/etc/flagd' }],
-            volumes: [{ name: 'config', configMap: { name: 'flagd-config' } }],
-          })
-        );
-        manifests.push(createService(svc.name, namespace, svc.port ? [svc.port] : []));
-        continue;
-      }
-
-      // For demo services (not valkey, flagd), add OTLP configuration
-      const isInfraService = ['valkey', 'redis-cart'].includes(svc.name);
-
       let finalEnv = { ...svc.env };
-
-      if (!isInfraService) {
-        // Use HTTP port (4318) for services that don't support gRPC, gRPC port (4317) for others
-        const otlpPort = HTTP_OTLP_SERVICES.has(svc.name) ? '4318' : '4317';
-
-        finalEnv = {
-          ...finalEnv,
-          OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
-          OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
-          OTEL_SERVICE_NAME: svc.name,
-        };
-      }
 
       // Apply scenario overrides (take precedence)
       const serviceEnvOverrides = envOverrides[svc.name] || {};
@@ -436,6 +429,12 @@ export const otelDemoManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          command: svc.command,
+          args: svc.args,
+          resources: svc.resources,
+          initContainers: svc.initContainers,
+          volumes: svc.volumes,
+          volumeMounts: svc.volumeMounts,
         })
       );
 
@@ -444,7 +443,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
       }
     }
 
-    // Frontend NodePort for external access
+    // UI NodePort for external access
     if (options.config.frontendService) {
       manifests.push({
         apiVersion: 'v1',

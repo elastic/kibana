@@ -10,8 +10,6 @@
 import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
-import { HTTP_OTLP_SERVICES, getFlagdConfig } from './config';
-
 /**
  * Creates common Kubernetes resources needed by all demos
  */
@@ -275,7 +273,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
 }
 
 /**
- * Creates a Kubernetes Deployment
+ * Creates a Kubernetes Deployment with resource limits
  */
 function createDeployment(opts: {
   name: string;
@@ -284,13 +282,42 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  command?: string[];
   args?: string[];
-  volumeMounts?: Array<{ name: string; mountPath: string }>;
-  volumes?: Array<{ name: string; configMap?: { name: string } }>;
+  resources?: {
+    requests?: { memory?: string; cpu?: string };
+    limits?: { memory?: string; cpu?: string };
+  };
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
     : [];
+
+  const container: Record<string, unknown> = {
+    name: opts.name,
+    image: opts.image,
+    imagePullPolicy: 'IfNotPresent',
+  };
+
+  if (opts.command) {
+    container.command = opts.command;
+  }
+
+  if (opts.args) {
+    container.args = opts.args;
+  }
+
+  if (opts.ports && opts.ports.length > 0) {
+    container.ports = opts.ports.map((p) => ({ containerPort: p }));
+  }
+
+  if (envList.length > 0) {
+    container.env = envList;
+  }
+
+  if (opts.resources) {
+    container.resources = opts.resources;
+  }
 
   return {
     apiVersion: 'apps/v1',
@@ -320,17 +347,7 @@ function createDeployment(opts: {
           },
         },
         spec: {
-          containers: [
-            {
-              name: opts.name,
-              image: opts.image,
-              ...(opts.args && { args: opts.args }),
-              ...(opts.ports && { ports: opts.ports.map((p) => ({ containerPort: p })) }),
-              ...(envList.length > 0 && { env: envList }),
-              ...(opts.volumeMounts && { volumeMounts: opts.volumeMounts }),
-            },
-          ],
-          ...(opts.volumes && { volumes: opts.volumes }),
+          containers: [container],
         },
       },
     },
@@ -358,9 +375,27 @@ function createService(name: string, namespace: string, ports: number[]): object
 }
 
 /**
- * Manifest generator for OpenTelemetry Demo
+ * Creates the PostgreSQL password secret for the database
  */
-export const otelDemoManifests: DemoManifestGenerator = {
+function createPostgresSecret(namespace: string): object {
+  return {
+    apiVersion: 'v1',
+    kind: 'Secret',
+    metadata: {
+      name: 'postgres-password',
+      namespace,
+    },
+    type: 'Opaque',
+    stringData: {
+      pgpassword: 'postgres',
+    },
+  };
+}
+
+/**
+ * Manifest generator for Rust K8s Demo
+ */
+export const rustK8sDemoManifests: DemoManifestGenerator = {
   generate(options: ManifestOptions): string {
     const manifests: object[] = [];
     const namespace = options.config.namespace;
@@ -370,59 +405,15 @@ export const otelDemoManifests: DemoManifestGenerator = {
     // Add common manifests (namespace, collector, etc.)
     manifests.push(...createCommonManifests(options));
 
-    // Flagd ConfigMap
-    manifests.push({
-      apiVersion: 'v1',
-      kind: 'ConfigMap',
-      metadata: {
-        name: 'flagd-config',
-        namespace,
-      },
-      data: {
-        'demo.flagd.json': JSON.stringify(getFlagdConfig(), null, 2),
-      },
-    });
+    // Add PostgreSQL password secret
+    manifests.push(createPostgresSecret(namespace));
 
     // Get all services for this demo
     const services = options.config.getServices(options.version);
 
     // Deploy each service
     for (const svc of services) {
-      // Special handling for flagd (needs config volume)
-      if (svc.name === 'flagd') {
-        manifests.push(
-          createDeployment({
-            name: svc.name,
-            namespace,
-            demoId,
-            image: svc.image,
-            ports: svc.port ? [svc.port] : [],
-            args: ['start', '--uri', 'file:/etc/flagd/demo.flagd.json', '--port', '8013'],
-            volumeMounts: [{ name: 'config', mountPath: '/etc/flagd' }],
-            volumes: [{ name: 'config', configMap: { name: 'flagd-config' } }],
-          })
-        );
-        manifests.push(createService(svc.name, namespace, svc.port ? [svc.port] : []));
-        continue;
-      }
-
-      // For demo services (not valkey, flagd), add OTLP configuration
-      const isInfraService = ['valkey', 'redis-cart'].includes(svc.name);
-
       let finalEnv = { ...svc.env };
-
-      if (!isInfraService) {
-        // Use HTTP port (4318) for services that don't support gRPC, gRPC port (4317) for others
-        const otlpPort = HTTP_OTLP_SERVICES.has(svc.name) ? '4318' : '4317';
-
-        finalEnv = {
-          ...finalEnv,
-          OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
-          OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
-          OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
-          OTEL_SERVICE_NAME: svc.name,
-        };
-      }
 
       // Apply scenario overrides (take precedence)
       const serviceEnvOverrides = envOverrides[svc.name] || {};
@@ -436,6 +427,9 @@ export const otelDemoManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          command: svc.command,
+          args: svc.args,
+          resources: svc.resources,
         })
       );
 
@@ -460,7 +454,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
           },
           ports: [
             {
-              port: 8080,
+              port: 80,
               targetPort: 8080,
               nodePort: options.config.frontendService.nodePort,
             },
