@@ -37,6 +37,7 @@ import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
+import { T_END, T_START } from '../../generate_esql_query';
 import {
   AUTO_INTERVAL,
   AUTO_TARGET_NUMBER_OF_BUCKETS,
@@ -44,9 +45,7 @@ import {
   getTimeZoneAndInterval,
   hasDateRange,
   restrictedInterval,
-  T_END,
-  T_START,
-} from '../../generate_esql_query';
+} from '../../date_histogram_esql';
 
 const { isValidInterval } = search.aggs;
 

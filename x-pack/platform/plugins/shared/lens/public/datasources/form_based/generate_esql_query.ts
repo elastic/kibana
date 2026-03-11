@@ -7,7 +7,6 @@
 
 import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import { UI_SETTINGS, convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
@@ -28,6 +27,12 @@ import { resolveTimeShift } from './time_shift_utils';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { defaultValue as defaultStaticValue } from './operations/definitions/static_value';
+import {
+  AUTO_INTERVAL,
+  AUTO_TARGET_NUMBER_OF_BUCKETS,
+  getTimeZoneAndInterval,
+  hasDateRange,
+} from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -101,59 +106,10 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   ms: '1ms',
 } as const;
 
-// TODO: Move to another file
 export const T_START = '?_tstart';
 export const T_END = '?_tend';
-export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
-/**
- * Default date histogram interval when auto cannot be used.
- * Both generate_esql_query and date_histogram toESQL use this when:
- * - Date range is missing (no fromDate/toDate), or
- * - Auto calculation returns no interval (generate_esql_query only).
- */
-export const DEFAULT_DATE_HISTOGRAM_INTERVAL = '1h';
+
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
-
-export const AUTO_INTERVAL = 'auto';
-
-export const hasDateRange = (dateRange: DateRange | undefined) => {
-  return dateRange?.fromDate != null && dateRange?.toDate != null;
-};
-
-export function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRestrictions>) {
-  if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
-    return;
-  }
-
-  return (
-    aggregationRestrictions.date_histogram.calendar_interval ||
-    aggregationRestrictions.date_histogram.fixed_interval
-  );
-}
-
-export function getTimeZoneAndInterval(
-  column: DateHistogramIndexPatternColumn,
-  indexPattern: IndexPattern
-) {
-  const usedField = indexPattern.getFieldByName(column.sourceField);
-
-  if (
-    usedField &&
-    usedField.aggregationRestrictions &&
-    usedField.aggregationRestrictions.date_histogram
-  ) {
-    return {
-      interval: restrictedInterval(usedField.aggregationRestrictions) ?? AUTO_INTERVAL,
-      timeZone: usedField.aggregationRestrictions.date_histogram.time_zone,
-      usedField,
-    };
-  }
-  return {
-    usedField: undefined,
-    timeZone: undefined,
-    interval: column.params?.interval ?? AUTO_INTERVAL,
-  };
-}
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
