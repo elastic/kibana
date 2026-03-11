@@ -79,6 +79,8 @@ describe('generateEsqlQuery date histogram', () => {
         params: {},
       };
       const result = generateEsqlQuery(
+        // Cast needed: params.interval is required by the type, but we intentionally
+        // omit it to test the missing-interval (auto) behavior.
         buildAggEntries(dateHistogramCol as DateHistogramIndexPatternColumn),
         buildLayer(dateHistogramCol as DateHistogramIndexPatternColumn),
         mockIndexPattern,
