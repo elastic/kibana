@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  let currentTaskId: string;
 
   describe('task event log', () => {
     beforeEach(async () => {
@@ -23,7 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana-event-log*',
-        query: { bool: { must: [{ match: { 'event.action': 'task-run' } }] } },
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.action': 'task-run' } },
+              { term: { 'kibana.task.id': currentTaskId } },
+            ],
+          },
+        },
         conflicts: 'proceed',
       });
     });
@@ -60,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         taskType: 'sampleTask',
         params: {},
       });
+      currentTaskId = scheduledTask.id;
 
       await runTaskSoon({ id: scheduledTask.id });
 
@@ -92,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         taskType: 'sampleTask',
         params: { failWith: 'Task error' },
       });
+      currentTaskId = scheduledTask.id;
 
       await runTaskSoon({ id: scheduledTask.id });
 
@@ -124,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleRecurringTaskTimingOut',
       });
+      currentTaskId = scheduledTask.id;
 
       await runTaskSoon({ id: scheduledTask.id });
 
@@ -134,7 +145,6 @@ export default function ({ getService }: FtrProviderContext) {
             bool: {
               filter: [
                 { term: { 'event.provider': 'taskManager' } },
-                { term: { 'event.action': 'task-run' } },
                 { term: { 'kibana.task.id': scheduledTask.id } },
               ],
             },
@@ -144,9 +154,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Should log a cancelled event and a success event indicating that the task was not cancelled without an error
         const cancelledEvent = response.hits.hits[0]._source as Record<string, any>;
-        expect(cancelledEvent.event.action).to.eql('task-run');
+        expect(cancelledEvent.event.action).to.eql('task-cancel');
         expect(cancelledEvent.event.provider).to.eql('taskManager');
-        expect(cancelledEvent.event.outcome).to.eql('cancelled');
+        expect(cancelledEvent.message).to.eql(
+          `Task sampleRecurringTaskTimingOut "${scheduledTask.id}" has been cancelled.`
+        );
         expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
 
         const event = response.hits.hits[1]._source as Record<string, any>;
@@ -161,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleRecurringTaskTimingOutWithError',
       });
+      currentTaskId = scheduledTask.id;
 
       await runTaskSoon({ id: scheduledTask.id });
 
@@ -171,7 +184,6 @@ export default function ({ getService }: FtrProviderContext) {
             bool: {
               filter: [
                 { term: { 'event.provider': 'taskManager' } },
-                { term: { 'event.action': 'task-run' } },
                 { term: { 'kibana.task.id': scheduledTask.id } },
               ],
             },
@@ -181,15 +193,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Should log a cancelled event and a failure event indicating that the task was cancelled with an error
         const cancelledEvent = response.hits.hits[0]._source as Record<string, any>;
-        expect(cancelledEvent.event.action).to.eql('task-run');
+        expect(cancelledEvent.event.action).to.eql('task-cancel');
         expect(cancelledEvent.event.provider).to.eql('taskManager');
-        expect(cancelledEvent.event.outcome).to.eql('cancelled');
+        expect(cancelledEvent.message).to.eql(
+          `Task sampleRecurringTaskTimingOutWithError "${scheduledTask.id}" has been cancelled.`
+        );
         expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
 
         const event = response.hits.hits[1]._source as Record<string, any>;
         expect(event.event.action).to.eql('task-run');
         expect(event.event.provider).to.eql('taskManager');
         expect(event.event.outcome).to.eql('failure');
+        expect(event.event.reason).to.eql(`Task "${scheduledTask.id}" was cancelled.`);
         expect(event.kibana.task.id).to.eql(scheduledTask.id);
       });
     });

@@ -189,6 +189,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
   private eventLogger: TaskEventLogger;
+  private isCancelled = false;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -417,13 +418,9 @@ export class TaskManagerRunner implements TaskRunner {
 
       const originalTaskCancel = this.task.cancel;
 
-      const logTaskCancelEvent = () => {
-        this.logTaskRunEvent(
-          this.instance.task,
-          stopTaskTimer(),
-          EVENT_LOG_OUTCOMES.cancel,
-          `Task ${this.taskType} "${this.id}" has been cancelled.`
-        );
+      const logCancelEvent = () => {
+        this.isCancelled = true;
+        this.logTaskCancelEvent(this.instance.task, stopTaskTimer());
       };
       this.task.cancel = async function () {
         abortController.abort();
@@ -433,7 +430,7 @@ export class TaskManagerRunner implements TaskRunner {
           stopUpdatingLongRunningTasks();
         }
 
-        logTaskCancelEvent();
+        logCancelEvent();
 
         if (originalTaskCancel) return originalTaskCancel.call(this);
       };
@@ -1074,6 +1071,7 @@ export class TaskManagerRunner implements TaskRunner {
         duration: runDurationMs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
+        ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
       },
       kibana: {
         task: {
@@ -1084,6 +1082,25 @@ export class TaskManagerRunner implements TaskRunner {
       },
       message,
       ...(error ? { error: errorDetails } : {}),
+    });
+  }
+
+  private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
+    const runDurationMs = taskTiming.stop - taskTiming.start;
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskCancel,
+        duration: runDurationMs,
+        start: new Date(taskTiming.start).toISOString(),
+        end: new Date(taskTiming.stop).toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          scheduled: task.scheduledAt.toISOString(),
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" has been cancelled.`,
     });
   }
 }

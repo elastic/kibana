@@ -51,6 +51,7 @@ const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
+const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -2605,9 +2606,9 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'success',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2649,9 +2650,9 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2687,9 +2688,9 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2739,14 +2740,13 @@ describe('TaskManagerRunner', () => {
 
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
-            action: 'task-run',
+            action: 'task-cancel',
             duration: expect.any(Number),
-            end: expect.any(String),
-            outcome: 'cancelled',
-            start: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: { id, scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2756,9 +2756,10 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
+            reason: `Task "${id}" was cancelled.`,
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2806,14 +2807,13 @@ describe('TaskManagerRunner', () => {
 
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
-            action: 'task-run',
+            action: 'task-cancel',
             duration: expect.any(Number),
-            end: expect.any(String),
-            outcome: 'cancelled',
-            start: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: { id, scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2822,9 +2822,10 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'failure',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
+            reason: `Task "${id}" was cancelled.`,
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2867,14 +2868,13 @@ describe('TaskManagerRunner', () => {
 
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
-            action: 'task-run',
+            action: 'task-cancel',
             duration: expect.any(Number),
-            end: expect.any(String),
-            outcome: 'cancelled',
-            start: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: { id, scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2882,9 +2882,9 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'success',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
@@ -2924,14 +2924,13 @@ describe('TaskManagerRunner', () => {
 
         expect(eventLoggerMock.logEvent).toHaveBeenCalledWith({
           event: {
-            action: 'task-run',
+            action: 'task-cancel',
             duration: expect.any(Number),
-            end: expect.any(String),
-            outcome: 'cancelled',
-            start: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: { id, scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2939,9 +2938,9 @@ describe('TaskManagerRunner', () => {
           event: {
             action: 'task-run',
             duration: expect.any(Number),
-            end: expect.any(String),
+            end: expect.stringMatching(dateRegExp),
             outcome: 'success',
-            start: expect.any(String),
+            start: expect.stringMatching(dateRegExp),
           },
           kibana: {
             task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
