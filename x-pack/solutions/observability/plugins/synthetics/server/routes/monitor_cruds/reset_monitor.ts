@@ -6,14 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import type { MonitorFields } from '../../../common/runtime_types';
-import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { validatePermissions } from './edit_monitor';
+import { ResetMonitorAPI } from './services/reset_monitor_api';
 
 export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -27,91 +23,35 @@ export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => 
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const {
-      request,
-      response,
-      spaceId,
-      server,
-      savedObjectsClient,
-      syntheticsMonitorClient,
-      monitorConfigRepository,
-    } = routeContext;
+    const { request, response, server } = routeContext;
     const { monitorId } = request.params;
     const { force } = request.query;
 
     try {
-      const { decryptedMonitor, normalizedMonitor } = await monitorConfigRepository.getDecrypted(
-        monitorId,
-        spaceId
-      );
-      const monitorAttributes = normalizedMonitor.attributes as MonitorFields;
+      const resetAPI = new ResetMonitorAPI(routeContext, force);
+      const { result, errors } = await resetAPI.execute({ monitorIds: [monitorId] });
 
-      const permissionErr = await validatePermissions(routeContext, monitorAttributes.locations);
-      if (permissionErr) {
-        return response.forbidden({ body: { message: permissionErr } });
-      }
+      const monitorResult = result[0];
 
-      const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
-
-      if (force) {
-        const monitorAsDelete = {
-          ...monitorAttributes,
-          id: monitorAttributes[ConfigKey.MONITOR_QUERY_ID] || normalizedMonitor.id,
-          updated_at: normalizedMonitor.updated_at ?? '',
-          created_at: normalizedMonitor.created_at ?? '',
-        };
-
-        await syntheticsMonitorClient.deleteMonitors([monitorAsDelete], spaceId);
-
-        const [, syncErrors] = await syntheticsMonitorClient.addMonitors(
-          [{ monitor: monitorAttributes, id: normalizedMonitor.id }],
-          allPrivateLocations,
-          spaceId
-        );
-
-        if (syncErrors && syncErrors.length > 0) {
-          return response.ok({
-            body: {
-              message: 'error pushing monitor to the service',
-              attributes: { errors: syncErrors },
-            },
-          });
-        }
-      } else {
-        const { failedPolicyUpdates, publicSyncErrors } =
-          await syntheticsMonitorClient.editMonitors(
-            [
-              {
-                monitor: monitorAttributes,
-                id: normalizedMonitor.id,
-                decryptedPreviousMonitor: decryptedMonitor,
-              },
-            ],
-            allPrivateLocations,
-            spaceId
-          );
-
-        const errors = [
-          ...(publicSyncErrors ?? []),
-          ...(failedPolicyUpdates ?? []).filter((u) => u.error).map((u) => u.error),
-        ];
-
-        if (errors.length > 0) {
-          return response.ok({
-            body: {
-              message: 'error pushing monitor to the service',
-              attributes: { errors },
-            },
-          });
-        }
-      }
-
-      return { id: normalizedMonitor.id, reset: true };
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      if (monitorResult && !monitorResult.reset && monitorResult.error?.includes('not found')) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
 
+      if (monitorResult && !monitorResult.reset && monitorResult.error) {
+        return response.forbidden({ body: { message: monitorResult.error } });
+      }
+
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: {
+            message: 'error pushing monitor to the service',
+            attributes: { errors },
+          },
+        });
+      }
+
+      return { id: monitorResult?.id ?? monitorId, reset: true };
+    } catch (error) {
       server.logger.error(`Unable to reset Synthetics monitor ${monitorId}: ${error.message}`, {
         error,
       });

@@ -83,6 +83,17 @@ export const resetMonitorAPI = async ({
   return await apiService.post(url, undefined, { force });
 };
 
+export const resetMonitorBulkAPI = async ({
+  ids,
+}: {
+  ids: string[];
+}): Promise<{
+  result: Array<{ id: string; reset: boolean; error?: string }>;
+  errors?: unknown[];
+}> => {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET, { ids });
+};
+
 export const deletePackagePolicy = async (
   packagePolicyId: string
 ): Promise<{
