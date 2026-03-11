@@ -593,12 +593,7 @@ describe('features', () => {
         'bulkDelete',
         'unsnooze',
         'runSoon',
-        'createGapAutoFillScheduler',
-        'updateGapAutoFillScheduler',
-        'deleteGapAutoFillScheduler',
       ],
-      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [
@@ -771,12 +766,7 @@ describe('features', () => {
         'bulkDelete',
         'unsnooze',
         'runSoon',
-        'createGapAutoFillScheduler',
-        'updateGapAutoFillScheduler',
-        'deleteGapAutoFillScheduler',
       ],
-      ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [
