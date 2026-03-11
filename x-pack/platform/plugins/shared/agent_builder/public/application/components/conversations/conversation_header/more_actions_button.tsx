@@ -22,6 +22,7 @@ import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import { css } from '@emotion/react';
 import { useIsAgentReadOnly } from '../../../hooks/agents/use_is_agent_read_only';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
   useHasActiveConversation,
@@ -70,6 +71,9 @@ const fullscreenLabels = {
   }),
   tools: i18n.translate('xpack.agentBuilder.conversationActions.tools', {
     defaultMessage: 'View all tools',
+  }),
+  skills: i18n.translate('xpack.agentBuilder.conversationActions.skills', {
+    defaultMessage: 'View all skills',
   }),
   sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
     defaultMessage: 'View all sources',
@@ -132,6 +136,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     services: { application, uiSettings },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
 
   const closePopover = () => {
@@ -225,6 +230,19 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
+    ...(isExperimentalFeaturesEnabled
+      ? [
+          <EuiContextMenuItem
+            key="skills"
+            icon="bullseye"
+            onClick={closePopover}
+            href={createAgentBuilderUrl(appPaths.skills.list)}
+            data-test-subj="agentBuilderActionsSkills"
+          >
+            {fullscreenLabels.skills}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(isDataSourcesEnabled
       ? [
           <EuiContextMenuItem
