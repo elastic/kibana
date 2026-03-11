@@ -25,12 +25,7 @@ import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
 import { combineDateAndTime, formatDateRange, toLocalPreciseString } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-import {
-  DEFAULT_END_HOUR,
-  DEFAULT_END_MINUTE,
-  DEFAULT_START_HOUR,
-  DEFAULT_START_MINUTE,
-} from './calendar_panel.constants';
+import { DEFAULT_END_TIME, DEFAULT_START_TIME } from './calendar_panel.constants';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
@@ -77,19 +72,12 @@ export function CalendarPanel() {
   }, [setText]);
 
   const getStartDate = useCallback(
-    (date: Date) =>
-      combineDateAndTime(
-        date,
-        timeSourceRef.current.startDate,
-        DEFAULT_START_HOUR,
-        DEFAULT_START_MINUTE
-      ),
+    (date: Date) => combineDateAndTime(date, timeSourceRef.current.startDate, DEFAULT_START_TIME),
     []
   );
 
   const getEndDate = useCallback(
-    (date: Date) =>
-      combineDateAndTime(date, timeSourceRef.current.endDate, DEFAULT_END_HOUR, DEFAULT_END_MINUTE),
+    (date: Date) => combineDateAndTime(date, timeSourceRef.current.endDate, DEFAULT_END_TIME),
     []
   );
 

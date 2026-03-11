@@ -134,24 +134,37 @@ export function formatDateRange(start: Date, end: Date): string {
 }
 
 /**
+ * Parses a `HH:mm:ss.SSS` time string into its numeric components.
+ */
+function parseTimeString(time: string): [number, number, number, number] {
+  const [hms, ms = '0'] = time.split('.');
+  const [h = '0', m = '0', s = '0'] = hms.split(':');
+  return [Number(h), Number(m), Number(s), Number(ms)];
+}
+
+/**
  * Combines date (year/month/day) from `date` with time from `timeSource`.
- * Falls back to defaults when timeSource is null.
+ * Falls back to `defaultTime` (`HH:mm:ss.SSS`) when timeSource is null.
  */
 export function combineDateAndTime(
   date: Date,
   timeSource: Date | null,
-  defaultHour = 0,
-  defaultMinute = 0
+  defaultTime = '00:00:00.000'
 ): Date {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    timeSource?.getHours() ?? defaultHour,
-    timeSource?.getMinutes() ?? defaultMinute,
-    timeSource?.getSeconds() ?? 0,
-    timeSource?.getMilliseconds() ?? 0
-  );
+  if (timeSource) {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      timeSource.getHours(),
+      timeSource.getMinutes(),
+      timeSource.getSeconds(),
+      timeSource.getMilliseconds()
+    );
+  }
+
+  const [h, m, s, ms] = parseTimeString(defaultTime);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m, s, ms);
 }
 
 /**

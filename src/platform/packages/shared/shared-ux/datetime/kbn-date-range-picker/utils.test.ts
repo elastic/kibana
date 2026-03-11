@@ -200,23 +200,25 @@ describe('combineDateAndTime', () => {
     expect(result.getMilliseconds()).toBe(123);
   });
 
-  it('uses default hour/minute when timeSource is null', () => {
+  it('uses defaultTime when timeSource is null', () => {
     const date = new Date(2026, 1, 10, 12, 0, 0, 0);
-    const result = combineDateAndTime(date, null, 23, 30);
+    const result = combineDateAndTime(date, null, '23:59:59.999');
 
     expect(result.getDate()).toBe(10);
     expect(result.getHours()).toBe(23);
-    expect(result.getMinutes()).toBe(30);
-    expect(result.getSeconds()).toBe(0);
-    expect(result.getMilliseconds()).toBe(0);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
   });
 
-  it('uses 0 for defaults when not specified', () => {
+  it('uses 00:00:00.000 when defaultTime is not specified', () => {
     const date = new Date(2026, 1, 10, 12, 0, 0, 0);
     const result = combineDateAndTime(date, null);
 
     expect(result.getHours()).toBe(0);
     expect(result.getMinutes()).toBe(0);
+    expect(result.getSeconds()).toBe(0);
+    expect(result.getMilliseconds()).toBe(0);
   });
 
   it('preserves seconds and milliseconds from timeSource', () => {

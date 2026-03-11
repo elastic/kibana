@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Default hour for start date when no time source is available */
-export const DEFAULT_START_HOUR = 0;
+/** Default time for start date when no time source is available. */
+export const DEFAULT_START_TIME = '00:00:00.000';
 
-/** Default minute for start date when no time source is available */
-export const DEFAULT_START_MINUTE = 0;
-
-/** Default hour for end date when no time source is available */
-export const DEFAULT_END_HOUR = 23;
-
-/** Default minute for end date when no time source is available */
-export const DEFAULT_END_MINUTE = 59;
+/** Default time for end date when no time source is available. */
+export const DEFAULT_END_TIME = '23:59:59.999';
