@@ -83,6 +83,7 @@ export class EntityStorePlugin
           logger: this.logger,
           config,
           core,
+          analytics: createReportEvent(core.analytics),
         }),
     };
   }

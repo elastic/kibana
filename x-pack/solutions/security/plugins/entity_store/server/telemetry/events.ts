@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
 
 // ------------------------------------
 //  Event types
@@ -25,6 +26,12 @@ interface InitializationFailureEvent {
 interface DeletionEvent {
   entityType: string;
   namespace: string;
+}
+
+interface EntityMaintainerEvent {
+  id: string;
+  namespace?: string;
+  type: EntityMaintainerTelemetryEventType;
 }
 
 // ------------------------------------
@@ -85,6 +92,31 @@ export const ENTITY_STORE_DELETION_EVENT = {
   },
 } as const satisfies EventTypeOpts<DeletionEvent>;
 
+export const ENTITY_MAINTAINER_EVENT = {
+  eventType: 'entity_maintainer',
+  schema: {
+    id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity maintainer identifier',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the maintainer runs (e.g. "default")',
+        optional: true,
+      },
+    },
+    type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityMaintainerEvent>;
+
 // ------------------------------------
 // Registration
 // ------------------------------------
@@ -93,6 +125,7 @@ const events = [
   ENTITY_STORE_INITIALIZATION_EVENT,
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
   ENTITY_STORE_DELETION_EVENT,
+  ENTITY_MAINTAINER_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
@@ -109,6 +142,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_INITIALIZATION_EVENT.eventType]: InitializationEvent;
   [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEvent;
   [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
+  [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
