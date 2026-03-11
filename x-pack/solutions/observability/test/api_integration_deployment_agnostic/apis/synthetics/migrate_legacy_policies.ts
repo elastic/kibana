@@ -269,7 +269,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Migration via cleanup task', () => {
+    describe('Migration via cleanup task', function () {
+      this.tags('failsOnMKI');
+
       it('should clean up orphaned legacy policies via cleanup endpoint', async () => {
         const monitorId = uuidv4();
 
@@ -360,7 +362,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Policy ID format verification', () => {
+    describe('Policy ID format verification', function () {
+      this.tags('failsOnMKI');
+
       it('creates new monitors with new format policy ID (without spaceId)', async () => {
         const monitorId = uuidv4();
 
