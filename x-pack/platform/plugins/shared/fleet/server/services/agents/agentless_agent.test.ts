@@ -85,6 +85,7 @@ jest.mock('@kbn/server-http-tools', () => ({
 describe('Agentless Agent service', () => {
   beforeEach(() => {
     axios.isAxiosError = jest.requireActual('axios').isAxiosError;
+    axios.AxiosError = jest.requireActual('axios').AxiosError;
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);

@@ -116,6 +116,9 @@ export interface FleetConfigType {
     interval: string;
     maxPoliciesPerRun: number;
   };
+  unenrollInactiveAgents?: {
+    taskInterval?: string;
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

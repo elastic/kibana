@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.enableExperimental=${JSON.stringify(['enableAutomaticAgentUpgrades'])}`,
         `--xpack.fleet.autoUpgrades.taskInterval=30s`,
         `--xpack.fleet.autoUpgrades.retryDelays=${JSON.stringify(['1m'])}`,
+        `--xpack.fleet.unenrollInactiveAgents.taskInterval=10s`,
       ],
     },
   };
