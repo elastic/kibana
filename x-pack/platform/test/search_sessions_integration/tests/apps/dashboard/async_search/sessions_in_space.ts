@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -61,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Check that session is restored
         await dashboardExpect.noErrorEmbeddablesPresent();
-        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
+        await toasts.assertCount(0); // no session restoration related warnings
       });
     });
     describe('Disabled storing search sessions', () => {
