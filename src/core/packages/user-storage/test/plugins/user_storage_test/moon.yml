@@ -16,7 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/core/packages/user-storage/server-internal/test/plugins/user_storage_test
+    sourceRoot: src/core/packages/user-storage/test/plugins/user_storage_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/zod'

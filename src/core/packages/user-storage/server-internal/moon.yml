@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/core-user-storage-common'
   - '@kbn/core-user-storage-server'
-  - '@kbn/scout'
 tags:
   - shared-server
   - package
