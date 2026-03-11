@@ -81,13 +81,13 @@ export const normalizeEntityId = (
   return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
 };
 
-const getColumnValue = (
+const getRowValue = (
   columns: Array<{ name: string }>,
-  values: unknown[][],
+  row: unknown[],
   columnName: string
 ): unknown => {
   const idx = columns.findIndex((col) => col.name === columnName);
-  return idx >= 0 ? values[0][idx] : undefined;
+  return idx >= 0 ? row[idx] : undefined;
 };
 interface GetAlertIdsFromRiskScoreIndexParams {
   entityId: string;
@@ -185,7 +185,7 @@ const findEntityById = async ({
 
   if (values.length === 0) {
     const rlikePattern = escapeEsqlRlikePattern(entityId);
-    const likeQuery = `FROM ${entityIndex} | WHERE entity.id RLIKE ".*${rlikePattern}.*" | LIMIT 1`;
+    const likeQuery = `FROM ${entityIndex} | WHERE entity.id RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
     const { columns: likeColumns, values: likeValues } = await executeEsql({
       query: likeQuery,
       esClient,
@@ -194,6 +194,102 @@ const findEntityById = async ({
   }
 
   return { query, columns, values };
+};
+
+interface EnrichEntityResultParams {
+  row: unknown[];
+  columns: Array<{ name: string; type: string }>;
+  query: string;
+  date?: string;
+  interval?: string;
+  spaceId: string;
+  esClient: ElasticsearchClient;
+}
+
+const enrichEntityResult = async ({
+  row,
+  columns,
+  query,
+  date,
+  interval,
+  spaceId,
+  esClient,
+}: EnrichEntityResultParams) => {
+  const rowEntityId = String(getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD) ?? '');
+  const escapedRowEntityId = escapeEsqlString(rowEntityId);
+
+  // date takes full priority: skip risk inputs and return the profile for the matching calendar day
+  if (date != null) {
+    const { start, end } = dateToUtcDayRange(date);
+    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
+      spaceId
+    )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= "${start}" AND @timestamp <= "${end}" | LIMIT 1`;
+    const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient });
+    const profileHistory = snapshotResponse.values.map((r) =>
+      Object.fromEntries(snapshotResponse.columns.map((col, i) => [col.name, r[i]]))
+    );
+    return {
+      tool_result_id: getToolResultId(),
+      type: ToolResultType.esqlResults,
+      data: {
+        query,
+        columns: [...columns, { name: 'profile_history', type: 'nested' }],
+        values: [[...row, JSON.stringify(profileHistory)]],
+      },
+    };
+  }
+
+  let resultColumns = columns;
+  let resultRow = [...row];
+
+  // Check if entity has a risk score; if so, fetch inputs from the risk score index
+  const riskScoreNorm = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD);
+  if (riskScoreNorm != null) {
+    const esType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
+    const esId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
+    if (esType != null && esId != null) {
+      const alertIds = await getAlertIdsFromRiskScoreIndex({
+        esClient,
+        spaceId,
+        entityId: String(esId),
+        entityType: String(esType),
+      });
+      if (alertIds.length > 0) {
+        const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+        const escapedIds = alertIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
+        const keepFields = Array.from(new Set(['_id', '_index', ...ESSENTIAL_ALERT_FIELDS])).join(
+          ', '
+        );
+        const alertsQuery = `FROM ${alertsIndex} METADATA _id, _index | WHERE _id IN (${escapedIds}) | KEEP ${keepFields} | LIMIT ${alertIds.length}`;
+        const alertsResponse = await executeEsql({ query: alertsQuery, esClient });
+        const riskScoreInputs = alertsResponse.values.map((r) =>
+          Object.fromEntries(alertsResponse.columns.map((col, i) => [col.name, r[i]]))
+        );
+        resultColumns = [...columns, { name: 'risk_score_inputs', type: 'nested' }];
+        resultRow = [...row, JSON.stringify(riskScoreInputs)];
+      }
+    }
+  }
+
+  if (interval) {
+    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
+      spaceId
+    )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= ${intervalToEsql(
+      interval
+    )} | SORT @timestamp DESC | LIMIT 100`;
+    const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient });
+    const profileHistory = snapshotResponse.values.map((r) =>
+      Object.fromEntries(snapshotResponse.columns.map((col, i) => [col.name, r[i]]))
+    );
+    resultColumns = [...resultColumns, { name: 'profile_history', type: 'nested' }];
+    resultRow = [...resultRow, JSON.stringify(profileHistory)];
+  }
+
+  return {
+    tool_result_id: getToolResultId(),
+    type: ToolResultType.esqlResults,
+    data: { query, columns: resultColumns, values: [resultRow] },
+  };
 };
 
 export const getEntityTool = (
@@ -279,105 +375,13 @@ export const getEntityTool = (
           };
         }
 
-        const resolvedEntityId = String(
-          getColumnValue(columns, values, ENTITY_STORE_ENTITY_ID_FIELD) ?? normalizedEntityId
-        );
-        const resolvedEscapedEntityId = escapeEsqlString(resolvedEntityId);
-
-        // date takes full priority: skip risk inputs and return the profile for the matching calendar day
-        if (date != null) {
-          const { start, end } = dateToUtcDayRange(date);
-          const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-            spaceId
-          )} | WHERE entity.id == "${resolvedEscapedEntityId}" AND @timestamp >= "${start}" AND @timestamp <= "${end}" | LIMIT 1`;
-          const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient: client });
-
-          const profileHistory = snapshotResponse.values.map((row) =>
-            Object.fromEntries(snapshotResponse.columns.map((col, i) => [col.name, row[i]]))
-          );
-
-          const dateResultColumns = [...columns, { name: 'profile_history', type: 'nested' }];
-          const dateResultValues = [[...values[0], JSON.stringify(profileHistory)]];
-
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.esqlResults,
-                data: { query, columns: dateResultColumns, values: dateResultValues },
-              },
-            ],
-          };
-        }
-
-        let resultColumns = columns;
-        let resultValues = values;
-
-        // Check if entity has a risk score; if so, fetch inputs from the risk score index
-        const riskScoreNorm = getColumnValue(
-          columns,
-          values,
-          ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD
+        const enrichedResults = await Promise.all(
+          values.map((row) =>
+            enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
+          )
         );
 
-        if (riskScoreNorm != null) {
-          const esType = getColumnValue(columns, values, ENTITY_STORE_ENTITY_TYPE_FIELD);
-          const esId = getColumnValue(columns, values, ENTITY_STORE_ENTITY_ID_FIELD);
-
-          if (esType != null && esId != null) {
-            const alertIds = await getAlertIdsFromRiskScoreIndex({
-              esClient: client,
-              spaceId,
-              entityId: String(esId),
-              entityType: String(esType),
-            });
-
-            if (alertIds.length > 0) {
-              const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-              const escapedIds = alertIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
-              const keepFields = Array.from(
-                new Set(['_id', '_index', ...ESSENTIAL_ALERT_FIELDS])
-              ).join(', ');
-
-              const alertsQuery = `FROM ${alertsIndex} METADATA _id, _index | WHERE _id IN (${escapedIds}) | KEEP ${keepFields} | LIMIT ${alertIds.length}`;
-              const alertsResponse = await executeEsql({ query: alertsQuery, esClient: client });
-
-              const riskScoreInputs = alertsResponse.values.map((row) =>
-                Object.fromEntries(alertsResponse.columns.map((col, i) => [col.name, row[i]]))
-              );
-
-              resultColumns = [...columns, { name: 'risk_score_inputs', type: 'nested' }];
-              resultValues = [[...values[0], JSON.stringify(riskScoreInputs)]];
-            }
-          }
-        }
-
-        if (interval) {
-          // Fetch entity snapshot data
-          const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-            spaceId
-          )} | WHERE entity.id == "${resolvedEscapedEntityId}" AND @timestamp >= ${intervalToEsql(
-            interval
-          )} | SORT @timestamp DESC | LIMIT 100`;
-          const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient: client });
-
-          const profileHistory = snapshotResponse.values.map((row) =>
-            Object.fromEntries(snapshotResponse.columns.map((col, i) => [col.name, row[i]]))
-          );
-
-          resultColumns = [...resultColumns, { name: 'profile_history', type: 'nested' }];
-          resultValues = [[...resultValues[0], JSON.stringify(profileHistory)]];
-        }
-
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.esqlResults,
-              data: { query, columns: resultColumns, values: resultValues },
-            },
-          ],
-        };
+        return { results: enrichedResults };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {

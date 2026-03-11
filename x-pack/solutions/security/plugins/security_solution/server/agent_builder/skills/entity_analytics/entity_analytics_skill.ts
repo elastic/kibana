@@ -63,6 +63,10 @@ Use this skill when:
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
     - profile_history - historical snapshot profiles for this entity over a specified time interval
+    This tool may return multiple results if an exact match for the entity ID is not found.
+    If multiple results are returned:
+      - Provide a summary of the FIRST result.
+      - You MUST mention the other results found and provide the COMPLETE entity ID for each
 
 ### Search Entities Tool
 - \`security.search_entities\` - Search the entity store for security entities (host, user, service, generic) matching specific criteria.

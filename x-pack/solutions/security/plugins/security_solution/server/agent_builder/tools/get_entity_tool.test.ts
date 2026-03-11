@@ -515,7 +515,9 @@ describe('getEntityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(executeEsql).toHaveBeenCalledTimes(2);
-      expect((executeEsql as jest.Mock).mock.calls[1][0].query).toContain('RLIKE ".*server1.*"');
+      const rlikeQuery = (executeEsql as jest.Mock).mock.calls[1][0].query;
+      expect(rlikeQuery).toContain('RLIKE ".*server1.*"');
+      expect(rlikeQuery).toContain('LIMIT 5');
       expect(result.results).toHaveLength(1);
       const esqlResult = result.results[0] as EsqlResults;
       expect(esqlResult.type).toBe(ToolResultType.esqlResults);
@@ -578,6 +580,102 @@ describe('getEntityTool', () => {
       expect(executeEsql).toHaveBeenCalledTimes(3);
       const snapshotQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
       expect(snapshotQuery).toContain('WHERE entity.id == "host:server1"');
+    });
+
+    it('returns one result per RLIKE entity with profile_history when interval is provided', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 2. RLIKE fallback — 2 entities (no risk score, so no extra enrichment calls)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+          ],
+          values: [
+            ['host:server1', 'server1'],
+            ['host:server10', 'server10'],
+          ],
+        })
+        // 3. Interval snapshot for host:server1
+        .mockResolvedValueOnce({
+          columns: [{ name: '@timestamp', type: 'date' }],
+          values: [['2024-01-01T00:00:00Z']],
+        })
+        // 4. Interval snapshot for host:server10
+        .mockResolvedValueOnce({
+          columns: [{ name: '@timestamp', type: 'date' }],
+          values: [['2024-01-02T00:00:00Z']],
+        });
+
+      const result = (await tool.handler(
+        { entityId: 'server', interval: '7d' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(executeEsql).toHaveBeenCalledTimes(4);
+      expect(result.results).toHaveLength(2);
+
+      const [r1, r2] = result.results as EsqlResults[];
+      expect(r1.type).toBe(ToolResultType.esqlResults);
+      expect(r2.type).toBe(ToolResultType.esqlResults);
+
+      expect(r1.data.values).toHaveLength(1);
+      expect(r2.data.values).toHaveLength(1);
+
+      expect(r1.data.columns.map((c) => c.name)).toContain('profile_history');
+      expect(r2.data.columns.map((c) => c.name)).toContain('profile_history');
+
+      // Each snapshot query uses the entity.id from the respective RLIKE result row
+      const snapshotCalls = (executeEsql as jest.Mock).mock.calls.slice(2);
+      expect(snapshotCalls[0][0].query).toContain('WHERE entity.id == "host:server1"');
+      expect(snapshotCalls[1][0].query).toContain('WHERE entity.id == "host:server10"');
+    });
+
+    it('returns one result per RLIKE entity when date is provided with early exit', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 2. RLIKE fallback — 2 entities (with risk score; date path exits before risk score fetch)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.risk.calculated_score_norm', type: 'double' },
+          ],
+          values: [
+            ['host:server1', 'server1', 75.5],
+            ['host:server10', 'server10', 60.0],
+          ],
+        })
+        // 3. Date snapshot for host:server1
+        .mockResolvedValueOnce({
+          columns: [{ name: '@timestamp', type: 'date' }],
+          values: [['2024-01-15T10:00:00Z']],
+        })
+        // 4. Date snapshot for host:server10
+        .mockResolvedValueOnce({
+          columns: [{ name: '@timestamp', type: 'date' }],
+          values: [['2024-01-15T11:00:00Z']],
+        });
+
+      const result = (await tool.handler(
+        { entityId: 'server', date: '2024-01-15T00:00:00Z' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(executeEsql).toHaveBeenCalledTimes(4);
+      expect(result.results).toHaveLength(2);
+
+      const [r1, r2] = result.results as EsqlResults[];
+      expect(r1.type).toBe(ToolResultType.esqlResults);
+      expect(r2.type).toBe(ToolResultType.esqlResults);
+
+      // Date path: profile_history column, no risk_score_inputs
+      expect(r1.data.columns.map((c) => c.name)).toContain('profile_history');
+      expect(r2.data.columns.map((c) => c.name)).toContain('profile_history');
+      expect(r1.data.columns.map((c) => c.name)).not.toContain('risk_score_inputs');
+      expect(r2.data.columns.map((c) => c.name)).not.toContain('risk_score_inputs');
     });
 
     it('returns error result when ES|QL query fails', async () => {
