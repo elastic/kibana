@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { IconSparkles } from '../../../../../common/icons/sparkles';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
+import { TagsBadge } from './tags_badge';
 import { AssigneesBadge } from './assignees_badge';
 
 export const EXPAND_BUTTON_ARIAL_LABEL = i18n.translate(
@@ -99,6 +100,11 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
                 >
                   <RuleStatus value={attack.alertWorkflowStatus} />
                 </EuiFlexItem>
+                {attack.tags && attack.tags.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <TagsBadge tags={attack.tags} />
+                  </EuiFlexItem>
+                )}
                 {attack.assignees && attack.assignees.length > 0 && (
                   <EuiFlexItem
                     grow={false}

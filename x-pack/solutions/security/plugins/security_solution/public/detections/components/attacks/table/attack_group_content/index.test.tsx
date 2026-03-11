@@ -88,6 +88,33 @@ describe('AttackGroupContent', () => {
     expect(getByTestId(`test_id${ATTACK_TITLE_TEST_ID_SUFFIX}`)).toBeEmptyDOMElement();
   });
 
+  it('should render tags badge when attack has tags', () => {
+    const attackWithTags = { ...mockAttack, tags: ['tag1', 'tag2'] };
+    const { getByTestId } = render(
+      <AttackGroupContent
+        attack={attackWithTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
+    );
+
+    expect(getByTestId('attack-tags-badge')).toBeInTheDocument();
+    expect(getByTestId('attack-tags-badgeDisplayPopoverButton')).toHaveTextContent('2');
+  });
+
+  it('should not render tags badge when attack has no tags', () => {
+    const attackWithNoTags = { ...mockAttack, tags: [] };
+    const { queryByTestId } = render(
+      <AttackGroupContent
+        attack={attackWithNoTags}
+        dataTestSubj="test_id"
+        openAttackDetailsFlyout={jest.fn()}
+      />
+    );
+
+    expect(queryByTestId('attack-tags-badge')).not.toBeInTheDocument();
+  });
+
   it('should show anonymized values in title when showAnonymized is true', () => {
     const { getByTestId } = render(
       <AttackGroupContent
