@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Get Scheduled Execution Details Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    ScheduledExecutionDetails:
+      type: object
+      required:
+        - scheduleId
+        - executionCount
+        - packId
+        - packName
+        - queryName
+        - queryText
+        - timestamp
+        - agentCount
+        - successCount
+        - errorCount
+        - totalRows
+      properties:
+        scheduleId:
+          description: 'The schedule ID for the scheduled query.'
+          type: string
+        executionCount:
+          description: 'The execution count for this scheduled query run.'
+          type: integer
+        packId:
+          description: 'The ID of the pack containing the query.'
+          type: string
+        packName:
+          description: 'The name of the pack containing the query.'
+          type: string
+        queryName:
+          description: 'The name of the query within the pack.'
+          type: string
+        queryText:
+          description: 'The SQL query that was executed.'
+          type: string
+        timestamp:
+          description: 'The timestamp of the most recent response for this execution.'
+          type: string
+        agentCount:
+          description: 'The number of unique agents that responded.'
+          type: integer
+        successCount:
+          description: 'The number of successful agent responses.'
+          type: integer
+        errorCount:
+          description: 'The number of agent responses with errors.'
+          type: integer
+        totalRows:
+          description: 'The total number of result rows returned across all agents.'
+          type: integer
+
+    GetScheduledExecutionDetailsResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ScheduledExecutionDetails'
+      example:
+        data:
+          scheduleId: 'pack_my_pack_uptime'
+          executionCount: 3
+          packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+          packName: 'My Pack'
+          queryName: 'uptime'
+          queryText: 'select * from uptime;'
+          timestamp: '2024-07-26T09:00:00.000Z'
+          agentCount: 10
+          successCount: 9
+          errorCount: 1
+          totalRows: 100

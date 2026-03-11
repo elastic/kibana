@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Get Scheduled Action Results Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    ScheduledActionResultsAggregations:
+      type: object
+      properties:
+        totalRowCount:
+          description: 'The total number of result rows across all agents.'
+          type: integer
+        totalResponded:
+          description: 'The total number of agents that responded.'
+          type: integer
+        successful:
+          description: 'The number of agents that completed successfully.'
+          type: integer
+        failed:
+          description: 'The number of agents that returned errors.'
+          type: integer
+        pending:
+          description: 'The number of agents with pending responses.'
+          type: integer
+
+    GetScheduledActionResultsResponse:
+      type: object
+      properties:
+        edges:
+          description: 'The paginated list of per-agent action results.'
+          type: array
+          items:
+            type: object
+        total:
+          description: 'The total number of action results.'
+          type: integer
+        currentPage:
+          description: 'The current page number (zero-based).'
+          type: integer
+        pageSize:
+          description: 'The number of results per page.'
+          type: integer
+        totalPages:
+          description: 'The total number of pages.'
+          type: integer
+        aggregations:
+          $ref: '#/components/schemas/ScheduledActionResultsAggregations'
+        inspect:
+          description: 'Debug/inspection data for the search query.'
+          type: object
+      example:
+        edges: [{}]
+        total: 10
+        currentPage: 0
+        pageSize: 20
+        totalPages: 1
+        aggregations:
+          totalRowCount: 42
+          totalResponded: 10
+          successful: 9
+          failed: 1
+          pending: 0

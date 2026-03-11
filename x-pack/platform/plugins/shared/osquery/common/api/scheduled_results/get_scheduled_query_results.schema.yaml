@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: Get Scheduled Query Results Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    GetScheduledQueryResultsResponse:
+      type: object
+      description: 'The response for getting scheduled query results.'
+      properties: {}
+      example:
+        data:
+          total: 2
+          edges: [{}, {}]
