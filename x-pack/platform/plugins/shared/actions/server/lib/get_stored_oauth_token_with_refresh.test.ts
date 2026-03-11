@@ -42,13 +42,13 @@ const refreshResponse = {
   refreshTokenExpiresIn: 604800,
 };
 
-const doRefresh = jest.fn();
+const refreshFn = jest.fn();
 
 const baseOpts = {
   connectorId: 'connector-1',
   logger,
   connectorTokenClient,
-  doRefresh,
+  refreshFn,
 };
 
 let clock: sinon.SinonFakeTimers;
@@ -73,7 +73,7 @@ describe('getStoredTokenWithRefresh', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         'Errors fetching connector token for connectorId: connector-1'
       );
-      expect(doRefresh).not.toHaveBeenCalled();
+      expect(refreshFn).not.toHaveBeenCalled();
     });
 
     it('returns null and warns when no token is stored', async () => {
@@ -85,10 +85,10 @@ describe('getStoredTokenWithRefresh', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         'No access token found for connectorId: connector-1. User must complete OAuth authorization flow.'
       );
-      expect(doRefresh).not.toHaveBeenCalled();
+      expect(refreshFn).not.toHaveBeenCalled();
     });
 
-    it('returns the stored token without calling doRefresh when it has not expired', async () => {
+    it('returns the stored token without calling refreshFn when it has not expired', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: validToken,
@@ -97,7 +97,7 @@ describe('getStoredTokenWithRefresh', () => {
       const result = await getStoredTokenWithRefresh(baseOpts);
 
       expect(result).toBe('stored-access-token');
-      expect(doRefresh).not.toHaveBeenCalled();
+      expect(refreshFn).not.toHaveBeenCalled();
     });
 
     it('treats a token with no expiresAt as never-expiring', async () => {
@@ -109,7 +109,7 @@ describe('getStoredTokenWithRefresh', () => {
       const result = await getStoredTokenWithRefresh(baseOpts);
 
       expect(result).toBe('stored-access-token');
-      expect(doRefresh).not.toHaveBeenCalled();
+      expect(refreshFn).not.toHaveBeenCalled();
     });
   });
 
@@ -145,16 +145,16 @@ describe('getStoredTokenWithRefresh', () => {
       );
     });
 
-    it('calls doRefresh with the stored refresh token when the access token is expired', async () => {
+    it('calls refreshFn with the stored refresh token when the access token is expired', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockResolvedValueOnce(refreshResponse);
+      refreshFn.mockResolvedValueOnce(refreshResponse);
 
       await getStoredTokenWithRefresh(baseOpts);
 
-      expect(doRefresh).toHaveBeenCalledWith('stored-refresh-token');
+      expect(refreshFn).toHaveBeenCalledWith('stored-refresh-token');
     });
 
     it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
@@ -162,7 +162,7 @@ describe('getStoredTokenWithRefresh', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockResolvedValueOnce(refreshResponse);
+      refreshFn.mockResolvedValueOnce(refreshResponse);
 
       const result = await getStoredTokenWithRefresh(baseOpts);
 
@@ -174,7 +174,7 @@ describe('getStoredTokenWithRefresh', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockResolvedValueOnce(refreshResponse);
+      refreshFn.mockResolvedValueOnce(refreshResponse);
 
       await getStoredTokenWithRefresh(baseOpts);
 
@@ -193,7 +193,7 @@ describe('getStoredTokenWithRefresh', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockResolvedValueOnce({ ...refreshResponse, refreshToken: undefined });
+      refreshFn.mockResolvedValueOnce({ ...refreshResponse, refreshToken: undefined });
 
       await getStoredTokenWithRefresh(baseOpts);
 
@@ -209,22 +209,22 @@ describe('getStoredTokenWithRefresh', () => {
         hasErrors: false,
         connectorToken: validToken,
       });
-      doRefresh.mockResolvedValueOnce(refreshResponse);
+      refreshFn.mockResolvedValueOnce(refreshResponse);
 
       const result = await getStoredTokenWithRefresh({ ...baseOpts, forceRefresh: true });
 
       expect(result).toBe('Bearer new-access-token');
-      expect(doRefresh).toHaveBeenCalledTimes(1);
+      expect(refreshFn).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when doRefresh throws', async () => {
+    it('returns null and logs an error when refreshFn throws', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockRejectedValueOnce(new Error('upstream auth failed'));
+      refreshFn.mockRejectedValueOnce(new Error('upstream auth failed'));
 
       const result = await getStoredTokenWithRefresh(baseOpts);
 
@@ -239,7 +239,7 @@ describe('getStoredTokenWithRefresh', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      doRefresh.mockResolvedValueOnce(refreshResponse);
+      refreshFn.mockResolvedValueOnce(refreshResponse);
       connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
         new Error('DB write failed')
       );

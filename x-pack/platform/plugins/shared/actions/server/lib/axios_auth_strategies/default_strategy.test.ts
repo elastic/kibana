@@ -84,7 +84,6 @@ describe('DefaultStrategy', () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer clientcred');
 
       const opts: OAuthGetTokenOpts = {
-        kind: 'oauth',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'the-client-id',
         clientSecret: 'the-client-secret',
@@ -111,7 +110,6 @@ describe('DefaultStrategy', () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer token');
 
       const opts: OAuthGetTokenOpts = {
-        kind: 'oauth',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'id',
         clientSecret: 'secret',

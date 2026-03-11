@@ -164,7 +164,7 @@ describe('OAuthAuthorizationService', () => {
       [
         'authorizationUrl',
         { clientId: 'client-id' },
-        'Connector missing required OAuth configuration (authorizationUrl)',
+        'Connector missing required OAuth configuration (authorizationUrl, clientId)',
       ],
       [
         'clientId',

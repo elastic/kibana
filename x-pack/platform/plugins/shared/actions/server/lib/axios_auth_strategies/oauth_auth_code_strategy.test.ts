@@ -183,7 +183,6 @@ describe('OAuthAuthCodeStrategy', () => {
     it('throws when connectorTokenClient is absent', async () => {
       const { connectorTokenClient: _ctc, ...depsWithoutClient } = baseDeps;
       const opts: OAuthGetTokenOpts = {
-        kind: 'oauth',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'id',
         clientSecret: 'secret',
@@ -197,7 +196,6 @@ describe('OAuthAuthCodeStrategy', () => {
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer token');
 
       const opts: OAuthGetTokenOpts = {
-        kind: 'oauth',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'the-client-id',
         clientSecret: 'the-client-secret',
@@ -222,7 +220,6 @@ describe('OAuthAuthCodeStrategy', () => {
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer token');
 
       const opts: OAuthGetTokenOpts = {
-        kind: 'oauth',
         tokenUrl: 'https://provider.example.com/token',
         clientId: 'id',
         clientSecret: 'secret',

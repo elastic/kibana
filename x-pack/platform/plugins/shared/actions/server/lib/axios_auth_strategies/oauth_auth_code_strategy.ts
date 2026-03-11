@@ -6,7 +6,7 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import type { GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
+import type { OAuthGetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
@@ -84,7 +84,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
     );
   }
 
-  async getToken(opts: GetTokenOpts, deps: AuthStrategyDeps): Promise<string | null> {
+  async getToken(opts: OAuthGetTokenOpts, deps: AuthStrategyDeps): Promise<string | null> {
     const {
       connectorId,
       connectorTokenClient,
@@ -98,21 +98,20 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
     }
 
-    const oauthOpts = opts as OAuthGetTokenOpts;
     return getOAuthAuthorizationCodeAccessToken({
       connectorId,
       logger,
       configurationUtilities,
       credentials: {
         config: {
-          clientId: oauthOpts.clientId,
-          tokenUrl: oauthOpts.tokenUrl,
-          ...(oauthOpts.additionalFields ? { additionalFields: oauthOpts.additionalFields } : {}),
+          clientId: opts.clientId,
+          tokenUrl: opts.tokenUrl,
+          ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
         },
-        secrets: { clientSecret: oauthOpts.clientSecret },
+        secrets: { clientSecret: opts.clientSecret },
       },
       connectorTokenClient,
-      scope: oauthOpts.scope,
+      scope: opts.scope,
       authMode,
       profileUid,
     });

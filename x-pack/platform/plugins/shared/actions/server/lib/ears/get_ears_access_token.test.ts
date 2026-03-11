@@ -23,7 +23,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
 
-const TOKEN_URL = 'https://ears.example.com/provider/oauth/token';
+const PROVIDER = 'my-provider';
 
 // A valid stored token: access token expires 1h from now, refresh token expires in 7 days
 const validToken = {
@@ -76,7 +76,7 @@ const baseOpts = {
   connectorId: 'connector-1',
   logger,
   configurationUtilities,
-  tokenUrl: TOKEN_URL,
+  provider: PROVIDER,
   connectorTokenClient,
 };
 
@@ -194,7 +194,7 @@ describe('getEarsAccessToken', () => {
       await getEarsAccessToken(baseOpts);
 
       expect(requestEarsRefreshToken).toHaveBeenCalledWith(
-        TOKEN_URL,
+        PROVIDER,
         logger,
         { refreshToken: 'stored-refresh-token' },
         configurationUtilities
@@ -353,7 +353,7 @@ describe('getEarsAccessToken', () => {
       });
 
       expect(requestEarsRefreshToken).toHaveBeenCalledWith(
-        TOKEN_URL,
+        PROVIDER,
         logger,
         { refreshToken: 'stored-per-user-refresh-token' },
         configurationUtilities

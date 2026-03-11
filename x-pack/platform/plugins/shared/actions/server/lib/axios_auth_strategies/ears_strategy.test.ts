@@ -86,7 +86,7 @@ describe('EarsStrategy', () => {
       expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
     });
 
-    it('rejects with message when both provider and tokenUrl are absent', async () => {
+    it('rejects with message when provider is absent', async () => {
       const { instance } = createMockAxiosInstance();
       strategy.installResponseInterceptor(instance, { ...baseDeps, secrets: {} });
       const onRejected = getOnRejected(instance);
@@ -98,7 +98,7 @@ describe('EarsStrategy', () => {
       };
       await expect(onRejected(error)).rejects.toBe(error);
       expect((error as { message: string }).message).toContain(
-        'Missing required EARS configuration'
+        'Authentication failed: Missing required EARS provider.'
       );
       expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
     });
@@ -143,7 +143,7 @@ describe('EarsStrategy', () => {
       );
     });
 
-    it('derives token path from provider when provider is present', async () => {
+    it('calls getEarsAccessToken with the provider from secrets', async () => {
       const { instance, mockRequest } = createMockAxiosInstance();
       strategy.installResponseInterceptor(instance, {
         ...baseDeps,
@@ -155,39 +155,14 @@ describe('EarsStrategy', () => {
       mockRequest.mockResolvedValue({ status: 200 });
 
       const error = {
-        config: { _retry: false, headers: {} },
+        config: { _retry: false, headers: {} as Record<string, string> },
         response: { status: 401 },
         message: '',
       };
       await onRejected(error);
 
-      expect(mockResolveEarsUrl).toHaveBeenCalledWith(
-        '/my-provider/oauth/token',
-        configurationUtilities.getEarsUrl()
-      );
-    });
-
-    it('uses tokenUrl directly when provider is absent', async () => {
-      const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, {
-        ...baseDeps,
-        secrets: { tokenUrl: '/custom/token' },
-      });
-      const onRejected = getOnRejected(instance);
-
-      mockGetEarsAccessToken.mockResolvedValue('Bearer token');
-      mockRequest.mockResolvedValue({ status: 200 });
-
-      const error = {
-        config: { _retry: false, headers: {} },
-        response: { status: 401 },
-        message: '',
-      };
-      await onRejected(error);
-
-      expect(mockResolveEarsUrl).toHaveBeenCalledWith(
-        '/custom/token',
-        configurationUtilities.getEarsUrl()
+      expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+        expect.objectContaining({ provider: 'my-provider', forceRefresh: true })
       );
     });
   });
@@ -196,25 +171,20 @@ describe('EarsStrategy', () => {
     it('throws when connectorTokenClient is absent', async () => {
       const { connectorTokenClient: _ctc, ...depsWithoutClient } = baseDeps;
       await expect(
-        strategy.getToken({ kind: 'ears', tokenUrl: '/token' }, depsWithoutClient)
+        strategy.getToken({ provider: 'my-provider' }, depsWithoutClient)
       ).rejects.toThrow('ConnectorTokenClient is required for EARS OAuth flow');
     });
 
-    it('resolves EARS URL and delegates to getEarsAccessToken', async () => {
+    it('delegates to getEarsAccessToken with provider', async () => {
       mockGetEarsAccessToken.mockResolvedValue('Bearer token');
-      mockResolveEarsUrl.mockReturnValue('https://ears.example.com/token');
 
-      const opts: EarsGetTokenOpts = { kind: 'ears', tokenUrl: '/token' };
+      const opts: EarsGetTokenOpts = { provider: 'my-provider' };
       await strategy.getToken(opts, baseDeps);
 
-      expect(mockResolveEarsUrl).toHaveBeenCalledWith(
-        '/token',
-        configurationUtilities.getEarsUrl()
-      );
       expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
         expect.objectContaining({
           connectorId: 'connector-1',
-          tokenUrl: 'https://ears.example.com/token',
+          provider: 'my-provider',
           connectorTokenClient,
         })
       );

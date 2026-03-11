@@ -77,7 +77,6 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 export interface OAuthGetTokenOpts {
-  kind: 'oauth';
   tokenUrl: string;
   scope?: string;
   clientId: string;
@@ -86,7 +85,6 @@ export interface OAuthGetTokenOpts {
 }
 
 export interface EarsGetTokenOpts {
-  kind: 'ears';
   provider: string;
   scope?: string;
 }
