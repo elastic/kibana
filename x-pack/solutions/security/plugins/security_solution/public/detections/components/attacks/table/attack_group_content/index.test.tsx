@@ -15,7 +15,6 @@ import {
   ATTACK_TITLE_TEST_ID_SUFFIX,
   ATTACK_GROUP_TEST_ID_SUFFIX,
   ATTACK_STATUS_TEST_ID_SUFFIX,
-  ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX,
   EXPAND_ATTACK_BUTTON_TEST_ID,
 } from '.';
 
@@ -53,7 +52,6 @@ describe('AttackGroupContent', () => {
     expect(getByTestId(`test_id${ATTACK_STATUS_TEST_ID_SUFFIX}`)).toHaveTextContent(
       mockAttack.alertWorkflowStatus!
     );
-    expect(getByTestId(`test_id${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`)).toBeInTheDocument();
     expect(getByTestId('mock-subtitle')).toBeInTheDocument();
   });
 
