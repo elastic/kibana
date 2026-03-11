@@ -56,12 +56,15 @@ const renderNotesDetailsContent = (
   );
 };
 
+const defaultUserPrivileges = {
+  notesPrivileges: { crud: true, read: true },
+  timelinePrivileges: { crud: true, read: true },
+};
+
 describe('NotesDetailsContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useUserPrivilegesMock.mockReturnValue({
-      notesPrivileges: { crud: true },
-    });
+    useUserPrivilegesMock.mockReturnValue(defaultUserPrivileges);
   });
 
   it('should fetch notes for the document id', () => {
@@ -180,7 +183,8 @@ describe('NotesDetailsContent', () => {
 
   it('should not render add note section when user lacks crud privileges', () => {
     useUserPrivilegesMock.mockReturnValue({
-      notesPrivileges: { crud: false },
+      ...defaultUserPrivileges,
+      notesPrivileges: { crud: false, read: true },
     });
 
     const storeState: State = {
