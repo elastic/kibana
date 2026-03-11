@@ -13,7 +13,12 @@ import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update
 
 type WorkflowStepCaseResult = CreateCaseStepOutput['case'];
 type WorkflowUpdatePayload = UpdateCaseStepInput['updates'];
-type PushableCase = Pick<WorkflowStepCaseResult, 'id' | 'connector'>;
+interface PushableCase {
+  id: string;
+  connector: {
+    id: string;
+  };
+}
 
 export const normalizeCaseStepUpdatesForBulkPatch = (updates: WorkflowUpdatePayload) => {
   const { assignees, connector, ...restUpdates } = updates;
