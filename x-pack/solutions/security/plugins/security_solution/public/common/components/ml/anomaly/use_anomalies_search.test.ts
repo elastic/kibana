@@ -106,8 +106,8 @@ describe('useAggregatedAnomaliesByJob', () => {
   });
 
   it('returns jobs sorted by name', async () => {
-    const firstJobId = 'v3_windows_anomalous_script';
-    const secondJobId = 'auth_rare_source_ip_for_a_user';
+    const firstJobId = 'v3_windows_anomalous_script_ea';
+    const secondJobId = 'auth_rare_source_ip_for_a_user_ea';
     const fistJobCount = { key: firstJobId, doc_count: 99 };
     const secondJobCount = { key: secondJobId, doc_count: 99 };
     const firstJobSecurityName = '0000001';
