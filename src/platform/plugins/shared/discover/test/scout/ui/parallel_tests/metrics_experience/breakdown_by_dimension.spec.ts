@@ -46,8 +46,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('show selected breakdown in toolbar selector', async () => {
-          await expect(metricsExperience.breakdownSelector.toggleButton).toBeVisible();
-          await expect(metricsExperience.breakdownSelector.toggleButton).toContainText('1');
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(breakdownField)
+          ).toBeVisible();
         });
 
         await spaceTest.step('keep metrics grid rendered after selecting breakdown', async () => {
