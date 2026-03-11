@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
@@ -63,9 +63,11 @@ const fetchMonitors = async (monitorIds: string[], routeContext: RouteContext) =
     if (result.status === 'fulfilled') {
       foundMonitors.push({ id: monitorIds[i], so: result.value });
     } else {
+      const reason = result.reason;
       errors.push({
         configId: monitorIds[i],
-        error: result.reason?.message ?? 'Failed to fetch monitor',
+        error: reason?.message ?? 'Failed to fetch monitor',
+        ...(SavedObjectsErrorHelpers.isNotFoundError(reason) ? { statusCode: 404 } : {}),
       });
     }
   }

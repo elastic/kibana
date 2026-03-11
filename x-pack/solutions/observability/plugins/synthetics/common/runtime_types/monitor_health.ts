@@ -32,6 +32,7 @@ export interface MonitorHealthStatus {
 export interface MonitorHealthError {
   configId: string;
   error: string;
+  statusCode?: number;
 }
 
 export interface MonitorsHealthResponse {
