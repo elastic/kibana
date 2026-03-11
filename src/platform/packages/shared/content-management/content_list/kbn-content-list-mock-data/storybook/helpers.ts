@@ -8,6 +8,7 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
@@ -19,7 +20,7 @@ import { mockFavoritesClient } from './services';
 interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
-  favoritesOnly?: boolean;
+  starredOnly?: boolean;
   users?: string[];
 }
 
@@ -49,12 +50,21 @@ export type MockContentItem =
  * Configuration for creating a mock findItems function
  */
 export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
-  /** The source array of mock items */
+  /** The source array of mock items. */
   items: T[];
-  /** Optional delay in milliseconds to simulate network latency */
+  /** Optional delay in milliseconds to simulate network latency. */
   delay?: number;
-  /** Optional function to handle status field sorting */
+  /** Optional function to handle status field sorting. */
   statusSortFn?: (a: T, b: T, direction: 'asc' | 'desc') => number;
+  /**
+   * Favorites client instance used to resolve starred-item filtering.
+   *
+   * Defaults to the module-level {@link mockFavoritesClient} singleton.
+   * Pass a story-specific client to ensure the same instance is shared
+   * between the provider (`services.favorites`) and `findItems`, so that
+   * starred items are immediately visible when `starredOnly` is toggled.
+   */
+  favoritesClient?: FavoritesClientPublic;
 }
 
 /**
@@ -63,7 +73,12 @@ export interface MockFindItemsConfig<T extends UserContentCommonSchema> {
 export function createMockFindItems<T extends UserContentCommonSchema>(
   config: MockFindItemsConfig<T>
 ) {
-  const { items: sourceItems, delay = 0, statusSortFn: customStatusSortFn } = config;
+  const {
+    items: sourceItems,
+    delay = 0,
+    statusSortFn: customStatusSortFn,
+    favoritesClient: configFavoritesClient,
+  } = config;
 
   return async ({
     searchQuery,
@@ -110,9 +125,10 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       );
     }
 
-    // Apply favorites filter (mock extension, not in ActiveFilters)
-    if ((filters as { favoritesOnly?: boolean }).favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply starred filter.
+    if (filters.starredOnly) {
+      const client = configFavoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
@@ -414,9 +430,15 @@ function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: stri
  *
  * This function uses inline mock data with pre-assigned status values.
  *
- * @param delay - Optional delay in milliseconds to simulate network latency
+ * @param delay - Optional delay in milliseconds to simulate network latency.
+ * @param favoritesClient - Optional favorites client. Defaults to the module-level
+ *   {@link mockFavoritesClient} singleton. Pass a story-specific instance to ensure
+ *   the same client is shared with the provider's `services.favorites`.
  */
-export const createSimpleMockFindItems = (delay: number = 0) => {
+export const createSimpleMockFindItems = (
+  delay: number = 0,
+  favoritesClient?: FavoritesClientPublic
+) => {
   return async ({
     searchQuery,
     filters,
@@ -469,9 +491,10 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
-      const favorites = await mockFavoritesClient.getFavorites();
+    // Apply starred filter.
+    if (filters.starredOnly) {
+      const client = favoritesClient ?? mockFavoritesClient;
+      const favorites = await client.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
 
