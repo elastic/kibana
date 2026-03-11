@@ -11,6 +11,7 @@
 
 import YAML from 'yaml';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
@@ -52,7 +53,9 @@ export class WorkflowRunFixture {
     http: {
       allowedHosts: ['*'],
     },
-  } as WorkflowsExecutionEngineConfig;
+    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
+    collectQueueMetrics: false,
+  } as unknown as WorkflowsExecutionEngineConfig;
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();

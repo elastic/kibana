@@ -102,6 +102,21 @@ const breadcrumbGetters: {
       text: liveQueryId,
     },
   ],
+  history_scheduled_details: ({ scheduleId, executionCount }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.history(),
+      text: i18n.translate('xpack.osquery.breadcrumbs.historyPageTitle', {
+        defaultMessage: 'History',
+      }),
+    },
+    {
+      text: i18n.translate('xpack.osquery.breadcrumbs.scheduledExecutionTitle', {
+        defaultMessage: 'Scheduled execution #{executionCount}',
+        values: { executionCount },
+      }),
+    },
+  ],
   saved_queries: () => [
     BASE_BREADCRUMB,
     {
