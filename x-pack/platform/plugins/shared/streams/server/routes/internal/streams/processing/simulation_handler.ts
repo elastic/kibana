@@ -42,7 +42,10 @@ import {
   Streams,
 } from '@kbn/streams-schema';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import {
+  FIELD_DEFINITION_TYPES,
+  type StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
 import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
 import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
@@ -1076,15 +1079,26 @@ const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSi
   return matchCount / docs.length;
 };
 
-const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
+type MappingDetectedField = NamedFieldDefinitionConfig & {
+  type: (typeof FIELD_DEFINITION_TYPES)[number];
+};
+
+const isMappingDetectedField = (field: NamedFieldDefinitionConfig): field is MappingDetectedField =>
+  FIELD_DEFINITION_TYPES.includes(field.type as (typeof FIELD_DEFINITION_TYPES)[number]);
+
+const computeMappingProperties = (
+  detectedFields: NamedFieldDefinitionConfig[]
+): StreamsMappingProperties => {
   return Object.fromEntries(
-    detectedFields.flatMap(({ name, ...config }) => {
-      if (config.type === 'system') {
+    detectedFields.flatMap((field) => {
+      if (!isMappingDetectedField(field)) {
         return [];
       }
+
+      const { name, description: _description, ...config } = field;
       return [[name, { ...config, ignore_malformed: false }]];
     })
-  );
+  ) as StreamsMappingProperties;
 };
 
 /**
