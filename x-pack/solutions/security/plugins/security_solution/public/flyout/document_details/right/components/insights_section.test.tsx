@@ -30,6 +30,11 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 
 jest.mock('../../shared/hooks/use_alert_prevalence');
 
@@ -47,7 +52,7 @@ jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
   return {
     ...original,
-    useLocation: () => jest.fn().mockReturnValue({ pathname: '/overview' }),
+    useLocation: () => ({ pathname: '/overview' }),
   };
 });
 (useAlertPrevalence as jest.Mock).mockReturnValue({
@@ -61,7 +66,7 @@ jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 const from = '2022-04-05T12:00:00.000Z';
-const to = '2022-04-08T12:00:00.;000Z';
+const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
@@ -97,6 +102,11 @@ jest.mock('../../../../explore/hosts/containers/hosts/details');
 jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
+jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
+jest.mock('../../shared/hooks/use_show_related_alerts_by_session');
+jest.mock('../../shared/hooks/use_show_related_cases');
+jest.mock('../../shared/hooks/use_show_suppressed_alerts');
 
 const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
@@ -130,6 +140,20 @@ describe('<InsightsSection />', () => {
       loading: false,
       error: false,
       data: [],
+    });
+    (useShowRelatedAlertsByAncestry as jest.Mock).mockReturnValue({
+      show: false,
+      documentId: 'event-id',
+    });
+    (useShowRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+      show: false,
+      originalEventId: 'originalEventId',
+    });
+    (useShowRelatedAlertsBySession as jest.Mock).mockReturnValue({ show: false });
+    (useShowRelatedCases as jest.Mock).mockReturnValue(false);
+    (useShowSuppressedAlerts as jest.Mock).mockReturnValue({
+      show: false,
+      alertSuppressionCount: 0,
     });
   });
 
