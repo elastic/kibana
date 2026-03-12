@@ -45,9 +45,9 @@ export interface InternalSkillDefinition {
    */
   referencedContent?: ReferencedContent[];
   /**
-   * Base path for filesystem mounting. Only defined for builtin skills.
+   * Base path for filesystem mounting.
    */
-  basePath?: string;
+  basePath: string;
   /**
    * Returns tool IDs from the tool registry that this skill can use.
    * - Builtin skills: returns from the skill definition's getRegistryTools()
@@ -59,4 +59,12 @@ export interface InternalSkillDefinition {
    * Only available for builtin skills.
    */
   getInlineTools?: () => MaybePromise<SkillBoundedTool[]>;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
+  /**
+   * Number of referenced content items.
+   */
+  referencedContentCount: number;
 }

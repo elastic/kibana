@@ -13,18 +13,26 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
+import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
   SearchInferenceEndpointsPluginStart,
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
-import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import {
+  INFERENCE_ENDPOINTS_APP_ID,
+  INFERENCE_SETTINGS_SO_TYPE,
+  MODEL_SETTINGS_APP_ID,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+} from '../common/constants';
 
 export class SearchInferenceEndpointsPlugin
   implements
@@ -56,6 +64,8 @@ export class SearchInferenceEndpointsPlugin
     this.logger.debug('searchInferenceEndpoints: Setup');
     const router = core.http.createRouter();
 
+    core.savedObjects.registerType(createInferenceSettingsSavedObjectType());
+
     defineRoutes({ logger: this.logger, router });
 
     plugins.features.registerKibanaFeature({
@@ -67,18 +77,18 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [INFERENCE_ENDPOINTS_APP_ID],
+        ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
       },
       privileges: {
         all: {
           app: [],
-          api: [],
+          api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
-            ml: [INFERENCE_ENDPOINTS_APP_ID],
+            ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
           },
           savedObject: {
-            all: [],
+            all: [INFERENCE_SETTINGS_SO_TYPE],
             read: [],
           },
           ui: [],
