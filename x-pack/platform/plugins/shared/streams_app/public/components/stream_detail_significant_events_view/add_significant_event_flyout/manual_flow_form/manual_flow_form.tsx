@@ -193,29 +193,16 @@ export function ManualFlowForm({
                 return true;
               },
             }}
-            render={({ field, fieldState }) => (
-              <EuiFormRow
-                isInvalid={fieldState.isTouched && !!fieldState.error}
-                error={fieldState.error?.message}
-                label={
-                  <EuiFormLabel>
-                    {i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
-                      { defaultMessage: 'Query' }
-                    )}
-                  </EuiFormLabel>
-                }
-              >
-                <StreamsESQLEditor
-                  query={{ esql: field.value }}
-                  isDisabled={isSubmitting}
-                  onTextLangQuerySubmit={async (newQuery) => {
-                    if (newQuery) field.onChange(newQuery.esql);
-                  }}
-                  onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
-                  prefix={validPrefixes}
-                />
-              </EuiFormRow>
+            render={({ field }) => (
+              <StreamsESQLEditor
+                query={{ esql: field.value }}
+                isDisabled={isSubmitting}
+                onTextLangQuerySubmit={async (newQuery) => {
+                  if (newQuery) field.onChange(newQuery.esql);
+                }}
+                onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
+                prefix={validPrefixes}
+              />
             )}
           />
         </EuiForm>

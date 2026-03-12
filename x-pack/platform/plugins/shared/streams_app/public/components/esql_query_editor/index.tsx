@@ -8,8 +8,9 @@
 import React from 'react';
 import type { ESQLEditorProps } from '@kbn/esql/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
+import { isEmpty, memoize } from 'lodash';
 import { normalizeEsqlQuery } from '@kbn/streams-schema';
 
 export interface ValidPrefixes {
@@ -27,16 +28,25 @@ export const StreamsESQLEditor = ({
   const allErrors = prefixValidation.isValid ? errors : [...errors, prefixValidation.error];
 
   return (
-    <ESQLLangEditor
-      disableAutoFocus
-      editorIsInline
-      expandToFitQueryOnMount
-      hasOutline
-      hideRunQueryButton
-      mergeExternalMessages
-      errors={allErrors}
-      {...props}
-    />
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.esqlQueryEditor.label', {
+        defaultMessage: 'ES|QL Query',
+      })}
+      data-test-subj="streamsEsqlEditor"
+      fullWidth
+      isInvalid={!isEmpty(allErrors)}
+    >
+      <ESQLLangEditor
+        disableAutoFocus
+        editorIsInline
+        expandToFitQueryOnMount
+        hasOutline
+        hideRunQueryButton
+        mergeExternalMessages
+        errors={allErrors}
+        {...props}
+      />
+    </EuiFormRow>
   );
 };
 
