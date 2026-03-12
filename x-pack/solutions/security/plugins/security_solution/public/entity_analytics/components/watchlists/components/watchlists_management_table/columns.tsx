@@ -166,7 +166,7 @@ const WatchlistsActionsCell = ({
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <WatchlistsActionsMenu record={record} onEdit={onEdit} onDelete={onDelete} />
+      <WatchlistsActionsMenu record={record} onDelete={onDelete} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
