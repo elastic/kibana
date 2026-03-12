@@ -39,7 +39,7 @@ export interface ConversationSidebarRef {
 }
 
 export interface OpenConversationSidebarReturn {
-  flyoutRef: ConversationSidebarRef;
+  chatRef: ConversationSidebarRef;
 }
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -102,25 +102,23 @@ export interface AgentBuilderPluginStart {
    * @example
    * ```tsx
    * // Open a new conversation with close handler
-   * const { flyoutRef } = plugins.agentBuilder.openConversationFlyout({
-   *   onClose: () => console.log('Sidebar closed')
+   * const { chatRef } = plugins.agentBuilder.openChat({
+   *   onClose: () => console.log('Chat closed')
    * });
    *
-   * // Programmatically close the sidebar
-   * flyoutRef.close();
+   * // Programmatically close the chat
+   * chatRef.close();
    * ```
    */
-  openConversationFlyout: (
-    options?: OpenConversationSidebarOptions
-  ) => OpenConversationSidebarReturn;
+  openChat: (options?: OpenConversationSidebarOptions) => OpenConversationSidebarReturn;
   /**
    * Toggles the conversation sidebar.
    *
    * If the sidebar is open, it will be closed. Otherwise, it will be opened.
    */
-  toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => void;
-  setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => void;
-  clearConversationFlyoutActiveConfig: () => void;
+  toggleChat: (options?: OpenConversationSidebarOptions) => void;
+  setChatConfig: (config: EmbeddableConversationProps) => void;
+  clearChatConfig: () => void;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.
