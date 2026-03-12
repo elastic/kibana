@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, type HealthScanResultResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGetHealthScanResults } from '../../../hooks/use_get_health_scan_results';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -100,10 +100,12 @@ export function ScanResultsPanel({ scanId }: Props) {
   const [isPending, setIsPending] = useState<boolean>(true);
   const [searchAfter, setSearchAfter] = useState<string | undefined>(undefined);
   const [searchAfterHistory, setSearchAfterHistory] = useState<Array<string | undefined>>([]);
+  const prevTotalRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setSearchAfter(undefined);
     setSearchAfterHistory([]);
+    prevTotalRef.current = undefined;
   }, [scanId]);
 
   const { data, isLoading, isError } = useGetHealthScanResults({
@@ -117,7 +119,13 @@ export function ScanResultsPanel({ scanId }: Props) {
 
   useEffect(() => {
     if (!isLoading && data) {
-      setIsPending(data.scan.status !== 'completed');
+      const scanPending = data.scan.status !== 'completed';
+      setIsPending(scanPending);
+      if (scanPending && prevTotalRef.current !== undefined && data.total !== prevTotalRef.current) {
+        setSearchAfter(undefined);
+        setSearchAfterHistory([]);
+      }
+      prevTotalRef.current = data.total;
     }
   }, [isLoading, data]);
 
