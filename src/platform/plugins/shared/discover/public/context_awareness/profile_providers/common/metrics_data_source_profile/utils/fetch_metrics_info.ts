@@ -60,7 +60,7 @@ export async function fetchMetricsInfo({
     filter,
     timeRange,
     variables,
-    executionContext: { page: 'metrics_experience' },
+    executionContext: { name: 'metrics_info' },
   });
 
   return response;
