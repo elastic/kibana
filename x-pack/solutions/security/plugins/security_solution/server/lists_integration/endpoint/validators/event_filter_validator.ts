@@ -28,7 +28,7 @@ const EventFilterDataSchema = schema.object(
         },
         { unknowns: 'ignore' }
       ),
-      { minSize: 1, maxSize: 250 }
+      { minSize: 1, maxSize: 2000 }
     ),
   },
   {

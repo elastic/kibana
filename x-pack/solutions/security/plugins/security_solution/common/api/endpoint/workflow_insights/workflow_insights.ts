@@ -78,7 +78,7 @@ export const UpdateWorkflowInsightRequestSchema = {
               list_id: schema.maybe(schema.string()),
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
-              entries: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 250 })),
+              entries: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 2000 })),
               tags: schema.maybe(arrayWithNonEmptyString('tag', { maxSize: 50 })),
               os_types: schema.maybe(arrayWithNonEmptyString('os_type', { maxSize: 20 })),
             }),

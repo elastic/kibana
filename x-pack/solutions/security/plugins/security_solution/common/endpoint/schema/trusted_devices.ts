@@ -64,7 +64,7 @@ const getTrustedDeviceDuplicateFields = (entries: TrustedDeviceConditionEntry[])
 
 const entriesSchemaOptions = {
   minSize: 1,
-  maxSize: 250,
+  maxSize: 2000,
   validate(entries: TrustedDeviceConditionEntry[]) {
     return (
       getTrustedDeviceDuplicateFields(entries)

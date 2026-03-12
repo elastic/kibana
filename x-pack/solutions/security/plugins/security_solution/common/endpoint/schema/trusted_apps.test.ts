@@ -158,11 +158,11 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(() => body.validate(createNewTrustedApp({ entries: [] }))).toThrow();
     });
 
-    it('should not accept more than 250 entries', () => {
+    it('should not accept more than 2000 entries', () => {
       expect(() =>
         body.validate(
           createNewTrustedApp({
-            entries: Array(251).fill(
+            entries: Array(2001).fill(
               createConditionEntry({ field: ConditionEntryField.PATH, value: '/tmp/path' })
             ),
           })
