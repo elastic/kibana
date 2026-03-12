@@ -88,7 +88,8 @@ export const CodeownersCommand: GenerateCommand = {
     // sort genarated entries by directory name
     // this improves readability and makes sure that ownership for nested
     // test plugins is not overriden by the parent package's entry
-    pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
+    // pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
+    // ^ this should be enabled in a different PR, too much change is introduced.
 
     const newCodeowners = `${GENERATED_START}${pkgs
       .map(
