@@ -7,9 +7,10 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core/logging/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { ApiKeyService } from './api_key_service';
 
@@ -206,10 +207,17 @@ describe('ApiKeyService', () => {
   });
 
   describe('markApiKeysForInvalidation', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const security = createMockSecurityService();
+    const logger = loggingSystemMock.create().get();
+    let invalidationSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      invalidationSavedObjectsClient = savedObjectsClientMock.create();
+    });
+
     it('does not call bulkCreate when apiKeys is empty', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await service.markApiKeysForInvalidation([]);
@@ -217,10 +225,7 @@ describe('ApiKeyService', () => {
       expect(invalidationSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('calls bulkCreate with decoded ES API keys (no uiamApiKey)', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
+    it('calls bulkCreate with decoded apiKeyId and createdAt for each key', async () => {
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
         saved_objects: [],
       });
@@ -238,60 +243,16 @@ describe('ApiKeyService', () => {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         attributes: { apiKeyId: '123', createdAt: expect.any(String) },
       });
-      expect(savedObjects[0].attributes).not.toHaveProperty('uiamApiKey');
+      expect(
+        Object.keys((savedObjects[0] as { attributes: Record<string, unknown> }).attributes)
+      ).toEqual(['apiKeyId', 'createdAt']);
       expect(savedObjects[1]).toMatchObject({
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         attributes: { apiKeyId: '456', createdAt: expect.any(String) },
       });
     });
 
-    it('includes uiamApiKey for UIAM credentials', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
-        saved_objects: [],
-      });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
-      const apiKeys = [Buffer.from('id123:essu_uiam_value').toString('base64')];
-
-      await service.markApiKeysForInvalidation(apiKeys);
-
-      const [savedObjects] = invalidationSavedObjectsClient.bulkCreate.mock.calls[0];
-      expect(savedObjects[0].attributes).toMatchObject({
-        apiKeyId: 'id123',
-        uiamApiKey: 'essu_uiam_value',
-      });
-    });
-
-    it('calls bulkCreate on invalidation SO client with decoded API keys', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
-        saved_objects: [],
-      });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
-      const apiKeyBase64 = Buffer.from('key-id-1:key-secret-1').toString('base64');
-
-      await service.markApiKeysForInvalidation([apiKeyBase64]);
-
-      expect(invalidationSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-      const [savedObjects] = invalidationSavedObjectsClient.bulkCreate.mock.calls[0];
-      expect(savedObjects).toHaveLength(1);
-      expect(savedObjects[0]).toMatchObject({
-        type: API_KEY_PENDING_INVALIDATION_TYPE,
-        attributes: {
-          apiKeyId: 'key-id-1',
-          createdAt: expect.any(String),
-        },
-      });
-    });
-
     it('logs error and does not throw when bulkCreate fails', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const security = createMockSecurityService();
-      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const err = new Error('bulkCreate failed');
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);

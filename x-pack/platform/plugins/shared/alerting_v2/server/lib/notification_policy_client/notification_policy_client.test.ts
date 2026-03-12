@@ -257,9 +257,7 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 409 },
       });
 
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
-        'encoded-es-api-key',
-      ]);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
 
     it('marks new API key for invalidation when create fails after key was created', async () => {
@@ -276,9 +274,7 @@ describe('NotificationPolicyClient', () => {
         })
       ).rejects.toThrow('storage error');
 
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
-        'encoded-es-api-key',
-      ]);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
   });
 
@@ -692,9 +688,7 @@ describe('NotificationPolicyClient', () => {
         })
       ).rejects.toThrow('storage error');
 
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
-        'encoded-es-api-key',
-      ]);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
 
     it('does not call invalidation on success when decrypted policy has no apiKey', async () => {
@@ -817,9 +811,7 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 409 },
       });
 
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
-        'encoded-es-api-key',
-      ]);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['encoded-es-api-key']);
     });
   });
 

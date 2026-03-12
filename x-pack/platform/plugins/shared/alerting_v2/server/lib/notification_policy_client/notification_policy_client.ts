@@ -91,9 +91,7 @@ export class NotificationPolicyClient {
 
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
-      if (attributes.auth?.apiKey) {
-        await this.apiKeyService.markApiKeysForInvalidation([attributes.auth.apiKey]);
-      }
+      this._markApiKeysForInvalidation(attributes.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(`Notification policy with id "${conflictId}" already exists`);
@@ -184,9 +182,8 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      if (nextAttrs.auth?.apiKey) {
-        await this.apiKeyService.markApiKeysForInvalidation([nextAttrs.auth.apiKey]);
-      }
+      // If update fails we mark the new API key for invalidation
+      this._markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -195,9 +192,7 @@ export class NotificationPolicyClient {
       throw e;
     }
 
-    if (oldAuth?.apiKey && oldAuth.createdByUser === false) {
-      this.apiKeyService.markApiKeysForInvalidation([oldAuth.apiKey]).catch(() => {});
-    }
+    this._markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser ?? true);
 
     return {
       id: params.options.id,
@@ -231,9 +226,16 @@ export class NotificationPolicyClient {
     await this.getNotificationPolicy({ id });
     const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
-    if (auth?.apiKey && auth.createdByUser === false) {
-      this.apiKeyService.markApiKeysForInvalidation([auth.apiKey]).catch(() => {});
+    this._markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser ?? true);
+  }
+
+  private _markApiKeysForInvalidation(apiKey: string | undefined, createdByUser: boolean): void {
+    if (!apiKey || createdByUser) {
+      return;
     }
+
+    // the apiKeyService already handles and logs errors, so we can swallow them here
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
   }
 
   /**
