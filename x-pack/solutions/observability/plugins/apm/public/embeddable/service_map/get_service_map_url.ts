@@ -55,3 +55,64 @@ export function getServiceMapPath(params: ServiceMapUrlParams): string {
 export function getServiceMapUrl(core: CoreStart, params: ServiceMapUrlParams): string {
   return core.application.getUrlForApp('apm', { path: getServiceMapPath(params) });
 }
+
+/**
+ * Builds the path (hash + query) for the APM service overview page.
+ * Use with application.navigateToApp('apm', { path }) or getUrlForApp for "View in APM".
+ * No kuery – single service view does not need an extra filter.
+ */
+export function getServiceDetailPath(
+  params: ServiceMapUrlParams & { serviceName: string }
+): string {
+  const { serviceName, rangeFrom, rangeTo, environment } = params;
+  const searchParams = new URLSearchParams();
+  searchParams.set('rangeFrom', rangeFrom);
+  searchParams.set('rangeTo', rangeTo);
+  if (environment !== undefined && environment !== '') {
+    searchParams.set('environment', environment);
+  }
+  const queryString = searchParams.toString();
+  const hashPath = `#/services/${encodeURIComponent(serviceName)}`;
+  return queryString ? `${hashPath}?${queryString}` : hashPath;
+}
+
+/**
+ * Builds the path (hash + query) for the APM service transactions tab.
+ * Use for edge "View in APM" so the user lands on transactions, not overview.
+ * No kuery – single service view does not need an extra filter.
+ */
+export function getServiceTransactionsPath(
+  params: Omit<ServiceMapUrlParams, 'kuery'> & { serviceName: string }
+): string {
+  const { serviceName, rangeFrom, rangeTo, environment } = params;
+  const searchParams = new URLSearchParams();
+  searchParams.set('rangeFrom', rangeFrom);
+  searchParams.set('rangeTo', rangeTo);
+  if (environment !== undefined && environment !== '') {
+    searchParams.set('environment', environment);
+  }
+  const queryString = searchParams.toString();
+  const hashPath = `#/services/${encodeURIComponent(serviceName)}/transactions`;
+  return queryString ? `${hashPath}?${queryString}` : hashPath;
+}
+
+/**
+ * Builds the path (hash + query) for the APM dependency overview page.
+ * Use with application.navigateToApp('apm', { path }) or getUrlForApp for "View in APM".
+ * No kuery – dependency view does not need an extra filter.
+ */
+export function getDependencyOverviewPath(
+  params: ServiceMapUrlParams & { dependencyName: string }
+): string {
+  const { dependencyName, rangeFrom, rangeTo, environment } = params;
+  const searchParams = new URLSearchParams();
+  searchParams.set('dependencyName', dependencyName);
+  searchParams.set('rangeFrom', rangeFrom);
+  searchParams.set('rangeTo', rangeTo);
+  if (environment !== undefined && environment !== '') {
+    searchParams.set('environment', environment);
+  }
+  const queryString = searchParams.toString();
+  const hashPath = '#/dependencies/overview';
+  return queryString ? `${hashPath}?${queryString}` : hashPath;
+}

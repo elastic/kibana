@@ -42,6 +42,7 @@ import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
 import { MapPopover } from './popover';
+import type { PopoverContentProps } from './popover/popover_content';
 import { ServiceMapMinimap } from './service_map_minimap';
 import type { Environment } from '../../../../common/environment_rt';
 import type {
@@ -77,6 +78,8 @@ interface GraphProps {
   showMinimap?: boolean;
   /** When false, disables the node/edge detail popover (e.g. in embeddable where router is unavailable). Default true. */
   showPopover?: boolean;
+  /** When provided, used as popover content instead of default (e.g. embeddable context with Discover in header). */
+  renderPopoverContent?: (props: PopoverContentProps) => React.ReactNode;
 }
 
 function GraphInner({
@@ -93,6 +96,7 @@ function GraphInner({
   fullMapHref,
   showMinimap = true,
   showPopover = true,
+  renderPopoverContent,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -445,6 +449,7 @@ function GraphInner({
           start={start}
           end={end}
           onClose={handlePopoverClose}
+          renderPopoverContent={renderPopoverContent}
         />
       )}
     </div>

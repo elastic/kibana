@@ -42,6 +42,9 @@ const VIEW_IN_APM_LABEL = i18n.translate('xpack.apm.alertDetails.serviceMapPanel
   defaultMessage: 'View in APM',
 });
 
+/** Set to true to show the "limited view" callout with link to full Service map (hidden in initial PoC). */
+const SHOW_LIMITED_VIEW_CALLOUT = false;
+
 function LimitedViewCallout({ fullMapUrl }: { fullMapUrl: string }) {
   return (
     <EuiCallOut
@@ -207,7 +210,9 @@ export function AlertDetailsServiceMapSection({
           )}
           <EuiFlexItem>
             <EuiPanel hasBorder paddingSize="none" style={{ overflow: 'hidden' }}>
-              <LimitedViewCallout fullMapUrl={fullMapUrlUnfiltered} />
+              {SHOW_LIMITED_VIEW_CALLOUT && (
+                <LimitedViewCallout fullMapUrl={fullMapUrlUnfiltered} />
+              )}
               <ServiceMapEmbeddable
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}

@@ -70,7 +70,7 @@ export function getContentsComponent(
   return DependencyContents;
 }
 
-function getPopoverTitle(selection: ServiceMapSelection): string {
+export function getPopoverTitle(selection: ServiceMapSelection): string {
   if (isEdge(selection)) {
     const source = selection.data?.sourceLabel ?? selection.source;
     const target = selection.data?.targetLabel ?? selection.target;
@@ -79,7 +79,7 @@ function getPopoverTitle(selection: ServiceMapSelection): string {
   return selection.data.label ?? selection.id;
 }
 
-interface PopoverContentProps {
+export interface PopoverContentProps {
   selectedNode: ServiceMapNode | null;
   selectedEdge: ServiceMapEdge | null;
   environment: Environment;

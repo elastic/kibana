@@ -15,6 +15,7 @@ import { ChartPointerEventContextProvider } from '../context/chart_pointer_event
 import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
+import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -70,9 +71,13 @@ export function ApmEmbeddableContext({
               kuery={kuery}
               useSpanName={false}
             >
-              <LicenseProvider>
-                <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-              </LicenseProvider>
+              <ApmIndexSettingsContextProvider
+                apmSourcesAccess={deps.pluginsStart.apmSourcesAccess}
+              >
+                <LicenseProvider>
+                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                </LicenseProvider>
+              </ApmIndexSettingsContextProvider>
             </TimeRangeMetadataContextProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>

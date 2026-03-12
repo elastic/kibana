@@ -23,6 +23,7 @@ import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
 import { getServiceMapUrl } from './get_service_map_url';
+import { EmbeddablePopoverContent } from './embeddable_popover_content';
 import type { Environment } from '../../../common/environment_rt';
 
 const EMBEDDABLE_MIN_HEIGHT = 400;
@@ -201,7 +202,15 @@ export function ServiceMapEmbeddable({
         isFullscreen={false}
         fullMapHref={fullMapHref}
         showMinimap={false}
-        showPopover={false}
+        showPopover={true}
+        renderPopoverContent={(popoverProps) => (
+          <EmbeddablePopoverContent
+            {...popoverProps}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            core={core}
+          />
+        )}
       />
     </div>
   );
