@@ -13,7 +13,6 @@ import type { SmlTypeDefinition, SmlContext, SmlCrawlerStateDocument } from './t
 import type { SmlIndexer } from './sml_indexer';
 import {
   createSmlCrawlerStateStorage,
-  smlCrawlerStateIndexName,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
 import { smlIndexName } from './sml_storage';
@@ -48,7 +47,6 @@ export const createSmlCrawler = ({ indexer, logger }: SmlCrawlerDeps): SmlCrawle
 class SmlCrawlerImpl implements SmlCrawler {
   private readonly indexer: SmlIndexer;
   private readonly logger: Logger;
-  private cleanupDone = false;
 
   constructor({ indexer, logger }: SmlCrawlerDeps) {
     this.indexer = indexer;
@@ -64,15 +62,6 @@ class SmlCrawlerImpl implements SmlCrawler {
     esClient: ElasticsearchClient;
     savedObjectsClient: ISavedObjectsRepository;
   }): Promise<void> {
-    if (!this.cleanupDone) {
-      try {
-        await this.cleanupStaleConcreteIndices(esClient);
-        this.cleanupDone = true;
-      } catch (error) {
-        this.logger.warn(`SML crawler: stale index cleanup failed: ${(error as Error).message}`);
-      }
-    }
-
     const crawlerStateStorage = createSmlCrawlerStateStorage({
       logger: this.logger,
       esClient,
@@ -322,22 +311,19 @@ class SmlCrawlerImpl implements SmlCrawler {
         })
         .map((hit) => {
           const doc = hit._source!;
-          const normalized = normalizeStateDocument(
-            doc as SmlCrawlerStateDocument & { space_id?: string }
-          );
-          const action = normalized.update_action!;
+          const action = doc.update_action!;
 
           return limit(async () => {
             try {
               this.logger.info(
-                `SML crawler: processing '${action}' for attachment '${normalized.attachment_id}' (type: ${normalized.attachment_type})`
+                `SML crawler: processing '${action}' for attachment '${doc.attachment_id}' (type: ${doc.attachment_type})`
               );
 
               await this.indexer.indexAttachment({
-                attachmentId: normalized.attachment_id,
-                attachmentType: normalized.attachment_type,
+                attachmentId: doc.attachment_id,
+                attachmentType: doc.attachment_type,
                 action,
-                spaces: normalized.spaces,
+                spaces: doc.spaces,
                 esClient,
                 savedObjectsClient,
                 logger: this.logger,
@@ -349,7 +335,7 @@ class SmlCrawlerImpl implements SmlCrawler {
                 stateAckOps.push({
                   index: {
                     _id: hit._id!,
-                    document: { ...normalized, update_action: undefined },
+                    document: { ...doc, update_action: undefined },
                   },
                 });
               }
@@ -357,9 +343,9 @@ class SmlCrawlerImpl implements SmlCrawler {
             } catch (error) {
               errorCount++;
               this.logger.error(
-                `SML crawler: failed to process action '${action}' for '${
-                  normalized.attachment_id
-                }': ${(error as Error).message}`
+                `SML crawler: failed to process action '${action}' for '${doc.attachment_id}': ${
+                  (error as Error).message
+                }`
               );
             }
           });
@@ -406,35 +392,6 @@ class SmlCrawlerImpl implements SmlCrawler {
       this.logger.info(
         `SML crawler: queue processing complete for type '${attachmentType}': ${processedCount} succeeded, ${errorCount} failed`
       );
-    }
-  }
-
-  /**
-   * If a concrete index exists with the same name as a StorageIndexAdapter alias,
-   * delete it. This can happen when a previous code path wrote directly to the
-   * index name (bypassing the adapter), causing ES to auto-create a concrete index.
-   * The adapter needs the name free to use as an alias.
-   */
-  private async cleanupStaleConcreteIndices(esClient: ElasticsearchClient): Promise<void> {
-    const indexNames = [smlCrawlerStateIndexName, smlIndexName];
-
-    for (const indexName of indexNames) {
-      try {
-        const exists = await esClient.indices.exists({ index: indexName });
-        if (!exists) continue;
-
-        const isAlias = await esClient.indices.existsAlias({ name: indexName }).catch(() => false);
-        if (isAlias) continue;
-
-        this.logger.warn(
-          `Deleting stale concrete index '${indexName}' that conflicts with the StorageIndexAdapter alias`
-        );
-        await esClient.indices.delete({ index: indexName });
-      } catch (error) {
-        this.logger.debug(
-          `Failed to clean up stale index '${indexName}': ${(error as Error).message}`
-        );
-      }
     }
   }
 
@@ -498,9 +455,7 @@ class SmlCrawlerImpl implements SmlCrawler {
         const hits = response.hits.hits;
         for (const hit of hits) {
           if (hit._source) {
-            allDocs.push(
-              normalizeStateDocument(hit._source as SmlCrawlerStateDocument & { space_id?: string })
-            );
+            allDocs.push(hit._source);
           }
         }
 
@@ -523,19 +478,6 @@ class SmlCrawlerImpl implements SmlCrawler {
     return allDocs;
   }
 }
-
-/**
- * Normalize a state document from the old format (space_id: string) to the
- * new format (spaces: string[]). Old documents written before the schema
- * migration will have space_id but no spaces field.
- */
-const normalizeStateDocument = (
-  doc: SmlCrawlerStateDocument & { space_id?: string }
-): SmlCrawlerStateDocument => {
-  if (doc.spaces) return doc;
-  const { space_id: spaceId, ...rest } = doc;
-  return { ...rest, spaces: spaceId ? [spaceId] : [] };
-};
 
 const arraysEqual = (a: string[], b: string[]): boolean => {
   if (a.length !== b.length) return false;

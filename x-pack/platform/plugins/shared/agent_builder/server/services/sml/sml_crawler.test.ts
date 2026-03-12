@@ -85,21 +85,6 @@ describe('createSmlCrawler', () => {
     mockStateClient.bulk.mockResolvedValue({ errors: false, items: [] });
   });
 
-  describe('cleanup runs once', () => {
-    it('first crawl runs cleanupStaleConcreteIndices, second crawl skips it', async () => {
-      const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
-      const definition = createMockDefinition({ list: jest.fn().mockResolvedValue([]) });
-
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-      const firstCrawlExistsCalls = (esClient.indices.exists as jest.Mock).mock.calls.length;
-      expect(firstCrawlExistsCalls).toBeGreaterThan(0);
-
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-      const secondCrawlExistsCalls = (esClient.indices.exists as jest.Mock).mock.calls.length;
-      expect(secondCrawlExistsCalls).toBe(firstCrawlExistsCalls);
-    });
-  });
-
   describe('new items detected', () => {
     it('when list returns items not in state, creates state docs with update_action create', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
@@ -566,60 +551,6 @@ describe('createSmlCrawler', () => {
     });
   });
 
-  describe('state normalization', () => {
-    it('old state docs with space_id and no spaces get normalized to spaces array', async () => {
-      const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([]),
-      });
-      mockStateClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  attachment_id: 'old-doc',
-                  attachment_type: 'test-type',
-                  space_id: 'default',
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: undefined,
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'test-type:old-doc',
-                sort: ['old-doc'],
-                _source: {
-                  attachment_id: 'old-doc',
-                  attachment_type: 'test-type',
-                  space_id: 'default',
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'delete',
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
-
-      const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attachmentId: 'old-doc',
-          spaces: ['default'],
-        })
-      );
-    });
-  });
 
   describe('data integrity check', () => {
     it('when state has items but countSmlDocuments returns 0, resets state to force re-index', async () => {
