@@ -10,6 +10,7 @@
 export {
   convertToWorkflowGraph,
   convertToSerializableGraph,
+  visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
@@ -37,6 +38,8 @@ export type {
   ExitContinueNode,
   WaitGraphNodeSchema,
   WaitGraphNode,
+  WaitForInputGraphNodeSchema,
+  WaitForInputGraphNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,
@@ -58,6 +61,7 @@ export {
   isElasticsearch,
   isKibana,
   isWait,
+  isWaitForInput,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,
