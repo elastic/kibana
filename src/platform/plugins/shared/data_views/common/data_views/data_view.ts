@@ -146,7 +146,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     return new DataView({
       spec: enrichedSpec,
-      fieldFormats: this.fieldFormatMap as any,
+      fieldFormats: this.fieldFormats,
       shortDotsEnable: this.shortDotsEnable,
       metaFields: this.metaFields,
     });

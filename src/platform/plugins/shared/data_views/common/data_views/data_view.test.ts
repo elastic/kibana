@@ -961,5 +961,24 @@ describe('IndexPattern', () => {
       expect(clonedDataView.fields.length).toEqual(1);
       expect(indexPattern.fields.getByName('new_field')).toBeUndefined();
     });
+
+    test('should clone fieldFormats service correctly', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'field1',
+          name: 'field1',
+          meta: { type: 'string' },
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      // Verify that the cloned DataView can get field formatters
+      const field = clonedDataView.fields.getByName('field1');
+      expect(field).toBeDefined();
+
+      // This should not throw - it verifies that fieldFormats service is properly passed
+      expect(() => clonedDataView.getFormatterForField(field!)).not.toThrow();
+    });
   });
 });
