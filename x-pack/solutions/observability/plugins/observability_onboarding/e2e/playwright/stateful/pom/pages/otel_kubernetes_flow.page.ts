@@ -6,7 +6,6 @@
  */
 
 import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
-import { DiscoverValidationPage } from './discover_validation.page';
 
 export class OtelKubernetesFlowPage {
   page: Page;
@@ -89,10 +88,5 @@ export class OtelKubernetesFlowPage {
 
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
-  }
-
-  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
-    await this.exploreLogsButton.click();
-    return new DiscoverValidationPage(this.page);
   }
 }

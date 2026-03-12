@@ -65,7 +65,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['viz-1'],
+      attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -90,7 +90,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['unsupported-1'],
+      attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -106,7 +106,7 @@ describe('resolvePanelsFromAttachments', () => {
 
   it('collects per-attachment failures without failing the whole operation', async () => {
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['missing-id'],
+      attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments: createAttachmentManager({}),
       logger: createMockLogger(),
     });
@@ -128,6 +128,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 
@@ -136,7 +137,7 @@ describe('upsertMarkdownPanel', () => {
     expect(result.changedPanel).toBeDefined();
     expect(result.panels).toHaveLength(2);
     expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       rawConfig: { content: '# Summary' },
       grid: { w: 48, h: 4, x: 0, y: 0 },
     });
@@ -159,7 +160,7 @@ describe('upsertMarkdownPanel', () => {
   it('updates existing markdown panel content and recalculates grid height', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old summary' },
         grid: { w: 48, h: 4, x: 0, y: 0 },
@@ -168,13 +169,14 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 
     const result = upsertMarkdownPanel(existingPanels, '# New summary\n\nLine 1\nLine 2\nLine 3');
 
     expect(result.changedPanel).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       panelId: 'markdown-1',
       rawConfig: { content: '# New summary\n\nLine 1\nLine 2\nLine 3' },
       grid: { w: 48, h: 6, x: 0, y: 0 },
@@ -185,7 +187,7 @@ describe('upsertMarkdownPanel', () => {
   it('does not change panels when markdown content is unchanged', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Summary' },
         grid: { w: 48, h: 4, x: 0, y: 0 },
@@ -201,7 +203,7 @@ describe('upsertMarkdownPanel', () => {
   it('preserves existing x and y position when updating markdown content', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old' },
         grid: { w: 48, h: 4, x: 0, y: 10 },
@@ -219,6 +221,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 
