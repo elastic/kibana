@@ -150,7 +150,7 @@ export const ManageIntegrationsTable: React.FC<{
       return {
         ...item,
         displayStatus,
-        availableAction: canReviewApproveIntegration(item) ? 'review_approve' : 'edit',
+        availableAction: isIntegrationPackageReady(item) ? 'review_approve' : 'edit',
       };
     });
   }, [integrations]);
