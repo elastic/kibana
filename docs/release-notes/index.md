@@ -36,10 +36,15 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 
 ### Fixes [kibana-9.3.2-fixes]
 
+**Elastic Agent Builder**:
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin (`xpack.actions` configuration property) [#255813]({{kib-pull}}255813).
+
 **Alerting**:
 * Fixes a problem generating a report with multi-page Canvas workpads [#255022]({{kib-pull}}255022).
 * Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
 * Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+* Fixes OOM crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
 
 **Dashboards and Visualizations**:
 * Applies embeddable transforms to embeddable elements [#252191]({{kib-pull}}252191).
@@ -52,6 +57,9 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 **Data ingestion and Fleet**:
 * Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
 * Fixes incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Discover**:
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.3.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -81,11 +89,6 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 * Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
 * Fixes focus behavior when there are errors in the connector flyout form [#255770]({{kib-pull}}255770).
 * Adds server-side API key generation [#256083]({{kib-pull}}256083).
-* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
-* Fixes MCP connectors ignoring the proxy and SSL configuration from the actions plugin (`xpack.actions` configuration property) [#255813]({{kib-pull}}255813).
-* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
-* Fixes EQL sequence document merging to treat dot and nested notation the same [#254830]({{kib-pull}}254830).
-* Fixes OOM crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
 
 ## 9.3.1 [kibana-9.3.1-release-notes]
 
