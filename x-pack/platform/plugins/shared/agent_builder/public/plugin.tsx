@@ -261,6 +261,9 @@ export class AgentBuilderPlugin
 
         openSidebarInternal(options);
       },
+      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: unknown) => {
+        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+      },
     };
 
     if (hasAgentBuilder) {
