@@ -37,6 +37,34 @@ describe('buildPath', () => {
     expect(buildPath('/api/myapi/{section}/{id?}', { section: 'test' })).toBe('/api/myapi/test');
   });
 
+  it('encodes multi-segment path parameters', () => {
+    expect(
+      buildPath('/api/myapi/{filePath*}', {
+        filePath: 'nested/folder/my file.txt',
+      })
+    ).toBe('/api/myapi/nested/folder/my%20file.txt');
+  });
+
+  it('encodes counted multi-segment path parameters from arrays', () => {
+    expect(
+      buildPath('/api/myapi/{coordinates*2}', {
+        coordinates: ['north east', 'south/west'],
+      })
+    ).toBe('/api/myapi/north%20east/south%2Fwest');
+  });
+
+  it('throws when a counted multi-segment path parameter has the wrong number of segments', () => {
+    expect(() => buildPath('/api/myapi/{coordinates*2}', { coordinates: 'only-one' })).toThrow(
+      'Expected 2 path segment(s) for parameter: coordinates, received 1'
+    );
+  });
+
+  it('throws when unsupported path template syntax remains unresolved', () => {
+    expect(() => buildPath('/api/myapi/{filePath?*}', { filePath: 'nested/file.txt' })).toThrow(
+      'Unsupported path template syntax: {filePath?*}'
+    );
+  });
+
   it('throws when a required path parameter is missing', () => {
     expect(() => buildPath('/api/dashboards/{id}', {})).toThrow(
       'Missing required path parameter: id'
