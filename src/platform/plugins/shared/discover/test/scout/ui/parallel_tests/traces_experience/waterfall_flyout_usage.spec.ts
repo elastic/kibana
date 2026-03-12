@@ -189,7 +189,7 @@ spaceTest.describe(
 
     spaceTest(
       'Open in Discover from child flyout sections navigates to the correct data',
-      async ({ browserAuth, pageObjects, page }) => {
+      async ({ browserAuth, pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('setup: login and open trace timeline', async () => {
@@ -210,8 +210,9 @@ spaceTest.describe(
           'Internal span child flyout - errors Open in Discover shows the span error',
           async () => {
             await flyout.waterfallFlyout.childDocFlyout.errors.openInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE);
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE
+            );
           }
         );
 
@@ -226,10 +227,15 @@ spaceTest.describe(
           'Internal span child flyout - logs Open in Discover shows the correlated logs',
           async () => {
             await flyout.waterfallFlyout.childDocFlyout.logs.openInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.PROCESS_ORDER_VALIDATING);
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.PROCESS_ORDER_INVENTORY);
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.PROCESS_ORDER_SUCCESS);
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_VALIDATING
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_INVENTORY
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.PROCESS_ORDER_SUCCESS
+            );
           }
         );
 
@@ -244,8 +250,7 @@ spaceTest.describe(
           'Internal span child flyout - span links Open in Discover shows the linked span',
           async () => {
             await flyout.waterfallFlyout.childDocFlyout.spanLinks.openInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
           }
         );
       }
