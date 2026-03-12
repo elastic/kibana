@@ -62,24 +62,6 @@ export class SavedSearchesService {
     return result.hits;
   };
 
-  find = async (search: string) => {
-    const { contentManagement } = this.deps;
-    const result = await contentManagement.search<
-      SavedSearchCrudTypes['SearchIn'],
-      SavedSearchCrudTypes['SearchOut']
-    >({
-      contentTypeId: SavedSearchType,
-      query: {
-        text: search,
-      },
-      options: {
-        searchFields: ['title'],
-        fields: ['title'],
-      },
-    });
-    return result.hits;
-  };
-
   save = (savedSearch: SavedSearch, options: SaveSavedSearchOptions = {}) => {
     const { contentManagement, savedObjectsTaggingOss } = this.deps;
     return saveSavedSearch(

@@ -1,0 +1,116 @@
+{
+  "10.11.0": [
+    {
+      "title": "Saved search (KQL)",
+      "description": "Fixture saved search used for modelVersion migration checks",
+      "columns": ["@timestamp", "message"],
+      "sort": [["@timestamp", "desc"]],
+      "grid": {
+        "columns": {
+          "@timestamp": {
+            "width": 190
+          },
+          "message": {
+            "width": 420
+          }
+        }
+      },
+      "hideChart": false,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"host.name : *\"},\"filter\":[]}"
+      },
+      "isTextBasedQuery": false,
+      "usesAdHocDataView": false,
+      "timeRestore": true,
+      "timeRange": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "refreshInterval": {
+        "pause": true,
+        "value": 0
+      },
+      "viewMode": "documents",
+      "hideAggregatedPreview": false,
+      "hits": 0,
+      "version": 1
+    },
+    {
+      "title": "Saved search (ES|QL text-based)",
+      "description": "",
+      "columns": [],
+      "sort": [],
+      "grid": {},
+      "hideChart": true,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
+      },
+      "isTextBasedQuery": true,
+      "timeRestore": false
+    }
+  ],
+  "10.12.0": [
+    {
+      "title": "Saved search (KQL)",
+      "description": "Fixture saved search used for modelVersion migration checks",
+      "tabs": [
+        {
+          "id": "23b8d702-cd0a-498c-b022-06a0f74aea16",
+          "label": "Untitled",
+          "attributes": {
+            "columns": ["@timestamp", "message"],
+            "sort": [["@timestamp", "desc"]],
+            "grid": {
+              "columns": {
+                "@timestamp": {
+                  "width": 190
+                },
+                "message": {
+                  "width": 420
+                }
+              }
+            },
+            "hideChart": false,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"host.name : *\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": false,
+            "usesAdHocDataView": false,
+            "timeRestore": true,
+            "timeRange": {
+              "from": "now-15m",
+              "to": "now"
+            },
+            "refreshInterval": {
+              "pause": true,
+              "value": 0
+            },
+            "viewMode": "documents",
+            "hideAggregatedPreview": false
+          }
+        }
+      ]
+    },
+    {
+      "title": "Saved search (ES|QL text-based)",
+      "description": "",
+      "tabs": [
+        {
+          "id": "8a7dda1f-2493-44dd-a0e9-7c6557d02f3a",
+          "label": "Untitled",
+          "attributes": {
+            "columns": [],
+            "sort": [],
+            "grid": {},
+            "hideChart": true,
+            "kibanaSavedObjectMeta": {
+              "searchSourceJSON": "{\"query\":{\"language\":\"esql\",\"query\":\"from logs-* | limit 10\"},\"filter\":[]}"
+            },
+            "isTextBasedQuery": true,
+            "timeRestore": false
+          }
+        }
+      ]
+    }
+  ]
+}

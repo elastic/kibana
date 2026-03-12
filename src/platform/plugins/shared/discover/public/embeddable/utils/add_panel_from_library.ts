@@ -8,10 +8,10 @@
  */
 
 import type { RegistryItem } from '@kbn/embeddable-plugin/public/add_from_library/registry';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiHasUniqueId, apiPublishesEditablePauseFetch } from '@kbn/presentation-publishing';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 
 type OnAddParams = Parameters<RegistryItem['onAdd']>;
@@ -20,11 +20,12 @@ export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = as
   container,
   savedObject
 ) => {
-  const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
+  const discoverSessionAttributes = savedObject.attributes as DiscoverSessionAttributes;
+  const firstTabAttributes = discoverSessionAttributes.tabs[0].attributes;
   const mightHaveVariables =
     apiPublishesESQLVariables(container) &&
-    savedSessionAttributes.controlGroupJson &&
-    savedSessionAttributes.controlGroupJson.length > 0;
+    firstTabAttributes.controlGroupJson &&
+    firstTabAttributes.controlGroupJson.length > 0;
 
   // pause fetching so that we don't try to build an ES|QL query without necessary variables
   const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
@@ -46,7 +47,7 @@ export const addPanelFromLibrary: (...params: OnAddParams) => Promise<void> = as
   if (mightHaveVariables) {
     await addControlsFromSavedSession(
       container,
-      savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
+      firstTabAttributes.controlGroupJson!, // this is verified via mightHaveVariables
       uuid
     );
   }

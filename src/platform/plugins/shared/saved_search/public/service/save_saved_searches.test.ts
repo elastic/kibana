@@ -19,6 +19,30 @@ describe('saveSavedSearch', () => {
   let cmApi: ContentManagementPublicStart['client'];
   let savedSearch: SavedSearch;
 
+  const expectedTabAttributes = expect.objectContaining({
+    breakdownField: undefined,
+    chartInterval: undefined,
+    columns: [],
+    controlGroupJson: undefined,
+    density: undefined,
+    grid: {},
+    hideAggregatedPreview: undefined,
+    hideChart: false,
+    isTextBasedQuery: false,
+    kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+    refreshInterval: undefined,
+    rowHeight: undefined,
+    headerRowHeight: undefined,
+    rowsPerPage: undefined,
+    sampleSize: undefined,
+    sort: [],
+    timeRange: undefined,
+    timeRestore: false,
+    usesAdHocDataView: undefined,
+    viewMode: undefined,
+    visContext: undefined,
+  });
+
   beforeEach(() => {
     cmApi = contentManagementMock.createStartContract().client;
     const searchSource = dataPluginMock.createStartContract().search.searchSource.createEmpty();
@@ -118,44 +142,17 @@ describe('saveSavedSearch', () => {
 
     expect(cmApi.create).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
+      data: expect.objectContaining({
         title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
+        description: '',
         tabs: [
           {
             id: expect.any(String),
             label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
+            attributes: expectedTabAttributes,
           },
         ],
-      },
+      }),
       options: { references: [] },
     });
   });
@@ -171,44 +168,17 @@ describe('saveSavedSearch', () => {
 
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        isTextBasedQuery: false,
-        hideChart: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        timeRange: undefined,
-        sort: [],
+      data: expect.objectContaining({
         title: 'title',
-        timeRestore: false,
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
+        description: '',
         tabs: [
           {
             id: expect.any(String),
             label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
+            attributes: expectedTabAttributes,
           },
         ],
-      },
+      }),
       id: 'id',
       options: { references: [] },
     });
@@ -239,44 +209,17 @@ describe('saveSavedSearch', () => {
     );
     expect(cmApi.update).toHaveBeenCalledWith({
       contentTypeId: 'search',
-      data: {
-        breakdownField: undefined,
-        columns: [],
-        description: '',
-        grid: {},
-        hideAggregatedPreview: undefined,
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        refreshInterval: undefined,
-        rowHeight: undefined,
-        headerRowHeight: undefined,
-        rowsPerPage: undefined,
-        sampleSize: undefined,
-        sort: [],
-        timeRange: undefined,
-        timeRestore: false,
+      data: expect.objectContaining({
         title: 'title',
-        usesAdHocDataView: undefined,
-        viewMode: undefined,
+        description: '',
         tabs: [
           {
             id: expect.any(String),
             label: 'Untitled',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              sort: [],
-              columns: [],
-              grid: {},
-              hideChart: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-            },
+            attributes: expectedTabAttributes,
           },
         ],
-      },
+      }),
       id: 'id',
       options: { references: ['tag-1', 'tag-2'] },
     });

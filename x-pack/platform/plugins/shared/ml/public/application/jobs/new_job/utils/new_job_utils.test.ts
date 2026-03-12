@@ -8,7 +8,7 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createSearchItems } from './new_job_utils';
-import { fromSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { fromDiscoverSessionAttributesToSavedSearch } from '@kbn/saved-search-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 
 describe('createSearchItems', () => {
@@ -27,19 +27,11 @@ describe('createSearchItems', () => {
     });
 
   const getSavedSearchMock = (searchSource: any = {}) =>
-    fromSavedSearchAttributes(
+    fromDiscoverSessionAttributesToSavedSearch(
       '4b9b1010-c678-11ea-b6e6-e942978da29c',
       {
         title: 'not test',
         description: '',
-        columns: ['_source'],
-        sort: [],
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '',
-        },
-        grid: {},
-        hideChart: false,
-        isTextBasedQuery: false,
         tabs: [
           {
             id: 'tab_0',
