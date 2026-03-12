@@ -18,7 +18,7 @@ export const GithubConnector: ConnectorSpec = {
       defaultMessage: 'Search through repositories and issues in Github',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: ['bearer'],

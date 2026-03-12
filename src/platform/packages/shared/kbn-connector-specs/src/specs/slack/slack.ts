@@ -474,7 +474,7 @@ export const Slack: ConnectorSpec = {
       defaultMessage: 'List public channels and send messages to Slack channels',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

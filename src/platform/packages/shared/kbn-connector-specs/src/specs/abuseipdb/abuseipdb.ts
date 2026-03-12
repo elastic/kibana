@@ -31,7 +31,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       defaultMessage: 'IP reputation checking and abuse reporting',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

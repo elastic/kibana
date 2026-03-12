@@ -97,7 +97,7 @@ export const Zoom: ConnectorSpec = {
         'Kibana Stack Connector for Zoom — access meetings, recordings, transcripts, and participants.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
