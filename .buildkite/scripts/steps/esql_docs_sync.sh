@@ -21,11 +21,12 @@ main () {
 
   # Start Elasticsearch in the background
   node scripts/es snapshot \
+    -E network.bind_host=127.0.0.1,192.168.56.1 \
+    -E discovery.type=single-node \
     --license=trial &
   ES_PID=$!
 
-  ELASTICSEARCH_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json)"
-  ELASTICSEARCH_URL="$(printf '%s' "$ELASTICSEARCH_URL" | sed 's:/*$::')"
+  ELASTICSEARCH_URL="http://localhost:9200"
 
   # Wait for Elasticsearch to be ready
   echo "Waiting for Elasticsearch to be ready..."
