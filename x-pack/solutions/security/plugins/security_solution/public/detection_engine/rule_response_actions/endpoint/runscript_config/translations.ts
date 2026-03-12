@@ -23,6 +23,10 @@ export const SCRIPT_ARGUMENTS_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.scriptArgumentsLabel',
   { defaultMessage: 'Arguments' }
 );
+export const SCRIPT_ARGUMENTS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.runscriptConfig.scriptArgumentsPlaceholder',
+  { defaultMessage: 'Enter arguments' }
+);
 export const SCRIPT_TIMEOUT_LABEL = i18n.translate(
   'xpack.securitySolution.runscriptConfig.scriptTimeoutLabel',
   { defaultMessage: 'Timeout' }

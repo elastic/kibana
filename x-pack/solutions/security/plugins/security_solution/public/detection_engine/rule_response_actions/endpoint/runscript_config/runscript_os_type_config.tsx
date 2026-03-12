@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
+  EuiTitle,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +26,7 @@ import {
   TIMEOUT_TOOLTIP_CONTENT,
   SCRIPT_SELECTION_LABEL,
   SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
+  SCRIPT_ARGUMENTS_PLACEHOLDER,
 } from './translations';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointRunScriptActionRequestParams } from '../../../../../common/api/endpoint';
@@ -32,11 +34,10 @@ import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_gen
 import type { EndpointScript } from '../../../../../common/endpoint/types';
 import type { EndpointRunscriptScriptSelectorProps } from '../../../../management/components/endpoint_runscript_script_selector';
 import { EndpointRunscriptScriptSelector } from '../../../../management/components/endpoint_runscript_script_selector';
-import { PlatformIcon } from '../../../../management/components/endpoint_responder/components/header_info/platforms';
 import { OS_TITLES } from '../../../../management/common/translations';
 import { validateTimeoutValue } from './utils';
 
-interface RunScriptOsTypeConfigProps {
+export interface RunScriptOsTypeConfigProps {
   'data-test-subj'?: string;
   platform: SupportedHostOsType;
   config: EndpointRunScriptActionRequestParams;
@@ -49,8 +50,10 @@ interface RunScriptOsTypeConfigProps {
   showFieldLabels?: boolean;
 }
 
-/** @private */
-const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
+/**
+ * Displays each OS row for configuring a runscript action
+ */
+export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
   ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
@@ -186,36 +189,25 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         {/* OS Column */}
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace={showFieldLabels} fullWidth>
-            <EuiFlexGroup
-              responsive={false}
-              wrap={false}
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="center"
+            <EuiTitle
+              size="xs"
               css={css`
                 width: 10ch;
+                margin-top: 0.75rem;
               `}
+              className="eui-textRight"
             >
-              <EuiFlexItem grow={false}>
-                <PlatformIcon platform={platform} size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem className="eui-textTruncate" grow={false}>
-                {OS_TITLES[platform] ?? platform}
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              <h6>{OS_TITLES[platform] ?? platform}</h6>
+            </EuiTitle>
           </EuiFormRow>
         </EuiFlexItem>
 
         {/* Script Selector Column */}
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} className="eui-textTruncate">
           <EuiFormRow
             label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
             fullWidth
-            helpText={
-              // FIXME:PT implement way to view script definition details - use component from Ash's PR
-              // scriptSelected ? 'TBD: Click here to view script definition details' : <>&nbsp;</>
-              <>&nbsp;</>
-            }
+            helpText={<>&nbsp;</>}
           >
             <EndpointRunscriptScriptSelector
               selectedScriptId={config.scriptId}
@@ -248,6 +240,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               value={config.scriptInput}
               fullWidth
               onChange={scriptParamsOnChangeHandler}
+              placeholder={SCRIPT_ARGUMENTS_PLACEHOLDER}
               data-test-subj={getTestId('scriptParams')}
             />
           </EuiFormRow>
@@ -259,13 +252,12 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             fullWidth
             isInvalid={!currentValidationState.timeout.isValid}
             error={currentValidationState.timeout.errors?.join('; ')}
-            helpText={
-              currentValidationState.timeout.isValid && config.scriptId
-                ? SCRIPT_TIMEOUT_HELP
-                : currentValidationState.timeout.isValid && <>&nbsp;</>
-            }
-            label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
+            data-test-subj={getTestId('timeoutContainer')}
+            helpText={<>&nbsp;</>}
             labelAppend={
+              showFieldLabels ? <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText> : undefined
+            }
+            label={
               showFieldLabels ? (
                 <EuiFlexGroup
                   responsive={false}
@@ -277,16 +269,13 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
                     line-height: 1rem;
                   `}
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
-                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{SCRIPT_TIMEOUT_LABEL}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiIconTip content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : undefined
             }
-            data-test-subj={getTestId('timeoutContainer')}
           >
             <EuiFieldText
               isInvalid={!currentValidationState.timeout.isValid}
@@ -295,6 +284,7 @@ const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
               fullWidth
               onChange={scriptTimeoutOnChangeHandler}
               value={config.timeout ?? ''}
+              placeholder={SCRIPT_TIMEOUT_HELP}
               data-test-subj={getTestId('timeout')}
             />
           </EuiFormRow>

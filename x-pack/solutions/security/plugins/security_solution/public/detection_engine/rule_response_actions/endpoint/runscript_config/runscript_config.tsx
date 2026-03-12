@@ -8,45 +8,16 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { EuiFieldTextProps } from '@elastic/eui';
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiIconTip,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { validateTimeoutValue } from './utils';
+import { EuiTitle, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { RunScriptOsTypeConfig } from './runscript_os_type_config';
 import type { ValidationState } from './types';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import type { EndpointRunScriptActionRequestParams } from '../../../../../common/api/endpoint';
-import type {
-  AutomatedRunScriptConfig,
-  EndpointScript,
-} from '../../../../../common/endpoint/types';
-import type { EndpointRunscriptScriptSelectorProps } from '../../../../management/components/endpoint_runscript_script_selector';
-import { EndpointRunscriptScriptSelector } from '../../../../management/components/endpoint_runscript_script_selector';
+import type { AutomatedRunScriptConfig } from '../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { CONSOLE_COMMANDS, OS_TITLES } from '../../../../management/common/translations';
-import { PlatformIcon } from '../../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
-import {
-  SCRIPT_TIMEOUT_HELP,
-  SCRIPT_TIMEOUT_LABEL,
-  SCRIPT_ARGUMENTS_LABEL,
-  OPTIONAL_FIELD_LABEL,
-  TIMEOUT_TOOLTIP_CONTENT,
-  SCRIPT_SELECTION_LABEL,
-  SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT,
-  RUNSCRIPT_CONFIG_REQUIRES_ONE_OS,
-  RUNSCRIPT_CONFIG_LABEL,
-} from './translations';
+import { RUNSCRIPT_CONFIG_REQUIRES_ONE_OS, RUNSCRIPT_CONFIG_LABEL } from './translations';
 
 const getDefaultRunScriptConfiguration = () => {
   return {
@@ -202,7 +173,7 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
       hasShadow={false}
       paddingSize="none"
     >
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h5>{RUNSCRIPT_CONFIG_LABEL}</h5>
       </EuiTitle>
 
@@ -212,7 +183,7 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
 
       <EuiSpacer size="s" />
 
-      <EuiPanel color="subdued" hasShadow={false} paddingSize="m" borderRadius="m" hasBorder>
+      <EuiPanel color="subdued" hasShadow={false} paddingSize="m" borderRadius="m" hasBorder={true}>
         <EuiText size="s">
           {(['linux', 'macos', 'windows'] as Array<keyof AutomatedRunScriptConfig>).map(
             (osType, index) => {
@@ -271,272 +242,3 @@ const AutomatedRunScriptConfiguration = memo<AutomatedRunScriptConfigurationProp
   );
 });
 AutomatedRunScriptConfiguration.displayName = 'AutomatedRunScriptConfiguration';
-
-interface RunScriptOsTypeConfigProps {
-  'data-test-subj'?: string;
-  platform: SupportedHostOsType;
-  config: EndpointRunScriptActionRequestParams;
-  onChange: (
-    updates: ValidationState & {
-      updatedConfig: EndpointRunScriptActionRequestParams;
-    }
-  ) => void;
-  /** If `true` (default) each field will include a label */
-  showFieldLabels?: boolean;
-}
-
-/** @private */
-const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
-  ({ config, onChange, 'data-test-subj': dataTestSubj, platform, showFieldLabels = true }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
-    const [scriptSelected, setSelectedScript] = useState<EndpointScript | undefined>(undefined);
-
-    interface OsConfigValidationResult extends ValidationState {
-      timeout: ValidationState;
-      arguments: ValidationState;
-    }
-    const validateConfig = useCallback(
-      (
-        updatedConfig: EndpointRunScriptActionRequestParams,
-        updatedScriptSelected: EndpointScript | undefined
-      ): OsConfigValidationResult => {
-        const validationResult: OsConfigValidationResult = {
-          isValid: true,
-          timeout: { isValid: true },
-          arguments: { isValid: true },
-        };
-
-        validationResult.timeout = validateTimeoutValue(updatedConfig.timeout);
-
-        if (updatedScriptSelected?.requiresInput && !updatedConfig.scriptInput) {
-          validationResult.arguments.isValid = false;
-          (validationResult.arguments.errors = validationResult.arguments.errors ?? []).push(
-            SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
-          );
-        }
-
-        validationResult.isValid =
-          validationResult.timeout.isValid && validationResult.arguments.isValid;
-        validationResult.errors = validationResult.isValid
-          ? undefined
-          : (validationResult.timeout.errors ?? [])
-              .map((errMessage) => `${SCRIPT_TIMEOUT_LABEL}: ${errMessage}`)
-              .concat(
-                (validationResult.arguments.errors ?? []).map(
-                  (errMessage) => `${SCRIPT_ARGUMENTS_LABEL}: ${errMessage}`
-                )
-              );
-
-        return validationResult;
-      },
-      []
-    );
-
-    const currentValidationState = useMemo(() => {
-      return validateConfig(config, scriptSelected);
-    }, [config, scriptSelected, validateConfig]);
-
-    const scriptSelectionOnChangeHandler: EndpointRunscriptScriptSelectorProps['onChange'] =
-      useCallback(
-        (newSelectedScript) => {
-          const updatedConfig = {
-            ...config,
-            scriptId: newSelectedScript?.id ?? '',
-            // reset script input ++ timeout if no script is selected
-            ...(!newSelectedScript ? { scriptInput: '', timeout: undefined } : {}),
-          };
-          const updatedConfigValidationResult = validateConfig(updatedConfig, newSelectedScript);
-
-          if (newSelectedScript?.id !== config.scriptId) {
-            onChange({
-              isValid: updatedConfigValidationResult.isValid,
-              errors: updatedConfigValidationResult.errors,
-              updatedConfig,
-            });
-          }
-
-          setSelectedScript(newSelectedScript);
-        },
-        [config, onChange, validateConfig]
-      );
-
-    const scriptSelectionOnScriptsLoadedHandler = useCallback<
-      Required<EndpointRunscriptScriptSelectorProps>['onScriptsLoaded']
-    >(
-      (scriptList) => {
-        if (config.scriptId && !scriptSelected) {
-          setSelectedScript(scriptList.find((script) => script.id === config.scriptId));
-        }
-      },
-      [config.scriptId, scriptSelected]
-    );
-
-    const scriptParamsOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
-      (ev) => {
-        const updatedConfig = {
-          ...config,
-          scriptInput: ev.target.value ?? '',
-        };
-        const { isValid, errors } = validateConfig(updatedConfig, scriptSelected);
-
-        onChange({
-          isValid,
-          errors,
-          updatedConfig,
-        });
-      },
-      [config, onChange, scriptSelected, validateConfig]
-    );
-
-    const scriptTimeoutOnChangeHandler: Required<EuiFieldTextProps>['onChange'] = useCallback(
-      (ev) => {
-        const userProvidedTimeoutValue = ev.target.value;
-        const updatedConfig = {
-          ...config,
-          timeout: (userProvidedTimeoutValue as unknown as number) || undefined,
-        };
-        const { isValid, errors, timeout } = validateConfig(updatedConfig, scriptSelected);
-
-        // Now that we know the user's value is valid, convert it to a number since the API expects a number
-        if (userProvidedTimeoutValue && timeout.isValid) {
-          updatedConfig.timeout = Number(userProvidedTimeoutValue);
-        }
-
-        onChange({
-          isValid,
-          errors,
-          updatedConfig,
-        });
-      },
-      [config, onChange, scriptSelected, validateConfig]
-    );
-
-    return (
-      <EuiFlexGroup
-        key={platform}
-        gutterSize="m"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        data-test-subj={dataTestSubj}
-      >
-        {/* OS Column */}
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={showFieldLabels} fullWidth>
-            <EuiFlexGroup
-              responsive={false}
-              wrap={false}
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="center"
-              css={css`
-                width: 10ch;
-              `}
-            >
-              <EuiFlexItem grow={false}>
-                <PlatformIcon platform={platform} size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem className="eui-textTruncate" grow={false}>
-                {OS_TITLES[platform] ?? platform}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        {/* Script Selector Column */}
-        <EuiFlexItem grow={2}>
-          <EuiFormRow
-            label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
-            fullWidth
-            helpText={
-              // FIXME:PT implement way to view script definition details - use component from Ash's PR
-              // scriptSelected ? 'TBD: Click here to view script definition details' : <>&nbsp;</>
-              <>&nbsp;</>
-            }
-          >
-            <EndpointRunscriptScriptSelector
-              selectedScriptId={config.scriptId}
-              osType={platform}
-              onChange={scriptSelectionOnChangeHandler}
-              onScriptsLoaded={scriptSelectionOnScriptsLoadedHandler}
-              data-test-subj={getTestId('scriptSelector')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        {/* Script Arguments Column */}
-        <EuiFlexItem grow={2}>
-          <EuiFormRow
-            label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
-            fullWidth
-            helpText={
-              !currentValidationState.arguments.errors && scriptSelected?.requiresInput
-                ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
-                : currentValidationState.arguments.isValid && <>&nbsp;</>
-            }
-            isInvalid={!currentValidationState.arguments.isValid}
-            error={currentValidationState.arguments.errors?.join('; ')}
-            data-test-subj={getTestId('scriptParamsContainer')}
-          >
-            <EuiFieldText
-              isInvalid={!currentValidationState.arguments.isValid}
-              name="scriptParams"
-              disabled={!scriptSelected}
-              value={config.scriptInput}
-              fullWidth
-              onChange={scriptParamsOnChangeHandler}
-              data-test-subj={getTestId('scriptParams')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-
-        {/* Script Timeout Column */}
-        <EuiFlexItem grow={1}>
-          <EuiFormRow
-            fullWidth
-            isInvalid={!currentValidationState.timeout.isValid}
-            error={currentValidationState.timeout.errors?.join('; ')}
-            helpText={
-              currentValidationState.timeout.isValid && config.scriptId
-                ? SCRIPT_TIMEOUT_HELP
-                : currentValidationState.timeout.isValid && <>&nbsp;</>
-            }
-            label={showFieldLabels ? SCRIPT_TIMEOUT_LABEL : undefined}
-            labelAppend={
-              showFieldLabels ? (
-                <EuiFlexGroup
-                  responsive={false}
-                  wrap={false}
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  gutterSize="xs"
-                  css={css`
-                    line-height: 1rem;
-                  `}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : undefined
-            }
-            data-test-subj={getTestId('timeoutContainer')}
-          >
-            <EuiFieldText
-              isInvalid={!currentValidationState.timeout.isValid}
-              name="timeout"
-              disabled={!scriptSelected}
-              fullWidth
-              onChange={scriptTimeoutOnChangeHandler}
-              value={config.timeout ?? ''}
-              data-test-subj={getTestId('timeout')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
-RunScriptOsTypeConfig.displayName = 'RunscriptOsTypeConfig';
