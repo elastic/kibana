@@ -162,14 +162,15 @@ describe('SelectInferenceId', () => {
       renderSelectInferenceId();
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.preconfigured-elser');
+      expect(button).toHaveTextContent('.jina-embeddings-v5-text-small');
     });
 
-    it('SHOULD prioritize ELSER endpoint as default selection', async () => {
+    it('SHOULD prioritize JINAv3 endpoint as default selection', async () => {
       renderSelectInferenceId();
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.preconfigured-elser');
+      expect(button).toHaveTextContent('.jina-embeddings-v5-text-small');
+      expect(button).not.toHaveTextContent('.preconfigured-elser');
       expect(button).not.toHaveTextContent('endpoint-1');
       expect(button).not.toHaveTextContent('endpoint-2');
     });
