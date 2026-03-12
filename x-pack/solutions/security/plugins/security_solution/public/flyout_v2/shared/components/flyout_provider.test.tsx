@@ -9,14 +9,23 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
+import { BehaviorSubject } from 'rxjs';
 import type { StartServices } from '../../../types';
 import { flyoutProviders } from './flyout_provider';
+
+const assistantContextValue$ = new BehaviorSubject({} as never);
 
 const services = {
   uiActions: {
     getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
+  },
+  elasticAssistantSharedState: {
+    assistantContextValue: {
+      getAssistantContextValue$: () => assistantContextValue$.asObservable(),
+    },
   },
 } as unknown as StartServices;
 
@@ -30,6 +39,12 @@ const ExpandableFlyoutApiProbe = () => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   return <div>{typeof openPreviewPanel}</div>;
+};
+
+const AssistantContextProbe = () => {
+  const context = useAssistantContext();
+
+  return <div>{context ? 'assistant-context' : 'no-assistant-context'}</div>;
 };
 
 describe('flyoutProviders', () => {
@@ -75,5 +90,19 @@ describe('flyoutProviders', () => {
     );
 
     expect(screen.getByText('function')).toBeInTheDocument();
+  });
+
+  it('provides assistant context to children', () => {
+    const store = createStore(() => ({}));
+
+    render(
+      flyoutProviders({
+        services,
+        store,
+        children: <AssistantContextProbe />,
+      })
+    );
+
+    expect(screen.getByText('assistant-context')).toBeInTheDocument();
   });
 });

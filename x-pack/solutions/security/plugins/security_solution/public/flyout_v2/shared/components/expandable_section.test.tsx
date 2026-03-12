@@ -11,6 +11,11 @@ import { CONTENT_TEST_ID, ExpandableSection, HEADER_TEST_ID } from './expandable
 
 const title = <p>{'title'}</p>;
 const children = <div>{'content'}</div>;
+const headerActions = (
+  <button type="button" data-test-subj="headerActions">
+    {'menu'}
+  </button>
+);
 const testId = 'test';
 const headerTestId = testId + HEADER_TEST_ID;
 const contentTestId = testId + CONTENT_TEST_ID;
@@ -49,5 +54,20 @@ describe('<ExpandableSection />', () => {
       getByTestId(headerTestId).click();
       expect(getByTestId(contentTestId)).toBeInTheDocument();
     });
+  });
+
+  it('should render header actions when provided', () => {
+    const { getByTestId } = render(
+      <ExpandableSection
+        expanded={false}
+        title={title}
+        data-test-subj={testId}
+        headerActions={headerActions}
+      >
+        {children}
+      </ExpandableSection>
+    );
+
+    expect(getByTestId('headerActions')).toBeInTheDocument();
   });
 });

@@ -29,6 +29,10 @@ export const INVESTIGATION_GUIDE_TEST_ID = `${PREFIX}InvestigationGuide` as cons
 export const INVESTIGATION_GUIDE_BUTTON_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Button` as const;
 export const INVESTIGATION_GUIDE_LOADING_TEST_ID = `${INVESTIGATION_GUIDE_TEST_ID}Loading` as const;
 
+/* AI summary */
+
+export const AI_SUMMARY_SECTION_TEST_ID = `${PREFIX}AISummarySection` as const;
+
 /* Visualizations */
 
 export const ANALYZER_PREVIEW_TEST_ID = `${PREFIX}AnalyzerPreview` as const;

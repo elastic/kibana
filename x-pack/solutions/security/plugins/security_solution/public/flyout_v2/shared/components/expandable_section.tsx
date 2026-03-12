@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ReactElement, useCallback } from 'react';
+import React, { memo, type ReactElement, useCallback, useMemo } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { useAccordionState } from '../hooks/use_accordion_state';
@@ -42,6 +42,10 @@ export interface ExpandableSectionProps {
    * Title value to render in the header of the accordion
    */
   title: ReactElement | string;
+  /**
+   * Optional content displayed on the right side of the header
+   */
+  headerActions?: React.ReactNode;
 }
 
 /**
@@ -58,6 +62,7 @@ export const ExpandableSection = memo(
     localStorageKey,
     sectionId,
     title,
+    headerActions,
   }: ExpandableSectionProps) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
     const { renderContent, state, toggle } = useAccordionState(expanded);
@@ -65,10 +70,13 @@ export const ExpandableSection = memo(
     const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
     const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
 
-    const header = (
-      <EuiTitle size="xs" data-test-subj={headerDataTestSub}>
-        <h4>{title}</h4>
-      </EuiTitle>
+    const header = useMemo(
+      () => (
+        <EuiTitle size="xs" data-test-subj={headerDataTestSub}>
+          <h4>{title}</h4>
+        </EuiTitle>
+      ),
+      [headerDataTestSub, title]
     );
 
     const onToggle = useCallback(() => {
@@ -76,7 +84,13 @@ export const ExpandableSection = memo(
     }, [toggle, localStorageKey, sectionId]);
 
     return (
-      <EuiAccordion forceState={state} onToggle={onToggle} id={accordionId} buttonContent={header}>
+      <EuiAccordion
+        buttonContent={header}
+        extraAction={headerActions}
+        forceState={state}
+        id={accordionId}
+        onToggle={onToggle}
+      >
         <EuiSpacer size="m" />
         <EuiFlexGroup
           gutterSize={gutterSize}

@@ -11,22 +11,18 @@ import {
   ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID,
   ALERT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID,
   AlertSummaryOptionsMenu,
-} from './settings_menu';
+} from './alert_summary_options_menu';
 import { ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID } from './anonymization_switch';
-import { EaseDetailsContext } from '../context';
 import userEvent from '@testing-library/user-event';
-
-const mockContextValue = {
-  showAnonymizedValues: false,
-  setShowAnonymizedValues: jest.fn(),
-} as unknown as EaseDetailsContext;
 
 describe('AlertSummaryOptionsMenu', () => {
   it('renders button with the anonymize option', async () => {
     const { getByTestId } = render(
-      <EaseDetailsContext.Provider value={mockContextValue}>
-        <AlertSummaryOptionsMenu hasAlertSummary={true} />
-      </EaseDetailsContext.Provider>
+      <AlertSummaryOptionsMenu
+        hasAlertSummary={true}
+        setShowAnonymizedValues={jest.fn()}
+        showAnonymizedValues={false}
+      />
     );
 
     const button = getByTestId(ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID);

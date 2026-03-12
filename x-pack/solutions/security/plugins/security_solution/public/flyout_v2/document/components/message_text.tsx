@@ -20,7 +20,7 @@ import React, { useMemo } from 'react';
 import { CustomCodeBlock } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_code_block';
 import { customCodeBlockLanguagePlugin } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
-export const MESSAGE_TEXT_TEST_ID = 'ease-alert-flyout-message-text';
+export const MESSAGE_TEXT_TEST_ID = 'alert-flyout-message-text';
 
 const getPluginDependencies = () => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -77,8 +77,7 @@ export interface MessageTextProps {
 }
 
 /**
- * To be used for alert summary. For AI Assistant, use `x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/stream/message_text.tsx`
- * This component does not handle rendering of any content references, does not supply a loading cursor, and does not augmentMessageCodeBlocks
+ * To be used for alert summary. For AI Assistant, use `assistant/get_comments/stream/message_text.tsx`.
  */
 export function MessageText({ content, 'data-test-subj': dataTestSubj }: MessageTextProps) {
   const containerCss = css`

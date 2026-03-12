@@ -7,6 +7,7 @@
 
 import { INVESTIGATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/investigation_section'; /* Table */
 import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/about_section'; /* Table */
+import { AI_SUMMARY_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/ai_summary_section';
 import {
   CONTENT_TEST_ID,
   HEADER_TEST_ID,
@@ -88,6 +89,11 @@ export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Detail
 export const INVESTIGATION_SECTION_HEADER_TEST_ID = INVESTIGATION_SECTION_TEST_ID + HEADER_TEST_ID;
 export const INVESTIGATION_SECTION_CONTENT_TEST_ID =
   INVESTIGATION_SECTION_TEST_ID + CONTENT_TEST_ID;
+
+/* AI summary section */
+
+export const AI_SUMMARY_SECTION_HEADER_TEST_ID = AI_SUMMARY_SECTION_TEST_ID + HEADER_TEST_ID;
+export const AI_SUMMARY_SECTION_CONTENT_TEST_ID = AI_SUMMARY_SECTION_TEST_ID + CONTENT_TEST_ID;
 
 const HIGHLIGHTED_FIELDS_TEST_ID = `${PREFIX}HighlightedFields` as const;
 export const HIGHLIGHTED_FIELDS_TITLE_TEST_ID = `${HIGHLIGHTED_FIELDS_TEST_ID}Title` as const;

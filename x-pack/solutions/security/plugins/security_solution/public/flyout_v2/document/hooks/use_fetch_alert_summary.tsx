@@ -21,14 +21,7 @@ export interface UseFetchAlertSummaryParams {
 
 /**
  * API call for fetching alert_summary for current spaceId
- *
- * @param {Object} options - The options object.
- * @param {string} options.alertId - alert id
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {useQuery} hook for getting the status of the alert_summary
  */
-
 export const useFetchAlertSummary = ({
   alertId,
   connectorId,

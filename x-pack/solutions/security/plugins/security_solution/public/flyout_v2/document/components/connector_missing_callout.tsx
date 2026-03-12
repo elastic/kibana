@@ -33,9 +33,8 @@ const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
   }
 );
 
-export const MISSING_CONNECTOR_CALLOUT_TEST_ID = 'ease-alert-flyout-missing-connector-callout';
-export const MISSING_CONNECTOR_CALLOUT_LINK_TEST_ID =
-  'ease-alert-flyout-missing-connector-callout-link';
+export const MISSING_CONNECTOR_CALLOUT_TEST_ID = 'alert-flyout-missing-connector-callout';
+export const MISSING_CONNECTOR_CALLOUT_LINK_TEST_ID = 'alert-flyout-missing-connector-callout-link';
 
 export interface ConnectorMissingCalloutProps {
   /**
@@ -45,8 +44,7 @@ export interface ConnectorMissingCalloutProps {
 }
 
 /**
- * Callout displayed in EASE alert flyout.
- * It is rendered in the alert summary section, and will help users add a connector if it is missing.
+ * Callout displayed in alert flyouts in the AI summary section.
  */
 export const ConnectorMissingCallout = memo(
   ({ canSeeAdvancedSettings }: ConnectorMissingCalloutProps) => {
