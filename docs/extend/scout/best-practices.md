@@ -476,7 +476,7 @@ await expect(downloadBtn).toBeEnabled({ timeout: 30_000 });
 
 ### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
 
-Tables/maps/visualizations can appear before data is rendered. Prefer waiting on an explicit **“loaded” signal** (ideally exposed by the component).
+Tables/maps/visualizations can appear before data is rendered. Prefer waiting on a component-specific **“loaded” signal** rather than global indicators like the Kibana chrome spinner (our data shows they are unreliable for confirming that a particular component has finished rendering).
 
 :::::{dropdown} Example
 In source code, use a dynamic `data-test-subj`:
@@ -553,6 +553,7 @@ async openEditMode() {
   await this.page.testSubj.waitForSelector('dashboardIsEditing', { state: 'visible' });
 }
 ```
+
 :::::
 
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
