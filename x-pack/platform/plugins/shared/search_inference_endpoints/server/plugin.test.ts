@@ -9,7 +9,12 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { SearchInferenceEndpointsPlugin } from './plugin';
-import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import {
+  INFERENCE_ENDPOINTS_APP_ID,
+  MODEL_SETTINGS_APP_ID,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+} from '../common/constants';
 import type { SearchInferenceEndpointsConfig } from './config';
 
 describe('SearchInferenceEndpointsPlugin', () => {
@@ -48,7 +53,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         minimumLicense: 'enterprise',
         category: DEFAULT_APP_CATEGORIES.kibana,
         management: {
-          ml: [INFERENCE_ENDPOINTS_APP_ID],
+          ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
         },
       });
     });
@@ -60,7 +65,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
       expect(feature.privileges?.all).toMatchObject({
         management: {
-          ml: [INFERENCE_ENDPOINTS_APP_ID],
+          ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
         },
       });
     });
