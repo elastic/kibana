@@ -23,6 +23,12 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Use [deployment tags](./deployment-tags.md) to skip tests that don’t apply to a given environment (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 
+### Prefer runtime feature flags [prefer-runtime-feature-flags]
+
+When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
+
+For the full guide (including when a custom server config is unavoidable), see [Feature flags](./feature-flags.md).
+
 ### Run tests multiple times to catch flakiness [use-the-flaky-test-runner-to-catch-flaky-tests-early]
 
 When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
@@ -116,6 +122,7 @@ test.beforeAll(async ({ esArchiver }) => {
   await esArchiver.load('large_metrics_archive');
 });
 ```
+
 :::::
 
 ### Keep cleanup in hooks [put-cleanup-code-in-hooks-not-in-the-test-body]
@@ -213,10 +220,10 @@ Best practices specific to UI tests.
 
 Default to [parallel UI suites](./parallelism.md) when possible. Parallel workers share the same Kibana/ES deployment, but run in isolated Spaces.
 
-| Mode           | When to use                                                                                                             |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often via the [global setup hook](./global-setup-hook.md)) |
-| **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                            |
+| Mode           | When to use                                                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](./global-setup-hook.md)) |
+| **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                              |
 
 ### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
 
@@ -264,7 +271,7 @@ test('navigates through pages', async ({ pageObjects }) => {
 
 ### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
 
-Setup/teardown via UI is slow and brittle. Prefer Kibana APIs and fixtures.
+Setup/teardown using UI is slow and brittle. Prefer Kibana APIs and fixtures.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** create test data through the UI:
@@ -350,7 +357,7 @@ await page.testSubj.click('submitButton');
 
 ### Locate UI elements reliably [locate-ui-elements-reliably]
 
-Prefer stable `data-test-subj` attributes accessed via `page.testSubj`. If `data-test-subj` is missing, prefer adding one to source code. If that’s not possible, use `getByRole` **inside a scoped container**.
+Prefer stable `data-test-subj` attributes accessed using `page.testSubj`. If `data-test-subj` is missing, prefer adding one to source code. If that’s not possible, use `getByRole` **inside a scoped container**.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** use raw CSS selectors or fragile text matchers:
@@ -515,18 +522,20 @@ Use the right fixture for the right purpose:
 Prefer tests that read like “call endpoint X as role Y, assert outcome”.
 
 ```ts
+import { expect } from '@kbn/scout/api';
+
 apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
   await apiServices.myFeature.createTestData();
   viewerCredentials = await requestAuth.getApiKeyForViewer();
 });
 
 apiTest('returns data for viewer', async ({ apiClient }) => {
-  const { body, statusCode } = await apiClient.get('api/my-feature/data', {
+  const response = await apiClient.get('api/my-feature/data', {
     headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
   });
 
-  expect(statusCode).toBe(200);
-  expect(body.items).toHaveLength(3);
+  expect(response).toHaveStatusCode(200);
+  expect(response.body.items).toHaveLength(3);
 });
 ```
 
@@ -541,11 +550,11 @@ Status code assertions are necessary but not sufficient—also validate shape an
 
 ```ts
 apiTest('returns autocomplete definitions', async ({ apiClient }) => {
-  const { statusCode } = await apiClient.get('api/console/api_server', {
+  const response = await apiClient.get('api/console/api_server', {
     headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
   });
 
-  expect(statusCode).toBe(200);
+  expect(response).toHaveStatusCode(200);
 });
 ```
 
@@ -553,12 +562,12 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
 
 ```ts
 apiTest('returns autocomplete definitions', async ({ apiClient }) => {
-  const { body, statusCode } = await apiClient.get('api/console/api_server', {
+  const response = await apiClient.get('api/console/api_server', {
     headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
   });
 
-  expect(statusCode).toBe(200);
-  expect(body).toMatchObject({
+  expect(response).toHaveStatusCode(200);
+  expect(response.body).toMatchObject({
     es: {
       endpoints: expect.any(Object),
       globals: expect.any(Object),
