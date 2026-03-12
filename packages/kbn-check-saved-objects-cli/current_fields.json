@@ -103,8 +103,8 @@
     "destinations.type",
     "enabled",
     "name",
-    "snoozedUntil",
     "rule_labels",
+    "snoozedUntil",
     "updatedAt",
     "updatedBy"
   ],
