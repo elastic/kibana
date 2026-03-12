@@ -111,7 +111,8 @@ export const ENTITY_MAINTAINER_EVENT = {
     type: {
       type: 'keyword',
       _meta: {
-        description: 'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
+        description:
+          'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
       },
     },
   },
