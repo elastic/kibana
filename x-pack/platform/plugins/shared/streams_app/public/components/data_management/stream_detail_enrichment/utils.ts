@@ -25,6 +25,7 @@ import type {
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
   TrimProcessor,
+  EnrichProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -67,6 +68,7 @@ import type {
   SortFormState,
   TrimFormState,
   UppercaseFormState,
+  EnrichFormState,
 } from './types';
 
 /**
@@ -90,6 +92,7 @@ export const SPECIALISED_TYPES = [
   'sort',
   'concat',
   'network_direction',
+  'enrich',
 ];
 
 interface FormStateDependencies {
@@ -329,6 +332,16 @@ const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState 
   where: ALWAYS_CONDITION,
 });
 
+const defaultEnrichProcessorFormState = (): EnrichFormState => ({
+  action: 'enrich' as const,
+  policy_name: '',
+  field: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -358,6 +371,7 @@ const defaultProcessorFormStateByType: Record<
   sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
+  enrich: defaultEnrichProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -425,7 +439,8 @@ export const getFormStateFromActionStep = (
     step.action === 'join' ||
     step.action === 'split' ||
     step.action === 'sort' ||
-    step.action === 'concat'
+    step.action === 'concat' ||
+    step.action === 'enrich'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -791,6 +806,22 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as NetworkDirectionProcessor,
+      };
+    }
+
+    if (formState.action === 'enrich') {
+      const { policy_name, field, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'enrich',
+          policy_name,
+          field,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as EnrichProcessor,
       };
     }
 
