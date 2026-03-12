@@ -44,7 +44,6 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 * Fixes a problem generating a report with multi-page Canvas workpads [#255022]({{kib-pull}}255022).
 * Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
 * Improves handling of `204` responses [#251090]({{kib-pull}}251090).
-* Fixes OOM crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
 
 **Dashboards and Visualizations**:
 * Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
