@@ -2003,7 +2003,7 @@
     "sass-loader": "10.5.2",
     "selenium-webdriver": "4.40.0",
     "sharp": "0.34.4",
-    "simple-git": "3.27.0",
+    "simple-git": "3.32.3",
     "sinon": "21.0.1",
     "sort-package-json": "3.2.1",
     "source-map": "0.7.6",
