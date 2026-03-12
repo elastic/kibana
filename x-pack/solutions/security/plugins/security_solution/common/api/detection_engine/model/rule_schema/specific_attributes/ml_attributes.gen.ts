@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100.

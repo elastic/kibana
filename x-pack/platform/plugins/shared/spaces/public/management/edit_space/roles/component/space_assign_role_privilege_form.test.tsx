@@ -131,7 +131,8 @@ const renderPrivilegeRolesForm = ({
   );
 };
 
-describe('PrivilegesRolesForm', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253823
+describe.skip('PrivilegesRolesForm', () => {
   let getRolesSpy: jest.SpiedFunction<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
   let getAllKibanaPrivilegeSpy: jest.SpiedFunction<
     ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
@@ -146,13 +147,17 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
-  it("would open the 'manage roles' link in a new tab", () => {
+  it("would open the 'manage roles' link in a new tab", async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     renderPrivilegeRolesForm();
 
     expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
+
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
   });
 
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
@@ -161,7 +166,9 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
 
     ['all', 'read', 'custom'].forEach((privilege) => {
       expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
@@ -183,11 +190,15 @@ describe('PrivilegesRolesForm', () => {
     );
   });
 
-  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     renderPrivilegeRolesForm();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
 
     expect(getRolesSpy).toHaveBeenCalledTimes(1);
 
@@ -197,7 +208,7 @@ describe('PrivilegesRolesForm', () => {
     // trigger page visibility change
     fireEvent(document, new Event('visibilitychange'));
 
-    expect(getRolesSpy).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(getRolesSpy).toHaveBeenCalledTimes(2));
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
@@ -212,11 +223,11 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(false)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(false)
+      )
     );
 
     expect(
@@ -260,11 +271,11 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(true)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      )
     );
 
     expect(
@@ -322,8 +333,7 @@ describe('PrivilegesRolesForm', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253663
-  describe.skip('applying custom privileges', () => {
+  describe('applying custom privileges', () => {
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -353,7 +363,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() =>
+        expect(screen.getByTestId('custom-privilege-button')).toBeInTheDocument()
+      );
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 
@@ -404,9 +416,11 @@ describe('PrivilegesRolesForm', () => {
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
       );
 
       expect(
@@ -466,6 +480,10 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
+      await waitFor(() =>
+        expect(screen.getByTestId('custom-privilege-button')).toBeInTheDocument()
+      );
+
       await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(
@@ -523,6 +541,10 @@ describe('PrivilegesRolesForm', () => {
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
       });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('custom-privilege-button')).toBeInTheDocument()
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 

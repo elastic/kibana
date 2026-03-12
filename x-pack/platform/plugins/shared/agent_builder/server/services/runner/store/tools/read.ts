@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { filestoreTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -15,6 +15,7 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import { summarizeFilestoreToolReturn } from './utils';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
@@ -40,6 +41,7 @@ export const readTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
+    summarizeToolReturn: summarizeFilestoreToolReturn,
     handler: async ({ path, raw }) => {
       const entry = await filestore.read(path);
       if (!entry) {
