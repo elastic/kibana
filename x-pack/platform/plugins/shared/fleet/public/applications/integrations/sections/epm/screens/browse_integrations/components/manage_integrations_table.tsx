@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -401,11 +402,18 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => {
           if (item.status === 'approved') {
             return (
-              <EuiBadge color="success" iconType="checkInCircleFilled">
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.status.approved"
-                  defaultMessage="Approved"
-                />
+              <EuiBadge color="hollow" style={{ color: '#5A6D8C' }}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.status.approved"
+                      defaultMessage="Approved"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiBadge>
             );
           }
