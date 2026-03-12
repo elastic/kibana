@@ -56,7 +56,7 @@ export interface ConnectorMetadata {
   description: string;
   docsUrl?: string;
   minimumLicense: LicenseType;
-  isPreview?: boolean;
+  isTechnicalPreview?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'

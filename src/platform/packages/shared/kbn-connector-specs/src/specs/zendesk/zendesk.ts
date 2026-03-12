@@ -23,7 +23,7 @@ export const ZendeskConnector: ConnectorSpec = {
         'Connect to Zendesk to search and retrieve tickets, users, and Help Center content.',
     }),
     minimumLicense: 'enterprise',
-    isPreview: true,
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 

@@ -19,7 +19,7 @@ export const NotionConnector: ConnectorSpec = {
       defaultMessage: 'Explore content and databases in Notion',
     }),
     minimumLicense: 'enterprise',
-    isPreview: true,
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 

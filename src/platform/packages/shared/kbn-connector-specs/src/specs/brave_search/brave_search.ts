@@ -31,7 +31,7 @@ export const BraveSearchConnector: ConnectorSpec = {
       defaultMessage: 'Search the web using Brave Search API for privacy-focused results',
     }),
     minimumLicense: 'enterprise',
-    isPreview: true,
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 
