@@ -31,7 +31,6 @@ import {
 } from '../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
-import { useDashboardAgentContext } from './hooks/use_agent_builder_dashboard_api';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
 import {
@@ -60,6 +59,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export function DashboardApp({
@@ -68,6 +68,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  setDashboardAppApi,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -109,7 +110,6 @@ export function DashboardApp({
   useObservabilityAIAssistantContext({
     dashboardApi,
   });
-  useDashboardAgentContext(dashboardApi);
 
   useExecutionContext(coreServices.executionContext, {
     type: 'application',
@@ -265,6 +265,7 @@ export function DashboardApp({
         key={regenerateId}
         locator={locator}
         onApiAvailable={(dashboard, dashboardInternal) => {
+          setDashboardAppApi(dashboard);
           if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
             setDashboardInternalApi(dashboardInternal);
@@ -272,6 +273,9 @@ export function DashboardApp({
               dashboard?.expandPanel(expandedPanelId);
             }
           }
+        }}
+        onApiCleanup={() => {
+          setDashboardAppApi(undefined);
         }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}

@@ -17,7 +17,6 @@ export type {
   DashboardCreationOptions,
 } from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
-export { setDashboardAgentService } from './dashboard_app/hooks/use_agent_builder_dashboard_api';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart, DashboardSetup } from './plugin';

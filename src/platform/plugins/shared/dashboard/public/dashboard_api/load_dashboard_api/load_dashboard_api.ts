@@ -25,9 +25,11 @@ import { transformPanels } from './transform_panels';
 
 export async function loadDashboardApi({
   getCreationOptions,
+  onApiCleanup,
   savedObjectId,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
+  onApiCleanup?: () => void;
   savedObjectId?: string;
 }) {
   const creationOptions = await getCreationOptions?.();
@@ -113,6 +115,9 @@ export async function loadDashboardApi({
     api,
     cleanup: () => {
       cleanup();
+      if (onApiCleanup) {
+        onApiCleanup();
+      }
       performanceSubscription.unsubscribe();
     },
     internalApi,
