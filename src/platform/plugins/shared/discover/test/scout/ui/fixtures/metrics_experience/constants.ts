@@ -34,6 +34,25 @@ export const METRICS_EXPERIENCE_VIEWER_ROLE: KibanaRole = {
   ],
 };
 
+export const METRICS_EXPERIENCE_PRIVILEGED_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
   'metricsExperienceFlyoutOverviewTabDimensionItem';
 

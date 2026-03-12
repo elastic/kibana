@@ -12,6 +12,7 @@ import {
   spaceTest,
   testData,
   DEFAULT_TIME_RANGE,
+  DEFAULT_CONFIG,
   PAGINATION,
 } from '../../fixtures/metrics_experience';
 
@@ -97,7 +98,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('search for metrics in fullscreen', async () => {
-        await metricsExperience.searchMetric(testData.METRICS_TEST_INDEX_NAME.slice(0, 4));
+        await metricsExperience.searchMetric(DEFAULT_CONFIG.metrics[0].name);
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
       });
 
