@@ -41,5 +41,6 @@
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/field-utils",
+    "@kbn/data-view-utils",
   ]
 }

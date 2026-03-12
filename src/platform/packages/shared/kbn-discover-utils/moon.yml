@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/core-ui-settings-browser'
   - '@kbn/apm-types'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/expressions-plugin'
 tags:
   - shared-common
   - package
