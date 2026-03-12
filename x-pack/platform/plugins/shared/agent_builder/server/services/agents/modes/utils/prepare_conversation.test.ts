@@ -466,6 +466,51 @@ describe('prepareConversation', () => {
   });
 
   describe('anonymization target derivation', () => {
+    it('keeps target context from existing conversation attachments when next input has none', async () => {
+      const existing: VersionedAttachment = {
+        id: 'security-alert',
+        type: 'security.alert',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: {
+              anonymizationTarget: {
+                targetType: 'data_view',
+                targetId: 'security-solution-default',
+              },
+            },
+            created_at: '2024-01-01T00:00:00.000Z',
+            content_hash: 'hash-v1',
+            estimated_tokens: 1,
+          },
+        ],
+      };
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Follow-up question',
+          attachments: [],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toEqual({
+        targetType: 'data_view',
+        targetId: 'security-solution-default',
+      });
+      expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+
     it('returns a single valid target from next input attachments', async () => {
       const result = await prepareConversation({
         previousRounds: [],
