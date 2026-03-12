@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './esql_utils';
-export * from './utils';
-export * from './enrichment_utils';
+export type * as graphEventsV1 from './v1';
