@@ -136,4 +136,14 @@ export const ConnectorIconsMap: Map<
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
+
+  [
+    '.google_cloud_storage',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIcongooglecloudstorage" */ './specs/google_cloud_storage/icon'
+        )
+    ),
+  ],
 ]);
