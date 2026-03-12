@@ -390,18 +390,18 @@ export class StatusRuleExecutor {
     const recoveryStrategy = this.params?.condition?.recoveryStrategy ?? DEFAULT_RECOVERY_STRATEGY;
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
-    const validDownConfigs = Object.fromEntries(
-      Object.entries(downConfigs).filter(([key, config]) => {
-        if (!config.latestPing?.monitor) {
-          this.debug(
-            `Skipping down config ${key}: latestPing is missing or corrupted (configId: ${config.configId})`
-          );
-          return false;
-        }
-        return true;
-      })
-    );
+    const validDownConfigs: AlertStatusConfigs = {};
 
+    for (const [key, config] of Object.entries(downConfigs)) {
+      if (!config.latestPing?.monitor) {
+        this.debug(
+          `Skipping down config ${key}: latestPing is missing or corrupted (configId: ${config.configId})`
+        );
+        continue;
+      }
+
+      validDownConfigs[key] = config;
+    }
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       for (const [idWithLocation, statusConfig] of Object.entries(validDownConfigs)) {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
