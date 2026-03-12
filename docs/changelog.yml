@@ -1,7 +1,17 @@
 # Changelog Configuration
 # This file configures the valid values for changelog fields using the pivot structure.
 # Place this file as `changelog.yml` in the `docs/` directory
+#
+# NOTE: All list-like fields accept BOTH forms:
+#   - Comma-separated string: "value1, value2, value3"
+#   - YAML list:
+#     - value1
+#     - value2
+#     - value3
+# Both forms produce the same result. Choose whichever is more readable for your use case.
 
+# Products configuration (optional)
+# If not specified, all products from products.yml are allowed
 products:
   # List of available product IDs (empty = all from products.yml)
   available:
@@ -37,13 +47,17 @@ extract:
 # Labels are specified in a "label -> value" format
 pivot:
   # Type definitions with optional labels
+  # At a minimum, feature, bug-fix, and breaking-change must be configured.
   # Keys are type names, values can be:
   #   - simple string: comma-separated label list (e.g., ">bug, >fix")
+  #   - YAML list: [">bug", ">fix"]
   #   - empty/null: no labels for this type
   #   - object: { labels: "...", subtypes: {...} } for breaking-change type only
+  #     (labels and subtype values also accept string or list)
   types:
     # Complex object form with subtypes (ONLY allowed for breaking-change)
     # Subtypes help categorize breaking changes by their nature
+    # Both labels and subtype values accept string or list form
     breaking-change:
       labels: "release_note:breaking"
     #   subtypes:
@@ -74,8 +88,8 @@ pivot:
   #   - ">release-highlight"
 
   # Area definitions with labels
-  # Keys are area display names, values are label strings
-  # Multiple labels can be comma-separated
+  # Keys are area display names, values are label strings or lists
+  # String form: "label1, label2" | List form: [label1, label2]
   areas:
     "Agent Builder": "feature:agent-builder"
     "AI for security":
@@ -255,15 +269,35 @@ pivot:
       - "Feature:Search"
       - "Project:AsyncSearch"
 
+  # Product definitions with labels (optional).
+  # Keys are product spec strings; values are label strings or lists that trigger that product.
+  # A product spec string is: "<product-id> [<target-version>] [<lifecycle>]"
+  #   - Product ID only:           "elasticsearch"
+  #   - Product + target:          "kibana 9.2.0"
+  #   - Full spec:                 "cloud-serverless 2025-06 ga"
+  # When a PR has labels matching any product entry, all matching products are added.
+  # Precedence: --products CLI option > pivot.products label mapping > products.default > repo inference.
+  #
+  # products:
+  #   'elasticsearch':
+  #     - ":stack/elasticsearch"
+  #   'kibana':
+  #     - ":stack/kibana"
+  #   'cloud-serverless':
+  #     - ":cloud/serverless"
+  #   # Specify a target version if known:
+  #   # 'elasticsearch 9.2.0':
+  #   #   - ":feature/new-in-9.2"
+
 # Rules configuration — controls which PRs create changelogs and which entries are published.
 # All list-like fields (exclude, include, exclude_types, etc.) accept BOTH forms:
 #   - Comma-separated string: "value1, value2, value3"
 #   - YAML list: [value1, value2, value3]
 #
-# Global match default for multi-valued fields (labels, areas).
+# Global match default for multi-valued fields (labels, areas, products).
 #   any (default) = match if ANY item matches the list
 #   all           = match only if ALL items match the list
-# Inherited by create, publish, and all product overrides.
+# Inherited by create, bundle, publish, and all product overrides.
 rules:
   # match: any
 
@@ -348,12 +382,20 @@ bundle:
   output_directory: docs/releases
   # Whether to resolve (copy contents) by default
   resolve: true
+  repo: kibana
+  owner: elastic
 
   # Named bundle profiles for different release scenarios
   profiles:
     kibana-release:
-      products: "kibana {version} {lifecycle}"
-      output: "kibana-{version}.yaml"
+      output_products: "kibana {version}"
+      output: "kibana/{version}.yaml"
+    observability-release:
+      output_products: "observability {version}"
+      output: "observability/{version}.yaml"
+    security-release:
+      output_products: "security {version}"
+      output: "security/{version}.yaml"
     serverless-release:
-      products: "cloud-serverless {version} {lifecycle}"
-      output: "serverless-{version}.yaml"
+      output_products: "cloud-serverless {version}"
+      output: "cloud-serverless/{version}.yaml"
