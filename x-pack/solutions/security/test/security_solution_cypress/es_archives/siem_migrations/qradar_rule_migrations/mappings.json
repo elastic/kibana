@@ -1,0 +1,53 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-migrations-default",
+    "aliases": {},
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "namespace": "default",
+        "kibana": {
+          "version": "9.1.0"
+        }
+      },
+      "properties": {
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "last_execution": {
+          "properties": {
+            "is_aborted": {
+              "type": "boolean"
+            },
+            "started_at": {
+              "type": "date"
+            },
+            "ended_at": {
+              "type": "date"
+            },
+            "skip_prebuilt_rules_matching": {
+              "type": "boolean"
+            },
+            "connector_id": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

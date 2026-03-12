@@ -1,0 +1,236 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-rules-default",
+    "id": "QRadarRule001",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "original_rule": {
+        "id": "qradar-rule-100001",
+        "vendor": "qradar",
+        "title": "QRadar Test Rule - Authentication Success",
+        "description": "Test rule for detecting successful authentication events",
+        "query": "when the event category for the event is one of the following Authentication.Admin Login Success Events",
+        "query_language": "aql",
+        "rule_type": "custom_rule",
+        "rule_data": "<rule buildingBlock=\"false\" enabled=\"true\" id=\"100001\"><name>QRadar Test Rule - Authentication Success</name><notes>Test rule for detecting successful authentication events</notes></rule>",
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0001",
+              "name": "Initial Access",
+              "reference": "https://attack.mitre.org/tactics/TA0001"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+              }
+            ]
+          }
+        ]
+      },
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "status": "completed",
+      "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:57:24.929Z",
+      "comments": [
+        {
+          "created_at": "2025-05-06T07:57:24.929Z",
+          "message": "## Translation Summary\nThe QRadar rule was analyzed and translated into ES|QL. The rule detects authentication success events.",
+          "created_by": "assistant"
+        }
+      ],
+      "translation_result": "full",
+      "elastic_rule": {
+        "severity": "low",
+        "risk_score": 21,
+        "query": "FROM logs-* METADATA _id, _version, _index\n| WHERE event.category == \"authentication\" AND event.outcome == \"success\"",
+        "description": "Test rule for detecting successful authentication events",
+        "query_language": "esql",
+        "title": "QRadar Test Rule - Authentication Success",
+        "integration_ids": [""],
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0001",
+              "name": "Initial Access",
+              "reference": "https://attack.mitre.org/tactics/TA0001"
+            },
+            "technique": [
+              {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-rules-default",
+    "id": "QRadarRule002",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "original_rule": {
+        "id": "qradar-rule-100002",
+        "vendor": "qradar",
+        "title": "QRadar Test Rule - Network Traffic Anomaly",
+        "description": "Building block rule for detecting network traffic anomalies",
+        "query": "when the event category for the event is one of the following Network.Suspicious Activity",
+        "query_language": "aql",
+        "rule_type": "building_block",
+        "rule_data": "<rule buildingBlock=\"true\" enabled=\"true\" id=\"100002\"><name>QRadar Test Rule - Network Traffic Anomaly</name><notes>Building block rule for detecting network traffic anomalies</notes></rule>",
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0011",
+              "name": "Command and Control",
+              "reference": "https://attack.mitre.org/tactics/TA0011"
+            },
+            "technique": [
+              {
+                "id": "T1071",
+                "name": "Application Layer Protocol",
+                "reference": "https://attack.mitre.org/techniques/T1071"
+              }
+            ]
+          }
+        ]
+      },
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "status": "completed",
+      "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:57:27.998Z",
+      "comments": [
+        {
+          "created_at": "2025-05-06T07:56:39.882Z",
+          "message": "## Translation Summary\nThe QRadar building block rule was analyzed and translated into ES|QL for network anomaly detection.",
+          "created_by": "assistant"
+        }
+      ],
+      "translation_result": "partial",
+      "elastic_rule": {
+        "severity": "medium",
+        "risk_score": 47,
+        "query": "FROM logs-* METADATA _id, _version, _index\n| WHERE network.type == \"ipv4\" AND [anomaly_condition]",
+        "description": "Building block rule for detecting network traffic anomalies",
+        "query_language": "esql",
+        "title": "QRadar Test Rule - Network Traffic Anomaly",
+        "integration_ids": [""]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-rules-default",
+    "id": "QRadarRule003",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "original_rule": {
+        "id": "qradar-rule-100003",
+        "vendor": "qradar",
+        "title": "QRadar Test Rule - Malware Detection",
+        "description": "Rule for detecting potential malware activity",
+        "query": "when the event category for the event is one of the following Malware.Potential Infection",
+        "query_language": "aql",
+        "rule_type": "custom_rule",
+        "rule_data": "<rule buildingBlock=\"false\" enabled=\"true\" id=\"100003\"><name>QRadar Test Rule - Malware Detection</name><notes>Rule for detecting potential malware activity</notes></rule>",
+        "threat": [
+          {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+              "id": "TA0002",
+              "name": "Execution",
+              "reference": "https://attack.mitre.org/tactics/TA0002"
+            },
+            "technique": [
+              {
+                "id": "T1204",
+                "name": "User Execution",
+                "reference": "https://attack.mitre.org/techniques/T1204",
+                "subtechnique": [
+                  {
+                    "id": "T1204.002",
+                    "name": "Malicious File",
+                    "reference": "https://attack.mitre.org/techniques/T1204/002"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "status": "completed",
+      "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:57:32.348Z",
+      "comments": [
+        {
+          "created_at": "2025-05-06T07:56:40.766Z",
+          "message": "## Translation Summary\nThe QRadar malware detection rule was translated to ES|QL.",
+          "created_by": "assistant"
+        }
+      ],
+      "translation_result": "partial",
+      "elastic_rule": {
+        "severity": "high",
+        "risk_score": 73,
+        "query": "FROM logs-* METADATA _id, _version, _index\n| WHERE event.category == \"malware\" AND [detection_condition]",
+        "description": "Rule for detecting potential malware activity",
+        "query_language": "esql",
+        "title": "QRadar Test Rule - Malware Detection",
+        "integration_ids": [""]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-rules-default",
+    "id": "QRadarRule004",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "original_rule": {
+        "id": "qradar-rule-100004",
+        "vendor": "qradar",
+        "title": "QRadar Test Rule - Failed Translation",
+        "description": "Rule that failed to translate",
+        "query": "complex unsupported query",
+        "query_language": "aql",
+        "rule_type": "custom_rule",
+        "rule_data": "<rule buildingBlock=\"false\" enabled=\"true\" id=\"100004\"><name>QRadar Test Rule - Failed Translation</name><notes>Rule that failed to translate</notes></rule>"
+      },
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "status": "failed",
+      "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:57:33.042Z",
+      "comments": [
+        {
+          "created_at": "2025-05-06T07:57:33.042Z",
+          "message": "Error migrating rule: Could not translate QRadar rule due to unsupported test conditions",
+          "created_by": "assistant"
+        }
+      ]
+    }
+  }
+}

@@ -70,6 +70,7 @@ export const TRANSLATED_RULE_QUERY_EDITOR_PARENT = `${getDataTestSubjectSelector
 
 export const TRANSLATED_RULE_QUERY_EDITOR_INPUT = `${TRANSLATED_RULE_QUERY_EDITOR_PARENT} textarea`;
 
+export const TRANSLATED_RULE_OVERVIEW_TAB = getDataTestSubjectSelector('tabOverview');
 export const TRANSLATED_RULE_EDIT_BTN = getDataTestSubjectSelector('editTranslatedRuleButton');
 export const TRANSLATED_RULE_SAVE_BTN = getDataTestSubjectSelector('saveTranslatedRuleBtn');
 
@@ -101,6 +102,18 @@ export const START_MIGRATION_MODAL = {
   ),
   START_MIGRATION_BTN: getDataTestSubjectSelector(`${START_MIGRATION_MODAL_PREFIX}-Translate`),
 };
+
+export const MIGRATION_SOURCE_DROPDOWN = getDataTestSubjectSelector('migrationSourceDropdown');
+export const MIGRATION_SOURCE_QRADAR_OPTION = getDataTestSubjectSelector(
+  'migrationSourceOption-qradar'
+);
+
+export const REFERENCE_SETS_UPLOAD_STEP = {
+  STEP_NUMBER: getDataTestSubjectSelector('referenceSetsUploadStepNumber'),
+  TITLE: getDataTestSubjectSelector('referenceSetsUploadTitle'),
+};
+
+export const MIGRATION_VENDOR_BADGE = getDataTestSubjectSelector('migrationVendorBadge');
 
 export const ONBOARDING_MIGRATION_ACTIONS = {
   OPEN_ACTIONS_MENU: getDataTestSubjectSelector('openMigrationOptionsButton'),

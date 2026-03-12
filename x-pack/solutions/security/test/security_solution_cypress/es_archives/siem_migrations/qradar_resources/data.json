@@ -1,0 +1,49 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-resources-default",
+    "id": "QRadarResource001",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "type": "lookup",
+      "name": "Blocked IPs",
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:53:48.805Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-resources-default",
+    "id": "QRadarResource002",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "type": "lookup",
+      "name": "Suspicious IPs",
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:53:48.805Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana-siem-rule-migrations-resources-default",
+    "id": "QRadarResource003",
+    "source": {
+      "migration_id": "qradar-migration-001",
+      "type": "lookup",
+      "name": "Malicious Hosts",
+      "@timestamp": "2025-05-06T07:53:48.805Z",
+      "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+      "updated_at": "2025-05-06T07:53:48.805Z"
+    }
+  }
+}
+
+
