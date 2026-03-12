@@ -174,21 +174,21 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
       getValueColumn(`${ACCESSOR}${i}_breakdown_${breakdownIndex}`, bd as string)
     ),
     ...getXValueColumn(layer.x_axis, i),
-    ...layer.y_axis.map((y_axis, index) => {
-      const params = hasFormatParams(y_axis)
+    ...layer.y_axis.map((yAxis, index) => {
+      const params = hasFormatParams(yAxis)
         ? {
-            id: y_axis.format as string,
+            id: yAxis.format as string,
             params: {
-              compact: y_axis.compactValues,
-              decimals: y_axis.decimals ?? 0,
-              suffix: y_axis.suffix,
-              fromUnit: y_axis.fromUnit,
-              toUnit: y_axis.toUnit,
+              compact: yAxis.compactValues,
+              decimals: yAxis.decimals ?? 0,
+              suffix: yAxis.suffix,
+              fromUnit: yAxis.fromUnit,
+              toUnit: yAxis.toUnit,
             },
           }
         : undefined;
 
-      return getValueColumn(`${ACCESSOR}${i}_${index}`, y_axis.value, 'number', params);
+      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
     }),
   ];
 }
