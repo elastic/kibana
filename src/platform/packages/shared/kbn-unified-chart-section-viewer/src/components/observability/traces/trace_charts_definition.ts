@@ -16,10 +16,12 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   SPAN_ID,
+  SPAN_DURATION,
 } from '@kbn/apm-types';
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { MetricUnit } from '../../../types';
 import { chartPalette } from '.';
 
@@ -37,7 +39,9 @@ const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
 function getWhereClauses(filters: string[]) {
   return [
     ...filters,
-    ...[`TO_STRING(${PROCESSOR_EVENT}) == "transaction" OR ${PROCESSOR_EVENT} IS NULL`],
+    ...[
+      `TO_STRING(${PROCESSOR_EVENT}) == "${ProcessorEvent.transaction}" OR TO_STRING(${PROCESSOR_EVENT}) == "${ProcessorEvent.span}" OR ${PROCESSOR_EVENT} IS NULL`,
+    ],
   ].map((filter) => where(filter));
 }
 
@@ -99,7 +103,9 @@ export function getLatencyChart({
     const esqlQuery = from(metadataDirective ? `${indexes} ${metadataDirective}` : indexes)
       .pipe(
         ...whereClauses,
-        evaluate(`duration_ms_ecs = ROUND(${TRANSACTION_DURATION})/1000`), // apm duration is in us
+        evaluate(
+          `duration_ms_ecs = CASE(${TRANSACTION_DURATION} IS NOT NULL, TO_DOUBLE(${TRANSACTION_DURATION})/1000, ${SPAN_DURATION} IS NOT NULL, TO_DOUBLE(${SPAN_DURATION})/1000, null)`
+        ), // apm duration is in us
         evaluate(`duration_ms_otel = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
         evaluate('duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))'), // need to convert both to the same type to make sure the COALESCE works
         stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)

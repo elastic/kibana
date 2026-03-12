@@ -207,15 +207,13 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
-export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
-/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
-export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in alert prevalence */
+export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE =
+  'securitySolution:excludeColdAndFrozenTiersInPrevalence' as const;
 
 /** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
 export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
@@ -529,6 +527,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
+export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution

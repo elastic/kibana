@@ -169,10 +169,8 @@ export function Wrapper({
                   {Streams.ingest.all.GetResponse.is(definition) && (
                     <DiscoverBadgeButton
                       stream={definition.stream}
-                      hasDataStream={
-                        Streams.WiredStream.GetResponse.is(definition) ||
-                        definition.data_stream_exists
-                      }
+                      hasDataStream={definition.data_stream_exists}
+                      indexMode={definition.index_mode ?? 'standard'}
                       spellOut
                     />
                   )}

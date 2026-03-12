@@ -23,7 +23,6 @@ import {
 import { FOCUSABLE_SELECTOR } from './constants';
 import { resolveInitialFocus } from './utils';
 import { useDateRangePickerContext } from './date_range_picker_context';
-import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 
@@ -40,6 +39,7 @@ export function DateRangePickerControl() {
     isEditing,
     setIsEditing,
     compressed,
+    collapsed,
     displayText,
     displayFullFormattedText,
     displayShortDuration,
@@ -48,11 +48,12 @@ export function DateRangePickerControl() {
     panelRef,
     panelId,
     initialFocus,
-    timeWindowButtonsConfig,
     onInputChange,
+    width,
+    disabled,
+    isLoading,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
-  const maxWidth = euiTheme.components.forms.maxWidth;
   const hintText = useInputHintText(text);
 
   const controlRef = useRef<HTMLDivElement>(null);
@@ -141,22 +142,28 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  const containerStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.s};
-    max-inline-size: ${maxWidth};
+  // The CSS custom property --kbnDateRangePickerWidth is not set by this component,
+  // allowing consumers to override the width; 21.25rem is the default fallback.
+  const wrapperRestrictedStyles = css`
+    inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
   `;
-
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
 
   return (
-    <div css={containerStyles} ref={controlRef} onKeyDown={onControlKeyDown}>
+    <div
+      ref={controlRef}
+      onKeyDown={onControlKeyDown}
+      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
+      data-test-subj="dateRangePickerControlWrapper"
+    >
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
+        isDisabled={disabled}
+        isLoading={isLoading}
+        fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
       >
         {isEditing ? (
@@ -171,6 +178,8 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
+            disabled={disabled}
+            fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}
@@ -179,7 +188,9 @@ export function DateRangePickerControl() {
         ) : (
           <EuiToolTip
             content={
-              displayFullFormattedText !== displayText ? displayFullFormattedText : undefined
+              !disabled && displayFullFormattedText !== displayText
+                ? displayFullFormattedText
+                : undefined
             }
             display="block"
             css={tooltipStyles}
@@ -188,17 +199,18 @@ export function DateRangePickerControl() {
             <EuiFormControlButton
               data-test-subj="dateRangePickerControlButton"
               buttonRef={buttonRef}
-              value={displayText}
+              aria-label={collapsed ? displayText : undefined}
+              value={collapsed ? '' : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
+              disabled={disabled}
               compressed={compressed}
             >
-              {displayShortDuration && <EuiBadge>{displayShortDuration}</EuiBadge>}
+              <EuiBadge>{displayShortDuration ?? '--'}</EuiBadge>
             </EuiFormControlButton>
           </EuiToolTip>
         )}
       </EuiFormControlLayout>
-      {timeWindowButtonsConfig && <TimeWindowButtons config={timeWindowButtonsConfig} />}
     </div>
   );
 }

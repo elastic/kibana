@@ -28,6 +28,7 @@ export type SkillsDirectoryStructure = Directory<{
     platform: FileDirectory<{
       dashboard: FileDirectory;
       visualization: FileDirectory;
+      workflows: FileDirectory;
     }>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
@@ -37,6 +38,7 @@ export type SkillsDirectoryStructure = Directory<{
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      ml: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

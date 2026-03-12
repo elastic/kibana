@@ -4,22 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-list-mock-data'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-list-mock-data'
+  title: '@kbn/content-list-mock-data'
   description: Moon project for @kbn/content-list-mock-data
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data
+  sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data
 dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/content-management-tags'
+  - '@kbn/content-management-favorites-public'
   - '@kbn/user-profile-components'
 tags:
   - shared-browser

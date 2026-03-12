@@ -3362,12 +3362,12 @@
                 "path": "src/platform/packages/shared/kbn-lens-common/visualizations/heatmap/constants.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/lib/configurations/palette.ts"
-              },
-              {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/coloring/coloring.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/lib/configurations/palette.ts"
               },
               {
                 "plugin": "lens",
