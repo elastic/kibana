@@ -343,12 +343,19 @@ Only write scenarios for things confirmed by the issue, linked docs, or Figma de
    If they are not present, prepend them before posting. Use the same model identifier written in the footer.
 3. Fetch all existing comments on the issue using `gh issue view <number> --repo <owner>/<repo> --json comments` and check for one whose body starts with `<!-- test-plan-generated -->`. **Always check before posting — creating a duplicate is an error.**
 
-| Tool available | Existing comment? | Action |
-|---|---|---|
-| `gh` CLI | Yes | `gh api --method PATCH /repos/<owner>/<repo>/issues/comments/<id> --field body=@file` |
-| `gh` CLI | No | `gh issue comment <number> --repo <owner>/<repo> --body-file ...` |
-| GitHub MCP | Yes | Edit the existing comment |
-| GitHub MCP | No | Create a new comment |
-| Neither | n/a | Stop — tell user to install `gh` with `brew install gh` and authenticate with `gh auth login` |
+   Select the tool to use:
 
-When using `gh` CLI, first verify it is authenticated with `gh auth status`. After posting by either method, delete the local file and confirm to the user with a direct link to the comment.
+   | Tool | When |
+   |---|---|
+   | `gh` CLI | Available and authenticated — always prefer this. Verify with `gh auth status` first. |
+   | GitHub MCP | Fallback if `gh` CLI is not available |
+   | Neither | Stop — tell user to install `gh` with `brew install gh` and authenticate with `gh auth login` |
+
+   Then post using the selected tool:
+
+   | Existing comment? | `gh` CLI | GitHub MCP |
+   |---|---|---|
+   | Yes | `gh api --method PATCH /repos/<owner>/<repo>/issues/comments/<id> --field body=@file` | Edit the existing comment |
+   | No | `gh issue comment <number> --repo <owner>/<repo> --body-file ...` | Create a new comment |
+
+After posting by either method, delete the local file and confirm to the user with a direct link to the comment.
