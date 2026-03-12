@@ -311,6 +311,51 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
+      async ({ page, pageObjects }) => {
+        const transactionDetailParams = {
+          ...APM_TIME_RANGE,
+          transactionName: RICH_TRACE.TRANSACTION_NAME,
+          transactionType: 'request',
+        };
+
+        await spaceTest.step('intercept trace API to force exceedsMax condition', async () => {
+          await page.route('**/internal/apm/traces/**', async (route) => {
+            const url = new URL(route.request().url());
+            url.searchParams.set('maxTraceItems', '2');
+            await route.continue({ url: url.toString() });
+          });
+        });
+
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: transactionDetailParams,
+          });
+        });
+
+        await spaceTest.step('waterfall size warning is visible', async () => {
+          await expect(page.testSubj.locator('apmWaterfallSizeWarning')).toBeVisible();
+        });
+
+        await spaceTest.step(
+          'warning "view in Discover" link opens traces experience',
+          async () => {
+            await page.testSubj.locator('apmWaterfallSizeWarningDiscoverLink').click();
+            await pageObjects.discover.waitForDocTableRendered();
+            for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+              await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+            }
+            await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
+          }
+        );
+
+        await spaceTest.step('clean up route interception', async () => {
+          await page.unrouteAll({ behavior: 'wait' });
+        });
+      }
+    );
+
+    spaceTest(
       'Dependencies - "Open in Discover" from operation detail opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM dependencies page', async () => {
