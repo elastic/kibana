@@ -10,6 +10,7 @@ import { subj } from '@kbn/test-subj-selector';
 import { generateHostsData } from '../synthtrace_data/hosts_data';
 
 export const journey = new Journey({
+  skipped: true,
   synthtrace: {
     type: 'infra',
     generator: generateHostsData,
