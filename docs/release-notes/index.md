@@ -402,6 +402,29 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
+## 9.2.7 [elastic-kibana-9.2.7-release-notes]
+
+### Features and enhancements [elastic-kibana-9.2.7-features-enhancements]
+
+### Fixes [elastic-kibana-9.2.7-fixes]
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Fixes Canvas workpads to correctly apply embeddable transforms to embedded panels, ensuring correct references and panel shapes [#252191]({{kib-pull}}252191).
+* Fixes the Fleet unenroll inactive agents task to correctly find agents across all spaces [#255726]({{kib-pull}}255726).
+* Fixes incorrect installation of Fleet integration assets when upgrading integrations with custom datasets [#254923]({{kib-pull}}254923).
+* Fixes the spaces selector briefly displaying "No spaces match" text while loading [#255654]({{kib-pull}}255654).
+* Fixes a test timing issue with the privilege assignment button in **Spaces** management [#255094]({{kib-pull}}255094).
+* Improves screen reader accessibility for the **Index mode** field in the **Create index** modal [#256392]({{kib-pull}}256392).
+* Fixes syntax highlighting in **Dev Tools Console** breaking when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes syntax highlighting in **Dev Tools Console** breaking after closing nested braces in JSON objects [#255426]({{kib-pull}}255426).
+* Fixes Search Playground routes to enforce maximum size limits on input arrays [#255881]({{kib-pull}}255881).
+* Fixes a crash in APM apps when invalid values were passed to `rangeFrom` and `rangeTo` query parameters in the URL [#256887]({{kib-pull}}256887).
+* Fixes an error on the SLO burn rate alert details page for suppressed alerts [#256435]({{kib-pull}}256435).
+* Fixes content connector API key regeneration to correctly generate and display a new key [#256083]({{kib-pull}}256083).
+* Fixes a 500 error and infinite loading on the APM **Error group details** page when the related transaction is missing the `transaction.sampled` field [#255788]({{kib-pull}}255788).
+* Fixes a rendering loop in the **Attributes** tab on the Discover traces flyout that caused UI glitches [#255173]({{kib-pull}}255173).
+* Fixes EQL sequence rule alert merging to treat dot notation and nested notation as the same field path [#254830]({{kib-pull}}254830).
+* Fixes the Cases webhook connector to correctly handle `204 No Content` responses from external services [#251090]({{kib-pull}}251090).
+
 ## 9.2.6 [kibana-9.2.6-release-notes]
 
 :::{important}
