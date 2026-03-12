@@ -4,6 +4,20 @@ This file contains the Gherkin templates for optional test plan sections, and th
 
 ---
 
+## Contents
+
+- [Optional section templates](#optional-section-templates)
+  - [Multi-space scenarios](#multi-space-scenarios)
+  - [Multi-tenant scenarios](#multi-tenant-scenarios)
+  - [Upgrade scenarios](#upgrade-scenarios)
+  - [Cross-cluster Search (CCS) scenarios](#cross-cluster-search-ccs-scenarios)
+- [Gherkin rules](#gherkin-rules-strictly-enforced)
+- [Tags](#tags)
+- [Priority levels](#priority-levels)
+- [Formatting for GitHub comments](#formatting-for-github-comments)
+
+---
+
 ## Optional section templates
 
 Include each optional section only when the evidence clearly supports it. If it is not clear whether a section applies, ask the user before including — do not include sections speculatively.
@@ -62,20 +76,22 @@ Scenario: Feature data is isolated between tenants
 ### Upgrade scenarios
 
 Use `TARGET_VERSION` (detected in Step 2) as the target version. Run upgrade scenarios from each of the following source versions:
-- `8.19.x` (last minor of 8.x)
-- `9.3` (last minor of current major cycle)
+- The last minor of the previous major series (currently `8.19.x`)
+- The last minor of the current major cycle (currently `9.3`)
+
+Check with the team if you are unsure which versions are current — these values change with each release cycle.
 
 ```gherkin
 @upgrade
-Scenario: Feature works correctly after upgrading from 8.19.x to TARGET_VERSION
-  Given a Kibana instance running version 8.19.x with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from the last minor of the previous major to TARGET_VERSION
+  Given a Kibana instance running the last minor of the previous major series with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
 
 @upgrade
-Scenario: Feature works correctly after upgrading from 9.3 to TARGET_VERSION
-  Given a Kibana instance running version 9.3 with existing data relevant to this feature
+Scenario: Feature works correctly after upgrading from the last minor of the current major cycle to TARGET_VERSION
+  Given a Kibana instance running the last minor of the current major cycle with existing data relevant to this feature
   When the instance is upgraded to TARGET_VERSION
   Then the feature is accessible and behaves as expected
   And existing data or configuration is preserved without errors
