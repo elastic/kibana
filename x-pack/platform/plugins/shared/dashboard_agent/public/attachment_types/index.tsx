@@ -68,7 +68,7 @@ export const registerDashboardAttachmentUiDefinition = ({
             }
 
             dashboardApi.setViewMode('edit');
-            dashboardApi.reinitialize(getStateFromAttachment(attachment));
+            dashboardApi.setState(getStateFromAttachment(attachment));
           },
         },
       ];
