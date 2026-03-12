@@ -8,7 +8,7 @@
 import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
-import { Command } from '@langchain/langgraph';
+import { Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
@@ -16,17 +16,74 @@ import { TASK_TOOL_DESCRIPTION } from '../prompts';
 import { AutomaticImportAgentState } from '../state';
 import type { SubAgent } from '../types';
 
+const MAX_INJECTED_SAMPLES = 10;
+const MAX_INJECTED_SUCCESSFUL_OUTPUTS = 5;
+const MAX_INJECTED_FAILURE_DETAILS = 10;
+
 interface TaskToolParams {
   subagents: SubAgent[];
   model: InferenceChatModel;
+  samples?: string[];
   recursionLimit?: number;
 }
 
+const injectPipelineState = (
+  taskDescription: string,
+  agentName: string,
+  samples?: string[]
+): string => {
+  try {
+    const currentState = getCurrentTaskInput<z.infer<typeof AutomaticImportAgentState>>();
+    const hasPipeline =
+      currentState.current_pipeline?.processors &&
+      currentState.current_pipeline.processors.length > 0;
+
+    if (agentName === 'ingest_pipeline_generator' && hasPipeline) {
+      const pipelineContext = {
+        current_pipeline: currentState.current_pipeline,
+        validation_results: currentState.pipeline_validation_results,
+      };
+      return `## Current Pipeline State\n${JSON.stringify(pipelineContext, null, 2)}\n\n${taskDescription}`;
+    }
+
+    if (agentName === 'review_agent') {
+      const pipelineContext: Record<string, unknown> = {
+        current_pipeline: currentState.current_pipeline,
+        validation_results: currentState.pipeline_validation_results,
+      };
+
+      if (samples && samples.length > 0) {
+        pipelineContext.sample_logs = samples.slice(0, MAX_INJECTED_SAMPLES);
+      }
+
+      const generationResults = currentState.pipeline_generation_results;
+      if (generationResults && generationResults.length > 0) {
+        pipelineContext.successful_outputs = generationResults.slice(
+          0,
+          MAX_INJECTED_SUCCESSFUL_OUTPUTS
+        );
+        pipelineContext.total_successful_count = generationResults.length;
+      }
+
+      const failureDetails = currentState.pipeline_validation_results?.failure_details;
+      if (failureDetails && failureDetails.length > 0) {
+        pipelineContext.failure_details = failureDetails.slice(0, MAX_INJECTED_FAILURE_DETAILS);
+        pipelineContext.total_failure_count = failureDetails.length;
+      }
+
+      return `## Current State\n${JSON.stringify(pipelineContext, null, 2)}\n\n${taskDescription}`;
+    }
+  } catch {
+    // State injection is best-effort; proceed without if unavailable
+  }
+
+  return taskDescription;
+};
+
 export const createTaskTool = (params: TaskToolParams) => {
-  const { subagents, model, recursionLimit } = params;
+  const { subagents, model, samples, recursionLimit } = params;
   const agentsMap = new Map<string, any>();
   for (const subagent of subagents) {
-    // Create ReAct agent for the subagent
     const baseSubAgent = createReactAgent({
       llm: model,
       tools: subagent.tools || [],
@@ -45,9 +102,15 @@ export const createTaskTool = (params: TaskToolParams) => {
       const toolCallId = config?.toolCall?.id as string;
       const subAgent = agentsMap.get(input.subagent_name);
 
+      const taskDescription = injectPipelineState(
+        input.description,
+        input.subagent_name,
+        samples
+      );
+
       const modifiedState = {
         ...state,
-        messages: [{ role: 'user', content: input.description }],
+        messages: [{ role: 'user', content: taskDescription }],
       };
 
       try {

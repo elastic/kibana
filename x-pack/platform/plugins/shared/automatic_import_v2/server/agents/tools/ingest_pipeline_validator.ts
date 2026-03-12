@@ -14,6 +14,58 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { estypes } from '@elastic/elasticsearch';
 
+const ECS_EVENT_TYPES_PER_CATEGORY: Record<string, string[]> = {
+  api: [
+    'access',
+    'admin',
+    'allowed',
+    'change',
+    'creation',
+    'deletion',
+    'denied',
+    'end',
+    'info',
+    'start',
+    'user',
+  ],
+  authentication: ['start', 'end', 'info'],
+  configuration: ['access', 'change', 'creation', 'deletion', 'info'],
+  database: ['access', 'change', 'info', 'error'],
+  driver: ['change', 'end', 'info', 'start'],
+  email: ['info'],
+  file: ['access', 'change', 'creation', 'deletion', 'info'],
+  host: ['access', 'change', 'end', 'info', 'start'],
+  iam: ['admin', 'change', 'creation', 'deletion', 'group', 'info', 'user'],
+  intrusion_detection: ['allowed', 'denied', 'info'],
+  library: ['start'],
+  malware: ['info'],
+  network: ['access', 'allowed', 'connection', 'denied', 'end', 'info', 'protocol', 'start'],
+  package: ['access', 'change', 'deletion', 'info', 'installation', 'start'],
+  process: ['access', 'change', 'end', 'info', 'start'],
+  registry: ['access', 'change', 'creation', 'deletion'],
+  session: ['start', 'end', 'info'],
+  threat: ['indicator'],
+  vulnerability: ['info'],
+  web: ['access', 'error', 'info'],
+};
+
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  const parts = path.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+};
+
+const asArray = (value: unknown): string[] => {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
+  if (typeof value === 'string') return [value];
+  return [];
+};
+
 interface DocTemplate {
   _index: string;
   _id: string;
@@ -251,12 +303,66 @@ export function ingestPipelineValidatorTool(
         const totalSamples = samples.length;
         const successRate = totalSamples > 0 ? (successfulCount / totalSamples) * 100 : 0;
 
-        const message =
+        const summaryMessage =
           failedCount === 0
             ? `Pipeline validation successful! All ${totalSamples} samples processed correctly.`
-            : `Pipeline validation completed with ${successfulCount}/${totalSamples} samples successful (${successRate.toFixed(
+            : `Pipeline validation completed with ${successfulCount}/${totalSamples} successful (${successRate.toFixed(
                 1
-              )}% success rate). ${failedCount} samples failed.`;
+              )}%).`;
+
+        const successSummary = successfulDocuments.slice(0, 5).map((doc, i) => ({
+          sample_index: i,
+          extracted_fields: Object.keys(doc as Record<string, unknown>).sort(),
+          source: doc,
+        }));
+
+        const ecsWarnings: string[] = [];
+
+        for (const doc of successfulDocuments.slice(0, 20)) {
+          const source = doc as Record<string, unknown>;
+          const categories = asArray(getNestedValue(source, 'event.category'));
+          const types = asArray(getNestedValue(source, 'event.type'));
+
+          for (const category of categories) {
+            const allowed = ECS_EVENT_TYPES_PER_CATEGORY[category];
+            if (!allowed) {
+              ecsWarnings.push(`Invalid event.category: "${category}"`);
+            } else {
+              for (const type of types) {
+                if (!allowed.includes(type)) {
+                  ecsWarnings.push(
+                    `event.type "${type}" is not valid for event.category "${category}". Allowed: ${allowed.join(
+                      ', '
+                    )}`
+                  );
+                }
+              }
+            }
+          }
+        }
+
+        const hasTimestamp = successfulDocuments.some(
+          (doc) => (doc as Record<string, unknown>)['@timestamp'] != null
+        );
+        if (!hasTimestamp && successfulDocuments.length > 0) {
+          ecsWarnings.push('@timestamp is not set in any processed document');
+        }
+
+        const uniqueEcsWarnings = [...new Set(ecsWarnings)];
+
+        const detailedResponse = JSON.stringify({
+          message: summaryMessage,
+          success_rate: successRate,
+          successful_samples: successfulCount,
+          failed_samples: failedCount,
+          total_samples: totalSamples,
+          successful_output_samples: successSummary,
+          failure_details: failedSamples.slice(0, 20).map((f) => ({
+            error: f.error,
+            sample: f.sample.substring(0, 500),
+          })),
+          ...(uniqueEcsWarnings.length > 0 ? { ecs_warnings: uniqueEcsWarnings } : {}),
+        });
 
         return new Command({
           update: {
@@ -275,7 +381,7 @@ export function ingestPipelineValidatorTool(
             },
             messages: [
               new ToolMessage({
-                content: message,
+                content: detailedResponse,
                 tool_call_id: config?.toolCall?.id as string,
               }),
             ],
