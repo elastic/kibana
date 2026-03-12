@@ -103,13 +103,6 @@ export class AgentBuilderPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    setupDeps.workflowsExtensions.registerStepDefinition(
-      getRunAgentStepDefinition(this.serviceManager)
-    );
-    setupDeps.workflowsExtensions.registerStepDefinition(getAiGuardrailsStepDefinition(coreSetup));
-
-    registerAgentBuilderHandlerContext({ coreSetup });
-
     const getInternalServices = () => {
       const services = this.serviceManager.internalStart;
       if (!services) {
@@ -117,6 +110,15 @@ export class AgentBuilderPlugin
       }
       return services;
     };
+
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getRunAgentStepDefinition(this.serviceManager)
+    );
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      getAiGuardrailsStepDefinition(coreSetup, getInternalServices)
+    );
+
+    registerAgentBuilderHandlerContext({ coreSetup });
 
     const router = coreSetup.http.createRouter<AgentBuilderHandlerContext>();
     registerRoutes({

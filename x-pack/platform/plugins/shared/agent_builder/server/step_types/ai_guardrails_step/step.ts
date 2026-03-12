@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
-import {
-  MAX_ATTACHMENT_DATA_CHARS,
-  MAX_ATTACHMENTS,
-  MAX_CONVERSATION_HISTORY_MESSAGES,
-} from '@kbn/workflows-extensions/common';
+import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { Conversation } from '@kbn/agent-builder-common';
+import { getActiveAttachments, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { AiGuardrailsStepCommonDefinition } from '../../../common/step_types';
+import type { InternalStartServices } from '../../services/types';
 import type { AgentBuilderStartDependencies } from '../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
-import { AiGuardrailsStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types';
+
+interface GuardrailLogger {
+  warn: (message: string, error?: Error) => void;
+}
 
 const GUARDRAIL_SYSTEM_PROMPT = `You are a guardrail evaluator. Your job is to decide whether the user message and context below are acceptable to proceed (e.g. no harmful content, no policy violations, no off-topic or inappropriate requests).
 
@@ -26,56 +27,121 @@ Respond with JSON only. Use this exact shape:
 
 Do not include any other text or markdown.`;
 
-function truncate(str: string, maxChars: number): string {
-  if (str.length <= maxChars) return str;
-  return `${str.slice(0, maxChars)}...[truncated]`;
+const MAX_CONTEXT_TOKENS = 100_000;
+
+async function formatConversationHistory(conversation: Conversation): Promise<string> {
+  const lines: string[] = [];
+  let currentTokenCount = 0;
+  const rounds = conversation.rounds ?? [];
+
+  for (let i = rounds.length - 1; i >= 0; i--) {
+    const round = rounds[i];
+    const userMsg = round.input?.message ?? '';
+    const assistantMsg = round.response?.message ?? '';
+    const roundText = [
+      userMsg ? `[user]: ${userMsg}` : '',
+      assistantMsg ? `[assistant]: ${assistantMsg}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+    if (!roundText) continue;
+
+    const roundTokens = estimateTokens(roundText);
+    if (currentTokenCount + roundTokens > MAX_CONTEXT_TOKENS) break;
+
+    lines.unshift(roundText);
+    currentTokenCount += roundTokens;
+  }
+
+  let remainingTokens = MAX_CONTEXT_TOKENS - currentTokenCount;
+  const activeAttachments = getActiveAttachments(conversation.attachments ?? []);
+
+  for (const attachment of activeAttachments) {
+    const version = getLatestVersion(attachment);
+    const data = version?.data;
+    const name = attachment.description ?? attachment.id ?? attachment.type;
+
+    if (data === undefined || data === null) {
+      lines.push(`\n[Attachment ${name}]: (no content)`);
+      continue;
+    }
+
+    let attachmentStr: string;
+    try {
+      attachmentStr = typeof data === 'string' ? data : JSON.stringify(data, null, 0);
+    } catch {
+      lines.push(`\n[Attachment ${name}]: (unable to stringify)`);
+      continue;
+    }
+
+    const attachmentTokens = estimateTokens(attachmentStr);
+    if (attachmentTokens <= remainingTokens) {
+      lines.push(`\n[Attachment ${name}]:\n${attachmentStr}`);
+      remainingTokens -= attachmentTokens;
+    } else {
+      lines.push(`\n[Attachment ${name} truncated due to limits]`);
+    }
+  }
+
+  return lines.join('\n');
 }
 
-function buildContextText(input: {
-  message: string;
-  conversation_history?: Array<{ role?: string; content: string }>;
-  attachments?: Array<{ type: string; data: Record<string, unknown> }>;
-}): string {
-  const parts: string[] = ['## Current message\n', input.message];
-
-  if (input.conversation_history?.length) {
-    const recent = input.conversation_history.slice(-MAX_CONVERSATION_HISTORY_MESSAGES);
-    parts.push('\n## Conversation history\n');
-    for (const msg of recent) {
-      const role = msg.role ?? 'user';
-      if (msg.content) {
-        parts.push(`[${role}]: ${msg.content}\n`);
-      }
-    }
+async function fetchConversationContext(
+  conversationId: string,
+  getInternalServices: () => InternalStartServices,
+  request: KibanaRequest,
+  logger: GuardrailLogger
+): Promise<string | null> {
+  try {
+    const { conversations } = getInternalServices();
+    const client = await conversations.getScopedClient({ request });
+    const conversation = await client.get(conversationId);
+    return await formatConversationHistory(conversation);
+  } catch (err) {
+    logger.warn(
+      `Failed to fetch conversation for guardrail context (conversation_id=${conversationId}), proceeding with current message only.`,
+      err instanceof Error ? err : undefined
+    );
+    return null;
   }
-
-  if (input.attachments?.length) {
-    const limited = input.attachments.slice(0, MAX_ATTACHMENTS);
-    parts.push('\n## Attachments\n');
-    for (const att of limited) {
-      if (att.data && typeof att.data === 'object') {
-        try {
-          const raw = JSON.stringify(att.data);
-          parts.push(`[${att.type}]: ${truncate(raw, MAX_ATTACHMENT_DATA_CHARS)}\n`);
-        } catch {
-          const raw = String(att.data);
-          parts.push(`[${att.type}]: ${truncate(raw, MAX_ATTACHMENT_DATA_CHARS)}\n`);
-        }
-      }
-    }
-  }
-
-  return parts.join('');
 }
 
 export const getAiGuardrailsStepDefinition = (
-  coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>
+  coreSetup: CoreSetup<AgentBuilderStartDependencies, unknown>,
+  getInternalServices: () => InternalStartServices
 ) =>
   createServerStepDefinition({
     ...AiGuardrailsStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const { message, conversation_id: conversationId, custom_rules: customRules } = context.input;
 
+      let conversationBlock = '';
+      if (conversationId?.trim()) {
+        const request = context.contextManager.getFakeRequest();
+        if (request) {
+          const history = await fetchConversationContext(
+            conversationId.trim(),
+            getInternalServices,
+            request,
+            context.logger
+          );
+          if (history) {
+            conversationBlock = `## Conversation history\n\n${history}\n\n`;
+          }
+        } else {
+          context.logger.warn(
+            'No request available for conversation fetch; proceeding with current message only.'
+          );
+        }
+      }
+
+      const systemPrompt =
+        GUARDRAIL_SYSTEM_PROMPT +
+        (customRules?.trim() ? `\n\n### CUSTOM USER RULES ###\n\n${customRules.trim()}` : '');
+
+      const userMessage = `${conversationBlock}## Current message\n\n${message}`;
+
+      const [, { inference }] = await coreSetup.getStartServices();
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
@@ -88,10 +154,9 @@ export const getAiGuardrailsStepDefinition = (
         chatModelOptions: { temperature: 0, maxRetries: 0 },
       });
 
-      const contextText = buildContextText(context.input);
       const modelInput = [
-        { role: 'system' as const, content: GUARDRAIL_SYSTEM_PROMPT },
-        { role: 'user' as const, content: contextText },
+        { role: 'system' as const, content: systemPrompt },
+        { role: 'user' as const, content: userMessage },
       ];
 
       const runnable = chatModel.withStructuredOutput(
