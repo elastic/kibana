@@ -653,5 +653,209 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         expect(importItems).toEqual(expectedItems);
       });
     });
+
+    describe('#validateImportOwnerSpaceIds()', () => {
+      it('should do nothing when item has no tags', async () => {
+        exceptionLikeItem.tags = [];
+
+        await expect(
+          validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+
+      describe('when the user has global artifact management privilege', () => {
+        it('should allow import when spaces are accessible and artifact is visible in current space', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+        });
+
+        it('should error when owner space is not accessible', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'inaccessible-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /invalid owner space IDs/
+          );
+        });
+
+        it('should error when artifact is not visible in current space', async () => {
+          // Artifact owned by another space with no policies assigned (not visible)
+          exceptionLikeItem.tags = [buildSpaceOwnerIdTag('other-space')];
+          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockResolvedValue([
+            { id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] },
+            { id: 'other-space', name: 'other', disabledFeatures: [] },
+          ]);
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts that are not visible in the current space/
+          );
+        });
+      });
+
+      describe('when the user does NOT have global artifact management privilege', () => {
+        it('should allow import when ownerSpaceId matches active space', async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+        });
+
+        it('should error when ownerSpaceId does not match active space', async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts to a different space requires global artifact management privilege/
+          );
+        });
+
+        it("should error when there's an additional owner space ID", async () => {
+          authzMock.canManageGlobalArtifacts = false;
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+          setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            /Importing artifacts to a different space requires global artifact management privilege/
+          );
+        });
+      });
+    });
+
+    describe('#isArtifactVisibleInCurrentSpace()', () => {
+      it('should return true when ownerSpaceIds includes the active space', async () => {
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            [DEFAULT_SPACE_ID, 'other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return true when item is a global artifact', async () => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return true when at least one assigned policy is visible in the current space', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildSpaceOwnerIdTag('other-space'),
+        ];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(true);
+      });
+
+      it('should return false when item has no assigned policies and owner is a different space', async () => {
+        exceptionLikeItem.tags = [buildSpaceOwnerIdTag('other-space')];
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(false);
+      });
+
+      it('should return false when no assigned policies are visible in the current space', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('invisible-policy'),
+          buildSpaceOwnerIdTag('other-space'),
+        ];
+        packagePolicyService.getByIDs.mockResolvedValue([]);
+
+        await expect(
+          validator._isArtifactVisibleInCurrentSpace(
+            ['other-space'],
+            DEFAULT_SPACE_ID,
+            exceptionLikeItem
+          )
+        ).resolves.toBe(false);
+      });
+    });
+
+    describe('#removeInvalidPolicyIds()', () => {
+      it('should do nothing when item is not by-policy', async () => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+        const originalTags = [...exceptionLikeItem.tags];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual(originalTags);
+      });
+
+      it('should do nothing when item has no policy IDs', async () => {
+        exceptionLikeItem.tags = [buildPerPolicyTag('some-id')];
+        // Clear the per-policy tags but keep it "by policy" by having the prefix
+        exceptionLikeItem.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}`];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+      });
+
+      it('should not modify tags when all policy IDs are valid', async () => {
+        exceptionLikeItem.tags = [buildPerPolicyTag('policy-1'), buildPerPolicyTag('policy-2')];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('policy-2'),
+        ]);
+      });
+
+      it('should remove invalid policy ID tags and add a comment', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('invalid-policy'),
+        ];
+        exceptionLikeItem.comments = [];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([buildPerPolicyTag('policy-1')]);
+        expect(exceptionLikeItem.comments).toHaveLength(1);
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('invalid-policy'),
+        });
+      });
+
+      it('should remove all invalid policy ID tags when multiple are invalid', async () => {
+        exceptionLikeItem.tags = [
+          buildPerPolicyTag('policy-1'),
+          buildPerPolicyTag('bad-1'),
+          buildPerPolicyTag('bad-2'),
+        ];
+        exceptionLikeItem.comments = [];
+
+        await validator._removeInvalidPolicyIds(exceptionLikeItem);
+
+        expect(exceptionLikeItem.tags).toEqual([buildPerPolicyTag('policy-1')]);
+        expect(exceptionLikeItem.comments).toHaveLength(1);
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('bad-1'),
+        });
+        expect(exceptionLikeItem.comments[0]).toEqual({
+          comment: expect.stringContaining('bad-2'),
+        });
+      });
+    });
   });
 });

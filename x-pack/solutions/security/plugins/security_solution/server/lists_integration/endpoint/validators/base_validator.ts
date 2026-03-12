@@ -348,7 +348,7 @@ export class BaseValidator {
     }
   }
 
-  private async isArtifactVisibleInCurrentSpace(
+  protected async isArtifactVisibleInCurrentSpace(
     ownerSpaceIds: string[],
     activeSpaceId: string,
     item: ExceptionItemLikeOptions

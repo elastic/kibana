@@ -91,6 +91,22 @@ export class BaseValidatorMock extends BaseValidator {
   ): Promise<void> {
     return this.validatePreImportItems(items, validator);
   }
+
+  _validateImportOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.validateImportOwnerSpaceIds(item);
+  }
+
+  _isArtifactVisibleInCurrentSpace(
+    ownerSpaceIds: string[],
+    activeSpaceId: string,
+    item: ExceptionItemLikeOptions
+  ): Promise<boolean> {
+    return this.isArtifactVisibleInCurrentSpace(ownerSpaceIds, activeSpaceId, item);
+  }
+
+  _removeInvalidPolicyIds(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.removeInvalidPolicyIds(item);
+  }
 }
 
 export const createExceptionItemLikeOptionsMock = (
