@@ -22,7 +22,6 @@ import {
   PAGINATION,
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
-  loginAsMetricsViewer,
 } from '../../fixtures/metrics_experience';
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
@@ -50,8 +49,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects, config }) => {
-      await loginAsMetricsViewer(browserAuth, config);
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
     });
 
