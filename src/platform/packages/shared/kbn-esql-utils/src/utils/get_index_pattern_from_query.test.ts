@@ -109,4 +109,20 @@ describe('getSourceCommandFromESQLQuery', () => {
     expect(getSourceCommandFromESQLQuery(undefined)).toBe('');
     expect(getSourceCommandFromESQLQuery('STATS count()')).toBe('');
   });
+
+  it('should return FROM when the query starts with SET and then FROM', () => {
+    expect(
+      getSourceCommandFromESQLQuery(
+        'SET unmapped_fields = "FAIL"; FROM kibana_sample_data_logstsdb'
+      )
+    ).toBe('FROM');
+  });
+
+  it('should return FROM when the query starts with a comment and then FROM', () => {
+    expect(
+      getSourceCommandFromESQLQuery(
+        '// a comment before the query\nFROM kibana_sample_data_logstsdb'
+      )
+    ).toBe('FROM');
+  });
 });

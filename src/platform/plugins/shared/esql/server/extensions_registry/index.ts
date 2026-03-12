@@ -32,6 +32,7 @@ import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
   private recommendedFields: Map<string, RecommendedField[]> = new Map();
+  private sourceCommandCache: Map<string, string> = new Map();
 
   private setRecommendedItems<T extends { name: string }>(
     map: Map<string, T[]>,
@@ -135,6 +136,14 @@ export class ESQLExtensionsRegistry {
         if (typeof recommendedQuery.query !== 'string') {
           return undefined;
         }
+
+        if (!this.sourceCommandCache.has(recommendedQuery.query)) {
+          this.sourceCommandCache.set(
+            recommendedQuery.query,
+            getSourceCommandFromESQLQuery(recommendedQuery.query)
+          );
+        }
+
         return getIndexPatternFromESQLQuery(recommendedQuery.query);
       },
       (existingQueries, newQuery) => existingQueries.some((q) => q.query === newQuery.query),
@@ -187,7 +196,7 @@ export class ESQLExtensionsRegistry {
         return true;
       }
 
-      const registeredSourceCommand = getSourceCommandFromESQLQuery(recommendedQuery.query);
+      const registeredSourceCommand = this.sourceCommandCache.get(recommendedQuery.query) ?? '';
 
       return !registeredSourceCommand || currentSourceCommand === registeredSourceCommand;
     });

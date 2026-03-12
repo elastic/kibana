@@ -11,7 +11,6 @@ import { getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
-const WHITESPACE_SEQUENCE_REGEX = /\s+/;
 
 function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
@@ -92,9 +91,10 @@ export function getSourceCommandFromESQLQuery(esql?: string): string {
     return '';
   }
 
-  // Source commands are always the first token in the query.
-  const [firstToken = ''] = esql.trimStart().split(WHITESPACE_SEQUENCE_REGEX, 1);
-  const sourceCommand = firstToken.toUpperCase();
+  const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
 
-  return INDEX_SOURCE_COMMANDS.has(sourceCommand) ? sourceCommand : '';
+  return sourceCommand?.name.toUpperCase() ?? '';
 }
