@@ -202,8 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('can edit a session and return to the dashboard', async () => {
       await addSearchEmbeddableToDashboard('logstash hits');
       expect(await discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
-      await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
+      await discover.editEmbeddableInDiscover();
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -231,6 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
       await dashboardPanelActions.clickEdit();
       await header.waitUntilLoadingHasFinished();
+
       // Run validations concurrently
       await Promise.all([
         globalNav
@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('resets back to a normal Discover session if navigated away from an edit session', async () => {
       await addSearchEmbeddableToDashboard();
-      await dashboardPanelActions.clickEdit();
+      await discover.editEmbeddableInDiscover();
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
       await Promise.all([
@@ -327,8 +327,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('switches to Discover mode if search is saved as new', async () => {
       await addSearchEmbeddableToDashboard();
-      await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
+      await discover.editEmbeddableInDiscover();
       await discover.saveAsSearch('Rendering Test: saved as search');
       await header.waitUntilLoadingHasFinished();
       // Run validations concurrently
