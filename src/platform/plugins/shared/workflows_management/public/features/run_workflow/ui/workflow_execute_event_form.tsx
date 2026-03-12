@@ -19,9 +19,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
-import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
+import { AlertsSearchBar, useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -29,9 +29,6 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 import { useKibana } from '../../../hooks/use_kibana';
-
-/** Index pattern for alerts based on space ID */
-const getAlertsIndexPattern = (spaceId: string) => `.alerts-*-${spaceId}`;
 
 interface Alert {
   _id: string;
@@ -61,8 +58,7 @@ export const WorkflowExecuteEventForm = ({
   setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { services } = useKibana();
-  const { spaces, http, notifications, data: dataService, unifiedSearch } = services;
-  const [spaceId, setSpaceId] = useState<string | null>(null);
+  const { http, notifications, data: dataService, unifiedSearch } = services;
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: 'now-15m',
@@ -76,33 +72,32 @@ export const WorkflowExecuteEventForm = ({
   const [dataView, setDataView] = useState<DataView | null>(null);
   const dataViewCreatingRef = useRef(false);
 
-  // Get space ID
-  useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => {
-        setSpaceId(space.id);
-      });
-    }
-  }, [spaces]);
+  // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
+  // Empty ruleTypeIds + enabled: true → returns indices for all authorized rule types
+  const { data: alertIndexNames } = useFetchAlertsIndexNamesQuery(
+    { http, ruleTypeIds: [] },
+    { enabled: true }
+  );
 
-  // Create and cache data view when space ID is available
+  const indexPattern = useMemo(
+    () => (alertIndexNames && alertIndexNames.length > 0 ? alertIndexNames.join(',') : undefined),
+    [alertIndexNames]
+  );
+
+  // Create and cache data view when alert index names are available
   useEffect(() => {
-    // Skip if already creating or if dependencies are not ready
-    if (!dataService || !spaceId) {
+    if (!dataService || !indexPattern) {
       return;
     }
 
-    // Check ref synchronously before async operation
     if (dataViewCreatingRef.current) {
       return;
     }
 
-    // Set ref synchronously before starting async operation
     dataViewCreatingRef.current = true;
 
     const createDataView = async () => {
       try {
-        const indexPattern = getAlertsIndexPattern(spaceId);
         const newDataView = await dataService.dataViews.create({
           title: indexPattern,
           timeFieldName: '@timestamp',
@@ -120,10 +115,10 @@ export const WorkflowExecuteEventForm = ({
     };
 
     createDataView();
-  }, [dataService, spaceId, setErrors]);
+  }, [dataService, indexPattern, setErrors]);
 
   const fetchAlerts = useCallback(async () => {
-    if (!dataService || !spaceId || !dataView) {
+    if (!dataService || !dataView) {
       return;
     }
 
@@ -213,16 +208,7 @@ export const WorkflowExecuteEventForm = ({
     } finally {
       setAlertsLoading(false);
     }
-  }, [
-    dataService,
-    setErrors,
-    submittedQuery,
-    timeRange.from,
-    timeRange.to,
-    spaceId,
-    filters,
-    dataView,
-  ]);
+  }, [dataService, setErrors, submittedQuery, timeRange.from, timeRange.to, filters, dataView]);
 
   useEffect(() => {
     if (dataView) {

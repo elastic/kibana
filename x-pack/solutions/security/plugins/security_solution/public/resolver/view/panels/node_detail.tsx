@@ -20,14 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { GeneratedText } from '../generated_text';
-import { CellActionsMode, SecurityCellActions } from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import { processPath, processPID } from '../../models/process_event';
 import * as nodeDataModel from '../../models/node_data';
@@ -40,6 +37,7 @@ import { useFormattedDate } from './use_formatted_date';
 import { PanelContentError } from './panel_content_error';
 import type { State } from '../../../common/store/types';
 import type { NodeEventOnClick } from './node_events_of_type';
+import type { ResolverCellActionRenderer } from '../../types';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -54,10 +52,12 @@ export const NodeDetail = memo(function ({
   id,
   nodeID,
   nodeEventOnClick,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
+  renderCellActions: ResolverCellActionRenderer;
 }) {
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
@@ -74,6 +74,7 @@ export const NodeDetail = memo(function ({
       nodeID={nodeID}
       processEvent={processEvent}
       nodeEventOnClick={nodeEventOnClick}
+      renderCellActions={renderCellActions}
     />
   ) : (
     <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
@@ -95,11 +96,13 @@ export const NodeDetailView = memo(function ({
   processEvent,
   nodeID,
   nodeEventOnClick,
+  renderCellActions,
 }: {
   id: string;
   processEvent: SafeResolverEvent;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
+  renderCellActions: ResolverCellActionRenderer;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
   const nodeState = useSelector((state: State) =>
@@ -265,21 +268,12 @@ export const NodeDetailView = memo(function ({
       ),
       'data-test-subj': 'resolver:node-detail:entry-description',
       render(data: NodeDetailsTableView) {
-        return (
-          <SecurityCellActions
-            data={{
-              field: data.title,
-              value: data.value ?? data.description,
-            }}
-            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
-            mode={CellActionsMode.HOVER_DOWN}
-            visibleCellActions={5}
-            sourcererScopeId={getSourcererScopeId(id)}
-            metadata={{ scopeId: id }}
-          >
-            {data.description}
-          </SecurityCellActions>
-        );
+        return renderCellActions({
+          field: data.title,
+          value: data.value ?? data.description,
+          children: data.description,
+          scopeId: id,
+        });
       },
     },
   ];
