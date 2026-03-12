@@ -59,7 +59,7 @@ export class SearchInferenceEndpointsPlugin
       id: PLUGIN_ID,
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
-      order: 2,
+      order: 1100,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: [],
       catalogue: [],

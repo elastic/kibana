@@ -53,6 +53,8 @@ xpack.features.overrides:
   discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
+  ### Inference Endpoints feature is moved from Analytics category to the Search one.
+  searchInferenceEndpoints.category: "enterpriseSearch"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
