@@ -20,7 +20,7 @@ Best practices that apply to both UI and API tests.
 
 Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
-- Use [deployment tags](./deployment-tags.md) to skip tests that don’t apply to a given environment (for example, a feature that only exists in stateful deployments).
+- Every suite must have [deployment tags](./deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
@@ -80,7 +80,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 
 ### Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). The test runner balances work at the spec-file level, so oversized files become bottlenecks during [parallel execution](./parallelism.md). Put shared login/navigation in `beforeEach`.
 
 :::::{dropdown} Example
 
@@ -172,7 +172,7 @@ test.afterEach(async ({ esClient, log }) => {
 
 ### Don’t use `try/catch` in tests [dont-use-try-catch-in-tests]
 
-Tests should be clean and declarative. If a helper might return an expected error (for example, 404 during cleanup), the helper should handle it internally, for example, by accepting an `ignoreErrors` option (e.g., for treating a 404 during deletion as a success).
+Tests should be clean and declarative. If a helper might return an expected error (for example, 404 during cleanup), the helper should handle it internally, for example by accepting an `ignoreErrors` option or treating a 404 during deletion as a success.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** catch errors in the test:
@@ -594,6 +594,7 @@ test('Overview tab shows all KPI values', async ({ pageObjects }) => {
   await expect.soft(pageObjects.nodeDetails.getKPI('diskUsage')).toHaveText('80.0%');
 });
 ```
+
 :::::
 
 ### Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
