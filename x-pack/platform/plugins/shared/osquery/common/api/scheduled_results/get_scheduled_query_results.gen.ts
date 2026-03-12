@@ -20,4 +20,24 @@ import { z } from '@kbn/zod/v4';
  * The response for getting scheduled query results.
  */
 export type GetScheduledQueryResultsResponse = z.infer<typeof GetScheduledQueryResultsResponse>;
-export const GetScheduledQueryResultsResponse = z.object({});
+export const GetScheduledQueryResultsResponse = z.object({
+  /**
+   * The query results data wrapper.
+   */
+  data: z
+    .object({
+      /**
+       * The paginated list of query result rows.
+       */
+      edges: z.array(z.object({})).optional(),
+      /**
+       * The total number of result rows.
+       */
+      total: z.number().int().optional(),
+      /**
+       * Debug/inspection data for the search query.
+       */
+      inspect: z.object({}).optional(),
+    })
+    .optional(),
+});
