@@ -31,6 +31,8 @@ export interface CreateKubernetesOnboardingFlowRouteResponse {
 
 export interface HasKubernetesDataRouteResponse {
   hasData: boolean;
+  hasLogs?: boolean;
+  hasMetrics?: boolean;
 }
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -132,22 +134,49 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     const { elasticsearch } = await resources.context.core;
 
     try {
-      const result = await elasticsearch.client.asCurrentUser.search({
-        index: ['logs-*', 'metrics-*', 'logs', 'logs.*'],
-        ignore_unavailable: true,
-        allow_partial_search_results: true,
-        size: 0,
-        terminate_after: 1,
-        query: {
-          bool: {
-            filter: termQuery('fields.onboarding_id', onboardingId),
-          },
+      const query: estypes.QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...termQuery('fields.onboarding_id', onboardingId),
+                  ...termQuery('resource.attributes.onboarding.id', onboardingId),
+                  ...termQuery('labels.onboarding_id', onboardingId),
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
         },
-      });
-      const { value } = result.hits.total as estypes.SearchTotalHits;
+      };
+
+      const [logsResult, metricsResult] = await Promise.all([
+        elasticsearch.client.asCurrentUser.search({
+          index: ['logs-*', 'logs', 'logs.*'],
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          size: 0,
+          terminate_after: 1,
+          query,
+        }),
+        elasticsearch.client.asCurrentUser.search({
+          index: ['metrics-*', 'metrics', 'metrics.*'],
+          ignore_unavailable: true,
+          allow_partial_search_results: true,
+          size: 0,
+          terminate_after: 1,
+          query,
+        }),
+      ]);
+
+      const hasLogs = (logsResult.hits.total as estypes.SearchTotalHits).value > 0;
+      const hasMetrics = (metricsResult.hits.total as estypes.SearchTotalHits).value > 0;
 
       return {
-        hasData: value > 0,
+        hasData: hasLogs || hasMetrics,
+        hasLogs,
+        hasMetrics,
       };
     } catch (error) {
       const errorType = error?.meta?.body?.error?.type;
@@ -159,6 +188,8 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       ) {
         return {
           hasData: false,
+          hasLogs: false,
+          hasMetrics: false,
         };
       }
 
