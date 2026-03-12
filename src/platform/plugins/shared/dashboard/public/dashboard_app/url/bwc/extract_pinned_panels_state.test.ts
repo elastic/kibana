@@ -47,7 +47,7 @@ describe('extractDashboardState', () => {
             selected_options: ['win 7'],
           },
           grow: true,
-          type: 'optionsListControl',
+          type: 'options_list_control',
           width: 'small',
         },
         {
@@ -57,7 +57,7 @@ describe('extractDashboardState', () => {
             selected_options: ['US'],
           },
           grow: false,
-          type: 'optionsListControl',
+          type: 'options_list_control',
           width: 'medium',
         },
       ]);
@@ -90,7 +90,7 @@ describe('extractDashboardState', () => {
             selected_options: ['win 7'],
           },
           grow: true,
-          type: 'optionsListControl',
+          type: 'options_list_control',
           width: 'small',
         },
       ]);
@@ -128,7 +128,7 @@ describe('extractDashboardState', () => {
             use_global_filters: false,
             ignore_validations: false,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
         {
           config: {
@@ -137,7 +137,7 @@ describe('extractDashboardState', () => {
             use_global_filters: false,
             ignore_validations: false,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
       ]);
     });
@@ -172,7 +172,7 @@ describe('extractDashboardState', () => {
             use_global_filters: false,
             ignore_validations: false,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
         {
           config: {
@@ -181,7 +181,7 @@ describe('extractDashboardState', () => {
             use_global_filters: false,
             ignore_validations: false,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
       ]);
     });
@@ -218,7 +218,7 @@ describe('extractDashboardState', () => {
             use_global_filters: true,
             ignore_validations: true,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
         {
           config: {
@@ -227,7 +227,7 @@ describe('extractDashboardState', () => {
             use_global_filters: true,
             ignore_validations: true,
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
       ]);
     });
@@ -267,7 +267,7 @@ describe('extractDashboardState', () => {
             field_name: 'name.keyword',
             selected_options: ['US', 'Canada'],
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
           grow: true,
           width: 'small',
           uid: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
@@ -278,7 +278,7 @@ describe('extractDashboardState', () => {
             field_name: 'machine.os.keyword',
             selected_options: ['win 7'],
           },
-          type: 'optionsListControl',
+          type: 'options_list_control',
           grow: false,
           uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
         },
@@ -319,7 +319,7 @@ describe('extractDashboardState', () => {
             ignore_validations: false,
           },
           uid: '6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693',
-          type: 'optionsListControl',
+          type: 'options_list_control',
         },
       ]);
     });
@@ -352,7 +352,7 @@ describe('extractDashboardState', () => {
           },
           uid: '8311639d-92e5-4aa5-99a4-9502b10eead5',
           grow: true,
-          type: 'optionsListControl',
+          type: 'options_list_control',
           width: 'small',
         },
       ]);
