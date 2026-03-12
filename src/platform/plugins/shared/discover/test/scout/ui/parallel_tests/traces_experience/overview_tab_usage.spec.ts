@@ -125,7 +125,7 @@ spaceTest.describe(
 
     spaceTest(
       'Similar Spans section - renders chart and Open in Discover returns similar spans',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
@@ -143,9 +143,8 @@ spaceTest.describe(
           'click Open in Discover and verify new tab returns similar spans',
           async () => {
             await flyout.similarSpansOpenInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.SERVICE_NAME);
-            await expect(docTable).toContainText(RICH_TRACE.INTERNAL_SPAN_NAME);
+            await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.SERVICE_NAME);
+            await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.INTERNAL_SPAN_NAME);
           }
         );
       }
@@ -155,7 +154,7 @@ spaceTest.describe(
 
     spaceTest(
       'Trace Summary section - waterfall actions and Open in Discover',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
@@ -186,9 +185,8 @@ spaceTest.describe(
           'click Open in Discover and verify new tab returns trace items',
           async () => {
             await flyout.traceSummaryOpenInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.TRANSACTION_NAME);
-            await expect(docTable).toContainText(RICH_TRACE.SERVICE_NAME);
+            await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.TRANSACTION_NAME);
+            await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.SERVICE_NAME);
           }
         );
       }
@@ -218,9 +216,10 @@ spaceTest.describe(
               .locator('error-group-link')
               .filter({ hasText: RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR });
             await errorLink.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR);
-            await expect(docTable).toContainText(RICH_TRACE.TRANSACTION_NAME);
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR
+            );
+            await pageObjects.discover.expectDocTableToContainText(RICH_TRACE.TRANSACTION_NAME);
           }
         );
 
@@ -232,9 +231,12 @@ spaceTest.describe(
           'click Open in Discover and verify new tab returns all transaction errors',
           async () => {
             await flyout.errorsOpenInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR);
-            await expect(docTable).toContainText(RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR);
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR
+            );
           }
         );
       }
@@ -244,7 +246,7 @@ spaceTest.describe(
 
     spaceTest(
       'Logs section - Open in Discover returns correlated logs',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step(
@@ -269,10 +271,15 @@ spaceTest.describe(
           'click Open in Discover and verify new tab returns correlated logs',
           async () => {
             await flyout.logsOpenInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.TRANSACTION_DB_ERROR);
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.TRANSACTION_VALIDATION_ERROR);
-            await expect(docTable).toContainText(RICH_TRACE.LOGS.TRANSACTION_INFO);
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.TRANSACTION_DB_ERROR
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.TRANSACTION_VALIDATION_ERROR
+            );
+            await pageObjects.discover.expectDocTableToContainText(
+              RICH_TRACE.LOGS.TRANSACTION_INFO
+            );
           }
         );
       }
@@ -282,7 +289,7 @@ spaceTest.describe(
 
     spaceTest(
       'Span Links section - links and Open in Discover return expected results',
-      async ({ pageObjects, page }) => {
+      async ({ pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span with span links and open overview tab', async () => {
@@ -296,9 +303,8 @@ spaceTest.describe(
               .locator('a')
               .filter({ hasText: PRODUCER_TRACE.KAFKA_SPAN_NAME });
             await spanNameLink.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
-            await expect(docTable).toContainText(PRODUCER_TRACE.SERVICE_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.SERVICE_NAME);
           }
         );
 
@@ -313,8 +319,7 @@ spaceTest.describe(
               .locator('a')
               .filter({ hasText: PRODUCER_TRACE.SERVICE_NAME });
             await serviceNameLink.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(PRODUCER_TRACE.SERVICE_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.SERVICE_NAME);
           }
         );
 
@@ -329,8 +334,7 @@ spaceTest.describe(
               '[data-test-subj^="outgoing-traceIdLink-"]'
             );
             await traceIdLink.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
           }
         );
 
@@ -342,8 +346,7 @@ spaceTest.describe(
           'click Open in Discover and verify new tab returns span link targets',
           async () => {
             await flyout.spanLinksOpenInDiscoverButton.click();
-            const docTable = page.testSubj.locator('discoverDocTable');
-            await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
+            await pageObjects.discover.expectDocTableToContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
           }
         );
       }
