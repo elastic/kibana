@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
+import { figmaDataSource } from './figma';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
 import { googleCalendarDataSource } from './google_calendar';
@@ -22,6 +23,7 @@ import { servicenowDataSource } from './servicenow';
 import { tavilyDataSource } from './tavily';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
+  dataCatalog.register(figmaDataSource);
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
   dataCatalog.register(googleCalendarDataSource);
