@@ -7,14 +7,15 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionConnector, ActionConnectorWithoutId } from '../../types';
+import type { UserConfiguredActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
+import type { ActionConnector } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
-  ActionConnectorWithoutId,
-  'actionTypeId' | 'name' | 'config' | 'secrets'
-> & { id?: string };
+  UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id'
+>;
 
 interface UseCreateConnectorReturnValue {
   isLoading: boolean;
@@ -63,30 +64,17 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
         setIsLoading(false);
 
         if (error.name !== 'AbortError') {
-          const isConflict = error.body?.statusCode === 409;
           toasts.addError(error, {
-            title: isConflict
-              ? i18n.translate(
-                  'xpack.triggersActionsUI.sections.useCreateConnector.duplicateIdErrorTitle',
-                  { defaultMessage: 'Connector ID already exists' }
-                )
-              : i18n.translate(
-                  'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
-                  { defaultMessage: 'Unable to create a connector.' }
-                ),
-            toastMessage: isConflict
-              ? i18n.translate(
-                  'xpack.triggersActionsUI.sections.useCreateConnector.duplicateIdErrorMessage',
-                  {
-                    defaultMessage:
-                      'A connector with this ID already exists. Please choose a different ID.',
-                  }
-                )
-              : error.body?.message ??
-                i18n.translate(
-                  'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
-                  { defaultMessage: 'Check the Kibana logs for more information.' }
-                ),
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationTitle',
+              { defaultMessage: 'Unable to create a connector.' }
+            ),
+            toastMessage:
+              error.body?.message ??
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.useCreateConnector.updateErrorNotificationText',
+                { defaultMessage: 'Check the Kibana logs for more information.' }
+              ),
           });
         }
       }

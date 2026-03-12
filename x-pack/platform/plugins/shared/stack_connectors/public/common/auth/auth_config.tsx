@@ -80,7 +80,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
     data: secretHeaderKeys = [],
     isLoading: isLoadingHeaders,
     isFetching: isFetchingHeaders,
-  } = useSecretHeaders(isEdit ? connectorId : undefined);
+  } = useSecretHeaders(connectorId, isEdit);
 
   const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
   const authType = config == null ? AuthType.Basic : config.authType;

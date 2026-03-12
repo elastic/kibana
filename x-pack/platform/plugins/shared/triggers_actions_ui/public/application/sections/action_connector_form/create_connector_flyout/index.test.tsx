@@ -744,7 +744,7 @@ describe('CreateConnectorFlyout', () => {
   describe('initial connector', () => {
     const initialConnector = {
       actionTypeId: 'initial-connector',
-      name: 'Initial connector',
+      name: 'My test connector',
       isDeprecated: false,
       config: {
         testTextField: 'Prefilled initial value',
@@ -787,7 +787,7 @@ describe('CreateConnectorFlyout', () => {
       );
 
       expect(await screen.findByTestId('test-connector-text-field')).toBeInTheDocument();
-      expect(await screen.findByTestId('nameInput')).toHaveValue('Initial connector');
+      expect(await screen.findByTestId('nameInput')).toHaveValue('My test connector');
 
       expect(await screen.findByTestId('test-connector-text-field')).toHaveValue(
         'Prefilled initial value'
@@ -817,10 +817,10 @@ describe('CreateConnectorFlyout', () => {
 
       await waitFor(() => {
         expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
-          '/api/actions/connector/initial-connector',
+          '/api/actions/connector/my-test-connector',
           {
             body: JSON.stringify({
-              name: 'Initial connector',
+              name: 'My test connector',
               config: { testTextField: 'Updated value' },
               secrets: {},
               connector_type_id: 'initial-connector',
