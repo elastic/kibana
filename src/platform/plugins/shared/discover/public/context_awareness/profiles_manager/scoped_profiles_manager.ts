@@ -94,6 +94,7 @@ export class ScopedProfilesManager {
     onBeforeChange?: () => void
   ): Promise<ResolveDataSourceProfileResult> {
     const serializedParams = serializeDataSourceProfileParams(params);
+    const isFirstResolution = this.prevDataSourceProfileParams === undefined;
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
       return { didProfileChange: false };
@@ -118,7 +119,8 @@ export class ScopedProfilesManager {
       return { didProfileChange: false };
     }
 
-    const didProfileChange = this.dataSourceContext$.getValue().profileId !== context.profileId;
+    const didProfileChange =
+      isFirstResolution || this.dataSourceContext$.getValue().profileId !== context.profileId;
 
     onBeforeChange?.();
     this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);

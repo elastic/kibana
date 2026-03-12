@@ -61,6 +61,20 @@ describe('ProfilesManager', () => {
     ]);
   });
 
+  it('should report a profile change on the first data source resolution even when it resolves to the default context', async () => {
+    jest
+      .spyOn(mocks.dataSourceProfileProviderMock, 'resolve')
+      .mockResolvedValueOnce({ isMatch: false });
+
+    const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
+      scopedEbtManager: mocks.scopedEbtManagerMock,
+    });
+
+    await expect(scopedProfilesManager.resolveDataSourceProfile({})).resolves.toEqual({
+      didProfileChange: true,
+    });
+  });
+
   it('should resolve document profile', async () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
