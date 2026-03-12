@@ -7,7 +7,7 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationInternalState, ConversationRound } from './conversation';
+import type { CompactionSummary, ConversationInternalState, ConversationRound } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
@@ -26,6 +26,8 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  compactionStarted = 'compaction_started',
+  compactionCompleted = 'compaction_completed',
 }
 
 export type ChatEventBase<
@@ -222,6 +224,11 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Compaction summary generated during this round, if compaction was triggered.
+   * Persisted at the conversation level for reuse in subsequent rounds.
+   */
+  compaction_summary?: CompactionSummary;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -285,6 +292,44 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Compaction started
+
+export interface CompactionStartedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
+}
+
+export type CompactionStartedEvent = ChatEventBase<
+  ChatEventType.compactionStarted,
+  CompactionStartedEventData
+>;
+
+export const isCompactionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionStartedEvent => {
+  return event.type === ChatEventType.compactionStarted;
+};
+
+// Compaction completed
+
+export interface CompactionCompletedEventData {
+  /** Estimated token count after compaction */
+  token_count_after: number;
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+}
+
+export type CompactionCompletedEvent = ChatEventBase<
+  ChatEventType.compactionCompleted,
+  CompactionCompletedEventData
+>;
+
+export const isCompactionCompletedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionCompletedEvent => {
+  return event.type === ChatEventType.compactionCompleted;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -299,7 +344,9 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | CompactionStartedEvent
+  | CompactionCompletedEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

@@ -17,6 +17,8 @@ import {
   isToolProgressEvent,
   isToolResultEvent,
   isThinkingCompleteEvent,
+  isCompactionStartedEvent,
+  isCompactionCompletedEvent,
 } from '@kbn/agent-builder-common';
 import {
   createReasoningStep,
@@ -127,6 +129,16 @@ export const useSubscribeToChatEvents = ({
       });
       // Stop loading when a prompt is requested - the round is now awaiting user input
       setIsResponseLoading(false);
+    } else if (isCompactionStartedEvent(event)) {
+      conversationActions.addCompactionStep({
+        tokenCountBefore: event.data.token_count_before,
+      });
+      setAgentReasoning('Optimizing conversation context...');
+    } else if (isCompactionCompletedEvent(event)) {
+      conversationActions.setCompactionStepComplete({
+        tokenCountAfter: event.data.token_count_after,
+        summarizedRoundCount: event.data.summarized_round_count,
+      });
     }
   };
 

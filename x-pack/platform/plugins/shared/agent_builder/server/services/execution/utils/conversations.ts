@@ -46,6 +46,9 @@ export const createConversation$ = ({
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(roundCompletedEvent.data.compaction_summary
+          ? { compaction_summary: roundCompletedEvent.data.compaction_summary }
+          : {}),
       });
     }),
     switchMap((createdConversation) => {
@@ -75,7 +78,8 @@ export const updateConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
-      const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
+      const { round, resumed = false, conversation_state, compaction_summary } =
+        roundCompletedEvent.data;
       // Replace last round when resumed (HITL flow), regenerate action is requested
       const shouldReplaceLastRound = resumed || action === 'regenerate';
       const updatedRound = shouldReplaceLastRound
@@ -90,6 +94,7 @@ export const updateConversation$ = ({
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(compaction_summary ? { compaction_summary } : {}),
       });
     }),
     switchMap((updatedConversation) => {

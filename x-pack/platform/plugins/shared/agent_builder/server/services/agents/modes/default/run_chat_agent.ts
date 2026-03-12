@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
+import { EMPTY, filter, finalize, from, merge, of, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
 import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
@@ -16,6 +16,7 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import { createResultTransformer } from '../utils/create_result_transformer';
 import {
@@ -30,6 +31,8 @@ import { resolveCapabilities } from '../utils/capabilities';
 import { resolveConfiguration } from '../utils/configuration';
 import { ensureValidInput } from '../utils/preflight_checks';
 import { roundToActions } from '../utils/round_to_actions';
+import { computeContextBudget } from '../utils/context_budget';
+import { compactConversation } from '../utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -173,15 +176,48 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filestoreEnabled: experimentalFeatures.filestore,
   });
 
+  // Context-aware compaction: check if conversation history exceeds the
+  // model's context window budget and apply hybrid compaction if needed.
+  const contextBudget = computeContextBudget(model.connector);
+  const compactionResult = await compactConversation({
+    processedConversation,
+    chatModel: model.chatModel,
+    contextBudget,
+    existingSummary: conversation?.compaction_summary,
+    logger,
+  });
+
+  // Use the (possibly compacted) conversation for prompt construction
+  const effectiveConversation = compactionResult.processedConversation;
+
+  // Build compaction events as a cold observable so they emit upon subscription.
+  // Cannot use the eventEmitter (Subject) here because nobody is subscribed yet.
+  const compactionEvents$ = compactionResult.compactionTriggered
+    ? of<ChatAgentEvent>(
+        {
+          type: ChatEventType.compactionStarted,
+          data: { token_count_before: compactionResult.tokensBefore ?? 0 },
+        },
+        {
+          type: ChatEventType.compactionCompleted,
+          data: {
+            token_count_after: compactionResult.tokensAfter ?? 0,
+            summarized_round_count: compactionResult.summarizedRoundCount ?? 0,
+          },
+        }
+      )
+    : EMPTY;
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     filestore,
-    processedConversation,
+    processedConversation: effectiveConversation,
     resultTransformer,
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    compactionSummary: compactionResult.summary,
   });
 
   const agentGraph = createAgentGraph({
@@ -193,7 +229,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
-    processedConversation,
+    processedConversation: effectiveConversation,
     promptFactory,
   });
 
@@ -201,7 +237,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
-      conversation: processedConversation,
+      conversation: effectiveConversation,
       agentBuilderToLangchainIdMap: toolManager.getToolIdMapping(),
       cycleLimit,
     }),
@@ -231,14 +267,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   );
 
   const processedInput: RoundInput = {
-    message: processedConversation.nextInput.message,
-    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+    message: effectiveConversation.nextInput.message,
+    attachments: effectiveConversation.nextInput.attachments.map((a) => a.attachment),
   };
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
   const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
 
-  const events$ = merge(graphEvents$, manualEvents$).pipe(
+  const events$ = merge(compactionEvents$, graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
       getConversationState: () => getConversationState({ promptManager, toolManager }),
@@ -248,6 +284,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
+      compactionSummary: compactionResult.summary,
+      compactionTokensBefore: compactionResult.tokensBefore,
+      compactionTokensAfter: compactionResult.tokensAfter,
     }),
     evictInternalEvents(),
     shareReplay()

@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
+import type { ResolvedAgentCapabilities, CompactionSummary } from '@kbn/agent-builder-common';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { ResolvedConfiguration } from '../../types';
@@ -27,6 +27,11 @@ export interface PromptFactoryParams {
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * Optional compaction summary from a previous or current compaction.
+   * Passed through to the prompt pipeline for injection into LLM context.
+   */
+  compactionSummary?: CompactionSummary;
 }
 
 export interface ResearchAgentPromptRuntimeParams {
