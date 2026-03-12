@@ -53,13 +53,29 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+const getCurrentProfileId = (
+  runtimeStateManager: Parameters<typeof selectTabRuntimeState>[0],
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileId;
+};
+
 export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
   function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
-    const profileId = selectTabRuntimeState(runtimeStateManager, payload.tabId)
-      .scopedProfilesManager$.getValue()
-      .getContexts().dataSourceContext.profileId;
+    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
 
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
+export const syncPreviousStateSnapshots: InternalStateThunkActionCreator<[TabActionPayload]> = (
+  payload
+) =>
+  function syncPreviousStateSnapshotsThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
+
+    dispatch(internalStateSlice.actions.syncPreviousStateSnapshots({ ...payload, profileId }));
   };
 
 /**
