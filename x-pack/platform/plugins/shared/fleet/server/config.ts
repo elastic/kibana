@@ -56,6 +56,7 @@ export const config: PluginConfigDescriptor = {
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
+    isAirGapped: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -411,6 +412,11 @@ export const config: PluginConfigDescriptor = {
           maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
           interval: schema.string({ defaultValue: '1h' }),
           maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
+        })
+      ),
+      unenrollInactiveAgents: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),

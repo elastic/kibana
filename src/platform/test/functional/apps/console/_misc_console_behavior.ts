@@ -13,6 +13,7 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve } from 'path';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { LARGE_INPUT } from './large_input';
+import { QUOTE_HEAVY_INPUT } from './quote_heavy_input';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -331,21 +332,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       writeFileSync(filePath, LARGE_INPUT, 'utf8');
 
-      // Set file to upload and wait for the editor to be updated
-      await PageObjects.console.setFileToUpload(filePath);
-      await PageObjects.console.acceptFileImport();
-      await PageObjects.common.sleep(1000);
+      try {
+        // Set file to upload and wait for the editor to be updated
+        await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.console.acceptFileImport();
+        await PageObjects.common.sleep(1000);
 
-      // The autocomplete should still show up without causing stack overflow
-      await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.enterText(`{\n\t"query": {`);
-      await PageObjects.console.pressEnter();
-      await PageObjects.console.sleepForDebouncePeriod();
-      await PageObjects.console.promptAutocomplete();
-      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        // The autocomplete should still show up without causing stack overflow
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      } finally {
+        unlinkSync(filePath);
+      }
+    });
 
-      // Clean up input file
-      unlinkSync(filePath);
+    it('should remain responsive with quote-heavy JSON payloads', async () => {
+      // This test targets the specific freeze scenario fixed in the ES|QL context detection.
+      // Before the fix, pasting JSON with many escaped quotes (e.g., serialized error messages)
+      // caused super-linear runtime in checkForTripleQuotesAndEsqlQuery, freezing the editor.
+      await PageObjects.console.clearEditorText();
+
+      const filePath = resolve(
+        REPO_ROOT,
+        `target/functional-tests/downloads/console_import_quote_heavy_input`
+      );
+      writeFileSync(filePath, QUOTE_HEAVY_INPUT, 'utf8');
+
+      try {
+        // Set file to upload and wait for the editor to be updated
+        await PageObjects.console.setFileToUpload(filePath);
+        await PageObjects.console.acceptFileImport();
+        await PageObjects.common.sleep(1000);
+
+        // Ensure we start a new request after the imported payload (it may not end with a newline).
+        await PageObjects.console.pressEnter();
+
+        // Reuse the same request shape as the existing "large content" test to guarantee suggestions exist.
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      } finally {
+        unlinkSync(filePath);
+      }
     });
   });
 }

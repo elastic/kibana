@@ -30,6 +30,7 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
 import {
   getOnBeforeHook,
+  orderSpecFilesForLoadBalance,
   parseTestFileConfig,
   retrieveIntegrations,
   setDefaultToolingLoggingLevel,
@@ -426,7 +427,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         ? grepSpecPattern // use the returned concrete file paths
         : globby.sync(specPattern); // convert the glob pattern to concrete file paths
 
-      const files = retrieveIntegrations(concreteFilePaths);
+      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
+      const files = retrieveIntegrations(orderedFilePaths);
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 

@@ -115,7 +115,12 @@ export const MonitorList = ({
 
   return (
     <ContextWrapper>
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="none"
+        data-test-subj={loading ? 'syntheticsMonitorList-loading' : 'syntheticsMonitorList-loaded'}
+      >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
           selectedItems={selectedItems}

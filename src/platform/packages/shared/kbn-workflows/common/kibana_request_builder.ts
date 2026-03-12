@@ -12,7 +12,7 @@ import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 import type { RequestOptions } from '../types/latest';
 
 // Meta params that control step behavior but should never be forwarded as HTTP params
-const KIBANA_STEP_META_KEYS = new Set(['forceServerInfo', 'forceLocalhost', 'debug']);
+const KIBANA_STEP_META_KEYS = new Set(['use_server_info', 'use_localhost', 'debug']);
 
 /**
  * Builds a Kibana HTTP request from connector definitions

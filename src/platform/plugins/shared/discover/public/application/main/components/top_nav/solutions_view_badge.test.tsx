@@ -32,6 +32,10 @@ const mockUseDiscoverServicesMock = ({
       getActiveSpace$: jest.fn().mockReturnValue(of(getActiveSpaceReturn)),
       isSolutionViewEnabled,
     },
+    theme: {
+      theme$: of({ darkMode: false, name: 'borealis' }),
+      getTheme: () => ({ darkMode: false, name: 'borealis' }),
+    },
     docLinks: {
       ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
     },

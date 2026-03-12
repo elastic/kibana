@@ -15,15 +15,15 @@ const LOCALHOST_FALLBACK = 'http://localhost:5601';
 export function getKibanaUrl(
   coreStart?: CoreStart,
   cloudSetup?: CloudSetup,
-  forceServerInfo: boolean = false,
-  forceLocalhost: boolean = false
+  use_server_info: boolean = false,
+  use_localhost: boolean = false
 ): string {
-  // Force flags take precedence (forceServerInfo wins over forceLocalhost)
-  if (forceServerInfo) {
+  // Force flags take precedence (use_server_info wins over use_localhost)
+  if (use_server_info) {
     return getServerInfoUrl(coreStart) ?? LOCALHOST_FALLBACK;
   }
 
-  if (forceLocalhost) {
+  if (use_localhost) {
     return LOCALHOST_FALLBACK;
   }
 

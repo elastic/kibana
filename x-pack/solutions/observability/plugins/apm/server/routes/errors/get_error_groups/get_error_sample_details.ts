@@ -36,6 +36,8 @@ import {
   TRANSACTION_PAGE_URL,
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
+  ERROR_MESSAGE,
+  ERROR_TYPE,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -99,6 +101,8 @@ export async function getErrorSampleDetails({
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
     ERROR_ID,
+    ERROR_MESSAGE,
+    ERROR_TYPE,
     URL_FULL,
     HTTP_REQUEST_METHOD,
     HTTP_RESPONSE_STATUS_CODE,
@@ -159,13 +163,17 @@ export async function getErrorSampleDetails({
 
   let transaction: Transaction | undefined;
   if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
+    try {
+      transaction = await getTransaction({
+        transactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      });
+    } catch {
+      transaction = undefined;
+    }
   }
 
   return {

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isMobileAgentName } from '../../../../../common/agent_name';
+import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
@@ -34,9 +35,11 @@ interface Props {
 
 export function ApmServiceTemplate(props: Props) {
   return (
-    <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
-    </ApmServiceContextProvider>
+    <ApmIndexSettingsContextProvider>
+      <ApmServiceContextProvider>
+        <TemplateWithContext {...props} />
+      </ApmServiceContextProvider>
+    </ApmIndexSettingsContextProvider>
   );
 }
 
