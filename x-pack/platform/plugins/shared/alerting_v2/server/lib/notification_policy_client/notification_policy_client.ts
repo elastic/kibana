@@ -22,8 +22,6 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import type { ApiKeyInvalidationServiceContract } from '../invalidate_pending_api_keys/api_key_invalidation_service';
-import { ApiKeyInvalidationServiceToken } from '../invalidate_pending_api_keys/tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
@@ -52,8 +50,6 @@ export class NotificationPolicyClient {
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
-    @inject(ApiKeyInvalidationServiceToken)
-    private readonly invalidationService: ApiKeyInvalidationServiceContract,
     @inject(Request) private readonly request: KibanaRequest,
     @inject(
       PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>('encryptedSavedObjects')
@@ -96,7 +92,7 @@ export class NotificationPolicyClient {
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
       if (attributes.auth?.apiKey) {
-        await this.invalidationService.markApiKeysForInvalidation([attributes.auth.apiKey]);
+        await this.apiKeyService.markApiKeysForInvalidation([attributes.auth.apiKey]);
       }
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
@@ -180,26 +176,16 @@ export class NotificationPolicyClient {
       updatedAt: now,
     };
 
+    let updated: { id: string; version?: string };
     try {
-      const updated = await this.notificationPolicySavedObjectService.update({
+      updated = await this.notificationPolicySavedObjectService.update({
         id: params.options.id,
         attrs: nextAttrs,
         version: params.options.version,
       });
-
-      if (oldAuth?.apiKey && oldAuth.createdByUser === false) {
-        this.invalidationService.markApiKeysForInvalidation([oldAuth.apiKey]).catch(() => {});
-      }
-
-      return {
-        id: params.options.id,
-        version: updated.version,
-        ...omit(nextAttrs, ['auth']),
-        auth: toAuthResponse(nextAttrs.auth),
-      };
     } catch (e) {
       if (nextAttrs.auth?.apiKey) {
-        await this.invalidationService.markApiKeysForInvalidation([nextAttrs.auth.apiKey]);
+        await this.apiKeyService.markApiKeysForInvalidation([nextAttrs.auth.apiKey]);
       }
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
@@ -208,6 +194,17 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
+
+    if (oldAuth?.apiKey && oldAuth.createdByUser === false) {
+      this.apiKeyService.markApiKeysForInvalidation([oldAuth.apiKey]).catch(() => {});
+    }
+
+    return {
+      id: params.options.id,
+      version: updated.version,
+      ...omit(nextAttrs, ['auth']),
+      auth: toAuthResponse(nextAttrs.auth),
+    };
   }
 
   public async findNotificationPolicies(
@@ -235,7 +232,7 @@ export class NotificationPolicyClient {
     const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
     if (auth?.apiKey && auth.createdByUser === false) {
-      this.invalidationService.markApiKeysForInvalidation([auth.apiKey]).catch(() => {});
+      this.apiKeyService.markApiKeysForInvalidation([auth.apiKey]).catch(() => {});
     }
   }
 

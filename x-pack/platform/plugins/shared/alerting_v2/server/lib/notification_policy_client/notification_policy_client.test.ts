@@ -12,7 +12,6 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
-import type { ApiKeyInvalidationServiceContract } from '../invalidate_pending_api_keys/api_key_invalidation_service';
 import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
@@ -20,12 +19,6 @@ import { createUserProfile, createUserService } from '../services/user_service/u
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
-
-function createMockInvalidationService(): jest.Mocked<ApiKeyInvalidationServiceContract> {
-  return {
-    markApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
-  };
-}
 
 function createMockRequest(): { url: { pathname: string } } {
   return { url: { pathname: '/s/default' } };
@@ -67,7 +60,6 @@ describe('NotificationPolicyClient', () => {
   let userService: UserService;
   let userProfile: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
-  let invalidationService: jest.Mocked<ApiKeyInvalidationServiceContract>;
   let mockRequest: ReturnType<typeof createMockRequest>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockSpaces: ReturnType<typeof createMockSpaces>;
@@ -83,7 +75,6 @@ describe('NotificationPolicyClient', () => {
       createNotificationPolicySavedObjectService());
     ({ userService, userProfile } = createUserService());
     apiKeyService = createMockApiKeyService();
-    invalidationService = createMockInvalidationService();
     mockRequest = createMockRequest();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
@@ -96,7 +87,6 @@ describe('NotificationPolicyClient', () => {
       notificationPolicySavedObjectService,
       userService,
       apiKeyService,
-      invalidationService,
       mockRequest as any,
       mockEncryptedSavedObjects as any,
       mockSpaces as any
@@ -267,7 +257,7 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 409 },
       });
 
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
         'encoded-es-api-key',
       ]);
     });
@@ -286,7 +276,7 @@ describe('NotificationPolicyClient', () => {
         })
       ).rejects.toThrow('storage error');
 
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
         'encoded-es-api-key',
       ]);
     });
@@ -606,7 +596,7 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.auth).not.toHaveProperty('apiKey');
 
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
     });
 
     it('does not call invalidation for old key when decrypted policy has createdByUser: true', async () => {
@@ -656,7 +646,7 @@ describe('NotificationPolicyClient', () => {
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
       });
 
-      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     it('when update throws, calls invalidation with the new (unused) key', async () => {
@@ -702,7 +692,7 @@ describe('NotificationPolicyClient', () => {
         })
       ).rejects.toThrow('storage error');
 
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
         'encoded-es-api-key',
       ]);
     });
@@ -753,7 +743,7 @@ describe('NotificationPolicyClient', () => {
         options: { id: 'policy-id-update-no-key', version: 'WzEsMV0=' },
       });
 
-      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -827,7 +817,7 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 409 },
       });
 
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
         'encoded-es-api-key',
       ]);
     });
@@ -863,7 +853,7 @@ describe('NotificationPolicyClient', () => {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-del-1'
       );
-      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -916,7 +906,7 @@ describe('NotificationPolicyClient', () => {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-del-user'
       );
-      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     it('does not call invalidation when decrypted policy has no apiKey', async () => {
@@ -952,7 +942,7 @@ describe('NotificationPolicyClient', () => {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-del-no-key'
       );
-      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 });

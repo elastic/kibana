@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { inject, injectable } from 'inversify';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
+import { ApiKeyServiceSavedObjectsClientToken } from './tokens';
 
 export interface ApiKeyAttributes {
   apiKey: string;
@@ -19,6 +23,7 @@ export interface ApiKeyAttributes {
 
 export interface ApiKeyServiceContract {
   create(name: string): Promise<ApiKeyAttributes>;
+  markApiKeysForInvalidation(apiKeys: string[]): Promise<void>;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -30,7 +35,10 @@ export class ApiKeyService implements ApiKeyServiceContract {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('security'))
-    private readonly securityService: SecurityServiceStart
+    private readonly securityService: SecurityServiceStart,
+    @inject(ApiKeyServiceSavedObjectsClientToken)
+    private readonly invalidationSavedObjectsClient: SavedObjectsClientContract,
+    @inject(PluginLogger) private readonly logger: Logger
   ) {}
 
   public async create(name: string): Promise<ApiKeyAttributes> {
@@ -48,6 +56,48 @@ export class ApiKeyService implements ApiKeyServiceContract {
     }
 
     return this.grantAPIKeyAttributes(name, username);
+  }
+
+  public async markApiKeysForInvalidation(apiKeys: string[]): Promise<void> {
+    if (apiKeys.length === 0) {
+      return;
+    }
+
+    const apiKeysToInvalidate = apiKeys.map((key) => {
+      let apiKeyId: string;
+      let apiKeyValue: string | undefined;
+
+      const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
+
+      if (apiKey && isUiamCredential(apiKey)) {
+        apiKeyId = id;
+        apiKeyValue = apiKey;
+      } else {
+        apiKeyId = id;
+      }
+
+      return {
+        attributes: {
+          apiKeyId,
+          createdAt: new Date().toISOString(),
+          ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+        },
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+      };
+    });
+
+    try {
+      await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
+    } catch (e) {
+      this.logger.error(
+        `Failed to bulk mark list of API keys [${apiKeys
+          .map((key) => `"${key}"`)
+          .join(', ')}] for invalidation: ${(e as Error).message}`,
+        {
+          error: { stack_trace: (e as Error).stack },
+        }
+      );
+    }
   }
 
   private isAuthenticationTypeAPIKey(): boolean {
