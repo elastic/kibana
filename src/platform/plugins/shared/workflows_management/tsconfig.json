@@ -85,8 +85,7 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/scout",
     "@kbn/agent-builder-server",
-    "@kbn/agent-builder-common",
-    "@kbn/agent-builder-browser"
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

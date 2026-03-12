@@ -12,12 +12,7 @@ export type { ProposedChange, PendingProposal, ProposalManagerOptions } from './
 
 export { AttachmentBridge } from './attachment_bridge';
 
-export {
-  setProposalActionHandlers,
-  updateProposalStatus,
-  acceptProposal,
-  declineProposal,
-} from './proposal_status_bridge';
+export { setProposalActionHandlers, updateProposalStatus } from './proposal_status_bridge';
 export type { ProposalStatus } from './proposal_status_bridge';
 
 export { registerWorkflowAttachmentRenderers } from './attachment_renderers';

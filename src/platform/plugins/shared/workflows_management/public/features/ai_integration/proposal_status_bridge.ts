@@ -28,46 +28,9 @@ interface ProposalActionResult {
   message?: string;
 }
 
-const PROPOSAL_STORAGE_PREFIX = 'workflows.proposalRecords';
-
 let actionHandlers: ProposalActionHandlers | null = null;
-let currentWorkflowId: string | undefined;
-let persistenceEnabled = true;
 const proposalRecords = new Map<string, ProposalRecord>();
 const listeners = new Set<() => void>();
-
-const getStorageKey = (): string | null => {
-  if (!currentWorkflowId) return null;
-  return `${PROPOSAL_STORAGE_PREFIX}.${currentWorkflowId}`;
-};
-
-const persistToStorage = (): void => {
-  if (!persistenceEnabled) return;
-  const key = getStorageKey();
-  if (!key) return;
-  try {
-    const records = Array.from(proposalRecords.values());
-    localStorage.setItem(key, JSON.stringify(records));
-  } catch {
-    // localStorage unavailable or quota exceeded
-  }
-};
-
-const loadFromStorage = (): void => {
-  const key = getStorageKey();
-  if (!key) return;
-  try {
-    const raw = localStorage.getItem(key);
-    if (raw) {
-      const records: ProposalRecord[] = JSON.parse(raw);
-      for (const record of records) {
-        proposalRecords.set(record.proposalId, record);
-      }
-    }
-  } catch {
-    // Invalid or corrupt data
-  }
-};
 
 const notify = () => {
   listeners.forEach((l) => l());
@@ -79,7 +42,6 @@ export const setProposalActionHandlers = (handlers: ProposalActionHandlers | nul
 
 export const setProposalRecord = (record: ProposalRecord): void => {
   proposalRecords.set(record.proposalId, record);
-  persistToStorage();
   notify();
 };
 
@@ -87,7 +49,6 @@ export const updateProposalStatus = (proposalId: string, status: ProposalStatus)
   const record = proposalRecords.get(proposalId);
   if (record) {
     record.status = status;
-    persistToStorage();
     notify();
   }
 };
@@ -109,24 +70,12 @@ export const subscribeToProposals = (listener: () => void): (() => void) => {
 
 export const clearProposalRecord = (proposalId: string): void => {
   proposalRecords.delete(proposalId);
-  persistToStorage();
   notify();
 };
 
 export const clearAllProposalRecords = (): void => {
   proposalRecords.clear();
-  persistToStorage();
   notify();
-};
-
-export const initProposalPersistence = (workflowId?: string): void => {
-  currentWorkflowId = workflowId;
-  persistenceEnabled = true;
-  loadFromStorage();
-};
-
-export const suspendPersistence = (): void => {
-  persistenceEnabled = false;
 };
 
 export const acceptProposal = async (proposalId: string): Promise<ProposalActionResult> => {
