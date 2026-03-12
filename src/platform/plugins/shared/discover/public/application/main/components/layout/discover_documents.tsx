@@ -314,7 +314,7 @@ function DiscoverDocumentsComponent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
-    dataView,
+    dataView: gridDataView,
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,

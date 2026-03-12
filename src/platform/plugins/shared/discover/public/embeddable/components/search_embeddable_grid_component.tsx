@@ -164,7 +164,7 @@ export function SearchEmbeddableGridComponent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
-    dataView,
+    dataView: gridDataView,
     query: savedSearchQuery,
     filters: savedSearchFilters,
     timeRange,
