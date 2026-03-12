@@ -12,8 +12,8 @@ import { css } from '@emotion/react';
 import { euiScreenReaderOnly } from '@elastic/eui';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 
-// Intervals grow by 1s each announcement, capped at 30s.
-// e.g. announcements fire at: 0s, 2s, 5s, 9s, 14s, 20s, 27s, 35s, ...
+// Intervals grow by 5s each announcement, capped at 30s.
+// e.g. announcements fire at: 0s, 5s, 15s, 30s, 50s, 75s, 105s, 135s, ...
 const INITIAL_INTERVAL_MS = 5_000;
 const INTERVAL_INCREMENT_MS = 5_000;
 const MAX_INTERVAL_MS = 30_000;
