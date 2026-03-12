@@ -19,6 +19,17 @@ const searchSchema = z.object({
     .describe(
       '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
     ),
+  time_range: z
+    .object({
+      from: z
+        .string()
+        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+    })
+    .optional()
+    .describe(
+      '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
+    ),
 });
 
 export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
@@ -46,11 +57,11 @@ Note:
     `,
     schema: searchSchema,
     handler: async (
-      { query: nlQuery, index = '*' },
+      { query: nlQuery, index = '*', time_range: explicitTimeRange },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
-      const timeRange = resolveTimeRange(attachments);
+      const timeRange = resolveTimeRange(attachments, explicitTimeRange);
       const results = await runSearchTool({
         nlQuery,
         index,

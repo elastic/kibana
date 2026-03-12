@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
@@ -45,7 +46,7 @@ export const naturalLanguageSearch = async ({
   events: ToolEventEmitter;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange: { from: string; to: string };
+  timeRange?: TimeRange;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,

@@ -7,17 +7,18 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 
-const DEFAULT_TIME_RANGE: { from: string; to: string } = { from: 'now-24h', to: 'now' };
+const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 
 /**
  * Extracts the time range from the active screen context attachment, if present.
  */
 export function getTimeRangeFromScreenContext(
   attachments: AttachmentStateManager
-): { from: string; to: string } | undefined {
+): TimeRange | undefined {
   const activeAttachments = attachments.getActive();
   const screenContext = activeAttachments.find((a) => a.type === AttachmentType.screenContext);
   if (!screenContext) {
@@ -34,7 +35,7 @@ export function getTimeRangeFromScreenContext(
  */
 export function resolveTimeRange(
   attachments: AttachmentStateManager,
-  explicit?: { from: string; to: string }
-): { from: string; to: string } {
+  explicit?: TimeRange
+): TimeRange {
   return explicit ?? getTimeRangeFromScreenContext(attachments) ?? DEFAULT_TIME_RANGE;
 }

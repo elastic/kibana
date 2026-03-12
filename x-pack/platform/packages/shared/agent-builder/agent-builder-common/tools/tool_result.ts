@@ -6,6 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { TimeRange } from '../base/time_range';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -84,7 +85,7 @@ export interface EsqlResultsData {
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
   /** Optional time range used for named parameters ?_tstart and ?_tend */
-  time_range?: { from: string; to: string };
+  time_range?: TimeRange;
 }
 
 export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;

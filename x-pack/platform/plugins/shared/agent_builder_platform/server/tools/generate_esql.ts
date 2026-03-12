@@ -13,7 +13,7 @@ import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
 
-const NAMED_PARAMS_INSTRUCTION = `You should always use named parameters for start and end time (?_tstart and ?_tend), for example "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"`;
+const NAMED_PARAMS_INSTRUCTION = `You should ALWAYS use named parameters for start and end time (?_tstart and ?_tend), for example "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend". NEVER hardcode time ranges into the query itself.`;
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),

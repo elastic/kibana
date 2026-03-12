@@ -10,6 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ToolEventEmitter, ToolHandlerResult } from '@kbn/agent-builder-server';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import { createSearchToolGraph } from './graph';
 
@@ -28,7 +29,7 @@ export const runSearchTool = async ({
   index?: string;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange: { from: string; to: string };
+  timeRange?: TimeRange;
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -49,13 +50,14 @@ export const runSearchTool = async ({
       },
     },
     async () => {
+      const resolvedTimeRange = timeRange ?? { from: 'now-24h', to: 'now' };
       const outState = await toolGraph.invoke(
         {
           nlQuery,
           targetPattern: index,
           rowLimit,
           customInstructions,
-          timeRange,
+          timeRange: resolvedTimeRange,
         },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );

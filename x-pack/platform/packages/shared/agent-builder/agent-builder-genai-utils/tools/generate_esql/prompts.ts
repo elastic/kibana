@@ -95,9 +95,6 @@ Please use the information accessible from your past actions when relevant.
 
 ## Documentation
 
-**CRITICAL**: You should ALWAYS use named parameters for start and end time (?_tstart and ?_tend), for example "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
-**CRITICAL**: NEVER hardcode time range into the query itself (always use "timestamp >= ?_tstart AND timestamp < ?_tend" instead of "timestamp >= NOW() - 2 weeks AND @timestamp < NOW()
-
 ${prompts.syntax}
 
 ${prompts.examples}

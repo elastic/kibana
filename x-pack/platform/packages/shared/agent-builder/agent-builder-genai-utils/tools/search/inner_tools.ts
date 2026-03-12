@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -107,7 +108,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange: { from: string; to: string };
+  timeRange: TimeRange;
 }) => {
   return toTool(
     async ({ query, index }) => {

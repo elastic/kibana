@@ -13,6 +13,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import useAsync from 'react-use/lib/useAsync';
@@ -23,7 +24,7 @@ interface Params {
   lens: LensPublicStart;
   esqlColumns: EsqlResults['data']['columns'] | undefined;
   preferredChartType?: ChartType;
-  timeRange?: { from: string; to: string };
+  timeRange?: TimeRange;
 }
 
 interface ReturnValue {

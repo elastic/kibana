@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { TimeRange } from '../base/time_range';
 
 /**
  * List of internal / built-in attachment types.
@@ -58,10 +59,7 @@ export const screenContextTimeRangeSchema = z.object({
   to: z.string(),
 });
 
-export interface ScreenContextTimeRange {
-  from: string;
-  to: string;
-}
+export type ScreenContextTimeRange = TimeRange;
 
 export const screenContextAttachmentDataSchema = z
   .object({
