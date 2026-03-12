@@ -24,8 +24,6 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
-  private cleanupAttachmentUi?: () => void;
-
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
@@ -57,7 +55,5 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  public stop() {
-    this.cleanupAttachmentUi?.();
-  }
+  public stop() {}
 }
