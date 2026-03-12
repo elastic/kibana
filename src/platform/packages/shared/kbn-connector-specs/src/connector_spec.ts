@@ -83,6 +83,7 @@ export interface GetTokenOpts {
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
 }
 
 export interface AuthContext {
