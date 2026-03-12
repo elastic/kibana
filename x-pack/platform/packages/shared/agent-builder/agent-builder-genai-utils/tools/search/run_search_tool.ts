@@ -28,7 +28,7 @@ export const runSearchTool = async ({
   index?: string;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange?: { from: string; to: string };
+  timeRange: { from: string; to: string };
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;

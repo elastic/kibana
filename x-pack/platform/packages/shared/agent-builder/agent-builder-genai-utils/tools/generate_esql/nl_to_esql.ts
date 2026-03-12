@@ -76,10 +76,10 @@ export interface GenerateEsqlOptions {
    */
   rowLimit?: number;
   /**
-   * Optional time range used to supply named parameters (?_tstart, ?_tend)
+   * Time range used to supply named parameters (?_tstart, ?_tend)
    * when executing the generated query for validation.
    */
-  timeRange?: { from: string; to: string };
+  timeRange: { from: string; to: string };
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;

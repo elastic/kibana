@@ -10,6 +10,8 @@ import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/atta
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 
+const DEFAULT_TIME_RANGE: { from: string; to: string } = { from: 'now-24h', to: 'now' };
+
 /**
  * Extracts the time range from the active screen context attachment, if present.
  */
@@ -24,4 +26,15 @@ export function getTimeRangeFromScreenContext(
   const latestVersion = getLatestVersion(screenContext);
   const data = latestVersion?.data as ScreenContextAttachmentData | undefined;
   return data?.time_range;
+}
+
+/**
+ * Resolves the time range to use, with fallback chain:
+ * explicit param → screen context attachment → last 24 hours.
+ */
+export function resolveTimeRange(
+  attachments: AttachmentStateManager,
+  explicit?: { from: string; to: string }
+): { from: string; to: string } {
+  return explicit ?? getTimeRangeFromScreenContext(attachments) ?? DEFAULT_TIME_RANGE;
 }

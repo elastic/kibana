@@ -45,7 +45,7 @@ export const naturalLanguageSearch = async ({
   events: ToolEventEmitter;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange?: { from: string; to: string };
+  timeRange: { from: string; to: string };
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,

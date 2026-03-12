@@ -11,7 +11,7 @@ import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getTimeRangeFromScreenContext } from './screen_context_utils';
+import { resolveTimeRange } from './screen_context_utils';
 
 const NAMED_PARAMS_INSTRUCTION = `You should always use named parameters for start and end time (?_tstart and ?_tend), for example "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"`;
 
@@ -70,9 +70,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       const model = await modelProvider.getDefaultModel();
 
       const additionalInstructions = disableNamedParams ? undefined : NAMED_PARAMS_INSTRUCTION;
-      const timeRange = disableNamedParams
-        ? undefined
-        : explicitTimeRange ?? getTimeRangeFromScreenContext(attachments);
+      const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const esqlResponse = await generateEsql({
         nlQuery,

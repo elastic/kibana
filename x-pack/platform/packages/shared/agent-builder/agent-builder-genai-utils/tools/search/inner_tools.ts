@@ -107,7 +107,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
-  timeRange?: { from: string; to: string };
+  timeRange: { from: string; to: string };
 }) => {
   return toTool(
     async ({ query, index }) => {

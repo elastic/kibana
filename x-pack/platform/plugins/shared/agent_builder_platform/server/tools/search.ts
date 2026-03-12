@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getTimeRangeFromScreenContext } from './screen_context_utils';
+import { resolveTimeRange } from './screen_context_utils';
 
 const searchSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
@@ -50,7 +50,7 @@ Note:
       { esClient, modelProvider, logger, events, attachments }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
-      const timeRange = getTimeRangeFromScreenContext(attachments);
+      const timeRange = resolveTimeRange(attachments);
       const results = await runSearchTool({
         nlQuery,
         index,

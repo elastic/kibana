@@ -42,7 +42,7 @@ const StateAnnotation = Annotation.Root({
   additionalInstructions: Annotation<string | undefined>(),
   additionalContext: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
-  timeRange: Annotation<{ from: string; to: string } | undefined>(),
+  timeRange: Annotation<{ from: string; to: string }>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),

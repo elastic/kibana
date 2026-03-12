@@ -26,7 +26,7 @@ const StateAnnotation = Annotation.Root({
   targetPattern: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
   customInstructions: Annotation<string | undefined>(),
-  timeRange: Annotation<{ from: string; to: string } | undefined>(),
+  timeRange: Annotation<{ from: string; to: string }>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
