@@ -94,7 +94,7 @@
     "**/sharp": "0.34.4",
     "**/typescript": "5.9.3",
     "**/util": "0.12.5",
-    "**/yauzl": "3.2.0",
+    "**/yauzl": "3.2.1",
     "**/zod": "3.25.76",
     "@aws-sdk/client-bedrock-agent-runtime": "3.747.0",
     "@aws-sdk/client-bedrock-runtime": "3.744.0",
@@ -1432,7 +1432,7 @@
     "xstate5": "npm:xstate@^5.19.2",
     "xterm": "5.3.0",
     "yaml": "2.8.1",
-    "yauzl": "3.2.0",
+    "yauzl": "3.2.1",
     "yazl": "3.3.1",
     "zod": "3.25.76",
     "zod-to-json-schema": "3.25.0"
