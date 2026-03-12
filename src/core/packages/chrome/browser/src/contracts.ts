@@ -76,11 +76,6 @@ export interface ChromeStart {
   getIsVisible$(): Observable<boolean>;
 
   /**
-   * Get the current visibility state of the chrome synchronously.
-   */
-  getIsVisible(): boolean;
-
-  /**
    * Set the temporary visibility for the chrome. This does nothing if the chrome is hidden
    * by default and should be used to hide the chrome for things like full-screen modes
    * with an exit button.

@@ -104,7 +104,6 @@ const createStartContractMock = () => {
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-    getIsVisible: jest.fn().mockReturnValue(false),
     getBadge$: jest.fn().mockReturnValue(new BehaviorSubject({} as ChromeBadge)),
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb])),

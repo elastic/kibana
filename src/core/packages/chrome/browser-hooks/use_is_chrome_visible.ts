@@ -16,5 +16,5 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
  */
 export function useIsChromeVisible(): boolean {
   const chrome = useChromeService();
-  return useObservable(chrome.getIsVisible$(), chrome.getIsVisible());
+  return useObservable(chrome.getIsVisible$(), false);
 }

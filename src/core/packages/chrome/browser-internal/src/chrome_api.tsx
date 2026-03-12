@@ -96,7 +96,6 @@ export function createChromeApi({
 
     // Visibility
     getIsVisible$: () => state.visibility.isVisible$,
-    getIsVisible: state.visibility.getIsVisible,
     setIsVisible: state.visibility.setIsVisible,
 
     // Badge
