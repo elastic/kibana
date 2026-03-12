@@ -19,6 +19,6 @@ describe('AnomaliesPlaceholderPanel', () => {
     );
 
     expect(screen.getByTestId('recent-anomalies-panel')).toBeInTheDocument();
-    expect(screen.getByText('Anomaly explorer')).toBeInTheDocument();
+    expect(screen.getByText('Recent anomalies')).toBeInTheDocument();
   });
 });

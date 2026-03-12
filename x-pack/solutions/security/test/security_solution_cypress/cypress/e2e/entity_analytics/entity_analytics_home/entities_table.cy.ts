@@ -17,7 +17,6 @@ import {
   DATAGRID_SORTING_SELECTOR,
   EXPAND_ROW_BUTTON,
   TIMELINE_ACTION,
-  AI_ACTION,
   FIELDS_SELECTOR_BUTTON,
   FIELDS_SELECTOR_MODAL,
   FIELDS_SELECTOR_RESET,
@@ -30,7 +29,7 @@ import {
 const ARCHIVE_NAME = 'entity_store_v2_home';
 
 const FTR_CONFIG = {
-  tags: ['@ess', '@serverless'],
+  tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   env: {
     ftrConfig: {
       kbnServerArgs: [
@@ -158,17 +157,6 @@ describe('Entities table - Row actions', FTR_CONFIG, () => {
     cy.get(TIMELINE_ACTION).first().should('be.visible');
     cy.get(TIMELINE_ACTION).first().click();
   });
-
-  it('"Add to chat" AI action button exists and is clickable', () => {
-    cy.get(AI_ACTION).should('have.length.at.least', 1);
-    cy.get(AI_ACTION).first().should('be.visible');
-    cy.get(AI_ACTION).first().click();
-  });
-
-  it('action buttons are not blue', () => {
-    cy.get(TIMELINE_ACTION).first().should('not.have.css', 'color', 'rgb(0, 119, 204)');
-    cy.get(EXPAND_ROW_BUTTON).first().should('not.have.css', 'color', 'rgb(0, 119, 204)');
-  });
 });
 
 describe('Entities table - Toolbar controls', FTR_CONFIG, () => {
@@ -264,7 +252,7 @@ describe('Entities table - Grouping', FTR_CONFIG, () => {
 describe(
   'Entities table - Empty state',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

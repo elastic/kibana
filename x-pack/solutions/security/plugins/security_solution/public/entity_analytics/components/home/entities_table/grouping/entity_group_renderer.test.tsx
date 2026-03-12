@@ -42,7 +42,7 @@ describe('groupPanelRenderer', () => {
 
   it('falls back to key.toString() when key_as_string is absent', () => {
     const bucket = createMockBucket({ key: 'host' });
-    delete (bucket as Record<string, unknown>).key_as_string;
+    delete (bucket as unknown as Record<string, unknown>).key_as_string;
     const element = groupPanelRenderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
 
     const { getByText } = render(<>{element}</>);
