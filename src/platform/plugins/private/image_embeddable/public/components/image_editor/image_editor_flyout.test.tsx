@@ -82,10 +82,10 @@ test('should call onSave when "Save" clicked (url)', async () => {
 
 test('should be able to edit', async () => {
   const initialImageConfig = {
-    altText: 'alt text',
-    backgroundColor: '',
+    alt_text: 'alt text',
+    background_color: '',
     sizing: {
-      objectFit: 'contain' as const,
+      object_fit: 'contain' as const,
     },
     src: {
       type: 'url' as const,
@@ -119,10 +119,10 @@ test('should be able to edit', async () => {
 
 test(`shouldn't be able to save if url is invalid`, async () => {
   const initialImageConfig = {
-    altText: 'alt text',
-    backgroundColor: '',
+    alt_text: 'alt text',
+    background_color: '',
     sizing: {
-      objectFit: 'contain' as const,
+      object_fit: 'contain' as const,
     },
     src: {
       type: 'url' as const,

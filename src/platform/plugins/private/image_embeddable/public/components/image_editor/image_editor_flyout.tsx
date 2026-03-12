@@ -68,11 +68,13 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
   const [fileId, setFileId] = useState<undefined | string>(() =>
-    props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
+    props.initialImageConfig?.src?.type === 'file'
+      ? props.initialImageConfig.src.file_id
+      : undefined
   );
   const [fileImageMeta, setFileImageMeta] = useState<undefined | FileImageMetadata>(() =>
     props.initialImageConfig?.src?.type === 'file'
-      ? props.initialImageConfig.src.fileImageMeta
+      ? props.initialImageConfig.src.file_image_meta
       : undefined
   );
   const [srcType, setSrcType] = useState<ImageConfig['src']['type']>(
@@ -86,12 +88,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     return null;
   });
   const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false);
-  const [sizingObjectFit, setSizingObjectFit] = useState<ImageConfig['sizing']['objectFit']>(
-    () => props.initialImageConfig?.sizing?.objectFit ?? 'contain'
+  const [sizingObjectFit, setSizingObjectFit] = useState<ImageConfig['sizing']['object_fit']>(
+    () => props.initialImageConfig?.sizing?.object_fit ?? 'contain'
   );
-  const [altText, setAltText] = useState<string>(() => props.initialImageConfig?.altText ?? '');
+  const [altText, setAltText] = useState<string>(() => props.initialImageConfig?.alt_text ?? '');
   const [color, setColor, colorErrors] = useColorPickerState(
-    props?.initialImageConfig?.backgroundColor
+    props?.initialImageConfig?.background_color
   );
   const isColorInvalid = !!color && !!colorErrors;
 
@@ -103,11 +105,11 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             type: 'url',
             url: srcUrl,
           }
-        : { type: 'file', fileId, fileImageMeta },
-    altText,
-    backgroundColor: colorErrors ? undefined : color,
+        : { type: 'file', file_id: fileId, file_image_meta: fileImageMeta },
+    alt_text: altText,
+    background_color: colorErrors ? undefined : color,
     sizing: {
-      objectFit: sizingObjectFit,
+      object_fit: sizingObjectFit,
     },
   };
 
@@ -342,7 +344,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             ]}
             value={sizingObjectFit}
             onChange={(e) =>
-              setSizingObjectFit(e.target.value as ImageConfig['sizing']['objectFit'])
+              setSizingObjectFit(e.target.value as ImageConfig['sizing']['object_fit'])
             }
           />
         </EuiFormRow>
