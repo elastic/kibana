@@ -347,6 +347,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
             <PreviewLink
               entityIdentifiers={stableEntityIdentifiers}
               scopeId={scopeId}
+              preferredField="user.name"
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >
               <EuiText

@@ -167,6 +167,11 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
                 <PreviewLink
                   entityIdentifiers={entityIdentifiers}
                   scopeId={data.scopeId}
+                  preferredField={
+                    data.field === 'host.name' || data.field === 'user.name'
+                      ? data.field
+                      : undefined
+                  }
                   data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
                 >
                   <EuiText size="xs">{value}</EuiText>

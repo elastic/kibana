@@ -37,7 +37,11 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const renderPreviewLink = (entityIdentifiers: Record<string, string>, dataTestSubj?: string) =>
+const renderPreviewLink = (
+  entityIdentifiers: Record<string, string>,
+  dataTestSubj?: string,
+  preferredField?: 'host.name' | 'user.name'
+) =>
   render(
     <TestProviders>
       <PreviewLink
@@ -45,6 +49,7 @@ const renderPreviewLink = (entityIdentifiers: Record<string, string>, dataTestSu
         data-test-subj={dataTestSubj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
+        preferredField={preferredField}
       />
     </TestProviders>
   );
@@ -98,6 +103,31 @@ describe('<PreviewLink />', () => {
         contextID: 'scopeId',
         entityIdentifiers: { 'user.name': 'user' },
         userName: 'user',
+        scopeId: 'scopeId',
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
+  });
+
+  it('should open user preview when preferredField is user.name and entityIdentifiers include both host and user', () => {
+    const entityIdentifiers = {
+      'user.name': 'alice',
+      'user.domain': 'domain',
+      'host.name': 'host-1',
+    };
+    const { getByTestId } = renderPreviewLink(
+      entityIdentifiers,
+      'user-link-with-preferred',
+      'user.name'
+    );
+    getByTestId('user-link-with-preferred').click();
+
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenLastCalledWith({
+      id: UserPreviewPanelKey,
+      params: {
+        contextID: 'scopeId',
+        entityIdentifiers,
+        userName: 'alice',
         scopeId: 'scopeId',
         banner: USER_PREVIEW_BANNER,
       },

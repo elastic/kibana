@@ -328,6 +328,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
             <PreviewLink
               entityIdentifiers={entityIdentifiers}
               scopeId={scopeId}
+              preferredField="host.name"
               data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
             >
               <EuiText

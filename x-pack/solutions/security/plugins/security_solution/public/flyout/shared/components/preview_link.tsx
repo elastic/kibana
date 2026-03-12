@@ -40,6 +40,12 @@ interface PreviewLinkProps {
    * when clicking on "Source event" id
    */
   ancestorsIndexName?: string;
+  /**
+   * When entityIdentifiers contain both host and user fields (e.g. from document context),
+   * use this to force which entity flyout (host vs user) to open. E.g. in Prevalence tab
+   * user.name row should open user flyout even when identifiers include host fields.
+   */
+  preferredField?: 'host.name' | 'user.name';
 }
 
 /**
@@ -52,17 +58,27 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   ruleId,
   children,
   ancestorsIndexName,
+  preferredField,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
-  // Extract primary field and value from entityIdentifiers
+  // Extract primary field and value from entityIdentifiers.
+  // When preferredField is set (e.g. from Prevalence tab), use it so the correct entity flyout opens
+  // even when entityIdentifiers include both host and user fields.
   const primaryField = useMemo(() => {
+    if (
+      preferredField &&
+      (preferredField === 'host.name' || preferredField === 'user.name') &&
+      entityIdentifiers[preferredField]
+    ) {
+      return preferredField;
+    }
     if (entityIdentifiers['host.name']) return 'host.name';
     if (entityIdentifiers['user.name']) return 'user.name';
     return Object.keys(entityIdentifiers)[0] ?? '';
-  }, [entityIdentifiers]);
+  }, [entityIdentifiers, preferredField]);
 
   const primaryValue = useMemo(() => {
     return primaryField ? entityIdentifiers[primaryField] : '';
