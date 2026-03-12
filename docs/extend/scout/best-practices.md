@@ -529,6 +529,32 @@ async openNewDashboard() {
 
 :::::
 
+### Avoid conditional logic in page objects and tests [avoid-conditional-logic-in-page-objects]
+
+Playwright creates a fresh browser context for each test, so there is no cached state to work around. Both page object methods and test code should be explicit about the action they perform, not defensive about the current state. Conditional flows (like "if modal is open, close it first") hide bugs, waste time, and make failures harder to understand.
+
+:::::{dropdown} Examples
+❌ **Don’t:** add conditional logic to handle unknown state:
+
+```ts
+async switchToEditMode() {
+  const isViewMode = await this.page.testSubj.locator('dashboardViewMode').isVisible();
+  if (isViewMode) {
+    await this.page.testSubj.click('dashboardEditMode');
+  }
+}
+```
+
+✔️ **Do:** make the action explicit—the caller knows the expected state:
+
+```ts
+async openEditMode() {
+  await this.page.testSubj.click('dashboardEditMode');
+  await this.page.testSubj.waitForSelector('dashboardIsEditing', { state: 'visible' });
+}
+```
+:::::
+
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
 
 Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes.
