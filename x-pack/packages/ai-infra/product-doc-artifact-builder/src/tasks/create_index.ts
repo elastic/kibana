@@ -10,6 +10,7 @@ import { getArtifactMappings } from '../artifact/mappings';
 
 export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 export const DEFAULT_E5_SMALL = '.multilingual-e5-small-elasticsearch';
+export const DEFAULT_JINA_V5_NANO = '.jina-embeddings-v5-text-nano';
 
 interface BaseSemanticTextMapping {
   type: 'semantic_text';
@@ -25,9 +26,17 @@ export interface SemanticTextMapping extends BaseSemanticTextMapping {
   };
 }
 
-type SupportedInferenceId = typeof DEFAULT_E5_SMALL | typeof DEFAULT_ELSER;
+type SupportedInferenceId =
+  | typeof DEFAULT_E5_SMALL
+  | typeof DEFAULT_ELSER
+  | typeof DEFAULT_JINA_V5_NANO;
+
 const isSupportedInferenceId = (inferenceId: string): inferenceId is SupportedInferenceId => {
-  return inferenceId === DEFAULT_E5_SMALL || inferenceId === DEFAULT_ELSER;
+  return (
+    inferenceId === DEFAULT_E5_SMALL ||
+    inferenceId === DEFAULT_ELSER ||
+    inferenceId === DEFAULT_JINA_V5_NANO
+  );
 };
 
 const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, SemanticTextMapping> = {
@@ -45,6 +54,10 @@ const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, Semant
   [DEFAULT_ELSER]: {
     type: 'semantic_text',
     inference_id: DEFAULT_ELSER,
+  },
+  [DEFAULT_JINA_V5_NANO]: {
+    type: 'semantic_text',
+    inference_id: DEFAULT_JINA_V5_NANO,
   },
 };
 export const getSemanticTextMapping = (
