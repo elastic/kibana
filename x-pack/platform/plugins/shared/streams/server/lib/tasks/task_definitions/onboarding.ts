@@ -280,6 +280,7 @@ export async function persistQueries(
         id: v4(),
         esql: query.esql,
         title: query.title,
+        description: query.description,
         severity_score: query.severity_score,
         evidence: query.evidence,
       },

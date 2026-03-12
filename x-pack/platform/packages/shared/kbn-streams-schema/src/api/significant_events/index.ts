@@ -59,6 +59,7 @@ interface GeneratedSignificantEventQuery {
   esql: EsqlQuery;
   severity_score: number;
   evidence?: string[];
+  description: string;
 }
 
 type SignificantEventsGenerateResponse = Observable<
