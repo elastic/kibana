@@ -492,10 +492,7 @@ export class SearchInterceptor {
     // FIXME: the dropNullColumns param shouldn't be needed during polling
     // once https://github.com/elastic/elasticsearch/issues/138439 is resolved
     // at that point, exclude all params when request.id is defined (polling phase)
-    const paramsToUse = request.id
-      ? // TODO 30s
-        { dropNullColumns: params?.dropNullColumns, wait_for_completion_timeout: '30s' }
-      : params || {};
+    const paramsToUse = request.id ? { dropNullColumns: params?.dropNullColumns } : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
         `/internal/search/${strategyToString(strategy)}${request.id ? `/${request.id}` : ''}`,

@@ -70,9 +70,13 @@ export const searchConfigSchema = schema.object({
     batchedReduceSize: schema.number({ defaultValue: 64 }),
     /**
      * How long to wait before polling the async_search after the previous poll response.
-     * If not provided, then default dynamic interval with backoff is used.
+     * If not provided, defaults to zero.
      */
     pollInterval: schema.maybe(schema.number({ min: 200 })),
+    /**
+     * How long to wait for results before initiating a new poll request. If not provided, defaults to 30s.
+     */
+    pollLength: schema.duration({ defaultValue: '30s' }),
   }),
   aggs: schema.object({
     shardDelay: schema.object({
