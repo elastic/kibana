@@ -19,6 +19,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
@@ -28,8 +29,8 @@ import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { useMetricsExperienceFieldsContext } from './context/metrics_experience_fields_provider';
 import { getPrimaryValue } from '../../../common/utils';
+import { extractWhereCommand } from '../../../utils/extract_where_command';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -52,11 +53,18 @@ export const MetricsExperienceGridContent = ({
   histogramCss,
   isDiscoverLoading = false,
 }: MetricsExperienceGridContentProps) => {
+  const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
+  const esqlQuery = useMemo(
+    () => (query && isOfAggregateQueryType(query) ? query.esql : undefined),
+    [query]
+  );
+
+  const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
+
   const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
-  const { whereStatements } = useMetricsExperienceFieldsContext();
 
   const {
     currentPageItems: currentPageFields = [],

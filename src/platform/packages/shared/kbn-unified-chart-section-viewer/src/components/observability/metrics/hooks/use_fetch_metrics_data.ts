@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Dimension, ParsedMetricItem } from '../../../../..';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
@@ -103,7 +103,7 @@ export function useFetchMetricsData({
 
   return {
     loading,
-    error,
+    error: error ?? null,
     metricItems: value?.metricItems.sort((a, b) => a.metricName.localeCompare(b.metricName)) ?? [],
     allDimensions: value?.allDimensions.sort((a, b) => a.localeCompare(b)) ?? [],
   };
