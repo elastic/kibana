@@ -32,23 +32,27 @@ const SingleOverviewCustomSchema = schema.object({
   overview_mode: schema.literal('single'),
 });
 
-const groupBySchema = schema.oneOf([
-  schema.literal('slo.tags'),
-  schema.literal('status'),
-  schema.literal('slo.indicator.type'),
-  schema.literal('_index'), // remote cluster
-]);
+const groupBySchema = schema.oneOf(
+  [
+    schema.literal('slo.tags'),
+    schema.literal('status'),
+    schema.literal('slo.indicator.type'),
+    schema.literal('_index'), // remote cluster
+  ],
+  { defaultValue: 'status' }
+);
 
 const GroupOverviewCustomSchema = schema.object({
-  group_filters: schema.maybe(
-    schema.object({
-      group_by: schema.maybe(groupBySchema),
+  group_filters: schema.object(
+    {
+      group_by: groupBySchema,
       // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
       groups: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
       // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
       kql_query: schema.maybe(schema.string()),
-    })
+    },
+    { defaultValue: { group_by: 'status' } }
   ),
   overview_mode: schema.literal('groups'),
 });
@@ -102,7 +106,7 @@ export type GroupOverviewCustomState = TypeOf<typeof GroupOverviewCustomSchema>;
 export type OverviewMode =
   | SingleOverviewCustomState['overview_mode']
   | GroupOverviewCustomState['overview_mode'];
-export type GroupFilters = Required<GroupOverviewCustomState>['group_filters'];
+export type GroupFilters = GroupOverviewCustomState['group_filters'];
 export type OverviewEmbeddableState = TypeOf<ReturnType<typeof getOverviewEmbeddableSchema>>;
 export type SingleOverviewEmbeddableState = TypeOf<
   ReturnType<typeof getSingleOverviewEmbeddableSchema>
