@@ -31,7 +31,7 @@ describe(`GET ${API_BASE_PATH}/search`, () => {
       }
     });
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
     return { handler, context, esClient, logger };
   };

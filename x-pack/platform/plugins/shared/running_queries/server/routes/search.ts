@@ -31,7 +31,7 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
     async (context, _request, response) => {
       try {
         const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const esClient = coreContext.elasticsearch.client.asInternalUser;
         const minRunningTimeMs = await coreContext.uiSettings.client.get<number>(
           RUNNING_QUERIES_MIN_RUNNING_TIME_SETTING
         );

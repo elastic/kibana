@@ -32,7 +32,7 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
 
       try {
         const coreContext = await context.core;
-        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const esClient = coreContext.elasticsearch.client.asInternalUser;
 
         const result = await esClient.tasks.cancel({
           task_id: taskId,

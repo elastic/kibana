@@ -22,7 +22,7 @@ describe(`POST ${API_BASE_PATH}/cancel`, () => {
 
     const coreContext = coreMock.createRequestHandlerContext();
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
 
     return { handler, context, esClient, logger };
   };
