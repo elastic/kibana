@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
@@ -45,16 +46,6 @@ describe('google drive workflows', () => {
   let fixture: WorkflowRunFixture;
   let transportRequestMock: jest.Mock;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows.map((w) => w.name).join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(googleDriveDataSource, {
@@ -155,7 +146,7 @@ describe('google drive workflows', () => {
     it('N file IDs produce N download actions and N text extractions', async () => {
       const fileIds = ['f1', 'f2', 'f3', 'f4', 'f5'];
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -169,7 +160,7 @@ describe('google drive workflows', () => {
     it('download output feeds into extraction input for each file', async () => {
       const fileIds = ['alpha', 'beta'];
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -199,7 +190,7 @@ describe('google drive workflows', () => {
     it('rerank=false stores all results without reranking', async () => {
       const fileIds = ['x1', 'x2'];
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -221,7 +212,7 @@ describe('google drive workflows', () => {
 
       const fileIds = ['r1', 'r2', 'r3'];
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: true, rerankQuery: 'quarterly report', topK: 2 },
       });
 
@@ -235,7 +226,7 @@ describe('google drive workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: "name contains 'budget'", pageSize: 10 },
       });
 
@@ -262,7 +253,7 @@ describe('google drive workflows', () => {
     it('forwards file IDs to the connector', async () => {
       const fileIds = ['meta-1', 'meta-2', 'meta-3'];
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('metadata'),
+        workflowYaml: getWorkflowYaml(workflows, 'metadata'),
         inputs: { fileIds },
       });
 

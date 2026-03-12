@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -22,18 +23,6 @@ const GITHUB_CONNECTOR_ID = 'fake-github-connector-uuid';
 describe('github workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(githubDataSource, {
@@ -109,7 +98,7 @@ describe('github workflows', () => {
   describe('search workflow', () => {
     it('calls MCP callTool with the selected search tool and query', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('source.github.search'),
+        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
         inputs: { tool_name: 'search_code', query: 'handleError language:typescript', per_page: 5 },
       });
 
@@ -139,7 +128,7 @@ describe('github workflows', () => {
   describe('get_doc workflow', () => {
     it('forwards repository and path parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_doc'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_doc'),
         inputs: { owner: 'elastic', repo: 'kibana', path: 'README.md', ref: 'main' },
       });
 

@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -36,18 +37,6 @@ describe('servicenow workflows', () => {
   let fixture: WorkflowRunFixture;
   let transportRequestMock: jest.Mock;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(servicenowDataSource, {
@@ -169,7 +158,7 @@ describe('servicenow workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { table: 'incident', query: 'network outage', limit: 10 },
       });
 
@@ -196,7 +185,7 @@ describe('servicenow workflows', () => {
   describe('list_tables workflow', () => {
     it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_tables'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_tables'),
         inputs: { query: 'incident' },
       });
 
@@ -220,7 +209,7 @@ describe('servicenow workflows', () => {
   describe('list_records workflow', () => {
     it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_records'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_records'),
         inputs: { table: 'incident', limit: 5 },
       });
 
@@ -247,7 +236,7 @@ describe('servicenow workflows', () => {
   describe('list_knowledge_bases workflow', () => {
     it('lists knowledge bases with defaults', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_knowledge_bases'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_knowledge_bases'),
         inputs: {},
       });
 
@@ -270,7 +259,7 @@ describe('servicenow workflows', () => {
   describe('get_record workflow', () => {
     it('retrieves a record by sys_id', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_record'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_record'),
         inputs: { table: 'incident', sys_id: 'INC001' },
       });
 
@@ -294,7 +283,7 @@ describe('servicenow workflows', () => {
   describe('get_record_with_comments workflow', () => {
     it('retrieves a record and its comments in two connector calls', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_record_with_comments'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_record_with_comments'),
         inputs: { table: 'incident', sys_id: 'INC001' },
       });
 
@@ -333,7 +322,7 @@ describe('servicenow workflows', () => {
   describe('get_comments workflow', () => {
     it('retrieves comments for a record', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_comments'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_comments'),
         inputs: { table_name: 'incident', record_sys_id: 'INC001', limit: 10 },
       });
 
@@ -358,7 +347,7 @@ describe('servicenow workflows', () => {
   describe('get_attachment workflow', () => {
     it('downloads an attachment and extracts content via ES pipeline', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_attachment'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_attachment'),
         inputs: { sys_id: 'ATT001' },
       });
 
@@ -387,7 +376,7 @@ describe('servicenow workflows', () => {
   describe('describe_table workflow', () => {
     it('describes a table schema', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('describe_table'),
+        workflowYaml: getWorkflowYaml(workflows, 'describe_table'),
         inputs: { table: 'incident' },
       });
 

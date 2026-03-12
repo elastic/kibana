@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -20,18 +21,6 @@ const CONNECTOR_ID = 'fake-zoom-connector-uuid';
 describe('zoom workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(zoomDataSource, {
@@ -106,9 +95,7 @@ describe('zoom workflows', () => {
             status: 'ok',
             actionId,
             data: {
-              recording_files: [
-                { id: 'rec-1', recording_type: 'shared_screen_with_speaker_view' },
-              ],
+              recording_files: [{ id: 'rec-1', recording_type: 'shared_screen_with_speaker_view' }],
             },
           };
         case 'getMeetingParticipants':
@@ -154,7 +141,7 @@ describe('zoom workflows', () => {
   describe('who_am_i workflow', () => {
     it('calls whoAmI with no parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('who_am_i'),
+        workflowYaml: getWorkflowYaml(workflows, 'who_am_i'),
         inputs: {},
       });
 
@@ -174,7 +161,7 @@ describe('zoom workflows', () => {
   describe('list workflow', () => {
     it('lists upcoming meetings', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list'),
+        workflowYaml: getWorkflowYaml(workflows, 'list'),
         inputs: { list_action: 'listUpcomingMeetings' },
       });
 
@@ -197,7 +184,7 @@ describe('zoom workflows', () => {
 
     it('lists user recordings', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list'),
+        workflowYaml: getWorkflowYaml(workflows, 'list'),
         inputs: {
           list_action: 'listUserRecordings',
           from: '2024-01-01',
@@ -227,7 +214,7 @@ describe('zoom workflows', () => {
   describe('get_meeting workflow', () => {
     it('gets meeting details', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_meeting'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_meeting'),
         inputs: { get_action: 'getMeetingDetails', meeting_id: '123' },
       });
 
@@ -247,7 +234,7 @@ describe('zoom workflows', () => {
 
     it('gets meeting recordings', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_meeting'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_meeting'),
         inputs: { get_action: 'getMeetingRecordings', meeting_id: '456' },
       });
 
@@ -267,7 +254,7 @@ describe('zoom workflows', () => {
 
     it('gets meeting participants', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_meeting'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_meeting'),
         inputs: { get_action: 'getMeetingParticipants', meeting_id: '123' },
       });
 
@@ -291,7 +278,7 @@ describe('zoom workflows', () => {
   describe('download_recording_file workflow', () => {
     it('downloads a recording file by URL', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download_recording_file'),
+        workflowYaml: getWorkflowYaml(workflows, 'download_recording_file'),
         inputs: { download_url: 'https://zoom.us/rec/download/abc123' },
       });
 

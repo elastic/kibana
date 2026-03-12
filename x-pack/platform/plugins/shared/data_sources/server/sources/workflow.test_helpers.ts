@@ -6,11 +6,6 @@
  */
 
 import { parse } from 'yaml';
-
-export const renderWorkflowTemplate = (
-  yaml: string,
-  templateVars: Record<string, string>
-): string => yaml.replace(/<%= ([^%]+) %>/g, (_, key) => templateVars[key.trim()] ?? '');
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -76,6 +71,18 @@ export function registerExtensionSteps(
       return undefined;
     }
   );
+}
+
+export function getWorkflowYaml(workflows: ProcessedWorkflow[], nameSubstring: string): string {
+  const wf = workflows.find((w) => w.name.includes(nameSubstring));
+  if (!wf) {
+    throw new Error(
+      `No workflow found matching '${nameSubstring}'. Available: ${workflows
+        .map((w) => w.name)
+        .join(', ')}`
+    );
+  }
+  return wf.yaml;
 }
 
 export interface ProcessedWorkflow {

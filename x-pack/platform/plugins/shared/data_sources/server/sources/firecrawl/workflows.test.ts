@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -20,18 +21,6 @@ const CONNECTOR_ID = 'fake-firecrawl-connector-uuid';
 describe('firecrawl workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(firecrawlDataSource, {
@@ -109,7 +98,7 @@ describe('firecrawl workflows', () => {
   describe('scrape workflow', () => {
     it('forwards scrape parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('scrape'),
+        workflowYaml: getWorkflowYaml(workflows, 'scrape'),
         inputs: { url: 'https://example.com' },
       });
 
@@ -134,7 +123,7 @@ describe('firecrawl workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: 'kibana plugins', limit: 3 },
       });
 
@@ -157,7 +146,7 @@ describe('firecrawl workflows', () => {
   describe('map workflow', () => {
     it('forwards map parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('map'),
+        workflowYaml: getWorkflowYaml(workflows, 'map'),
         inputs: { url: 'https://example.com', search: 'docs' },
       });
 
@@ -182,7 +171,7 @@ describe('firecrawl workflows', () => {
   describe('crawl workflow', () => {
     it('crawl action starts an async crawl job', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('crawl'),
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
         inputs: { crawl_action: 'crawl', url: 'https://example.com', limit: 10 },
       });
 
@@ -205,7 +194,7 @@ describe('firecrawl workflows', () => {
 
     it('getCrawlStatus checks an existing crawl job', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('crawl'),
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
         inputs: { crawl_action: 'getCrawlStatus', id: 'crawl-job-123' },
       });
 
@@ -225,7 +214,7 @@ describe('firecrawl workflows', () => {
 
     it('crawlAndWait runs a synchronous crawl', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('crawl'),
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
         inputs: { crawl_action: 'crawlAndWait', url: 'https://example.com' },
       });
 

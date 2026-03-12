@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
@@ -18,24 +19,11 @@ import { pagerdutyDataSource } from './data_type';
 const CONNECTOR_NAME = 'fake-mcp-connector';
 const CONNECTOR_ID = 'fake-mcp-connector-uuid';
 
-const mcpResponse = (data: unknown) =>
-  JSON.stringify(Array.isArray(data) ? data : [data]);
+const mcpResponse = (data: unknown) => JSON.stringify(Array.isArray(data) ? data : [data]);
 
 describe('pagerduty workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(pagerdutyDataSource, {
@@ -81,7 +69,7 @@ describe('pagerduty workflows', () => {
   describe('who_am_i workflow', () => {
     it('calls get_user_data with no arguments', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('who_am_i'),
+        workflowYaml: getWorkflowYaml(workflows, 'who_am_i'),
         inputs: {},
       });
 
@@ -104,7 +92,7 @@ describe('pagerduty workflows', () => {
   describe('search workflow', () => {
     it('searches users via list_users MCP tool', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { item_type: 'users', limit: 5, query: 'john' },
       });
 
@@ -130,7 +118,7 @@ describe('pagerduty workflows', () => {
 
     it('searches schedules via list_schedules MCP tool', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { item_type: 'schedules', limit: 10, query: 'primary' },
       });
 
@@ -159,7 +147,7 @@ describe('pagerduty workflows', () => {
   describe('get_incidents workflow', () => {
     it('calls list_incidents MCP tool with filter params', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_incidents'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_incidents'),
         inputs: { limit: 10, status: ['triggered', 'acknowledged'] },
       });
 
@@ -194,7 +182,7 @@ describe('pagerduty workflows', () => {
   describe('get_by_id workflow', () => {
     it('retrieves an incident by ID', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_by_id'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_by_id'),
         inputs: { item_type: 'incident', id: 'P123ABC' },
       });
 
@@ -217,7 +205,7 @@ describe('pagerduty workflows', () => {
 
     it('retrieves a schedule by ID', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_by_id'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_by_id'),
         inputs: { item_type: 'schedule', id: 'PSCHED1' },
       });
 
@@ -242,7 +230,7 @@ describe('pagerduty workflows', () => {
   describe('get_oncalls workflow', () => {
     it('calls list_oncalls MCP tool', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_oncalls'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_oncalls'),
         inputs: { limit: 5 },
       });
 
@@ -276,7 +264,7 @@ describe('pagerduty workflows', () => {
   describe('get_escalation_policies workflow', () => {
     it('calls list_escalation_policies MCP tool', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_escalation_policies'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_escalation_policies'),
         inputs: { query: 'production', limit: 10 },
       });
 

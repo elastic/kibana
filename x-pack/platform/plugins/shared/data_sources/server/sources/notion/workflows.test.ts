@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -20,18 +21,6 @@ const CONNECTOR_ID = 'fake-notion-connector-uuid';
 describe('notion workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(notionDataSource, {
@@ -111,7 +100,7 @@ describe('notion workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('source.notion.search'),
+        workflowYaml: getWorkflowYaml(workflows, 'source.search'),
         inputs: { query_string: 'meeting notes', query_object: 'page' },
       });
 
@@ -137,7 +126,7 @@ describe('notion workflows', () => {
   describe('get_page workflow', () => {
     it('forwards page ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_page'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_page'),
         inputs: { page_id: 'abc-123-def' },
       });
 
@@ -158,7 +147,7 @@ describe('notion workflows', () => {
   describe('query_data_source workflow', () => {
     it('forwards query parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('query_data_source'),
+        workflowYaml: getWorkflowYaml(workflows, 'query_data_source'),
         inputs: { data_source_id: 'db-456', page_size: 5 },
       });
 
@@ -184,7 +173,7 @@ describe('notion workflows', () => {
   describe('get_data_source workflow', () => {
     it('forwards data source ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_data_source'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_data_source'),
         inputs: { data_source_id: 'ds-789' },
       });
 

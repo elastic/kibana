@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
@@ -14,15 +12,15 @@ import { createTestEsCluster } from '@kbn/test';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
-import { renderWorkflowTemplate } from '../../workflow.test_helpers';
+import {
+  loadWorkflowsThroughProductionPath,
+  getWorkflowYaml,
+  type ProcessedWorkflow,
+} from '../../workflow.test_helpers';
+import { googleDriveDataSource } from '../data_type';
 
 const CONNECTOR_NAME = 'fake-google-drive-connector';
 const CONNECTOR_ID = 'fake-gd-connector-uuid';
-
-const loadWorkflow = (file: string): string =>
-  renderWorkflowTemplate(readFileSync(resolve(__dirname, '..', 'workflows', file), 'utf-8'), {
-    'google_drive-stack-connector-id': CONNECTOR_NAME,
-  });
 
 const TINY_PDF_BASE64 = Buffer.from(
   '%PDF-1.0\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
@@ -35,9 +33,15 @@ describe('google drive workflows (real ES)', () => {
   let esCluster: EsTestCluster;
   let esClient: Client;
   let fixture: WorkflowRunFixture;
+  let workflows: ProcessedWorkflow[];
 
   beforeAll(async () => {
     jest.setTimeout(5 * 60_000);
+
+    workflows = await loadWorkflowsThroughProductionPath(googleDriveDataSource, {
+      stackConnectorId: CONNECTOR_NAME,
+    });
+
     esCluster = createTestEsCluster({
       log: new ToolingLog({ writeTo: process.stdout, level: 'info' }),
       esArgs: ['xpack.ml.enabled=false'],
@@ -104,7 +108,7 @@ describe('google drive workflows (real ES)', () => {
     it('_ingest/pipeline/_simulate returns real extracted text from attachment processor', async () => {
       const fileIds = ['file-alpha', 'file-beta'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: false },
       });
 
@@ -129,7 +133,7 @@ describe('google drive workflows (real ES)', () => {
     it('handles multiple files through the foreach loop with real extraction', async () => {
       const fileIds = ['doc-1', 'doc-2', 'doc-3'];
       await fixture.runWorkflow({
-        workflowYaml: loadWorkflow('download.yaml'),
+        workflowYaml: getWorkflowYaml(workflows, 'download'),
         inputs: { fileIds, rerank: false },
       });
 

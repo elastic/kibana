@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -20,18 +21,6 @@ const CONNECTOR_ID = 'fake-slack-connector-uuid';
 describe('slack workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(slackDataSource, {
@@ -92,7 +81,7 @@ describe('slack workflows', () => {
   describe('send_message workflow', () => {
     it('forwards message parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('send_message'),
+        workflowYaml: getWorkflowYaml(workflows, 'send_message'),
         inputs: { channel: 'C123ABC', text: 'Hello from test', thread_ts: '1234.5678' },
       });
 
@@ -119,7 +108,7 @@ describe('slack workflows', () => {
   describe('search_messages workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search_messages'),
+        workflowYaml: getWorkflowYaml(workflows, 'search_messages'),
         inputs: { query: 'deployment update', in_channel: 'engineering', count: 5 },
       });
 

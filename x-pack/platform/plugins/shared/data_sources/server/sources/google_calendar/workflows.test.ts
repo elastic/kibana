@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
@@ -21,18 +22,6 @@ const CONNECTOR_ID = 'fake-gcal-connector-uuid';
 describe('google calendar workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(googleCalendarDataSource, {
@@ -73,7 +62,9 @@ describe('google calendar workflows', () => {
                   status: 'confirmed',
                   htmlLink: 'https://calendar.google.com/event?eid=evt-1',
                   organizer: { email: 'org@example.com' },
-                  attendees: [{ email: 'a@example.com', displayName: 'Alice', responseStatus: 'accepted' }],
+                  attendees: [
+                    { email: 'a@example.com', displayName: 'Alice', responseStatus: 'accepted' },
+                  ],
                   created: '2024-01-01T00:00:00Z',
                   updated: '2024-01-10T00:00:00Z',
                 },
@@ -86,7 +77,9 @@ describe('google calendar workflows', () => {
             status: 'ok',
             actionId,
             data: {
-              items: [{ id: 'evt-2', summary: 'Lunch', start: { dateTime: '2024-01-15T12:00:00Z' } }],
+              items: [
+                { id: 'evt-2', summary: 'Lunch', start: { dateTime: '2024-01-15T12:00:00Z' } },
+              ],
               nextPageToken: null,
             },
           };
@@ -96,7 +89,13 @@ describe('google calendar workflows', () => {
             actionId,
             data: {
               items: [
-                { id: 'primary', summary: 'My Calendar', primary: true, accessRole: 'owner', timeZone: 'UTC' },
+                {
+                  id: 'primary',
+                  summary: 'My Calendar',
+                  primary: true,
+                  accessRole: 'owner',
+                  timeZone: 'UTC',
+                },
               ],
               nextPageToken: null,
             },
@@ -115,7 +114,9 @@ describe('google calendar workflows', () => {
               htmlLink: 'https://calendar.google.com/event?eid=evt-1',
               organizer: { email: 'org@example.com' },
               creator: { email: 'org@example.com' },
-              attendees: [{ email: 'a@example.com', displayName: 'Alice', responseStatus: 'accepted' }],
+              attendees: [
+                { email: 'a@example.com', displayName: 'Alice', responseStatus: 'accepted' },
+              ],
               created: '2024-01-01T00:00:00Z',
               updated: '2024-01-10T00:00:00Z',
             },
@@ -153,7 +154,7 @@ describe('google calendar workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: 'team meeting', maxResults: 10 },
       });
 
@@ -180,7 +181,7 @@ describe('google calendar workflows', () => {
   describe('list_events workflow', () => {
     it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_events'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_events'),
         inputs: { timeMin: '2024-01-01T00:00:00Z', timeMax: '2024-01-31T23:59:59Z' },
       });
 
@@ -207,7 +208,7 @@ describe('google calendar workflows', () => {
   describe('list_calendars workflow', () => {
     it('lists calendars with no parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_calendars'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_calendars'),
         inputs: {},
       });
 
@@ -229,7 +230,7 @@ describe('google calendar workflows', () => {
   describe('get_event workflow', () => {
     it('forwards event ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_event'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_event'),
         inputs: { eventId: 'evt-abc-123' },
       });
 
@@ -252,7 +253,7 @@ describe('google calendar workflows', () => {
   describe('free_busy workflow', () => {
     it('forwards free/busy parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('free_busy'),
+        workflowYaml: getWorkflowYaml(workflows, 'free_busy'),
         inputs: {
           timeMin: '2024-01-15T09:00:00Z',
           timeMax: '2024-01-15T18:00:00Z',

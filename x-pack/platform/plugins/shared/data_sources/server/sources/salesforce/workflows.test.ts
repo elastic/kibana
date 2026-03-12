@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   type ProcessedWorkflow,
 } from '../workflow.test_helpers';
@@ -20,18 +21,6 @@ const CONNECTOR_ID = 'fake-salesforce-connector-uuid';
 describe('salesforce workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(salesforceDataSource, {
@@ -113,7 +102,7 @@ describe('salesforce workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { search_term: 'Acme Corp', returning: 'Account,Contact' },
       });
 
@@ -137,7 +126,7 @@ describe('salesforce workflows', () => {
   describe('query workflow', () => {
     it('forwards SOQL query to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('query'),
+        workflowYaml: getWorkflowYaml(workflows, 'query'),
         inputs: { soql: 'SELECT Id, Name FROM Account LIMIT 10' },
       });
 
@@ -160,7 +149,7 @@ describe('salesforce workflows', () => {
   describe('list_records workflow', () => {
     it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_records'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_records'),
         inputs: { sobject_name: 'Account', limit: 5 },
       });
 
@@ -184,7 +173,7 @@ describe('salesforce workflows', () => {
   describe('get_record workflow', () => {
     it('forwards record lookup to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_record'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_record'),
         inputs: { sobject_name: 'Account', record_id: '001ABC123' },
       });
 
@@ -207,7 +196,7 @@ describe('salesforce workflows', () => {
   describe('download_file workflow', () => {
     it('forwards content version ID to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('download_file'),
+        workflowYaml: getWorkflowYaml(workflows, 'download_file'),
         inputs: { content_version_id: '068ABC123' },
       });
 
@@ -229,7 +218,7 @@ describe('salesforce workflows', () => {
   describe('describe workflow', () => {
     it('forwards sobject name to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('describe'),
+        workflowYaml: getWorkflowYaml(workflows, 'describe'),
         inputs: { sobject_name: 'Account' },
       });
 

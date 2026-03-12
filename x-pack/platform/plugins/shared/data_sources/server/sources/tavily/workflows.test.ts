@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
@@ -21,18 +22,6 @@ const CONNECTOR_ID = 'fake-mcp-connector-uuid';
 describe('tavily workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(tavilyDataSource, {
@@ -97,7 +86,7 @@ describe('tavily workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the MCP connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: 'kibana dashboards', max_results: 5, search_depth: 'advanced' },
       });
 
@@ -125,7 +114,7 @@ describe('tavily workflows', () => {
   describe('extract workflow', () => {
     it('forwards extract parameters to the MCP connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('extract'),
+        workflowYaml: getWorkflowYaml(workflows, 'extract'),
         inputs: { urls: ['https://example.com', 'https://example.org'] },
       });
 
@@ -152,7 +141,7 @@ describe('tavily workflows', () => {
   describe('map workflow', () => {
     it('forwards map parameters to the MCP connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('map'),
+        workflowYaml: getWorkflowYaml(workflows, 'map'),
         inputs: { url: 'https://example.com', instructions: 'find docs' },
       });
 
@@ -181,7 +170,7 @@ describe('tavily workflows', () => {
   describe('crawl workflow', () => {
     it('forwards crawl parameters to the MCP connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('crawl'),
+        workflowYaml: getWorkflowYaml(workflows, 'crawl'),
         inputs: { url: 'https://example.com', limit: 10, extract_depth: 'advanced' },
       });
 

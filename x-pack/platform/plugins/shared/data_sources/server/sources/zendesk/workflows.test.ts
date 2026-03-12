@@ -9,6 +9,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import {
+  getWorkflowYaml,
   loadWorkflowsThroughProductionPath,
   registerExtensionSteps,
   type ProcessedWorkflow,
@@ -21,18 +22,6 @@ const CONNECTOR_ID = 'fake-zendesk-connector-uuid';
 describe('zendesk workflows', () => {
   let fixture: WorkflowRunFixture;
   let workflows: ProcessedWorkflow[];
-
-  const getWorkflowYaml = (nameSubstring: string): string => {
-    const wf = workflows.find((w) => w.name.includes(nameSubstring));
-    if (!wf) {
-      throw new Error(
-        `No workflow found matching '${nameSubstring}'. Available: ${workflows
-          .map((w) => w.name)
-          .join(', ')}`
-      );
-    }
-    return wf.yaml;
-  };
 
   beforeAll(async () => {
     workflows = await loadWorkflowsThroughProductionPath(zendeskDataSource, {
@@ -69,39 +58,43 @@ describe('zendesk workflows', () => {
           return {
             status: 'ok',
             actionId,
-            data: [{
-              count: 1,
-              next_page: null,
-              previous_page: null,
-              results: [
-                {
-                  id: 456,
-                  result_type: 'ticket',
-                  subject: 'Test ticket',
-                  description: 'A test',
-                  status: 'open',
-                  priority: 'normal',
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-02',
-                  url: 'https://test.zendesk.com/api/v2/tickets/456',
-                  requester_id: 1,
-                  assignee_id: 2,
-                  submitter_id: 1,
-                  tags: ['test'],
-                },
-              ],
-            }],
+            data: [
+              {
+                count: 1,
+                next_page: null,
+                previous_page: null,
+                results: [
+                  {
+                    id: 456,
+                    result_type: 'ticket',
+                    subject: 'Test ticket',
+                    description: 'A test',
+                    status: 'open',
+                    priority: 'normal',
+                    created_at: '2024-01-01',
+                    updated_at: '2024-01-02',
+                    url: 'https://test.zendesk.com/api/v2/tickets/456',
+                    requester_id: 1,
+                    assignee_id: 2,
+                    submitter_id: 1,
+                    tags: ['test'],
+                  },
+                ],
+              },
+            ],
           };
         case 'listTickets':
           return {
             status: 'ok',
             actionId,
-            data: [{
-              count: 1,
-              next_page: null,
-              previous_page: null,
-              tickets: [{ id: 789, subject: 'Ticket 1', status: 'open' }],
-            }],
+            data: [
+              {
+                count: 1,
+                next_page: null,
+                previous_page: null,
+                tickets: [{ id: 789, subject: 'Ticket 1', status: 'open' }],
+              },
+            ],
           };
         case 'getTicket':
           return {
@@ -136,7 +129,7 @@ describe('zendesk workflows', () => {
   describe('who_am_i workflow', () => {
     it('calls whoAmI with no parameters', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('who_am_i'),
+        workflowYaml: getWorkflowYaml(workflows, 'who_am_i'),
         inputs: {},
       });
 
@@ -156,7 +149,7 @@ describe('zendesk workflows', () => {
   describe('search workflow', () => {
     it('forwards search parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('search'),
+        workflowYaml: getWorkflowYaml(workflows, 'search'),
         inputs: { query: 'type:ticket status:open', per_page: 25 },
       });
 
@@ -183,7 +176,7 @@ describe('zendesk workflows', () => {
   describe('list_tickets workflow', () => {
     it('forwards list parameters to the connector', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('list_tickets'),
+        workflowYaml: getWorkflowYaml(workflows, 'list_tickets'),
         inputs: { page: 2, per_page: 10 },
       });
 
@@ -207,7 +200,7 @@ describe('zendesk workflows', () => {
   describe('get_ticket workflow', () => {
     it('retrieves a ticket by ID', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_ticket'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_ticket'),
         inputs: { ticket_id: '456' },
       });
 
@@ -229,7 +222,7 @@ describe('zendesk workflows', () => {
   describe('get_ticket_comments workflow', () => {
     it('retrieves comments for a ticket', async () => {
       await fixture.runWorkflow({
-        workflowYaml: getWorkflowYaml('get_ticket_comments'),
+        workflowYaml: getWorkflowYaml(workflows, 'get_ticket_comments'),
         inputs: { ticket_id: '456' },
       });
 
