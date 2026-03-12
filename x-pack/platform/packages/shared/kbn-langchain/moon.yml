@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/langchain'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-generative-ai'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/langchain'
+  title: '@kbn/langchain'
   description: Moon project for @kbn/langchain
   channel: ''
   owner: '@elastic/security-generative-ai'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-langchain
+  sourceRoot: x-pack/platform/packages/shared/kbn-langchain
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
@@ -37,14 +36,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
