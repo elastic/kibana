@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/monitoring-collection-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/stack-monitoring'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/monitoring-collection-plugin'
+  title: '@kbn/monitoring-collection-plugin'
   description: Moon project for @kbn/monitoring-collection-plugin
   channel: ''
   owner: '@elastic/stack-monitoring'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/monitoring_collection
+  sourceRoot: x-pack/platform/plugins/private/monitoring_collection
 dependsOn:
   - '@kbn/core'
   - '@kbn/usage-collection-plugin'
@@ -38,14 +37,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
