@@ -34,6 +34,7 @@ import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
   implements
@@ -122,6 +123,19 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Phantom capability: not a registered feature privilege. Used as an admin check
+    // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
+    coreSetup.capabilities.registerProvider(() => ({
+      agentBuilder: {
+        isAdmin: false,
+      },
+    }));
+
+    coreSetup.capabilities.registerSwitcher(
+      createAdminPrivilegeSwitcher(coreSetup.getStartServices, this.logger.get('capabilities')),
+      { capabilityPath: 'agentBuilder.*' }
+    );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
