@@ -132,7 +132,7 @@ describe('NumberInput', () => {
   });
 
   describe('key filtering', () => {
-    it.each(['-', '+', '.', 'e', 'E'])('prevents typing "%s"', (key) => {
+    it.each(['-', '+', ',', '.', 'e', 'E'])('prevents typing "%s"', (key) => {
       renderInput({ value: 5 });
       const input = screen.getByTestId('testNumberInput');
 
