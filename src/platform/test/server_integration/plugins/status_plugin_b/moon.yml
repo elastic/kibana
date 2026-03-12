@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/status-plugin-b-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/status-plugin-b-plugin'
+  title: '@kbn/status-plugin-b-plugin'
   description: Moon project for @kbn/status-plugin-b-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/server_integration/plugins/status_plugin_b
+  sourceRoot: src/platform/test/server_integration/plugins/status_plugin_b
 dependsOn:
   - '@kbn/core'
 tags:
