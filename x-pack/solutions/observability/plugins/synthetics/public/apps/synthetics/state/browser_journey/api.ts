@@ -13,10 +13,7 @@ import type {
   SyntheticsJourneyApiResponse,
   Ping,
 } from '../../../../../common/runtime_types';
-import {
-  SyntheticsJourneyApiResponseType,
-  PingType,
-} from '../../../../../common/runtime_types';
+import { SyntheticsJourneyApiResponseType, PingType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
