@@ -25,7 +25,7 @@ interface Arguments {
 
 export interface SavedLensInput {
   title?: string;
-  ref_id: string;
+  savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
