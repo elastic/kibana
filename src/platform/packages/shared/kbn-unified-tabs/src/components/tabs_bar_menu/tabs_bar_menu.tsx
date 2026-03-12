@@ -17,7 +17,6 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   useGeneratedHtmlId,
-  useEuiTheme,
   EuiPopoverTitle,
   EuiHorizontalRule,
   EuiToolTip,
@@ -30,7 +29,9 @@ import {
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { RecentlyClosedTabItem, TabPreviewData } from '../../types';
 import type { TabItem } from '../../types';
 import { TabPreview } from '../tab_preview';
@@ -96,15 +97,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     const [previewTabId, setPreviewTabId] = useState<string | null>(null);
     const [menuOpenedAt, setMenuOpenedAt] = useState<number | null>(null);
     const contextMenuPopoverId = useGeneratedHtmlId();
-    const { euiTheme } = useEuiTheme();
-
-    const recentlyClosedContextMenuCss = useMemo(() => {
-      return css`
-        && .euiContextMenuPanel__title.euiContextMenuItem {
-          padding: ${euiTheme.size.s};
-        }
-      `;
-    }, [euiTheme.size.s]);
+    const styles = useMemoCss(componentStyles);
 
     const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
       defaultMessage: 'Tabs menu',
@@ -334,13 +327,13 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           </EuiToolTip>
         }
       >
-        <div css={menuContainerCss}>
+        <div css={styles.menuContainerCss}>
           <EuiPopoverTitle paddingSize="s">
             {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
               defaultMessage: 'Opened tabs',
             })}
           </EuiPopoverTitle>
-          <div css={sectionListCss}>
+          <div css={styles.sectionListCss}>
             <EuiContextMenu
               size="s"
               initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
@@ -380,9 +373,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPopoverTitle>
-              <div css={sectionListCss}>
+              <div css={styles.sectionListCss}>
                 <EuiContextMenu
-                  css={recentlyClosedContextMenuCss}
+                  css={styles.recentlyClosedContextMenuCss}
                   size="s"
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}
@@ -397,16 +390,22 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
   }
 );
 
-const menuContainerCss = css`
-  width: 240px;
-  max-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-`;
-
-const sectionListCss = css`
-  overflow-y: auto;
-  min-height: 0;
-  max-height: 350px;
-`;
+const componentStyles = {
+  menuContainerCss: () => css`
+    width: 240px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  `,
+  sectionListCss: () => css`
+    overflow-y: auto;
+    min-height: 0;
+    max-height: 350px;
+  `,
+  recentlyClosedContextMenuCss: ({ euiTheme }: UseEuiTheme) => css`
+    && .euiContextMenuPanel__title.euiContextMenuItem {
+      padding: ${euiTheme.size.s};
+    }
+  `,
+};
