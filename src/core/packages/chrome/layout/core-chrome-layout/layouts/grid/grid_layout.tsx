@@ -101,81 +101,79 @@ export class GridLayout implements LayoutService {
       customBranding$: customBranding.customBranding$,
     };
 
-    const GridLayoutContent = React.memo(
-      ({ debug: showDebug }: { debug: boolean }) => {
-        const chromeVisible = useIsChromeVisible();
-        const hasHeaderBanner = useHasHeaderBanner();
-        const chromeStyle = useChromeStyle();
-        const hasAppMenu = useHasAppMenu();
-        const footer = useGlobalFooter();
-        const sidebarWidth = useSidebarWidth();
+    const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {
+      const chromeVisible = useIsChromeVisible();
+      const hasHeaderBanner = useHasHeaderBanner();
+      const chromeStyle = useChromeStyle();
+      const hasAppMenu = useHasAppMenu();
+      const footer = useGlobalFooter();
+      const sidebarWidth = useSidebarWidth();
 
-        const layoutConfig = {
-          ...layoutConfigs[chromeStyle],
-          sidebarWidth,
-        };
+      const layoutConfig = {
+        ...layoutConfigs[chromeStyle],
+        sidebarWidth,
+      };
 
-        // Assign main layout parts first
-        let header: ReactNode;
-        let navigation: ReactNode;
-        let banner: ReactNode;
-        let applicationTopBar: ReactNode;
+      // Assign main layout parts first
+      let header: ReactNode;
+      let navigation: ReactNode;
+      let banner: ReactNode;
+      let applicationTopBar: ReactNode;
 
-        if (chromeVisible) {
-          if (chromeStyle === 'classic') {
-            header = <ClassicHeader />;
-          } else {
-            header = <ProjectHeader />;
-            if (hasAppMenu) {
-              applicationTopBar = <AppMenuBar />;
-            }
-
-            navigation = <GridLayoutProjectSideNav />;
+      if (chromeVisible) {
+        if (chromeStyle === 'classic') {
+          header = <ClassicHeader />;
+        } else {
+          header = <ProjectHeader />;
+          if (hasAppMenu) {
+            applicationTopBar = <AppMenuBar />;
           }
+
+          navigation = <GridLayoutProjectSideNav />;
         }
-
-        if (hasHeaderBanner) {
-          banner = <HeaderTopBanner position="static" />;
-        }
-
-        if (showDebug) {
-          if (chromeVisible) {
-            if (!navigation) {
-              navigation = <SimpleDebugOverlay label="Debug Navigation" />;
-            }
-          }
-          if (!banner) {
-            banner = <SimpleDebugOverlay label="Debug Banner" />;
-          }
-        }
-
-        return (
-          <>
-            <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
-            <ChromeLayoutConfigProvider value={layoutConfig}>
-              <ChromeLayout
-                header={header}
-                sidebar={<Sidebar />}
-                footer={footer}
-                navigation={navigation}
-                banner={banner}
-                applicationTopBar={applicationTopBar}
-              >
-                <>
-                  {!chromeVisible && <ChromelessHeader />}
-
-                  <div id="globalBannerList">{appBannerComponent}</div>
-                  <AppWrapper chromeVisible={chromeVisible}>
-                    <div id={APP_FIXED_VIEWPORT_ID} />
-                    {appComponent}
-                  </AppWrapper>
-                </>
-              </ChromeLayout>
-            </ChromeLayoutConfigProvider>
-          </>
-        );
       }
-    );
+
+      if (hasHeaderBanner) {
+        banner = <HeaderTopBanner position="static" />;
+      }
+
+      if (showDebug) {
+        if (chromeVisible) {
+          if (!navigation) {
+            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
+          }
+        }
+        if (!banner) {
+          banner = <SimpleDebugOverlay label="Debug Banner" />;
+        }
+      }
+
+      return (
+        <>
+          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
+          <ChromeLayoutConfigProvider value={layoutConfig}>
+            <ChromeLayout
+              header={header}
+              sidebar={<Sidebar />}
+              footer={footer}
+              navigation={navigation}
+              banner={banner}
+              applicationTopBar={applicationTopBar}
+            >
+              <>
+                {!chromeVisible && <ChromelessHeader />}
+
+                <div id="globalBannerList">{appBannerComponent}</div>
+                <AppWrapper chromeVisible={chromeVisible}>
+                  <div id={APP_FIXED_VIEWPORT_ID} />
+                  {appComponent}
+                </AppWrapper>
+              </>
+            </ChromeLayout>
+          </ChromeLayoutConfigProvider>
+        </>
+      );
+    });
 
     return () => (
       <ChromeComponentsProvider value={componentDeps}>
