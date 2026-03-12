@@ -32,6 +32,15 @@ describe('Status', () => {
         right: defaultRequest,
       });
     });
+
+    it('accepts syncedAlerts when provided', () => {
+      const query = StatusUserActionPayloadRt.decode({ ...defaultRequest, syncedAlerts: 3 });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, syncedAlerts: 3 },
+      });
+    });
   });
 
   describe('StatusUserActionRt', () => {

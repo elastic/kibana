@@ -12,7 +12,7 @@ import { UserActionTypes } from '../action/v1';
 export const StatusUserActionPayloadRt = rt.exact(
   rt.intersection([
     rt.type({ status: CaseStatusRt }),
-    rt.partial({ closeReason: CaseCloseReasonRt }),
+    rt.partial({ closeReason: CaseCloseReasonRt, syncedAlerts: rt.number }),
   ])
 );
 

@@ -50,6 +50,7 @@ import {
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import type { AlertsStatusUpdateSummary } from '../../services/alerts';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type {
   Cases,
@@ -61,9 +62,39 @@ import type {
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
-import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import {
+  CasesRt,
+  CaseStatuses,
+  AttachmentType,
+  UserActionActions,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+
+const EMPTY_ALERTS_STATUS_UPDATE_SUMMARY: AlertsStatusUpdateSummary = {
+  total: 0,
+  closed: 0,
+  open: 0,
+  inProgress: 0,
+  versionConflicts: 0,
+};
+
+const addAlertsStatusUpdateSummary = (
+  first: AlertsStatusUpdateSummary,
+  second: AlertsStatusUpdateSummary
+): AlertsStatusUpdateSummary => ({
+  total: first.total + second.total,
+  closed: first.closed + second.closed,
+  open: first.open + second.open,
+  inProgress: first.inProgress + second.inProgress,
+  versionConflicts: first.versionConflicts + second.versionConflicts,
+});
+
+interface AlertsStatusUpdateResult {
+  totalSummary: AlertsStatusUpdateSummary;
+  summariesByCaseId: Map<string, AlertsStatusUpdateSummary>;
+}
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -229,7 +260,7 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
-}) {
+}): Promise<AlertsStatusUpdateResult> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
    * last so when the map is built we will use the last status change as the source of truth.
@@ -254,29 +285,99 @@ async function updateAlerts({
   });
 
   // create an array of requests that indicate the id, index, and status to update an alert
-  const alertsToUpdate = totalAlerts.saved_objects.reduce(
-    (acc: UpdateAlertStatusRequest[], alertComment) => {
+  const alertsToUpdateByCaseId = totalAlerts.saved_objects.reduce(
+    (acc: Map<string, UpdateAlertStatusRequest[]>, alertComment) => {
       if (isCommentRequestTypeAlert(alertComment.attributes)) {
+        const caseId = getID(alertComment, CASE_SAVED_OBJECT);
+        if (caseId == null) {
+          return acc;
+        }
+
         const statusAndReason = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
         });
 
-        acc.push(
-          ...createAlertUpdateStatusRequest({
-            comment: alertComment.attributes,
-            status: statusAndReason[0],
-            closingReason: statusAndReason[1],
-          })
-        );
+        const existingAlerts = acc.get(caseId) ?? [];
+        const alertsToUpdate = createAlertUpdateStatusRequest({
+          comment: alertComment.attributes,
+          status: statusAndReason[0],
+          closingReason: statusAndReason[1],
+        });
+
+        acc.set(caseId, [...existingAlerts, ...alertsToUpdate]);
       }
 
       return acc;
     },
-    []
+    new Map<string, UpdateAlertStatusRequest[]>()
   );
 
-  await alertsService.updateAlertsStatus(alertsToUpdate);
+  if (alertsToUpdateByCaseId.size === 0) {
+    return {
+      totalSummary: { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY },
+      summariesByCaseId: new Map<string, AlertsStatusUpdateSummary>(),
+    };
+  }
+
+  const summariesByCaseId = new Map<string, AlertsStatusUpdateSummary>();
+
+  await Promise.all(
+    Array.from(alertsToUpdateByCaseId.entries()).map(async ([caseId, alertsToUpdate]) => {
+      const summary = await alertsService.updateAlertsStatus(alertsToUpdate);
+      summariesByCaseId.set(caseId, summary ?? { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY });
+    })
+  );
+
+  const totalSummary = Array.from(summariesByCaseId.values()).reduce(
+    (acc, summary) => addAlertsStatusUpdateSummary(acc, summary),
+    { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY }
+  );
+
+  return {
+    totalSummary,
+    summariesByCaseId,
+  };
+}
+
+function addSyncedAlertsCountToStatusUserActions(
+  userActionsDict: UserActionsDict,
+  alertsStatusSummaryByCaseId: Map<string, AlertsStatusUpdateSummary>
+) {
+  const isStatusUserAction = (userAction: unknown): userAction is UserActionEvent => {
+    if (
+      typeof userAction !== 'object' ||
+      userAction == null ||
+      !('parameters' in userAction) ||
+      !('eventDetails' in userAction)
+    ) {
+      return false;
+    }
+
+    const attributes = userAction.parameters?.attributes;
+    return (
+      attributes != null &&
+      attributes.type === UserActionTypes.status &&
+      attributes.action === UserActionActions.update
+    );
+  };
+
+  Object.entries(userActionsDict).forEach(([caseId, userActions]) => {
+    const syncedAlertsCount = alertsStatusSummaryByCaseId.get(caseId)?.total ?? 0;
+    userActions.forEach((userAction) => {
+      if (isStatusUserAction(userAction)) {
+        userAction.parameters.attributes.payload = {
+          ...userAction.parameters.attributes.payload,
+          syncedAlerts: syncedAlertsCount,
+        };
+      }
+    });
+  });
+}
+
+export interface BulkUpdateCasesResponse {
+  cases: Cases;
+  alertsStatusUpdateSummary: AlertsStatusUpdateSummary;
 }
 
 function partitionPatchRequest(
@@ -383,6 +484,15 @@ export const bulkUpdate = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Cases> => {
+  const result = await bulkUpdateWithAlertsStatusSummary(cases, clientArgs, casesClient);
+  return result.cases;
+};
+
+export const bulkUpdateWithAlertsStatusSummary = async (
+  cases: CasesPatchRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<BulkUpdateCasesResponse> => {
   const {
     services: {
       caseService,
@@ -525,12 +635,16 @@ export const bulkUpdate = async (
     });
 
     // Update the alert's status to match any case status or sync settings changes
-    await updateAlerts({
+    const { totalSummary: alertsStatusUpdateSummary, summariesByCaseId } = await updateAlerts({
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
     });
+
+    if (userActionsDict != null) {
+      addSyncedAlertsCountToStatusUserActions(userActionsDict, summariesByCaseId);
+    }
 
     const commentsMap = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
@@ -583,7 +697,10 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return decodeOrThrow(CasesRt)(returnUpdatedCase);
+    return {
+      cases: decodeOrThrow(CasesRt)(returnUpdatedCase),
+      alertsStatusUpdateSummary,
+    };
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

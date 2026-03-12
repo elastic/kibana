@@ -28,6 +28,8 @@ import type {
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
+  CasesPatchResponse,
+  AlertsStatusUpdateSummary,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -104,6 +106,7 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  decodeCasesPatchResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
@@ -370,13 +373,33 @@ export const patchCase = async ({
 
 export const updateCases = async ({
   cases,
+  includeAlertsStatusUpdateSummary = false,
   signal,
 }: {
   cases: CaseUpdateRequest[];
+  includeAlertsStatusUpdateSummary?: boolean;
   signal?: AbortSignal;
-}): Promise<CasesUI> => {
+}): Promise<{
+  cases: CasesUI;
+  alertsStatusUpdateSummary?: AlertsStatusUpdateSummary;
+}> => {
   if (cases.length === 0) {
-    return [];
+    return { cases: [] };
+  }
+
+  if (includeAlertsStatusUpdateSummary) {
+    const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
+      method: 'PATCH',
+      body: JSON.stringify({ cases }),
+      query: { include_alerts_status_update_summary: true },
+      signal,
+    });
+
+    const decodedResponse = decodeCasesPatchResponse(response);
+    return {
+      cases: convertCasesToCamelCase(decodedResponse.cases),
+      alertsStatusUpdateSummary: decodedResponse.alertsStatusUpdateSummary,
+    };
   }
 
   const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
@@ -385,7 +408,7 @@ export const updateCases = async ({
     signal,
   });
 
-  return convertCasesToCamelCase(decodeCasesResponse(response));
+  return { cases: convertCasesToCamelCase(decodeCasesResponse(response)) };
 };
 
 export const replaceCustomField = async ({

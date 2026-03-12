@@ -33,6 +33,20 @@ const getStatusToasterMessage = (status: CaseStatuses, cases: CasesUI): string =
   return '';
 };
 
+const getCloseStatusToast = ({
+  cases,
+  closedAlertsCount,
+}: {
+  cases: CasesUI;
+  closedAlertsCount: number;
+}) => ({
+  title: i18n.CLOSED_CASES({
+    totalCases: cases.length,
+    caseTitle: cases.length === 1 ? cases[0].title : '',
+  }),
+  text: i18n.CLOSED_ALERTS_SYNC_SUMMARY(closedAlertsCount),
+});
+
 interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
@@ -58,7 +72,19 @@ export const useStatusAction = ({
       updateCases(
         {
           cases: casesToUpdate,
-          successToasterTitle: getStatusToasterMessage(status, selectedCases),
+          successToasterTitle:
+            closeReason != null && status === CaseStatuses.closed
+              ? undefined
+              : getStatusToasterMessage(status, selectedCases),
+          includeAlertsStatusUpdateSummary: closeReason != null && status === CaseStatuses.closed,
+          getSuccessToast:
+            closeReason != null && status === CaseStatuses.closed
+              ? ({ alertsStatusUpdateSummary }) =>
+                  getCloseStatusToast({
+                    cases: selectedCases,
+                    closedAlertsCount: alertsStatusUpdateSummary?.closed ?? 0,
+                  })
+              : undefined,
         },
         { onSuccess: onActionSuccess }
       );

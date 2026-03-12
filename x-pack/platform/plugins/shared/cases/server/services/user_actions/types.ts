@@ -50,7 +50,12 @@ export interface BuilderParameters {
   };
   status: {
     parameters: {
-      payload: { status: CaseStatuses; closeReason?: string; syncAlerts?: boolean };
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlerts?: number;
+      };
     };
   };
   severity: {

@@ -20,7 +20,11 @@ import {
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
-import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
+import {
+  bulkUpdate,
+  bulkUpdateWithAlertsStatusSummary,
+  getOperationsToAuthorize,
+} from './bulk_update';
 
 describe('update', () => {
   const cases = {
@@ -56,6 +60,10 @@ describe('update', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+        [mockCases[1].id]: 0,
+      });
     });
 
     it('notifies an assignee', async () => {
@@ -1981,6 +1989,13 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue({
+        total: 1,
+        closed: 1,
+        open: 0,
+        inProgress: 0,
+        versionConflicts: 0,
+      });
 
       await bulkUpdate(
         {
@@ -2010,6 +2025,54 @@ describe('update', () => {
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
 
       expect(updatedAttributes).not.toHaveProperty('closeReason');
+    });
+
+    it('returns the alerts status update summary', async () => {
+      const alertComment = {
+        ...mockCaseComments[3],
+        references: [
+          {
+            ...mockCaseComments[3].references[0],
+            id: mockCases[0].id,
+          },
+        ],
+      };
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [alertComment],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue({
+        total: 3,
+        closed: 3,
+        open: 0,
+        inProgress: 0,
+        versionConflicts: 0,
+      });
+
+      const result = await bulkUpdateWithAlertsStatusSummary(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(result.alertsStatusUpdateSummary).toEqual({
+        total: 3,
+        closed: 3,
+        open: 0,
+        inProgress: 0,
+        versionConflicts: 0,
+      });
     });
   });
 });

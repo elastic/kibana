@@ -51,6 +51,27 @@ describe('createStatusUserActionBuilder ', () => {
 
   it('renders close reason details when provided by status user action', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
+      payload: { status: CaseStatuses.closed, closeReason: 'false_positive', syncedAlerts: 2 },
+    });
+    const builder = createStatusUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('and synced 2 alerts with close reason')).toBeInTheDocument();
+    expect(screen.getByText('False Positive')).toBeInTheDocument();
+    expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toBeInTheDocument();
+  });
+
+  it('does not render sync details when only close reason is present', () => {
+    const userAction = getUserAction('status', UserActionActions.update, {
       payload: { status: CaseStatuses.closed, closeReason: 'false_positive' },
     });
     const builder = createStatusUserActionBuilder({
@@ -65,14 +86,16 @@ describe('createStatusUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('and synced alerts with close reason')).toBeInTheDocument();
-    expect(screen.getByText('False Positive')).toBeInTheDocument();
-    expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toBeInTheDocument();
+    expect(screen.queryByText('and synced 1 alert with close reason')).not.toBeInTheDocument();
+    expect(screen.queryByText('False Positive')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('status-update-user-action-close-reason-badge')
+    ).not.toBeInTheDocument();
   });
 
   it('renders custom close reason values as-is', () => {
     const userAction = getUserAction('status', UserActionActions.update, {
-      payload: { status: CaseStatuses.closed, closeReason: 'my custom reason' },
+      payload: { status: CaseStatuses.closed, closeReason: 'my custom reason', syncedAlerts: 1 },
     });
     const builder = createStatusUserActionBuilder({
       ...builderArgs,
@@ -86,6 +109,7 @@ describe('createStatusUserActionBuilder ', () => {
       </TestProviders>
     );
 
+    expect(screen.getByText('and synced 1 alert with close reason')).toBeInTheDocument();
     expect(screen.getByText('my custom reason')).toBeInTheDocument();
   });
 });

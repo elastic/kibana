@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -16,6 +17,11 @@ export const patchCaseRoute = createCasesRoute({
   method: 'patch',
   path: CASES_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
+  params: {
+    query: schema.object({
+      include_alerts_status_update_summary: schema.boolean({ defaultValue: false }),
+    }),
+  },
   routerOptions: {
     access: 'public',
     summary: 'Update cases',
@@ -26,8 +32,11 @@ export const patchCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const cases = request.body as caseApiV1.CasesPatchRequest;
-
-      const res: caseDomainV1.Cases = await casesClient.cases.bulkUpdate(cases);
+      const includeAlertsStatusUpdateSummary = request.query.include_alerts_status_update_summary;
+      const res: caseDomainV1.Cases | caseApiV1.CasesPatchResponse =
+        includeAlertsStatusUpdateSummary
+          ? await casesClient.cases.bulkUpdateWithAlertsStatusSummary(cases)
+          : await casesClient.cases.bulkUpdate(cases);
 
       return response.ok({
         body: res,

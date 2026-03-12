@@ -26,6 +26,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -39,7 +40,7 @@ import type { CasesByAlertIDParams, GetParams } from './get';
 import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
-import { bulkUpdate } from './bulk_update';
+import { bulkUpdate, bulkUpdateWithAlertsStatusSummary } from './bulk_update';
 import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
@@ -96,6 +97,10 @@ export interface CasesSubClient {
    * Update the specified cases with the passed in values.
    */
   bulkUpdate(cases: CasesPatchRequest): Promise<Cases>;
+  /**
+   * Update cases and return aggregated alert status updates for the operation.
+   */
+  bulkUpdateWithAlertsStatusSummary(cases: CasesPatchRequest): Promise<CasesPatchResponse>;
   /**
    * Delete a case and all its comments.
    *
@@ -168,6 +173,8 @@ export const createCasesSubClient = (
     bulkGet: (params) => bulkGet(params, clientArgs),
     push: (params: PushParams) => push(params, clientArgs, casesClient),
     bulkUpdate: (cases: CasesPatchRequest) => bulkUpdate(cases, clientArgs, casesClient),
+    bulkUpdateWithAlertsStatusSummary: (cases: CasesPatchRequest) =>
+      bulkUpdateWithAlertsStatusSummary(cases, clientArgs, casesClient),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),

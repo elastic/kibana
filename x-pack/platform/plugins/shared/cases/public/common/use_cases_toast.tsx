@@ -184,8 +184,8 @@ export const useCasesToast = () => {
           toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
         }
       },
-      showSuccessToast: (title: string) => {
-        toasts.addSuccess({ title, className: 'eui-textBreakWord' });
+      showSuccessToast: (title: string, text?: string) => {
+        toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
       showDangerToast: (title: string, text?: string) => {
         toasts.addDanger({ title, text, className: 'eui-textBreakWord' });

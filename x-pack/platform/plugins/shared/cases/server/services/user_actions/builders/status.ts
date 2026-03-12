@@ -33,6 +33,7 @@ export class StatusUserActionBuilder extends UserActionBuilder {
         payload: {
           status: args.payload.status,
           ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
+          ...(args.payload.syncedAlerts != null ? { syncedAlerts: args.payload.syncedAlerts } : {}),
         },
         type: UserActionTypes.status,
       },

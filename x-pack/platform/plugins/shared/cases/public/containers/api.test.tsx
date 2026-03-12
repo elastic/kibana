@@ -788,12 +788,49 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual(cases);
+      expect(resp).toEqual({ cases });
     });
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
-      expect(resp).toEqual([]);
+      expect(resp).toEqual({ cases: [] });
+    });
+
+    it('returns cases with alert status update summary when requested', async () => {
+      fetchMock.mockResolvedValue({
+        cases: casesSnake,
+        alertsStatusUpdateSummary: {
+          total: 2,
+          closed: 2,
+          open: 0,
+          inProgress: 0,
+          versionConflicts: 0,
+        },
+      });
+
+      const resp = await updateCases({
+        cases: data,
+        signal: abortCtrl.signal,
+        includeAlertsStatusUpdateSummary: true,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cases: data }),
+        query: { include_alerts_status_update_summary: true },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual({
+        cases,
+        alertsStatusUpdateSummary: {
+          total: 2,
+          closed: 2,
+          open: 0,
+          inProgress: 0,
+          versionConflicts: 0,
+        },
+      });
     });
   });
 

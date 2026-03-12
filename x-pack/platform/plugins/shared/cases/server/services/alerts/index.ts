@@ -29,6 +29,22 @@ import type {
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
+export interface AlertsStatusUpdateSummary {
+  total: number;
+  closed: number;
+  open: number;
+  inProgress: number;
+  versionConflicts: number;
+}
+
+const EMPTY_ALERTS_STATUS_UPDATE_SUMMARY: AlertsStatusUpdateSummary = {
+  total: 0,
+  closed: 0,
+  open: 0,
+  inProgress: 0,
+  versionConflicts: 0,
+};
+
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
@@ -86,15 +102,28 @@ export class AlertService {
     };
   }
 
-  public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]) {
+  public async updateAlertsStatus(
+    alerts: UpdateAlertStatusRequest[]
+  ): Promise<AlertsStatusUpdateSummary> {
     try {
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
-      await pMap(
+      const updateResults = await pMap(
         indexBuckets,
         async (indexBucket: [string, StatusAndReasonBuckets]) => this.updateByQuery(indexBucket),
         { concurrency: MAX_CONCURRENT_SEARCHES }
+      );
+
+      return updateResults.reduce<AlertsStatusUpdateSummary>(
+        (acc, updateResult) => ({
+          total: acc.total + updateResult.total,
+          closed: acc.closed + updateResult.closed,
+          open: acc.open + updateResult.open,
+          inProgress: acc.inProgress + updateResult.inProgress,
+          versionConflicts: acc.versionConflicts + updateResult.versionConflicts,
+        }),
+        { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY }
       );
     } catch (error) {
       throw createCaseError({
@@ -146,22 +175,45 @@ export class AlertService {
     return translatedStatus ?? 'open';
   }
 
-  private async updateByQuery([index, statusAndReasonBuckets]: [string, StatusAndReasonBuckets]) {
+  private async updateByQuery([index, statusAndReasonBuckets]: [
+    string,
+    StatusAndReasonBuckets
+  ]): Promise<AlertsStatusUpdateSummary> {
     const statusBuckets = Array.from(statusAndReasonBuckets.entries());
-    return Promise.all(
-      // this will create up to three update-by-query calls per status, split by close reason when closed
-      statusBuckets.flatMap(([status, reasonToAlerts]) =>
-        Array.from(reasonToAlerts.entries()).map(([reason, alerts]) =>
-          this.scopedClusterClient.updateByQuery({
-            index,
-            conflicts: 'abort',
-            script: getUpdateAlertsStatusScript(status, reason),
-            // the query here will contain all the ids that have the same status (and reason for closed)
-            query: { ids: { values: alerts.map(({ id }) => id) } },
-            ignore_unavailable: true,
-          })
-        )
-      )
+    const updateRequests = statusBuckets.flatMap(([status, reasonToAlerts]) =>
+      Array.from(reasonToAlerts.entries()).map(async ([reason, alerts]) => {
+        const updateResponse = await this.scopedClusterClient.updateByQuery({
+          index,
+          conflicts: 'abort',
+          script: getUpdateAlertsStatusScript(status, reason),
+          // the query here will contain all the ids that have the same status (and reason for closed)
+          query: { ids: { values: alerts.map(({ id }) => id) } },
+          ignore_unavailable: true,
+        });
+
+        const updated = updateResponse?.updated ?? 0;
+        const versionConflicts = updateResponse?.version_conflicts ?? 0;
+
+        return {
+          total: updated,
+          closed: status === 'closed' ? updated : 0,
+          open: status === 'open' ? updated : 0,
+          inProgress: status === 'acknowledged' ? updated : 0,
+          versionConflicts,
+        };
+      })
+    );
+
+    const updatesForIndex = await Promise.all(updateRequests);
+    return updatesForIndex.reduce<AlertsStatusUpdateSummary>(
+      (acc, updateResult) => ({
+        total: acc.total + updateResult.total,
+        closed: acc.closed + updateResult.closed,
+        open: acc.open + updateResult.open,
+        inProgress: acc.inProgress + updateResult.inProgress,
+        versionConflicts: acc.versionConflicts + updateResult.versionConflicts,
+      }),
+      { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY }
     );
   }
 
@@ -295,7 +347,10 @@ type StatusAndReasonBuckets = Map<
 
 const getUpdateAlertsStatusScript = (status: STATUS_VALUES, reason?: string) => ({
   source: `
+    boolean statusChanged = false;
+    boolean signalStatusChanged = false;
     if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != params.status) {
+      statusChanged = true;
       ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.status;
       ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = params.updatedAt;
       if (params.reason != null) {
@@ -305,8 +360,17 @@ const getUpdateAlertsStatusScript = (status: STATUS_VALUES, reason?: string) => 
         ctx._source.remove('${ALERT_WORKFLOW_REASON}');
       }
     }
-    if (ctx._source.signal != null && ctx._source.signal.status != null) {
+    if (
+      ctx._source.signal != null &&
+      ctx._source.signal.status != null &&
+      ctx._source.signal.status != params.status
+    ) {
+      signalStatusChanged = true;
       ctx._source.signal.status = params.status;
+    }
+
+    if (!statusChanged && !signalStatusChanged) {
+      ctx.op = 'noop';
     }
   `,
   lang: 'painless',

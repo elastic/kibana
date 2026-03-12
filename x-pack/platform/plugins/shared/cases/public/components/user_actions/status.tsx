@@ -21,8 +21,11 @@ const isStatusValid = (status: string): status is CaseStatuses => Object.hasOwn(
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';
   const closeReason = userAction.payload.closeReason;
+  const syncedAlerts = userAction.payload.syncedAlerts;
 
   if (isStatusValid(status)) {
+    const shouldRenderSyncDetails = closeReason != null && syncedAlerts != null;
+
     return (
       <EuiFlexGroup
         gutterSize="s"
@@ -34,9 +37,11 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
         <EuiFlexItem grow={false}>
           <Status status={status} />
         </EuiFlexItem>
-        {closeReason != null && (
+        {shouldRenderSyncDetails && (
           <>
-            <EuiFlexItem grow={false}>{i18n.SYNCED_ALERTS_CLOSE_REASON}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {i18n.SYNCED_ALERTS_WITH_CLOSE_REASON(syncedAlerts)}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge data-test-subj={`${userAction.id}-user-action-close-reason-badge`}>
                 {getDefaultClosingReasonLabel(closeReason)}

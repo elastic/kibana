@@ -8,6 +8,7 @@
 import { useQueryClient, useMutation } from '@kbn/react-query';
 import * as i18n from './translations';
 import { updateCases } from './api';
+import type { AlertsStatusUpdateSummary } from '../../common/types/api';
 import type { CaseUpdateRequest } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
@@ -15,26 +16,43 @@ import { casesQueriesKeys, casesMutationsKeys } from './constants';
 
 interface MutationArgs {
   cases: CaseUpdateRequest[];
-  successToasterTitle: string;
+  successToasterTitle?: string;
+  includeAlertsStatusUpdateSummary?: boolean;
+  getSuccessToast?: (args: { alertsStatusUpdateSummary?: AlertsStatusUpdateSummary }) => {
+    title: string;
+    text?: string;
+  };
 }
 
 export const useUpdateCases = () => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
-  return useMutation(({ cases }: MutationArgs) => updateCases({ cases }), {
-    mutationKey: casesMutationsKeys.updateCases,
-    onSuccess: (_, { successToasterTitle }) => {
-      queryClient.invalidateQueries(casesQueriesKeys.casesList());
-      queryClient.invalidateQueries(casesQueriesKeys.tags());
-      queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
+  return useMutation(
+    ({ cases, includeAlertsStatusUpdateSummary }: MutationArgs) =>
+      updateCases({ cases, includeAlertsStatusUpdateSummary }),
+    {
+      mutationKey: casesMutationsKeys.updateCases,
+      onSuccess: (data, { successToasterTitle, getSuccessToast }) => {
+        queryClient.invalidateQueries(casesQueriesKeys.casesList());
+        queryClient.invalidateQueries(casesQueriesKeys.tags());
+        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
-      showSuccessToast(successToasterTitle);
-    },
-    onError: (error: ServerError) => {
-      showErrorToast(error, { title: i18n.ERROR_UPDATING });
-    },
-  });
+        const customToast = getSuccessToast?.({
+          alertsStatusUpdateSummary: data?.alertsStatusUpdateSummary,
+        });
+
+        if (customToast) {
+          showSuccessToast(customToast.title, customToast.text);
+        } else if (successToasterTitle) {
+          showSuccessToast(successToasterTitle);
+        }
+      },
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_UPDATING });
+      },
+    }
+  );
 };
 
 export type UseUpdateCases = ReturnType<typeof useUpdateCases>;

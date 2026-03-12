@@ -536,6 +536,19 @@ export const CasesPatchRequestRt = rt.strict({
   }),
 });
 
+export const AlertsStatusUpdateSummaryRt = rt.strict({
+  total: rt.number,
+  closed: rt.number,
+  open: rt.number,
+  inProgress: rt.number,
+  versionConflicts: rt.number,
+});
+
+export const CasesPatchResponseRt = rt.strict({
+  cases: CasesRt,
+  alertsStatusUpdateSummary: AlertsStatusUpdateSummaryRt,
+});
+
 /**
  * Push case
  */
@@ -625,6 +638,8 @@ export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFi
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
+export type AlertsStatusUpdateSummary = rt.TypeOf<typeof AlertsStatusUpdateSummaryRt>;
+export type CasesPatchResponse = rt.TypeOf<typeof CasesPatchResponseRt>;
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type GetTagsResponse = rt.TypeOf<typeof GetTagsResponseRt>;
 export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;

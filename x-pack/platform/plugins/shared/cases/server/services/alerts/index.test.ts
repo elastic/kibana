@@ -57,7 +57,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -67,8 +70,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -100,6 +112,27 @@ describe('updateAlertsStatus', () => {
       expect(
         scriptSource.match(/ctx\._source\.remove\('kibana\.alert\.workflow_reason'\);/g)
       ).toHaveLength(1);
+      expect(scriptSource).toMatch(/ctx\.op = 'noop';/);
+    });
+
+    it('returns aggregated update counts by status', async () => {
+      esClient.updateByQuery
+        .mockResolvedValueOnce({ updated: 2, version_conflicts: 0 })
+        .mockResolvedValueOnce({ updated: 1, version_conflicts: 1 });
+
+      const result = await alertService.updateAlertsStatus([
+        { id: 'id1', index: '1', status: CaseStatuses.closed },
+        { id: 'id2', index: '1', status: CaseStatuses.closed },
+        { id: 'id3', index: '1', status: CaseStatuses.open },
+      ]);
+
+      expect(result).toEqual({
+        total: 3,
+        closed: 2,
+        open: 1,
+        inProgress: 0,
+        versionConflicts: 1,
+      });
     });
 
     it('buckets the alerts by index', async () => {
@@ -134,7 +167,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -144,8 +180,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -182,7 +227,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -192,8 +240,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -234,7 +291,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -244,8 +304,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -276,7 +345,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -286,8 +358,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -328,7 +409,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -338,8 +422,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },
@@ -370,7 +463,10 @@ describe('updateAlertsStatus', () => {
                 "updatedAt": "2022-02-21T17:35:00.000Z",
               },
               "source": "
+            boolean statusChanged = false;
+            boolean signalStatusChanged = false;
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
+              statusChanged = true;
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
               if (params.reason != null) {
@@ -380,8 +476,17 @@ describe('updateAlertsStatus', () => {
                 ctx._source.remove('kibana.alert.workflow_reason');
               }
             }
-            if (ctx._source.signal != null && ctx._source.signal.status != null) {
+            if (
+              ctx._source.signal != null &&
+              ctx._source.signal.status != null &&
+              ctx._source.signal.status != params.status
+            ) {
+              signalStatusChanged = true;
               ctx._source.signal.status = params.status;
+            }
+
+            if (!statusChanged && !signalStatusChanged) {
+              ctx.op = 'noop';
             }
           ",
             },

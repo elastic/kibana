@@ -70,9 +70,8 @@ describe('useStatusAction', () => {
           "data-test-subj": "cases-bulk-action-status-closed",
           "disabled": false,
           "icon": "empty",
-          "key": "cases-bulk-status-action",
+          "key": "cases-bulk-action-status-closed",
           "name": "Closed",
-          "onClick": [Function],
         },
       ]
     `);
@@ -90,11 +89,7 @@ describe('useStatusAction', () => {
 
     const actions = result.current.getActions([basicCase]);
 
-    for (const [index, status] of [
-      CaseStatuses.open,
-      CaseStatuses['in-progress'],
-      CaseStatuses.closed,
-    ].entries()) {
+    for (const [index, status] of [CaseStatuses.open, CaseStatuses['in-progress']].entries()) {
       act(() => {
         // @ts-expect-error: onClick expects a MouseEvent argument
         actions[index]!.onClick();
@@ -105,16 +100,62 @@ describe('useStatusAction', () => {
       });
 
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith({
-        cases: [{ status, id: basicCase.id, version: basicCase.version }],
-      });
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [{ status, id: basicCase.id, version: basicCase.version }],
+        })
+      );
     }
+
+    act(() => {
+      result.current.handleUpdateCaseStatus([basicCase], CaseStatuses.closed);
+    });
+
+    await waitFor(() => {
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [{ status: CaseStatuses.closed, id: basicCase.id, version: basicCase.version }],
+        })
+      );
+    });
+  });
+
+  it('shows closed alert count details when closing with a reason', async () => {
+    const coreStart = coreMock.createStart();
+    jest.spyOn(api, 'updateCases').mockResolvedValue({
+      cases: [basicCase],
+      alertsStatusUpdateSummary: {
+        total: 3,
+        closed: 3,
+        open: 0,
+        inProgress: 0,
+        versionConflicts: 0,
+      },
+    });
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+      }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus([basicCase], CaseStatuses.closed, 'false_positive');
+    });
+
+    await waitFor(() =>
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Closed "Another horrible breach!!"',
+        text: 'Closed 3 attached alerts.',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   const singleCaseTests = [
     [CaseStatuses.open, 0, 'Opened "Another horrible breach!!"'],
     [CaseStatuses['in-progress'], 1, 'Marked "Another horrible breach!!" as in progress'],
-    [CaseStatuses.closed, 2, 'Closed "Another horrible breach!!"'],
   ];
 
   it.each(singleCaseTests)(
@@ -139,16 +180,39 @@ describe('useStatusAction', () => {
       await waitFor(() => {
         expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
+          text: undefined,
           className: 'eui-textBreakWord',
         });
       });
     }
   );
 
+  it('shows the success toaster correctly when updating a single case to closed', async () => {
+    const coreStart = coreMock.createStart();
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+      }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus([basicCase], CaseStatuses.closed);
+    });
+
+    await waitFor(() => {
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Closed "Another horrible breach!!"',
+        text: undefined,
+        className: 'eui-textBreakWord',
+      });
+    });
+  });
+
   const multipleCasesTests: Array<[CaseStatuses, number, string]> = [
     [CaseStatuses.open, 0, 'Opened 2 cases'],
     [CaseStatuses['in-progress'], 1, 'Marked 2 cases as in progress'],
-    [CaseStatuses.closed, 2, 'Closed 2 cases'],
   ];
 
   it.each(multipleCasesTests)(
@@ -173,11 +237,35 @@ describe('useStatusAction', () => {
       await waitFor(() => {
         expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
+          text: undefined,
           className: 'eui-textBreakWord',
         });
       });
     }
   );
+
+  it('shows the success toaster correctly when updating multiple cases to closed', async () => {
+    const coreStart = coreMock.createStart();
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+      }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus([basicCase, basicCase], CaseStatuses.closed);
+    });
+
+    await waitFor(() => {
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Closed 2 cases',
+        text: undefined,
+        className: 'eui-textBreakWord',
+      });
+    });
+  });
 
   const disabledTests: Array<[CaseStatuses, number]> = [
     [CaseStatuses.open, 0],
