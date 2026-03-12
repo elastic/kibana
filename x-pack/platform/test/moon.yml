@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-platform'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-platform'
+  title: '@kbn/test-suites-xpack-platform'
   description: Moon project for @kbn/test-suites-xpack-platform
   channel: ''
-  metadata:
-    sourceRoot: x-pack/platform/test
+  sourceRoot: x-pack/platform/test
 dependsOn:
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
