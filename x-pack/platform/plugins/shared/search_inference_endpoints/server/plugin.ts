@@ -127,7 +127,6 @@ export class SearchInferenceEndpointsPlugin
 
     return {
       features: {
-        register: this.featureRegistry.register.bind(this.featureRegistry),
         getAll: this.featureRegistry.getAll.bind(this.featureRegistry),
         get: this.featureRegistry.get.bind(this.featureRegistry),
       },

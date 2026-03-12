@@ -7,22 +7,27 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+
+export type { InferenceTaskType };
 
 export interface InferenceFeatureConfig {
   featureId: string;
   parentFeatureId?: string;
   featureName: string;
   featureDescription: string;
-  taskType: string;
+  taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
 }
 
+export type RegisterResult = { ok: true } | { ok: false; error: string };
+
 export interface InferenceFeatureRegistryContract {
-  register: (feature: InferenceFeatureConfig) => void;
+  register: (feature: InferenceFeatureConfig) => RegisterResult;
 }
 
-export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
+export interface InferenceFeatureRegistryStartContract {
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
 }

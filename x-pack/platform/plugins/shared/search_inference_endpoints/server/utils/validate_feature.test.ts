@@ -6,7 +6,7 @@
  */
 
 import type { InferenceFeatureConfig } from '../types';
-import { validateFeature, validateFeatures } from './validate_feature';
+import { validateFeature } from './validate_feature';
 
 const createValidFeature = (
   overrides: Partial<InferenceFeatureConfig> = {}
@@ -66,7 +66,6 @@ describe('validateFeature', () => {
       overrides: { featureDescription: '' },
       expectedMessage: 'featureDescription',
     },
-    { name: 'empty taskType', overrides: { taskType: '' }, expectedMessage: 'taskType' },
     {
       name: 'parentFeatureId with uppercase',
       overrides: { parentFeatureId: 'Parent' },
@@ -107,25 +106,6 @@ describe('validateFeature', () => {
   it.each(validationErrors)('rejects $name', ({ overrides, expectedMessage }) => {
     expect(() => validateFeature(createValidFeature(overrides))).toThrow(
       expect.objectContaining({ message: expect.stringContaining(expectedMessage) })
-    );
-  });
-});
-
-describe('validateFeatures', () => {
-  it('passes with valid features', () => {
-    const features = new Map<string, InferenceFeatureConfig>([
-      ['parent', createValidFeature({ featureId: 'parent' })],
-      ['child', createValidFeature({ featureId: 'child', parentFeatureId: 'parent' })],
-    ]);
-    expect(() => validateFeatures(features)).not.toThrow();
-  });
-
-  it('rejects parentFeatureId referencing non-existent feature', () => {
-    const features = new Map<string, InferenceFeatureConfig>([
-      ['a', createValidFeature({ featureId: 'a', parentFeatureId: 'missing' })],
-    ]);
-    expect(() => validateFeatures(features)).toThrow(
-      expect.objectContaining({ message: expect.stringContaining('parentFeatureId') })
     );
   });
 });

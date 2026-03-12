@@ -27,12 +27,9 @@ describe('InferenceFeatureRegistry', () => {
   });
 
   describe('registration', () => {
-    it('registers a minimal valid feature and stores it correctly', () => {
-      const feature = createValidFeature();
-      registry.register(feature);
-
-      const stored = registry.get(feature.featureId);
-      expect(stored).toEqual(feature);
+    it('registers a minimal valid feature and returns ok', () => {
+      const result = registry.register(createValidFeature());
+      expect(result).toEqual({ ok: true });
     });
 
     it('registers a feature with all optional fields and stores them correctly', () => {
@@ -43,42 +40,47 @@ describe('InferenceFeatureRegistry', () => {
         maxNumberOfEndpoints: 3,
         recommendedEndpoints: ['endpoint1', 'endpoint2'],
       });
-      registry.register(feature);
+      const result = registry.register(feature);
 
-      const stored = registry.get(feature.featureId);
-      expect(stored).toEqual(feature);
+      expect(result).toEqual({ ok: true });
+      expect(registry.get(feature.featureId)).toEqual(feature);
     });
 
-    it('rejects invalid features and does not store them', () => {
-      expect(() => registry.register(createValidFeature({ featureId: '' }))).toThrow('featureId');
+    it('returns error and does not store invalid features', () => {
+      const result = registry.register(createValidFeature({ featureId: '' }));
 
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('featureId') });
       expect(registry.getAll()).toHaveLength(0);
     });
 
-    it('rejects featureId starting with a digit', () => {
-      expect(() => registry.register(createValidFeature({ featureId: '1abc' }))).toThrow(
-        'featureId'
-      );
+    it('returns error for featureId starting with a digit', () => {
+      const result = registry.register(createValidFeature({ featureId: '1abc' }));
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('featureId') });
     });
 
-    it('rejects duplicate featureId', () => {
+    it('returns error for duplicate featureId', () => {
       registry.register(createValidFeature());
-      expect(() => registry.register(createValidFeature())).toThrow('already registered');
+      const result = registry.register(createValidFeature());
 
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('already registered') });
       expect(registry.getAll()).toHaveLength(1);
     });
 
-    it('rejects parentFeatureId referencing non-existent feature', () => {
-      expect(() => registry.register(createValidFeature({ parentFeatureId: 'missing' }))).toThrow(
-        'parentFeatureId'
-      );
+    it('returns error for parentFeatureId referencing non-existent feature', () => {
+      const result = registry.register(createValidFeature({ parentFeatureId: 'missing' }));
+
+      expect(result).toEqual({ ok: false, error: expect.stringContaining('parentFeatureId') });
     });
 
     it('accepts child after parent is registered', () => {
       registry.register(createValidFeature({ featureId: 'parent' }));
-      expect(() =>
-        registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }))
-      ).not.toThrow();
+      const result = registry.register(
+        createValidFeature({ featureId: 'child', parentFeatureId: 'parent' })
+      );
+
+      expect(result).toEqual({ ok: true });
+      expect(registry.getAll()).toHaveLength(2);
     });
 
     it('allows registration at any time', () => {

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { cloneDeep } from 'lodash';
-import type { InferenceFeatureConfig } from './types';
+import type { InferenceFeatureConfig, RegisterResult } from './types';
 import { validateFeature } from './utils/validate_feature';
 
 /**
@@ -20,55 +18,46 @@ export class InferenceFeatureRegistry {
    * Registers a new inference feature in the registry.
    *
    * @param feature - The feature configuration to register.
-   * @throws If a feature with the same `featureId` is already registered.
-   * @throws If the feature fails validation (see {@link validateFeature}).
-   * @throws If `parentFeatureId` is set but the referenced parent is not yet registered.
+   * @returns `{ ok: true }` on success, or `{ ok: false, error }` if validation fails or the feature is a duplicate.
    */
-  register(feature: InferenceFeatureConfig): void {
-    validateFeature(feature);
+  register(feature: InferenceFeatureConfig): RegisterResult {
+    try {
+      validateFeature(feature);
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
 
     if (this.features.has(feature.featureId)) {
-      throw new Error(
-        i18n.translate('xpack.searchInferenceEndpoints.featureRegistry.duplicateFeature', {
-          defaultMessage: 'Feature with id {featureId} is already registered.',
-          values: { featureId: feature.featureId },
-        })
-      );
+      return { ok: false, error: `Feature with id "${feature.featureId}" is already registered.` };
     }
 
     if (feature.parentFeatureId !== undefined && !this.features.has(feature.parentFeatureId)) {
-      throw new Error(
-        i18n.translate('xpack.searchInferenceEndpoints.featureRegistry.parentFeatureNotFound', {
-          defaultMessage:
-            'parentFeatureId "{parentFeatureId}" referenced by feature "{featureId}" does not exist.',
-          values: {
-            parentFeatureId: feature.parentFeatureId,
-            featureId: feature.featureId,
-          },
-        })
-      );
+      return {
+        ok: false,
+        error: `parentFeatureId "${feature.parentFeatureId}" referenced by feature "${feature.featureId}" does not exist.`,
+      };
     }
 
-    this.features.set(feature.featureId, cloneDeep(feature));
+    this.features.set(feature.featureId, feature);
+    return { ok: true };
   }
 
   /**
-   * Returns a deep copy of all registered features.
+   * Returns all registered features.
    *
    * @returns An array of all registered {@link InferenceFeatureConfig} entries.
    */
   getAll(): InferenceFeatureConfig[] {
-    return cloneDeep([...this.features.values()]);
+    return [...this.features.values()];
   }
 
   /**
-   * Returns a deep copy of a single feature by its ID, or `undefined` if not found.
+   * Returns a single feature by its ID, or `undefined` if not found.
    *
    * @param featureId - The ID of the feature to retrieve.
    * @returns The matching {@link InferenceFeatureConfig}, or `undefined`.
    */
   get(featureId: string): InferenceFeatureConfig | undefined {
-    const feature = this.features.get(featureId);
-    return feature ? cloneDeep(feature) : undefined;
+    return this.features.get(featureId);
   }
 }
