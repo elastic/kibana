@@ -81,6 +81,9 @@ export function build401RetryFetch({
         secrets as OAuth2AuthCodeParams;
 
       if (!clientId || !clientSecret || !tokenUrl) {
+        logger.warn(
+          `MCP client 401 for connectorId ${connectorId}: missing required OAuth configuration (clientId, clientSecret, tokenUrl)`
+        );
         return response;
       }
 
@@ -99,12 +102,17 @@ export function build401RetryFetch({
         forceRefresh: true,
       });
 
-      if (freshToken) {
-        logger.debug(`Token refreshed for connectorId ${connectorId}, retrying MCP request`);
-        const headers = new Headers(init?.headers);
-        headers.set('Authorization', freshToken);
-        return baseFetch(url, { ...init, headers });
+      if (!freshToken) {
+        logger.warn(
+          `MCP client 401 for connectorId ${connectorId}: unable to refresh access token. User may need to re-authorize.`
+        );
+        return response;
       }
+
+      logger.debug(`Token refreshed for connectorId ${connectorId}, retrying MCP request`);
+      const headers = new Headers(init?.headers);
+      headers.set('Authorization', freshToken);
+      return baseFetch(url, { ...init, headers });
     }
 
     return response;
