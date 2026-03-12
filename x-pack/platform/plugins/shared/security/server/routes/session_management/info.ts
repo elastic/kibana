@@ -7,7 +7,7 @@
 
 import type { RouteDefinitionParams } from '..';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
-import type { SessionInfo } from '../../../common/types';
+import { LogoutReason, type SessionInfo } from '../../../common/types';
 
 /**
  * Defines routes required for the session info.
@@ -36,8 +36,8 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
         const expirationReason: SessionInfo['expirationReason'] | undefined =
           expirationTime !== null
             ? expirationTime === sessionValue.lifespanExpiration
-              ? 'lifespan'
-              : 'idle'
+              ? LogoutReason.SESSION_LIFESPAN_TIMEOUT
+              : LogoutReason.SESSION_IDLE_TIMEOUT
             : undefined;
 
         return response.ok({

@@ -7,13 +7,6 @@
 
 import type { AuthenticationProvider } from '@kbn/security-plugin-types-common';
 
-export interface SessionInfo {
-  expiresInMs: number | null;
-  canBeExtended: boolean;
-  provider: AuthenticationProvider;
-  expirationReason?: 'idle' | 'lifespan';
-}
-
 export enum LogoutReason {
   'SESSION_EXPIRED' = 'SESSION_EXPIRED',
   'SESSION_IDLE_TIMEOUT' = 'SESSION_IDLE_TIMEOUT',
@@ -22,6 +15,13 @@ export enum LogoutReason {
   'AUTHENTICATION_ERROR' = 'AUTHENTICATION_ERROR',
   'LOGGED_OUT' = 'LOGGED_OUT',
   'UNAUTHENTICATED' = 'UNAUTHENTICATED',
+}
+
+export interface SessionInfo {
+  expiresInMs: number | null;
+  canBeExtended: boolean;
+  provider: AuthenticationProvider;
+  expirationReason?: LogoutReason.SESSION_IDLE_TIMEOUT | LogoutReason.SESSION_LIFESPAN_TIMEOUT;
 }
 
 export interface SecurityCheckupState {

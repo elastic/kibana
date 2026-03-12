@@ -39,7 +39,7 @@ const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 function createSessionTimeout(
   expiresInMs: number | null = 60 * 60 * 1000,
   canBeExtended = true,
-  expirationReason: SessionInfo['expirationReason'] = 'idle'
+  expirationReason: SessionInfo['expirationReason'] = LogoutReason.SESSION_IDLE_TIMEOUT
 ) {
   const { http, notifications, overlays, ...coreStart } = coreMock.createStart();
   const toast = Symbol();
@@ -381,7 +381,11 @@ describe('SessionTimeout', () => {
   });
 
   it('logs user out slightly before session expires with idle timeout reason', async () => {
-    const { sessionTimeout, sessionExpired } = createSessionTimeout(60 * 60 * 1000, true, 'idle');
+    const { sessionTimeout, sessionExpired } = createSessionTimeout(
+      60 * 60 * 1000,
+      true,
+      LogoutReason.SESSION_IDLE_TIMEOUT
+    );
     await sessionTimeout.start();
 
     jest.advanceTimersByTime(60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS);
@@ -393,7 +397,7 @@ describe('SessionTimeout', () => {
     const { sessionTimeout, sessionExpired } = createSessionTimeout(
       60 * 60 * 1000,
       false,
-      'lifespan'
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT
     );
     await sessionTimeout.start();
 

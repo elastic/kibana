@@ -12,6 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineSessionInfoRoutes } from './info';
 import { SESSION_EXPIRATION_WARNING_MS } from '../../../common/constants';
+import { LogoutReason } from '../../../common/types';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -73,7 +74,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: true,
             expiresInMs: 100,
-            expirationReason: 'idle',
+            expirationReason: LogoutReason.SESSION_IDLE_TIMEOUT,
           },
         ],
         [
@@ -84,7 +85,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
-            expirationReason: 'idle',
+            expirationReason: LogoutReason.SESSION_IDLE_TIMEOUT,
           },
         ],
         [
@@ -95,7 +96,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
-            expirationReason: 'lifespan',
+            expirationReason: LogoutReason.SESSION_LIFESPAN_TIMEOUT,
           },
         ],
         [
@@ -106,7 +107,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: false,
             expiresInMs: 100,
-            expirationReason: 'lifespan',
+            expirationReason: LogoutReason.SESSION_LIFESPAN_TIMEOUT,
           },
         ],
         [
@@ -117,7 +118,7 @@ describe('Info session routes', () => {
           {
             canBeExtended: true,
             expiresInMs: 100,
-            expirationReason: 'idle',
+            expirationReason: LogoutReason.SESSION_IDLE_TIMEOUT,
           },
         ],
         [

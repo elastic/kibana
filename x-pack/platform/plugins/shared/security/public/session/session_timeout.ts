@@ -178,12 +178,7 @@ export class SessionTimeout {
       const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
       // Schedule logout when session is about to expire
-      const logoutReason =
-        expirationReason === 'lifespan'
-          ? LogoutReason.SESSION_LIFESPAN_TIMEOUT
-          : expirationReason === 'idle'
-          ? LogoutReason.SESSION_IDLE_TIMEOUT
-          : LogoutReason.SESSION_EXPIRED;
+      const logoutReason = expirationReason ?? LogoutReason.SESSION_EXPIRED;
       this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(logoutReason), logoutInMs);
 
       // Hide warning if session has been extended
