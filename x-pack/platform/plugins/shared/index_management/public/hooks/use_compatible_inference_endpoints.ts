@@ -24,7 +24,7 @@ interface CompatibleEndpointsData {
 }
 
 const defaultEndpointsPriorityList = [
-  defaultInferenceEndpoints.JINAv3,
+  defaultInferenceEndpoints.JINAv5,
   defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
   defaultInferenceEndpoints.ELSER,
   defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,

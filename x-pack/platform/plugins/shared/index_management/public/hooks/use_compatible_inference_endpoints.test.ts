@@ -43,7 +43,7 @@ describe('useCompatibleInferenceEndpoints', () => {
     it('should prioritize JINAv3 when available', () => {
       const endpoints: InferenceAPIConfigResponse[] = [
         {
-          inference_id: defaultInferenceEndpoints.JINAv3,
+          inference_id: defaultInferenceEndpoints.JINAv5,
           task_type: 'text_embedding',
           service: 'elastic',
           service_settings: { model_id: 'jina-embeddings-v5-text-small' },
@@ -59,7 +59,7 @@ describe('useCompatibleInferenceEndpoints', () => {
         useCompatibleInferenceEndpoints(endpoints, false)
       );
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
-        defaultInferenceEndpoints.JINAv3
+        defaultInferenceEndpoints.JINAv5
       );
     });
 
