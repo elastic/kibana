@@ -544,6 +544,10 @@ function createNavTree({
               {
                 link: 'management:maintenanceWindows',
               },
+              {
+                link: 'management:running_queries',
+                badgeType: 'new',
+              },
             ],
           },
           {

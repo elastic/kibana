@@ -200,6 +200,7 @@ export const createNavigationTree = (
             { link: 'management:jobsListLink' },
             { link: 'management:watcher' },
             { link: 'management:maintenanceWindows' },
+            { link: 'management:running_queries', badgeType: 'new' },
             {
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),

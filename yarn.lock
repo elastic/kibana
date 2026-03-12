@@ -8274,6 +8274,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/running-queries-plugin@link:x-pack/platform/plugins/shared/running_queries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/runtime-fields-plugin@link:x-pack/platform/plugins/private/runtime_fields":
   version "0.0.0"
   uid ""

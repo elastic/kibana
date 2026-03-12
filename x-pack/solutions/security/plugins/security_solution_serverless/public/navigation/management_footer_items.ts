@@ -121,6 +121,11 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'management:running_queries',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
+            },
+            {
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
