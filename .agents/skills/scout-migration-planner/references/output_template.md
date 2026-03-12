@@ -2,7 +2,7 @@
 
 The planner must produce a Markdown file following this structure exactly. Every section is required unless marked `(omit if empty)`. Use the headings, table formats, and bullet styles shown here so the executor skill can parse sections programmatically.
 
-**Guiding principle**: be thorough on what was found in FTR. Keep Scout references at the decision level — the executor knows Scout's APIs and will handle implementation details.
+**Guiding principle**: be thorough on what was found in FTR. Reference Scout concepts when they inform a decision (e.g. "no Scout equivalent exists"), but leave implementation specifics to the executor.
 
 ---
 
@@ -95,19 +95,19 @@ Files that test multiple roles or unrelated flows and should become separate spe
 | Archive path | Contents | Size | Used by (files) | Verdict |
 |-------------|----------|------|-----------------|---------|
 | `fixtures/es_archiver/dashboard/current/data` | `logstash-*` index, 14k docs | ~2MB | 6 files | Keep — shared, load once |
-| `fixtures/es_archiver/empty_kibana` | Empty `.kibana` index | <1KB | 1 file | Drop — Scout starts clean |
+| `fixtures/es_archiver/empty_kibana` | Empty `.kibana` index | <1KB | 1 file | Drop — no longer needed |
 | `fixtures/kbn_archiver/dashboard/current/kibana` | 3 dashboards, 2 data views | ~50KB | 4 files | Keep — load per space for parallel tests |
 
 ### UI settings mutations
 
-| FTR call | Semantics | Files | Notes |
-|----------|-----------|-------|-------|
-| `kibanaServer.uiSettings.replace({...})` | Wipes all, sets new | `index.ts:15` | Full-replace — executor must handle wipe-then-set semantics |
-| `kibanaServer.uiSettings.update({timepicker: ...})` | Merges | `time_filter.ts:8` | Simple merge |
+| FTR call | Semantics | Files |
+|----------|-----------|-------|
+| `kibanaServer.uiSettings.replace({...})` | Wipes all settings, then sets new values | `index.ts:15` |
+| `kibanaServer.uiSettings.update({timepicker: ...})` | Merges into existing settings | `time_filter.ts:8` |
 
 ### Shared constants to extract
 
-Values that appear in ≥2 files and should live in a shared `constants.ts`:
+Values that appear in ≥2 files and should live in a shared constants file:
 
 | Value | Occurrences | Current locations |
 |-------|-------------|-------------------|
@@ -128,7 +128,7 @@ Values that appear in ≥2 files and should live in a shared `constants.ts`:
 | Role name | Source | Privileges (summary) | Used by (files) | Notes |
 |-----------|--------|---------------------|-----------------|-------|
 | `superuser` (default) | `config.base.ts` | Full cluster + all Kibana features | 12 files | Over-privileged for most tests |
-| `dashboard_only_user` | `config.base.ts` | `feature: { dashboard: ['read'] }, spaces: ['*']` | 4 files | Good candidate for built-in viewer |
+| `dashboard_only_user` | `config.base.ts` | `feature: { dashboard: ['read'] }, spaces: ['*']` | 4 files | Matches a built-in viewer role |
 | `custom_analyst` | `data_counts.ts:20` | `indices: [{ names: ['logs-*'], privileges: ['read'] }]` | 1 file | Inline definition, narrow scope |
 
 ### Over-privileged tests
@@ -157,9 +157,9 @@ Tests running as `superuser` that likely don't need it:
 
 | FTR name | What it does | Used by (files) | Scout equivalent exists? | Hidden assertions? | Recommended scope |
 |----------|-------------|-----------------|-------------------------|-------------------|-------------------|
-| `PageObjects.dashboard` | Navigate to dashboards, create, edit, delete | 8 files | yes (Scout package) | no | — (import existing) |
-| `PageObjects.header` | Wait for loading, check breadcrumbs | 10 files | yes (Scout package) | yes — `waitUntilLoadingHasFinished` asserts internally | — (import existing, but note assertion) |
-| `getService('filterBar')` | Add/remove/pin filters | 5 files | no | no | shared (Scout package) — used across many plugins |
+| `PageObjects.dashboard` | Navigate to dashboards, create, edit, delete | 8 files | yes (Scout package) | no | — (use existing) |
+| `PageObjects.header` | Wait for loading, check breadcrumbs | 10 files | yes (Scout package) | yes — `waitUntilLoadingHasFinished` asserts internally | — (use existing, note assertion) |
+| `getService('filterBar')` | Add/remove/pin filters | 5 files | no | no | shared — used across many plugins |
 | `getService('dashboardCustomizations')` | Plugin-specific panel config | 2 files | no | no | plugin-local |
 
 ### EUI components interacted with directly
@@ -180,7 +180,7 @@ Locators that need `data-test-subj` added to source code:
 
 ### Page objects with hidden assertions
 
-FTR helpers that contain assertions internally (must be restructured — page objects should return state, assertions belong in specs):
+FTR helpers that contain assertions internally (page objects should return state, not assert):
 
 | FTR helper | Method | Assertion | File:line |
 |-----------|--------|-----------|-----------|
@@ -195,16 +195,16 @@ FTR helpers that contain assertions internally (must be restructured — page ob
 
 | Arg | Source config | Category | Notes |
 |-----|-------------|----------|-------|
-| `--xpack.security.authc.api_key.enabled=true` | `config.base.ts:45` | already in Scout default | no action |
-| `--xpack.maps.showMapsInspectorAdapter=true` | `config.base.ts:52` | runtime-settable (UI setting) | setting key: `maps:showInspector` |
-| `--xpack.fleet.registryUrl=http://localhost:1234` | `config.base.ts:60` | requires server config | check if existing Scout config set covers it |
-| `--xpack.encryptedSavedObjects.encryptionKey=...` | `config.base.ts:48` | already in Scout default | no action |
+| `--xpack.security.authc.api_key.enabled=true` | `config.base.ts:45` | already in Scout default | no action needed |
+| `--xpack.maps.showMapsInspectorAdapter=true` | `config.base.ts:52` | runtime-settable | setting key: `maps:showInspector` |
+| `--xpack.fleet.registryUrl=http://localhost:1234` | `config.base.ts:60` | requires server config | no matching Scout config set found |
+| `--xpack.encryptedSavedObjects.encryptionKey=...` | `config.base.ts:48` | already in Scout default | no action needed |
 
 ### ES server args
 
 | Arg | Source config | Notes |
 |-----|-------------|-------|
-| `path.repo=/tmp/` | `config.base.ts:30` | Snapshot repo — check if needed for these tests |
+| `path.repo=/tmp/` | `config.base.ts:30` | Snapshot repo — only used by `snapshot_restore.ts` |
 
 ### Custom server config needed? (omit if all args are covered)
 
@@ -238,21 +238,21 @@ Non-portable assumptions found in FTR tests:
 
 ## 9. FTR test smells
 
-| Smell | File | Lines | Description | What the executor needs to know |
-|-------|------|-------|------------|--------------------------------|
-| Hardcoded timeout | `dashboard_grid.ts` | 45-47 | `await new Promise(r => setTimeout(r, 3000))` | 3s wait for panel resize animation to complete |
+| Smell | File | Lines | Description | Context |
+|-------|------|-------|------------|---------|
+| Hardcoded timeout | `dashboard_grid.ts` | 45-47 | `await new Promise(r => setTimeout(r, 3000))` | Waits for panel resize animation |
 | Shared mutable state | `panel_actions.ts` | 12, 30, 55 | `panelId` set in first `it`, read in subsequent `it` blocks | These `it` blocks form a single journey |
-| Sequential journey | `create_edit_delete.ts` | all | 6 `it` blocks forming one CRUD flow — each depends on previous | Combine into single test with steps |
-| try/catch swallowing | `error_handling.ts` | 80-85 | Empty catch block hides cleanup failures | Cleanup should be in hooks, errors should propagate |
-| Retry wrapper | `slow_render.ts` | 22-30 | `retry.try(() => testSubjects.existOrFail('chart'))` | Waiting for chart render; Playwright auto-wait handles this |
-| Global loading wait | `navigation.ts` | 15 | `await PageObjects.header.waitUntilLoadingHasFinished()` | Restricted in Scout; need content-specific ready signal |
-| UI-based setup | `create_dashboard.ts` | 8-20 | `before` hook navigates to UI and clicks "Create" button | Should use API for setup instead |
-| Onboarding dismissal | `home_page.ts` | 5 | `browser.setLocalStorageItem('home:welcome:show', 'false')` | Needs `addInitScript` pattern in Scout |
-| Brittle selector | `filter_bar.ts` | 52 | `find.byClassName('globalFilterItem')` | No `data-test-subj` — needs to be added to source |
-| Conditional assertion | `feature_flag.ts` | 40-50 | `if (isEnabled) { ... } else { ... }` inside `it()` | Split into two tests or parameterize |
-| Duplicate tests | `filter_basic.ts` | 20-60 | 3 `it` blocks test same filter behavior with different field names | Merge or parameterize |
-| Over-privileged | `read_only_view.ts` | all | Tests read-only dashboard but runs as `superuser` | Should use viewer role |
-| Missing cleanup | `saved_objects.ts` | 15 | Creates index pattern in `before`, no `after` to delete it | Add cleanup |
+| Sequential journey | `create_edit_delete.ts` | all | 6 `it` blocks forming one CRUD flow — each depends on previous | Create → edit → verify → delete sequence |
+| try/catch swallowing | `error_handling.ts` | 80-85 | Empty catch block hides cleanup failures | Cleanup for temp saved objects |
+| Retry wrapper | `slow_render.ts` | 22-30 | `retry.try(() => testSubjects.existOrFail('chart'))` | Waiting for chart to render after data load |
+| Global loading wait | `navigation.ts` | 15 | `await PageObjects.header.waitUntilLoadingHasFinished()` | Used after every navigation to wait for page ready |
+| UI-based setup | `create_dashboard.ts` | 8-20 | `before` hook navigates to UI and clicks "Create" button | Creates test dashboard via UI instead of API |
+| Onboarding dismissal | `home_page.ts` | 5 | `browser.setLocalStorageItem('home:welcome:show', 'false')` | Dismisses welcome screen before test starts |
+| Brittle selector | `filter_bar.ts` | 52 | `find.byClassName('globalFilterItem')` | No `data-test-subj` on filter pill component |
+| Conditional assertion | `feature_flag.ts` | 40-50 | `if (isEnabled) { ... } else { ... }` inside `it()` | Branches on experimental feature flag at runtime |
+| Duplicate tests | `filter_basic.ts` | 20-60 | 3 `it` blocks test same filter behavior with different field names | Only the field name varies; logic is identical |
+| Over-privileged | `read_only_view.ts` | all | Tests read-only dashboard view but runs as `superuser` | Only exercises `dashboard: read` |
+| Missing cleanup | `saved_objects.ts` | 15 | Creates index pattern in `before`, no `after` to delete it | Orphaned index pattern accumulates across runs |
 
 ---
 
@@ -316,8 +316,4 @@ Simple tests, all dependencies exist, no new abstractions needed.
 - <Items marked `NEEDS VERIFICATION`>
 - <Decisions that need human sign-off>
 - <Missing Scout capabilities that block deferred tests>
-
-### Post-migration validation
-
-After each batch is implemented, run the flaky test runner (20–50 times) to catch flakiness early before merging.
 ````
