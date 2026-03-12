@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiTextArea,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -160,6 +161,34 @@ export function GeneratedEventPreview({
               }}
             />
           </>
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <EuiFormLabel>
+              {i18n.translate(
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldDescriptionLabel',
+                { defaultMessage: 'Description' }
+              )}
+            </EuiFormLabel>
+          }
+        >
+          <EuiTextArea
+            compressed
+            value={query.description ?? ''}
+            disabled={!isEditing}
+            rows={2}
+            resize="vertical"
+            onChange={(event) => {
+              setQuery({ ...query, description: event.currentTarget.value });
+            }}
+            placeholder={i18n.translate(
+              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.descriptionPlaceholder',
+              {
+                defaultMessage: 'Describe what this query detects and why it matters',
+              }
+            )}
+          />
         </EuiFormRow>
 
         <EuiFormRow

@@ -12,6 +12,7 @@ import {
   EuiFormLabel,
   EuiFormRow,
   EuiPanel,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
@@ -54,10 +55,11 @@ export function ManualFlowForm({
     control,
     watch,
     formState: { isDirty, isValid },
-  } = useForm<Pick<StreamQuery, 'esql' | 'title' | 'severity_score'>>({
+  } = useForm<Pick<StreamQuery, 'esql' | 'title' | 'description' | 'severity_score'>>({
     defaultValues: {
       esql: { query: defaultEsql },
       title: query.title,
+      description: query.description ?? '',
       severity_score: query.severity_score,
     },
     mode: 'onChange',
@@ -120,6 +122,36 @@ export function ManualFlowForm({
                 </EuiFormRow>
               );
             }}
+          />
+
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={
+                  <EuiFormLabel>
+                    {i18n.translate(
+                      'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldDescriptionLabel',
+                      { defaultMessage: 'Description' }
+                    )}
+                  </EuiFormLabel>
+                }
+              >
+                <EuiTextArea
+                  value={field.value}
+                  disabled={isSubmitting}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  rows={2}
+                  resize="vertical"
+                  placeholder={i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.manualFlow.descriptionPlaceholder',
+                    { defaultMessage: 'Describe what this query detects and why it matters' }
+                  )}
+                />
+              </EuiFormRow>
+            )}
           />
 
           <Controller
