@@ -59,6 +59,7 @@ export function initializeEditApi({
   isEditable,
   discoverServices,
   getTitle,
+  getSelectedTabId,
 }: {
   uuid: string;
   parentApi?: unknown;
@@ -68,6 +69,7 @@ export function initializeEditApi({
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
+  getSelectedTabId?: () => string | undefined;
 }): HasEditCapabilities | undefined {
   /**
    * If the parent is providing context, then the embeddable state transfer service can be used
@@ -105,9 +107,13 @@ export function initializeEditApi({
       let path: string | undefined;
 
       if (isByReference) {
-        ({ app, path } = await discoverServices.locator.getLocation(
-          getDiscoverLocatorParams(partialApi)
-        ));
+        const selectedTabId = getSelectedTabId?.();
+        const tabParam = selectedTabId ? { tab: { id: selectedTabId } } : {};
+
+        ({ app, path } = await discoverServices.locator.getLocation({
+          ...getDiscoverLocatorParams(partialApi),
+          ...tabParam,
+        }));
       } else {
         ({ app, path } = await discoverServices.locator.getLocation({}));
       }

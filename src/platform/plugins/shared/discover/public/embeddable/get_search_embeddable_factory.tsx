@@ -211,6 +211,8 @@ export const getSearchEmbeddableFactory = ({
         discoverServices,
         isEditable: startServices.isEditable,
         getTitle: () => titleManager.api.title$.getValue(),
+        getSelectedTabId: () =>
+          inlineEditingApi.draftSelectedTabId$.getValue() ?? selectedTabId$.getValue(),
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
