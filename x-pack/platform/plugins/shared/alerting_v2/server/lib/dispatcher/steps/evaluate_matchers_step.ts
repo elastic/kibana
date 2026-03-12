@@ -38,14 +38,14 @@ export function evaluateMatchers(
   policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>
 ): MatchedPair[] {
   const matched: MatchedPair[] = [];
+  const allPolicies = Array.from(policies.values());
 
   for (const episode of dispatchable) {
     const rule = rules.get(episode.rule_id);
     if (!rule) continue;
 
-    for (const policyId of rule.notificationPolicyIds) {
-      const policy = policies.get(policyId);
-      if (!policy) continue;
+    for (const policy of allPolicies) {
+      if (!matchesRuleLabels(policy, rule)) continue;
 
       if (!policy.matcher) {
         matched.push({ episode, policy });
@@ -60,4 +60,9 @@ export function evaluateMatchers(
   }
 
   return matched;
+}
+
+function matchesRuleLabels(policy: NotificationPolicy, rule: Rule): boolean {
+  if (policy.ruleLabels.length === 0) return true;
+  return policy.ruleLabels.some((label) => rule.labels.includes(label));
 }

@@ -43,7 +43,7 @@ export class FetchRulesStep implements DispatcherStep {
         id: doc.id,
         name: doc.attributes.metadata.name,
         description: doc.attributes.metadata.owner ?? '',
-        notificationPolicyIds: doc.attributes.notification_policies?.map((p) => p.ref) ?? [],
+        labels: doc.attributes.metadata.labels ?? [],
         enabled: doc.attributes.enabled,
         createdAt: doc.attributes.createdAt,
         updatedAt: doc.attributes.updatedAt,

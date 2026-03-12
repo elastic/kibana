@@ -28,6 +28,7 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
       interval: schema.string(),
     })
   ),
+  rule_labels: schema.maybe(schema.arrayOf(schema.string())),
   auth: schema.object({
     apiKey: schema.maybe(schema.string()),
     owner: schema.string(),

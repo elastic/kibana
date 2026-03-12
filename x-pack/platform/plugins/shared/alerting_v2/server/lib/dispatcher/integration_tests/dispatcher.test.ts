@@ -400,7 +400,7 @@ describe('DispatcherService integration tests', () => {
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
 
-    jest.spyOn(npSoService, 'bulkGetDecryptedByIds').mockImplementation(async () => {
+    jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
         page: 1,
         perPage: 1000,
@@ -715,7 +715,6 @@ async function seedRulesAndPolicies(
     time_field: '@timestamp',
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM test' } },
-    notification_policies: [{ ref: NOTIFICATION_POLICY_ID }],
     enabled: true,
     createdBy: null,
     updatedBy: null,
