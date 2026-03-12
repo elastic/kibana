@@ -8,7 +8,12 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const configSchema = schema.object({});
+export const configSchema = schema.object({
+  preconfigured: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
+  }),
+});
 
 export type StreamsConfig = TypeOf<typeof configSchema>;
 
