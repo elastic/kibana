@@ -361,7 +361,7 @@ export class DiscoverApp {
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
 
-  private get esqlMenuPopover(): Locator {
+  public get esqlMenuPopover(): Locator {
     return this.page.testSubj.locator('esql-menu-popover');
   }
 
