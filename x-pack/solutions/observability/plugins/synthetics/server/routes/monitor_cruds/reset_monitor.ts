@@ -44,7 +44,7 @@ export const resetSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => 
       if (errors && errors.length > 0) {
         return response.ok({
           body: {
-            message: 'error pushing monitor to the service',
+            message: 'error resetting monitor Fleet resources',
             attributes: { errors },
           },
         });

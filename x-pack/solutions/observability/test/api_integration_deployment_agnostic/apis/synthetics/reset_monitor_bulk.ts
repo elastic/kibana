@@ -28,6 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 
+    const retry = getService('retry');
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
@@ -145,15 +146,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         try {
           const policyId = `${mon1.id}-${testPolicyId}-default`;
           await deletePackagePolicyDirectly(policyId);
-          expect(await getPackagePoliciesForMonitor(mon1.id, testPolicyId)).to.be(undefined);
+
+          await retry.try(async () => {
+            expect(await getPackagePoliciesForMonitor(mon1.id, testPolicyId)).to.be(undefined);
+          });
 
           const res = await bulkResetMonitors([mon1.id, mon2.id]);
           const results = res.body.result;
           expect(results.find((r: any) => r.id === mon1.id).reset).to.eql(true);
           expect(results.find((r: any) => r.id === mon2.id).reset).to.eql(true);
 
-          const policyRestored = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
-          expect(policyRestored).to.not.be(undefined);
+          await retry.try(async () => {
+            const policyRestored = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
+            expect(policyRestored).to.not.be(undefined);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, mon1.id, 200, 'default');
           await monitorTestService.deleteMonitor(editorUser, mon2.id, 200, 'default');

@@ -27,6 +27,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const supertestWithAuth = getService('supertest');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
@@ -126,15 +127,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const policyIdToDelete = `${monitorId}-${testPolicyId}-default`;
           await deletePackagePolicyDirectly(policyIdToDelete);
 
-          const policyAfterDelete = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          expect(policyAfterDelete).to.be(undefined);
+          await retry.try(async () => {
+            const policyAfterDelete = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            expect(policyAfterDelete).to.be(undefined);
+          });
 
           const resetResponse = await resetMonitor(monitorId);
           expect(resetResponse.body).to.eql({ id: monitorId, reset: true });
 
-          const policyAfterReset = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          expect(policyAfterReset).to.not.be(undefined);
-          expect(policyAfterReset!.policy_id).to.eql(testPolicyId);
+          await retry.try(async () => {
+            const policyAfterReset = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            expect(policyAfterReset).to.not.be(undefined);
+            expect(policyAfterReset!.policy_id).to.eql(testPolicyId);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, monitorId, 200, 'default');
         }
@@ -223,15 +228,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const policyIdToDelete = `${monitorId}-${testPolicyId}-default`;
           await deletePackagePolicyDirectly(policyIdToDelete);
 
-          const policyGone = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          expect(policyGone).to.be(undefined);
+          await retry.try(async () => {
+            const policyGone = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            expect(policyGone).to.be(undefined);
+          });
 
           const resetResponse = await resetMonitor(monitorId, { force: true });
           expect(resetResponse.body).to.eql({ id: monitorId, reset: true });
 
-          const policyRestored = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          expect(policyRestored).to.not.be(undefined);
-          expect(policyRestored!.policy_id).to.eql(testPolicyId);
+          await retry.try(async () => {
+            const policyRestored = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            expect(policyRestored).to.not.be(undefined);
+            expect(policyRestored!.policy_id).to.eql(testPolicyId);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, monitorId, 200, 'default');
         }
@@ -300,17 +309,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const policyIdToDelete = `${monitorId}-${testPolicyId}-default`;
           await deletePackagePolicyDirectly(policyIdToDelete);
 
-          const policy1Gone = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          expect(policy1Gone).to.be(undefined);
+          await retry.try(async () => {
+            const policy1Gone = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            expect(policy1Gone).to.be(undefined);
+          });
 
           await resetMonitor(monitorId);
 
-          const policy1After = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          const policy2After = await getPackagePoliciesForMonitor(monitorId, testPolicyId2);
-          expect(policy1After).to.not.be(undefined);
-          expect(policy2After).to.not.be(undefined);
-          expect(policy1After!.policy_id).to.eql(testPolicyId);
-          expect(policy2After!.policy_id).to.eql(testPolicyId2);
+          await retry.try(async () => {
+            const policy1After = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            const policy2After = await getPackagePoliciesForMonitor(monitorId, testPolicyId2);
+            expect(policy1After).to.not.be(undefined);
+            expect(policy2After).to.not.be(undefined);
+            expect(policy1After!.policy_id).to.eql(testPolicyId);
+            expect(policy2After!.policy_id).to.eql(testPolicyId2);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, monitorId, 200, 'default');
         }
@@ -323,16 +336,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await deletePackagePolicyDirectly(`${monitorId}-${testPolicyId}-default`);
           await deletePackagePolicyDirectly(`${monitorId}-${testPolicyId2}-default`);
 
-          expect(await getPackagePoliciesForMonitor(monitorId, testPolicyId)).to.be(undefined);
-          expect(await getPackagePoliciesForMonitor(monitorId, testPolicyId2)).to.be(undefined);
+          await retry.try(async () => {
+            expect(await getPackagePoliciesForMonitor(monitorId, testPolicyId)).to.be(undefined);
+            expect(await getPackagePoliciesForMonitor(monitorId, testPolicyId2)).to.be(undefined);
+          });
 
           const resetResponse = await resetMonitor(monitorId, { force: true });
           expect(resetResponse.body).to.eql({ id: monitorId, reset: true });
 
-          const policy1 = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
-          const policy2 = await getPackagePoliciesForMonitor(monitorId, testPolicyId2);
-          expect(policy1).to.not.be(undefined);
-          expect(policy2).to.not.be(undefined);
+          await retry.try(async () => {
+            const policy1 = await getPackagePoliciesForMonitor(monitorId, testPolicyId);
+            const policy2 = await getPackagePoliciesForMonitor(monitorId, testPolicyId2);
+            expect(policy1).to.not.be(undefined);
+            expect(policy2).to.not.be(undefined);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, monitorId, 200, 'default');
         }
