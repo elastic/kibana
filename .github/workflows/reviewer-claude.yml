@@ -1,4 +1,4 @@
-name: AI Code Review
+name: reviewer:claude
 
 on:
   pull_request_target:
@@ -14,26 +14,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gate:
-    runs-on: ubuntu-latest
+  claude-review:
     if: >-
       github.event.pull_request.user.type != 'Bot' &&
       contains(fromJSON('["MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) &&
-      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai')
-    outputs:
-      run_claude: ${{ steps.labels.outputs.run_claude }}
-    steps:
-      - name: Check labels
-        id: labels
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          script: |
-            const labels = context.payload.pull_request.labels.map(l => l.name);
-            core.setOutput('run_claude', labels.includes('reviewer:claude'));
-
-  review-claude:
-    needs: gate
-    if: needs.gate.outputs.run_claude == 'true'
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai') &&
+      contains(github.event.pull_request.labels.*.name, 'reviewer:claude')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
