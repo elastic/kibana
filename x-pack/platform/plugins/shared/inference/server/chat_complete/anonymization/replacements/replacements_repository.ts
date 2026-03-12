@@ -9,6 +9,7 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypt
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ReplacementsSet } from '@kbn/anonymization-common';
+import { isConflictError } from '../../utils';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
 
 /** ES document shape for replacements. */
@@ -128,12 +129,6 @@ export class ReplacementsRepository {
     const withStatus = error as Error & { statusCode: number };
     withStatus.statusCode = statusCode;
     return withStatus;
-  }
-
-  private isVersionConflict(err: unknown): boolean {
-    const statusCode = (err as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
-    const metaStatusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-    return statusCode === 409 || metaStatusCode === 409;
   }
 
   private dedupeAndValidate(
@@ -278,7 +273,7 @@ export class ReplacementsRepository {
 
         return this.get(namespace, replacementsId);
       } catch (err) {
-        if (this.isVersionConflict(err) && attempt < MAX_UPDATE_RETRIES - 1) {
+        if (isConflictError(err) && attempt < MAX_UPDATE_RETRIES - 1) {
           continue;
         }
         throw err;

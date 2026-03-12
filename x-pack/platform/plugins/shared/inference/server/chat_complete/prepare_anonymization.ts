@@ -20,6 +20,7 @@ import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
 import { shouldLogAnonymizationDebug, stringifyForLogs } from './anonymization/debug_logging';
+import { isConflictError, isRetryableShardRecoveryError, withShardRecoveryRetry } from './utils';
 
 interface PrepareAnonymizationOptions {
   namespace: string;
@@ -39,12 +40,6 @@ interface PrepareAnonymizationOptions {
   system?: ChatCompleteOptions['system'];
   messages: ChatCompleteOptions['messages'];
 }
-
-const isConflictError = (error: unknown): boolean => {
-  const statusCode = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
-  const metaStatusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
-  return statusCode === 409 || metaStatusCode === 409;
-};
 
 export const prepareAnonymization = async ({
   namespace,
@@ -112,14 +107,22 @@ export const prepareAnonymization = async ({
         400
       );
     }
-    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    await withShardRecoveryRetry({
+      logger,
+      operation: 'ensure_replacements_index',
+      action: () => ensureReplacementsIndex({ esClient: replacementsClient, logger }),
+    });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
     });
   }
 
   let existingReplacements = carriedReplacementsId
-    ? await repo?.get(namespace, carriedReplacementsId)
+    ? await withShardRecoveryRetry({
+        logger,
+        operation: 'get_replacements',
+        action: async () => repo?.get(namespace, carriedReplacementsId),
+      })
     : null;
 
   const anonymization = await anonymizeMessages({
@@ -164,7 +167,11 @@ export const prepareAnonymization = async ({
   replacementsId ??= uuidv4();
 
   if (!repo) {
-    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    await withShardRecoveryRetry({
+      logger,
+      operation: 'ensure_replacements_index',
+      action: () => ensureReplacementsIndex({ esClient: replacementsClient, logger }),
+    });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
     });
@@ -172,12 +179,25 @@ export const prepareAnonymization = async ({
 
   if (existingReplacements) {
     try {
-      const updated = await repo.update(namespace, replacementsId, { replacements });
+      if (!replacementsId) {
+        throw new Error(
+          'Invariant violation: existing replacements found without a replacementsId'
+        );
+      }
+      const replacementsIdForUpdate = replacementsId;
+      const updated = await withShardRecoveryRetry({
+        logger,
+        operation: 'update_replacements',
+        action: () => repo.update(namespace, replacementsIdForUpdate, { replacements }),
+      });
       if (!updated) {
         replacementsId = uuidv4();
         existingReplacements = null;
       }
     } catch (updateErr) {
+      if (isRetryableShardRecoveryError(updateErr)) {
+        throw updateErr;
+      }
       logger.warn(
         `Replacements update failed for ${replacementsId}, creating new document: ${
           updateErr instanceof Error ? updateErr.message : String(updateErr)
@@ -190,18 +210,27 @@ export const prepareAnonymization = async ({
 
   if (!existingReplacements) {
     try {
-      await repo.create({
-        id: replacementsId,
-        namespace,
-        createdBy: 'inference',
-        replacements,
+      await withShardRecoveryRetry({
+        logger,
+        operation: 'create_replacements',
+        action: () =>
+          repo.create({
+            id: replacementsId,
+            namespace,
+            createdBy: 'inference',
+            replacements,
+          }),
       });
     } catch (createErr) {
       // Another concurrent request may have created this replacements document first.
       if (!isConflictError(createErr)) {
         throw createErr;
       }
-      await repo.update(namespace, replacementsId, { replacements });
+      await withShardRecoveryRetry({
+        logger,
+        operation: 'update_replacements_after_conflict',
+        action: () => repo.update(namespace, replacementsId, { replacements }),
+      });
     }
   }
 
