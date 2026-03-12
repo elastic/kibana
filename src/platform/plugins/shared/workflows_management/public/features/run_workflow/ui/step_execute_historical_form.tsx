@@ -111,7 +111,12 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         acc[stepExecution.workflowRunId] = (acc[stepExecution.workflowRunId] ?? 0) + 1;
         return acc;
       }, {} as Record<string, number>);
-      const stepRunIdsLoopIndex: Record<string, number> = {};
+
+      const loopStepRunIdsIndex = new Map<string, number>(
+        Object.entries(workflowRunIdsStepCount)
+          .filter(([_, count]) => count > 1) // only steps executed multiple times (count > 1)
+          .map(([workflowRunId, count]) => [workflowRunId, count - 1]) // start at 0 for the first loop iteration
+      );
 
       return results.map((stepExecution): EuiComboBoxOptionOption<string> => {
         const { id, stepType, workflowRunId, startedAt, status, isTestRun, executionTimeMs } =
@@ -121,11 +126,10 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         const timeAgo = moment(startedAt).fromNow();
         const statusIcon = getExecutionStatusIcon(euiTheme, status);
 
-        const isLoopExecution = workflowRunIdsStepCount[workflowRunId] > 1;
         const append: React.ReactNode[] = [];
-        if (isLoopExecution) {
-          const loopIndex = stepRunIdsLoopIndex[workflowRunId] ?? 0;
-          stepRunIdsLoopIndex[workflowRunId] = loopIndex + 1;
+        if (loopStepRunIdsIndex.has(workflowRunId)) {
+          const loopIndex = loopStepRunIdsIndex.get(workflowRunId) ?? 0;
+          loopStepRunIdsIndex.set(workflowRunId, loopIndex - 1); // decrement the index for the next loop iteration (time descending order)
           append.push(
             <EuiFlexItem grow={false}>
               <EuiIconTip
@@ -284,6 +288,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
                   onChange={handleChange}
                   editorDidMount={handleMount}
                   dataTestSubj="workflow-test-step-historical-json-editor"
+                  overflowWidgetsContainerZIndexOverride={6001}
                   options={{
                     language: 'json',
                     minimap: { enabled: false },

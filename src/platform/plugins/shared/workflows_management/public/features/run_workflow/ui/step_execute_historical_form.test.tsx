@@ -22,6 +22,17 @@ jest.mock('../../workflow_execution_detail/model/use_step_execution', () => ({
   useStepExecution: (...args: unknown[]) => mockUseStepExecution(...args),
 }));
 
+const mockUseWorkflowExecution = jest.fn();
+jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
+  useWorkflowExecution: (...args: unknown[]) => mockUseWorkflowExecution(...args),
+}));
+
+const mockBuildContextOverrideFromExecution = jest.fn();
+jest.mock('../../../shared/utils/build_step_context_override/build_step_context_override', () => ({
+  buildContextOverrideFromExecution: (...args: unknown[]) =>
+    mockBuildContextOverrideFromExecution(...args),
+}));
+
 jest.mock('../../../shared/ui/use_formatted_date', () => ({
   useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
 }));
@@ -71,7 +82,9 @@ describe('StepExecuteHistoricalForm', () => {
       return null;
     });
     mockUseStepExecution.mockReturnValue({ data: null, isLoading: false });
+    mockUseWorkflowExecution.mockReturnValue({ data: null, isLoading: false });
     mockUseWorkflowStepExecutions.mockReturnValue({ data: undefined });
+    mockBuildContextOverrideFromExecution.mockReturnValue({ stepContext: {} });
   });
 
   describe('rendering', () => {
@@ -179,10 +192,21 @@ describe('StepExecuteHistoricalForm', () => {
       expect(screen.getByTestId('workflow-test-step-historical-json-editor')).toBeInTheDocument();
     });
 
-    it('should call setValue with formatted input when step execution loads', () => {
+    it('should call setValue with context override when step execution and workflow execution load', () => {
+      const mockStepExecution = { input: { foo: 'bar' } };
+      const mockWorkflowExec = { id: 'run-1' };
+      const mockGraph = { nodes: [] };
+
       mockUseStepExecution.mockReturnValue({
-        data: { input: { foo: 'bar' } },
+        data: mockStepExecution,
         isLoading: false,
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: mockWorkflowExec,
+        isLoading: false,
+      });
+      mockBuildContextOverrideFromExecution.mockReturnValue({
+        stepContext: { foo: 'bar' },
       });
       mockUseWorkflowStepExecutions.mockReturnValue({
         data: {
@@ -202,14 +226,24 @@ describe('StepExecuteHistoricalForm', () => {
           {...defaultProps}
           initialStepExecutionId="step-exec-1"
           initialWorkflowRunId="run-1"
+          workflowGraph={mockGraph as any}
         />
+      );
+      expect(mockBuildContextOverrideFromExecution).toHaveBeenCalledWith(
+        mockGraph,
+        mockWorkflowExec,
+        mockStepExecution
       );
       expect(defaultProps.setValue).toHaveBeenCalledWith(JSON.stringify({ foo: 'bar' }, null, 2));
     });
 
-    it('should wrap non-object input in a value property', () => {
+    it('should not call setValue when workflowGraph is not provided', () => {
       mockUseStepExecution.mockReturnValue({
-        data: { input: 'raw-string' },
+        data: { input: { foo: 'bar' } },
+        isLoading: false,
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'run-1' },
         isLoading: false,
       });
       mockUseWorkflowStepExecutions.mockReturnValue({
@@ -232,9 +266,8 @@ describe('StepExecuteHistoricalForm', () => {
           initialWorkflowRunId="run-1"
         />
       );
-      expect(defaultProps.setValue).toHaveBeenCalledWith(
-        JSON.stringify({ value: 'raw-string' }, null, 2)
-      );
+      expect(mockBuildContextOverrideFromExecution).not.toHaveBeenCalled();
+      expect(defaultProps.setValue).not.toHaveBeenCalled();
     });
   });
 

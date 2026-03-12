@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { z } from '@kbn/zod/v4';
 import type { StepExecuteModalProps } from './step_execute_modal';
 import { StepExecuteModal } from './step_execute_modal';
 
@@ -65,7 +66,7 @@ const renderWithProviders = (props: StepExecuteModalProps) => {
 describe('StepExecuteModal', () => {
   const defaultContextOverride = {
     stepContext: { inputs: { key: 'value' } },
-    schema: {} as any,
+    schema: z.object({}),
   };
 
   const defaultProps: StepExecuteModalProps = {
@@ -80,15 +81,10 @@ describe('StepExecuteModal', () => {
   });
 
   describe('rendering', () => {
-    it('should render the modal with title and description', () => {
+    it('should render the modal with title', () => {
       renderWithProviders(defaultProps);
       expect(screen.getByTestId('workflowTestStepModal')).toBeInTheDocument();
-      expect(screen.getByText('Test step')).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          'Test run with current changes and provided payload. Will not be saved in history.'
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Test.*my_step.*step/)).toBeInTheDocument();
     });
 
     it('should render the Run button', () => {
@@ -105,8 +101,10 @@ describe('StepExecuteModal', () => {
 
     it('should render tab descriptions', () => {
       renderWithProviders(defaultProps);
-      expect(screen.getByText('Enter or edit JSON input manually.')).toBeInTheDocument();
-      expect(screen.getByText('Reuse input from a previous step run.')).toBeInTheDocument();
+      expect(screen.getByText('Provide custom JSON data manually')).toBeInTheDocument();
+      expect(
+        screen.getByText('Reuse input data from previous step executions')
+      ).toBeInTheDocument();
     });
   });
 
@@ -185,7 +183,7 @@ describe('StepExecuteModal', () => {
       fireEvent.click(screen.getByTestId('manualFormChange'));
       fireEvent.click(screen.getByTestId('workflowSubmitStepRun'));
       expect(defaultProps.onSubmit).toHaveBeenCalledWith({
-        stepInputs: { inputs: { updated: 'value' } },
+        stepInputs: { updated: 'value' },
       });
     });
 
@@ -229,7 +227,7 @@ describe('StepExecuteModal', () => {
         ...defaultProps,
         initialcontextOverride: {
           stepContext: {},
-          schema: {} as any,
+          schema: z.object({}),
         },
       });
       expect(screen.getByTestId('manualFormValue')).toHaveTextContent('{}');
