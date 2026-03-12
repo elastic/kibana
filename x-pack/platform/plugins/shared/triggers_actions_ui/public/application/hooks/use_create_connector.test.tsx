@@ -37,13 +37,17 @@ describe('useCreateConnector', () => {
         name: 'test',
         config: {},
         secrets: {},
+        id: 'test-id',
       });
     });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-        body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
-      })
+      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/test-id',
+        {
+          body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
+        }
+      )
     );
   });
 
@@ -120,6 +124,7 @@ describe('useCreateConnector', () => {
         name: 'test',
         config: {},
         secrets: {},
+        id: 'test-id',
       });
     });
 

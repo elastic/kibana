@@ -188,7 +188,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
-        id,
+        id: id ?? '',
       };
 
       const createdConnector = await createConnector(validConnector);
