@@ -7,8 +7,8 @@
 
 import { of, Observable } from 'rxjs';
 import { z } from '@kbn/zod';
-import type { AIMessageChunk } from '@langchain/core/messages';
 import {
+  type AIMessageChunk,
   AIMessage,
   HumanMessage,
   isAIMessage,
@@ -422,9 +422,7 @@ describe('InferenceChatModel', () => {
           modelName: 'some-other-model',
           abortSignal: abortCtrl.signal,
           stream: false,
-          metadata: {
-            connectorTelemetry: undefined,
-          },
+          metadata: undefined,
         })
       );
 
@@ -693,6 +691,85 @@ describe('InferenceChatModel', () => {
         input_tokens: 5,
         output_tokens: 20,
         total_tokens: 25,
+      });
+    });
+
+    it('preserves anonymization metadata on streamed chunks', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const response = createStreamResponse([
+        {
+          content: 'EMAIL_token',
+          metadata: {
+            anonymization: {
+              replacementsId: 'rep-123',
+            },
+          },
+        },
+      ]);
+      chatComplete.mockReturnValue(response);
+
+      const output = await chatModel.stream('Some question');
+
+      const allChunks: AIMessageChunk[] = [];
+      let concatChunk: AIMessageChunk | undefined;
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+        concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
+      }
+
+      expect(allChunks[0].additional_kwargs).toEqual({
+        anonymization: { replacementsId: 'rep-123' },
+      });
+      expect(concatChunk?.additional_kwargs).toEqual({
+        anonymization: { replacementsId: 'rep-123' },
+      });
+    });
+
+    it('does not concatenate anonymization replacementsId across chunks', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+      });
+
+      const response = createStreamResponse([
+        {
+          content: 'EMAIL_',
+          metadata: {
+            anonymization: {
+              replacementsId: 'rep-123',
+            },
+          },
+        },
+        {
+          content: 'token',
+          metadata: {
+            anonymization: {
+              replacementsId: 'rep-123',
+            },
+          },
+        },
+      ]);
+      chatComplete.mockReturnValue(response);
+
+      const output = await chatModel.stream('Some question');
+
+      const allChunks: AIMessageChunk[] = [];
+      let concatChunk: AIMessageChunk | undefined;
+      for await (const chunk of output) {
+        allChunks.push(chunk);
+        concatChunk = concatChunk ? concatChunk.concat(chunk) : chunk;
+      }
+
+      expect(allChunks[0].additional_kwargs).toEqual({
+        anonymization: { replacementsId: 'rep-123' },
+      });
+      expect(allChunks[1].additional_kwargs).toEqual({});
+      expect(concatChunk?.additional_kwargs).toEqual({
+        anonymization: { replacementsId: 'rep-123' },
       });
     });
 

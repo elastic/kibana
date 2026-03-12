@@ -36,6 +36,7 @@ import type {
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
+  ChatCompleteAnonymizationMetadata,
 } from '@kbn/inference-common';
 import {
   isChatCompletionChunkEvent,
@@ -75,6 +76,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   temperature?: number;
   model?: string;
   timeout?: number;
+  anonymization?: ChatCompleteAnonymizationMetadata;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -188,6 +190,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
     const resolvedToolChoice = options.tool_choice ?? 'auto';
+    const metadata = {
+      ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
+      ...(options.anonymization ? { anonymization: options.anonymization } : {}),
+    };
 
     return {
       connectorId: this.connector.connectorId,
@@ -203,7 +209,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
-      metadata: { connectorTelemetry: this.telemetryMetadata },
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       timeout: options.timeout ?? this.timeout,
     };
   }
@@ -284,9 +290,24 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     });
 
     const responseIterator = toAsyncIterator(response$);
+    let hasEmittedAnonymizationMetadata = false;
     for await (const event of responseIterator) {
       if (isChatCompletionChunkEvent(event)) {
-        const chunk = completionChunkToLangchain(event);
+        const shouldStripAnonymizationMetadata =
+          hasEmittedAnonymizationMetadata && Boolean(event.metadata?.anonymization?.replacementsId);
+        const eventWithoutAnonymizationMetadata = shouldStripAnonymizationMetadata
+          ? {
+              ...event,
+              metadata: {
+                ...event.metadata,
+                anonymization: undefined,
+              },
+            }
+          : event;
+        const chunk = completionChunkToLangchain(eventWithoutAnonymizationMetadata);
+        if (event.metadata?.anonymization?.replacementsId) {
+          hasEmittedAnonymizationMetadata = true;
+        }
         const generationChunk = new ChatGenerationChunk({
           message: chunk,
           text: event.content,
