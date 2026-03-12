@@ -36,15 +36,15 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
-  const { openConversationFlyout } = useAgentBuilderServices();
+  const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openSidebarConversation = useCallback(() => {
     if (conversationId) {
       updatePersistedConversationId(conversationId);
     }
-    openConversationFlyout();
-  }, [conversationId, updatePersistedConversationId, openConversationFlyout]);
+    openSidebarConversationInternal();
+  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {

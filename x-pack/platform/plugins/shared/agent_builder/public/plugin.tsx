@@ -210,7 +210,7 @@ export class AgentBuilderPlugin
       startDependencies,
       accessChecker,
       eventsService,
-      openConversationFlyout: (options?: OpenConversationSidebarOptions) => {
+      openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
     };

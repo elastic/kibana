@@ -30,7 +30,7 @@ export interface AgentBuilderInternalService {
   startDependencies: AgentBuilderStartDependencies;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
-  openConversationFlyout: (
+  openSidebarConversation: (
     options?: OpenConversationSidebarOptions
   ) => OpenConversationSidebarReturn;
 }

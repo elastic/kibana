@@ -38,7 +38,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 }) => {
   const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
   const { conversationActions } = useConversationContext();
-  const { openConversationFlyout } = useAgentBuilderServices();
+  const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openCanvas = useCallback(() => {
@@ -58,8 +58,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     if (conversationId) {
       updatePersistedConversationId(conversationId);
     }
-    openConversationFlyout();
-  }, [conversationId, updatePersistedConversationId, openConversationFlyout]);
+    openSidebarConversationInternal();
+  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
