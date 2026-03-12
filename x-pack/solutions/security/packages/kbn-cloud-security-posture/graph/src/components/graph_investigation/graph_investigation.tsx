@@ -372,6 +372,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
+    const nodeDetailsClickHandler = useCallback(
+      (node: NodeViewModel) => {
+        onOpenEventPreview?.(node, timeRange);
+      },
+      [onOpenEventPreview, timeRange]
+    );
+
     const {
       nodeExpandPopover,
       labelExpandPopover,
@@ -384,7 +391,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createEventClickHandler,
     } = useGraphPopovers({
       scopeId,
-      onOpenEventPreview,
+      onOpenEventPreview: nodeDetailsClickHandler,
       onOpenNetworkPreview,
     });
 

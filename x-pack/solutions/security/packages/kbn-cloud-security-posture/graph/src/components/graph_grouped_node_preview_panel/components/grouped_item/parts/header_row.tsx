@@ -117,7 +117,6 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
               position: relative;
               top: 1px;
             `}
-            aria-hidden={true}
           />
         </EuiFlexItem>
       )}

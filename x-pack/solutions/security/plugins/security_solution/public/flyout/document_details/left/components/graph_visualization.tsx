@@ -20,8 +20,6 @@ import {
   NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
-import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
-import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';

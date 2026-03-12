@@ -27,11 +27,6 @@ const mockInvestigateInTimeline = {
   investigateInTimeline: jest.fn(),
 };
 
-const mockTimeRange = {
-  from: '2024-01-01T00:00:00.000Z||-30m',
-  to: '2024-01-01T00:00:00.000Z||+30m',
-};
-
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
 jest.mock('@kbn/expandable-flyout', () => ({
@@ -46,7 +41,7 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
     '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
   );
   const { isEntityItem } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'
+    '@kbn/cloud-security-posture-graph/src/components/utils'
   );
 
   return {
