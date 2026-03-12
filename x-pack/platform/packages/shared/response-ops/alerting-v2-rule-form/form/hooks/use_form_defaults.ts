@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { FormValues } from '../types';
 import { useDefaultGroupBy } from './use_default_group_by';
+import { useQueryBaseAndCondition } from './use_query_base_and_condition';
 
 interface UseFormDefaultsProps {
   /** The ES|QL query to derive defaults from */
@@ -20,11 +21,12 @@ interface UseFormDefaultsProps {
  * This hook extracts:
  * - groupingKey: columns from the STATS ... BY clause
  *
- * Note: timeField is initialized as empty and auto-selected by TimeFieldSelect
- * based on the available date fields from the query.
+ * Note: timeField defaults to '@timestamp' which is the most common time field.
+ * TimeFieldSelect may update this if @timestamp is not available in the query results.
  */
 export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => {
   const { defaultGroupBy } = useDefaultGroupBy({ query });
+  const { baseQuery, condition } = useQueryBaseAndCondition({ query });
 
   return useMemo(
     () => ({
@@ -34,14 +36,15 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
         enabled: true,
         description: '',
       },
-      timeField: '', // Auto-selected by TimeFieldSelect when fields load
+      timeField: '@timestamp', // Default to @timestamp; TimeFieldSelect may update if not available
       schedule: {
         every: '5m',
         lookback: '1m',
       },
       evaluation: {
         query: {
-          base: query,
+          base: baseQuery,
+          condition,
         },
       },
       grouping: defaultGroupBy.length
@@ -49,7 +52,10 @@ export const useFormDefaults = ({ query }: UseFormDefaultsProps): FormValues => 
             fields: defaultGroupBy,
           }
         : undefined,
+      recoveryPolicy: {
+        type: 'no_breach',
+      },
     }),
-    [query, defaultGroupBy]
+    [baseQuery, condition, defaultGroupBy]
   );
 };

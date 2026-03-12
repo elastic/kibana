@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { validateEsqlQuery } from './validation';
 import { durationSchema } from './common';
+import { MAX_CONSECUTIVE_BREACHES } from './constants';
 
 /** Primitives */
 
@@ -84,6 +85,12 @@ const recoveryPolicySchema = z
     query: z
       .object({
         base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
+        condition: z
+          .string()
+          .min(1)
+          .max(5000)
+          .optional()
+          .describe('Recovery condition (WHERE clause) applied to the base query.'),
       })
       .strict()
       .optional()
@@ -105,7 +112,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
-      .max(1000)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive breaches before active.'),
     pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
@@ -243,6 +250,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 

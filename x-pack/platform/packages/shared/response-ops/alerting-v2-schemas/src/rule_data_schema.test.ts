@@ -471,6 +471,52 @@ describe('createRuleDataSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('accepts recovery_policy with type "query" and query.condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: 'status == "ok"' },
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.recovery_policy?.query?.condition).toBe('status == "ok"');
+    });
+
+    it('accepts recovery_policy with type "query" without condition', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data?.recovery_policy?.query?.condition).toBeUndefined();
+    });
+
+    it('rejects recovery_policy with an empty condition string', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: '' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects recovery_policy condition exceeding 5000 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | LIMIT 1', condition: 'x'.repeat(5001) },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('required fields', () => {
@@ -494,6 +540,21 @@ describe('updateRuleDataSchema', () => {
   it('accepts partial updates', () => {
     const result = updateRuleDataSchema.parse({ metadata: { name: 'updated name' } });
     expect(result).toEqual({ metadata: { name: 'updated name' } });
+  });
+
+  it('accepts an enabled field set to true', () => {
+    const result = updateRuleDataSchema.parse({ enabled: true });
+    expect(result).toEqual({ enabled: true });
+  });
+
+  it('accepts an enabled field set to false', () => {
+    const result = updateRuleDataSchema.parse({ enabled: false });
+    expect(result).toEqual({ enabled: false });
+  });
+
+  it('omits enabled when not provided', () => {
+    const result = updateRuleDataSchema.parse({});
+    expect(result).not.toHaveProperty('enabled');
   });
 
   it('accepts a state_transition object', () => {

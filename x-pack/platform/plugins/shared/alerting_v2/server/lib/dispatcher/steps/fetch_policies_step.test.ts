@@ -5,41 +5,36 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { FetchPoliciesStep } from './fetch_policies_step';
 import type { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { createNotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { createDispatcherPipelineState, createRule } from '../fixtures/test_utils';
+import { FetchPoliciesStep } from './fetch_policies_step';
 
 describe('FetchPoliciesStep', () => {
   let npSoService: NotificationPolicySavedObjectService;
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockBulkGetDecryptedByIds: jest.SpyInstance;
 
   beforeEach(() => {
-    ({ notificationPolicySavedObjectService: npSoService, mockSavedObjectsClient } =
+    ({ notificationPolicySavedObjectService: npSoService, mockBulkGetDecryptedByIds } =
       createNotificationPolicySavedObjectService());
   });
 
-  it('fetches unique policies from rules', async () => {
-    mockSavedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'p1',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {
-            name: 'Policy 1',
-            description: 'Test',
-            destinations: [{ type: 'workflow' as const, id: 'w1' }],
-            createdBy: null,
-            updatedBy: null,
-            createdAt: '2026-01-01T00:00:00.000Z',
-            updatedAt: '2026-01-01T00:00:00.000Z',
-          },
-          references: [],
+  it('fetches and decrypts unique policies via bulkGetDecryptedByIds', async () => {
+    mockBulkGetDecryptedByIds.mockResolvedValue([
+      {
+        id: 'p1',
+        attributes: {
+          name: 'Policy 1',
+          description: 'Test',
+          destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          auth: { apiKey: 'decrypted-key', owner: 'elastic', createdByUser: false },
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
         },
-      ],
-    });
+      },
+    ]);
 
     const step = new FetchPoliciesStep(npSoService);
     const state = createDispatcherPipelineState({
@@ -54,11 +49,13 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(1);
-    expect(result.data?.policies?.get('p1')?.name).toBe('Policy 1');
-    expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'p1' }],
-      undefined
-    );
+
+    const policy = result.data?.policies?.get('p1');
+    expect(policy?.name).toBe('Policy 1');
+    expect(policy?.apiKey).toBe('decrypted-key');
+
+    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledTimes(1);
+    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledWith(['p1']);
   });
 
   it('returns empty map when rules is empty', async () => {
@@ -70,7 +67,7 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(mockBulkGetDecryptedByIds).not.toHaveBeenCalled();
   });
 
   it('returns empty map when rules have no policy IDs', async () => {
@@ -85,21 +82,13 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(mockBulkGetDecryptedByIds).not.toHaveBeenCalled();
   });
 
   it('skips documents with errors', async () => {
-    mockSavedObjectsClient.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'p1',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {},
-          references: [],
-          error: { statusCode: 404, message: 'Not found', error: 'Not Found' },
-        },
-      ],
-    } as any);
+    mockBulkGetDecryptedByIds.mockResolvedValue([
+      { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
+    ]);
 
     const step = new FetchPoliciesStep(npSoService);
     const state = createDispatcherPipelineState({
@@ -111,5 +100,51 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
+  });
+
+  it('fetches multiple policies', async () => {
+    mockBulkGetDecryptedByIds.mockResolvedValue([
+      {
+        id: 'p1',
+        attributes: {
+          name: 'Policy 1',
+          destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          auth: { apiKey: 'key-1', owner: 'elastic', createdByUser: false },
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      },
+      {
+        id: 'p2',
+        attributes: {
+          name: 'Policy 2',
+          destinations: [],
+          auth: { apiKey: 'key-2', owner: 'elastic', createdByUser: false },
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
+        },
+      },
+    ]);
+
+    const step = new FetchPoliciesStep(npSoService);
+    const state = createDispatcherPipelineState({
+      rules: new Map([
+        ['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })],
+        ['r2', createRule({ id: 'r2', notificationPolicyIds: ['p2'] })],
+      ]),
+    });
+
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.policies?.size).toBe(2);
+    expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
+    expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
+    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledTimes(1);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginStart } from '@kbn/core-di';
+import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -55,7 +55,11 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
-import type { AlertingServerStartDependencies } from '../types';
+import {
+  EncryptedSavedObjectsClientToken,
+  WorkflowsManagementApiToken,
+} from '../lib/dispatcher/steps/dispatch_step_tokens';
+import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -102,6 +106,17 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(EncryptedSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const eso = get(
+        PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>(
+          'encryptedSavedObjects'
+        )
+      );
+      return eso.getClient({ includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE] });
+    })
+    .inSingletonScope();
+
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
   bind(NotificationPolicySavedObjectServiceScopedToken).toService(
     NotificationPolicySavedObjectService
@@ -113,7 +128,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const internalClient = savedObjects.createInternalRepository([
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       ]);
-      return new NotificationPolicySavedObjectService(() => internalClient, spaces);
+      const esoClient = get(EncryptedSavedObjectsClientToken);
+      return new NotificationPolicySavedObjectService(() => internalClient, spaces, esoClient);
     })
     .inSingletonScope();
 
@@ -153,6 +169,15 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
       return new StorageService(esClient, loggerService);
+    })
+    .inSingletonScope();
+
+  bind(WorkflowsManagementApiToken)
+    .toDynamicValue(({ get }) => {
+      const wfm = get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
+      );
+      return wfm.management;
     })
     .inSingletonScope();
 

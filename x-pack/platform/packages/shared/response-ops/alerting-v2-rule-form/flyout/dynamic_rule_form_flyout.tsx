@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
+import { RuleFormFlyout } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
@@ -30,39 +30,39 @@ export interface DynamicRuleFormFlyoutProps {
  * Use this for Discover integration where the form needs to react to external
  * query changes while preserving user-modified fields.
  *
- * The time field is automatically derived from the query's available date fields.
+ * The flyout manages its own submission via useCreateRule so it can control
+ * the loading state of its footer buttons. The time field is automatically
+ * derived from the query's available date fields.
  */
-const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
+const DynamicRuleFormFlyoutInner = ({
   push,
   onClose,
   query,
   services,
-}) => {
-  const { http, notifications } = services;
-
+}: DynamicRuleFormFlyoutProps) => {
   const { createRule, isLoading } = useCreateRule({
-    http,
-    notifications,
-    onSuccess: onClose,
+    http: services.http,
+    notifications: services.notifications,
   });
 
   const handleSubmit = (values: FormValues) => {
-    createRule(values);
+    createRule(values, { onSuccess: onClose });
   };
 
   return (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <DynamicRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={handleSubmit}
+        isSubmitting={isLoading}
         query={query}
         services={services}
+        layout="flyout"
       />
     </RuleFormFlyout>
   );
 };
 
-export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => {
+export const DynamicRuleFormFlyout = (props: DynamicRuleFormFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

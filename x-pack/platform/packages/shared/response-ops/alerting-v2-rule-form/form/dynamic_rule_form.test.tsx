@@ -9,32 +9,57 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { RULE_FORM_ID } from './constants';
+
+// Mock the yaml-rule-editor to avoid monaco editor setup
+jest.mock('@kbn/yaml-rule-editor', () => ({
+  YamlRuleEditor: () => <div data-test-subj="yamlRuleEditorMock">YAML Editor Mock</div>,
+}));
+
+// Mock the code-editor to avoid monaco editor setup
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+    <textarea
+      data-test-subj="codeEditorMock"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+  ESQL_LANG_ID: 'esql',
+}));
 
 // Mock the ES|QL utils to avoid complex setup
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn().mockResolvedValue({
     fields: {
       getByType: () => [{ name: '@timestamp', type: 'date' }],
+      toSpec: () => ({}),
     },
   }),
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([]),
 }));
 
+const createMockApplication = () => ({
+  currentAppId$: {
+    subscribe: () => ({ unsubscribe: () => {} }),
+  },
+});
+
 const createMockServices = () => ({
   http: httpServiceMock.createStartContract(),
+  notifications: notificationServiceMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
-  notifications: notificationServiceMock.createStartContract(),
+  application: createMockApplication() as any,
 });
 
 describe('DynamicRuleForm', () => {
   const defaultProps = {
-    formId: 'test-form',
     onSubmit: jest.fn(),
     query: 'FROM logs-* | STATS count = COUNT(*)',
     defaultTimeField: '@timestamp',
@@ -54,8 +79,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // The form should render
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('updates form state when query prop changes', async () => {
@@ -76,7 +100,7 @@ describe('DynamicRuleForm', () => {
     // The form should update - we can verify by checking that no errors occurred
     // and the component re-rendered successfully
     await waitFor(() => {
-      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Untitled rule')).toBeInTheDocument();
     });
   });
 
@@ -90,11 +114,22 @@ describe('DynamicRuleForm', () => {
       </Wrapper>
     );
 
-    // User modifies the name field
-    const nameInput = screen.getByRole('textbox', { name: 'Name' });
-    await user.type(nameInput, 'My Custom Rule');
+    // User modifies the name field — click to enter edit mode, then type
+    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
+    await user.click(readModeButton);
+
+    // Find the name input (not the combo box input) and replace content
+    const nameInput = screen.getByLabelText('Edit rule name');
+
+    // Select all text and replace with new value
+    await user.tripleClick(nameInput);
+    await user.keyboard('My Custom Rule');
 
     expect(nameInput).toHaveValue('My Custom Rule');
+
+    // Save the edit
+    const saveButton = screen.getByTestId('euiInlineEditModeSaveButton');
+    await user.click(saveButton);
 
     // Query prop changes (simulating Discover updating the query)
     rerender(
@@ -105,7 +140,7 @@ describe('DynamicRuleForm', () => {
 
     // User's input should be preserved (keepDirtyValues: true)
     await waitFor(() => {
-      expect(nameInput).toHaveValue('My Custom Rule');
+      expect(screen.getByText('My Custom Rule')).toBeInTheDocument();
     });
   });
 
@@ -145,7 +180,7 @@ describe('DynamicRuleForm', () => {
 
     // Form should have updated - component renders without errors
     await waitFor(() => {
-      expect(screen.getByText('Rule details')).toBeInTheDocument();
+      expect(screen.getByText('Untitled rule')).toBeInTheDocument();
     });
   });
 
@@ -160,7 +195,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // Form should still render
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('handles query prop changes from invalid to valid', () => {
@@ -179,7 +214,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // Form should still render
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('calls onSubmit with form values when form is submitted', async () => {
@@ -191,19 +226,28 @@ describe('DynamicRuleForm', () => {
       <Wrapper>
         <DynamicRuleForm
           {...defaultProps}
-          formId="submit-test-form"
           onSubmit={onSubmit}
           query="FROM logs-* | STATS count = COUNT(*)"
         />
       </Wrapper>
     );
 
-    // Fill in required field
-    const nameInput = screen.getByRole('textbox', { name: 'Name' });
-    await user.type(nameInput, 'Test Rule');
+    // Fill in required field — click inline edit title, then type
+    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
+    await user.click(readModeButton);
 
-    // Submit the form
-    const form = document.getElementById('submit-test-form');
+    const nameInput = screen.getByLabelText('Edit rule name');
+
+    // Select all and replace with new value
+    await user.tripleClick(nameInput);
+    await user.keyboard('Test Rule');
+
+    // Save the edit
+    const saveButton = screen.getByTestId('euiInlineEditModeSaveButton');
+    await user.click(saveButton);
+
+    // Submit the form using the constant RULE_FORM_ID
+    const form = document.getElementById(RULE_FORM_ID);
     expect(form).toBeInTheDocument();
 
     // Trigger form submission

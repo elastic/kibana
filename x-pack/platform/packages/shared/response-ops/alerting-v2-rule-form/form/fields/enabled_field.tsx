@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
-export const EnabledField: React.FC = () => {
+export const EnabledField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -28,6 +28,7 @@ export const EnabledField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <EuiSwitch
             label={

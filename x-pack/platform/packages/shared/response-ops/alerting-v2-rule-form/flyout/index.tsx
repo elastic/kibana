@@ -30,30 +30,32 @@ const LazyStandaloneRuleFormFlyout = React.lazy(() =>
   }))
 );
 
+// Export lazy components directly for consumers who need full control over Suspense
+export { LazyDynamicRuleFormFlyout, LazyStandaloneRuleFormFlyout, LazyRuleFormFlyout };
+
 /** Base flyout wrapper - use with DynamicRuleForm or StandaloneRuleForm as children */
-export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = (props) => (
+export const RuleFormFlyout = (props: RuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyRuleFormFlyout {...props} />
   </Suspense>
 );
 
 /** Pre-composed flyout for Discover integration - syncs with external query changes */
-export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => (
+export const DynamicRuleFormFlyout = (props: DynamicRuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyDynamicRuleFormFlyout {...props} />
   </Suspense>
 );
 
 /** Pre-composed flyout for classic experience - static initialization */
-export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => (
+export const StandaloneRuleFormFlyout = (props: StandaloneRuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyStandaloneRuleFormFlyout {...props} />
   </Suspense>
 );
 
-// Export types and constants
+// Export types
 export type { RuleFormFlyoutProps } from './rule_form_flyout';
-export { RULE_FORM_ID } from './rule_form_flyout';
 export type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
 export type { StandaloneRuleFormFlyoutProps } from './standalone_rule_form_flyout';
 export type * from '../form/types';

@@ -17,7 +17,7 @@ import { useRuleFormServices } from '../contexts';
 
 const PREFERRED_TIME_FIELD = '@timestamp';
 
-export const TimeFieldSelect: React.FC = () => {
+export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });
@@ -69,12 +69,11 @@ export const TimeFieldSelect: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.timeFieldLabel', {
               defaultMessage: 'Time Field',
             })}
-            fullWidth
             isInvalid={!!error}
             error={error?.message}
+            fullWidth
           >
             <EuiSelect
-              fullWidth
               options={timeFieldOptions}
               value={value ?? ''}
               onChange={handleChange}
@@ -84,6 +83,7 @@ export const TimeFieldSelect: React.FC = () => {
               inputRef={ref}
               isInvalid={!!error}
               isLoading={isLoading}
+              fullWidth
             />
           </EuiFormRow>
         );

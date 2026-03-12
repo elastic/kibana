@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -18,21 +18,19 @@ jest.mock('../../hooks/use_fetch_rule', () => ({
   useFetchRule: (id: string | undefined) => mockUseFetchRule(id),
 }));
 
-const mockCreateMutate = jest.fn();
-const mockUseCreateRule = jest.fn();
-jest.mock('../../hooks/use_create_rule', () => ({
-  useCreateRule: () => mockUseCreateRule(),
-}));
-
-const mockUpdateMutate = jest.fn();
-const mockUseUpdateRule = jest.fn();
-jest.mock('../../hooks/use_update_rule', () => ({
-  useUpdateRule: () => mockUseUpdateRule(),
-}));
-
-const mockDataPlugin = {
-  search: { search: jest.fn() },
-};
+// Mock StandaloneRuleForm to avoid monaco-editor resolution and verify props.
+// We keep the real mapRuleResponseToFormValues so the page logic is exercised.
+let capturedStandaloneProps: Record<string, unknown> = {};
+jest.mock('@kbn/alerting-v2-rule-form', () => {
+  const actual = jest.requireActual('@kbn/alerting-v2-rule-form');
+  return {
+    ...actual,
+    StandaloneRuleForm: (props: Record<string, unknown>) => {
+      capturedStandaloneProps = props;
+      return <div data-test-subj="mockStandaloneRuleForm" />;
+    },
+  };
+});
 
 const mockNavigateToUrl = jest.fn();
 
@@ -45,7 +43,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { navigateToUrl: mockNavigateToUrl };
     }
     if (token === 'data') {
-      return mockDataPlugin;
+      return { search: { search: jest.fn() } };
     }
     return {};
   },
@@ -54,29 +52,6 @@ jest.mock('@kbn/core-di-browser', () => ({
 
 jest.mock('@kbn/core-di', () => ({
   PluginStart: (key: string) => key,
-}));
-
-jest.mock('@kbn/yaml-rule-editor', () => ({
-  YamlRuleEditor: ({
-    value,
-    onChange,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    dataTestSubj: string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
-
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLSources: jest.fn().mockResolvedValue([]),
-  getEsqlColumns: jest.fn().mockResolvedValue([]),
 }));
 
 const createQueryClient = () =>
@@ -112,19 +87,24 @@ const renderEditPage = (ruleId: string = 'rule-1') => {
   );
 };
 
+const renderClonePage = (sourceRuleId: string = 'rule-1') => {
+  return render(
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[`/create?cloneFrom=${sourceRuleId}`]}>
+        <I18nProvider>
+          <Route path="/create">
+            <RuleFormPage />
+          </Route>
+        </I18nProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+};
+
 describe('RuleFormPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCreateRule.mockReturnValue({
-      mutate: mockCreateMutate,
-      isLoading: false,
-      error: null,
-    });
-    mockUseUpdateRule.mockReturnValue({
-      mutate: mockUpdateMutate,
-      isLoading: false,
-      error: null,
-    });
+    capturedStandaloneProps = {};
   });
 
   describe('create mode', () => {
@@ -134,20 +114,24 @@ describe('RuleFormPage', () => {
       expect(screen.getByRole('heading', { name: 'Create rule' })).toBeInTheDocument();
     });
 
-    it('renders the YAML editor with default content', () => {
+    it('renders StandaloneRuleForm', () => {
       renderCreatePage();
 
-      expect(screen.getByTestId('alertingV2CreateRuleYaml')).toBeInTheDocument();
+      expect(screen.getByTestId('mockStandaloneRuleForm')).toBeInTheDocument();
     });
 
-    it('navigates back to list on cancel', () => {
+    it('passes default query and no ruleId or initialValues', () => {
       renderCreatePage();
 
-      fireEvent.click(screen.getByTestId('cancelCreateRule'));
+      expect(capturedStandaloneProps.query).toBe('FROM logs-*\n| LIMIT 1');
+      expect(capturedStandaloneProps.ruleId).toBeUndefined();
+      expect(capturedStandaloneProps.initialValues).toBeUndefined();
+    });
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2'
-      );
+    it('passes includeSubmission as true', () => {
+      renderCreatePage();
+
+      expect(capturedStandaloneProps.includeSubmission).toBe(true);
     });
   });
 
@@ -198,7 +182,290 @@ describe('RuleFormPage', () => {
       renderEditPage();
 
       expect(screen.getByText('Edit rule')).toBeInTheDocument();
-      expect(screen.getByText('Save changes')).toBeInTheDocument();
+    });
+
+    it('passes ruleId to StandaloneRuleForm', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Test Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage('rule-1');
+
+      expect(capturedStandaloneProps.ruleId).toBe('rule-1');
+    });
+
+    it('passes initialValues mapped from the fetched rule', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          time_field: '@timestamp',
+          schedule: { every: '10m', lookback: '2m' },
+          evaluation: {
+            query: {
+              base: 'FROM logs-* | STATS count() BY host.name',
+              condition: 'WHERE count > 5',
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          recovery_policy: { type: 'no_breach' },
+          state_transition: { pending_count: 3, pending_timeframe: '5m' },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage('rule-1');
+
+      const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
+      expect(initialValues).toBeDefined();
+
+      // Metadata
+      const metadata = initialValues.metadata as Record<string, unknown>;
+      expect(metadata.name).toBe('My Alert Rule');
+      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.owner).toBe('team-a');
+      expect(metadata.enabled).toBe(true);
+
+      // Schedule
+      const schedule = initialValues.schedule as Record<string, unknown>;
+      expect(schedule.every).toBe('10m');
+      expect(schedule.lookback).toBe('2m');
+
+      // Evaluation
+      const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
+      expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+      expect(evaluation.query.condition).toBe('WHERE count > 5');
+
+      // Grouping
+      const grouping = initialValues.grouping as { fields: string[] };
+      expect(grouping.fields).toEqual(['host.name']);
+
+      // Recovery policy
+      const recoveryPolicy = initialValues.recoveryPolicy as Record<string, unknown>;
+      expect(recoveryPolicy.type).toBe('no_breach');
+
+      // State transition
+      const stateTransition = initialValues.stateTransition as Record<string, unknown>;
+      expect(stateTransition.pendingCount).toBe(3);
+      expect(stateTransition.pendingTimeframe).toBe('5m');
+    });
+
+    it('passes the base query from the fetched rule as the query prop', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Test' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderEditPage();
+
+      expect(capturedStandaloneProps.query).toBe('FROM metrics-* | LIMIT 10');
+    });
+  });
+
+  describe('clone mode', () => {
+    it('shows loading spinner while fetching source rule', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('shows error state when source rule fetch fails', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: new Error('Rule not found'),
+      });
+
+      renderClonePage();
+
+      expect(screen.getByText('Failed to load source rule for cloning')).toBeInTheDocument();
+      expect(screen.getByText('Rule not found')).toBeInTheDocument();
+    });
+
+    it('renders the "Clone rule" page title', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Source Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(screen.getByRole('heading', { name: 'Clone rule' })).toBeInTheDocument();
+    });
+
+    it('does not pass ruleId to StandaloneRuleForm (creates a new rule)', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Source Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(capturedStandaloneProps.ruleId).toBeUndefined();
+    });
+
+    it('appends " (clone)" to the rule name in initialValues', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          time_field: '@timestamp',
+          schedule: { every: '10m', lookback: '2m' },
+          evaluation: {
+            query: {
+              base: 'FROM logs-* | STATS count() BY host.name',
+              condition: 'WHERE count > 5',
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          recovery_policy: { type: 'no_breach' },
+          state_transition: { pending_count: 3, pending_timeframe: '5m' },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
+      expect(initialValues).toBeDefined();
+
+      const metadata = initialValues.metadata as Record<string, unknown>;
+      expect(metadata.name).toBe('My Alert Rule (clone)');
+    });
+
+    it('preserves all source rule configurations in initialValues', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          time_field: '@timestamp',
+          schedule: { every: '10m', lookback: '2m' },
+          evaluation: {
+            query: {
+              base: 'FROM logs-* | STATS count() BY host.name',
+              condition: 'WHERE count > 5',
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          recovery_policy: { type: 'no_breach' },
+          state_transition: { pending_count: 3, pending_timeframe: '5m' },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
+
+      // Metadata (labels, owner preserved)
+      const metadata = initialValues.metadata as Record<string, unknown>;
+      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.owner).toBe('team-a');
+
+      // Schedule
+      const schedule = initialValues.schedule as Record<string, unknown>;
+      expect(schedule.every).toBe('10m');
+      expect(schedule.lookback).toBe('2m');
+
+      // Evaluation
+      const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
+      expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+      expect(evaluation.query.condition).toBe('WHERE count > 5');
+
+      // Grouping
+      const grouping = initialValues.grouping as { fields: string[] };
+      expect(grouping.fields).toEqual(['host.name']);
+
+      // Recovery policy
+      const recoveryPolicy = initialValues.recoveryPolicy as Record<string, unknown>;
+      expect(recoveryPolicy.type).toBe('no_breach');
+
+      // State transition
+      const stateTransition = initialValues.stateTransition as Record<string, unknown>;
+      expect(stateTransition.pendingCount).toBe(3);
+      expect(stateTransition.pendingTimeframe).toBe('5m');
+    });
+
+    it('passes the base query from the source rule as the query prop', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Test' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(capturedStandaloneProps.query).toBe('FROM metrics-* | LIMIT 10');
     });
   });
 });

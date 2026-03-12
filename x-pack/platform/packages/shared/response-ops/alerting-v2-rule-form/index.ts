@@ -6,13 +6,34 @@
  */
 
 // Pre-composed flyouts (lazy loaded) - recommended for most use cases
-export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout, RULE_FORM_ID } from './flyout';
+export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
+
+// Lazy components (without Suspense wrapper) - for consumers who need full control
+export {
+  LazyDynamicRuleFormFlyout,
+  LazyStandaloneRuleFormFlyout,
+  LazyRuleFormFlyout,
+} from './flyout';
+
+// Constants
+export { RULE_FORM_ID } from './form/constants';
 
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';
 
+// Preview component (lazy loaded) - for displaying rule query results preview
+export { RuleResultsPreview } from './form';
+
 // Context - for consumers who need custom integrations
-export { RuleFormServicesProvider, useRuleFormServices } from './form';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
+
+// Mappers
+export {
+  mapFormValuesToRuleRequest,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+  mapRuleResponseToFormValues,
+} from './form';
 
 // Types
 export type {
@@ -20,6 +41,9 @@ export type {
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,
+  RuleFormMeta,
+  RuleFormLayout,
+  RuleRequestCommon,
 } from './form';
 
 export type {

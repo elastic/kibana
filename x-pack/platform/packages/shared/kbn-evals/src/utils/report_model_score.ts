@@ -55,6 +55,7 @@ export async function mapToEvaluationScoreDocuments({
         example: {
           id: exampleId,
           index: taskRun.exampleIndex,
+          input: taskRun.input ?? null,
           dataset: {
             id: datasetId,
             name: datasetName,
@@ -63,6 +64,7 @@ export async function mapToEvaluationScoreDocuments({
         task: {
           trace_id: taskRun.traceId ?? null,
           repetition_index: taskRun.repetition,
+          output: taskRun.output ?? null,
           model: taskModel,
         },
         evaluator: {

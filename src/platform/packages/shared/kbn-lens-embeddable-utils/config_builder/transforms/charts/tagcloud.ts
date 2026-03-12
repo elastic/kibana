@@ -72,9 +72,7 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
     minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
     showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
     tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.tag_by.color) }
-      : {}),
+    ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
   };
 }
 
@@ -121,13 +119,13 @@ function getTagcloudTagBy(
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
+  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
 
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
       : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
-    ...(colorMapping ? { color: colorMapping } : {}),
+    ...(color && { color }),
   };
 }
 
@@ -220,7 +218,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
