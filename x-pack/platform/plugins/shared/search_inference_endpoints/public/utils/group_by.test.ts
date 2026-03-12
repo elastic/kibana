@@ -94,30 +94,30 @@ describe('group by utils', () => {
         expect(result.anthropic.endpoints).toEqual(anthropicEndpoints);
       });
 
-      it('groups Elastic-branded endpoints (jina, elser, rainbow-sprinkles, rerank) under the elastic group', () => {
+      it('groups Elastic-branded endpoints (jina, elser, rerank) under the elastic group', () => {
         const elasticModelEndpoints = InferenceEndpoints.filter((e) =>
-          [
-            '.elser-2-elastic',
-            '.jina-embeddings-v3',
-            '.rainbow-sprinkles-elastic',
-            '.rerank-v1-elasticsearch',
-          ].includes(e.inference_id)
+          ['.elser-2-elastic', '.jina-embeddings-v3', '.rerank-v1-elasticsearch'].includes(
+            e.inference_id
+          )
         );
         const result = elasticModelEndpoints.reduce(reducer, {});
 
         expect(Object.keys(result)).toEqual([ELASTIC_GROUP_ID]);
-        expect(result[ELASTIC_GROUP_ID].endpoints).toHaveLength(4);
+        expect(result[ELASTIC_GROUP_ID].endpoints).toHaveLength(3);
       });
 
-      it('groups endpoints with no recognised model id by their model id directly', () => {
-        const unknownModelEndpoints = InferenceEndpoints.filter((e) =>
-          ['.gp-llm-v2-chat_completion', '.gp-llm-v2-completion'].includes(e.inference_id)
+      it('groups gp-llm-v2 and rainbow-sprinkles endpoints under the anthropic group', () => {
+        const anthropicEndpoints = InferenceEndpoints.filter((e) =>
+          [
+            '.gp-llm-v2-chat_completion',
+            '.gp-llm-v2-completion',
+            '.rainbow-sprinkles-elastic',
+          ].includes(e.inference_id)
         );
-        const result = unknownModelEndpoints.reduce(reducer, {});
+        const result = anthropicEndpoints.reduce(reducer, {});
 
-        expect(Object.keys(result)).toEqual(['gp-llm-v2']);
-        expect(result['gp-llm-v2'].groupLabel).toBe('gp-llm-v2');
-        expect(result['gp-llm-v2'].endpoints).toHaveLength(2);
+        expect(Object.keys(result)).toEqual(['anthropic']);
+        expect(result.anthropic.endpoints).toHaveLength(3);
       });
 
       it('groups endpoints with no model id at all under the unknown model fallback', () => {
