@@ -25,7 +25,7 @@ export const AgentBuilderPlugins = () => {
         pageTitle={labels.plugins.title}
         description={i18n.translate('xpack.agentBuilder.plugins.pluginsDescription', {
           defaultMessage:
-            'Plugins are installable packages that bundle agent capabilities such as skills, following the Claude agent plugin specification.',
+            'Plugins are installable packages that bundle agent capabilities such as skills, and are compatible with the Claude agent plugin specification.',
         })}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
