@@ -27,7 +27,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
 }
 
 export const useToolbarActions = ({
-  allMetricFields,
+  metricItems,
   dimensions,
   renderToggleActions,
   onDimensionsChange: onDimensionsChangeProp,
@@ -52,7 +52,7 @@ export const useToolbarActions = ({
     () => [
       hideDimensionsSelector ? null : (
         <DimensionsSelector
-          fields={allMetricFields}
+          metricItems={metricItems}
           dimensions={dimensions}
           onChange={onDimensionsSelectionChange}
           selectedDimensions={selectedDimensions}
@@ -65,7 +65,7 @@ export const useToolbarActions = ({
     [
       isSmallScreen,
       selectedDimensions,
-      allMetricFields,
+      metricItems,
       dimensions,
       onDimensionsSelectionChange,
       hideDimensionsSelector,

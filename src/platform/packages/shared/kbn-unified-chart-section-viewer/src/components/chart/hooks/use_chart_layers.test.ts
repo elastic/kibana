@@ -20,12 +20,12 @@ jest.mock('../../../common/utils', () => ({
 
 describe('useChartLayers', () => {
   const mockMetric: MetricField = {
-    name: 'system.cpu.total.norm.pct',
-    type: ES_FIELD_TYPES.DOUBLE,
-    instrument: 'gauge',
-    unit: 'percent',
-    index: 'metrics-*',
-    dimensions: [],
+    metricName: 'system.cpu.total.norm.pct',
+    dataStream: 'metrics-*',
+    fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+    metricTypes: ['gauge'],
+    units: ['percent'],
+    dimensionFields: [],
   };
 
   it('should return an area chart configuration when no dimensions are provided', () => {
@@ -81,7 +81,7 @@ describe('useChartLayers', () => {
   });
 
   it('should include format options if the metric has a unit', () => {
-    const metricWithUnit: MetricField = { ...mockMetric, unit: 'bytes' };
+    const metricWithUnit: MetricField = { ...mockMetric, units: ['bytes'] };
     const { result } = renderHook(() =>
       useChartLayers({
         metric: metricWithUnit,
@@ -94,7 +94,7 @@ describe('useChartLayers', () => {
   });
 
   it('should not include format options if the metric has no unit', () => {
-    const metricWithoutUnit: MetricField = { ...mockMetric, unit: undefined };
+    const metricWithoutUnit: MetricField = { ...mockMetric, units: [] };
     const { result } = renderHook(() =>
       useChartLayers({
         metric: metricWithoutUnit,

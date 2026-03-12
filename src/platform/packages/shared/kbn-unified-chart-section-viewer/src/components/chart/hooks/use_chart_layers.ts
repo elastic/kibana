@@ -9,7 +9,7 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, MetricField } from '../../../types';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
@@ -19,7 +19,7 @@ import {
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
@@ -35,19 +35,19 @@ interface UseChartLayersParams {
  */
 export const useChartLayers = ({
   dimensions = [],
-  metric,
+  metricItem,
   color,
   seriesType,
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
-    const type = getPrimaryValue(metric.fieldtypes);
-    const instrument = getPrimaryValue(metric.metricTypes);
-    const resolvedUnit = getPrimaryValue(metric.units);
+    const type = getPrimaryValue(metricItem.fieldTypes);
+    const instrument = getPrimaryValue(metricItem.metricTypes);
+    const resolvedUnit = getPrimaryValue(metricItem.units);
     const metricField = createMetricAggregation({
       type,
       instrument,
-      metricName: metric.name,
+      metricName: metricItem.metricName,
       customFunction,
     });
     const hasDimensions = dimensions.length > 0;
@@ -76,10 +76,10 @@ export const useChartLayers = ({
     color,
     customFunction,
     dimensions,
-    metric.fieldtypes,
-    metric.metricTypes,
-    metric.name,
-    metric.units,
+    metricItem.fieldTypes,
+    metricItem.metricTypes,
+    metricItem.metricName,
+    metricItem.units,
     seriesType,
   ]);
 };

@@ -19,7 +19,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { MetricField, UnifiedMetricsGridProps } from '../../../types';
+import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
@@ -37,12 +37,12 @@ export interface MetricsExperienceGridContentProps
     'services' | 'fetchParams' | 'onBrushEnd' | 'onFilter' | 'actions' | 'histogramCss'
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-  fields: MetricField[];
+  metricItems: ParsedMetricItem[];
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
-  fields,
+  metricItems,
   services,
   discoverFetch$,
   fetchParams,
@@ -63,7 +63,7 @@ export const MetricsExperienceGridContent = ({
     totalPages = 0,
     totalCount: filteredFieldsCount = 0,
   } = usePagination({
-    items: fields,
+    items: metricItems,
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
@@ -74,8 +74,11 @@ export const MetricsExperienceGridContent = ({
   );
 
   const getUserMessages = useCallback(
-    (metric: MetricField) =>
-      isLegacyHistogram(getPrimaryValue(metric.fieldtypes), getPrimaryValue(metric.metricTypes))
+    (metricItem: ParsedMetricItem) =>
+      isLegacyHistogram(
+        getPrimaryValue(metricItem.fieldTypes),
+        getPrimaryValue(metricItem.metricTypes)
+      )
         ? LEGACY_HISTOGRAM_USER_MESSAGES
         : undefined,
     []
@@ -148,7 +151,7 @@ export const MetricsExperienceGridContent = ({
           columns={columns}
           dimensions={selectedDimensions}
           services={services}
-          fields={currentPageFields}
+          metricItems={currentPageFields}
           onBrushEnd={onBrushEnd}
           actions={actions}
           onFilter={onFilter}

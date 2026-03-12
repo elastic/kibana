@@ -9,12 +9,12 @@
 
 import { stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { MetricField } from '../../../types';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { getPrimaryValue } from '../get_primary_value';
+import type { ParsedMetricItem } from '../../../types';
 
 interface CreateESQLQueryParams {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
 }
@@ -30,12 +30,12 @@ interface CreateESQLQueryParams {
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
-  metric,
+  metricItem,
   splitAccessors = [],
   whereStatements = [],
 }: CreateESQLQueryParams) {
-  const { name: metricField, metricTypes, fieldtypes: fieldTypes, dataStreams } = metric;
-  const index = getPrimaryValue(dataStreams) ?? 'unknown';
+  const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
+  const index = dataStream;
   const type = getPrimaryValue(fieldTypes);
   const instrument = getPrimaryValue(metricTypes);
   const source = timeseries(index);
@@ -52,14 +52,14 @@ export function createESQLQuery({
       `${createMetricAggregation({
         type,
         instrument,
-        placeholderName: 'metricField',
+        placeholderName: 'metricName',
       })} BY ${createTimeBucketAggregation({})}${
         splitAccessors.length > 0
           ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
           : ''
       }`,
       {
-        metricField,
+        metricName,
       }
     )
   );

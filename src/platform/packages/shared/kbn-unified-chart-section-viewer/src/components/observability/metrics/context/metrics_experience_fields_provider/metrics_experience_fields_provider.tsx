@@ -12,7 +12,7 @@ import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/ty
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Dimension, MetricField, ParsedMetricsInfo } from '../../../../../types';
+import type { Dimension, MetricField } from '../../../../../types';
 import { createSampleRowByField } from './helpers/fields_parser';
 import { extractWhereCommand } from '../../../../../utils/extract_where_command';
 

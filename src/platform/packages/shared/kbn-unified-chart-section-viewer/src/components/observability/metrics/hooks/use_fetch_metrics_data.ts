@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Dimension, ParsedMetricsInfo } from '../../../../..';
+import type { Dimension, ParsedMetricItem } from '../../../../..';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
@@ -20,7 +20,7 @@ import { parseMetricsResponse } from '../utils/parse_metrics_response';
 export interface MetricsInfoResponse {
   loading: boolean;
   error: Error | null;
-  metricsItems: ParsedMetricItem[];
+  metricItems: ParsedMetricItem[];
   allDimensions: string[];
 }
 
@@ -40,7 +40,7 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
-}): MetricsDataResponse {
+}): MetricsInfoResponse {
   const esql =
     fetchParams.query && isOfAggregateQueryType(fetchParams.query)
       ? fetchParams.query.esql
@@ -49,7 +49,7 @@ export function useFetchMetricsData({
     isComponentVisible && !!esql && !!fetchParams.isESQLQuery && !hasTransformationalCommand(esql);
 
   const [{ value, error, loading }, executeFetch] =
-    useAsyncFn(async (): Promise<ParsedMetricsInfo | null> => {
+    useAsyncFn(async (): Promise<ParsedMetricItem | null> => {
       const dimensions = selectedDimensionNames?.map((dimension) => dimension.name);
       const metricsInfoQuery = buildMetricsInfoQuery(esql, dimensions);
       const result = await executeEsqlQuery({
@@ -104,7 +104,7 @@ export function useFetchMetricsData({
   return {
     loading,
     error,
-    metricItems: value?.metricItems ?? [],
-    allDimensions: value?.allDimensions ?? [],
+    metricItems: value?.metricItems.sort((a, b) => a.metricName.localeCompare(b.metricName)) ?? [],
+    allDimensions: value?.allDimensions.sort((a, b) => a.localeCompare(b)) ?? [],
   };
 }

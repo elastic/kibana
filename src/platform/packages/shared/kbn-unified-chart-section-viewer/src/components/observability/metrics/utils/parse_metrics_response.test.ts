@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsESQLResponseObject } from './parse_metrics_response';
+import type { MetricsESQLResponseObject } from '../../../../types';
 import { parseMetricsResponse } from './parse_metrics_response';
 
 describe('parseMetricsResponse', () => {
-  it('returns empty metrics and allDimensions for empty input', () => {
+  it('returns empty metricItems and allDimensions for empty input', () => {
     expect(parseMetricsResponse([])).toEqual({
-      metrics: [],
+      metricItems: [],
       allDimensions: [],
     });
   });
 
-  it('returns empty metrics and allDimensions for empty array', () => {
+  it('returns empty metricItems and allDimensions for empty array', () => {
     const response: MetricsESQLResponseObject[] = [];
     expect(parseMetricsResponse(response)).toEqual({
-      metrics: [],
+      metricItems: [],
       allDimensions: [],
     });
   });
@@ -39,7 +39,7 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result).toEqual({
-      metrics: [
+      metricItems: [
         {
           metricName: 'my.metric',
           dataStream: 'my-index',
@@ -66,7 +66,7 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result).toEqual({
-      metrics: [
+      metricItems: [
         {
           metricName: 'cpu.usage',
           dataStream: 'my-index',
@@ -93,7 +93,7 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result).toEqual({
-      metrics: [
+      metricItems: [
         {
           metricName: 'cpu.usage',
           dataStream: 'stream-a',
@@ -128,7 +128,7 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result).toEqual({
-      metrics: [
+      metricItems: [
         {
           metricName: 'my.metric',
           dataStream: 'my-index',
@@ -155,7 +155,7 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result).toEqual({
-      metrics: [
+      metricItems: [
         {
           metricName: 'my.metric',
           dataStream: 'my-index',

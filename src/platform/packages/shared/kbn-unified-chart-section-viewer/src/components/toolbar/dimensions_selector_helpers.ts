@@ -28,5 +28,5 @@ export const getOptionDisabledState = ({
 }: OptionDisabledStateParams): boolean => {
   if (singleSelection) return false;
   if (isSelected) return false;
-  return !isIntersecting || isAtMaxLimit;
+  return isAtMaxLimit;
 };

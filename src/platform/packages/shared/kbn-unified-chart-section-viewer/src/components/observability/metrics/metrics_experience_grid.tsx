@@ -55,7 +55,6 @@ export const MetricsExperienceGrid = ({
     selectedDimensionNames: selectedDimensions,
   });
 
-  const visibleMetricFields = metricItems.map((item) => ({ name: item.metricName }));
   // TODO: simplify the dimensions to a string array
   const dimensions = allDimensions.map((name) => ({ name }));
 
@@ -139,7 +138,7 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={visibleMetricFields}
+        metricItems={metricItems}
         services={services}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}

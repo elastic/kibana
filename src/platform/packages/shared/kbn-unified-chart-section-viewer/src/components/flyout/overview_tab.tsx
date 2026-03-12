@@ -48,11 +48,11 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
-    if (!metric.dimensions || metric.dimensions.length === 0) {
+    if (!metric.dimensionFields || metric.dimensionFields.length === 0) {
       return [];
     }
-    return [...metric.dimensions].sort((a, b) => a.localeCompare(b));
-  }, [metric.dimensions]);
+    return [...metric.dimensionFields].sort((a, b) => a.localeCompare(b));
+  }, [metric.dimensionFields]);
 
   // Calculate pagination - 0 means show all
   const pageSize = itemsPerPage === 0 ? sortedDimensions.length : itemsPerPage;
@@ -92,7 +92,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           defaultMessage: 'Data stream',
         }),
         <EuiText color="primary" size="s">
-          {metric.dataStreams?.[0] ?? ''}
+          {metric.dataStream ?? ''}
         </EuiText>
       ),
       createDescriptionListItem(
@@ -100,7 +100,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           defaultMessage: 'Field type',
         }),
         <div>
-          <EuiBadge>{metric.fieldtypes?.[0] ?? ''}</EuiBadge>
+          <EuiBadge>{metric.fieldTypes?.[0] ?? ''}</EuiBadge>
         </div>
       ),
       ...(unitLabel
@@ -128,13 +128,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
           ]
         : []),
     ],
-    [
-      metric.dataStreams,
-      metric.fieldtypes,
-      metric.metricTypes,
-      unitLabel,
-      createDescriptionListItem,
-    ]
+    [metric.dataStream, metric.fieldTypes, metric.metricTypes, unitLabel, createDescriptionListItem]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the container height

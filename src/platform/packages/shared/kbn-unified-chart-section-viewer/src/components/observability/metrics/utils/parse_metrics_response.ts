@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsESQLResponseObject, ParsedMetricsResult } from '../../../../types';
+import type {
+  MetricsESQLResponseObject,
+  ParsedMetricItem,
+  ParsedMetricsResult,
+} from '../../../../types';
 import { toArray } from './to_array';
 
 export const parseMetricsResponse = (

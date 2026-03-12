@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { EsqlQueryTab } from './esql_query_tab';
 
@@ -43,7 +43,7 @@ const tabs = [
 ];
 
 interface MetricFlyoutBodyProps {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   description?: string;
   esqlQuery?: string;
 }
