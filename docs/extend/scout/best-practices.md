@@ -19,6 +19,7 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 | Question                                 | Section                                                                                                                |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
+| How should I **name** my tests?          | [Write descriptive test names](#write-descriptive-test-names)                                                          |
 | Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
 | Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
 | Where should **shared values** live?     | [Use constants for shared test values](#use-constants-for-shared-test-values)                                          |
@@ -27,21 +28,21 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 
 **UI tests**
 
-| Question                                                             | Section                                                                                                       |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| What should I test in **UI tests** vs **API tests**?                 | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness)          |
-| Should my tests run in **parallel** or **sequentially**?             | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible)                           |
-| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows)                                    |
-| How should I set up **test data**?                                   | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown)       |
-| How do I skip **onboarding screens**?                                | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript)                       |
-| Do I need to add explicit **waits** everywhere?                      | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting)                                         |
-| How do I **wait for the UI** to be ready?                            | [Wait for UI updates when the next action requires it](#wait-for-ui-updates-when-the-next-action-requires-it) |
-| How do I test **tables** and **complex components**?                 | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render)                   |
-| What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                                   |
-| Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                                  |
-| How do I write good **page objects**?                                | [Page object tips](#page-object-tips)                                                                         |
-| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                            |
-| Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                       |
+| Question                                                             | Section                                                                                                 |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| What should I test in **UI tests** vs **API tests**?                 | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness)    |
+| Should my tests run in **parallel** or **sequentially**?             | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible)                     |
+| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows)                              |
+| How should I set up **test data**?                                   | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown) |
+| Do I need to add explicit **waits** everywhere?                      | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting)                                   |
+| How do I **wait for the UI** to be ready?                            | [Wait for UI updates after actions](#wait-for-ui-updates-when-the-next-action-requires-it)              |
+| How do I test **tables** and **complex components**?                 | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render)             |
+| What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                             |
+| Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                            |
+| How do I write good **page objects**?                                | [Use existing page objects](#use-existing-page-objects-to-interact-with-the-kibana-ui)                  |
+| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                      |
+| How do I skip **onboarding screens**?                                | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript)                 |
+| Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                 |
 
 **API tests**
 
@@ -60,20 +61,14 @@ Best practices that apply to both UI and API tests.
 
 Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
-- Tag suites with [deployment tags](./deployment-tags.md) and use `--grep` to target environments.
-- Prefer portable assumptions: don’t depend on “special” Cloud deployment tweaks for correctness.
+- Use [deployment tags](./deployment-tags.md) to skip tests that don’t apply to a given environment (for example, a feature that only exists in stateful deployments).
+- Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 
 ### Run tests multiple times to catch flakiness [use-the-flaky-test-runner-to-catch-flaky-tests-early]
 
 When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
 
-Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed.
-
-For how to reproduce flakiness locally and in CI (including `--grep` guidance), see [Debug flaky tests](./debugging.md#scout-debugging-flaky-tests).
-
-```bash
-/flaky scoutConfig:<Playwright config path>:<number of runs>
-```
+Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](./debugging.md#scout-debugging-flaky-tests) for guidance.
 
 ### Keep test suites independent [keep-test-suites-independent]
 
@@ -81,9 +76,38 @@ For how to reproduce flakiness locally and in CI (including `--grep` guidance), 
 - Avoid nested `describe` blocks. Use `test.step` for structure inside a test.
 - Don’t rely on test file execution order (it’s [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order)).
 
+### Write descriptive test names [write-descriptive-test-names]
+
+Test names should read like a sentence describing expected behavior. Clear names make failures self-explanatory and test suites scannable.
+
+:::::{dropdown} Examples
+❌ **Don’t:**
+
+```ts
+test('test 1', async ({ page }) => {
+  /* ... */
+});
+test('works correctly', async ({ page }) => {
+  /* ... */
+});
+```
+
+✔️ **Do:**
+
+```ts
+test('viewer can see dashboard but cannot edit', async ({ page }) => {
+  /* ... */
+});
+test('returns 403 when missing read privilege', async ({ apiClient }) => {
+  /* ... */
+});
+```
+
+:::::
+
 ### Organize test suites by role and user flow [organize-test-suites-by-role-and-user-flow]
 
-Prefer “one role + one flow per file”. Put shared login/navigation in `beforeEach`.
+Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). Put shared login/navigation in `beforeEach`.
 
 ```ts
 // dashboard_viewer.spec.ts
@@ -112,6 +136,19 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 
 Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`.
 
+:::::{dropdown} Examples
+❌ **Don’t:** put cleanup at the end of the test body—it’s skipped if the test fails:
+
+```ts
+test('creates and deletes index', async ({ esClient }) => {
+  await esClient.indices.create({ index: testIndexName });
+  // ... assertions ...
+  await esClient.indices.delete({ index: testIndexName }); // skipped on failure!
+});
+```
+
+✔️ **Do:** use hooks so cleanup always runs:
+
 ```ts
 test.afterEach(async ({ esClient, log }) => {
   try {
@@ -121,6 +158,8 @@ test.afterEach(async ({ esClient, log }) => {
   }
 });
 ```
+
+:::::
 
 ### Use constants for shared test values [use-constants-for-shared-test-values]
 
@@ -152,7 +191,22 @@ Avoid `admin` unless there’s no alternative. Minimal permissions catch real pe
 
 See [browser authentication](./browser-auth.md) and [API authentication](./api-auth.md).
 
+:::::{dropdown} Examples
+❌ **Don’t:** default to `admin` for convenience:
+
 ```ts
+test.beforeEach(async ({ browserAuth }) => {
+  await browserAuth.loginAsAdmin();
+});
+```
+
+✔️ **Do:** use a built-in role when it fits (`viewer`, `editor`, etc.), or create a custom one for tighter scoping:
+
+```ts
+// built-in role
+await browserAuth.loginAsViewer();
+
+// custom role for finer-grained control
 await browserAuth.loginWithCustomRole('logs_analyst', {
   elasticsearch: {
     indices: [{ names: ['logs-*'], privileges: ['read'] }],
@@ -160,6 +214,8 @@ await browserAuth.loginWithCustomRole('logs_analyst', {
   kibana: [{ spaces: ['*'], base: [], feature: { discover: ['read'] } }],
 });
 ```
+
+:::::
 
 ---
 
@@ -171,10 +227,38 @@ Best practices specific to UI tests.
 
 Default to [parallel UI suites](./parallelism.md) when possible. Parallel workers share the same Kibana/ES deployment, but run in isolated Spaces.
 
-| Run in **parallel**                                                                                 | Run **sequentially**                           |
-| --------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| UI tests (most suites)                                                                              | API tests                                      |
-| Suites that can share pre-ingested data (often via the [global setup hook](./global-setup-hook.md)) | Suites requiring a “clean” Elasticsearch state |
+| Mode           | When to use                                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often via the [global setup hook](./global-setup-hook.md)) |
+| **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                            |
+
+### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
+
+UI tests should answer “does this feature work for the user?”—verify that components render, respond to interaction, and navigate correctly. Leave exact data validation (computed values, aggregation results, edge cases) to API or unit tests, which are faster and less brittle.
+
+| What you’re testing                                                         | Recommended layer  |
+| --------------------------------------------------------------------------- | ------------------ |
+| User flows, navigation, rendering                                           | Scout UI test      |
+| Data correctness, API contracts, edge cases                                 | Scout API test     |
+| Isolated component logic (loading/error states, tooltips, field validation) | RTL/Jest unit test |
+
+:::::{dropdown} Examples
+❌ **Don’t:** verify computed values that belong in an API test:
+
+```ts
+await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
+await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
+```
+
+✔️ **Do:** verify that the UI renders and responds to interaction:
+
+```ts
+await expect(page.testSubj.locator('datasetQualityTable-loaded')).toBeVisible();
+await page.testSubj.click('tableSortByLastActivity');
+await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
+```
+
+:::::
 
 ### Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
 
@@ -192,28 +276,23 @@ test('navigates through pages', async ({ pageObjects }) => {
 });
 ```
 
-### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
-
-Keep UI tests focused on:
-
-- layout and rendering
-- navigation and interaction
-- “does this feature work” at a user level
-
-Validate data correctness and edge cases with API/unit tests instead.
-
-```ts
-// basic render checks: table is visible, expected headers exist
-await expect(page.testSubj.locator('datasetQualityTable-loaded')).toBeVisible();
-await expect(page.testSubj.locator('datasetQualityTable').locator('th')).toContainText([
-  'Dataset',
-  'Last Activity',
-]);
-```
-
 ### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
 
 Setup/teardown via UI is slow and brittle. Prefer Kibana APIs and fixtures.
+
+:::::{dropdown} Examples
+❌ **Don’t:** create test data through the UI:
+
+```ts
+test.beforeEach(async ({ page, browserAuth }) => {
+  await browserAuth.loginAsAdmin();
+  await page.testSubj.click('createDataViewButton');
+  await page.testSubj.fill('indexPatternInput', 'logs-*');
+  await page.testSubj.click('saveDataViewButton');
+});
+```
+
+✔️ **Do:** use API fixtures:
 
 ```ts
 test.beforeEach(async ({ uiSettings, kbnClient }) => {
@@ -222,57 +301,87 @@ test.beforeEach(async ({ uiSettings, kbnClient }) => {
 });
 ```
 
-### Skip onboarding with `addInitScript` [skip-onboarding-flows-with-addinitscript]
-
-If a page has onboarding/getting-started state, set localStorage before navigation.
-
-```ts
-test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
-  await browserAuth.loginAsViewer();
-  await page.addInitScript(() => {
-    window.localStorage.setItem('gettingStartedVisited', 'true');
-  });
-  await pageObjects.homepage.goto();
-});
-```
+:::::
 
 ### Use Playwright auto-waiting [leverage-playwright-auto-waiting]
 
-Playwright actions and [web-first assertions](https://playwright.dev/docs/best-practices#use-web-first-assertions) already wait/retry.
+Playwright actions and [web-first assertions](https://playwright.dev/docs/best-practices#use-web-first-assertions) already wait/retry. Don’t add redundant waits.
 
-- Avoid “pre-waits” like `waitForSelector()` before `click()`/`fill()` unless the **next step** depends on a new UI state (see below).
-- Avoid manual `waitFor()` before assertions like `toBeVisible()`—they already retry.
+:::::{dropdown} Examples
+❌ **Don’t:** add unnecessary waits before actions or assertions:
+
+```ts
+await page.testSubj.waitForSelector('myButton', { state: 'visible' });
+await page.testSubj.click('myButton');
+await page.testSubj.locator('successToast').waitFor();
+await expect(page.testSubj.locator('successToast')).toBeVisible();
+```
+
+✔️ **Do:** let Playwright handle waiting automatically:
 
 ```ts
 await page.testSubj.click('myButton');
 await expect(page.testSubj.locator('successToast')).toBeVisible();
 ```
 
+:::::
+
+### Wait for UI updates after actions [wait-for-ui-updates-when-the-next-action-requires-it]
+
+When an action triggers async UI work (navigation, saving, loading data), wait for the resulting state before your next step. This ensures the UI is ready and prevents flaky interactions with elements that haven’t rendered yet.
+
+```ts
+await page.gotoApp('sample/page/here');
+await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
+```
+
 ### Don't use manual retry loops [dont-use-manual-retry-loops]
 
-If an action fails, don’t wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs).
+If an action fails, don't wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs). Fix the component or make your waiting/locators explicit and stable.
 
-If you need retries to make a test pass, fix the component or make your waiting/locators explicit and stable.
+:::::{dropdown} Examples
+❌ **Don't:** retry actions in a loop:
+
+```ts
+for (let i = 0; i < 3; i++) {
+  try {
+    await page.testSubj.click('submitButton');
+    break;
+  } catch {
+    await page.waitForTimeout(1000);
+  }
+}
+```
+
+✔️ **Do:** fix the root cause (for example, wait for a readiness signal):
+
+```ts
+await expect(page.testSubj.locator('formReady')).toBeVisible();
+await page.testSubj.click('submitButton');
+```
+
+:::::
 
 ### Locate UI elements reliably [locate-ui-elements-reliably]
 
-Prefer stable `data-test-subj` attributes accessed via `page.testSubj`.
+Prefer stable `data-test-subj` attributes accessed via `page.testSubj`. If `data-test-subj` is missing, prefer adding one to source code. If that’s not possible, use `getByRole` **inside a scoped container**.
+
+:::::{dropdown} Examples
+❌ **Don’t:** use raw CSS selectors or fragile text matchers:
 
 ```ts
-// verbose
 await page.click('[data-test-subj="myButton"]');
-
-// preferred
-await page.testSubj.click('myButton');
+await page.getByText('Delete').click();
 ```
 
-If `data-test-subj` is missing, prefer adding one to source code. If that’s not possible, use `getByRole` **inside a scoped container**:
+✔️ **Do:** use `page.testSubj` or scoped `getByRole`:
 
 ```ts
+await page.testSubj.click('myButton');
 await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'Delete' }).click();
 ```
 
-Avoid `getByText` for primary selectors; text changes and translations make it fragile.
+:::::
 
 ### Use Scout's default timeouts [use-scouts-default-timeouts]
 
@@ -282,24 +391,15 @@ Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana
 - If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale.
 
 ```ts
-await expect(editor).toBeVisible(); // default timeout
+await expect(editor).toBeVisible(); // will use the default timeout
 
 // justified: report generation can be slow
 await expect(downloadBtn).toBeEnabled({ timeout: 30_000 });
 ```
 
-### Wait when the next step depends on it [wait-for-ui-updates-when-the-next-action-requires-it]
-
-Don’t “wait everywhere”. Add explicit waits when an action triggers UI work that the next step depends on.
-
-```ts
-await page.gotoApp('sample/page/here');
-await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
-```
-
 ### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
 
-Tables/maps/visualizations can appear before data is rendered. Prefer waiting on an explicit “loaded” signal (ideally exposed by the component).
+Tables/maps/visualizations can appear before data is rendered. Prefer waiting on an explicit **“loaded” signal** (ideally exposed by the component).
 
 In source code, use a dynamic `data-test-subj`:
 
@@ -320,11 +420,7 @@ await expect(page.testSubj.locator('myTable-loaded')).toBeVisible();
 
 For Kibana Maps, `data-render-complete="true"` is often the right “ready” signal.
 
-### Page object tips [page-object-tips]
-
-These tips complement the dedicated docs on [page objects](./page-objects.md).
-
-#### Use existing page objects to interact with the Kibana UI [use-existing-page-objects-to-interact-with-the-kibana-ui]
+### Use existing page objects to interact with the Kibana UI [use-existing-page-objects-to-interact-with-the-kibana-ui]
 
 Prefer existing page objects (and their methods) over rebuilding EUI interactions in test files.
 
@@ -335,9 +431,9 @@ await pageObjects.datePicker.setAbsoluteRange({
 });
 ```
 
-#### Abstract common operations in page object methods [abstract-common-operations-in-page-object-methods]
+### Abstract common operations in page object methods [abstract-common-operations-in-page-object-methods]
 
-Create methods for repeated flows (and make them wait for readiness).
+Create methods for repeated flows (and make them [wait for readiness](#wait-for-ui-updates-when-the-next-action-requires-it)).
 
 ```ts
 async openNewDashboard() {
@@ -346,16 +442,31 @@ async openNewDashboard() {
 }
 ```
 
-#### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
+### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
 
 Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes.
+
+:::::{dropdown} Examples
+❌ **Don’t:** hide assertions inside page objects:
+
+```ts
+// inside page object
+async createIndexAndVerify(name: string) {
+  await this.page.testSubj.click('saveButton');
+  await expect(this.page.testSubj.locator('indicesTable')).toContainText(name);
+}
+```
+
+✔️ **Do:** keep assertions in the test file:
 
 ```ts
 await pageObjects.indexManagement.clickCreateIndexSaveButton();
 await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName);
 ```
 
-#### Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
+:::::
+
+### Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
 
 If you must interact with EUI internals, use wrappers from Scout to keep that complexity out of tests.
 
@@ -373,6 +484,20 @@ export class StreamsAppPage {
     await this.fieldComboBox.selectSingleOption(value);
   }
 }
+```
+
+### Skip onboarding with `addInitScript` [skip-onboarding-flows-with-addinitscript]
+
+If a page has onboarding/getting-started state, set `localStorage` before navigation.
+
+```ts
+test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
+  await browserAuth.loginAsViewer();
+  await page.addInitScript(() => {
+    window.localStorage.setItem('gettingStartedVisited', 'true');
+  });
+  await pageObjects.homepage.goto();
+});
 ```
 
 ### Contribute to Scout when possible [contribute-to-scout-when-possible]
@@ -425,6 +550,21 @@ This pattern validates both endpoint behavior and the [permission model](#test-w
 
 Status code assertions are necessary but not sufficient—also validate shape and key fields.
 
+:::::{dropdown} Examples
+❌ **Don’t:** assert only the status code:
+
+```ts
+apiTest('returns autocomplete definitions', async ({ apiClient }) => {
+  const { statusCode } = await apiClient.get('api/console/api_server', {
+    headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+  });
+
+  expect(statusCode).toBe(200);
+});
+```
+
+✔️ **Do:** validate shape and key fields too:
+
 ```ts
 apiTest('returns autocomplete definitions', async ({ apiClient }) => {
   const { body, statusCode } = await apiClient.get('api/console/api_server', {
@@ -441,3 +581,5 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
   });
 });
 ```
+
+:::::
