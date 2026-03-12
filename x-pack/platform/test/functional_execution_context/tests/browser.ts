@@ -304,7 +304,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
           await logContains({
             description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
-            predicate: checkHttpRequestId('search:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'),
+            predicate: checkHttpRequestId(
+              'discover_session:discover:571aaf70-4c88-11e8-b3d7-01146121b73d'
+            ),
           });
         });
 
@@ -320,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               description: '[Flights] Global Flight Dashboard',
               space: 'default',
               child: {
-                type: 'search',
+                type: 'discover_session',
                 name: 'discover',
                 id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
                 description: '[Flights] Flight Log',
