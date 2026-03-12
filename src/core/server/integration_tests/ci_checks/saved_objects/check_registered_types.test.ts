@@ -62,7 +62,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
         "alert": "cc1657e7f0ab8d9d21fe6edf25381046973ee1df059160f602c181c7cb4c6150",
         "alerting_notification_policy": "a02a9e8a48c8433f403f4d172cd44329ff6e408700185c54efb6707608b09181",
-        "alerting_rule": "8f80d561d2b3caf07925be4a5fff52d8433ca3f3f204723f6f3e9e32dbce7f42",
+        "alerting_rule": "23041cb78f5af3cc6dd0fd5de42b7a4c6937b55882d7ba1aa147bb81eb5e6bf8",
         "alerting_rule_template": "a26521005d8a51af336ec95a2097c4bd073980c050e3c675cec3851acff78fd9",
         "anonymization-salt": "487fee82ef036b64199d1eb26b9834c0f67d94d2ed7b74e5c10e04fa8616554a",
         "api_key_pending_invalidation": "c1c0f5cbb1175a7d25c762b290d9d46c04557e4a8ae6a2c7bf77b8fd99b2146d",
