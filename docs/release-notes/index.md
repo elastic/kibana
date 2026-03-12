@@ -31,8 +31,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 **Elastic Security solution**:
 For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-**Machine Learning**:
-* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet preconfigured connectors [#253109]({{kib-pull}}253109).
+**Connectivity**:
+* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet models to preconfigured connectors [#253109]({{kib-pull}}253109).
 
 ### Fixes [kibana-9.3.2-fixes]
 
@@ -47,11 +47,10 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 * Fixes OOM crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
 
 **Dashboards and Visualizations**:
-* Applies embeddable transforms to embeddable elements [#252191]({{kib-pull}}252191).
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
 * Fixes the **Add from library** action adding incorrect embeddable state [#257261]({{kib-pull}}257261).
 * Fixes Lens transforms [#257224]({{kib-pull}}257224).
 * Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
-* Throws on RPC route validation errors in dev mode [#255181]({{kib-pull}}255181).
 * Fixes Maps failing to load when the stored time filter contained a `quick` mode value [#255178]({{kib-pull}}255178).
 
 **Data ingestion and Fleet**:
