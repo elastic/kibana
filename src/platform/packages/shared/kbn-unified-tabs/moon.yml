@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/es-query'
   - '@kbn/core'
+  - '@kbn/css-utils'
 tags:
   - shared-browser
   - package
