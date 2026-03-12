@@ -33,6 +33,7 @@ jest.mock('../../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+const mockUiSettingsGet = jest.fn();
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
@@ -61,13 +62,17 @@ describe('<PrevalenceOverview />', () => {
       data: [],
     });
     (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
-    (useKibana as jest.Mock).mockReturnValue({
+    (useKibana as jest.Mock).mockImplementation(() => ({
       services: {
         storage: {
           get: () => undefined,
         },
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
       },
-    });
+    }));
+    mockUiSettingsGet.mockReturnValue(true);
   });
 
   it('should render wrapper component', () => {
@@ -91,12 +96,29 @@ describe('<PrevalenceOverview />', () => {
         storage: {
           get: () => ({ from: 'now-7d', to: 'now-3d' }),
         },
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
       },
     });
 
     const { getByTestId } = renderPrevalenceOverview();
 
     expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Custom time range applied');
+  });
+
+  it('should show badge for excluded cold and frozen tiers', () => {
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Cold/Frozen tiers off');
+  });
+
+  it('should show badge for included cold and frozen tiers', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Cold/Frozen tiers on');
   });
 
   it('should render link without icon if isPreviewMode is true', () => {
@@ -226,6 +248,9 @@ describe('<PrevalenceOverview />', () => {
       services: {
         storage: {
           get: () => ({ start: 'now-7d', end: 'now-3d' }),
+        },
+        uiSettings: {
+          get: mockUiSettingsGet,
         },
       },
     });
