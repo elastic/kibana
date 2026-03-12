@@ -7,11 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { Capabilities } from '@kbn/core/public';
-import {
-  ALERTS_FEATURE_ID,
-  CASES_FEATURE_ID,
-  SECURITY_FEATURE_ID,
-} from '../common/constants';
+import { ALERTS_FEATURE_ID, CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {

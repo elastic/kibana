@@ -24,9 +24,7 @@ export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean
 
 /** Attack Discovery requires Alerts read; used for route-level availability. */
 export function hasAccessToAttackDiscovery(capabilities: Capabilities): boolean {
-  return (
-    hasAccessToSecuritySolution(capabilities) && hasAccessToAlerts(capabilities) === true
-  );
+  return hasAccessToSecuritySolution(capabilities) && hasAccessToAlerts(capabilities) === true;
 }
 export function hasAccessToRules(capabilities: Capabilities): boolean {
   return Boolean(capabilities[RULES_FEATURE_ID]?.[RULES_UI_READ]);
