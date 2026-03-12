@@ -10,79 +10,216 @@
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 
-import {
-  DATE_TYPE_ABSOLUTE,
-  DATE_TYPE_NOW,
-  DATE_TYPE_RELATIVE,
-  DATE_RANGE_INPUT_DELIMITER,
-  DEFAULT_DATE_FORMAT,
-  FORMAT_NO_YEAR,
-  UNIT_FULL_TO_SHORT_MAP,
-} from '../constants';
-import type { DateType, DateString, TimeRange, TimeRangeTransformOptions } from '../types';
+import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
+import type {
+  DateType,
+  DateString,
+  DateOffset,
+  TimeUnit,
+  TimeRange,
+  TimeRangeTransformOptions,
+  TimeRangeBoundsOption,
+  ParserLocale,
+} from '../types';
 import { isValidTimeRange } from '../utils';
+import type { CompiledLocale, CompiledTemplate } from './compile_locale';
+import { compileParserLocale, buildDelimiterPattern } from './compile_locale';
+import { en } from './locales/en';
+
+/** Matches text against preset labels (case-insensitive). */
+export function matchPreset(
+  text: string,
+  presets: TimeRangeBoundsOption[]
+): TimeRangeBoundsOption | undefined {
+  const lower = text.trim().toLowerCase();
+  return presets.find((preset) => preset.label?.toLowerCase() === lower);
+}
 
 /**
- * Creates a TimeRange, automatically computing `isInvalid` from the range fields.
+ * Parses free-form text into a structured {@link TimeRange}.
+ *
+ * Supports presets, named ranges, natural durations/instants,
+ * shorthand datemath, unix timestamps, and absolute dates.
+ * Vocabulary comes from the locale (defaults to English).
  */
-function buildTimeRange(fields: Omit<TimeRange, 'isInvalid'>): TimeRange {
-  const range: TimeRange = { ...fields, isInvalid: true };
+export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
+  const trimmed = text.trim();
+  if (!trimmed) return buildInvalidRange(text);
+
+  const locale = options?.locale ?? en;
+  const compiled = compileParserLocale(locale);
+  const { presets = [], delimiter, dateFormat } = options ?? {};
+  const formats = dateFormat ? [dateFormat, ...compiled.absoluteFormats] : compiled.absoluteFormats;
+
+  // (1) Preset label match
+  // TODO move this out of the parse function?
+  const preset = matchPreset(trimmed, presets);
+  if (preset) {
+    return buildRange(text, preset.start, preset.end, formats, true);
+  }
+
+  // (2) Named range from locale ("today", "yesterday", "this week", ...)
+  const named = locale.namedRanges[trimmed.toLowerCase()];
+  if (named) {
+    return buildRange(text, named.start, named.end, formats, true);
+  }
+
+  // (3) Natural duration ("last 7 minutes", "next 3 days")
+  const duration = matchNaturalDuration(trimmed, locale, compiled);
+  if (duration) {
+    return buildRange(text, duration.start, duration.end, formats, true);
+  }
+
+  // (4) Try splitting on delimiters (locale + universal + extra)
+  const parts = trySplit(trimmed, compiled, delimiter);
+  if (parts) {
+    const startDateString = instantToDateString(parts[0], locale, compiled, formats);
+    const endDateString = instantToDateString(parts[1], locale, compiled, formats);
+    if (startDateString && endDateString) {
+      return buildRange(text, startDateString, endDateString, formats, false);
+    }
+    return buildInvalidRange(text);
+  }
+
+  // (5) Single instant (no delimiter found)
+  const dateString = instantToDateString(trimmed, locale, compiled, formats);
+  if (!dateString) return buildInvalidRange(text);
+
+  if (dateString.startsWith('now+')) {
+    return buildRange(text, 'now', dateString, formats, false);
+  }
+  return buildRange(text, dateString, 'now', formats, false);
+}
+
+/** Resolves a user-typed unit string through locale aliases (exact first, then lowercase). */
+function resolveUnit(text: string, aliases: Record<string, TimeUnit>): TimeUnit | null {
+  return aliases[text] ?? aliases[text.toLowerCase()] ?? null;
+}
+
+/** Parses a unix timestamp string (10-digit seconds or 13-digit milliseconds) to a `Date`. */
+function unixTimestampToDate(text: string): Date | null {
+  if (/^\d{10}$/.test(text)) return new Date(parseInt(text, 10) * 1000);
+  if (/^\d{13}$/.test(text)) return new Date(parseInt(text, 10));
+  return null;
+}
+
+function dateStringToType(dateString: DateString): DateType {
+  if (dateString === 'now') return DATE_TYPE_NOW;
+  if (dateString.includes('now')) return DATE_TYPE_RELATIVE;
+  return DATE_TYPE_ABSOLUTE;
+}
+
+/** Extracts a structured {@link DateOffset} from a datemath string like `now-7d/d`. */
+function dateStringToOffset(dateString: DateString): DateOffset | null {
+  const match = dateString.match(/^now([+-])(\d+)([a-zA-Z]+)(?:\/([smhdwMy]))?$/);
+  if (!match) return null;
+  const [, operator, digits, unit, roundUnit] = match;
+  return {
+    count: operator === '-' ? -parseInt(digits, 10) : parseInt(digits, 10),
+    unit: unit as TimeUnit,
+    ...(roundUnit ? { roundTo: roundUnit as TimeUnit } : {}),
+  };
+}
+
+/**
+ * Converts a single text fragment into a {@link DateString}.
+ * Tries (in order): "now", shorthand, natural instant, unix timestamp,
+ * locale absolute formats, and finally dateMath/ISO fallback.
+ */
+function instantToDateString(
+  text: string,
+  locale: ParserLocale,
+  compiled: CompiledLocale,
+  formats: string[]
+): DateString | null {
+  const trimmed = text.trim();
+
+  if (trimmed.toLowerCase() === locale.now) return 'now';
+
+  // Shorthand: "7d", "-7d", "+7d", "now-7d/d", "500ms"
+  const shorthandMatch = trimmed.match(compiled.shorthandRegex);
+  if (shorthandMatch) {
+    const unit = resolveUnit(shorthandMatch[4], locale.unitAliases);
+    if (unit) {
+      const operator = shorthandMatch[2] === '+' ? '+' : '-';
+      return `now${operator}${shorthandMatch[3]}${unit}${shorthandMatch[5] ?? ''}`;
+    }
+  }
+
+  // Natural instant: "7 minutes ago", "in 7 minutes"
+  const instant = matchNaturalInstant(trimmed, locale, compiled);
+  if (instant) return instant;
+
+  const unixDate = unixTimestampToDate(trimmed);
+  if (unixDate) return unixDate.toISOString();
+
+  // Absolute date / dateMath / ISO fallback
+  if (dateStringToDate(trimmed, formats) !== null) return trimmed;
+
+  return null;
+}
+
+/**
+ * Converts a {@link DateString} to a `Date`, returning `null` if unrecognised.
+ *
+ * Handles locale absolute formats (strict then forgiving), ISO 8601, and datemath.
+ * Unix timestamps are handled upstream by `instantToDateString` before this is called.
+ *
+ * Note: dateMath.parse supports milliseconds although it seems undocumented.
+ */
+function dateStringToDate(
+  dateString: DateString,
+  formats: string[],
+  options?: { roundUp?: boolean }
+): Date | null {
+  const strict = moment(dateString, formats, true);
+  if (strict.isValid()) return strict.toDate();
+
+  // Try locale formats with non-strict matching, but only
+  // when the input is not valid ISO 8601 (to avoid cross-format ambiguity)
+  if (formats.length && !moment(dateString, moment.ISO_8601, true).isValid()) {
+    const forgiving = moment(dateString, formats);
+    if (forgiving.isValid()) return forgiving.toDate();
+  }
+
+  if (/^(now|[+-]|\d)/.test(dateString)) {
+    return dateMath.parse(dateString, options)?.toDate() ?? null;
+  }
+
+  return null;
+}
+
+/**
+ * Builds a complete {@link TimeRange} from start/end datemath strings,
+ * resolving dates, types, and offsets automatically.
+ */
+function buildRange(
+  text: string,
+  start: DateString,
+  end: DateString,
+  formats: string[],
+  isNaturalLanguage: boolean
+): TimeRange {
+  const startType = dateStringToType(start);
+  const endType = dateStringToType(end);
+  const range: TimeRange = {
+    value: text,
+    start,
+    end,
+    startDate: dateStringToDate(start, formats),
+    endDate: dateStringToDate(end, formats, { roundUp: true }),
+    type: [startType, endType],
+    isNaturalLanguage,
+    startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,
+    endOffset: endType === DATE_TYPE_RELATIVE ? dateStringToOffset(end) : null,
+    isInvalid: true,
+  };
   range.isInvalid = !isValidTimeRange(range);
   return range;
 }
 
-// Shorthand: "-7m", "+7d", "now-7m", "now+7d/d"
-const SHORTHAND_REGEX = /^(now)?([+-])(\d+)([smhdwMy])(\/[smhdwMy])?$/i;
-
-// (works because parsing of end is done with `roundUp` true)
-const NAMED_RANGES: Record<string, { start: string; end: string }> = {
-  today: { start: 'now/d', end: 'now/d' },
-  yesterday: { start: 'now-1d/d', end: 'now-1d/d' },
-  tomorrow: { start: 'now+1d/d', end: 'now+1d/d' },
-};
-
-// "last 7 minutes" or "next 7 minutes"
-const NATURAL_DURATION_REGEX = /^(last|next)\s+(\d+)\s+(\w+)$/i;
-
-// "7 minutes ago" or "7 minutes from now"
-const NATURAL_INSTANT_REGEX = /^(\d+)\s+(\w+)\s+(ago|from now)$/i;
-
-// TODO this will change when we improve "forgivingness"
-// see https://github.com/elastic/eui/pull/9199
-const SUPPORTED_DATE_FORMATS = [
-  DEFAULT_DATE_FORMAT, // 'MMM D YYYY, HH:mm'
-  FORMAT_NO_YEAR, // 'MMM D, HH:mm'
-  'MMM D YYYY', // e.g. "Feb 3 2016"
-  'MMM D, YYYY', // e.g. "feb 3, 2016"
-  'YYYY-MM-DD',
-  'YYYY-MM-DDTHH:mm:ss.SSSZ',
-  'YYYY-MM-DDTHH:mm:ssZ',
-  'YYYY-MM-DDTHH:mm',
-];
-
-const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const getDelimiterPattern = (delimiter: string) => {
-  const normalized = delimiter.trim();
-  if (!normalized) {
-    return null;
-  }
-
-  return new RegExp(`^(.+?)\\s+${escapeRegExp(normalized)}\\s+(.+)$`);
-};
-
-/**
- * Main parsing function to transform text into a time range
- *
- * TODO: Move preset matching out of this function into a separate step (e.g. `matchPreset`),
- * so this function stays focused on text parsing only.
- */
-export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
-  const trimmed = text.trim();
-  const { presets = [], delimiter = DATE_RANGE_INPUT_DELIMITER } = options ?? {};
-  const delimiterPattern = getDelimiterPattern(delimiter);
-
-  const invalidResult: TimeRange = {
+function buildInvalidRange(text: string): TimeRange {
+  return {
     value: text,
     start: '',
     end: '',
@@ -91,199 +228,89 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
     type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
     isNaturalLanguage: false,
     isInvalid: true,
+    startOffset: null,
+    endOffset: null,
   };
-
-  if (!trimmed) {
-    return invalidResult;
-  }
-
-  // (1) Check if text matches a preset label (case insensitive)
-
-  const matchedPreset = presets.find(
-    (preset) => preset.label?.toLowerCase() === trimmed.toLowerCase()
-  );
-  if (matchedPreset) {
-    return buildTimeRange({
-      value: text,
-      start: matchedPreset.start,
-      end: matchedPreset.end,
-      startDate: parseDateStringToDate(matchedPreset.start),
-      endDate: parseDateStringToDate(matchedPreset.end, { roundUp: true }),
-      type: [dateStringToDateType(matchedPreset.start), dateStringToDateType(matchedPreset.end)],
-      isNaturalLanguage: true,
-    });
-  }
-
-  // (2) Check if it's a single value (no delimiter)
-
-  const delimiterMatch = delimiterPattern ? trimmed.match(delimiterPattern) : null;
-  if (!delimiterMatch) {
-    // Try natural duration: "last 7 minutes", "today", etc.
-    const naturalDuration = getTimeRangeBoundsFromNaturalDuration(trimmed);
-    if (naturalDuration) {
-      return buildTimeRange({
-        value: text,
-        start: naturalDuration.start,
-        end: naturalDuration.end,
-        startDate: parseDateStringToDate(naturalDuration.start),
-        endDate: parseDateStringToDate(naturalDuration.end, { roundUp: true }),
-        type: [
-          dateStringToDateType(naturalDuration.start),
-          dateStringToDateType(naturalDuration.end),
-        ],
-        isNaturalLanguage: true,
-      });
-    }
-
-    // Try as a single instant (treat as start, with end = now)
-    const singleInstant = textInstantToDateString(trimmed);
-    if (singleInstant) {
-      // future shorthand exception (start = now)
-      if (SHORTHAND_REGEX.test(singleInstant) && singleInstant.startsWith('now+')) {
-        return buildTimeRange({
-          value: text,
-          start: 'now',
-          end: singleInstant,
-          startDate: new Date(), // now
-          endDate: parseDateStringToDate(singleInstant),
-          type: [DATE_TYPE_NOW, dateStringToDateType(singleInstant)],
-          isNaturalLanguage: false,
-        });
-      }
-      return buildTimeRange({
-        value: text,
-        start: singleInstant,
-        end: 'now',
-        startDate: parseDateStringToDate(singleInstant),
-        endDate: new Date(), // now
-        type: [dateStringToDateType(singleInstant), DATE_TYPE_NOW],
-        isNaturalLanguage: false,
-      });
-    }
-
-    return invalidResult;
-  }
-
-  // (3) Parse as a range with delimiter
-
-  const startText = delimiterMatch[1].trim();
-  const endText = delimiterMatch[2].trim();
-
-  if (!startText || !endText) {
-    return invalidResult;
-  }
-
-  const start = textInstantToDateString(startText.trim());
-  const end = textInstantToDateString(endText.trim());
-
-  if (!start || !end) {
-    return invalidResult;
-  }
-
-  return buildTimeRange({
-    value: text,
-    start,
-    end,
-    startDate: parseDateStringToDate(start),
-    endDate: parseDateStringToDate(end, { roundUp: true }),
-    type: [dateStringToDateType(start), dateStringToDateType(end)],
-    isNaturalLanguage: false,
-  });
 }
 
-function getTimeRangeBoundsFromNaturalDuration(
-  text: string
+/**
+ * Attempts to split text into two parts using available delimiters.
+ * Tries in order: extra delimiter, then precompiled locale + universal patterns.
+ */
+function trySplit(text: string, compiled: CompiledLocale, extra?: string): [string, string] | null {
+  const patterns = extra
+    ? [buildDelimiterPattern(extra), ...compiled.delimiterPatterns].filter(
+        (p): p is RegExp => p !== null
+      )
+    : compiled.delimiterPatterns;
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1].trim() && match[2].trim()) {
+      return [match[1].trim(), match[2].trim()];
+    }
+  }
+  return null;
+}
+
+/** Tries each compiled template against the text, returning the first successful build or `null`. */
+function matchTemplates(
+  text: string,
+  templates: CompiledTemplate[],
+  aliases: Record<string, TimeUnit>,
+  buildResult: (count: string, unit: TimeUnit) => string
+): string | null {
+  for (const t of templates) {
+    const match = text.match(t.regex);
+    if (match) {
+      const unit = resolveUnit(match[t.unitGroup], aliases);
+      if (unit) return buildResult(match[t.countGroup], unit);
+    }
+  }
+  return null;
+}
+
+function matchNaturalDuration(
+  text: string,
+  locale: ParserLocale,
+  compiled: CompiledLocale
 ): { start: DateString; end: DateString } | null {
-  const trimmed = text.trim().toLowerCase();
+  const past = matchTemplates(
+    text,
+    compiled.durationPast,
+    locale.unitAliases,
+    (count, unit) => `now-${count}${unit}`
+  );
+  if (past) return { start: past, end: 'now' };
 
-  // Check named ranges first
-  if (NAMED_RANGES[trimmed]) {
-    return NAMED_RANGES[trimmed];
-  }
-
-  // "last 7 minutes" or "next 7 days"
-  const match = trimmed.match(NATURAL_DURATION_REGEX);
-  if (match) {
-    const [, direction, count, unitWord] = match;
-    const unit = UNIT_FULL_TO_SHORT_MAP[unitWord.toLowerCase()];
-    if (unit) {
-      if (direction === 'last') {
-        return { start: `now-${count}${unit}`, end: 'now' };
-      }
-      return { start: 'now', end: `now+${count}${unit}` };
-    }
-  }
+  const future = matchTemplates(
+    text,
+    compiled.durationFuture,
+    locale.unitAliases,
+    (count, unit) => `now+${count}${unit}`
+  );
+  if (future) return { start: 'now', end: future };
 
   return null;
 }
 
-function textInstantToDateString(text: string): DateString | null {
-  const trimmed = text.trim();
-  const normalized = trimmed.toLowerCase();
-
-  // "now"
-  if (normalized === 'now') {
-    return 'now';
-  }
-
-  // Shorthand: "-7m", "+7d", "now-7m/d"
-  const shorthandMatch = trimmed.match(SHORTHAND_REGEX);
-  if (shorthandMatch) {
-    const [, , operator, count, unit, round = ''] = shorthandMatch;
-    return `now${operator}${count}${unit}${round}`;
-  }
-
-  // Natural instant: "7 minutes ago" -> now-7m
-  const instantMatch = normalized.match(NATURAL_INSTANT_REGEX);
-  if (instantMatch) {
-    const [, count, unitWord, direction] = instantMatch;
-    const unit = UNIT_FULL_TO_SHORT_MAP[unitWord.toLowerCase()];
-    if (unit) {
-      const operator = direction === 'ago' ? '-' : '+';
-      return `now${operator}${count}${unit}`;
-    }
-  }
-
-  // Try parsing as absolute date with explicit display formats first
-  const parsedWithFormat = moment(trimmed, SUPPORTED_DATE_FORMATS, true);
-  if (parsedWithFormat.isValid()) {
-    return trimmed; // Return original, it's valid
-  }
-
-  // Only try dateMath for strings that could be datemath or ISO
-  if (!/^(now|[+-]|\d)/.test(trimmed)) {
-    return null;
-  }
-
-  // Try parsing as absolute date via dateMath (ISO, RFC 2822, datemath, etc.)
-  const parsed = dateMath.parse(trimmed);
-  if (parsed?.isValid()) {
-    return trimmed; // Return original, it's valid
-  }
-
-  return null;
-}
-
-/**
- * Parses a DateString to a Date. Uses explicit formats for absolute display
- * strings to avoid moment's deprecated fallback for non-ISO input.
- */
-function parseDateStringToDate(
-  dateString: DateString,
-  options?: { roundUp?: boolean }
-): Date | null {
-  const parsedWithFormat = moment(dateString, SUPPORTED_DATE_FORMATS, true);
-  if (parsedWithFormat.isValid()) {
-    return parsedWithFormat.toDate();
-  }
-  return dateMath.parse(dateString, options)?.toDate() ?? null;
-}
-
-/**
- * Determines the type of a date string
- */
-function dateStringToDateType(dateString: DateString): DateType {
-  if (dateString === 'now') return DATE_TYPE_NOW;
-  if (dateString.includes('now')) return DATE_TYPE_RELATIVE;
-  return DATE_TYPE_ABSOLUTE;
+function matchNaturalInstant(
+  text: string,
+  locale: ParserLocale,
+  compiled: CompiledLocale
+): DateString | null {
+  return (
+    matchTemplates(
+      text,
+      compiled.instantPast,
+      locale.unitAliases,
+      (count, unit) => `now-${count}${unit}`
+    ) ??
+    matchTemplates(
+      text,
+      compiled.instantFuture,
+      locale.unitAliases,
+      (count, unit) => `now+${count}${unit}`
+    )
+  );
 }
