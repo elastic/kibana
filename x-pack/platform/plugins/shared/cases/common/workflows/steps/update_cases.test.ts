@@ -17,6 +17,7 @@ import {
   updateCasesInputWithVersionFixture,
   caseIdFixture,
 } from './test_fixtures';
+import { MAX_CASES_TO_UPDATE } from '../../constants';
 
 describe('update_cases common step definition', () => {
   it('exposes the expected step id', () => {
@@ -52,7 +53,45 @@ describe('update_cases common step definition', () => {
     ).toBe(false);
   });
 
+  it('accepts update cases input with max cases', () => {
+    const cases = Array.from({ length: MAX_CASES_TO_UPDATE }, (_, index) => ({
+      case_id: `case-${index}`,
+      updates: { title: `title-${index}` },
+    }));
+
+    expect(
+      InputSchema.safeParse({
+        cases,
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects update cases input when cases exceeds max', () => {
+    const cases = Array.from({ length: MAX_CASES_TO_UPDATE + 1 }, (_, index) => ({
+      case_id: `case-${index}`,
+      updates: { title: `title-${index}` },
+    }));
+
+    expect(
+      InputSchema.safeParse({
+        cases,
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts valid output payload', () => {
     expect(OutputSchema.safeParse({ cases: [createCaseResponseFixture] }).success).toBe(true);
+  });
+
+  it('accepts output payload with max cases', () => {
+    const cases = Array.from({ length: MAX_CASES_TO_UPDATE }, () => createCaseResponseFixture);
+
+    expect(OutputSchema.safeParse({ cases }).success).toBe(true);
+  });
+
+  it('rejects output payload when cases exceeds max', () => {
+    const cases = Array.from({ length: MAX_CASES_TO_UPDATE + 1 }, () => createCaseResponseFixture);
+
+    expect(OutputSchema.safeParse({ cases }).success).toBe(false);
   });
 });

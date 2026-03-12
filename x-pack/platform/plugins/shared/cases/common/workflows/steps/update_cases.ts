@@ -12,6 +12,7 @@ import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   UpdateCaseRequest as UpdateCaseRequestSchema,
 } from '../../bundled-types.gen';
+import { MAX_CASES_TO_UPDATE } from '../../constants';
 import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 import * as i18n from '../translations';
 
@@ -29,11 +30,11 @@ const CaseUpdateSchema = CasesStepCaseIdVersionSchema.extend({
 });
 
 export const InputSchema = z.object({
-  cases: z.array(CaseUpdateSchema).min(1).max(100),
+  cases: z.array(CaseUpdateSchema).min(1).max(MAX_CASES_TO_UPDATE),
 });
 
 export const OutputSchema = z.object({
-  cases: z.array(CaseResponsePropertiesSchema).max(100),
+  cases: z.array(CaseResponsePropertiesSchema).max(MAX_CASES_TO_UPDATE),
 });
 
 export type UpdateCasesStepInputSchema = typeof InputSchema;
