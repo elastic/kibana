@@ -41,11 +41,6 @@ export const runWithSpan = <T>({ name, namespace, attributes = {}, cb }: RunWith
     cb
   );
 
-export const getTaskNamespace = (taskState: unknown): string => {
-  const namespace = (taskState as { namespace?: unknown })?.namespace;
-  return typeof namespace === 'string' && namespace.length > 0 ? namespace : 'unknown';
-};
-
 export const wrapTaskRun = <T>({
   spanName,
   namespace,

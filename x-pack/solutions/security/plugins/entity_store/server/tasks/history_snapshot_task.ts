@@ -18,7 +18,7 @@ import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
-import { getTaskNamespace, wrapTaskRun } from '../telemetry/traces';
+import { wrapTaskRun } from '../telemetry/traces';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
@@ -99,7 +99,7 @@ export function registerHistorySnapshotTask({
         run: () =>
           wrapTaskRun({
             spanName: 'entityStore.task.history_snapshot.run',
-            namespace: getTaskNamespace(taskInstance.state),
+            namespace: taskInstance.state.namespace,
             attributes: {
               'entity_store.task.id': taskInstance.id,
               'entity_store.task.type': taskType,

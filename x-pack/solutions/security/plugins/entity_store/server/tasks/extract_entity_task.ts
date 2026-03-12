@@ -18,7 +18,7 @@ import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
-import { getTaskNamespace, wrapTaskRun } from '../telemetry/traces';
+import { wrapTaskRun } from '../telemetry/traces';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -129,7 +129,7 @@ export function registerExtractEntityTasks({
             run: () =>
               wrapTaskRun({
                 spanName: 'entityStore.task.extract_entity.run',
-                namespace: getTaskNamespace(taskInstance.state),
+                namespace: taskInstance.state.namespace,
                 attributes: {
                   'entity_store.task.id': taskInstance.id,
                   'entity_store.task.type': taskType,

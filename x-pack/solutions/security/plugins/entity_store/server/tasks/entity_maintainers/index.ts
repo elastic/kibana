@@ -20,7 +20,7 @@ import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import { CRUDClient } from '../../domain/crud';
-import { getTaskNamespace, wrapTaskRun } from '../../telemetry/traces';
+import { wrapTaskRun } from '../../telemetry/traces';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -127,7 +127,7 @@ export function registerEntityMaintainerTask({
 
               return await wrapTaskRun({
                 spanName: 'entityStore.task.entity_maintainer.run',
-                namespace: getTaskNamespace(taskInstance.state),
+                namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace || '',
                 attributes: {
                   'entity_store.task.id': taskInstance.id,
                   'entity_store.task.type': type,
