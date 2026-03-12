@@ -32,7 +32,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Connectivity**:
-* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet preconfigured connectors [#253109]({{kib-pull}}253109).
+* Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet models to preconfigured connectors [#253109]({{kib-pull}}253109).
 
 ### Fixes [kibana-9.3.2-fixes]
 
