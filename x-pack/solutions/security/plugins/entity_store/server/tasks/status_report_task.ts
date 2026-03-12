@@ -20,7 +20,6 @@ import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema'
 import { AssetManagerClient } from '../domain/asset_manager';
 import { getLatestEntitiesIndexName } from '../domain/asset_manager/latest_index';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
-import { CRUDClient } from '../domain/crud';
 import { CcsLogsExtractionClient, LogsExtractionClient } from '../domain/logs_extraction';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import type { GetStatusResult } from '../domain/types';
@@ -124,11 +123,6 @@ async function runTask({
       );
       const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
       const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
-      const crudClient = new CRUDClient({
-        logger,
-        esClient,
-        namespace,
-      });
       const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
       const logsExtractionClient = new LogsExtractionClient({
         logger,
