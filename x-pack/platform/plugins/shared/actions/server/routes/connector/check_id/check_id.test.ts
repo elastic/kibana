@@ -17,6 +17,12 @@ jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
+const createErrorWithStatusCode = (message: string, statusCode: number): Error => {
+  const error: Error & { output?: { statusCode: number } } = new Error(message);
+  error.output = { statusCode };
+  return error;
+};
+
 beforeEach(() => {
   jest.resetAllMocks();
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
@@ -66,9 +72,7 @@ describe('checkConnectorIdRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    const notFoundError = new Error('Not found');
-    (notFoundError as any).output = { statusCode: 404 };
-    actionsClient.get.mockRejectedValueOnce(notFoundError);
+    actionsClient.get.mockRejectedValueOnce(createErrorWithStatusCode('Not found', 404));
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -94,9 +98,7 @@ describe('checkConnectorIdRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    const serverError = new Error('Server error');
-    (serverError as any).output = { statusCode: 500 };
-    actionsClient.get.mockRejectedValueOnce(serverError);
+    actionsClient.get.mockRejectedValueOnce(createErrorWithStatusCode('Server error', 500));
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -118,9 +120,7 @@ describe('checkConnectorIdRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     const actionsClient = actionsClientMock.create();
-    const notFoundError = new Error('Not found');
-    (notFoundError as any).output = { statusCode: 404 };
-    actionsClient.get.mockRejectedValueOnce(notFoundError);
+    actionsClient.get.mockRejectedValueOnce(createErrorWithStatusCode('Not found', 404));
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },

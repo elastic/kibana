@@ -70,12 +70,12 @@ describe('useCreateConnector', () => {
     );
   });
 
-  it('shows specific error message for duplicate connector ID (409 conflict)', async () => {
+  it('shows server error message for duplicate connector ID (409 conflict)', async () => {
     const conflictError = {
       name: 'Error',
       body: {
         statusCode: 409,
-        message: 'Conflict',
+        message: 'A connector with ID "duplicate-id" already exists.',
       },
     };
     useKibanaMock().services.http.post = jest.fn().mockRejectedValue(conflictError);
@@ -95,8 +95,8 @@ describe('useCreateConnector', () => {
 
     await waitFor(() => {
       expect(addErrorMock).toHaveBeenCalledWith(conflictError, {
-        title: 'Connector ID already exists',
-        toastMessage: 'A connector with this ID already exists. Please choose a different ID.',
+        title: 'Unable to create a connector.',
+        toastMessage: 'A connector with ID "duplicate-id" already exists.',
       });
     });
   });
