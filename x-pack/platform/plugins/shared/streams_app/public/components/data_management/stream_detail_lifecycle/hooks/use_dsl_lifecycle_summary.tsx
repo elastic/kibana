@@ -47,6 +47,7 @@ interface UseDslLifecycleSummaryResult {
   onRemoveDownsampleStep?: (stepNumber: number) => void;
   onEditDownsampleStep?: (stepNumber: number) => void;
   onAddDownsampleStep?: () => void;
+  selectedStepIndex?: number;
   isEditLifecycleFlyoutOpen: boolean;
   flyoutInvalidStepIndices: number[];
   modals: React.ReactNode;
@@ -338,6 +339,7 @@ export const useDslLifecycleSummary = ({
     onRemoveDownsampleStep: isDsl ? handleRemoveDslDownsampleStep : undefined,
     onEditDownsampleStep: isDsl ? handleEditDslDownsampleStep : undefined,
     onAddDownsampleStep: isDsl ? handleAddDslDownsampleStep : undefined,
+    selectedStepIndex: uiState.selectedStepIndex,
     isEditLifecycleFlyoutOpen: uiState.isEditDslStepsFlyoutOpen,
     flyoutInvalidStepIndices: uiState.flyoutInvalidStepIndices,
     modals,
