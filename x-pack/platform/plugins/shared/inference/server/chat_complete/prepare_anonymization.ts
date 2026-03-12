@@ -19,6 +19,7 @@ import { anonymizeMessages } from './anonymization/anonymize_messages';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
+import { shouldLogAnonymizationDebug, stringifyForLogs } from './anonymization/debug_logging';
 
 interface PrepareAnonymizationOptions {
   namespace: string;
@@ -39,6 +40,12 @@ interface PrepareAnonymizationOptions {
   messages: ChatCompleteOptions['messages'];
 }
 
+const isConflictError = (error: unknown): boolean => {
+  const statusCode = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
+  const metaStatusCode = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  return statusCode === 409 || metaStatusCode === 409;
+};
+
 export const prepareAnonymization = async ({
   namespace,
   logger,
@@ -55,8 +62,21 @@ export const prepareAnonymization = async ({
   system,
   messages,
 }: PrepareAnonymizationOptions) => {
+  const isAnonymizationDebugLoggingEnabled = shouldLogAnonymizationDebug();
   const salt = await saltPromise;
   const effectivePolicy = await resolveEffectivePolicy?.(metadata?.anonymization?.target);
+  if (isAnonymizationDebugLoggingEnabled) {
+    logger.debug(
+      `[inference.anonymization.prepare] metadata=${stringifyForLogs(
+        metadata?.anonymization,
+        4000
+      )} total_rules=${anonymizationRules.length} enabled_rules=${
+        anonymizationRules.filter((rule) => rule.enabled).length
+      } effective_policy_entries=${
+        Object.keys(effectivePolicy ?? {}).length
+      } carried_replacements_id=${metadata?.anonymization?.replacementsId ?? 'none'}`
+    );
+  }
   if (!usePersistentReplacements) {
     const anonymization = await anonymizeMessages({
       system,
@@ -101,10 +121,6 @@ export const prepareAnonymization = async ({
   let existingReplacements = carriedReplacementsId
     ? await repo?.get(namespace, carriedReplacementsId)
     : null;
-  if (carriedReplacementsId && !existingReplacements) {
-    // Recover by allocating a new doc ID when caller carries a stale/unknown one.
-    replacementsId = uuidv4();
-  }
 
   const anonymization = await anonymizeMessages({
     system,
@@ -124,6 +140,13 @@ export const prepareAnonymization = async ({
     anonymized: entity.mask,
     original: entity.value,
   }));
+  if (isAnonymizationDebugLoggingEnabled) {
+    logger.debug(
+      `[inference.anonymization.result] anonymizations=${
+        anonymization.anonymizations.length
+      } replacements=${replacements.length} generated_replacements_id=${replacementsId ?? 'none'}`
+    );
+  }
   const shouldPersistReplacements = Boolean(carriedReplacementsId || replacements.length);
 
   if (!shouldPersistReplacements) {
@@ -166,12 +189,20 @@ export const prepareAnonymization = async ({
   }
 
   if (!existingReplacements) {
-    await repo.create({
-      id: replacementsId,
-      namespace,
-      createdBy: 'inference',
-      replacements,
-    });
+    try {
+      await repo.create({
+        id: replacementsId,
+        namespace,
+        createdBy: 'inference',
+        replacements,
+      });
+    } catch (createErr) {
+      // Another concurrent request may have created this replacements document first.
+      if (!isConflictError(createErr)) {
+        throw createErr;
+      }
+      await repo.update(namespace, replacementsId, { replacements });
+    }
   }
 
   return { anonymization, replacementsId, effectivePolicy };
