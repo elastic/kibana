@@ -19,6 +19,7 @@ import type { ConfigurationRequest } from '../../../common/types/api';
 type Request = Omit<SnakeToCamelCase<ConfigurationRequest>, 'owner'> & {
   id: string;
   version: string;
+  analyticsEnabled?: boolean;
 };
 
 export const usePersistConfiguration = () => {
@@ -35,6 +36,7 @@ export const usePersistConfiguration = () => {
       templates,
       connector,
       observableTypes,
+      analyticsEnabled,
     }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
@@ -44,6 +46,7 @@ export const usePersistConfiguration = () => {
           templates: templates ?? [],
           owner: owner[0],
           observableTypes,
+          analytics_enabled: analyticsEnabled,
         });
       }
 
@@ -54,6 +57,7 @@ export const usePersistConfiguration = () => {
         customFields: customFields ?? [],
         templates: templates ?? [],
         observableTypes,
+        analytics_enabled: analyticsEnabled,
       });
     },
     {

@@ -29,7 +29,7 @@
       "uiActions",
       "workflowsExtensions"
     ],
-    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
+    "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless", "dataViews"],
     "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
     "extraPublicDirs": ["common"]
   }

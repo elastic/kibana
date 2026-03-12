@@ -50,6 +50,7 @@ describe('useCasesFeatures', () => {
         isObservablesFeatureEnabled: true,
         isExtractObservablesEnabled: false,
         connectorsAuthorized: false,
+        isAnalyticsAuthorized: false,
       });
     }
   );
@@ -84,6 +85,7 @@ describe('useCasesFeatures', () => {
         isObservablesFeatureEnabled,
         isExtractObservablesEnabled,
         connectorsAuthorized: false,
+        isAnalyticsAuthorized: false,
       });
     }
   );
@@ -107,6 +109,7 @@ describe('useCasesFeatures', () => {
       isObservablesFeatureEnabled: true,
       isExtractObservablesEnabled: false,
       connectorsAuthorized: false,
+      isAnalyticsAuthorized: false,
     });
   });
 
