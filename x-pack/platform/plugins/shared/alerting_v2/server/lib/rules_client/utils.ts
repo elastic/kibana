@@ -100,8 +100,8 @@ export function buildUpdateRuleAttributes(
       updateData.notification_policies,
       existingAttrs.notification_policies
     ),
+    enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
-    enabled: existingAttrs.enabled,
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
     ...serverFields,

@@ -77,6 +77,7 @@ export const StatusPopoverButton = memo(({ enrichedFieldInfo }: StatusPopoverBut
     ],
     closePopover: togglePopover,
     onSuccess: onWorkflowStatusChange,
+    telemetrySource: 'attacks_page_flyout_header',
   });
 
   const button = useMemo(

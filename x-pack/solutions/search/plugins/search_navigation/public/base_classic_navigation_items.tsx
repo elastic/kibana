@@ -107,14 +107,6 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
         },
         id: 'searchQueryRules',
       },
-      {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        deepLink: {
-          link: 'searchInferenceEndpoints:inferenceEndpoints',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'inference_endpoints',
-      },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.relevanceTitle', {
       defaultMessage: 'Relevance',

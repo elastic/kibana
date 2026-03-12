@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ServiceIdentifier } from 'inversify';
 import type { NotificationPolicySavedObjectServiceContract } from './notification_policy_saved_object_service';
+
+/**
+ * Pre-configured SavedObjects client with hidden types for notification policies
+ */
+export const NotificationPolicySavedObjectsClientToken = Symbol.for(
+  'alerting_v2.NotificationPolicySavedObjectsClient'
+) as ServiceIdentifier<SavedObjectsClientContract>;
 
 /**
  * NotificationPolicySavedObjectService scoped to the current request
