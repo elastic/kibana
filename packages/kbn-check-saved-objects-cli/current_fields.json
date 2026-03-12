@@ -598,6 +598,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "monitoring_enabled",
     "monitoring_output_id",
@@ -621,7 +622,13 @@
     "namespace",
     "packagePolicyCount",
     "updated_at",
-    "vars"
+    "vars",
+    "verification_failed_at",
+    "verification_id",
+    "verification_permissions",
+    "verification_started_at",
+    "verification_status",
+    "verification_timestamp"
   ],
   "fleet-fleet-server-host": [
     "host_urls",
@@ -737,6 +744,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "monitoring_diagnostics",
     "monitoring_enabled",

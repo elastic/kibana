@@ -2011,6 +2011,9 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
       },
@@ -2084,6 +2087,24 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_id": {
+        "type": "keyword"
+      },
+      "verification_permissions": {
+        "type": "flattened"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
+      },
+      "verification_timestamp": {
+        "type": "date"
       }
     }
   },
@@ -2439,6 +2460,9 @@
         "type": "keyword"
       },
       "is_protected": {
+        "type": "boolean"
+      },
+      "is_verifier": {
         "type": "boolean"
       },
       "keep_monitoring_alive": {
