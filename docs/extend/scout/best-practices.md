@@ -57,6 +57,14 @@ test('works correctly', async ({ page }) => {
 });
 ```
 
+❌ **Don’t:** use variables or template literals in test titles as they look opaque in stack traces and test reports:
+
+```ts
+test(`handles ${dataView.title} correctly`, async ({ page }) => {
+  /* ... */
+});
+```
+
 ✔️ **Do:**
 
 ```ts
@@ -359,7 +367,7 @@ test.beforeEach(async ({ uiSettings, kbnClient }) => {
 
 ### Use Playwright auto-waiting [leverage-playwright-auto-waiting]
 
-Playwright actions and [web-first assertions](https://playwright.dev/docs/best-practices#use-web-first-assertions) already wait/retry. Don’t add redundant waits.
+Playwright actions and [web-first assertions](https://playwright.dev/docs/best-practices#use-web-first-assertions) already wait/retry. Don’t add redundant waits, and never use `page.waitForTimeout()` as it’s a hard sleep with no readiness signal and a common source of flakiness.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** add unnecessary waits before actions or assertions:
@@ -452,7 +460,8 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts)). Prefer defaults.
 
 - Don’t override suite-level timeouts/retries with `test.describe.configure()` unless you have a strong reason.
-- If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale.
+- If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale. An assertion timeout that exceeds the test timeout is ignored.
+- Time spent in hooks (`beforeEach`, `afterEach`) counts toward the test timeout. If setup is slow, the test itself may time out even though its assertions are fast.
 
 :::::{dropdown} Example
 
