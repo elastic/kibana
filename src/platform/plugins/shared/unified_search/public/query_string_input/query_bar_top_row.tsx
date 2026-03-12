@@ -302,6 +302,7 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [suppressFilterToggleTooltip, setSuppressFilterToggleTooltip] = useState(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const { euiTheme } = useEuiTheme();
@@ -904,6 +905,7 @@ export const QueryBarTopRow = React.memo(
       const hasFilters = Boolean(props.filters?.length);
 
       function handleFilterToggleClick() {
+        setSuppressFilterToggleTooltip(true);
         if (filterToggleClickTimer.current) {
           clearTimeout(filterToggleClickTimer.current);
           filterToggleClickTimer.current = null;
@@ -917,38 +919,44 @@ export const QueryBarTopRow = React.memo(
       }
 
       const filterCount = props.filters?.length ?? 0;
+      const toggleButton = (
+        <EuiButtonIcon
+          iconType="filter"
+          aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
+            defaultMessage: 'Toggle filters panel',
+          })}
+          onClick={handleFilterToggleClick}
+          size="s"
+          display="base"
+          color="text"
+          data-test-subj="unifiedFilterPanelToggle"
+          css={
+            props.isFiltersVisible
+              ? css({
+                  backgroundColor: euiTheme.colors.darkShade,
+                  color: euiTheme.colors.ghost,
+                  '&:hover, &:focus': {
+                    backgroundColor: euiTheme.colors.darkShade,
+                  },
+                })
+              : undefined
+          }
+        />
+      );
 
       return (
         <EuiFlexItem grow={false}>
-          <div css={{ position: 'relative', display: 'inline-flex' }}>
-            <EuiToolTip
-              position="bottom"
-              content={strings.getFilterToggleTooltip()}
-              delay="long"
-            >
-              <EuiButtonIcon
-                iconType="filter"
-                aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
-                  defaultMessage: 'Toggle filters panel',
-                })}
-                onClick={handleFilterToggleClick}
-                size="s"
-                display="base"
-                color="text"
-                data-test-subj="unifiedFilterPanelToggle"
-                css={
-                  props.isFiltersVisible
-                    ? css({
-                        backgroundColor: euiTheme.colors.darkShade,
-                        color: euiTheme.colors.ghost,
-                        '&:hover, &:focus': {
-                          backgroundColor: euiTheme.colors.darkShade,
-                        },
-                      })
-                    : undefined
-                }
-              />
-            </EuiToolTip>
+          <div
+            css={{ position: 'relative', display: 'inline-flex' }}
+            onMouseLeave={() => setSuppressFilterToggleTooltip(false)}
+          >
+            {suppressFilterToggleTooltip ? (
+              toggleButton
+            ) : (
+              <EuiToolTip position="bottom" content={strings.getFilterToggleTooltip()} delay="long">
+                {toggleButton}
+              </EuiToolTip>
+            )}
             <EuiNotificationBadge
                 aria-hidden
                 size="s"
