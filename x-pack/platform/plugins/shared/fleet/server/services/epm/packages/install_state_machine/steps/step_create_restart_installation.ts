@@ -27,6 +27,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
     force,
     verificationResult,
     installedPkg,
+    installedAsDependencyOf,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, version: pkgVersion } = packageInfo;
@@ -62,6 +63,8 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
             installSource,
             verificationResult,
             previousVersion,
+            installedAsDependencyOf,
+            existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
             dependencies,
           })
         );
@@ -86,6 +89,8 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
           installSource,
           verificationResult,
           previousVersion,
+          installedAsDependencyOf,
+          existingIsDependencyOf: installedPkg.attributes.is_dependency_of ?? [],
           dependencies,
         })
       );
@@ -100,6 +105,7 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
         installSource,
         spaceId,
         verificationResult,
+        installedAsDependencyOf,
         dependencies,
       })
     );

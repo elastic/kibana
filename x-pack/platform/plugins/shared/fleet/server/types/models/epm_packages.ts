@@ -72,3 +72,15 @@ export const EpmPackagesSchemaV7 = EpmPackagesSchemaV6.extends({
     )
   ),
 });
+
+export const EpmPackagesSchemaV8 = EpmPackagesSchemaV7.extends({
+  is_dependency_of: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { maxSize: 1000 }
+    )
+  ),
+});

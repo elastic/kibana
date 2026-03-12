@@ -28,3 +28,17 @@ export function getPackageDependencies(
     })) ?? null;
   return dependencies;
 }
+
+export function mergeIsDependencyOf(
+  installedAsDependencyOf?: { name: string; version: string },
+  existingIsDependencyOf?: { name: string; version: string }[]
+): { name: string; version: string }[] {
+  const existing = existingIsDependencyOf ?? [];
+  if (!installedAsDependencyOf) {
+    return existing;
+  }
+  const alreadyHas = existing.some(
+    (p) => p.name === installedAsDependencyOf.name && p.version === installedAsDependencyOf.version
+  );
+  return alreadyHas ? existing : [...existing, installedAsDependencyOf];
+}

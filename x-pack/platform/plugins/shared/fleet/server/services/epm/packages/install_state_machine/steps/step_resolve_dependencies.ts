@@ -73,6 +73,10 @@ export async function stepResolveDependencies(context: InstallContext) {
               spaceId: context.spaceId,
               force: context.force,
               prerelease: isPrerelease,
+              installedAsDependencyOf: {
+                name: context.packageInstallContext.packageInfo.name,
+                version: context.packageInstallContext.packageInfo.version,
+              },
             });
           }
         },

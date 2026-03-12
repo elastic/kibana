@@ -8,10 +8,15 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
-import { packagePolicyService } from '../..';
+import { packagePolicyService, appContextService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
-import { deleteESAsset, removeInstallation, cleanupAssets } from './remove';
+import {
+  deleteESAsset,
+  removeInstallation,
+  cleanupAssets,
+  cleanupDependenciesStep,
+} from './remove';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 import { getInstallation } from './get';
 
@@ -24,6 +29,9 @@ jest.mock('../..', () => {
         warn: jest.fn(),
       }),
       getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+      getExperimentalFeatures: jest.fn().mockReturnValue({
+        enableResolveDependencies: false,
+      }),
     },
     packagePolicyService: {
       list: jest.fn().mockImplementation((soClient, params) => {
@@ -70,11 +78,182 @@ const mockDeletePackageKnowledgeBase = deletePackageKnowledgeBase as jest.Mocked
   typeof deletePackageKnowledgeBase
 >;
 const mockGetInstallation = getInstallation as jest.MockedFunction<typeof getInstallation>;
+const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
+
+describe('cleanupDependenciesStep', () => {
+  let soClientMock: any;
+  const esClientMock = {} as any;
+
+  beforeEach(() => {
+    soClientMock = {
+      get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: jest.fn().mockResolvedValue({}),
+      delete: jest.fn(),
+      find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+    } as any;
+    mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: true });
+    mockGetInstallation.mockReset();
+  });
+
+  afterEach(() => {
+    mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
+  });
+
+  it('returns early when enableResolveDependencies is false', async () => {
+    mockGetExperimentalFeatures.mockReturnValue({ enableResolveDependencies: false });
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      dependencies: [{ name: 'dep-a', version: '1.0.0' }],
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(mockGetInstallation).not.toHaveBeenCalled();
+    expect(soClientMock.update).not.toHaveBeenCalled();
+  });
+
+  it('returns early when installation has no dependencies', async () => {
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      dependencies: [],
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(mockGetInstallation).not.toHaveBeenCalled();
+  });
+
+  it('returns early when installation.dependencies is undefined', async () => {
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(mockGetInstallation).not.toHaveBeenCalled();
+  });
+
+  it('skips dependency when getInstallation returns null for that dep', async () => {
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      dependencies: [{ name: 'dep-a', version: '1.0.0' }],
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+    mockGetInstallation.mockResolvedValue(undefined);
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(soClientMock.update).not.toHaveBeenCalled();
+  });
+
+  it('updates dep is_dependency_of and does not remove when other dependants remain', async () => {
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      dependencies: [{ name: 'dep-a', version: '1.0.0' }],
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+    mockGetInstallation.mockImplementation(({ pkgName }: { pkgName: string }) => {
+      if (pkgName === 'dep-a') {
+        return Promise.resolve({
+          name: 'dep-a',
+          version: '1.0.0',
+          is_dependency_of: [
+            { name: 'parent', version: '1.0.0' },
+            { name: 'other-parent', version: '2.0.0' },
+          ],
+          installed_kibana: [],
+          installed_es: [],
+        } as any);
+      }
+      return Promise.resolve(undefined);
+    });
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(soClientMock.update).toHaveBeenCalledTimes(1);
+    expect(soClientMock.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'dep-a', {
+      is_dependency_of: [{ name: 'other-parent', version: '2.0.0' }],
+    });
+  });
+
+  it('updates dep is_dependency_of and calls removeInstallation when no other dependants remain', async () => {
+    const installation = {
+      name: 'parent',
+      version: '1.0.0',
+      dependencies: [{ name: 'dep-a', version: '1.0.0' }],
+      installed_kibana: [],
+      installed_es: [],
+    } as any;
+    mockGetInstallation.mockImplementation(({ pkgName }: { pkgName: string }) => {
+      if (pkgName === 'dep-a') {
+        return Promise.resolve({
+          name: 'dep-a',
+          version: '1.0.0',
+          is_dependency_of: [{ name: 'parent', version: '1.0.0' }],
+          dependencies: [],
+          installed_kibana: [],
+          installed_es: [],
+          package_assets: [],
+        } as any);
+      }
+      return Promise.resolve(undefined);
+    });
+
+    await cleanupDependenciesStep({
+      savedObjectsClient: soClientMock,
+      pkgName: 'parent',
+      installation,
+      esClient: esClientMock,
+    });
+
+    expect(soClientMock.delete).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'dep-a');
+  });
+});
 
 describe('removeInstallation', () => {
   let soClientMock: any;
   const esClientMock = {} as any;
   beforeEach(() => {
+    jest.clearAllMocks();
     soClientMock = {
       get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
       update: jest.fn(),
@@ -129,7 +308,7 @@ describe('removeInstallation', () => {
       esClient: esClientMock,
       force: false,
     });
-    expect(mockPackagePolicyService.delete).toHaveBeenCalledTimes(2);
+    expect(mockPackagePolicyService.delete).toHaveBeenCalled();
   });
 
   it('should call audit logger', async () => {

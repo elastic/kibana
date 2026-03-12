@@ -40,6 +40,19 @@ export default function (providerContext: FtrProviderContext) {
     return res?._source?.['epm-packages'] as Installation;
   };
 
+  const installationExists = async (pkg: string): Promise<boolean> => {
+    try {
+      await es.transport.request({
+        method: 'GET',
+        path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/epm-packages:${pkg}`,
+      });
+      return true;
+    } catch (err: any) {
+      if (err?.meta?.statusCode === 404) return false;
+      throw err;
+    }
+  };
+
   describe('Install package with dependencies (requires.content)', () => {
     skipIfNoDockerRegistry(providerContext);
 
@@ -60,11 +73,29 @@ export default function (providerContext: FtrProviderContext) {
       expect(depInstallation).toBeDefined();
       expect(depInstallation?.name).toBe(DEP_PACKAGE);
       expect(depInstallation?.version).toBe(VERSION);
+      expect(depInstallation?.is_dependency_of).toEqual([
+        { name: PARENT_PACKAGE, version: VERSION },
+      ]);
 
       const parentInstallation = await getInstallationSavedObject(PARENT_PACKAGE);
       expect(parentInstallation).toBeDefined();
       expect(parentInstallation?.name).toBe(PARENT_PACKAGE);
       expect(parentInstallation?.dependencies).toEqual([{ name: DEP_PACKAGE, version: VERSION }]);
+    });
+
+    it('cleans up dependency package when parent is uninstalled', async () => {
+      await installPackage(PARENT_PACKAGE, VERSION).expect(200);
+
+      expect(await installationExists(DEP_PACKAGE)).toBe(true);
+      expect(await installationExists(PARENT_PACKAGE)).toBe(true);
+
+      const uninstallRes = await supertest
+        .delete(`/api/fleet/epm/packages/${PARENT_PACKAGE}/${VERSION}`)
+        .set('kbn-xsrf', 'xxxx');
+      expect(uninstallRes.status).toBe(200);
+
+      expect(await installationExists(PARENT_PACKAGE)).toBe(false);
+      expect(await installationExists(DEP_PACKAGE)).toBe(false);
     });
   });
 }

@@ -719,6 +719,9 @@ export interface StateContext<T> {
 
 export type PackageDependencies = { name: string; version: string }[];
 
+/** Packages (name, version) that have this package as a dependency */
+export type IsDependencyOf = PackageDependencies;
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
@@ -754,6 +757,8 @@ export interface Installation {
     action?: 'accepted' | 'declined' | 'pending';
   };
   dependencies?: PackageDependencies | null;
+  /** Packages (name, version) that have this package as a dependency */
+  is_dependency_of?: IsDependencyOf | null;
 }
 
 export interface PackageUsageStats {
