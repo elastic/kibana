@@ -87,6 +87,20 @@ const renderEditPage = (ruleId: string = 'rule-1') => {
   );
 };
 
+const renderClonePage = (sourceRuleId: string = 'rule-1') => {
+  return render(
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[`/create?cloneFrom=${sourceRuleId}`]}>
+        <I18nProvider>
+          <Route path="/create">
+            <RuleFormPage />
+          </Route>
+        </I18nProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+};
+
 describe('RuleFormPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -268,6 +282,188 @@ describe('RuleFormPage', () => {
       });
 
       renderEditPage();
+
+      expect(capturedStandaloneProps.query).toBe('FROM metrics-* | LIMIT 10');
+    });
+  });
+
+  describe('clone mode', () => {
+    it('shows loading spinner while fetching source rule', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    it('shows error state when source rule fetch fails', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        isError: true,
+        error: new Error('Rule not found'),
+      });
+
+      renderClonePage();
+
+      expect(screen.getByText('Failed to load source rule for cloning')).toBeInTheDocument();
+      expect(screen.getByText('Rule not found')).toBeInTheDocument();
+    });
+
+    it('renders the "Clone rule" page title', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Source Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(screen.getByRole('heading', { name: 'Clone rule' })).toBeInTheDocument();
+    });
+
+    it('does not pass ruleId to StandaloneRuleForm (creates a new rule)', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Source Rule' },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      expect(capturedStandaloneProps.ruleId).toBeUndefined();
+    });
+
+    it('appends " (clone)" to the rule name in initialValues', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          time_field: '@timestamp',
+          schedule: { every: '10m', lookback: '2m' },
+          evaluation: {
+            query: {
+              base: 'FROM logs-* | STATS count() BY host.name',
+              condition: 'WHERE count > 5',
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          recovery_policy: { type: 'no_breach' },
+          state_transition: { pending_count: 3, pending_timeframe: '5m' },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
+      expect(initialValues).toBeDefined();
+
+      const metadata = initialValues.metadata as Record<string, unknown>;
+      expect(metadata.name).toBe('My Alert Rule (clone)');
+    });
+
+    it('preserves all source rule configurations in initialValues', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'My Alert Rule', labels: ['prod'], owner: 'team-a' },
+          time_field: '@timestamp',
+          schedule: { every: '10m', lookback: '2m' },
+          evaluation: {
+            query: {
+              base: 'FROM logs-* | STATS count() BY host.name',
+              condition: 'WHERE count > 5',
+            },
+          },
+          grouping: { fields: ['host.name'] },
+          recovery_policy: { type: 'no_breach' },
+          state_transition: { pending_count: 3, pending_timeframe: '5m' },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
+
+      const initialValues = capturedStandaloneProps.initialValues as Record<string, unknown>;
+
+      // Metadata (labels, owner preserved)
+      const metadata = initialValues.metadata as Record<string, unknown>;
+      expect(metadata.labels).toEqual(['prod']);
+      expect(metadata.owner).toBe('team-a');
+
+      // Schedule
+      const schedule = initialValues.schedule as Record<string, unknown>;
+      expect(schedule.every).toBe('10m');
+      expect(schedule.lookback).toBe('2m');
+
+      // Evaluation
+      const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
+      expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+      expect(evaluation.query.condition).toBe('WHERE count > 5');
+
+      // Grouping
+      const grouping = initialValues.grouping as { fields: string[] };
+      expect(grouping.fields).toEqual(['host.name']);
+
+      // Recovery policy
+      const recoveryPolicy = initialValues.recoveryPolicy as Record<string, unknown>;
+      expect(recoveryPolicy.type).toBe('no_breach');
+
+      // State transition
+      const stateTransition = initialValues.stateTransition as Record<string, unknown>;
+      expect(stateTransition.pendingCount).toBe(3);
+      expect(stateTransition.pendingTimeframe).toBe('5m');
+    });
+
+    it('passes the base query from the source rule as the query prop', () => {
+      mockUseFetchRule.mockReturnValue({
+        data: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Test' },
+          time_field: '@timestamp',
+          schedule: { every: '5m' },
+          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      });
+
+      renderClonePage();
 
       expect(capturedStandaloneProps.query).toBe('FROM metrics-* | LIMIT 10');
     });
