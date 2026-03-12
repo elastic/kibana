@@ -42,8 +42,10 @@ export const useLogRateAnalysisBarColors = () => {
   };
 };
 
-/**  */
-export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiopsLogRateAnalysisEmbeddable' as const;
+//
+// Do not change constant value - part of public REST APIs
+//
+export const EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE = 'aiops_log_rate_analysis' as const;
 
 /**  */
 export const LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME = 'aiopsLogRateAnalysisEmbeddableDataViewId';
