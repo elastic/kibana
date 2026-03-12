@@ -14,6 +14,8 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+export TS_NODE_PROJECT=".buildkite/tsconfig.json"
+
 export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
 
 # A few things, such as Chrome, respect this variable
