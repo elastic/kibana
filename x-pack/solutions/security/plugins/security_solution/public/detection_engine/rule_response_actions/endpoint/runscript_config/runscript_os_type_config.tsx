@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
+  EuiSpacer,
   EuiTitle,
   EuiFieldText,
   EuiFlexGroup,
@@ -17,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { SelectedScriptDetails } from './selected_script_details';
 import type { ValidationState } from './types';
 import {
   SCRIPT_TIMEOUT_HELP,
@@ -190,104 +192,127 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace={showFieldLabels} fullWidth>
             <EuiTitle
-              size="xs"
+              size="s"
               css={css`
                 width: 10ch;
                 margin-top: 0.75rem;
               `}
               className="eui-textRight"
             >
-              <h6>{OS_TITLES[platform] ?? platform}</h6>
+              <h5>{OS_TITLES[platform] ?? platform}</h5>
             </EuiTitle>
           </EuiFormRow>
         </EuiFlexItem>
 
-        {/* Script Selector Column */}
-        <EuiFlexItem grow={2} className="eui-textTruncate">
-          <EuiFormRow
-            label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
-            fullWidth
-            helpText={<>&nbsp;</>}
+        {/* Right side of OS label column */}
+        <EuiFlexItem className="eui-textTruncate">
+          <EuiFlexGroup
+            key={platform}
+            gutterSize="m"
+            alignItems="flexStart"
+            justifyContent="spaceBetween"
+            data-test-subj={dataTestSubj}
           >
-            <EndpointRunscriptScriptSelector
-              selectedScriptId={config.scriptId}
-              osType={platform}
-              onChange={scriptSelectionOnChangeHandler}
-              onScriptsLoaded={scriptSelectionOnScriptsLoadedHandler}
-              data-test-subj={getTestId('scriptSelector')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+            {/* Script Selector Column */}
+            <EuiFlexItem grow={2} className="eui-textTruncate">
+              <EuiFormRow
+                label={showFieldLabels ? SCRIPT_SELECTION_LABEL : undefined}
+                fullWidth
+                helpText={<>&nbsp;</>}
+              >
+                <EndpointRunscriptScriptSelector
+                  selectedScriptId={config.scriptId}
+                  osType={platform}
+                  onChange={scriptSelectionOnChangeHandler}
+                  onScriptsLoaded={scriptSelectionOnScriptsLoadedHandler}
+                  data-test-subj={getTestId('scriptSelector')}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
 
-        {/* Script Arguments Column */}
-        <EuiFlexItem grow={2}>
-          <EuiFormRow
-            label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
-            fullWidth
-            helpText={
-              !currentValidationState.arguments.errors && scriptSelected?.requiresInput
-                ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
-                : currentValidationState.arguments.isValid && <>&nbsp;</>
-            }
-            isInvalid={!currentValidationState.arguments.isValid}
-            error={currentValidationState.arguments.errors?.join('; ')}
-            data-test-subj={getTestId('scriptParamsContainer')}
-          >
-            <EuiFieldText
-              isInvalid={!currentValidationState.arguments.isValid}
-              name="scriptParams"
-              disabled={!scriptSelected}
-              value={config.scriptInput}
-              fullWidth
-              onChange={scriptParamsOnChangeHandler}
-              placeholder={SCRIPT_ARGUMENTS_PLACEHOLDER}
-              data-test-subj={getTestId('scriptParams')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+            {/* Script Arguments Column */}
+            <EuiFlexItem grow={2}>
+              <EuiFormRow
+                label={showFieldLabels ? SCRIPT_ARGUMENTS_LABEL : undefined}
+                fullWidth
+                helpText={
+                  !currentValidationState.arguments.errors && scriptSelected?.requiresInput
+                    ? SCRIPT_ARGUMENTS_REQUIRED_HELP_TEXT
+                    : currentValidationState.arguments.isValid && <>&nbsp;</>
+                }
+                isInvalid={!currentValidationState.arguments.isValid}
+                error={currentValidationState.arguments.errors?.join('; ')}
+                data-test-subj={getTestId('scriptParamsContainer')}
+              >
+                <EuiFieldText
+                  isInvalid={!currentValidationState.arguments.isValid}
+                  name="scriptParams"
+                  disabled={!scriptSelected}
+                  value={config.scriptInput}
+                  fullWidth
+                  onChange={scriptParamsOnChangeHandler}
+                  placeholder={SCRIPT_ARGUMENTS_PLACEHOLDER}
+                  data-test-subj={getTestId('scriptParams')}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
 
-        {/* Script Timeout Column */}
-        <EuiFlexItem grow={1}>
-          <EuiFormRow
-            fullWidth
-            isInvalid={!currentValidationState.timeout.isValid}
-            error={currentValidationState.timeout.errors?.join('; ')}
-            data-test-subj={getTestId('timeoutContainer')}
-            helpText={<>&nbsp;</>}
-            labelAppend={
-              showFieldLabels ? <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText> : undefined
-            }
-            label={
-              showFieldLabels ? (
-                <EuiFlexGroup
-                  responsive={false}
-                  wrap={false}
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  gutterSize="xs"
-                  css={css`
-                    line-height: 1rem;
-                  `}
-                >
-                  <EuiFlexItem grow={false}>{SCRIPT_TIMEOUT_LABEL}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : undefined
-            }
-          >
-            <EuiFieldText
-              isInvalid={!currentValidationState.timeout.isValid}
-              name="timeout"
-              disabled={!scriptSelected}
-              fullWidth
-              onChange={scriptTimeoutOnChangeHandler}
-              value={config.timeout ?? ''}
-              placeholder={SCRIPT_TIMEOUT_HELP}
-              data-test-subj={getTestId('timeout')}
-            />
-          </EuiFormRow>
+            {/* Script Timeout Column */}
+            <EuiFlexItem grow={1}>
+              <EuiFormRow
+                fullWidth
+                isInvalid={!currentValidationState.timeout.isValid}
+                error={currentValidationState.timeout.errors?.join('; ')}
+                data-test-subj={getTestId('timeoutContainer')}
+                helpText={<>&nbsp;</>}
+                labelAppend={
+                  showFieldLabels ? <EuiText size="xs">{OPTIONAL_FIELD_LABEL}</EuiText> : undefined
+                }
+                label={
+                  showFieldLabels ? (
+                    <EuiFlexGroup
+                      responsive={false}
+                      wrap={false}
+                      alignItems="center"
+                      justifyContent="flexEnd"
+                      gutterSize="xs"
+                      css={css`
+                        line-height: 1rem;
+                      `}
+                    >
+                      <EuiFlexItem grow={false}>{SCRIPT_TIMEOUT_LABEL}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={<EuiText size="xs">{TIMEOUT_TOOLTIP_CONTENT}</EuiText>}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : undefined
+                }
+              >
+                <EuiFieldText
+                  isInvalid={!currentValidationState.timeout.isValid}
+                  name="timeout"
+                  disabled={!scriptSelected}
+                  fullWidth
+                  onChange={scriptTimeoutOnChangeHandler}
+                  value={config.timeout ?? ''}
+                  placeholder={SCRIPT_TIMEOUT_HELP}
+                  data-test-subj={getTestId('timeout')}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {scriptSelected && (
+            <>
+              <EuiSpacer size="s" />
+              <SelectedScriptDetails
+                script={scriptSelected}
+                data-test-subj={getTestId('selectedScriptDetails')}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

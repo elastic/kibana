@@ -59,3 +59,7 @@ export const TIMEOUT_VALUE_MUST_BE_GREATER_THAN_ZERO = i18n.translate(
     defaultMessage: 'Value must be greater than 0',
   }
 );
+export const SELECTED_SCRIPT_DETAILS_LABEL = i18n.translate(
+  'xpack.securitySolution.runscriptConfig.selectedScriptDetailsLabel',
+  { defaultMessage: 'Script details' }
+);
