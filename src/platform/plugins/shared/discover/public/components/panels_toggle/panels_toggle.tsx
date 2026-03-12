@@ -9,13 +9,20 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
 import { VIEW_MODE } from '../../../common/constants';
+import {
+  FieldListHiddenIcon,
+  FieldListShownIcon,
+  TableHiddenIcon,
+  TableShownIcon,
+  VizHiddenIcon,
+  VizShownIcon,
+} from './panel_icons';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -88,16 +95,11 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
       label: i18n.translate('discover.panelsToggle.showSidebarButton', {
         defaultMessage: 'Show sidebar',
       }),
-      iconType: 'listBullet',
+      iconType: isSidebarCollapsed ? FieldListHiddenIcon : FieldListShownIcon,
       'data-test-subj': 'dscShowSidebarButton',
       'aria-expanded': !isSidebarCollapsed,
       'aria-controls': 'discover-sidebar',
       onClick: () => sidebarToggleState?.toggle?.(!sidebarToggleState.isCollapsed),
-      css: css`
-        .euiIcon {
-          opacity: ${sidebarToggleState?.isCollapsed ? 0.3 : 1};
-        }
-      `,
     },
     {
       label: isChartHidden
@@ -107,17 +109,12 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         : i18n.translate('discover.panelsToggle.hideChartButton', {
             defaultMessage: 'Hide chart',
           }),
-      iconType: isChartHidden ? 'chartBarVertical' : 'chartBarVertical',
+      iconType: isChartHidden ? VizHiddenIcon : VizShownIcon,
       'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
       'aria-expanded': !isChartHidden,
       'aria-controls': 'unifiedHistogramCollapsablePanel',
       onClick: onToggleChart,
       disabled: (isTableHidden && !isChartHidden) || !isActualChartAvailable,
-      css: css`
-        .euiIcon {
-          opacity: ${isChartHidden || !isActualChartAvailable ? 0.3 : 1};
-        }
-      `,
     },
 
     {
@@ -128,17 +125,12 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         : i18n.translate('discover.panelsToggle.hideTableButton', {
             defaultMessage: 'Hide table',
           }),
-      iconType: isTableHidden ? 'table' : 'table',
+      iconType: isTableHidden ? TableHiddenIcon : TableShownIcon,
       'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
       'aria-expanded': !isTableHidden,
       'aria-controls': 'discoverDocTable',
       onClick: onToggleTable,
       disabled: isChartHidden || !isActualChartAvailable,
-      css: css`
-        .euiIcon {
-          opacity: ${isTableHidden && isActualChartAvailable ? 0.3 : 1};
-        }
-      `,
     },
   ];
 
