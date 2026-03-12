@@ -83,7 +83,16 @@ export interface ChromeStart {
   setIsVisible(isVisible: boolean): void;
 
   /**
-   * Override the current badge
+   * Get an observable of the current badge
+   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
+   */
+  getBadge$(): Observable<ChromeBadge | undefined>;
+
+  /**
+   * Override the current badge.
+   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
+   * renders inline with breadcrumbs in both classic and project layouts.
+   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
    */
   setBadge(badge?: ChromeBadge): void;
 
