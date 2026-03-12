@@ -44,4 +44,46 @@ describe('addAlertsStepDefinition', () => {
       ],
     });
   });
+
+  it('drops alert rule when response has null rule fields', async () => {
+    const alertCommentWithNullRule = {
+      id: 'alert-comment-id',
+      type: 'alert' as const,
+      alertId: ['alert-1'],
+      index: ['.alerts-security.alerts-default'],
+      owner: createCaseResponseFixture.owner,
+      rule: { id: null, name: null },
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue({
+      ...createCaseResponseFixture,
+      comments: [alertCommentWithNullRule],
+    });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addAlertsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        alerts: [{ alertId: 'alert-1', index: '.alerts-security.alerts-default' }],
+      })
+    );
+
+    const outputCase = result.output?.case;
+    if (outputCase == null) {
+      throw new Error('Expected output from add alerts step');
+    }
+
+    expect(outputCase.comments?.[0]).not.toHaveProperty('rule');
+  });
 });

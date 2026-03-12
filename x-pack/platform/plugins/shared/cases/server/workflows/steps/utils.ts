@@ -41,10 +41,10 @@ export async function getCasesClientFromStepsContext(
 
 export const createCaseIdOnError =
   <TInput extends { case_id: string }, TConfig = unknown>(
-    messageFactory: (caseId: string) => string
+    messageFactory: (caseId: string, error: any) => string
   ) =>
   (_error: unknown, input: TInput, _config: TConfig) =>
-    new Error(messageFactory(input.case_id));
+    new Error(messageFactory(input.case_id, _error));
 
 export const withCaseOwner = async <T>(
   client: CasesClient,

@@ -279,7 +279,7 @@ export const UNASSIGN_CASE_STEP_LABEL = i18n.translate(
 export const UNASSIGN_CASE_STEP_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowSteps.unassignCase.description',
   {
-    defaultMessage: 'Sets assignees after unassignment for an existing case',
+    defaultMessage: 'Removes assignees from an existing case',
   }
 );
 
@@ -287,7 +287,7 @@ export const UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.unassignCase.documentation.details',
   {
     defaultMessage:
-      'This step sets the assignees array on an existing case after unassignment logic in your workflow. Provide an empty array to clear all assignees.',
+      'This step removes the given assignees from an existing case. Provide an empty array to clear all assignees.',
   }
 );
 

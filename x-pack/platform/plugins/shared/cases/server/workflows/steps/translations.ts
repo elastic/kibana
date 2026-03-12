@@ -34,10 +34,10 @@ export const SET_CUSTOM_FIELD_FAILED_MESSAGE = (caseId: string, fieldName: strin
     }
   );
 
-export const ADD_ALERTS_FAILED_MESSAGE = (caseId: string) =>
+export const ADD_ALERTS_FAILED_MESSAGE = (caseId: string, error: string) =>
   i18n.translate('xpack.cases.workflowSteps.addAlerts.error.alertsCouldNotBeAdded', {
-    defaultMessage: 'Alerts could not be added to case "{caseId}".',
-    values: { caseId },
+    defaultMessage: 'Alerts could not be added to case "{caseId}". {error}',
+    values: { caseId, error },
   });
 
 export const ADD_EVENTS_FAILED_MESSAGE = (caseId: string) =>

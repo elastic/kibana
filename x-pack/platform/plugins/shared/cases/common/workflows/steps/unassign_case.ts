@@ -41,13 +41,22 @@ export const unassignCaseStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
     examples: [
-      `## Set assignees after unassignment
+      `## Unassign specific users from a case
 \`\`\`yaml
 - name: unassign_case_users
   type: ${UnassignCaseStepTypeId}
   with:
     case_id: "abc-123-def-456"
-    assignees: []
+    assignees:
+      - uid: "user-123"
+\`\`\``,
+      `## Unassign everyone from a case
+\`\`\`yaml
+- name: unassign_all_case_users
+  type: ${UnassignCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    assignees: null
 \`\`\``,
     ],
   },
