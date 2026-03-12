@@ -8,6 +8,7 @@
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 const DEFAULT_ENTITY_FIELDS = ['host.name', 'user.name', 'service.name'] as const;
@@ -152,6 +153,7 @@ export const buildAlertEntityGraphStepDefinition: PublicStepDefinition = {
   id: 'security.buildAlertEntityGraph',
   inputSchema,
   outputSchema,
+  category: StepCategory.Elasticsearch,
   label: i18n.translate('xpack.securitySolution.workflows.steps.buildAlertEntityGraph.label', {
     defaultMessage: 'Build Alert Entity Graph',
   }),

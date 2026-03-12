@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { buildRelatedAlertsGraph } from './graph_builder';
 import { parseTimeWindowToMs } from './time_window';
@@ -157,6 +158,10 @@ const outputSchema = z.object({
 
 export const buildAlertEntityGraphStepDefinition = createServerStepDefinition({
   id: 'security.buildAlertEntityGraph',
+  label: 'Build Alert Entity Graph',
+  description:
+    'Build a scored graph of correlated alerts by performing a breadth-first search over shared entity fields',
+  category: StepCategory.Elasticsearch,
   inputSchema,
   outputSchema,
   handler: async (context) => {

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
@@ -136,6 +137,10 @@ const getAlertSource = async ({
 
 export const renderAlertNarrativeStepDefinition = createServerStepDefinition({
   id: 'security.renderAlertNarrative',
+  label: 'Render Alert Narrative',
+  description:
+    'Render a human-readable narrative string for an alert based on its event, process, network, and host fields',
+  category: StepCategory.Elasticsearch,
   inputSchema,
   outputSchema,
   handler: async (context) => {

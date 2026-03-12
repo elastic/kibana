@@ -8,6 +8,7 @@
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 const inputSchema = z.object({
@@ -26,6 +27,7 @@ export const renderAlertNarrativeStepDefinition: PublicStepDefinition = {
   id: 'security.renderAlertNarrative',
   inputSchema,
   outputSchema,
+  category: StepCategory.Elasticsearch,
   label: i18n.translate('xpack.securitySolution.workflows.steps.renderAlertNarrative.label', {
     defaultMessage: 'Render Alert Narrative',
   }),
