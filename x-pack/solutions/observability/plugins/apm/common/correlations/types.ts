@@ -41,15 +41,6 @@ export interface CommonCorrelationsQueryParams {
 export type EntityType = 'transaction' | 'exit_span';
 export type Metric = 'throughput' | 'latency' | 'failure_rate';
 
-export enum CorrelationType {
-  TRANSACTION_DURATION = 'transaction_duration',
-  ERROR_RATE = 'error_rate',
-  INFRASTRUCTURE_CPU = 'infrastructure_cpu',
-  INFRASTRUCTURE_MEMORY = 'infrastructure_memory',
-  INFRASTRUCTURE_DISK = 'infrastructure_disk',
-  INFRASTRUCTURE_NETWORK = 'infrastructure_network',
-}
-
 export interface UnifiedCorrelation {
   fieldName: string;
   fieldValue: string | number;
