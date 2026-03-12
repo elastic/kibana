@@ -93,7 +93,7 @@ export const ENTITY_STORE_DELETION_EVENT = {
 } as const satisfies EventTypeOpts<DeletionEvent>;
 
 export const ENTITY_MAINTAINER_EVENT = {
-  eventType: 'entity_maintainer',
+  eventType: 'entity_store_entity_maintainer',
   schema: {
     id: {
       type: 'keyword',
