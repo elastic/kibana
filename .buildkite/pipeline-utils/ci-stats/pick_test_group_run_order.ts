@@ -197,8 +197,9 @@ export async function pickTestGroupRunOrder() {
     );
   };
 
+  const JEST_CONFIG_GLOB = process.env.JEST_CONFIG_GLOB || '**/jest.config.js';
   const jestUnitConfigsWithEmpties = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs([JEST_CONFIG_GLOB, '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
@@ -211,8 +212,10 @@ export async function pickTestGroupRunOrder() {
   // Expand sharded unit configs (e.g. cases/jest.config.js) into shard-annotated entries
   const jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 
+  const JEST_INTEGRATION_CONFIG_GLOB =
+    process.env.JEST_INTEGRATION_CONFIG_GLOB || '**/jest.integration.config.*js';
   const jestIntegrationConfigsRaw = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
+    ? globby.sync(getJestConfigGlobs([JEST_INTEGRATION_CONFIG_GLOB, '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],

@@ -48,25 +48,6 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function parseGithubPrLabels(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (Array.isArray(parsed)) {
-      return parsed
-        .map(String)
-        .map((label) => label.trim())
-        .filter(Boolean);
-    }
-  } catch {
-    // fall through
-  }
-
-  return raw
-    .split(/[\n,]+/g)
-    .map((label) => label.trim())
-    .filter(Boolean);
-}
-
 function normalizeEvaluationConnectorId(raw: string): string {
   // Support `models:judge:eis/<modelId>` where the judge value is a model id, not a connector id.
   if (raw.startsWith('eis/')) {
@@ -156,9 +137,7 @@ function buildEvalsYaml({
  * Reads evals suite metadata and PR labels, then returns a Buildkite YAML group
  * for the matching eval suites.
  */
-export function getEvalPipeline(githubPrLabels: string): string | null {
-  const parsedLabels = parseGithubPrLabels(githubPrLabels);
-
+export function getEvalPipeline(parsedLabels: string[]): string | null {
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');

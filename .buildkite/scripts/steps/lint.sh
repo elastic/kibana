@@ -14,12 +14,18 @@ echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
-if is_pr && ! is_auto_commit_disabled; then
-  desc="node scripts/eslint_all_files --no-cache --fix"
-  node scripts/eslint_all_files --no-cache --fix
+
+if is_pr; then
+  if is_auto_commit_disabled; then
+    desc="node scripts/eslint_all_projects --affected"
+    node scripts/eslint_all_projects --affected
+  else
+    desc="node scripts/eslint_all_projects --affected --fix"
+    node scripts/eslint_all_projects --affected --fix
+  fi
 else
-  desc="node scripts/eslint_all_files --no-cache"
-  node scripts/eslint_all_files --no-cache
+  desc="node scripts/eslint_all_projects --update-cache"
+  node scripts/eslint_all_projects --update-cache
 fi
 
 eslint_exit=$?

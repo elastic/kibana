@@ -1,6 +1,12 @@
 fileGroups:
   src:
     - 'version_dependencies.txt'
+dependsOn:
+  - '@kbn/eslint-plugin-disable'
+  - '@kbn/eslint-plugin-eslint'
+  - '@kbn/eslint-plugin-i18n'
+  - '@kbn/eslint-plugin-imports'
+  - '@kbn/eslint-plugin-telemetry'
 tasks:
   extract-version-dependencies:
     command: node

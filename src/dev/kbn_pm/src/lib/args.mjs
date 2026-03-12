@@ -37,6 +37,7 @@ function parseArgv(argv) {
       // boolean flag
       if (name.startsWith('no-')) {
         flags.set(name.slice(3), false);
+        flags.set(name, true);
       } else {
         flags.set(name, true);
       }
