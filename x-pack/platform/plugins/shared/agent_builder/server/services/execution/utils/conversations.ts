@@ -129,16 +129,18 @@ export const getConversation = async ({
   conversationId,
   autoCreateConversationWithId = false,
   conversationClient,
+  anonymizationEnabled,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
+  anonymizationEnabled: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {
-      ...placeholderConversation({ agentId }),
+      ...placeholderConversation({ agentId, anonymizationEnabled }),
       operation: 'CREATE',
     };
   }
@@ -148,7 +150,10 @@ export const getConversation = async ({
     const conversation = await conversationClient.get(conversationId);
     return {
       ...conversation,
-      replacementsId: conversation.replacementsId ?? uuidv4(),
+      replacementsId:
+        anonymizationEnabled && !conversation.replacementsId
+          ? uuidv4()
+          : conversation.replacementsId,
       operation: 'UPDATE',
     };
   }
@@ -159,12 +164,15 @@ export const getConversation = async ({
     const conversation = await conversationClient.get(conversationId);
     return {
       ...conversation,
-      replacementsId: conversation.replacementsId ?? uuidv4(),
+      replacementsId:
+        anonymizationEnabled && !conversation.replacementsId
+          ? uuidv4()
+          : conversation.replacementsId,
       operation: 'UPDATE',
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId }),
+      ...placeholderConversation({ conversationId, agentId, anonymizationEnabled }),
       operation: 'CREATE',
     };
   }
@@ -173,9 +181,11 @@ export const getConversation = async ({
 export const placeholderConversation = ({
   agentId,
   conversationId,
+  anonymizationEnabled,
 }: {
   agentId: string;
   conversationId?: string;
+  anonymizationEnabled: boolean;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -183,7 +193,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     rounds: [],
     updated_at: new Date().toISOString(),
-    replacementsId: uuidv4(),
+    replacementsId: anonymizationEnabled ? uuidv4() : undefined,
     created_at: new Date().toISOString(),
     user: {
       id: 'unknown',

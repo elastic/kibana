@@ -134,6 +134,13 @@ describe('chat_message_text', () => {
       conversationsService: {},
       toolsService: {},
       startDependencies: createStartDependencies(),
+      accessChecker: {
+        getAccess: jest.fn(() => ({
+          hasRequiredLicense: true,
+          hasLlmConnector: true,
+          hasAnonymizationEnabled: true,
+        })),
+      },
     } as ReturnType<typeof useAgentBuilderServices>);
     useStepsFromPrevRoundsMock.mockReturnValue([]);
     useConversationContextMock.mockReturnValue({
@@ -478,6 +485,31 @@ Area Chart
       expect(
         useResolveAnonymizedValuesMock.mock.calls.some(([params]) => params.enabled === true)
       ).toBe(false);
+    });
+
+    it('does not enable replacements lookup when anonymization is disabled', () => {
+      useAgentBuilderServicesMock.mockReturnValue({
+        agentService: {},
+        chatService: {},
+        conversationsService: {},
+        toolsService: {},
+        startDependencies: createStartDependencies(),
+        accessChecker: {
+          getAccess: jest.fn(() => ({
+            hasRequiredLicense: true,
+            hasLlmConnector: true,
+            hasAnonymizationEnabled: false,
+          })),
+        },
+      } as ReturnType<typeof useAgentBuilderServices>);
+
+      render(<ChatMessageText content="response" steps={[]} replacementsId="repl-1" />);
+
+      expect(
+        useResolveAnonymizedValuesMock.mock.calls.some(
+          ([params]) => params.replacementsId === 'repl-1' && params.enabled === false
+        )
+      ).toBe(true);
     });
 
     it('holds streaming content while replacements are loading when enabled', () => {

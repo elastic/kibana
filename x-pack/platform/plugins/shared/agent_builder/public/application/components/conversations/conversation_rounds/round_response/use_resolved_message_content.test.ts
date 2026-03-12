@@ -57,6 +57,7 @@ describe('useResolvedMessageContent', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
         content: 'Contact: EMAIL_token',
+        anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
@@ -90,6 +91,7 @@ describe('useResolvedMessageContent', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
         content: 'EMAIL_token',
+        anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
@@ -112,6 +114,7 @@ describe('useResolvedMessageContent', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
         content: 'EMAIL_token',
+        anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
@@ -134,6 +137,7 @@ describe('useResolvedMessageContent', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
         content: 'EMAIL_token',
+        anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
@@ -149,6 +153,7 @@ describe('useResolvedMessageContent', () => {
     renderHook(() =>
       useResolvedMessageContent({
         content: 'EMAIL_token',
+        anonymizationEnabled: true,
         hasHttp: true,
         http,
         holdContentWhileResolvingReplacements: false,
@@ -159,6 +164,28 @@ describe('useResolvedMessageContent', () => {
     expect(useResolveAnonymizedValuesMock).toHaveBeenCalledWith(
       expect.objectContaining({
         replacementsId: undefined,
+        enabled: false,
+      })
+    );
+  });
+
+  it('disables replacements lookup when anonymization is disabled', () => {
+    const { result } = renderHook(() =>
+      useResolvedMessageContent({
+        content: 'EMAIL_token',
+        anonymizationEnabled: false,
+        hasHttp: true,
+        http,
+        replacementsId: 'repl-1',
+        holdContentWhileResolvingReplacements: false,
+        holdContentMaxMs: 600,
+      })
+    );
+
+    expect(result.current.displayContent).toBe('EMAIL_token');
+    expect(useResolveAnonymizedValuesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        replacementsId: 'repl-1',
         enabled: false,
       })
     );

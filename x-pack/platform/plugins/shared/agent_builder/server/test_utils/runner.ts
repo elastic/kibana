@@ -272,6 +272,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       filestore: false,
       skills: false,
     },
+    anonymizationEnabled: true,
   };
 };
 
@@ -335,6 +336,9 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
+    inference: {
+      isAnonymizationEnabled: () => true,
+    } as any,
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
@@ -360,6 +364,9 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     spaces: spacesMock.createStart(),
     actions: actionsMock.createStart(),
+    inference: {
+      isAnonymizationEnabled: () => true,
+    } as any,
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),

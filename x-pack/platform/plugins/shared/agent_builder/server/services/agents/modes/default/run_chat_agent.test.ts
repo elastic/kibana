@@ -132,4 +132,52 @@ describe('runDefaultAgentMode', () => {
       { dynamic: true }
     );
   });
+
+  it('omits anonymization metadata when anonymization is disabled', async () => {
+    const context = createAgentHandlerContextMock();
+    context.anonymizationEnabled = false;
+
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {} as any,
+    } as any);
+
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingRoundMock.mockReturnValue(undefined);
+
+    selectToolsMock.mockResolvedValue({
+      staticTools: [],
+      dynamicTools: [],
+    } as any);
+
+    prepareConversationMock.mockResolvedValue({
+      previousRounds: [],
+      nextInput: { message: 'hello', attachments: [] },
+      anonymizationTarget: { targetType: 'index', targetId: 'logs-*' },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({
+      streamEvents: jest.fn(() => []),
+    } as any);
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        conversation: { replacementsId: 'repl-1', rounds: [] } as any,
+        agentConfiguration: { tools: [] } as any,
+      } as any,
+      context
+    );
+
+    expect(createAgentGraphMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        anonymizationMetadata: undefined,
+      })
+    );
+  });
 });

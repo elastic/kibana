@@ -150,6 +150,10 @@ export interface AgentHandlerContext {
    * Determined by the UI setting at the start of execution.
    */
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * Whether anonymization platform behavior is active for this execution.
+   */
+  anonymizationEnabled?: boolean;
 }
 
 /**

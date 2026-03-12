@@ -24,6 +24,7 @@ describe('conversations utils', () => {
           agentId: 'test-agent',
           conversationId: undefined,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('CREATE');
@@ -37,6 +38,7 @@ describe('conversations utils', () => {
           agentId: 'test-agent',
           conversationId: 'test-conversation',
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('UPDATE');
@@ -53,6 +55,7 @@ describe('conversations utils', () => {
           agentId: 'test-agent',
           conversationId: 'test-conversation',
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('UPDATE');
@@ -68,6 +71,7 @@ describe('conversations utils', () => {
           conversationId: 'new-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('CREATE');
@@ -84,9 +88,27 @@ describe('conversations utils', () => {
           conversationId: 'existing-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('UPDATE');
+      });
+
+      it('does not assign replacementsId when anonymization is disabled', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.get.mockResolvedValue(
+          createEmptyConversation({ replacementsId: undefined })
+        );
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'test-conversation',
+          conversationClient,
+          anonymizationEnabled: false,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.replacementsId).toBeUndefined();
       });
     });
   });

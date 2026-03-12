@@ -12,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 export interface AgentBuilderAccess {
   hasRequiredLicense: boolean;
   hasLlmConnector: boolean;
+  hasAnonymizationEnabled: boolean;
 }
 
 type PromiseValues<T> = {
@@ -46,9 +47,12 @@ export class AgentBuilderAccessChecker {
     return license.hasAtLeast('enterprise') && license.isActive;
   }
 
-  private async hasLlmConnector() {
-    const connectors = await this.inference.getConnectors();
-    return connectors.length > 0;
+  private async getInferenceAccess() {
+    const { connectors, anonymizationEnabled } = await this.inference.getConnectors();
+    return {
+      hasLlmConnector: connectors.length > 0,
+      hasAnonymizationEnabled: anonymizationEnabled,
+    };
   }
 
   public async initAccess() {
@@ -56,9 +60,13 @@ export class AgentBuilderAccessChecker {
       return;
     }
 
+    const inferenceAccessPromise = this.getInferenceAccess();
     const accessPromise: PromiseValues<AgentBuilderAccess> = {
       hasRequiredLicense: this.hasRequiredLicense(),
-      hasLlmConnector: this.hasLlmConnector(),
+      hasLlmConnector: inferenceAccessPromise.then((access) => access.hasLlmConnector),
+      hasAnonymizationEnabled: inferenceAccessPromise.then(
+        (access) => access.hasAnonymizationEnabled
+      ),
     };
 
     try {
