@@ -210,6 +210,24 @@ await browserAuth.loginWithCustomRole('logs_analyst', {
 
 :::::
 
+:::::{dropdown} Tip: extend browserAuth for repeated roles
+If the same custom role appears in many specs, extract it into a `browserAuth` fixture extension instead of repeating the role descriptor everywhere. Tests then read like intent:
+
+```ts
+// in your plugin's fixtures/index.ts
+await use({
+  ...browserAuth,
+  loginAsPlatformEngineer: () =>
+    browserAuth.loginWithCustomRole('platform_engineer', roleDescriptor),
+});
+
+// in specs
+await browserAuth.loginAsPlatformEngineer();
+```
+
+For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth-extend).
+:::::
+
 ---
 
 ## UI tests [ui-tests]
