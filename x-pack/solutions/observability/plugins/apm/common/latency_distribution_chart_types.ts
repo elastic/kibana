@@ -13,10 +13,6 @@ export enum LatencyDistributionChartType {
   latencyCorrelations = 'latencyCorrelations',
   failedTransactionsCorrelations = 'failedTransactionsCorrelations',
   dependencyLatency = 'dependencyLatency',
-  /** Exit span latency correlations (outgoing requests to dependencies) */
-  exitSpanLatencyCorrelations = 'exitSpanLatencyCorrelations',
-  /** Exit span failed transaction rate correlations */
-  exitSpanFailedTransactionsCorrelations = 'exitSpanFailedTransactionsCorrelations',
 }
 export const latencyDistributionChartTypeRt = t.union([
   t.literal(LatencyDistributionChartType.transactionLatency),
@@ -24,6 +20,4 @@ export const latencyDistributionChartTypeRt = t.union([
   t.literal(LatencyDistributionChartType.latencyCorrelations),
   t.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
   t.literal(LatencyDistributionChartType.dependencyLatency),
-  t.literal(LatencyDistributionChartType.exitSpanLatencyCorrelations),
-  t.literal(LatencyDistributionChartType.exitSpanFailedTransactionsCorrelations),
 ]);

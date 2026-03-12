@@ -19,8 +19,6 @@ const {
   failedTransactionsCorrelations,
   dependencyLatency,
   spanLatency,
-  exitSpanLatencyCorrelations,
-  exitSpanFailedTransactionsCorrelations,
 } = LatencyDistributionChartType;
 
 export function getDurationField(
@@ -40,9 +38,6 @@ export function getDurationField(
       return TRANSACTION_DURATION;
     case dependencyLatency:
     case spanLatency:
-      return isOtel ? DURATION : SPAN_DURATION;
-    case exitSpanLatencyCorrelations:
-    case exitSpanFailedTransactionsCorrelations:
       return isOtel ? DURATION : SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;
