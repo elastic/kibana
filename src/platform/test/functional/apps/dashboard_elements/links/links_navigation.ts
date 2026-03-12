@@ -93,10 +93,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should disable link if dashboard does not exist', async () => {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        expect(await testSubjects.exists('dashboardLink--links 004 - broken--error')).to.be(true);
-        expect(await testSubjects.isEnabled('dashboardLink--links 004 - broken--error')).to.be(
-          false
+        expect(await testSubjects.exists('dashboardLink--Error fetching dashboard--error')).to.be(
+          true
         );
+        expect(
+          await testSubjects.isEnabled('dashboardLink--Error fetching dashboard--error')
+        ).to.be(false);
       });
 
       it('useFilters should pass filter pills and query', async () => {
@@ -108,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 002');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--links 001 - filters');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '0930f310-5bc2-11ee-9a85-7b86504227bc'
@@ -142,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--links 002 - date range');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 002');
         await header.waitUntilLoadingHasFinished();
         expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
           '24751520-5bc2-11ee-9a85-7b86504227bc'
@@ -176,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
          */
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
-        await testSubjects.clickWhenNotDisabled('dashboardLink--links 003 - external');
+        await testSubjects.clickWhenNotDisabled('dashboardLink--links 003');
         await header.waitUntilLoadingHasFinished();
 
         // Should have opened another tab

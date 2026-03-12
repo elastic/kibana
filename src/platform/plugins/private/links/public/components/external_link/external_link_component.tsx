@@ -39,7 +39,7 @@ export const ExternalLinkComponent = ({
   }, [linkOptions, link.destination]);
 
   const id = `externalLink--${link.id}`;
-  const testId = `externalLink--${link.label}`;
+  const testId = `externalLink--${link.title}`;
 
   return (
     <EuiListGroupItem

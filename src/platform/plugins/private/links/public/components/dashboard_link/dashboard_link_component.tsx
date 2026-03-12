@@ -145,7 +145,7 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   ]);
 
   const id = `dashboardLink--${link.id}`;
-  const testId = `dashboardLink--${link.label}`;
+  const testId = `dashboardLink--${link.title}`;
 
   return (
     <EuiListGroupItem

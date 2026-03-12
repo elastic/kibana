@@ -36,7 +36,7 @@ describe('external link component', () => {
   test('by default opens in new tab and renders external icon', async () => {
     render(<ExternalLinkComponent link={defaultLinkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toBeInTheDocument();
     const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
     expect(externalIcon).toBeInTheDocument();
@@ -50,7 +50,7 @@ describe('external link component', () => {
       options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
     expect(externalIcon).toBeInTheDocument();
   });
@@ -62,7 +62,7 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toHaveTextContent('https://example.com');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
@@ -77,7 +77,7 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = await screen.findByTestId('externalLink--foo');
+    const link = await screen.findByTestId('externalLink--https://example.com');
     await userEvent.click(link);
     expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
@@ -91,7 +91,7 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
-    const link = screen.getByTestId('externalLink--foo--error');
+    const link = screen.getByTestId('externalLink--https://example.com--error');
     expect(link).toBeDisabled();
     /**
      * TODO: We should test the tooltip content, but the component is disabled
