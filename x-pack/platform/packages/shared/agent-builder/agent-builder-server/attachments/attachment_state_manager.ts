@@ -58,6 +58,14 @@ export interface ResolvedAttachmentRef {
 }
 
 /**
+ * Result of evaluating staleness for a single attachment.
+ */
+export interface StaleCheckResult {
+  attachment_id: string;
+  is_stale: boolean;
+}
+
+/**
  * Interface for managing conversation attachment state.
  * Provides CRUD operations with version tracking.
  */
@@ -108,6 +116,10 @@ export interface AttachmentStateManager {
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
   /** Update the origin reference for an attachment */
   updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean>;
+  /** Evaluate staleness for all active attachments. Only attachments with origin are checked via the type's isStale; others are considered not stale. */
+  evaluateStalenessForActiveAttachments(
+    context: AttachmentResolveContext
+  ): Promise<StaleCheckResult[]>;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -336,6 +348,9 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
+      // When created with origin (by-reference), record snapshot time for isStale comparison.
+      // By-value attachments leave this undefined.
+      ...(input.origin !== undefined && { origin_snapshot_at: now }),
     };
 
     this.attachments.set(id, attachment);
@@ -466,6 +481,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   async updateOrigin(id: string, origin: unknown, actor?: AttachmentRefActor): Promise<boolean> {
     const attachment = this.attachments.get(id);
+    const now = new Date().toISOString();
     if (!attachment) {
       return false;
     }
@@ -486,6 +502,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.origin = validatedOrigin;
+    attachment.origin_snapshot_at = now;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;
@@ -543,6 +560,24 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   markClean(): void {
     this.dirty = false;
+  }
+
+  async evaluateStalenessForActiveAttachments(
+    resolveContext: AttachmentResolveContext
+  ): Promise<StaleCheckResult[]> {
+    const activeAttachments = this.getActive();
+
+    return Promise.all(
+      activeAttachments.map(async (attachment): Promise<StaleCheckResult> => {
+        if (attachment.origin === undefined) {
+          return { attachment_id: attachment.id, is_stale: false };
+        }
+
+        const typeDefinition = this.options.getTypeDefinition(attachment.type);
+        const isStale = await typeDefinition?.isStale?.(attachment, resolveContext);
+        return { attachment_id: attachment.id, is_stale: isStale ?? false };
+      })
+    );
   }
 
   private recordAccess(

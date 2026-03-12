@@ -102,6 +102,7 @@ const InputContainer: React.FC<
 
 interface ConversationInputProps {
   onSubmit?: () => void;
+  onFocus?: () => void;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -118,7 +119,7 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
+export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit, onFocus }) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
@@ -208,6 +209,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
         <MessageEditor
           messageEditor={messageEditor}
           onSubmit={handleSubmit}
+          onFocus={onFocus}
           disabled={isInputDisabled}
           placeholder={placeholder}
           data-test-subj="agentBuilderConversationInputEditor"

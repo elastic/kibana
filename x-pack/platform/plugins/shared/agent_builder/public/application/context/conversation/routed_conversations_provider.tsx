@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
 import { newConversationId } from '../../utils/new_conversation';
@@ -84,6 +85,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
+  const [attachments, setAttachments] = useState<AttachmentInput[] | undefined>(undefined);
+
   const conversationActions = useConversationActions({
     conversationId,
     queryClient,
@@ -91,6 +94,51 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     onConversationCreated,
     onDeleteConversation,
   });
+
+  const upsertAttachments = useCallback((nextAttachments: AttachmentInput[]) => {
+    if (nextAttachments.length === 0) {
+      return;
+    }
+
+    setAttachments((prevAttachments) => {
+      const existingAttachments = [...(prevAttachments ?? [])];
+      const byId = new Map<string, AttachmentInput>(
+        existingAttachments
+          .filter((attachment): attachment is AttachmentInput & { id: string } =>
+            Boolean(attachment.id)
+          )
+          .map((attachment) => [attachment.id, attachment])
+      );
+
+      for (const nextAttachment of nextAttachments) {
+        if (nextAttachment.id && byId.has(nextAttachment.id)) {
+          byId.set(nextAttachment.id, nextAttachment);
+          continue;
+        }
+
+        existingAttachments.push(nextAttachment);
+      }
+
+      const deduplicated = existingAttachments.map((attachment) => {
+        if (!attachment.id) {
+          return attachment;
+        }
+        return byId.get(attachment.id) ?? attachment;
+      });
+
+      return deduplicated;
+    });
+  }, []);
+
+  const resetAttachments = useCallback(() => {
+    setAttachments(undefined);
+  }, []);
+
+  const removeAttachment = useCallback((attachmentIndex: number) => {
+    setAttachments((prevAttachments) =>
+      prevAttachments?.filter((_, index) => index !== attachmentIndex)
+    );
+  }, []);
 
   // Handle agent ID syncing from URL params (moved from useSyncAgentId)
   useEffect(() => {
@@ -117,8 +165,21 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage: true,
+      attachments,
+      upsertAttachments,
+      resetAttachments,
+      removeAttachment,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [
+      conversationId,
+      shouldStickToBottom,
+      conversationActions,
+      initialMessage,
+      attachments,
+      upsertAttachments,
+      resetAttachments,
+      removeAttachment,
+    ]
   );
 
   return (
