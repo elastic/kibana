@@ -13,9 +13,9 @@ import type { ActionDefinition } from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   ADD_PANEL_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_ROW,
+  ON_CLICK_VALUE,
 } from '../../common/trigger_ids';
 
 const coreStart = coreMock.createStart();
@@ -31,7 +31,7 @@ beforeEach(() => {
 
   uiActions.setup.registerAction(action as ActionDefinition);
 
-  uiActions.setup.addTriggerAction(CONTEXT_MENU_TRIGGER, action as ActionDefinition);
+  uiActions.setup.addTriggerAction(ON_OPEN_PANEL_MENU, action as ActionDefinition);
 });
 
 test('can register action', async () => {
@@ -47,10 +47,10 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
   setup.registerAction(helloWorldAction);
 
-  setup.addTriggerAction(VALUE_CLICK_TRIGGER, helloWorldAction);
+  setup.addTriggerAction(ON_CLICK_VALUE, helloWorldAction);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions(VALUE_CLICK_TRIGGER, {});
+  const actions = await start.getTriggerCompatibleActions(ON_CLICK_VALUE, {});
 
   expect(actions.length).toBe(1);
   expect(actions[0].id).toBe(helloWorldAction.id);
@@ -68,14 +68,14 @@ test('filters out actions not applicable based on the context', async () => {
   };
 
   setup.registerAction(action1);
-  setup.addTriggerAction(ROW_CLICK_TRIGGER, action1);
+  setup.addTriggerAction(ON_CLICK_ROW, action1);
 
   const start = doStart();
-  let actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: true });
+  let actions = await start.getTriggerCompatibleActions(ON_CLICK_ROW, { accept: true });
 
   expect(actions.length).toBe(1);
 
-  actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: false });
+  actions = await start.getTriggerCompatibleActions(ON_CLICK_ROW, { accept: false });
 
   expect(actions.length).toBe(0);
 });

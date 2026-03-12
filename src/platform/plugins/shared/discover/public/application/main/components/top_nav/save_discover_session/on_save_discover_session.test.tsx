@@ -170,6 +170,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        currentDataView: dataViewMock,
       });
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -179,6 +180,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        currentDataView: dataViewMockWithTimeField,
       });
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -188,6 +190,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        currentDataView: undefined,
       });
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({
@@ -200,6 +203,7 @@ describe('onSaveDiscoverSession', () => {
           },
         }),
         services,
+        currentDataView: undefined,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -248,10 +252,12 @@ describe('onSaveDiscoverSession', () => {
       const noTimeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
         services,
+        currentDataView: dataViewMock,
       });
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
         services,
+        currentDataView: dataViewMock,
       });
       let { saveModal } = await setup({
         additionalPersistedTabs: [noTimeRestoreTab],
@@ -290,7 +296,7 @@ describe('onSaveDiscoverSession', () => {
       };
       const { stateContainer, saveModal } = await setup({ savedSearch });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual([
+      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag3',
         'tag4',
       ]);
@@ -306,7 +312,7 @@ describe('onSaveDiscoverSession', () => {
         services: { ...createDiscoverServicesMock(), savedObjectsTagging: undefined },
       });
       await saveModal?.props.onSave(getOnSaveProps({ newTags: ['tag3', 'tag4'] }));
-      expect(stateContainer.savedSearchState.getCurrent$().getValue().tags).toEqual([
+      expect(stateContainer.internalState.getState().persistedDiscoverSession?.tags).toEqual([
         'tag1',
         'tag2',
       ]);

@@ -189,31 +189,30 @@ const formatAttachmentContent = (attachment: VersionedAttachment, data: unknown)
 };
 
 /**
- * Returns the system prompt for attachment handling based on presentation mode.
+ * Returns the conversation attachments prompt section (title, XML content, and handling instructions).
+ * Returns an empty string when there are no active attachments.
  */
-export const getAttachmentSystemPrompt = (presentation: AttachmentPresentation): string => {
-  if (presentation.activeCount === 0) {
+export const getConversationAttachmentsSection = (
+  presentation?: AttachmentPresentation
+): string => {
+  if (!presentation || presentation.activeCount <= 0) {
     return '';
   }
 
-  if (presentation.mode === 'inline') {
-    return `## Conversation Attachments
+  const preamble =
+    presentation.mode === 'inline'
+      ? `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown below in XML format.`
+      : `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. Only metadata is shown below due to the large number.`;
 
-The user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown above in XML format.
-
-You can:
+  const instructions =
+    presentation.mode === 'inline'
+      ? `You can:
 - Read attachments using attachment_read(id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`;
-  }
-
-  return `## Conversation Attachments
-
-The user has ${presentation.activeCount} attachment(s) in this conversation. Only metadata is shown above due to the large number.
-
-You MUST use attachment tools to access content:
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`
+      : `You MUST use attachment tools to access content:
 - Read attachments using attachment_read(id) to see the content
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
@@ -221,6 +220,8 @@ You MUST use attachment tools to access content:
 - Compare versions using attachment_diff(id, from_version, to_version)
 
 Always read an attachment before referencing its content in your response.`;
+
+  return `${preamble}\n\n${presentation.content}\n\n${instructions}`;
 };
 
 /**
@@ -230,11 +231,9 @@ Always read an attachment before referencing its content in your response.`;
 export const getConversationAttachmentsSystemMessages = (
   presentation?: AttachmentPresentation
 ): BaseMessageLike[] => {
-  if (!presentation || presentation.activeCount <= 0) {
+  const section = getConversationAttachmentsSection(presentation);
+  if (!section) {
     return [];
   }
-
-  return [
-    ['system', `${presentation.content}\n\n${getAttachmentSystemPrompt(presentation)}`] as const,
-  ];
+  return [['system', section] as const];
 };

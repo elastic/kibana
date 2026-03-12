@@ -13,6 +13,7 @@
       "_connector"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-connector-put",
     "availability": {
       "stack": true,
       "serverless": true

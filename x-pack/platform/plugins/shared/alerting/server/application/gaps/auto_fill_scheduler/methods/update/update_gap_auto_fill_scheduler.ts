@@ -83,15 +83,17 @@ export async function updateGapAutoFillScheduler(
   }
 
   // Authorize against any newly requested rule types in the update params
+  const ruleTypeIdConsumersPairs = params.ruleTypes.map((ruleType) => ({
+    ruleTypeId: ruleType.type,
+    consumers: [ruleType.consumer],
+  }));
+
   try {
-    for (const ruleType of params.ruleTypes) {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation: WriteOperations.UpdateGapAutoFillScheduler,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation: WriteOperations.UpdateGapAutoFillScheduler,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
   } catch (error) {
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({

@@ -218,6 +218,7 @@ describe('utils', () => {
       text_structure: true,
       read_failure_store: true,
       manage_failure_store: true,
+      create_snapshot_repository: true,
     });
 
     const createWiredDefinition = (): Streams.WiredStream.GetResponse => ({
@@ -228,6 +229,7 @@ describe('utils', () => {
       inherited_fields: {},
       effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'ancestor' },
       effective_settings: {},
+      data_stream_exists: true,
       stream: {
         name: 'wired-stream',
         description: 'A wired stream',

@@ -30,8 +30,8 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
   INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -159,7 +159,8 @@ const getDetailsList = (
   data: CspFinding,
   ruleFlyoutLink?: string,
   discoverDataViewLink?: string,
-  euiTheme?: EuiThemeComputed<{}>
+  euiTheme?: EuiThemeComputed<{}>,
+  dataViewName?: string
 ) => [
   {
     title: (
@@ -232,9 +233,11 @@ const getDetailsList = (
       </EuiTitle>
     ),
     description: discoverDataViewLink ? (
-      <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
+      <EuiLink href={discoverDataViewLink}>
+        {dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME}
+      </EuiLink>
     ) : (
-      CDR_MISCONFIGURATIONS_INDEX_PATTERN
+      dataViewName ?? CDR_MISCONFIGURATIONS_DATA_VIEW_NAME
     ),
   },
 ];
@@ -324,7 +327,13 @@ export const OverviewTab = ({
             defaultMessage: 'About',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink, euiTheme),
+          listItems: getDetailsList(
+            data,
+            ruleFlyoutLink,
+            discoverDataViewLink,
+            euiTheme,
+            cdrMisconfigurationsDataView.data?.name
+          ),
         },
         {
           initialIsOpen: true,
@@ -353,7 +362,14 @@ export const OverviewTab = ({
             listItems: getEvidenceList(evidence),
           },
       ].filter(truthy),
-    [data, discoverDataViewLink, euiTheme, ruleFlyoutLink, evidence]
+    [
+      data,
+      discoverDataViewLink,
+      euiTheme,
+      ruleFlyoutLink,
+      evidence,
+      cdrMisconfigurationsDataView.data?.name,
+    ]
   );
 
   return (

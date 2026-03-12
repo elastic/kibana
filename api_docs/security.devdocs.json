@@ -980,7 +980,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "lineNumber": 14,
@@ -1466,195 +1466,7 @@
     }
   },
   "server": {
-    "classes": [
-      {
-        "parentPluginId": "security",
-        "id": "def-server.HTTPAuthorizationHeader",
-        "type": "Class",
-        "tags": [],
-        "label": "HTTPAuthorizationHeader",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-        "lineNumber": 10,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.HTTPAuthorizationHeader.scheme",
-            "type": "string",
-            "tags": [],
-            "label": "scheme",
-            "description": [
-              "\nThe authentication scheme. Should be consumed in a case-insensitive manner.\nhttps://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml#authschemes"
-            ],
-            "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-            "lineNumber": 11,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.HTTPAuthorizationHeader.credentials",
-            "type": "string",
-            "tags": [],
-            "label": "credentials",
-            "description": [
-              "\nThe authentication credentials for the scheme."
-            ],
-            "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-            "lineNumber": 17,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.HTTPAuthorizationHeader.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$1",
-                "type": "string",
-                "tags": [],
-                "label": "scheme",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-                "lineNumber": 22,
-                "columnNumber": 15,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.HTTPAuthorizationHeader.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "credentials",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-                "lineNumber": 22,
-                "columnNumber": 31,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.HTTPAuthorizationHeader.parseFromRequest",
-            "type": "Function",
-            "tags": [],
-            "label": "parseFromRequest",
-            "description": [
-              "\nParses request's `Authorization` HTTP header if present."
-            ],
-            "signature": [
-              "(request: ",
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>, headerName?: string) => ",
-              {
-                "pluginId": "security",
-                "scope": "server",
-                "docId": "kibSecurityPluginApi",
-                "section": "def-server.HTTPAuthorizationHeader",
-                "text": "HTTPAuthorizationHeader"
-              },
-              " | null"
-            ],
-            "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-            "lineNumber": 27,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "security",
-                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "request",
-                "description": [
-                  "Request instance to extract the authorization header from."
-                ],
-                "signature": [
-                  "KibanaRequest",
-                  "<unknown, unknown, unknown, any>"
-                ],
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-                "lineNumber": 33,
-                "columnNumber": 27,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "security",
-                "id": "def-server.HTTPAuthorizationHeader.parseFromRequest.$2",
-                "type": "string",
-                "tags": [],
-                "label": "headerName",
-                "description": [
-                  "Optional name of the HTTP header to extract authentication information from. By default, the\nauthentication information is extracted from the `Authorization` HTTP header."
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-                "lineNumber": 33,
-                "columnNumber": 51,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.HTTPAuthorizationHeader.toString",
-            "type": "Function",
-            "tags": [],
-            "label": "toString",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "x-pack/platform/plugins/shared/security/server/authentication/http_authentication/http_authorization_header.ts",
-            "lineNumber": 45,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [],
     "interfaces": [
       {
@@ -2042,6 +1854,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
               },
               {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
@@ -2100,10 +1916,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "profiling",
@@ -6472,7 +6284,7 @@
         }
       ],
       "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-      "lineNumber": 71,
+      "lineNumber": 72,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -6494,7 +6306,7 @@
             " | null; }"
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 75,
+          "lineNumber": 76,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6528,7 +6340,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 81,
+          "lineNumber": 82,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6606,10 +6418,6 @@
           "references": [
             {
               "plugin": "alerting",
-              "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
-            },
-            {
-              "plugin": "alerting",
               "path": "x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts"
             },
             {
@@ -6619,6 +6427,10 @@
             {
               "plugin": "alerting",
               "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
+            },
+            {
+              "plugin": "observabilityAIAssistant",
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "fleet",
@@ -6635,10 +6447,6 @@
             {
               "plugin": "fleet",
               "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
-            },
-            {
-              "plugin": "observabilityAIAssistant",
-              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "reindexService",
@@ -6767,6 +6575,10 @@
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "entityStore",
+              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
             }
           ]
         },

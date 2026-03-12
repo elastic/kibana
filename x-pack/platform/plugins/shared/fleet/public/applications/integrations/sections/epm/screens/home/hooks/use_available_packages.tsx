@@ -105,6 +105,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
           };
         })
       : [];

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const DRILLDOWN_TO_DISCOVER_URL = 'Go to discover';
@@ -45,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
         destinationURLTemplate: urlTemplate,
-        trigger: 'SELECT_RANGE_TRIGGER',
+        trigger: ON_SELECT_RANGE,
       });
 
       await testSubjects.click('urlDrilldownAdditionalOptions');

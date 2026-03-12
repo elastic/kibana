@@ -50,10 +50,10 @@ export class NavLinksService {
         navLinks$.next(navlinks);
       });
 
+    const sortedNavLinks$ = navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
+
     return {
-      getNavLinks$: () => {
-        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
-      },
+      getNavLinks$: () => sortedNavLinks$,
 
       get(id: string) {
         const link = navLinks$.value.get(id);

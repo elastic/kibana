@@ -38,7 +38,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 33,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -60,7 +60,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -76,7 +76,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +93,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 39,
+                "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -131,7 +131,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -156,7 +156,7 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 44,
+                "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -179,7 +179,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 45,
+                "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -209,7 +209,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 75,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -225,7 +225,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 75,
+                "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -248,7 +248,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 75,
+                "lineNumber": 70,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -268,7 +268,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 77,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -474,9 +474,9 @@
           "<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           ", object>"
@@ -549,7 +549,7 @@
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 19,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -571,7 +571,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +593,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 21,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -616,7 +616,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 22,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -629,15 +629,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
-              {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
-              },
-              ") => void; readonly registerAction: <Context extends object>(definition: ",
+              "{ readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -680,7 +672,7 @@
               "<any, {}>>) => void; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 23,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -696,7 +688,7 @@
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 26,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -718,7 +710,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 27,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -740,7 +732,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 28,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -763,7 +755,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 29,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -776,17 +768,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -858,12 +848,12 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

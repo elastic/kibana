@@ -8,7 +8,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/charts-plugin",

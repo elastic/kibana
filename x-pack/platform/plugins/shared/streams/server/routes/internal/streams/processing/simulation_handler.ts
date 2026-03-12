@@ -21,7 +21,7 @@ import type {
   FieldCapsResponse,
   IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
@@ -35,13 +35,19 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
-import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { validateStreamlang } from '@kbn/streamlang';
-import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import {
+  getInheritedFieldsFromAncestors,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import {
+  FIELD_DEFINITION_TYPES,
+  type StreamsMappingProperties,
+} from '@kbn/streams-schema/src/fields';
+import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
@@ -63,7 +69,7 @@ export interface ProcessingSimulationParams {
 
 export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
@@ -102,7 +108,7 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
 
 export const simulateProcessing = async ({
   params,
-  scopedClusterClient,
+  esClient,
   streamsClient,
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
@@ -110,7 +116,7 @@ export const simulateProcessing = async ({
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
-      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
+      getStreamIndex(esClient, streamsClient, params.path.name),
     ]);
 
   const streamFields = await getStreamFields(streamsClient, stream);
@@ -121,9 +127,12 @@ export const simulateProcessing = async ({
     .map(([name]) => name);
 
   // Validate the Streamlang DSL before attempting simulation
+  const rootStream = getRoot(params.path.name);
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
   const validationResult = validateStreamlang(params.body.processing, {
     reservedFields,
-    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+    streamType: isWiredStream ? 'wired' : 'classic',
+    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
   });
 
   if (!validationResult.isValid) {
@@ -160,8 +169,8 @@ export const simulateProcessing = async ({
    * - The ingest simulation is used to fail fast on mapping failures. This runs only if `detected_fields` is provided.
    */
   const [pipelineSimulationResult, ingestSimulationResult] = await Promise.all([
-    executePipelineSimulation(scopedClusterClient, pipelineSimulationBody),
-    executeIngestSimulation(scopedClusterClient, ingestSimulationBody),
+    executePipelineSimulation(esClient, pipelineSimulationBody),
+    executeIngestSimulation(esClient, ingestSimulationBody),
   ]);
 
   /* 3. Fail fast on pipeline simulations errors and return the generic error response gracefully */
@@ -230,7 +239,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig.tag,
+                processor_id: processorConfig?.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -342,13 +351,11 @@ const prepareIngestSimulationBody = (
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
 export const executePipelineSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
-      simulationBody
-    );
+    const originalSimulation = await esClient.ingest.simulate(simulationBody);
     const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
@@ -454,11 +461,11 @@ function propagateProcessorResultsPipelineTags(
 }
 
 const executeIngestSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: SimulateIngestRequest
 ): Promise<IngestSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.simulate.ingest(simulationBody);
+    const simulation = await esClient.simulate.ingest(simulationBody);
 
     return {
       status: 'success',
@@ -584,16 +591,17 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processors: IngestProcessorContainer[]
+  processors: NonNullable<IngestProcessorContainer>[]
 ): Record<string, ProcessorMetrics> => {
   // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
   // ID across it's nested processors.
   const ids = new Set<string>();
 
   for (const processor of processors) {
-    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config = processor[type] as Record<string, unknown>;
-    const tag = config.tag;
+    const type = Object.keys(processor)[0] as keyof NonNullable<IngestProcessorContainer>;
+    const config = processor[type];
+
+    const tag = config?.tag;
 
     if (typeof tag === 'string') {
       ids.add(tag);
@@ -949,7 +957,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
 };
 
 const getStreamIndex = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   streamsClient: StreamsClient,
   streamName: string
 ): Promise<{
@@ -963,10 +971,10 @@ const getStreamIndex = async (
   }
 
   const [lastIndex, lastIndexFieldCaps] = await Promise.all([
-    scopedClusterClient.asCurrentUser.indices.get({
+    esClient.indices.get({
       index: lastIndexRef.index_name,
     }),
-    scopedClusterClient.asCurrentUser.fieldCaps({
+    esClient.fieldCaps({
       index: lastIndexRef.index_name,
       fields: '*',
     }),
@@ -1071,15 +1079,26 @@ const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSi
   return matchCount / docs.length;
 };
 
-const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
+type MappingDetectedField = NamedFieldDefinitionConfig & {
+  type: (typeof FIELD_DEFINITION_TYPES)[number];
+};
+
+const isMappingDetectedField = (field: NamedFieldDefinitionConfig): field is MappingDetectedField =>
+  FIELD_DEFINITION_TYPES.includes(field.type as (typeof FIELD_DEFINITION_TYPES)[number]);
+
+const computeMappingProperties = (
+  detectedFields: NamedFieldDefinitionConfig[]
+): StreamsMappingProperties => {
   return Object.fromEntries(
-    detectedFields.flatMap(({ name, ...config }) => {
-      if (config.type === 'system') {
+    detectedFields.flatMap((field) => {
+      if (!isMappingDetectedField(field)) {
         return [];
       }
+
+      const { name, description: _description, ...config } = field;
       return [[name, { ...config, ignore_malformed: false }]];
     })
-  );
+  ) as StreamsMappingProperties;
 };
 
 /**

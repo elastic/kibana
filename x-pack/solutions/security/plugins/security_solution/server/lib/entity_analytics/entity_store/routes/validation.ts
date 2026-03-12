@@ -8,21 +8,21 @@
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { TypeOf, ZodType } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { TypeOf, ZodType } from '@kbn/zod/v4';
 import type { InitEntityEngineRequestBody } from '../../../../../common/api/entity_analytics';
 
 export const buildInitRequestBodyValidation =
-  <ZodSchema extends ZodType, Type = TypeOf<ZodSchema>>(
-    schema: ZodSchema
-  ): RouteValidationFunction<Type> =>
+  <ZodSchema extends ZodType>(schema: ZodSchema): RouteValidationFunction<TypeOf<ZodSchema>> =>
   (inputValue: unknown, validationResultFactory: RouteValidationResultFactory) => {
     const zodValidationResult = buildRouteValidationWithZod(schema)(
       inputValue,
       validationResultFactory
     );
     if (zodValidationResult.error) return zodValidationResult;
-    const additionalValidationResult = validateInitializationRequestBody(zodValidationResult.value);
+    const additionalValidationResult = validateInitializationRequestBody(
+      zodValidationResult.value as Parameters<typeof validateInitializationRequestBody>[0]
+    );
     if (additionalValidationResult)
       return validationResultFactory.badRequest(additionalValidationResult);
     return zodValidationResult;

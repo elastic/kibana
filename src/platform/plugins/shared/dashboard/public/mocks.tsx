@@ -100,6 +100,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       sync_cursor: true,
       sync_tooltips: false,
       hide_panel_titles: false,
+      hide_panel_borders: false,
     },
 
     tags: [],

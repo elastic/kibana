@@ -28,7 +28,7 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   hasPreviousVersion,
@@ -40,6 +40,7 @@ import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
@@ -147,6 +148,11 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               });
               const isDeprecated = !!item?.deprecated;
 
+              const hasDeprecatedPolicyTemplates =
+                doesPackageHaveIntegrations(item) &&
+                !isDeprecated &&
+                (item.policy_templates || []).some((pt) => !!pt.deprecated);
+
               return (
                 <EuiLink href={url}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -178,6 +184,20 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         />
                       </EuiFlexItem>
                     )}
+                    {hasDeprecatedPolicyTemplates && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="warning"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                            {
+                              defaultMessage: 'This integration contains deprecated features',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiLink>
               );
@@ -198,22 +218,33 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
           },
           {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.rulesColumnTitle', {
+              defaultMessage: 'Rules',
+            }),
+            render: (item: InstalledPackageUIPackageListItem) => <AlertsCell package={item} />,
+          },
+          {
             name: i18n.translate(
               'xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle',
               {
                 defaultMessage: 'Attached policies',
               }
             ),
-            width: '206px',
+            width: '270px',
             render: (item: InstalledPackageUIPackageListItem) => {
               const policyCount = item.packagePoliciesInfo?.count ?? 0;
-              if (!policyCount) {
+              const status = item.ui.installation_status;
+              const review = item.installationInfo?.pending_upgrade_review;
+              const showPendingReview = status === 'pending_upgrade_review' && review;
+              const showDeclinedReview = status === 'declined_review' && review;
+
+              if (!policyCount && !showPendingReview && !showDeclinedReview) {
                 return null;
               }
 
               const isDisabled = !authz.fleet.readAgentPolicies;
 
-              return (
+              const policiesLink = policyCount ? (
                 <DisabledWrapperTooltip
                   tooltipContent={
                     <FormattedMessage
@@ -229,7 +260,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     <FormattedMessage
                       id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
                       defaultMessage={
-                        'View {policyCount, plural, one {# policies} other {# policies}}'
+                        'View {policyCount, plural, one {# policy} other {# policies}}'
                       }
                       values={{
                         policyCount,
@@ -237,7 +268,31 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     />
                   </EuiLink>
                 </DisabledWrapperTooltip>
-              );
+              ) : null;
+              if (showPendingReview) {
+                return (
+                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
+                    {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.fleet.installedIntegrations.upgradeAvailableTooltip',
+                          {
+                            defaultMessage: 'Auto-upgrade to version {version} is available.',
+                            values: {
+                              version:
+                                item.installationInfo?.pending_upgrade_review?.target_version,
+                            },
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              }
+              return policiesLink;
             },
           },
           {

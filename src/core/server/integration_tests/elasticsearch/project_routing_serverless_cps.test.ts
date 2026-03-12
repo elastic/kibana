@@ -487,6 +487,48 @@ describe('project_routing on serverless CPS', () => {
       expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
+
+    it('injects project_routing as query param via high-level client.msearch()', async () => {
+      // The CPS request handler must inject project_routing as a query param, not in the body,
+      // because msearch uses NDJSON format and injecting into the body would corrupt the request.
+      const response = await client.msearch({
+        searches: [
+          { index: TEST_INDEX },
+          { query: { match_all: {} } },
+          { index: TEST_INDEX },
+          { query: { term: { category: 'alpha' } } },
+        ],
+      });
+
+      const expectedMsearchQueries = 2;
+      expect(response.responses.length).toBe(expectedMsearchQueries);
+      expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+    });
+  });
+
+  describe('msearch_template API with project_routing', () => {
+    it('injects project_routing as query param via high-level client.msearchTemplate()', async () => {
+      // First, create a search template to use
+      await client.putScript({
+        id: 'cps-test-template',
+        script: {
+          lang: 'mustache',
+          source: JSON.stringify({ query: { match_all: {} } }),
+        },
+      });
+
+      try {
+        const response = await client.msearchTemplate({
+          search_templates: [{ index: TEST_INDEX }, { id: 'cps-test-template', params: {} }],
+        });
+
+        expect(response.responses.length).toBe(1);
+        expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      } finally {
+        await client.deleteScript({ id: 'cps-test-template' }).catch(() => {});
+      }
+    });
   });
 
   describe('count API with project_routing', () => {
@@ -765,6 +807,168 @@ describe('project_routing on serverless CPS', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       const counts = response.hits.hits.map((hit: any) => hit._source.count);
       expect(counts).toEqual(SORTED_COUNTS_DESC);
+    });
+  });
+
+  /**
+   * Tests for NPRE (Named Project Routing Expressions) lifecycle and usage.
+   *
+   * NPREs are created via `PUT /_project_routing/{name}` with an `expression` field,
+   * and referenced in requests using the `@{name}` syntax in `project_routing`.
+   *
+   * Two NPREs are tested:
+   * - `_alias:*`       - routes to any index accessible via any alias
+   * - `_alias:_origin` - routes to the origin project's own indices
+   *
+   * A test alias on the test index is created so that `_alias:*` can resolve it.
+   */
+  describe('NPRE (named project routing expressions) lifecycle and usage', () => {
+    const TEST_ALIAS = `${TEST_INDEX}-alias`;
+    const NPRE_ALIAS_STAR = 'cps-test-alias-star';
+    const NPRE_ALIAS_ORIGIN = 'cps-test-alias-origin';
+
+    const deleteNpre = (name: string) =>
+      client?.transport
+        .request({ method: 'DELETE', path: `/_project_routing/${name}` })
+        .catch(() => {});
+
+    beforeAll(async () => {
+      // Create an alias on the test index so that '_alias:*' can resolve it.
+      await client.indices.putAlias({ index: TEST_INDEX, name: TEST_ALIAS });
+
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_project_routing/${NPRE_ALIAS_STAR}`,
+        body: { expression: '_alias:*' },
+      });
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_project_routing/${NPRE_ALIAS_ORIGIN}`,
+        body: { expression: '_alias:_origin' },
+      });
+    });
+
+    afterAll(async () => {
+      await deleteNpre(NPRE_ALIAS_STAR);
+      await deleteNpre(NPRE_ALIAS_ORIGIN);
+      await client?.indices.deleteAlias({ index: TEST_INDEX, name: TEST_ALIAS }).catch(() => {});
+    });
+
+    describe(`with expression '_alias:*' (any alias)`, () => {
+      it('search returns results', async () => {
+        const response = await client.search({
+          index: TEST_ALIAS,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_STAR}`,
+          },
+        });
+
+        expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      });
+
+      it('search with filter returns correct results', async () => {
+        const response = await client.search({
+          index: TEST_ALIAS,
+          query: { term: { category: 'alpha' } },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_STAR}`,
+          },
+        });
+
+        expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+      });
+
+      it('count returns the correct total', async () => {
+        const response = await client.count({
+          index: TEST_ALIAS,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_STAR}`,
+          },
+        });
+
+        expect(response.count).toBe(TOTAL_DOCS_COUNT);
+      });
+    });
+
+    describe(`with expression '_alias:_origin' (origin project indices)`, () => {
+      it('search returns results', async () => {
+        const response = await client.search({
+          index: TEST_INDEX,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
+          },
+        });
+
+        expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      });
+
+      it('search with filter returns correct results', async () => {
+        const response = await client.search({
+          index: TEST_INDEX,
+          query: { term: { category: 'alpha' } },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
+          },
+        });
+
+        expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+      });
+
+      it('count returns the correct total', async () => {
+        const response = await client.count({
+          index: TEST_INDEX,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
+          },
+        });
+
+        expect(response.count).toBe(TOTAL_DOCS_COUNT);
+      });
+    });
+
+    /**
+     * When a referenced NPRE does not exist, ES does not reject the request.
+     * Instead, it issues a 299 deprecation warning header and falls back to
+     * processing the request without NPRE filtering (i.e. as if no
+     * project_routing was set). The request still succeeds and returns results.
+     */
+    describe('with a non-existent NPRE', () => {
+      it('search succeeds and returns results despite the NPRE not existing', async () => {
+        const response = await client.search({
+          index: TEST_INDEX,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: '@cps-test-does-not-exist',
+          },
+        });
+
+        // ES falls back to no-op routing and returns results normally.
+        expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      });
+
+      it('count succeeds and returns the total despite the NPRE not existing', async () => {
+        const response = await client.count({
+          index: TEST_INDEX,
+          query: { match_all: {} },
+          body: {
+            // @ts-expect-error - project_routing is a valid body parameter
+            project_routing: '@cps-test-does-not-exist',
+          },
+        });
+
+        expect(response.count).toBe(TOTAL_DOCS_COUNT);
+      });
     });
   });
 });

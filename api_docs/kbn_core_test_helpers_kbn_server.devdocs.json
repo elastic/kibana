@@ -38,9 +38,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
@@ -101,9 +99,7 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
@@ -244,7 +240,7 @@
           "Root"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 165,
+        "lineNumber": 267,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -260,7 +256,7 @@
               "{}"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 165,
+            "lineNumber": 267,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -279,7 +275,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 165,
+            "lineNumber": 267,
             "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
@@ -301,13 +297,13 @@
           "\nSee docs in {@link TestUtils}. This function provides the same utilities but\nconfigured for serverless.\n"
         ],
         "signature": [
-          "({\n  adjustTimeout,\n  kibana = {},\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
+          "({\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
           "CliArgs",
-          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; }) => ",
+          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; enableCPS?: boolean | undefined; esArgs?: string[] | undefined; projectType?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; kibanaUrl?: string | undefined; }) => ",
           "TestServerlessUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -317,10 +313,10 @@
             "id": "def-server.createTestServerlessInstances.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  adjustTimeout,\n  kibana = {},\n}",
+            "label": "{\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}",
             "description": [],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 45,
+            "lineNumber": 51,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -338,7 +334,7 @@
                   "> | undefined; } | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                "lineNumber": 46,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -354,7 +350,7 @@
                   "((timeout: number) => void) | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                "lineNumber": 50,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -370,7 +366,7 @@
                       "number"
                     ],
                     "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                    "lineNumber": 50,
+                    "lineNumber": 56,
                     "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -378,6 +374,82 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.enableCPS",
+                "type": "CompoundType",
+                "tags": [
+                  "default"
+                ],
+                "label": "enableCPS",
+                "description": [
+                  "\nEnable Cross-Project Search (CPS) mode on the serverless ES instance.\nWhen true, starts ES with UIAM support and the required CPS settings:\n - `serverless.cross_project.enabled=true`\n - `remote_cluster_server.enabled=true`\n\nEquivalent to running:\n `yarn es serverless --projectType observability --uiam --kill --clean \\\n   --kibanaUrl http://localhost:5601/ \\\n   -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`\n"
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 57,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.esArgs",
+                "type": "Array",
+                "tags": [
+                  "default"
+                ],
+                "label": "esArgs",
+                "description": [
+                  "\nAdditional Elasticsearch arguments to pass when starting the cluster.\nThese are general-purpose ES configuration arguments that will be appended\nto any default arguments (including CPS args when enableCPS is true).\n\nExample: `['script.allowed_types=inline']`\n"
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 71,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.projectType",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "projectType",
+                "description": [
+                  "\nThe serverless project type to run (`yarn es serverless --projectType`).\n\nDefaults to `es` for existing tests."
+                ],
+                "signature": [
+                  "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 81,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.kibanaUrl",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaUrl",
+                "description": [
+                  "\nPassed through to the `@kbn/es` serverless docker runner as `--kibanaUrl`.\n\nThis is important for UIAM mode: the serverless runner only applies the\nUIAM-related ES args (including project metadata) when `kibanaUrl` is set.\n\nSee `resolveEsArgs()` in `src/platform/packages/shared/kbn-es/src/utils/docker.ts`."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 87,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -853,12 +925,12 @@
         "signature": [
           "Pick<",
           "TestElasticsearchUtils",
-          ", \"stop\" | \"es\"> & { getClient: () => ",
+          ", \"es\" | \"stop\"> & { getClient: () => ",
           "default",
           "; }"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -875,7 +947,7 @@
           "TestKibanaUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

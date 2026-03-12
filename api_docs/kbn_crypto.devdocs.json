@@ -128,7 +128,7 @@
             "tags": [],
             "label": "password",
             "description": [
-              "The optional password of the key store and private key;\nif there is no password, this may be an empty string or `undefined`,\ndepending on how the key store was generated."
+              "The optional password of the key store and private key;"
             ],
             "signature": [
               "string | undefined"
@@ -190,7 +190,7 @@
             "tags": [],
             "label": "password",
             "description": [
-              "The optional password of the trust store; if there is\nno password, this may be an empty string or `undefined`, depending on\nhow the trust store was generated."
+              "The optional password of the trust store; if there is"
             ],
             "signature": [
               "string | undefined"

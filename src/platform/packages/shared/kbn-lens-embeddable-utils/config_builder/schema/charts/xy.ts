@@ -291,7 +291,13 @@ const xySharedSettings = {
           }
         ),
       ],
-      { meta: { id: 'xyLegend', description: 'Legend configuration for XY chart' } }
+      {
+        meta: {
+          id: 'xyLegend',
+          title: 'Legend',
+          description: 'Legend configuration for XY chart',
+        },
+      }
     )
   ),
 
@@ -360,7 +366,13 @@ const xySharedSettings = {
         left: schema.maybe(yAxisSchema),
         right: schema.maybe(yAxisSchema),
       },
-      { meta: { id: 'xyAxis', description: 'Axis configuration for X, left Y, and right Y axes' } }
+      {
+        meta: {
+          id: 'xyAxis',
+          title: 'Axis',
+          description: 'Axis configuration for X, left Y, and right Y axes',
+        },
+      }
     )
   ),
   decorations: schema.maybe(decorationsSchema),
@@ -397,6 +409,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyLayerNoESQL',
+      title: 'Layer (DSL)',
       description: 'Data layer for standard queries with metrics and buckets',
     },
   }
@@ -432,7 +445,11 @@ const xyDataLayerSchemaESQL = schema.object(
     x: schema.maybe(esqlColumnSchema),
   },
   {
-    meta: { id: 'xyLayerESQL', description: 'Data layer for ES|QL queries with column references' },
+    meta: {
+      id: 'xyLayerESQL',
+      title: 'Layer (ES|QL)',
+      description: 'Data layer for ES|QL queries with column references',
+    },
   }
 );
 
@@ -493,6 +510,11 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
+  decoration_position: schema.maybe(
+    schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
+      meta: { description: 'Position of the icon and label relative to the reference line' },
+    })
+  ),
   axis: schema.maybe(
     schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
       defaultValue: 'left',
@@ -517,6 +539,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyReferenceLineLayerNoESQL',
+      title: 'Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
     },
   }
@@ -537,7 +560,11 @@ const referenceLineLayerSchemaESQL = schema.object(
     }),
   },
   {
-    meta: { id: 'xyReferenceLineLayerESQL', description: 'Reference line layer for ES|QL queries' },
+    meta: {
+      id: 'xyReferenceLineLayerESQL',
+      title: 'Reference Line Layer (ES|QL)',
+      description: 'Reference line layer for ES|QL queries',
+    },
   }
 );
 
@@ -693,6 +720,7 @@ const annotationLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationLayerNoESQL',
+      title: 'Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
     },
   }
@@ -725,10 +753,31 @@ export const xyStateSchema = schema.object(
       }
     ),
   },
-  { meta: { id: 'xyChartSchema', description: 'Complete XY chart configuration' } }
+  { meta: { id: 'xyChart', title: 'XY Chart', description: 'Complete XY chart configuration' } }
+);
+
+// TODO: temporary ESQL schema for XY chart to not feed agent with heavy schema for DSL that is not used in agent
+export const xyStateSchemaESQL = schema.object(
+  {
+    type: schema.literal('xy'),
+    ...sharedPanelInfoSchema,
+    ...xySharedSettings,
+    layers: schema.arrayOf(xyDataLayerSchemaESQL, {
+      minSize: 1,
+      maxSize: 1,
+      meta: { description: 'Only single layer ESQL charts are supported ' },
+    }),
+  },
+  {
+    meta: {
+      id: 'xyChartESQL',
+      title: 'XY Chart (ES|QL)',
+    },
+  }
 );
 
 export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
