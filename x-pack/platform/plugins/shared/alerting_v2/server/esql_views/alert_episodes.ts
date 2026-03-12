@@ -10,6 +10,9 @@ import type { EsqlViewDefinition } from '../lib/services/esql_views_service/type
 export const getAlertEpisodesViewDefinition = (): EsqlViewDefinition => ({
   key: 'view:alerting-episodes',
   name: '$.alerting-episodes',
-  query:
-    'FROM .alerting-events | INLINE STATS last_timestamp = MAX(@timestamp) BY episode.id | WHERE @timestamp == last_timestamp AND type == "alert"',
+  query: `FROM .alerting-events
+| INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
+| EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
+| WHERE @timestamp == last_timestamp AND type == "alert"
+| SORT @timestamp DESC`,
 });
