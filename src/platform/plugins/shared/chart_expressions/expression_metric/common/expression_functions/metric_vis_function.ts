@@ -188,6 +188,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
+    secondaryTrendTextPalette: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.textPalette.help', {
+        defaultMessage: 'Specifies the text palette used for the Secondary Metric trend',
+      }),
+      multi: true,
+      required: false,
+    },
     secondaryLabelPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
@@ -290,6 +298,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               visuals: args.secondaryTrendVisuals,
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
+              textPalette: args.secondaryTrendTextPalette,
             },
             secondaryLabelPosition: args.secondaryLabelPosition,
             applyColorTo: args.applyColorTo,

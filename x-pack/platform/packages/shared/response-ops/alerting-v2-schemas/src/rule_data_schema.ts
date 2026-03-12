@@ -262,6 +262,7 @@ export const updateRuleDataSchema = z
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 

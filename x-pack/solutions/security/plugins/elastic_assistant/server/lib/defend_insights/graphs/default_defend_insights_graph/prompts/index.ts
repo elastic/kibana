@@ -47,9 +47,9 @@ export function getDefendInsightsPrompt({
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<DefendInsightsCombinedPrompts> {
   switch (type) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return getIncompatibleAntivirusPrompt(args);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return getPolicyResponseFailurePrompt(args);
     default:
       throw new InvalidDefendInsightTypeError();

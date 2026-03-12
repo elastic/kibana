@@ -35,7 +35,7 @@ jest.mock('./recovery_base_query_field', () => ({
  * Helper to capture the form instance so tests can call getValues() directly.
  */
 let formRef: UseFormReturn<FormValues> | undefined;
-const FormRefCapture: React.FC = () => {
+const FormRefCapture = () => {
   formRef = useFormContext<FormValues>();
   return null;
 };

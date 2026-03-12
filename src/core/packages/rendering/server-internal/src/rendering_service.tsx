@@ -70,6 +70,7 @@ export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
+  private isCoreRenderingInReactConcurrentMode: boolean = true;
 
   constructor(private readonly coreContext: CoreContext) {}
 
@@ -109,6 +110,10 @@ export class RenderingService {
     this.airgapped = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('airgapped')
     ).catch(() => false);
+
+    this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
+      this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
+    ).catch(() => true);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -177,6 +182,7 @@ export class RenderingService {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
+      isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();

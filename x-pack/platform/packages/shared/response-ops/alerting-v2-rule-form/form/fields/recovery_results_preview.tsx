@@ -17,7 +17,7 @@ import { QueryResultsGrid } from './query_results_grid';
  * the recovery policy type is `'query'`. Delegates grid rendering to
  * `QueryResultsGrid`.
  */
-export const RecoveryResultsPreview: React.FC = () => {
+export const RecoveryResultsPreview = () => {
   const {
     columns,
     rows,

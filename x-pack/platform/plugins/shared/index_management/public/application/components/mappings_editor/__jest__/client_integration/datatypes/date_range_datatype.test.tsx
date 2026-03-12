@@ -24,9 +24,8 @@ interface Mappings {
   properties: Record<string, Record<string, unknown>>;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/253541
-describe.skip('Mappings editor: date range datatype', () => {
-  test('should require a scaling factor to be provided', async () => {
+describe('Mappings editor: date range datatype', () => {
+  test('should append custom format to default formats', async () => {
     const defaultMappings: Mappings = {
       properties: {
         myField: {
@@ -62,7 +61,8 @@ describe.skip('Mappings editor: date range datatype', () => {
     // The label is "Date range" (from TYPE_DEFINITION)
     const fieldSubTypeComboBox = new EuiComboBoxTestHarness('fieldSubType');
     await fieldSubTypeComboBox.select('Date range');
-    await fieldSubTypeComboBox.close();
+    // This is a single-selection combobox, avoid toggle-clicking while it's auto-closing.
+    await fieldSubTypeComboBox.waitForClosed();
 
     const formatParameter = await within(flyout).findByTestId('formatParameter');
     expect(formatParameter).toBeInTheDocument();
@@ -71,23 +71,28 @@ describe.skip('Mappings editor: date range datatype', () => {
     expect(within(flyout).queryByTestId('formatInput')).not.toBeInTheDocument();
 
     // Enable the format parameter toggle
-    const formatToggle = within(formatParameter).getByTestId('formRowToggle');
-    fireEvent.click(formatToggle);
+    fireEvent.click(within(formatParameter).getByTestId('formRowToggle'));
 
     await waitFor(() => {
+      // Re-query to avoid asserting on a stale element after rerenders.
+      const formatToggle = within(formatParameter).getByTestId('formRowToggle');
       expect(formatToggle.getAttribute('aria-checked')).toBe('true');
     });
 
-    await within(flyout).findByTestId('formatParameter');
-
     // Set custom format value using EuiComboBox harness
     const formatComboBox = new EuiComboBoxTestHarness('formatInput');
-    await formatComboBox.select('customDateFormat');
-    await formatComboBox.close();
+    // `select()` spends time looking for an options list, this input is createable/free-form.
+    formatComboBox.addCustomValue('customDateFormat');
+    // This combobox can remain open after Enter, close explicitly for deterministic cleanup.
+    await formatComboBox.close({ timeout: 1000 });
 
     // Save the field and close the flyout
     const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
     fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('mappingsEditorFieldEdit')).not.toBeInTheDocument();
+    });
 
     await waitFor(() => {
       expect(onChangeHandler).toHaveBeenCalled();

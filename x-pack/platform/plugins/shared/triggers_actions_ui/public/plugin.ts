@@ -24,6 +24,8 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -161,6 +163,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 }
 
 interface PluginsSetup {
+  security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -168,6 +171,7 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
+  security: SecurityPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -222,6 +226,13 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
+    };
+
+    const getCasesPlugin = async (): Promise<CasesService | undefined> => {
+      const { cases: casesResponse } = await core.plugins.onStart<{
+        cases: CasesService;
+      }>('cases');
+      return casesResponse.found ? casesResponse.contract : undefined;
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -313,6 +324,8 @@ export class Plugin
             return renderRulesPageApp({
               ...coreStart,
               actions: plugins.actions,
+              getCasesPlugin,
+              security: pluginsStart.security,
               cloud: plugins.cloud,
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
@@ -394,6 +407,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -498,6 +512,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,

@@ -48,7 +48,7 @@ const deriveMode = (stateTransition?: {
   return 'immediate';
 };
 
-export const RecoveryDelayField: React.FC = () => {
+export const RecoveryDelayField = () => {
   const { control, setValue } = useFormContext<FormValues>();
   const stateTransition = useWatch({ control, name: 'stateTransition' });
   const [selectedMode, setSelectedMode] = useState<DelayMode>(deriveMode(stateTransition));
