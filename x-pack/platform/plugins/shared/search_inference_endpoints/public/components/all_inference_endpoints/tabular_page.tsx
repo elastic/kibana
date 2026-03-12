@@ -9,14 +9,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
-import { EuiInMemoryTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  useCloudConnectStatus,
+} from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { docLinks } from '../../../common/doc_links';
@@ -25,14 +29,12 @@ import {
   ENDPOINT_COPY_ID_ACTION_LABEL,
   ENDPOINT_DELETE_ACTION_LABEL,
   ENDPOINT_VIEW_ACTION_LABEL,
-  INFERENCE_ENDPOINTS_TABLE_CAPTION,
   MODEL,
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
 import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
-import { useFilteredInferenceEndpoints } from '../../hooks/use_filtered_endpoints';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -47,9 +49,8 @@ import { EndpointInfo } from './render_table_columns/render_endpoint/endpoint_in
 import { Model } from './render_table_columns/render_model/model';
 import { ServiceProvider } from './render_table_columns/render_service_provider/service_provider';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
-import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
-import { EndpointStats } from './endpoint_stats';
+import { EndpointsTable } from './endpoints_table';
 import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
@@ -81,8 +82,11 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { cloud, application },
+    services: { cloud, cloudConnect, application },
   } = useKibana();
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
+    cloudConnect?.hooks.useCloudConnectStatus
+  );
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
@@ -115,8 +119,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
   }, []);
-
-  const tableData = useFilteredInferenceEndpoints(inferenceEndpoints, filterOptions, searchKey);
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceInferenceEndpointInfo>>>(
     () => [
@@ -210,14 +212,16 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           ctaLink={docLinks.elasticInferenceService}
           direction="row"
         />
-        <EisCloudConnectPromoCallout
-          promoId="inferenceEndpointManagement"
-          isSelfManaged={!cloud?.isCloudEnabled}
-          direction="row"
-          navigateToApp={() =>
-            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-          }
-        />
+        {!isCloudConnectStatusLoading && !isCloudConnected && (
+          <EisCloudConnectPromoCallout
+            promoId="inferenceEndpointManagement"
+            isSelfManaged={!cloud?.isCloudEnabled}
+            direction="row"
+            navigateToApp={() =>
+              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+            }
+          />
+        )}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
@@ -244,24 +248,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EndpointStats endpoints={tableData} />
         {groupBy === GroupByOptions.None ? (
-          <EuiInMemoryTable
-            allowNeutralSort={false}
+          <EndpointsTable
+            inferenceEndpoints={inferenceEndpoints}
+            filterOptions={filterOptions}
+            searchKey={searchKey}
             columns={tableColumns}
-            itemId="inference_id"
-            items={tableData}
-            pagination={{
-              pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-            }}
-            sorting={{
-              sort: {
-                field: 'inference_id',
-                direction: 'asc',
-              },
-            }}
-            data-test-subj="inferenceEndpointTable"
-            tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
           />
         ) : (
           <EuiFlexItem>

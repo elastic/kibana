@@ -551,6 +551,39 @@ describe('patch', () => {
       beforeRedirect: expect.any(Function),
     });
   });
+
+  test('caller-provided maxContentLength overrides the global default', async () => {
+    await request({
+      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      maxContentLength: 50 * 1024 * 1024, // 50MB caller override
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith(
+      TestUrl,
+      expect.objectContaining({
+        maxContentLength: 50 * 1024 * 1024, // should use caller value, not the 1MB default
+      })
+    );
+  });
+
+  test('global default maxContentLength is used when caller does not provide one', async () => {
+    await request({
+      axios: axiosMock as jest.Mocked<AxiosInstance>,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith(
+      TestUrl,
+      expect.objectContaining({
+        maxContentLength: 1000000, // global default from configurationUtilities mock
+      })
+    );
+  });
 });
 
 describe('getErrorMessage', () => {
