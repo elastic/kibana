@@ -52,6 +52,7 @@ import type {
   InfraClientStartDeps,
   InfraClientStartExports,
 } from './types';
+import { OverviewHostsTable } from './components/overview_hosts_table';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import {
   hostsTitle,
@@ -317,6 +318,7 @@ export class Plugin implements InfraClientPluginClass {
       inventoryViews,
       metricsExplorerViews,
       telemetry,
+      OverviewHostsTable,
     };
 
     return startContract;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -61,10 +62,16 @@ import type { TelemetryServiceStart } from './services/telemetry';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InfraClientSetupExports {}
 
+export interface OverviewHostsTableProps {
+  dateRange: { from: number; to: number };
+  schema?: 'ecs' | 'semconv';
+}
+
 export interface InfraClientStartExports {
   inventoryViews: InventoryViewsServiceStart;
   metricsExplorerViews?: MetricsExplorerViewsServiceStart;
   telemetry: TelemetryServiceStart;
+  OverviewHostsTable: ComponentType<OverviewHostsTableProps>;
 }
 
 export interface InfraClientSetupDeps {
