@@ -10,12 +10,15 @@ import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import React, { useMemo } from 'react';
+
 import { useNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../hooks/use_experimental_features';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
 import { useConversationList } from '../../hooks/use_conversation_list';
+import { useFullscreen } from '../../context/fullscreen';
 import { appPaths } from '../../utils/app_paths';
+import { newConversationId } from '../../utils/new_conversation';
 
 const getShortcutSymbols = () => ({
   meta: isMac ? '⌘' : 'Ctrl',
@@ -74,6 +77,14 @@ export const useCommandPaletteActions = ({
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
   const { conversations = [] } = useConversationList();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+
+  // Check if we're on an active conversation (not the new chat route)
+  // Using window.location since we're outside the router context
+  const currentPath = window.location.hash || window.location.pathname;
+  const isOnConversationRoute = currentPath.includes('/conversations/');
+  const isNewConversationRoute = currentPath.includes(`/conversations/${newConversationId}`);
+  const hasActiveConversation = isOnConversationRoute && !isNewConversationRoute;
 
   const trimmedQuery = searchQuery.trim();
   const hasSearchQuery = trimmedQuery.length > 0;
@@ -118,6 +129,27 @@ export const useCommandPaletteActions = ({
           onClose();
         },
       },
+      // Only show fullscreen option when there's an active conversation
+      ...(hasActiveConversation || isFullscreen
+        ? [
+            {
+              id: 'toggle-fullscreen',
+              label: isFullscreen
+                ? i18n.translate('xpack.agentBuilder.commandPalette.action.exitFullscreen', {
+                    defaultMessage: 'Exit fullscreen',
+                  })
+                : i18n.translate('xpack.agentBuilder.commandPalette.action.fullscreenChat', {
+                    defaultMessage: 'Fullscreen chat',
+                  }),
+              icon: isFullscreen ? 'fullScreenExit' : 'fullScreen',
+              section: 'quick' as const,
+              onSelect: () => {
+                toggleFullscreen();
+                onClose();
+              },
+            },
+          ]
+        : []),
 
       // Conversations (filtered when searching, recent when not)
       ...filteredConversations.map((conversation) => ({
@@ -257,6 +289,9 @@ export const useCommandPaletteActions = ({
     filteredConversations,
     hasSearchQuery,
     trimmedQuery,
+    hasActiveConversation,
+    isFullscreen,
+    toggleFullscreen,
     onClose,
   ]);
 

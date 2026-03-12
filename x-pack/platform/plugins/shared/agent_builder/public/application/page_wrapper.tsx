@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { AccessBoundary } from './components/access/access_boundary';
 import { CommandPaletteProvider } from './components/command_palette';
+import { FullscreenProvider } from './context/fullscreen';
 
 const wrapperStyles = css`
   display: inherit;
@@ -22,7 +23,9 @@ export const PageWrapper: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <div css={wrapperStyles} data-test-subj="agentBuilderWrapper">
       <AccessBoundary>
-        <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        <FullscreenProvider>
+          <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        </FullscreenProvider>
       </AccessBoundary>
     </div>
   );
