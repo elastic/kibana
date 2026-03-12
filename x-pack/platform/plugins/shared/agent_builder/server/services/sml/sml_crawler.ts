@@ -102,7 +102,7 @@ class SmlCrawlerImpl implements SmlCrawler {
     }
 
     // 2. Load existing crawler state for this type
-    let existingState;
+    let existingState: SmlCrawlerStateDocument[];
     try {
       existingState = await this.loadCrawlerState({
         stateClient,
