@@ -70,6 +70,11 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
             <Route key="skills-list" path="/skills">
               <AgentBuilderSkillsPage />
             </Route>,
+          ]
+        : null}
+
+      {isExperimentalFeaturesEnabled
+        ? [
             <Route key="plugin-details" path="/plugins/:pluginId">
               <AgentBuilderPluginDetailsPage />
             </Route>,
