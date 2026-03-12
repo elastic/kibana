@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransforms } from './transforms';
 
 jest.mock('@kbn/presentation-publishing', () => ({
   transformTitlesOut: <T>(state: T) => state,
 }));
 
-const identityDrilldownTransforms = {
+const identityDrilldownTransforms: DrilldownTransforms = {
   transformIn: (state) => ({ state, references: [] }),
   transformOut: (state) => state,
 };
 
-describe('transformOut', () => {
+describe('Image embeddable transformOut', () => {
   const { transformOut } = getTransforms(identityDrilldownTransforms);
 
   it('converts camelCase file source state to snake_case', () => {
@@ -41,7 +42,7 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(legacy)).toEqual({
+    expect(transformOut(legacy as any)).toEqual({
       image_config: {
         src: {
           type: 'file',
@@ -75,7 +76,7 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(legacy)).toEqual({
+    expect(transformOut(legacy as any)).toEqual({
       image_config: {
         src: {
           type: 'url',
@@ -109,6 +110,6 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(current)).toEqual(current);
+    expect(transformOut(current as any)).toEqual(current);
   });
 });
