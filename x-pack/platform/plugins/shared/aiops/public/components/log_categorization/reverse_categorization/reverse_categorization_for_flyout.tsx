@@ -506,10 +506,10 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
             <EuiButtonEmpty
               disabled={data === null || data.docs.length === 0}
               onClick={() => openInDiscover.openFunction(QUERY_MODE.INCLUDE, false)}
-              data-test-subj="aiopsChangePointChartsInitializerCancelButton"
+              data-test-subj="aiopsReverseCategorizationDocsTableOpenDocumentsInDiscoverButton"
             >
               <FormattedMessage
-                id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+                id="xpack.aiops.logCategorization.reverseCategorization.openDocumentsInDiscoverButtonLabel"
                 defaultMessage="Open documents in Discover"
               />
             </EuiButtonEmpty>
@@ -518,10 +518,10 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
             <EuiButtonEmpty
               disabled={data === null || data.docs.length === 0}
               onClick={() => openInDiscover.openFunction(QUERY_MODE.EXCLUDE, false)}
-              data-test-subj="aiopsChangePointChartsInitializerCancelButton"
+              data-test-subj="aiopsReverseCategorizationDocsTableFilterOutDocumentsInDiscoverButton"
             >
               <FormattedMessage
-                id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+                id="xpack.aiops.logCategorization.reverseCategorization.filterOutDocumentsInDiscoverButtonLabel"
                 defaultMessage="Filter out documents in Discover"
               />
             </EuiButtonEmpty>
@@ -546,7 +546,7 @@ const Header: FC<HeaderProps> = ({ fieldName, randomSampler, reload }) => (
         <EuiTitle size="m">
           <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
             <FormattedMessage
-              id="xpack.aiops.categorizeFlyout.title"
+              id="xpack.aiops.logCategorization.reverseCategorization.title"
               defaultMessage="Similar values of {name}"
               values={{ name: fieldName }}
             />
