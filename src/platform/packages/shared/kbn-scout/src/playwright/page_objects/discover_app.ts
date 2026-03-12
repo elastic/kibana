@@ -405,8 +405,9 @@ export class DiscoverApp {
 
   async addBreakdownFieldFromSidebar(field: string) {
     const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
-    await sidebarToggleButton.waitFor({ state: 'visible' });
-    await sidebarToggleButton.click();
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
 
     await this.waitUntilFieldListHasCountOfFields();
 
