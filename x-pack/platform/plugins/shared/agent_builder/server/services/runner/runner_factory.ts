@@ -33,6 +33,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
     } = this.deps;
     return {
       ...otherDeps,
+      inference,
       savedObjects,
       uiSettings,
       trackingService,

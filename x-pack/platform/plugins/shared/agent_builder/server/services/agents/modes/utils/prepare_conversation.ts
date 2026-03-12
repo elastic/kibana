@@ -267,14 +267,18 @@ export const prepareConversation = async ({
 
   // Current-turn targets are authoritative when provided. If absent, fall back
   // to prior conversation context for follow-up continuity.
-  const currentTurnAnonymizationTarget = deriveAnonymizationTarget({
-    attachments: nextInputAttachments,
-    logger: context.logger,
-  });
-  const conversationContextAnonymizationTarget = deriveAnonymizationTarget({
-    attachments: [...activeConversationAttachments, ...previousAttachments],
-    logger: context.logger,
-  });
+  const currentTurnAnonymizationTarget = context.anonymizationEnabled
+    ? deriveAnonymizationTarget({
+        attachments: nextInputAttachments,
+        logger: context.logger,
+      })
+    : undefined;
+  const conversationContextAnonymizationTarget = context.anonymizationEnabled
+    ? deriveAnonymizationTarget({
+        attachments: [...activeConversationAttachments, ...previousAttachments],
+        logger: context.logger,
+      })
+    : undefined;
   const anonymizationTarget =
     currentTurnAnonymizationTarget ?? conversationContextAnonymizationTarget;
 

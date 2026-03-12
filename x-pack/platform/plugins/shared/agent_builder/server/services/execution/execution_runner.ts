@@ -95,6 +95,7 @@ export const handleAgentExecution = async ({
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const anonymizationEnabled = deps.inference.isAnonymizationEnabled?.() ?? false;
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -110,6 +111,7 @@ export const handleAgentExecution = async ({
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
+    anonymizationEnabled,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -139,7 +141,7 @@ export const handleAgentExecution = async ({
   // Generate title (for CREATE) or use existing title (for UPDATE)
   const title$ =
     conversation.operation === 'CREATE'
-      ? generateTitle({ chatModel, conversation, nextInput })
+      ? generateTitle({ chatModel, conversation, nextInput, anonymizationEnabled })
       : of(conversation.title);
 
   // Persist conversation (optional)

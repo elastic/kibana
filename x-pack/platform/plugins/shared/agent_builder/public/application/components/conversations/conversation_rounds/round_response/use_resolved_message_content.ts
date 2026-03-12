@@ -15,6 +15,7 @@ import { useReplacementsHold } from './use_replacements_hold';
 interface UseResolvedMessageContentParams {
   content: string;
   hasHttp: boolean;
+  anonymizationEnabled: boolean;
   http?: Parameters<typeof createAnonymizationReplacementsClient>[0];
   replacementsId?: string;
   holdContentWhileResolvingReplacements: boolean;
@@ -24,6 +25,7 @@ interface UseResolvedMessageContentParams {
 export const useResolvedMessageContent = ({
   content,
   hasHttp,
+  anonymizationEnabled,
   http,
   replacementsId,
   holdContentWhileResolvingReplacements,
@@ -48,7 +50,7 @@ export const useResolvedMessageContent = ({
   } = useResolveAnonymizedValues({
     client: replacementsClient,
     replacementsId,
-    enabled: Boolean(hasHttp && replacementsId),
+    enabled: Boolean(anonymizationEnabled && hasHttp && replacementsId),
   });
 
   const shouldHoldContent = useReplacementsHold({
@@ -63,12 +65,19 @@ export const useResolvedMessageContent = ({
     if (shouldHoldContent) {
       return '';
     }
-    if (!hasHttp || !replacementsId || isResolvingReplacements || replacementsError) {
+    if (
+      !anonymizationEnabled ||
+      !hasHttp ||
+      !replacementsId ||
+      isResolvingReplacements ||
+      replacementsError
+    ) {
       return content;
     }
     return resolveText(content);
   }, [
     content,
+    anonymizationEnabled,
     hasHttp,
     isResolvingReplacements,
     replacementsError,

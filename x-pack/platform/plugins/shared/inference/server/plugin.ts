@@ -259,6 +259,7 @@ export class InferencePlugin
     };
 
     return {
+      isAnonymizationEnabled: () => anonymizationEnabled,
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
           ...options,

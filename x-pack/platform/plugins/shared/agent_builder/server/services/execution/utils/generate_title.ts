@@ -21,10 +21,12 @@ export const generateTitle = ({
   nextInput,
   conversation,
   chatModel,
+  anonymizationEnabled,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
+  anonymizationEnabled: boolean;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -32,7 +34,7 @@ export const generateTitle = ({
         previousRounds: conversation.rounds,
         nextInput,
         chatModel,
-        replacementsId: conversation.replacementsId,
+        replacementsId: anonymizationEnabled ? conversation.replacementsId : undefined,
       });
     } catch (e) {
       return conversation.title;

@@ -87,7 +87,7 @@ export function ChatMessageText({
     }
   `;
 
-  const { attachmentsService, startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, startDependencies, accessChecker } = useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
@@ -95,9 +95,11 @@ export function ChatMessageText({
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+  const anonymizationEnabled = accessChecker.getAccess().hasAnonymizationEnabled;
   const { displayContent } = useResolvedMessageContent({
     content,
     hasHttp: Boolean(http),
+    anonymizationEnabled,
     http,
     replacementsId,
     holdContentWhileResolvingReplacements,

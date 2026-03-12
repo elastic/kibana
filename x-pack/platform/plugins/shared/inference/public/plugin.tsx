@@ -47,10 +47,7 @@ export class InferencePlugin
       chatComplete,
       output,
       getConnectors: async () => {
-        const res = await coreStart.http.get<GetConnectorsResponseBody>(
-          '/internal/inference/connectors'
-        );
-        return res.connectors;
+        return coreStart.http.get<GetConnectorsResponseBody>('/internal/inference/connectors');
       },
     };
   }

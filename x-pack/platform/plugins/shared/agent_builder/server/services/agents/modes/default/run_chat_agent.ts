@@ -189,12 +189,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
   });
 
-  const anonymizationMetadata: ChatCompleteAnonymizationMetadata = {
-    ...(conversation?.replacementsId ? { replacementsId: conversation.replacementsId } : {}),
-    ...(processedConversation.anonymizationTarget
-      ? { target: processedConversation.anonymizationTarget }
-      : {}),
-  };
+  const anonymizationMetadata: ChatCompleteAnonymizationMetadata | undefined =
+    context.anonymizationEnabled
+      ? {
+          ...(conversation?.replacementsId ? { replacementsId: conversation.replacementsId } : {}),
+          ...(processedConversation.anonymizationTarget
+            ? { target: processedConversation.anonymizationTarget }
+            : {}),
+        }
+      : undefined;
 
   const agentGraph = createAgentGraph({
     logger,

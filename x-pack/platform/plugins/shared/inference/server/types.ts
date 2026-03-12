@@ -78,6 +78,11 @@ export type InferenceClientCreateOptions =
  */
 export interface InferenceServerStart {
   /**
+   * Returns whether anonymization platform integration is active.
+   */
+  isAnonymizationEnabled?: () => boolean;
+
+  /**
    * Creates an {@link InferenceClient}, scoped to a request.
    *
    * @example
