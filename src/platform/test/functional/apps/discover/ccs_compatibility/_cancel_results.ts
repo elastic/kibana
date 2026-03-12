@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 "name": "*:*",
                 "error_type": "exception",
                 "message": "'Watch out!'",
-                "stall_time_seconds": 5
+                "stall_time_seconds": 30
               }
             ]
           }
@@ -81,12 +81,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }`,
           false
         );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await testSubjects.exists('queryCancelButton');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('queryCancelButton');
+        });
         await testSubjects.click('queryCancelButton');
+        await header.waitUntilLoadingHasFinished();
 
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);
@@ -120,13 +122,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await timePicker.setDefaultAbsoluteRange();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        await testSubjects.exists('queryCancelButton');
+        await retry.try(async () => {
+          await testSubjects.existOrFail('queryCancelButton');
+        });
         await testSubjects.click('queryCancelButton');
-
         await header.waitUntilLoadingHasFinished();
+
         // Warning callout is shown
-        await testSubjects.exists('searchResponseWarningsCallout');
+        await testSubjects.existOrFail('searchResponseWarningsCallout');
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);
