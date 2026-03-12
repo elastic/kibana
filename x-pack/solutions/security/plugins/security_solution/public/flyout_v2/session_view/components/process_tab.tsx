@@ -10,14 +10,17 @@ import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelProcessTab } from '@kbn/session-view-plugin/public';
 import type { Process } from '@kbn/session-view-plugin/common';
-import { useSessionViewPanelContext } from '../context';
+import type { CustomProcess } from '../../../flyout/document_details/session_view/context';
+
+export interface ProcessTabProps {
+  selectedProcess: CustomProcess | null;
+  index: string;
+}
 
 /**
  * Tab displayed in the SessionView preview panel, shows the details related to the process selected in the SessionView tree.
  */
-export const ProcessTab = memo(() => {
-  const { selectedProcess, index } = useSessionViewPanelContext();
-
+export const ProcessTab = memo(({ selectedProcess, index }: ProcessTabProps) => {
   // We need to partially recreate the Process object here, as the SessionView code
   // is expecting a Process object with at least the following properties
   const process: Process | null = useMemo(

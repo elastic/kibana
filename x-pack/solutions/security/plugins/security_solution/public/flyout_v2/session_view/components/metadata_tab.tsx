@@ -9,14 +9,16 @@ import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelMetadataTab } from '@kbn/session-view-plugin/public';
-import { useSessionViewPanelContext } from '../context';
+import type { CustomProcess } from '../../../flyout/document_details/session_view/context';
+
+export interface MetadataTabProps {
+  selectedProcess: CustomProcess | null;
+}
 
 /**
  * Tab displayed in the SessionView preview panel, shows metadata related process selected in the SessionView tree.
  */
-export const MetadataTab = memo(() => {
-  const { selectedProcess } = useSessionViewPanelContext();
-
+export const MetadataTab = memo(({ selectedProcess }: MetadataTabProps) => {
   return (
     <EuiPanel
       hasBorder={false}
