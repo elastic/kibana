@@ -178,6 +178,9 @@ export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
+  // 'multiple-isolated' technically allows a pack to be shared to multiple spaces via the
+  // Saved Objects management UI, but the Osquery UI never exposes that feature. In practice
+  // every pack lives in exactly one space, so namespaces[0] is always the correct space.
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
   modelVersions: {
