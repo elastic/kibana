@@ -26,7 +26,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(MANY_MARKDOWNS_KBN_ARCHIVE_PATH);
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   apiTest('should retrieve a paginated list of markdown panels', async ({ apiClient }) => {
