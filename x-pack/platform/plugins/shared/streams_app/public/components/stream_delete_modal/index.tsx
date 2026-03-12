@@ -109,7 +109,7 @@ export function StreamDeleteModal({
                       copyToClipboard(name);
                     }}
                   >
-                    {name} <EuiIcon type="copy" />
+                    {name} <EuiIcon type="copy" aria-hidden={true} />
                   </EuiLink>
                 ),
               }}
@@ -169,6 +169,7 @@ export function StreamDeleteModal({
                 color="danger"
                 onClick={handleDelete}
                 fill
+                data-test-subj="streamsAppDeleteStreamModalDeleteButton"
               >
                 {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.deleteButton', {
                   defaultMessage: 'Delete',

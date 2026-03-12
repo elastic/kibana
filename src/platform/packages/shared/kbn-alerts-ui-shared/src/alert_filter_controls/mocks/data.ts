@@ -46,7 +46,7 @@ export const sampleOutputData: ControlGroupOutput = {
 export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlState> = {
   initialChildControlState: {
     '0': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       ...DEFAULT_PINNED_CONTROL_STATE,
       order: 0,
       width: 'small',
@@ -61,7 +61,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '1': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       ...DEFAULT_PINNED_CONTROL_STATE,
       order: 1,
       width: 'small',
@@ -76,7 +76,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '2': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       ...DEFAULT_PINNED_CONTROL_STATE,
       order: 2,
       width: 'small',
@@ -92,7 +92,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '3': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       ...DEFAULT_PINNED_CONTROL_STATE,
       order: 3,
       width: 'small',
@@ -107,7 +107,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '4': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       ...DEFAULT_PINNED_CONTROL_STATE,
       order: 4,
       width: 'small',

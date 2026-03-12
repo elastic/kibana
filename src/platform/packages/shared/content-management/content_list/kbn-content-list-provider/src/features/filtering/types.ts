@@ -13,7 +13,7 @@ import type { ActiveFilters } from '../../datasource';
  * State returned by `useFilterDisplay` indicating which filter UI elements should be rendered.
  */
 export interface FilterDisplayState {
-  /** Whether any filter popover buttons should be shown (sorting or tags). Search is separate. */
+  /** Whether any filter popover buttons should be shown (sorting, tags, or starred). Search is separate. */
   hasFilters: boolean;
   /** Whether sorting is enabled. */
   hasSorting: boolean;
@@ -21,6 +21,8 @@ export interface FilterDisplayState {
   hasSearch: boolean;
   /** Whether tags filtering should be shown. */
   hasTags: boolean;
+  /** Whether the starred filter toggle should be shown. */
+  hasStarred: boolean;
 }
 
 /**

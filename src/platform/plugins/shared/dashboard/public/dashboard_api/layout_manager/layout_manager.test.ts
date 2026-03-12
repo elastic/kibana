@@ -58,7 +58,7 @@ describe('layout manager', () => {
     {
       ...DEFAULT_PINNED_CONTROL_STATE,
       uid: 'control1',
-      type: 'optionsListControl',
+      type: 'options_list_control',
       config: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
@@ -68,7 +68,7 @@ describe('layout manager', () => {
     {
       ...DEFAULT_PINNED_CONTROL_STATE,
       uid: 'control2',
-      type: 'optionsListControl',
+      type: 'options_list_control',
       config: {
         ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         data_view_id: '',
@@ -348,7 +348,7 @@ describe('layout manager', () => {
           panel1,
           {
             uid: 'control3',
-            type: 'optionsListControl',
+            type: 'options_list_control',
             config: {},
             grid: { x: 0, y: 2, h: 1, w: 1 },
           },
@@ -372,7 +372,7 @@ describe('layout manager', () => {
         },
         ['control3']: {
           ...DEFAULT_PINNED_CONTROL_STATE,
-          type: 'optionsListControl',
+          type: 'options_list_control',
           order: 2,
         },
       });
@@ -417,7 +417,7 @@ describe('layout manager', () => {
           grid: { ...panel1.grid, y: 2 }, // push panel 1 down,
         },
         ['control1']: {
-          type: 'optionsListControl',
+          type: 'options_list_control',
           grid: { x: 0, y: 0, w: 12, h: 2 },
         },
       });

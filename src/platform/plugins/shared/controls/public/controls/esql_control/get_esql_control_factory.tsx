@@ -114,7 +114,9 @@ export const getESQLControlFactory = (): EmbeddableFactory<
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
               onSaveControl,
+              parentApi,
               initialState: nextState,
+              controlId: uuid,
             });
           } catch (e) {
             // eslint-disable-next-line no-console
