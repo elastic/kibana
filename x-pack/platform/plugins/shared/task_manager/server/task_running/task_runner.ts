@@ -72,7 +72,7 @@ import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_OUTCOMES } from '../constants';
+import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -886,7 +886,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.logTaskRunEvent(
               task,
               taskTiming,
-              EVENT_LOG_OUTCOMES.failure,
+              EventLogOutcomes.failure,
               `Task ${this.taskType} "${this.id}" failed with a taskRunError.`,
               taskRunError
             );
@@ -901,7 +901,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.logTaskRunEvent(
               task,
               taskTiming,
-              EVENT_LOG_OUTCOMES.success,
+              EventLogOutcomes.success,
               `Task ${this.taskType} "${this.id}" completed successfully.`
             );
           }
@@ -922,7 +922,7 @@ export class TaskManagerRunner implements TaskRunner {
           this.logTaskRunEvent(
             task,
             taskTiming,
-            EVENT_LOG_OUTCOMES.failure,
+            EventLogOutcomes.failure,
             `Task ${this.taskType} "${this.id}" failed.`,
             err as Error
           );
@@ -947,7 +947,7 @@ export class TaskManagerRunner implements TaskRunner {
         this.logTaskRunEvent(
           task,
           taskTiming,
-          EVENT_LOG_OUTCOMES.failure,
+          EventLogOutcomes.failure,
           `Task ${this.taskType} "${this.id}" failed.`,
           error
         );
@@ -1049,7 +1049,7 @@ export class TaskManagerRunner implements TaskRunner {
   private logTaskRunEvent(
     task: ConcreteTaskInstance,
     taskTiming: TaskTiming,
-    outcome: string,
+    outcome: EventLogOutcomes,
     message: string,
     error?: Error | DecoratedError
   ): void {
@@ -1076,6 +1076,7 @@ export class TaskManagerRunner implements TaskRunner {
       kibana: {
         task: {
           id: this.id,
+          type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
         },
@@ -1097,6 +1098,7 @@ export class TaskManagerRunner implements TaskRunner {
       kibana: {
         task: {
           id: this.id,
+          type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
         },
       },

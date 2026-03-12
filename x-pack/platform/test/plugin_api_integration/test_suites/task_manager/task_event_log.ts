@@ -26,10 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: '.kibana-event-log*',
         query: {
           bool: {
-            filter: [
-              { term: { 'event.action': 'task-run' } },
-              { term: { 'kibana.task.id': currentTaskId } },
-            ],
+            filter: [{ term: { 'kibana.task.id': currentTaskId } }],
           },
         },
         conflicts: 'proceed',
@@ -89,10 +86,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.hits.hits.length).to.eql(1);
 
         const event = response.hits.hits[0]._source as Record<string, any>;
-        expect(event?.event?.action).to.eql('task-run');
-        expect(event?.event?.provider).to.eql('taskManager');
-        expect(event?.event?.outcome).to.eql('success');
-        expect(event?.kibana?.task?.id).to.eql(scheduledTask.id);
+        expect(event.event.action).to.eql('task-run');
+        expect(event.event.provider).to.eql('taskManager');
+        expect(event.event.outcome).to.eql('success');
+        expect(event.kibana.task.id).to.eql(scheduledTask.id);
+        expect(event.kibana.task.type).to.eql('sampleTask');
       });
     });
 
@@ -127,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(event.event.outcome).to.eql('failure');
         expect(event.error.message).to.eql('Task error');
         expect(event.kibana.task.id).to.eql(scheduledTask.id);
+        expect(event.kibana.task.type).to.eql('sampleTask');
       });
     });
 
@@ -160,12 +159,14 @@ export default function ({ getService }: FtrProviderContext) {
           `Task sampleRecurringTaskTimingOut "${scheduledTask.id}" has been cancelled.`
         );
         expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
+        expect(cancelledEvent.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
 
         const event = response.hits.hits[1]._source as Record<string, any>;
         expect(event.event.action).to.eql('task-run');
         expect(event.event.provider).to.eql('taskManager');
         expect(event.event.outcome).to.eql('success');
         expect(event.kibana.task.id).to.eql(scheduledTask.id);
+        expect(event.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
       });
     });
 
@@ -199,6 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           `Task sampleRecurringTaskTimingOutWithError "${scheduledTask.id}" has been cancelled.`
         );
         expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
+        expect(cancelledEvent.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
 
         const event = response.hits.hits[1]._source as Record<string, any>;
         expect(event.event.action).to.eql('task-run');
@@ -206,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(event.event.outcome).to.eql('failure');
         expect(event.event.reason).to.eql(`Task "${scheduledTask.id}" was cancelled.`);
         expect(event.kibana.task.id).to.eql(scheduledTask.id);
+        expect(event.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
       });
     });
   });

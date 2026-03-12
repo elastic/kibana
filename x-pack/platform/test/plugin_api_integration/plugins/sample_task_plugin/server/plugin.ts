@@ -255,12 +255,12 @@ export class SampleTaskManagerFixturePlugin
         title: 'Sample Recurring Task that Times Out and Throws an Error',
         description: 'A sample task that times out each run and throws an error.',
         maxAttempts: 3,
-        timeout: '30s',
+        timeout: '1s',
         createTaskRunner: () => {
           let isCancelled: boolean = false;
           return {
             async run() {
-              await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 seconds
+              await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
               if (isCancelled) {
                 throw new Error('The task was cancelled and there was an error!');
               }

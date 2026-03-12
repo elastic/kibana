@@ -25,7 +25,8 @@ export const EVENT_LOG_ACTIONS = {
   taskRun: 'task-run',
   taskCancel: 'task-cancel',
 };
-export const EVENT_LOG_OUTCOMES = {
-  success: 'success',
-  failure: 'failure',
-};
+
+export enum EventLogOutcomes {
+  success = 'success',
+  failure = 'failure',
+}

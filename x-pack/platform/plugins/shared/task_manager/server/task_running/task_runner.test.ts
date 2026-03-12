@@ -2611,7 +2611,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" completed successfully.`,
         });
@@ -2655,7 +2660,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" failed with a taskRunError.`,
         });
@@ -2693,7 +2703,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" failed.`,
         });
@@ -2746,7 +2761,7 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, scheduled: expect.any(String) },
+            task: { id, type: 'bar', scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2762,7 +2777,12 @@ describe('TaskManagerRunner', () => {
             reason: `Task "${id}" was cancelled.`,
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" failed.`,
         });
@@ -2813,7 +2833,7 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, scheduled: expect.any(String) },
+            task: { id, type: 'bar', scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2828,7 +2848,12 @@ describe('TaskManagerRunner', () => {
             reason: `Task "${id}" was cancelled.`,
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" failed.`,
         });
@@ -2874,7 +2899,7 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, scheduled: expect.any(String) },
+            task: { id, type: 'bar', scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2887,7 +2912,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" completed successfully.`,
         });
@@ -2930,7 +2960,7 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, scheduled: expect.any(String) },
+            task: { id, type: 'bar', scheduled: expect.any(String) },
           },
           message: `Task bar "${id}" has been cancelled.`,
         });
@@ -2943,7 +2973,12 @@ describe('TaskManagerRunner', () => {
             start: expect.stringMatching(dateRegExp),
           },
           kibana: {
-            task: { id, schedule_delay: expect.any(Number), scheduled: expect.any(String) },
+            task: {
+              id,
+              type: 'bar',
+              schedule_delay: expect.any(Number),
+              scheduled: expect.any(String),
+            },
           },
           message: `Task bar "${id}" completed successfully.`,
         });
