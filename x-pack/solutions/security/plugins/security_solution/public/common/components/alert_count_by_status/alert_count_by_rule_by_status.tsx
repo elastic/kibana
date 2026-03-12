@@ -62,7 +62,9 @@ const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
  */
 const buildTimelineFiltersFromEntityIdentifiers = (
   entityIdentifiers: EntityIdentifiers,
-  api: { buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[] } | null
+  api: {
+    buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[];
+  } | null
 ): Filter[] => {
   if (!api) return [];
   const esFilters = api.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
@@ -70,7 +72,10 @@ const buildTimelineFiltersFromEntityIdentifiers = (
   return esFilters
     .filter(
       (filter): filter is { term: Record<string, string> } =>
-        filter != null && filter !== undefined && 'term' in filter && filter.term !== undefined
+        typeof filter === 'object' &&
+        filter !== null &&
+        'term' in filter &&
+        filter.term !== undefined
     )
     .flatMap((filter) => {
       return Object.entries(filter.term).map(([field, value]) => ({

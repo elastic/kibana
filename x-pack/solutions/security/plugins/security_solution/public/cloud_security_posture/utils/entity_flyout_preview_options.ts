@@ -8,13 +8,13 @@
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 
 /** API shape needed (from useEntityStoreEuidApi()). */
-export type EntityFlyoutPreviewApi = {
+export interface EntityFlyoutPreviewApi {
   buildGenericEntityFlyoutPreviewQuery: (
     entityIdentifiers: Record<string, string>,
     status?: string,
     queryField?: string
   ) => { bool: { filter: unknown[] } };
-};
+}
 
 /**
  * Builds CSP preview options for useHasMisconfigurations and useHasVulnerabilities

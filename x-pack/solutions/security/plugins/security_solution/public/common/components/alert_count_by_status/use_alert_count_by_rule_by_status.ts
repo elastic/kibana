@@ -179,13 +179,15 @@ export const buildRuleAlertsByEntityQuery = ({
   statuses: string[];
   entityIdentifiers: EntityIdentifiers;
   isExploreContext?: boolean;
-  buildEntityFiltersFromEntityIdentifiers?: (ids: Record<string, string>) => QueryDslQueryContainer[];
+  buildEntityFiltersFromEntityIdentifiers?: (
+    ids: Record<string, string>
+  ) => QueryDslQueryContainer[];
 }) => {
   const entityFilters = isExploreContext
     ? getExploreEntityNameFilter(entityIdentifiers)
     : buildEntityFilters
-      ? buildEntityFilters(entityIdentifiers)
-      : getExploreEntityNameFilter(entityIdentifiers);
+    ? buildEntityFilters(entityIdentifiers)
+    : getExploreEntityNameFilter(entityIdentifiers);
   return {
     size: 0,
     _source: false,

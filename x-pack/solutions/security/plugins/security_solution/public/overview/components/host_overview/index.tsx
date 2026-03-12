@@ -213,16 +213,16 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {
           title: i18n.HOST_ID,
           description:
-            data && data.host
-              ? (
-                  <HostIdRenderer
-                    host={data.host}
-                    noLink={true}
-                    scopeId={scopeId}
-                    isFlyoutOpen={isFlyoutOpen}
-                  />
-                )
-              : getEmptyTagValue(),
+            data && data.host ? (
+              <HostIdRenderer
+                host={data.host}
+                noLink={true}
+                scopeId={scopeId}
+                isFlyoutOpen={isFlyoutOpen}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.FIRST_SEEN,

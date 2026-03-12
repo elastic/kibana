@@ -153,11 +153,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.id is provided', () => {
       render(
         <TestProviders>
-          <HostIdRenderer
-            scopeId={scopeId}
-            host={emptyIdHost}
-            isFlyoutOpen={false}
-          />
+          <HostIdRenderer scopeId={scopeId} host={emptyIdHost} isFlyoutOpen={false} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -165,11 +161,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.ip is provided', () => {
       render(
         <TestProviders>
-          <HostIdRenderer
-            scopeId={scopeId}
-            host={emptyIpHost}
-            isFlyoutOpen={false}
-          />
+          <HostIdRenderer scopeId={scopeId} host={emptyIpHost} isFlyoutOpen={false} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -223,11 +215,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.ip is provided', () => {
       render(
         <TestProviders>
-          <HostNameRenderer
-            scopeId={scopeId}
-            host={emptyIpHost}
-            isFlyoutOpen={false}
-          />
+          <HostNameRenderer scopeId={scopeId} host={emptyIpHost} isFlyoutOpen={false} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
@@ -235,11 +223,7 @@ describe('Field Renderers', () => {
     test('it renders emptyTagValue when no host.name is provided', () => {
       render(
         <TestProviders>
-          <HostNameRenderer
-            scopeId={scopeId}
-            host={emptyNameHost}
-            isFlyoutOpen={false}
-          />
+          <HostNameRenderer scopeId={scopeId} host={emptyNameHost} isFlyoutOpen={false} />
         </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();

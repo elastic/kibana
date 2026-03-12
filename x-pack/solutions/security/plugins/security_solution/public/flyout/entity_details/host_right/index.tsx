@@ -102,8 +102,7 @@ export const HostPanel = ({
     () =>
       (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers) as
         | ESQuery
-        | undefined) ??
-      (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
+        | undefined) ?? (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
     [euidApi?.euid, entityIdentifiers, effectiveHostName]
   );
 

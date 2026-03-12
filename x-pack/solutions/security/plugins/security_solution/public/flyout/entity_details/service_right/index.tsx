@@ -60,15 +60,10 @@ export const ServicePanel = ({ contextID, scopeId, entityIdentifiers }: ServiceP
   );
 
   const serviceFilterQuery = useMemo(() => {
-    if (
-      entityStoreV2Enabled &&
-      Object.keys(entityIdentifiers ?? {}).length > 0 &&
-      euidApi?.euid
-    ) {
-      return euidApi.euid.getEuidDslFilterBasedOnDocument(
-        'service',
-        entityIdentifiers ?? {}
-      ) as ESQuery | undefined;
+    if (entityStoreV2Enabled && Object.keys(entityIdentifiers ?? {}).length > 0 && euidApi?.euid) {
+      return euidApi.euid.getEuidDslFilterBasedOnDocument('service', entityIdentifiers ?? {}) as
+        | ESQuery
+        | undefined;
     }
     return serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined;
   }, [entityStoreV2Enabled, entityIdentifiers, serviceName, euidApi?.euid]);

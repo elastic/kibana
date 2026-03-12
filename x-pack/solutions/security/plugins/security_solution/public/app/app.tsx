@@ -57,30 +57,30 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
           <EntityStoreEuidApiProvider>
-          <EuiThemeProvider darkMode={darkMode}>
-            <MlCapabilitiesProvider>
-              <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                <ManageUserInfo>
-                  <NavigationProvider core={services}>
-                    <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <PageRouter history={history}>
-                              <AssistantProvider>{children}</AssistantProvider>
-                              <TrialCompanion />
-                            </PageRouter>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
-                    </ReactQueryClientProvider>
-                  </NavigationProvider>
-                </ManageUserInfo>
-              </UserPrivilegesProvider>
-            </MlCapabilitiesProvider>
-          </EuiThemeProvider>
+            <EuiThemeProvider darkMode={darkMode}>
+              <MlCapabilitiesProvider>
+                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                  <ManageUserInfo>
+                    <NavigationProvider core={services}>
+                      <ReactQueryClientProvider>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                        >
+                          <UpsellingProvider upsellingService={upselling}>
+                            <DiscoverInTimelineContextProvider>
+                              <PageRouter history={history}>
+                                <AssistantProvider>{children}</AssistantProvider>
+                                <TrialCompanion />
+                              </PageRouter>
+                            </DiscoverInTimelineContextProvider>
+                          </UpsellingProvider>
+                        </CellActionsProvider>
+                      </ReactQueryClientProvider>
+                    </NavigationProvider>
+                  </ManageUserInfo>
+                </UserPrivilegesProvider>
+              </MlCapabilitiesProvider>
+            </EuiThemeProvider>
           </EntityStoreEuidApiProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
