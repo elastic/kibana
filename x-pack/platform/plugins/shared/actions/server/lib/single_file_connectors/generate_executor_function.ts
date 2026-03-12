@@ -5,22 +5,25 @@
  * 2.0.
  */
 
+import type { AxiosInstance } from 'axios';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '../../types';
-import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
+import type { ClientTypeRegistry } from '../../client_types';
 
 type RecordUnknown = Record<string, unknown>;
 
 export const generateExecutorFunction = ({
   actions,
-  getAxiosInstanceWithAuth,
+  clientTypeRegistry,
+  declaredClients,
 }: {
   actions: ConnectorSpec['actions'];
-  getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  clientTypeRegistry: ClientTypeRegistry;
+  declaredClients: Record<string, Record<string, unknown>>;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -39,30 +42,46 @@ export const generateExecutorFunction = ({
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({
-      connectorId,
-      connectorTokenClient,
-      additionalHeaders: globalAuthHeaders,
-      secrets,
-      signal,
-      authMode,
-      profileUid,
-    });
-
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
 
-    const actionContext = {
-      log: logger,
-      client: axiosInstance,
-      secrets,
-      config,
-    };
+    const createdClients: Record<string, unknown> = {};
+    for (const [clientId, clientConfig] of Object.entries(declaredClients)) {
+      const clientType = clientTypeRegistry.get(clientId);
+      createdClients[clientId] = await clientType.create({
+        connectorId,
+        secrets,
+        config: config as RecordUnknown,
+        additionalHeaders: globalAuthHeaders
+          ? Object.fromEntries(
+              Object.entries(globalAuthHeaders).filter(
+                (entry): entry is [string, string] => typeof entry[1] === 'string'
+              )
+            )
+          : undefined,
+        connectorTokenClient,
+        signal,
+        authMode,
+        profileUid,
+        clientConfig,
+      });
+      if (clientType.connect) {
+        await clientType.connect(createdClients[clientId]);
+      }
+    }
 
     try {
+      const actionContext = {
+        log: logger,
+        client: createdClients.http as AxiosInstance,
+        clients: createdClients,
+        secrets,
+        config,
+      };
+
       let data = {};
       const res = await actions[subAction].handler(actionContext, subActionParams);
 
@@ -79,5 +98,20 @@ export const generateExecutorFunction = ({
         message: errorMessage,
         actionId: connectorId,
       };
+    } finally {
+      for (const [clientId, client] of Object.entries(createdClients)) {
+        const clientType = clientTypeRegistry.get(clientId);
+        if (clientType.disconnect && clientType.isConnected?.(client)) {
+          try {
+            await clientType.disconnect(client);
+          } catch (disconnectError) {
+            const errMsg =
+              disconnectError instanceof Error ? disconnectError.message : String(disconnectError);
+            logger.warn(
+              `Failed to disconnect ${clientId} client for connector ${connectorId}: ${errMsg}`
+            );
+          }
+        }
+      }
     }
   };

@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
 import { isString } from 'lodash';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
@@ -38,6 +37,18 @@ type NormalizedAuthSchemaType = Record<string, string>;
 export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
+  authenticate: async (
+    _: AuthContext,
+    secret: NormalizedAuthSchemaType
+  ): Promise<Record<string, string>> => {
+    const headers: Record<string, string> = {};
+    Object.keys(secret)
+      .filter((key) => key !== 'authType')
+      .forEach((key) => {
+        headers[key] = secret[key];
+      });
+    return headers;
+  },
   normalizeSchema: (defaults?: Record<string, unknown>) => {
     const existingMeta = authSchema.meta() ?? {};
     const schemaToUse = z.object({
@@ -45,7 +56,6 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
     });
 
     if (defaults) {
-      // get the default values for the headerField
       const headerField: string =
         defaults.headerField && isString(defaults.headerField)
           ? defaults.headerField
@@ -56,19 +66,5 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
     }
 
     return schemaToUse.meta(existingMeta);
-  },
-  configure: async (
-    _: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: NormalizedAuthSchemaType
-  ): Promise<AxiosInstance> => {
-    // set global defaults
-    Object.keys(secret)
-      .filter((key) => key !== 'authType')
-      .forEach((key) => {
-        axiosInstance.defaults.headers.common[key] = secret[key];
-      });
-
-    return axiosInstance;
   },
 };

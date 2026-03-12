@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
@@ -34,17 +33,8 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BasicAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'basic',
   schema: authSchema,
-  configure: async (
-    _: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    // set global defaults
-    axiosInstance.defaults.auth = {
-      username: secret.username,
-      password: secret.password,
-    };
-
-    return axiosInstance;
+  authenticate: async (_: AuthContext, secret: AuthSchemaType): Promise<Record<string, string>> => {
+    const encoded = Buffer.from(`${secret.username}:${secret.password}`).toString('base64');
+    return { Authorization: `Basic ${encoded}` };
   },
 };

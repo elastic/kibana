@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
@@ -30,14 +29,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const BearerAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'bearer',
   schema: authSchema,
-  configure: async (
-    _: AuthContext,
-    axiosInstance: AxiosInstance,
-    secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = `Bearer ${secret.token}`;
-
-    return axiosInstance;
+  authenticate: async (_: AuthContext, secret: AuthSchemaType): Promise<Record<string, string>> => {
+    return { Authorization: `Bearer ${secret.token}` };
   },
 };

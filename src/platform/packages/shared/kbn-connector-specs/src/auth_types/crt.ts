@@ -39,6 +39,9 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const CRT: AuthTypeSpec<AuthSchemaType> = {
   id: 'crt_certificate',
   schema: authSchema,
+  authenticate: async (): Promise<Record<string, string>> => {
+    return {};
+  },
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,

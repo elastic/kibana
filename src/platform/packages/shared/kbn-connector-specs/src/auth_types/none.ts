@@ -8,8 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
-import type { AuthContext, AuthTypeSpec } from '../connector_spec';
+import type { AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
 const authSchema = z.object({}).meta({ label: i18n.NO_AUTH_LABEL });
@@ -22,7 +21,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'none',
   schema: authSchema,
-  configure: async (_: AuthContext, axiosInstance: AxiosInstance): Promise<AxiosInstance> => {
-    return axiosInstance;
+  authenticate: async (): Promise<Record<string, string>> => {
+    return {};
   },
 };

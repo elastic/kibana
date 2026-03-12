@@ -195,6 +195,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'aws_credentials',
   schema: authSchema,
+  authenticate: async () => ({}),
   configure: async (
     _: AuthContext,
     axiosInstance: AxiosInstance,

@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
@@ -83,14 +82,10 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_authorization_code',
   schema: authSchema,
   authMode: 'per-user',
-  configure: async (
+  authenticate: async (
     ctx: AuthContext,
-    axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
-    // For authorization code flow, tokens are managed separately via callback routes
-    // The getToken() method will retrieve already-stored tokens and auto-refresh if needed
-    // For this auth spec, getToken() calls getOAuthAuthorizationCodeAccessToken()
+  ): Promise<Record<string, string>> => {
     let token;
     try {
       token = await ctx.getToken({
@@ -109,9 +104,6 @@ export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
       throw new Error(`No access token available. User must complete OAuth authorization flow.`);
     }
 
-    // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
-
-    return axiosInstance;
+    return { Authorization: token };
   },
 };

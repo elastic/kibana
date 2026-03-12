@@ -38,6 +38,9 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const PFX: AuthTypeSpec<AuthSchemaType> = {
   id: 'pfx_certificate',
   schema: authSchema,
+  authenticate: async (): Promise<Record<string, string>> => {
+    return {};
+  },
   configure: async (
     ctx: AuthContext,
     axiosInstance: AxiosInstance,

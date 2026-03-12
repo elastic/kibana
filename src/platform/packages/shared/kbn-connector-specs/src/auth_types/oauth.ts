@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
@@ -35,11 +34,10 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const OAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'oauth_client_credentials',
   schema: authSchema,
-  configure: async (
+  authenticate: async (
     ctx: AuthContext,
-    axiosInstance: AxiosInstance,
     secret: AuthSchemaType
-  ): Promise<AxiosInstance> => {
+  ): Promise<Record<string, string>> => {
     let token;
     try {
       token = await ctx.getToken({
@@ -56,9 +54,6 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
       throw new Error(`Unable to retrieve new access token`);
     }
 
-    // set global defaults
-    axiosInstance.defaults.headers.common.Authorization = token;
-
-    return axiosInstance;
+    return { Authorization: token };
   },
 };
