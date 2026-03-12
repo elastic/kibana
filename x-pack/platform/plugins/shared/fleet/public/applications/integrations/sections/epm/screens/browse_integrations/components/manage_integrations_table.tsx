@@ -402,10 +402,15 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => {
           if (item.status === 'approved') {
             return (
-              <EuiBadge color="hollow" style={{ color: '#5A6D8C' }}>
+              <EuiBadge color="hollow" style={{ color: euiTheme.colors.textSubdued }}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="checkInCircleFilled" color="success" size="s" />
+                    <EuiIcon
+                      type="checkInCircleFilled"
+                      color="success"
+                      size="m"
+                      aria-hidden={true}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
@@ -496,6 +501,7 @@ export const ManageIntegrationsTable: React.FC<{
       installToCluster,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
+      euiTheme.colors.textSubdued,
       userProfiles,
     ]
   );
