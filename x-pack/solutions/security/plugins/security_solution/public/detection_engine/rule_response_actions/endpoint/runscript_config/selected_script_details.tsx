@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { SELECTED_SCRIPT_DETAILS_LABEL } from './translations';
 import type { EndpointScript } from '../../../../../common/endpoint/types';
@@ -41,6 +42,7 @@ export interface SelectedScriptDetailsProps {
 export const SelectedScriptDetails = memo<SelectedScriptDetailsProps>(
   ({ script, 'data-test-subj': dataTestSubj }) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'selectedScript' });
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const listItems: EuiDescriptionListProps['listItems'] = useMemo(() => {
       return [
@@ -51,7 +53,11 @@ export const SelectedScriptDetails = memo<SelectedScriptDetailsProps>(
               defaultMessage="Description"
             />
           ),
-          description: <FormattedContent>{script.description || getEmptyValue()}</FormattedContent>,
+          description: (
+            <FormattedContent data-test-subj={getTestId('description')}>
+              {script.description || getEmptyValue()}
+            </FormattedContent>
+          ),
         },
 
         {
@@ -62,7 +68,9 @@ export const SelectedScriptDetails = memo<SelectedScriptDetailsProps>(
             />
           ),
           description: (
-            <FormattedContent>{script.instructions || getEmptyValue()}</FormattedContent>
+            <FormattedContent data-test-subj={getTestId('instructions')}>
+              {script.instructions || getEmptyValue()}
+            </FormattedContent>
           ),
         },
 
@@ -73,10 +81,14 @@ export const SelectedScriptDetails = memo<SelectedScriptDetailsProps>(
               defaultMessage="Examples"
             />
           ),
-          description: <FormattedContent>{script.example || getEmptyValue()}</FormattedContent>,
+          description: (
+            <FormattedContent data-test-subj={getTestId('example')}>
+              {script.example || getEmptyValue()}
+            </FormattedContent>
+          ),
         },
       ];
-    }, [script.description, script.example, script.instructions]);
+    }, [script.description, script.example, script.instructions, getTestId]);
 
     return (
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder={true}>
@@ -105,13 +117,21 @@ SelectedScriptDetails.displayName = 'SelectedScriptDetails';
 
 interface FormattedContentProps {
   children: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
-const FormattedContent = memo<FormattedContentProps>(({ children }) => {
-  return (
-    <EuiText size="s" className="eui-textBreakAll" css={formattedContentCss}>
-      {children}
-    </EuiText>
-  );
-});
+const FormattedContent = memo<FormattedContentProps>(
+  ({ children, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiText
+        size="s"
+        className="eui-textBreakAll"
+        css={formattedContentCss}
+        data-test-subj={dataTestSubj}
+      >
+        {children}
+      </EuiText>
+    );
+  }
+);
 FormattedContent.displayName = 'FormattedContent';
