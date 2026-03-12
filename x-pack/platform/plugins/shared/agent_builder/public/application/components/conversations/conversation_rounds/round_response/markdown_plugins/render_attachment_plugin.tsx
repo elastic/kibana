@@ -114,6 +114,7 @@ export const createRenderAttachmentRenderer = ({
           hidden: attachment.hidden,
           origin: attachment.origin,
         }}
+        version={versionToUse}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}

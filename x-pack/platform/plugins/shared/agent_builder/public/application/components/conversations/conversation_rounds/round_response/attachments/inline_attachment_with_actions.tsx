@@ -18,6 +18,7 @@ import { useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
+  version?: number;
   attachmentsService: AttachmentsService;
   isSidebar: boolean;
   conversationId: string;
@@ -29,6 +30,7 @@ interface InlineAttachmentWithActionsProps {
  */
 export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsProps> = ({
   attachment,
+  version,
   attachmentsService,
   isSidebar,
   conversationId,
@@ -38,8 +40,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { conversationActions } = useConversationContext();
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar);
-  }, [openCanvasContext, attachment, isSidebar]);
+    openCanvasContext(attachment, isSidebar, version);
+  }, [openCanvasContext, attachment, isSidebar, version]);
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
@@ -65,8 +67,14 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   );
 
   const isViewingAttachmentInCanvas = useMemo(() => {
-    return canvasState?.attachment.id === attachment.id;
-  }, [canvasState, attachment]);
+    if (canvasState?.attachment.id !== attachment.id) {
+      return false;
+    }
+    if (version !== undefined && canvasState.version !== undefined) {
+      return canvasState.version === version;
+    }
+    return true;
+  }, [canvasState, attachment.id, version]);
 
   if (!uiDefinition) {
     return null;
