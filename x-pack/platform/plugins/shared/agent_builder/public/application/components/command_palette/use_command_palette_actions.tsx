@@ -8,12 +8,19 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 import React, { useMemo } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../hooks/use_experimental_features';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
 import { appPaths } from '../../utils/app_paths';
+
+const getShortcutSymbols = () => ({
+  meta: isMac ? '⌘' : 'Ctrl',
+  shift: '⇧',
+  enter: '↵',
+});
 
 type CommandPaletteSection = 'quick' | 'navigation' | 'shortcuts';
 
@@ -51,6 +58,7 @@ export const useCommandPaletteActions = ({
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
   const actions = useMemo<CommandPaletteAction[]>(() => {
+    const shortcutSymbols = getShortcutSymbols();
     const items: CommandPaletteAction[] = [
       // Quick Actions
       {
@@ -144,9 +152,8 @@ export const useCommandPaletteActions = ({
         }),
         icon: 'search',
         section: 'shortcuts',
-        shortcutDisplay: '⌘ K',
+        shortcutDisplay: `${shortcutSymbols.meta} K`,
         onSelect: () => {
-          // Already open, just close
           onClose();
         },
       },
@@ -157,9 +164,9 @@ export const useCommandPaletteActions = ({
         }),
         icon: 'menuLeft',
         section: 'shortcuts',
-        shortcutDisplay: '⌘ ;',
+        shortcutDisplay: `${shortcutSymbols.meta} ;`,
         onSelect: () => {
-          // No-op for now - sidebar not yet implemented
+          // TODO: Implement sidebar toggle
           onClose();
         },
       },
@@ -170,9 +177,8 @@ export const useCommandPaletteActions = ({
         }),
         icon: 'returnKey',
         section: 'shortcuts',
-        shortcutDisplay: '↵',
+        shortcutDisplay: shortcutSymbols.enter,
         onSelect: () => {
-          // No-op - context-dependent action
           onClose();
         },
       },
@@ -183,9 +189,9 @@ export const useCommandPaletteActions = ({
         }),
         icon: 'branch',
         section: 'shortcuts',
-        shortcutDisplay: '⌘ ⇧ E',
+        shortcutDisplay: `${shortcutSymbols.meta} ${shortcutSymbols.shift} E`,
         onSelect: () => {
-          // No-op - context-dependent action
+          // TODO: Implement extended thinking toggle
           onClose();
         },
       },
@@ -219,7 +225,7 @@ export const useCommandPaletteActions = ({
         options.push({
           key: action.id,
           label: action.label,
-          prepend: <EuiIcon type={action.icon} size="m" />,
+          prepend: <EuiIcon type={action.icon} size="m" aria-hidden={true} />,
           append: action.shortcutDisplay ? (
             <EuiBadge color="hollow">{action.shortcutDisplay}</EuiBadge>
           ) : undefined,
