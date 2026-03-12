@@ -38,7 +38,7 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      discoverActions: new DiscoverActions(page, pageObjects.discover),
+      discoverActions: new DiscoverActions(page),
       metricsExperience: createLazyPageObject(MetricsExperiencePage, page),
     };
 

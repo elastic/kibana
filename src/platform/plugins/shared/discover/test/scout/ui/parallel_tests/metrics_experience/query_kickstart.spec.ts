@@ -42,7 +42,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify Search all metrics is available and apply it', async () => {
-        await discoverActions.runRecommendedEsqlQuery(
+        await discover.runRecommendedEsqlQuery(
           testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
         );
       });
