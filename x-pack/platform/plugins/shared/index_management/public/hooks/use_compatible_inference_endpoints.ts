@@ -28,7 +28,7 @@ const defaultEndpointsPriorityList = [
   defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
   defaultInferenceEndpoints.ELSER,
   defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
-]
+];
 
 /**
  * Transforms the inference endpoints into a format that can be used to build the selectable options for the inference endpoint dropdown.
@@ -47,7 +47,10 @@ export const useCompatibleInferenceEndpoints = (
       endpoints?.some((endpoint) => endpoint.inference_id === defaultEndpoint)
     );
     // If no compatible endpoints are found, default to the ELSER endpoint which is always available
-    const defaultInferenceId = availableDefaultEndpoints.length > 0 ? availableDefaultEndpoints[0] : defaultInferenceEndpoints.ELSER;
+    const defaultInferenceId =
+      availableDefaultEndpoints.length > 0
+        ? availableDefaultEndpoints[0]
+        : defaultInferenceEndpoints.ELSER;
     const endpointDefinitions: EndpointDefinition[] = [];
     endpoints?.forEach((endpoint) => {
       // Skip incompatible endpoints

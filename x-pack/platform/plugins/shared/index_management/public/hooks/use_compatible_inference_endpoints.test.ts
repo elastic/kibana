@@ -13,9 +13,7 @@ import { useCompatibleInferenceEndpoints } from './use_compatible_inference_endp
 describe('useCompatibleInferenceEndpoints', () => {
   describe('when endpoints are loading', () => {
     it('should return undefined while loading', () => {
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(null, true)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(null, true));
       expect(result.current.compatibleEndpoints).toBeUndefined();
       expect(result.current.isLoading).toBe(true);
     });
@@ -23,18 +21,14 @@ describe('useCompatibleInferenceEndpoints', () => {
 
   describe('when no endpoints are available', () => {
     it('should return ELSER as default when no endpoints are provided', () => {
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints([], false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints([], false));
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
         defaultInferenceEndpoints.ELSER
       );
     });
 
     it('should have empty endpoint definitions with no endpoints', () => {
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints([], false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints([], false));
       expect(result.current?.compatibleEndpoints?.endpointDefinitions).toEqual([]);
     });
   });
@@ -55,9 +49,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'elser' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
         defaultInferenceEndpoints.JINAv5
       );
@@ -78,9 +70,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'e5' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
         defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
       );
@@ -101,9 +91,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'e5' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
         defaultInferenceEndpoints.ELSER
       );
@@ -118,9 +106,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'e5' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.defaultInferenceId).toBe(
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL
       );
@@ -149,9 +135,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'gpt-4' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.endpointDefinitions).toHaveLength(2);
       expect(result.current?.compatibleEndpoints?.endpointDefinitions).toEqual(
         expect.arrayContaining([
@@ -180,9 +164,7 @@ describe('useCompatibleInferenceEndpoints', () => {
           service_settings: { model_id: 'text-embedding-3-large' },
         },
       ];
-      const { result } = renderHook(() =>
-        useCompatibleInferenceEndpoints(endpoints, false)
-      );
+      const { result } = renderHook(() => useCompatibleInferenceEndpoints(endpoints, false));
       expect(result.current?.compatibleEndpoints?.endpointDefinitions).toContainEqual(
         expect.objectContaining({
           inference_id: defaultInferenceEndpoints.ELSER,
