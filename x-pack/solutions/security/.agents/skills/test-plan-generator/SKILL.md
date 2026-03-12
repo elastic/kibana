@@ -24,7 +24,7 @@ If the user is not available and the information cannot be found in any source, 
 
 **Sequential only — no parallel calls.** Execute every MCP tool call one at a time. Wait for each call to complete before making the next one. This applies throughout the entire skill — GitHub, Figma, Google Drive, filesystem reads, everything. Do not batch or parallelize any calls for efficiency.
 
-**Do not read reference files until Step 3.** The files in `references/` are read at a specific point inside Step 3 — immediately before writing scenarios. Do not read them during Step 1, Step 2, or before starting the steps. Do not pre-load them "to save time."
+**Read reference files only when explicitly instructed.** Each reference file is read at the exact point in the workflow where it is needed — never speculatively at the start of a session. The instructions in each mode and step tell you precisely when to read each file.
 
 ---
 
@@ -62,13 +62,19 @@ If the user selects **A**, proceed as follows:
 1. Read the published test plan in full — this is the baseline.
 2. Run Steps 1 and 2 normally to gather and analyze all current context, including any PRs linked since the test plan was published.
 3. Compare the gathered context against the baseline: identify acceptance criteria, scenarios, or sections that are missing or outdated.
-4. If gaps are found: add only the missing scenarios and update only the outdated sections. Do not rewrite sections that are still accurate. Before saving, review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save the result to `.agents/tmp/test-plan-#<issue_number>.md` and tell the user exactly what was added or changed.
+4. If gaps are found: add only the missing scenarios and update only the outdated sections. Do not rewrite sections that are still accurate. If new scenarios need to be written, first read both reference files sequentially, one at a time:
+   - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, and optional section templates
+   - `references/output-formats.md` — scenario structure and automation coverage format
+
+   When all new scenarios are written, run the Gherkin self-review from `references/output-formats.md`. Then review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save the result to `.agents/tmp/test-plan-#<issue_number>.md` and tell the user exactly what was added or changed.
 5. After saving the draft, output the Sources Summary as defined in `references/output-formats.md`.
 6. If no gaps are found: tell the user "The existing test plan appears to be up to date. No changes are needed." Do not save a draft file.
 
 If the user selects **B**, proceed normally through Steps 1, 2, and 3.
 
 **update / regenerate — incremental diff**
+
+If no published comment is found (body starting with `<!-- test-plan-generated -->`), skip the steps below and run Steps 1–3 as a full draft fallback — this is already covered by the modes table above.
 
 1. Fetch the published comment on the issue that starts with `<!-- test-plan-generated -->`. This is the current state of the test plan — use it as the base. Store the comment's `updatedAt` timestamp as `PLAN_PUBLISHED_AT` — you will use it in step 3 to detect PR changes.
    ```
@@ -92,6 +98,8 @@ If the user selects **B**, proceed normally through Steps 1, 2, and 3.
 
 4. **Re-read PRs that have been updated.** For each PR in the re-read list, fetch the full content — description, review comments, and diff — applying the same limits as draft mode (max 20 files per PR, skip files over 500 lines, skip generated/binary/translation files). Update the test coverage catalog with any new or changed test files found.
 
+   If a re-read PR has no test files, apply the same filesystem search described in the MANDATORY Pull Requests section of Step 1 — using [`references/security-test-directories.md`](references/security-test-directories.md) — before recording `No existing tests found` in the catalog.
+
    If the user runs `update test plan for issue #1234 including PRs`, skip the date comparison in step 3 and re-read **all** linked PRs regardless of their `updatedAt`.
 
 5. Compare all gathered sources against the published comment and identify:
@@ -101,7 +109,11 @@ If the user selects **B**, proceed normally through Steps 1, 2, and 3.
    - Known Limitations that have been resolved or new ones that have emerged
    - New test files found in re-read PRs that should be reflected in automation coverage lines
 
-6. Apply only the identified changes to the published comment content. Do not rewrite sections that are still accurate.
+6. Apply only the identified changes to the published comment content. Do not rewrite sections that are still accurate. If any identified changes require writing new scenarios, first read both reference files sequentially, one at a time:
+   - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, and optional section templates
+   - `references/output-formats.md` — scenario structure and automation coverage format
+
+   When all new scenarios are written, run the Gherkin self-review from `references/output-formats.md`.
 
 7. Before saving, review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save the result to `.agents/tmp/test-plan-#<issue_number>.md`.
 
@@ -119,7 +131,7 @@ If the file does not exist, tell the user: "No draft found for issue #1234. Run 
 
 ## Step 1 — Gather all context
 
-**Runs in:** draft mode; update fallback. Skip entirely in publish mode.
+**Runs in:** draft mode; generate option A; update fallback. Skip entirely in publish mode.
 
 **Execute all fetches sequentially — one at a time.** Wait for each call to complete before making the next one. This applies to all tools — `gh` CLI, GitHub MCP, Figma MCP, Google Drive MCP.
 
@@ -233,9 +245,7 @@ If stopped early, continue to Step 2 with what you have and list every skipped s
 
 ## Step 2 — Analyze the context
 
-**Runs in:** draft mode; update fallback. Skip entirely in publish mode.
-
-Before writing anything, build a mental model of:
+**Runs in:** draft mode; generate option A; update fallback. Skip entirely in publish mode.
 - What feature or functionality is being built
 - What the acceptance criteria are (explicit or implied)
 - What the UI looks like (from Figma, if available)
@@ -287,8 +297,6 @@ Use the first value found and store it as `TARGET_VERSION`. If no version is fou
 **Runs in:** draft mode; update fallback. Skip entirely in publish mode.
 
 Apply the Core rule before starting: if there is any remaining ambiguity about scope, acceptance criteria, or expected behaviour that was not resolved in Step 2, stop and ask the user now.
-
-**Do not read any reference files yet.** Reference files are read later in this step, immediately before writing scenarios — not before Steps 1 and 2.
 
 Write the test plan following the Document structure and Writing scenarios sections below.
 

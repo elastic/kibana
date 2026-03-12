@@ -4,6 +4,14 @@ This file defines the required sections of a test plan, their order, and the con
 
 ---
 
+## Contents
+
+- [Template](#template)
+- [Notes](#notes)
+- [Test Coverage Summary — filling in the table](#test-coverage-summary--filling-in-the-table)
+
+---
+
 ## Template
 
 ```markdown
