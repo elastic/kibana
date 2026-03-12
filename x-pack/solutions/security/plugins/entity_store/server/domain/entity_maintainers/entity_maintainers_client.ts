@@ -116,6 +116,20 @@ export class EntityMaintainersClient {
     }
   }
 
+  public async runNow(id: string): Promise<void> {
+    try {
+      if (!entityMaintainersRegistry.hasId(id)) {
+        this.logger.debug(`Maintainer not found, skipping run now: ${id}`);
+        return;
+      }
+      const taskId = getTaskId(id, this.namespace);
+      await this.taskManager.runSoon(taskId);
+    } catch (error) {
+      this.logger.error(`Failed to run entity maintainer task: ${id}`, { error });
+      throw error;
+    }
+  }
+
   public async removeAll(): Promise<void> {
     this.logger.debug('Removing all entity maintainer tasks');
     try {
