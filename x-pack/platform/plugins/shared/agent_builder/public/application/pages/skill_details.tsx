@@ -20,7 +20,7 @@ export const AgentBuilderSkillDetailsPage = () => {
   const { skillId } = useParams<{ skillId: string }>();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { skill, isLoading } = useSkill({ skillId });
-  const { plugins } = usePluginsService();
+  const { plugins, isLoading: isLoadingPlugins } = usePluginsService();
 
   const parentPlugin = useMemo(() => {
     const pluginName = skill?.plugin_id;
@@ -31,6 +31,9 @@ export const AgentBuilderSkillDetailsPage = () => {
   }, [skill?.plugin_id, plugins]);
 
   const breadcrumbs = useMemo(() => {
+    if (isLoading || isLoadingPlugins) {
+      return [];
+    }
     if (parentPlugin) {
       return [
         {
@@ -60,7 +63,7 @@ export const AgentBuilderSkillDetailsPage = () => {
         path: appPaths.skills.details({ skillId: skillId || '' }),
       },
     ];
-  }, [parentPlugin, skillId]);
+  }, [parentPlugin, skillId, isLoading, isLoadingPlugins]);
 
   useBreadcrumb(breadcrumbs);
 

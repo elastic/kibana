@@ -91,6 +91,7 @@ export const useDeletePlugin = ({
           new Error('Delete operation failed. API returned: { success: false }')
         ),
       });
+      setDeletePluginState(null);
       return;
     }
 
