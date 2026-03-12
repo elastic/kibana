@@ -10,7 +10,6 @@ import { render } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
-import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { RulePanel } from '.';
 import { getStepsData } from '../../../detection_engine/common/helpers';
 import { useRuleDetails } from '../hooks/use_rule_details';
@@ -21,7 +20,6 @@ import {
 } from '../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { BODY_TEST_ID, LOADING_TEST_ID } from './test_ids';
-import { RULE_PREVIEW_FOOTER_TEST_ID } from '../preview/test_ids';
 import type {
   ExpandableFlyoutApi,
   ExpandableFlyoutState,
@@ -33,7 +31,13 @@ import {
   useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
-jest.mock('../../document_details/shared/hooks/use_rule_details_link');
+const mockPreviewFooter = jest.fn();
+jest.mock('../preview/footer', () => ({
+  PreviewFooter: (props: Record<string, unknown>) => {
+    mockPreviewFooter(props);
+    return <div data-test-subj="RULE_PREVIEW_FOOTER_TEST_ID" />;
+  },
+}));
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
@@ -120,8 +124,7 @@ describe('<RulePanel />', () => {
     expect(getByText(ERROR_MESSAGE)).toBeInTheDocument();
   });
 
-  it('should render preview footer when isPreviewMode is true', () => {
-    (useRuleDetailsLink as jest.Mock).mockReturnValue('rule_details_link');
+  it('should render preview footer', () => {
     mockUseRuleDetails.mockReturnValue({
       rule,
       loading: false,
@@ -130,6 +133,9 @@ describe('<RulePanel />', () => {
     mockGetStepsData.mockReturnValue({});
     const { getByTestId } = renderRulePanel(true);
 
-    expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId('RULE_PREVIEW_FOOTER_TEST_ID')).toBeInTheDocument();
+    expect(mockPreviewFooter).toHaveBeenCalledWith(
+      expect.objectContaining({ rule, isPreviewMode: true })
+    );
   });
 });

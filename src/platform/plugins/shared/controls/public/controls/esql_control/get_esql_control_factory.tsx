@@ -15,7 +15,7 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import {
   type PublishingSubject,
-  apiCanPinPanels,
+  apiHasPinnedPanels,
   initializeStateManager,
   initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
@@ -111,7 +111,9 @@ export const getESQLControlFactory = (): EmbeddableFactory<
               controlType: nextState.control_type,
               esqlVariables: variablesInParent,
               onSaveControl,
+              parentApi,
               initialState: nextState,
+              controlId: uuid,
             });
           } catch (e) {
             // eslint-disable-next-line no-console
@@ -200,7 +202,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
-      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,

@@ -10,12 +10,13 @@ import { expect } from '@kbn/scout-security/api';
 import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
-// Failing: See https://github.com/elastic/kibana/issues/254773
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store CRUD API tests: 503 errors on stopped engine',
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    const spaceId = `entity-store-stopped`;
+    const inSpace = (path: string) => `s/${spaceId}/${path}`;
 
     apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
@@ -24,13 +25,21 @@ apiTest.describe.skip(
         ...COMMON_HEADERS,
       };
 
-      // enable feature flag
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      await kbnClient.spaces.create({
+        id: spaceId,
+        name: spaceId,
       });
 
+      // enable feature flag
+      await kbnClient.uiSettings.update(
+        {
+          [FF_ENABLE_ENTITY_STORE_V2]: true,
+        },
+        { space: spaceId }
+      );
+
       // Install the entity store
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const response = await apiClient.post(inSpace(ENTITY_STORE_ROUTES.INSTALL), {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
@@ -39,7 +48,7 @@ apiTest.describe.skip(
 
       const entityTypesBody = { entityTypes: ['generic'] };
 
-      const stopResponse = await apiClient.put(ENTITY_STORE_ROUTES.STOP, {
+      const stopResponse = await apiClient.put(inSpace(ENTITY_STORE_ROUTES.STOP), {
         headers: defaultHeaders,
         responseType: 'json',
         body: entityTypesBody,
@@ -47,13 +56,15 @@ apiTest.describe.skip(
       expect(stopResponse.statusCode).toBe(200);
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+      const response = await apiClient.post(inSpace(ENTITY_STORE_ROUTES.UNINSTALL), {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
       expect(response.statusCode).toBe(200);
+
+      await kbnClient.spaces.delete(spaceId);
     });
 
     apiTest(
@@ -80,7 +91,7 @@ apiTest.describe.skip(
           ],
         };
 
-        const bulkUpsert = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPSERT_BULK, {
+        const bulkUpsert = await apiClient.put(inSpace(ENTITY_STORE_ROUTES.CRUD_UPSERT_BULK), {
           headers: defaultHeaders,
           responseType: 'json',
           body: bulkBody,

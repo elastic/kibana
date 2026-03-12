@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
@@ -262,7 +262,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 path: { name: stream.name },
                 body: { processing: pipeline, documents: params.body.documents },
               },
-              scopedClusterClient,
+              esClient: scopedClusterClient.asCurrentUser,
               streamsClient,
               fieldsMetadataClient,
             }),
@@ -431,7 +431,7 @@ async function processGrokPatterns({
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -551,7 +551,7 @@ async function processDissectPattern({
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });

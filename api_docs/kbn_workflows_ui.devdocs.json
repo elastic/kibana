@@ -314,11 +314,57 @@
       },
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.useRunWorkflow",
+        "type": "Function",
+        "tags": [],
+        "label": "useRunWorkflow",
+        "description": [
+          "\nRuns a workflow.\n\nSends `POST /api/workflows/{id}/run` with `{ inputs }`.\nCall with `{ id, inputs }`:\n- `id`: workflow ID to run\n- `inputs`: runtime input values consumed by the workflow\n"
+        ],
+        "signature": [
+          "<P extends object = {}>(options?: ",
+          "UseMutationOptions",
+          "<z.infer<any>, HttpError, any, unknown> | undefined) => ",
+          "UseMutationResult",
+          "<z.infer<any>, HttpError, any, unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.useRunWorkflow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "UseMutationOptions",
+              "<z.infer<any>, HttpError, any, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.useWorkflows",
         "type": "Function",
         "tags": [],
         "label": "useWorkflows",
-        "description": [],
+        "description": [
+          "\nFetches a paginated/filterable list of workflows.\n\nSends `POST /api/workflows/search` with the provided search params.\n"
+        ],
         "signature": [
           "(params: ",
           {
@@ -363,13 +409,58 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows.ts",
-            "lineNumber": 15,
+            "lineNumber": 25,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.useWorkflowsCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "useWorkflowsCapabilities",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.WorkflowsManagementCapabilities",
+            "text": "WorkflowsManagementCapabilities"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.useWorkflowsUIEnabledSetting",
+        "type": "Function",
+        "tags": [],
+        "label": "useWorkflowsUIEnabledSetting",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_ui_settings.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -994,6 +1085,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.CapabilitiesKey",
+        "type": "Type",
+        "tags": [],
+        "label": "CapabilitiesKey",
+        "description": [],
+        "signature": [
+          "\"canCreateWorkflow\" | \"canReadWorkflow\" | \"canUpdateWorkflow\" | \"canDeleteWorkflow\" | \"canExecuteWorkflow\" | \"canReadWorkflowExecution\" | \"canCancelWorkflowExecution\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.CREATE_NEW_WORKFLOW",
         "type": "string",
         "tags": [],
@@ -1162,6 +1270,23 @@
       },
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.RunWorkflowParams",
+        "type": "Type",
+        "tags": [],
+        "label": "RunWorkflowParams",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_run_workflow.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.SELECT_WORKFLOW_PLACEHOLDER",
         "type": "string",
         "tags": [],
@@ -1240,6 +1365,23 @@
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/translations.ts",
         "lineNumber": 27,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WorkflowsManagementCapabilities",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowsManagementCapabilities",
+        "description": [],
+        "signature": [
+          "{ canCreateWorkflow: boolean; canReadWorkflow: boolean; canUpdateWorkflow: boolean; canDeleteWorkflow: boolean; canExecuteWorkflow: boolean; canReadWorkflowExecution: boolean; canCancelWorkflowExecution: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

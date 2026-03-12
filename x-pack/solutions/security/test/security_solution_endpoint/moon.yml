@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-security-endpoint'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-defend-workflows'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-security-endpoint'
+  title: '@kbn/test-suites-xpack-security-endpoint'
   description: Moon project for @kbn/test-suites-xpack-security-endpoint
   channel: ''
   owner: '@elastic/security-defend-workflows'
-  metadata:
-    sourceRoot: x-pack/solutions/security/test/security_solution_endpoint
+  sourceRoot: x-pack/solutions/security/test/security_solution_endpoint
 dependsOn:
   - '@kbn/expect'
   - '@kbn/security-solution-plugin'

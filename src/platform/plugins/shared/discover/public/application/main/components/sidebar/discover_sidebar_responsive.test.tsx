@@ -740,7 +740,8 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  describe('search bar customization', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/225127
+  describe.skip('search bar customization', () => {
     it(
       'should not render CustomDataViewPicker',
       async () => {

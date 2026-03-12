@@ -273,7 +273,10 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:trained_models' },
                     {
-                      link: 'searchInferenceEndpoints:inferenceEndpoints',
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
                     },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },

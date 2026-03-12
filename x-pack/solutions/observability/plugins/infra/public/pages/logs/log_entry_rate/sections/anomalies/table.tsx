@@ -134,7 +134,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   const expandedIdsRowContents = useMemo(
     () =>
       [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
-        const anomaly = results.find((_anomaly) => _anomaly.id === id);
+        const anomaly = results?.find((_anomaly) => _anomaly.id === id);
 
         return {
           ...aggregatedRows,

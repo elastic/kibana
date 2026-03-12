@@ -13974,6 +13974,10 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
+                "plugin": "@kbn/anonymization-ui",
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_preview_document_loader.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
               },
@@ -14015,6 +14019,10 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_policy_agent_ids.ts"
               },
               {
@@ -14036,6 +14044,10 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/components/endpoint_runscript_script_selector/endpoint_runscript_script_selector.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14209,15 +14221,19 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_action_license.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_action_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
               },
               {
                 "plugin": "cases",
@@ -14262,10 +14278,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
               },
               {
                 "plugin": "cases",
@@ -14374,6 +14386,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_all_live_queries.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
               },
               {
                 "plugin": "osquery",
@@ -14512,12 +14528,12 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule_management_filters.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14525,15 +14541,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
               },
               {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
               },
               {
                 "plugin": "@kbn/cloud-security-posture",
@@ -14586,6 +14598,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
               },
               {
                 "plugin": "securitySolution",
