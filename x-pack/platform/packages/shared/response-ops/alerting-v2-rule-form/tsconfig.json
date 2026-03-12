@@ -36,7 +36,9 @@
     "@kbn/code-editor",
     "@kbn/monaco",
     "@kbn/core-application-browser-mocks",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/embeddable-plugin"
   ]
 }
 

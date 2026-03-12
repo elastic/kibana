@@ -13,6 +13,9 @@ import * as useRulePreviewModule from '../hooks/use_rule_preview';
 import type { RulePreviewResult } from '../hooks/use_rule_preview';
 
 jest.mock('../hooks/use_rule_preview');
+jest.mock('./rule_preview_chart', () => ({
+  PreviewChart: () => <div data-test-subj="previewChart">Chart Preview Mock</div>,
+}));
 jest.mock('./recovery_results_preview', () => ({
   RecoveryResultsPreview: () => (
     <div data-test-subj="recoveryResultsPreview">Recovery Preview Mock</div>
@@ -34,6 +37,9 @@ const mockPreviewResult: RulePreviewResult = {
   groupingFields: [],
   uniqueGroupCount: null,
   hasValidQuery: true,
+  query: 'FROM logs-*',
+  timeField: '@timestamp',
+  lookback: '1m',
 };
 
 const defaultFormValues = {

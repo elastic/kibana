@@ -13,6 +13,9 @@ import * as useRecoveryPreviewModule from '../hooks/use_recovery_preview';
 import type { PreviewResult } from '../hooks/use_preview';
 
 jest.mock('../hooks/use_recovery_preview');
+jest.mock('./rule_preview_chart', () => ({
+  PreviewChart: () => <div data-test-subj="previewChart">Chart Mock</div>,
+}));
 
 const mockUseRecoveryPreview = jest.mocked(useRecoveryPreviewModule.useRecoveryPreview);
 
@@ -48,6 +51,9 @@ const mockPreviewResult: PreviewResult = {
   groupingFields: ['host.name'],
   uniqueGroupCount: 2,
   hasValidQuery: true,
+  query: 'FROM logs-* | STATS count() BY host.name | WHERE count < 5',
+  timeField: '@timestamp',
+  lookback: '1m',
 };
 
 describe('RecoveryResultsPreview', () => {
@@ -101,14 +107,13 @@ describe('RecoveryResultsPreview', () => {
 
   it('renders empty prompt when no query is configured', () => {
     mockUseRecoveryPreview.mockReturnValue({
+      ...mockPreviewResult,
       columns: [],
       rows: [],
       totalRowCount: 0,
       isLoading: false,
       isError: false,
       error: null,
-      groupingFields: [],
-      uniqueGroupCount: null,
       hasValidQuery: false,
     });
 
@@ -124,14 +129,13 @@ describe('RecoveryResultsPreview', () => {
 
   it('renders no-results prompt when query returns empty results', () => {
     mockUseRecoveryPreview.mockReturnValue({
+      ...mockPreviewResult,
       columns: [{ id: 'host.name', displayAsText: 'host.name', esType: 'keyword' }],
       rows: [],
       totalRowCount: 0,
       isLoading: false,
       isError: false,
       error: null,
-      groupingFields: [],
-      uniqueGroupCount: null,
       hasValidQuery: true,
     });
 
@@ -147,14 +151,13 @@ describe('RecoveryResultsPreview', () => {
 
   it('renders no-results prompt when valid query returns 0 results with no columns', () => {
     mockUseRecoveryPreview.mockReturnValue({
+      ...mockPreviewResult,
       columns: [],
       rows: [],
       totalRowCount: 0,
       isLoading: false,
       isError: false,
       error: null,
-      groupingFields: [],
-      uniqueGroupCount: null,
       hasValidQuery: true,
     });
 
@@ -166,14 +169,13 @@ describe('RecoveryResultsPreview', () => {
 
   it('renders error callout when query fails', () => {
     mockUseRecoveryPreview.mockReturnValue({
+      ...mockPreviewResult,
       columns: [],
       rows: [],
       totalRowCount: 0,
       isLoading: false,
       isError: true,
       error: 'Recovery query syntax error',
-      groupingFields: [],
-      uniqueGroupCount: null,
       hasValidQuery: false,
     });
 
