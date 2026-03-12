@@ -455,6 +455,7 @@ export const ManageIntegrationsTable: React.FC<{
 
           return null;
         },
+        width: '140px',
       },
       {
         name: (
@@ -463,7 +464,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Actions"
           />
         ),
-        width: '80px',
+        width: '48px',
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
