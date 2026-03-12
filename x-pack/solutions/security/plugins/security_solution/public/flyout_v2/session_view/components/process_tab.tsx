@@ -5,32 +5,42 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelProcessTab } from '@kbn/session-view-plugin/public';
 import type { Process } from '@kbn/session-view-plugin/common';
-import { useSessionViewPanelContext } from '../context';
+import { isCustomProcess, isProcess } from '../utils/helpers';
+import type { CustomProcess } from '../../../flyout/document_details/session_view/context';
+
+export interface ProcessTabProps {
+  /**
+   * Selected process information coming from Session View, to show information in the process tab
+   */
+  // TODO remove CustomProcess when the expandable flyout is removed
+  selectedProcess: CustomProcess | Process | null;
+  /**
+   * Index coming from the session view config
+   */
+  index: string;
+}
 
 /**
  * Tab displayed in the SessionView preview panel, shows the details related to the process selected in the SessionView tree.
  */
-export const ProcessTab = memo(() => {
-  const { selectedProcess, index } = useSessionViewPanelContext();
-
+export const ProcessTab = memo(({ selectedProcess, index }: ProcessTabProps) => {
   // We need to partially recreate the Process object here, as the SessionView code
   // is expecting a Process object with at least the following properties
-  const process: Process | null = useMemo(
-    () =>
-      selectedProcess
-        ? ({
-            getDetails: () => selectedProcess.details,
-            id: selectedProcess.id,
-            getEndTime: () => selectedProcess.endTime,
-          } as Process)
-        : null,
-    [selectedProcess]
-  );
+  // TODO delete check logic when the expandable flyout is removed
+  const process = isProcess(selectedProcess)
+    ? selectedProcess
+    : isCustomProcess(selectedProcess)
+    ? ({
+        getDetails: () => selectedProcess.details,
+        id: selectedProcess.id,
+        getEndTime: () => selectedProcess.endTime,
+      } as Process)
+    : null;
 
   return (
     <EuiPanel
