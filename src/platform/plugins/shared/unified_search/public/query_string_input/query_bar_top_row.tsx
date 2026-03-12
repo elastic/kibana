@@ -936,7 +936,7 @@ export const QueryBarTopRow = React.memo(
             minWidth: 0,
             border: 'none',
             borderRadius: euiTheme.border.radius.medium,
-            backgroundColor: isActive ? euiTheme.colors.darkShade : euiTheme.colors.lightShade,
+            backgroundColor: isActive ? euiTheme.colors.darkShade : '#EDF1F9',
             color: isActive ? euiTheme.colors.ghost : euiTheme.colors.text,
             cursor: 'pointer',
             fontFamily: euiTheme.font.family,
