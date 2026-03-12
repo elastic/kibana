@@ -24,6 +24,8 @@ import type { WorkflowsManagementApi } from '../../workflows_management/workflow
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_attachment';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_diff_attachment';
 
+export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
+
 export const WORKFLOW_INSERT_STEP_TOOL_ID = 'platform.workflows.workflow_insert_step';
 export const WORKFLOW_MODIFY_STEP_TOOL_ID = 'platform.workflows.workflow_modify_step';
 export const WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID =
@@ -112,6 +114,14 @@ const emitDiffAndUpdateYaml = async (
 
   await context.attachments.update(attachmentId, {
     data: { yaml: afterYaml, workflowId, name: workflowName },
+  });
+
+  context.events.sendUiEvent(WORKFLOW_YAML_CHANGED_EVENT, {
+    proposalId,
+    beforeYaml,
+    afterYaml,
+    workflowId,
+    name: workflowName,
   });
 
   return diffAttachment.id;

@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/monaco';
 import {
   AttachmentBridge,
+  baseProposalId,
   ProposalManager,
   setProposalActionHandlers,
   updateProposalStatus,
@@ -73,11 +74,11 @@ export const useAgentBuilderIntegration = ({
 
     const manager = new ProposalManager();
     manager.initialize(editor, {
-      onAccept: (proposalId) => {
-        updateProposalStatus(proposalId, 'accepted');
+      onAccept: (hunkId) => {
+        updateProposalStatus(baseProposalId(hunkId), 'accepted');
       },
-      onReject: (proposalId) => {
-        updateProposalStatus(proposalId, 'declined');
+      onReject: (hunkId) => {
+        updateProposalStatus(baseProposalId(hunkId), 'declined');
       },
     });
 
@@ -88,18 +89,26 @@ export const useAgentBuilderIntegration = ({
         const m = proposalManagerRef.current;
         if (!m) return false;
         const pending = m.getPendingProposals();
-        const match = pending.find((p) => p.proposalId === proposalId);
-        if (!match) return false;
-        m.acceptProposal(proposalId);
+        const matches = pending.filter(
+          (p) => p.proposalId === proposalId || baseProposalId(p.proposalId) === proposalId
+        );
+        if (matches.length === 0) return false;
+        for (const match of matches) {
+          m.acceptProposal(match.proposalId);
+        }
         return true;
       },
       declineProposal: (proposalId) => {
         const m = proposalManagerRef.current;
         if (!m) return false;
         const pending = m.getPendingProposals();
-        const match = pending.find((p) => p.proposalId === proposalId);
-        if (!match) return false;
-        m.rejectProposal(proposalId);
+        const matches = pending.filter(
+          (p) => p.proposalId === proposalId || baseProposalId(p.proposalId) === proposalId
+        );
+        if (matches.length === 0) return false;
+        for (const match of matches) {
+          m.rejectProposal(match.proposalId);
+        }
         return true;
       },
     });

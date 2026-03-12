@@ -10,7 +10,7 @@
 export { ProposalManager } from './proposed_changes';
 export type { ProposedChange, PendingProposal, ProposalManagerOptions } from './proposed_changes';
 
-export { AttachmentBridge } from './attachment_bridge';
+export { AttachmentBridge, baseProposalId } from './attachment_bridge';
 
 export { setProposalActionHandlers, updateProposalStatus } from './proposal_status_bridge';
 export type { ProposalStatus } from './proposal_status_bridge';

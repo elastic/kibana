@@ -87,7 +87,20 @@ export class ProposalManager {
     const originalContent = this.getOriginalContent(change);
 
     const endLine = change.endLine ?? change.startLine;
-    const endColumn = change.endLine ? model.getLineMaxColumn(endLine) : 1;
+    let rangeEndLine: number;
+    let rangeEndColumn: number;
+
+    if (change.type === 'insert') {
+      rangeEndLine = change.startLine;
+      rangeEndColumn = 1;
+    } else if (endLine < model.getLineCount()) {
+      rangeEndLine = endLine + 1;
+      rangeEndColumn = 1;
+    } else {
+      rangeEndLine = endLine;
+      rangeEndColumn = model.getLineMaxColumn(endLine);
+    }
+
     const lineCountBefore = model.getLineCount();
 
     this.editor.pushUndoStop();
@@ -95,7 +108,7 @@ export class ProposalManager {
       null,
       [
         {
-          range: new monaco.Range(change.startLine, 1, endLine, endColumn),
+          range: new monaco.Range(change.startLine, 1, rangeEndLine, rangeEndColumn),
           text: change.newText,
         },
       ],
@@ -175,6 +188,14 @@ export class ProposalManager {
     this.clearProposal(proposalId);
     this.options.onReject?.(proposalId);
     this.updateBulkBar();
+  }
+
+  acceptOverlapping(startLine: number, endLine: number): void {
+    for (const [id, proposal] of this.proposals.entries()) {
+      if (proposal.startLine <= endLine && startLine <= proposal.undoEndLine) {
+        this.acceptProposal(id);
+      }
+    }
   }
 
   acceptAll(): void {

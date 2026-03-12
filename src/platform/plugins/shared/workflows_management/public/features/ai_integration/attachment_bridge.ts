@@ -7,170 +7,145 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import type { Observable, Subscription } from 'rxjs';
+import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
-import { setProposalRecord } from './proposal_status_bridge';
+import { getAllProposalRecords, setProposalRecord } from './proposal_status_bridge';
 import type { ProposalManager, ProposedChange } from './proposed_changes';
 import type { AgentBuilderChatEvent } from '../../types';
 
+const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
 const WORKFLOW_YAML_DIFF_TYPE = 'workflow.yaml.diff';
 
-interface WorkflowYamlDiffData {
+interface WorkflowYamlChangedPayload {
+  proposalId: string;
   beforeYaml: string;
   afterYaml: string;
-  proposalId: string;
-  status: 'pending' | 'accepted' | 'declined';
   workflowId?: string;
   name?: string;
 }
 
-interface VersionedAttachment {
-  id: string;
-  type: string;
-  versions: Array<{
-    version: number;
-    data: unknown;
-  }>;
-}
+export const changeFingerprint = (change: ProposedChange): string =>
+  `${change.type}:${change.newText}`;
 
-interface RoundCompleteEventData {
-  round: unknown;
-  attachments?: VersionedAttachment[];
-}
-
-const isRoundCompleteEvent = (
-  event: AgentBuilderChatEvent
-): event is AgentBuilderChatEvent & { data: RoundCompleteEventData } => {
-  return event.type === 'round_complete';
-};
-
-const extractPendingDiffs = (attachments: VersionedAttachment[]): WorkflowYamlDiffData[] => {
-  return attachments
-    .filter((a) => a.type === WORKFLOW_YAML_DIFF_TYPE)
-    .map((a) => {
-      const latestVersion = a.versions[a.versions.length - 1];
-      return latestVersion?.data as WorkflowYamlDiffData;
-    })
-    .filter((data): data is WorkflowYamlDiffData => data != null && data.status === 'pending');
+export const baseProposalId = (hunkId: string): string => {
+  const sep = hunkId.indexOf('::');
+  return sep === -1 ? hunkId : hunkId.substring(0, sep);
 };
 
 /**
- * Collapse chained diffs where one diff's afterYaml matches the next diff's
- * beforeYaml. This happens when the LLM retries after a validation failure,
- * producing multiple incremental edits. The user should only see the net
- * change from original to final state.
+ * Merge adjacent hunks so that closely related changes (e.g. a replace
+ * followed by an insert on the very next line) become a single proposal
+ * with one Accept/Decline pill instead of two.
  */
-export const collapseChainedDiffs = (diffs: WorkflowYamlDiffData[]): WorkflowYamlDiffData[] => {
-  if (diffs.length <= 1) return diffs;
+const mergeAdjacentChanges = (changes: ProposedChange[]): ProposedChange[] => {
+  if (changes.length <= 1) return changes;
 
-  const result: WorkflowYamlDiffData[] = [];
+  const result: ProposedChange[] = [{ ...changes[0] }];
 
-  let i = 0;
-  while (i < diffs.length) {
-    let current = diffs[i];
-    while (i + 1 < diffs.length && current.afterYaml === diffs[i + 1].beforeYaml) {
-      current = {
-        ...diffs[i + 1],
-        beforeYaml: current.beforeYaml,
-      };
-      i++;
+  for (let i = 1; i < changes.length; i++) {
+    const prev = result[result.length - 1];
+    const curr = changes[i];
+
+    const prevOrigEnd =
+      prev.type === 'insert' ? prev.startLine : (prev.endLine ?? prev.startLine) + 1;
+
+    if (curr.startLine <= prevOrigEnd) {
+      prev.newText += curr.newText;
+
+      if (curr.type !== 'insert') {
+        const currEnd = curr.endLine ?? curr.startLine;
+        if (prev.type === 'insert') {
+          prev.endLine = currEnd;
+        } else {
+          prev.endLine = Math.max(prev.endLine ?? prev.startLine, currEnd);
+        }
+        prev.type = prev.newText ? 'replace' : 'delete';
+      }
+    } else {
+      result.push({ ...curr });
     }
-    result.push(current);
-    i++;
   }
 
   return result;
 };
 
 /**
- * Compute a minimal ProposedChange by comparing beforeYaml and afterYaml
- * line-by-line. Finds the common prefix/suffix to narrow the change to only
- * the lines that actually differ, producing a single contained hunk.
+ * Compute ProposedChanges by diffing beforeYaml and afterYaml using the
+ * Myers diff algorithm (via the `diff` library). Returns one ProposedChange
+ * per contiguous hunk, so non-adjacent edits produce separate proposals
+ * that the editor can highlight independently. Adjacent hunks are merged
+ * to avoid duplicate Accept/Decline pills.
  */
-export const computeMinimalChange = (
-  beforeYaml: string,
-  afterYaml: string,
+export const computeChanges = (
+  beforeRaw: string,
+  afterRaw: string,
   proposalId: string
-): ProposedChange | null => {
-  const beforeLines = beforeYaml.split('\n');
-  const afterLines = afterYaml.split('\n');
+): ProposedChange[] => {
+  if (beforeRaw === afterRaw) return [];
 
-  let prefixLen = 0;
-  const minLen = Math.min(beforeLines.length, afterLines.length);
-  while (prefixLen < minLen && beforeLines[prefixLen] === afterLines[prefixLen]) {
-    prefixLen++;
-  }
+  // eslint-disable-next-line prefer-template
+  const normalizeTrailing = (s: string) => s.trimEnd() + '\n';
+  const before = normalizeTrailing(beforeRaw);
+  const after = normalizeTrailing(afterRaw);
 
-  if (prefixLen === beforeLines.length && prefixLen === afterLines.length) {
-    return null;
-  }
+  if (before === after) return [];
 
-  let suffixLen = 0;
-  const maxSuffix = minLen - prefixLen;
-  while (
-    suffixLen < maxSuffix &&
-    beforeLines[beforeLines.length - 1 - suffixLen] ===
-      afterLines[afterLines.length - 1 - suffixLen]
-  ) {
-    suffixLen++;
-  }
+  const parts = diffLines(before, after);
+  const changes: ProposedChange[] = [];
+  let currentLine = 1;
 
-  const beforeStart = prefixLen;
-  const beforeEnd = beforeLines.length - suffixLen;
-  const afterStart = prefixLen;
-  const afterEnd = afterLines.length - suffixLen;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const lineCount = part.count ?? 0;
 
-  const changedBefore = beforeLines.slice(beforeStart, beforeEnd);
-  const changedAfter = afterLines.slice(afterStart, afterEnd);
+    if (!part.added && !part.removed) {
+      currentLine += lineCount;
+    } else if (part.removed) {
+      const next = parts[i + 1];
 
-  const startLine = prefixLen + 1;
-
-  if (changedBefore.length === 0 && changedAfter.length > 0) {
-    if (startLine > beforeLines.length) {
-      const lastLineContent = beforeLines[beforeLines.length - 1];
-      return {
+      if (next?.added) {
+        changes.push({
+          proposalId,
+          type: 'replace',
+          startLine: currentLine,
+          endLine: currentLine + lineCount - 1,
+          newText: next.value,
+        });
+        i++;
+      } else {
+        changes.push({
+          proposalId,
+          type: 'delete',
+          startLine: currentLine,
+          endLine: currentLine + lineCount - 1,
+          newText: '',
+        });
+      }
+      currentLine += lineCount;
+    } else if (part.added) {
+      changes.push({
         proposalId,
-        type: 'replace',
-        startLine: beforeLines.length,
-        endLine: beforeLines.length,
-        newText: `${lastLineContent}\n${changedAfter.join('\n')}\n`,
-      };
+        type: 'insert',
+        startLine: currentLine,
+        newText: part.value,
+      });
     }
-
-    return {
-      proposalId,
-      type: 'insert',
-      startLine,
-      newText: `${changedAfter.join('\n')}\n`,
-    };
   }
 
-  if (changedBefore.length > 0 && changedAfter.length === 0) {
-    return {
-      proposalId,
-      type: 'delete',
-      startLine,
-      endLine: beforeEnd,
-      newText: '',
-    };
-  }
-
-  return {
-    proposalId,
-    type: 'replace',
-    startLine,
-    endLine: beforeEnd,
-    newText: `${changedAfter.join('\n')}\n`,
-  };
+  return mergeAdjacentChanges(changes);
 };
 
 /**
  * Bridge that subscribes to agent builder chat events and dispatches
- * `workflow.yaml.diff` attachments to the Monaco ProposalManager.
+ * workflow YAML changes to the Monaco ProposalManager.
  *
- * When the server emits a diff attachment with `status: 'pending'`, the bridge
- * computes a minimal line-level diff and proposes only the changed region so
- * the user sees a contained, surgical diff in the editor.
+ * Listens for `workflow:yaml_changed` ToolUiEvents emitted by server-side
+ * edit tools. Each event is processed immediately against the editor's
+ * current content — since `proposeChange` applies edits to the model,
+ * chained events naturally diff against already-applied changes, producing
+ * tight per-event hunks without explicit collapsing.
  */
 export class AttachmentBridge {
   private subscription: Subscription | null = null;
@@ -188,8 +163,8 @@ export class AttachmentBridge {
     this.editorRef = editorRef;
 
     this.subscription = chat$.subscribe((event) => {
-      if (isRoundCompleteEvent(event) && event.data.attachments) {
-        this.handleAttachments(event.data.attachments);
+      if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
+        this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
       }
     });
   }
@@ -202,7 +177,7 @@ export class AttachmentBridge {
     this.processedProposals.clear();
   }
 
-  private handleAttachments(attachments: VersionedAttachment[]): void {
+  private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
     const manager = this.proposalManager;
     const editor = this.editorRef?.current;
     if (!manager || !editor) return;
@@ -210,27 +185,47 @@ export class AttachmentBridge {
     const model = editor.getModel();
     if (!model) return;
 
-    const pendingDiffs = collapseChainedDiffs(extractPendingDiffs(attachments));
+    const { proposalId, beforeYaml, afterYaml } = payload;
 
-    for (const diff of pendingDiffs) {
-      if (!this.processedProposals.has(diff.proposalId)) {
-        this.processedProposals.add(diff.proposalId);
+    if (this.processedProposals.has(proposalId)) return;
+    this.processedProposals.add(proposalId);
 
-        setProposalRecord({
-          proposalId: diff.proposalId,
-          status: 'pending',
-          beforeYaml: diff.beforeYaml,
-          afterYaml: diff.afterYaml,
-          toolId: WORKFLOW_YAML_DIFF_TYPE,
-        });
+    setProposalRecord({
+      proposalId,
+      status: 'pending',
+      beforeYaml,
+      afterYaml,
+      toolId: WORKFLOW_YAML_DIFF_TYPE,
+    });
 
-        const currentContent = model.getValue();
-        const change = computeMinimalChange(currentContent, diff.afterYaml, diff.proposalId);
+    const declined = this.getDeclinedFingerprints();
+    const currentContent = model.getValue();
+    const changes = computeChanges(currentContent, afterYaml, proposalId);
 
-        if (change) {
-          manager.proposeChange(change);
+    // Apply bottom-to-top so each proposeChange (which modifies the model)
+    // only shifts lines below the current edit, keeping coordinates of
+    // earlier (higher) hunks valid.
+    for (let i = changes.length - 1; i >= 0; i--) {
+      const change = changes[i];
+      if (!declined.has(changeFingerprint(change))) {
+        const changeEnd = change.endLine ?? change.startLine;
+        manager.acceptOverlapping(change.startLine, changeEnd);
+        const hunkChange = { ...change, proposalId: `${change.proposalId}::${i}` };
+        manager.proposeChange(hunkChange);
+      }
+    }
+  }
+
+  private getDeclinedFingerprints(): Set<string> {
+    const fps = new Set<string>();
+    for (const record of getAllProposalRecords()) {
+      if (record.status === 'declined') {
+        const hunks = computeChanges(record.beforeYaml, record.afterYaml, 'declined');
+        for (const hunk of hunks) {
+          fps.add(changeFingerprint(hunk));
         }
       }
     }
+    return fps;
   }
 }

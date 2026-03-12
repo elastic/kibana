@@ -258,4 +258,103 @@ describe('ProposalManager', () => {
     expect(proposals[0].undoEndLine).toBeDefined();
     expect(proposals[0].undoEndColumn).toBeDefined();
   });
+
+  describe('acceptOverlapping', () => {
+    it('clears only proposals whose line range overlaps the given range', () => {
+      const onAccept = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onAccept });
+
+      manager.proposeChange(createReplaceChange('at-line-3'));
+
+      const atLine8: ProposedChange = {
+        proposalId: 'at-line-8',
+        type: 'replace',
+        startLine: 8,
+        endLine: 8,
+        newText: 'replacement at line 8',
+      };
+      manager.proposeChange(atLine8);
+
+      expect(manager.getPendingProposals()).toHaveLength(2);
+
+      manager.acceptOverlapping(2, 4);
+
+      expect(onAccept).toHaveBeenCalledTimes(1);
+      expect(onAccept).toHaveBeenCalledWith('at-line-3');
+
+      const remaining = manager.getPendingProposals();
+      expect(remaining).toHaveLength(1);
+      expect(remaining[0].proposalId).toBe('at-line-8');
+    });
+
+    it('is a no-op when no proposals overlap the given range', () => {
+      const onAccept = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onAccept });
+
+      manager.proposeChange(createReplaceChange('at-line-3'));
+
+      manager.acceptOverlapping(7, 9);
+
+      expect(onAccept).not.toHaveBeenCalled();
+      expect(manager.getPendingProposals()).toHaveLength(1);
+    });
+
+    it('clears all proposals when all overlap the given range', () => {
+      const onAccept = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onAccept });
+
+      const atLine3a: ProposedChange = {
+        proposalId: 'p1',
+        type: 'replace',
+        startLine: 3,
+        endLine: 4,
+        newText: 'first replacement',
+      };
+      const atLine3b: ProposedChange = {
+        proposalId: 'p2',
+        type: 'replace',
+        startLine: 3,
+        endLine: 3,
+        newText: 'second replacement',
+      };
+
+      manager.proposeChange(atLine3a);
+      manager.proposeChange(atLine3b);
+
+      manager.acceptOverlapping(3, 4);
+
+      expect(onAccept).toHaveBeenCalledTimes(2);
+      expect(manager.hasPendingProposals()).toBe(false);
+    });
+
+    it('does not modify the model (accept is UI-only)', () => {
+      const editor = createMockEditor();
+      manager.initialize(editor);
+
+      manager.proposeChange(createReplaceChange('at-line-3'));
+
+      const model = editor.getModel();
+      const callCountAfterPropose = model.pushEditOperations.mock.calls.length;
+
+      manager.acceptOverlapping(2, 4);
+
+      expect(model.pushEditOperations).toHaveBeenCalledTimes(callCountAfterPropose);
+    });
+
+    it('handles insert proposals using startLine for overlap', () => {
+      const onAccept = jest.fn();
+      const editor = createMockEditor();
+      manager.initialize(editor, { onAccept });
+
+      manager.proposeChange(createInsertChange('insert-at-5'));
+
+      manager.acceptOverlapping(4, 6);
+
+      expect(onAccept).toHaveBeenCalledWith('insert-at-5');
+      expect(manager.hasPendingProposals()).toBe(false);
+    });
+  });
 });
