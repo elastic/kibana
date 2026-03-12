@@ -392,15 +392,15 @@ export class StatusRuleExecutor {
 
     const validDownConfigs: AlertStatusConfigs = {};
 
-    for (const [key, config] of Object.entries(downConfigs)) {
+    for (const [downConfigId, config] of Object.entries(downConfigs)) {
       if (!config.latestPing?.monitor) {
         this.debug(
-          `Skipping down config ${key}: latestPing is missing or corrupted (configId: ${config.configId})`
+          `Skipping down config ${downConfigId}: latestPing is missing or corrupted (configId: ${config.configId})`
         );
         continue;
       }
 
-      validDownConfigs[key] = config;
+      validDownConfigs[downConfigId] = config;
     }
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       for (const [idWithLocation, statusConfig] of Object.entries(validDownConfigs)) {
