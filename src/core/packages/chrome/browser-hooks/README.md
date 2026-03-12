@@ -24,7 +24,6 @@ For use by plugins and any code outside core Chrome internals:
 For use by core Chrome components only (e.g. layout, grid). Not part of the public API:
 
 - `useGlobalFooter()` — returns the current global footer `ReactNode` (used by the developer toolbar).
-- `useHasAppMenu()` — returns `true` when either a legacy action menu or a new `AppMenuConfig` is active. Uses internal `componentDeps`.
 - `useHasHeaderBanner()` — returns `true` when a header banner is currently registered via `chrome.setHeaderBanner()`.
 
 ## Notes

@@ -8,24 +8,24 @@
  */
 
 import { useMemo } from 'react';
-import { combineLatest, map } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 
 /**
- * Returns `true` when an app menu is currently active — either a legacy action
- * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
- * registered via `chrome.setAppMenu()`.
+ * Returns the side nav collapsed state and a setter to toggle it.
+ * **Internal** — used by `GridLayoutProjectSideNav`.
  */
-export function useHasAppMenu(): boolean {
+export function useSideNavCollapsed(): {
+  isCollapsed: boolean;
+  setIsCollapsed: (isCollapsed: boolean) => void;
+} {
   const chrome = useChromeService();
-  const hasAppMenu$ = useMemo(
-    () =>
-      combineLatest([
-        chrome.componentDeps.application.currentActionMenu$,
-        chrome.getAppMenu$(),
-      ]).pipe(map(([menu, appMenu]) => !!menu || !!appMenu)),
-    [chrome]
+  const isCollapsed = useObservable(
+    chrome.sideNav.getIsCollapsed$(),
+    chrome.sideNav.getIsCollapsed()
   );
-  return useObservable(hasAppMenu$, false);
+  return useMemo(
+    () => ({ isCollapsed, setIsCollapsed: chrome.sideNav.setIsCollapsed }),
+    [isCollapsed, chrome]
+  );
 }

@@ -24,17 +24,14 @@ import {
   ChromelessHeader,
   AppMenuBar,
   Sidebar,
+  useHasAppMenu,
 } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
   useSidebarWidth,
 } from '@kbn/core-chrome-browser-hooks';
-import {
-  useGlobalFooter,
-  useHasAppMenu,
-  useHasHeaderBanner,
-} from '@kbn/core-chrome-browser-hooks/internal';
+import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -82,7 +79,7 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, chrome, overlays } = this.deps;
+    const { application, chrome, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
@@ -142,7 +139,21 @@ export class GridLayout implements LayoutService {
       }
 
       return (
-        <ChromeComponentsProvider value={chrome.componentDeps}>
+        <ChromeComponentsProvider
+          value={{
+            ...chrome.componentDeps,
+            application: {
+              navigateToApp: application.navigateToApp,
+              navigateToUrl: application.navigateToUrl,
+              currentAppId$: application.currentAppId$,
+              currentActionMenu$: application.currentActionMenu$,
+            },
+            basePath: http.basePath,
+            docLinks,
+            loadingCount$: http.getLoadingCount$(),
+            customBranding$: customBranding.customBranding$,
+          }}
+        >
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout

@@ -116,6 +116,7 @@ const createStartContractMock = () => {
       setIsCollapsed: jest.fn(),
     }),
     getBreadcrumbsAppendExtensions$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+    getBreadcrumbsAppendExtensionsWithBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     registerGlobalHelpExtensionMenuLink: jest.fn(),

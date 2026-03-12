@@ -118,6 +118,7 @@ export function createChromeApi({
       }
     },
     getBreadcrumbsAppendExtensions$: () => state.breadcrumbs.appendExtensions.$,
+    getBreadcrumbsAppendExtensionsWithBadges$: () => state.breadcrumbs.appendExtensionsWithBadges$,
     setBreadcrumbsAppendExtension: (extension) => {
       state.breadcrumbs.appendExtensions.addSorted(
         extension,

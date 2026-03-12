@@ -25,3 +25,4 @@ export {
   HeaderTopBanner,
   ChromelessHeader,
 } from './src/shared';
+export { useHasAppMenu } from './src/shared/chrome_hooks';
