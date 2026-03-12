@@ -37,7 +37,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskSeverity, HostItem } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
@@ -90,7 +90,6 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityIdentifiers } from '../../shared/utils';
 import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import type { HostItem } from '../../../../../common/search_strategy';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import {
@@ -207,8 +206,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     entityType: 'host',
     skip: !entityStoreV2Enabled,
   });
-  const effectiveHostEntityFromStore =
-    hostEntityFromStoreResultProp ?? entityFromStoreResult;
+  const effectiveHostEntityFromStore = hostEntityFromStoreResultProp ?? entityFromStoreResult;
   const observedHost = useObservedHost(
     entityIdentifiers,
     scopeId,
@@ -271,9 +269,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const effectiveRiskScoreState = useMemo(
     () =>
       hostRiskScoreStateFromEntityStore ??
-      (riskScoreStateFromApi.data?.length
-        ? riskScoreStateFromApi
-        : undefined),
+      (riskScoreStateFromApi.data?.length ? riskScoreStateFromApi : undefined),
     [hostRiskScoreStateFromEntityStore, riskScoreStateFromApi]
   );
 
@@ -475,9 +471,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
             inspect={
-              entityStoreV2Enabled
-                ? effectiveHostEntityFromStore?.inspect
-                : hostDetailsArgs.inspect
+              entityStoreV2Enabled ? effectiveHostEntityFromStore?.inspect : hostDetailsArgs.inspect
             }
             deleteQuery={deleteQuery}
             scopeId={scopeId}
