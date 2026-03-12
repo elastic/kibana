@@ -13,11 +13,11 @@ import { ruleKeys } from './query_key_factory';
 
 export function useCloneRule() {
   const rulesApi = useService(RulesApi);
-  const notifications = useService(CoreStart('notifications'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['cloneRule'],
+    mutationKey: ruleKeys.clone(),
     mutationFn: (rule: RuleApiResponse) => {
       const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = rule;
       return rulesApi.createRule({
@@ -29,15 +29,15 @@ export function useCloneRule() {
       });
     },
     onError: (error) => {
-      notifications?.toasts.addError(error as Error, {
+      toasts.addError(error as Error, {
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneError', {
           defaultMessage: 'Unable to clone rule',
         }),
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-      notifications?.toasts.addSuccess({
+      queryClient.invalidateQueries(ruleKeys.lists());
+      toasts.addSuccess({
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneSuccess', {
           defaultMessage: 'Rule cloned',
         }),

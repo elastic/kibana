@@ -13,23 +13,23 @@ import { ruleKeys } from './query_key_factory';
 
 export function useEnableRule() {
   const rulesApi = useService(RulesApi);
-  const notifications = useService(CoreStart('notifications'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['enableRule'],
+    mutationKey: ruleKeys.enable(),
     mutationFn: ({ id }: { id: string }) => rulesApi.enableRule(id),
     onError: (error) => {
-      notifications?.toasts.addError(error as Error, {
+      toasts.addError(error as Error, {
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableError', {
           defaultMessage: 'Unable to enable rule',
         }),
       });
     },
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ruleKeys.detail(id), exact: false });
-      queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-      notifications?.toasts.addSuccess({
+      queryClient.invalidateQueries(ruleKeys.detail(id));
+      queryClient.invalidateQueries(ruleKeys.lists());
+      toasts.addSuccess({
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableSuccess', {
           defaultMessage: 'Rule enabled',
         }),

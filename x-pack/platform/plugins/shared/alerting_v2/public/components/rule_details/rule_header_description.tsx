@@ -14,7 +14,7 @@ export interface RuleHeaderDescriptionProps {
   rule: RuleApiResponse;
 }
 
-export const KIND_LABELS: Record<string, string> = {
+const KIND_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.kindSignal', {
     defaultMessage: 'Detect only',
   }),

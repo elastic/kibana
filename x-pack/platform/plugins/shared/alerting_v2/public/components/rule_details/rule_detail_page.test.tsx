@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,6 +23,12 @@ jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => key,
 }));
 
+const mockHistoryPush = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({ push: mockHistoryPush }),
+}));
+
 jest.mock('../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
@@ -32,16 +38,19 @@ jest.mock('../../hooks/use_delete_rule', () => ({
   useDeleteRule: () => ({ mutate: mockDeleteRule }),
 }));
 
+const mockCloneRule = jest.fn();
 jest.mock('../../hooks/use_clone_rule', () => ({
-  useCloneRule: () => ({ mutate: jest.fn() }),
+  useCloneRule: () => ({ mutate: mockCloneRule }),
 }));
 
+const mockDisableRule = jest.fn();
 jest.mock('../../hooks/use_disable_rule', () => ({
-  useDisableRule: () => ({ mutate: jest.fn() }),
+  useDisableRule: () => ({ mutate: mockDisableRule }),
 }));
 
+const mockEnableRule = jest.fn();
 jest.mock('../../hooks/use_enable_rule', () => ({
-  useEnableRule: () => ({ mutate: jest.fn() }),
+  useEnableRule: () => ({ mutate: mockEnableRule }),
 }));
 
 jest.mock('@kbn/alerting-plugin/common', () => ({
@@ -305,6 +314,61 @@ describe('RuleDetailPage', () => {
     it('renders the actions menu', () => {
       renderPage(baseRule);
       expect(screen.getByTestId('ruleDetailsActionsButton')).toBeInTheDocument();
+    });
+  });
+
+  describe('interactions', () => {
+    it('navigates to edit page when edit button is clicked', () => {
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('openEditRuleFlyoutButton'));
+      expect(mockHistoryPush).toHaveBeenCalledWith('/edit/rule-1');
+    });
+
+    it('shows delete confirmation modal and calls deleteRule on confirm', async () => {
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+      fireEvent.click(screen.getByTestId('ruleDetailsDeleteButton'));
+      expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+
+      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
+      fireEvent.click(confirmButton);
+      expect(mockDeleteRule).toHaveBeenCalledWith(
+        'rule-1',
+        expect.objectContaining({
+          onSuccess: expect.any(Function),
+        })
+      );
+    });
+
+    it('calls cloneRule when clone action is clicked', () => {
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+      fireEvent.click(screen.getByTestId('ruleDetailsCloneButton'));
+      expect(mockCloneRule).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('calls disableRule when disable action is clicked on an enabled rule', () => {
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+      fireEvent.click(screen.getByTestId('ruleDetailsDisableButton'));
+      expect(mockDisableRule).toHaveBeenCalledWith({ id: 'rule-1' });
+    });
+
+    it('calls enableRule when enable action is clicked on a disabled rule', () => {
+      renderPage({ ...baseRule, enabled: false });
+      fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+      fireEvent.click(screen.getByTestId('ruleDetailsEnableButton'));
+      expect(mockEnableRule).toHaveBeenCalledWith({ id: 'rule-1' });
+    });
+
+    it('closes delete modal when cancel is clicked', () => {
+      renderPage(baseRule);
+      fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
+      fireEvent.click(screen.getByTestId('ruleDetailsDeleteButton'));
+      expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Cancel'));
+      expect(screen.queryByTestId('rulesDeleteConfirmation')).not.toBeInTheDocument();
     });
   });
 });

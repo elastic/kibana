@@ -13,23 +13,23 @@ import { ruleKeys } from './query_key_factory';
 
 export function useDisableRule() {
   const rulesApi = useService(RulesApi);
-  const notifications = useService(CoreStart('notifications'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ['disableRule'],
+    mutationKey: ruleKeys.disable(),
     mutationFn: ({ id }: { id: string }) => rulesApi.disableRule(id),
     onError: (error) => {
-      notifications?.toasts.addError(error as Error, {
+      toasts.addError(error as Error, {
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDisableError', {
           defaultMessage: 'Unable to disable rule',
         }),
       });
     },
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ruleKeys.detail(id), exact: false });
-      queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-      notifications?.toasts.addSuccess({
+      queryClient.invalidateQueries(ruleKeys.detail(id));
+      queryClient.invalidateQueries(ruleKeys.lists());
+      toasts.addSuccess({
         title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDisableSuccess', {
           defaultMessage: 'Rule disabled',
         }),
