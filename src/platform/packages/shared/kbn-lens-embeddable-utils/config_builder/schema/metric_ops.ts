@@ -338,3 +338,6 @@ export type LensApiAllMetricOrFormulaOperations =
   | LensApiMovingAverageOperation
   | LensApiCumulativeSumOperation
   | LensApiCounterRateOperation;
+
+export type LensApiESQLColumn = TypeOf<typeof esqlColumnSchema>;
+export type LensApiESQLColumnWithFormat = TypeOf<typeof esqlColumnWithFormatSchema>;
