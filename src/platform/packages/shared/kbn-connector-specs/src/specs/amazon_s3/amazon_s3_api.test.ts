@@ -16,6 +16,16 @@ import {
   downloadAmazonS3BucketObject,
 } from './amazon_s3_api';
 
+const mockSha256Hash = jest.fn();
+const mockCalculateAWSA4Signature = jest.fn();
+
+require('../../auth_types/aws_crypto_helpers');
+
+jest.mock('../../auth_types/aws_crypto_helpers', () => ({
+  sha256Hash: () => mockSha256Hash,
+  calculateAWSA4Signature: () => mockCalculateAWSA4Signature,
+}));
+
 describe('amazon_s3_api exports', () => {
   const mockClient = {
     get: jest.fn(),
@@ -31,6 +41,8 @@ describe('amazon_s3_api exports', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSha256Hash.mockResolvedValue('mocked-hash');
+    mockCalculateAWSA4Signature.mockResolvedValue('mocked-signature');
   });
 
   it('should listAmazonS3BucketObjects without any buckets', async () => {
@@ -172,11 +184,6 @@ describe('amazon_s3_api exports', () => {
   });
 
   it('should generate a Amazon S3 bucket object presigned url', async () => {
-    const nodeCrypto = await import('crypto');
-    Object.defineProperty(global, 'crypto', {
-      value: nodeCrypto,
-      writable: true,
-    });
     const result = await generateAmazonS3BucketObjectPresignedUrl(
       mockContext,
       'test-bucket-name',
@@ -190,11 +197,6 @@ describe('amazon_s3_api exports', () => {
   });
 
   it('should generate a Amazon S3 bucket object presigned url with spaces in key for URI encoding', async () => {
-    const nodeCrypto = await import('crypto');
-    Object.defineProperty(global, 'crypto', {
-      value: nodeCrypto,
-      writable: true,
-    });
     const result = await generateAmazonS3BucketObjectPresignedUrl(
       mockContext,
       'test-bucket-name',

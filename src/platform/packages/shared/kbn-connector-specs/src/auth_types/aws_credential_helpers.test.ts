@@ -8,6 +8,16 @@
  */
 
 import { parseAwsHost, signRequest } from './aws_credential_helpers';
+import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
+
+jest.mock('./aws_crypto_helpers', () => ({
+  sha256Hash: jest.fn(),
+  hmacSha256: jest.fn(),
+  calculateAWSA4Signature: jest.fn(),
+}));
+
+const mockSha256Hash = jest.mocked(sha256Hash);
+const mockCalculateAWSA4Signature = jest.mocked(calculateAWSA4Signature);
 
 describe('parseAwsHost()', () => {
   it('returns null for non-AWS hostnames', () => {
@@ -37,15 +47,13 @@ describe('parseAwsHost()', () => {
 
 describe('signRequest()', () => {
   beforeEach(async () => {
-    const nodeCrypto = await import('crypto');
-    Object.defineProperty(global, 'crypto', {
-      value: nodeCrypto,
-      writable: true,
-    });
     jest.useFakeTimers().setSystemTime(new Date('2026-03-11T12:34:56.000Z'));
+    mockSha256Hash.mockResolvedValue('b'.repeat(64));
+    mockCalculateAWSA4Signature.mockResolvedValue('a'.repeat(64));
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     jest.useRealTimers();
   });
 

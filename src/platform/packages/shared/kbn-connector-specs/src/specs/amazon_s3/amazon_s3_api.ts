@@ -9,7 +9,7 @@
 
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
-import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credential_helpers';
+import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_crypto_helpers';
 import type {
   AmazonS3BucketObjectListing,
   AmazonS3Bucket,
@@ -49,33 +49,36 @@ function createAwsS3Error(error: unknown): Error {
   }
 }
 
-function getJsObjectOrValue(value: any, collectionItems: Record<string, string | undefined>): any {
+function getJsObjectOrValue(
+  value: unknown,
+  collectionItems: Record<string, string | undefined>
+): unknown {
   if (typeof value === 'object' && value !== null) {
-    return jsObjectToRecord(value, collectionItems);
+    return jsObjectToRecord(value as Record<string, unknown>, collectionItems);
   }
   return value;
 }
 
 function extractCollectionValues(
-  values: any,
+  values: unknown,
   itemKey: string | undefined,
   collectionItems: Record<string, string | undefined>
-): any[] {
-  let itemsArray: any[] = [];
+): unknown[] {
+  let itemsArray: unknown[] = [];
 
   if (Array.isArray(values)) {
     if (!itemKey) {
       itemsArray = values.map((value) => getJsObjectOrValue(value, collectionItems));
     } else {
       values.forEach((value) => {
-        const itemValue = value[itemKey];
+        const itemValue = (value as Record<string, unknown>)[itemKey];
         if (itemValue) {
           itemsArray.push(getJsObjectOrValue(itemValue, collectionItems));
         }
       });
     }
   } else if (typeof values === 'object' && values !== null) {
-    const itemValue = itemKey ? values[itemKey] : values;
+    const itemValue = itemKey ? (values as Record<string, unknown>)[itemKey] : values;
     if (itemValue) {
       if (Array.isArray(itemValue)) {
         itemValue.forEach((value) => {
@@ -91,14 +94,14 @@ function extractCollectionValues(
 }
 
 function jsObjectToRecord(
-  obj: any,
+  obj: Record<string, unknown>,
   collectionItems: Record<string, string | undefined>
 ): Record<string, unknown> {
   const returnData: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (Array.isArray(value)) {
       returnData[key] = value.map((arrayItem) => getJsObjectOrValue(arrayItem, collectionItems));
-    } else if (collectionItems.hasOwnProperty(key)) {
+    } else if (Object.prototype.hasOwnProperty.call(collectionItems, key)) {
       returnData[key] = extractCollectionValues(value, collectionItems[key], collectionItems);
     } else {
       returnData[key] = getJsObjectOrValue(value, collectionItems);
@@ -164,7 +167,7 @@ export async function listAmazonS3Buckets(
 
     const buckets: AmazonS3Bucket[] = [];
     if (response.Buckets) {
-      for (const bucket of response.Buckets as any[]) {
+      for (const bucket of response.Buckets as Array<Record<string, unknown>>) {
         buckets.push({
           name: bucket.Name as string,
           creationDate: bucket.CreationDate as string,
@@ -211,7 +214,7 @@ export async function listAmazonS3BucketObjects(
     return {
       bucket: bucketName,
       objectCount: parseInt((response.KeyCount as string) || '0', 10),
-      objects: ((response.Contents as any[]) || []).map((item) => ({
+      objects: ((response.Contents as Array<Record<string, unknown>>) || []).map((item) => ({
         key: item.Key as string,
         size: parseInt((item.Size as string) || '0', 10),
         lastModified: item.LastModified as string,
