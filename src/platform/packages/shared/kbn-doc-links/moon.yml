@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/doc-links'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/docs'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/doc-links'
+  title: '@kbn/doc-links'
   description: Moon project for @kbn/doc-links
   channel: ''
   owner: '@elastic/docs'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-doc-links
+  sourceRoot: src/platform/packages/shared/kbn-doc-links
 dependsOn:
   - '@kbn/std'
 tags:
@@ -32,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
