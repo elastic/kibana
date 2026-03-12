@@ -13,7 +13,7 @@ import {
   indexAll,
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_logs/tool';
+import type { GetLogsToolSuccessResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_logs/tool';
 import { uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -57,7 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns all response sections', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
@@ -74,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns expected sample fields', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
@@ -94,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns expected category patterns with type', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
@@ -127,7 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns expected topValues', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
@@ -161,7 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('filters results with kqlFilter', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
           start: START,
@@ -188,7 +188,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('groups histogram by field with groupBy', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
           start: START,
@@ -205,7 +205,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('limits sample count with limit parameter', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END, limit: 3 },
       });
@@ -214,7 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('controls sample fields with fields parameter', async () => {
-      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
           start: START,
@@ -228,14 +228,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('reduces results when iteratively excluding noise', async () => {
-      const broadResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const broadResults = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
       const broadCount = broadResults[0].data.totalCount;
       expect(broadCount).to.be.greaterThan(1000);
 
-      const filteredResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const filteredResults = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
           start: START,
@@ -246,7 +246,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const filteredCount = filteredResults[0].data.totalCount;
       expect(filteredCount).to.be.lessThan(broadCount);
 
-      const narrowResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+      const narrowResults = await agentBuilderApiClient.executeTool<GetLogsToolSuccessResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
           start: START,

@@ -24,7 +24,8 @@ import type { GetLogsResult } from './handler';
 import { getDefaultBucketSize, getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 
-export type GetLogsToolResult = OtherResult<GetLogsResult> | ErrorResult;
+export type GetLogsToolSuccessResult = OtherResult<GetLogsResult>;
+type GetLogsHandlerResult = GetLogsToolSuccessResult | ErrorResult;
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
@@ -77,8 +78,8 @@ export function createGetLogsTool({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): StaticToolRegistration<typeof getLogsSchema, GetLogsToolResult> {
-  const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema, GetLogsToolResult> = {
+}): StaticToolRegistration<typeof getLogsSchema, GetLogsHandlerResult> {
+  const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema, GetLogsHandlerResult> = {
     id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent(
