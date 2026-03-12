@@ -115,7 +115,7 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 
-It’s common for test suites to load Elasticsearch or Kibana archives that are barely used—or not used at all. Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Audit your archive imports periodically and remove any that aren’t exercised by assertions.
+It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Audit your archive imports periodically and remove any that aren’t exercised by assertions.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** load archives that no test in the suite relies on:
@@ -146,7 +146,7 @@ test.beforeAll(async ({ esArchiver }) => {
 Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`.
 
 :::::{dropdown} Examples
-❌ **Don’t:** put cleanup at the end of the test body—it’s skipped if the test fails:
+❌ **Don’t:** put cleanup at the end of the test body (it’s skipped if the test fails):
 
 ```ts
 test('creates and deletes index', async ({ esClient }) => {
@@ -172,7 +172,7 @@ test.afterEach(async ({ esClient, log }) => {
 
 ### Don’t use `try/catch` in tests [dont-use-try-catch-in-tests]
 
-Tests should be clean and declarative. If a helper might return an expected error (for example, 404 during cleanup), the helper should handle it internally—for example, by accepting an `ignoreErrors` option (e.g., for treating a 404 during deletion as a success).
+Tests should be clean and declarative. If a helper might return an expected error (for example, 404 during cleanup), the helper should handle it internally, for example, by accepting an `ignoreErrors` option (e.g., for treating a 404 during deletion as a success).
 
 :::::{dropdown} Examples
 ❌ **Don’t:** catch errors in the test:
@@ -292,7 +292,7 @@ Default to [parallel UI suites](./parallelism.md) when possible. Parallel worker
 
 ### Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
 
-UI tests should answer “does this feature work for the user?”—verify that components render, respond to interaction, and navigate correctly. Leave exact data validation (computed values, aggregation results, edge cases) to API or unit tests, which are faster and less brittle.
+UI tests should answer “does this feature work for the user?” Verify that components render, respond to interaction, and navigate correctly. Leave exact data validation (computed values, aggregation results, edge cases) to API or unit tests, which are faster and less brittle.
 
 | What you’re testing                                                         | Recommended layer  |
 | --------------------------------------------------------------------------- | ------------------ |
@@ -440,7 +440,7 @@ await page.click('[data-test-subj="myButton"]');
 await page.getByText('Delete').click();
 ```
 
-❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices))—they break on non-clean environments where tests run without server restart and extra data may exist:
+❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices)), as they break on non-clean environments where tests run without server restart and extra data may exist:
 
 ```ts
 await page.testSubj.locator('tableRow').nth(0).click();
@@ -545,7 +545,7 @@ async switchToEditMode() {
 }
 ```
 
-✔️ **Do:** make the action explicit—the caller knows the expected state:
+✔️ **Do:** make the action explicit, since the caller knows the expected state:
 
 ```ts
 async openEditMode() {
@@ -558,7 +558,7 @@ async openEditMode() {
 
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
 
-Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes.
+Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes. Also prefer `expect()` over manual boolean checks, as Playwright’s error output includes the locator, call log, and a clear message, which `if`/`throw` patterns lose.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** hide assertions inside page objects:
@@ -606,7 +606,7 @@ export class StreamsAppPage {
 
 ### Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
-Scout supports automated accessibility (a11y) scanning via `page.checkA11y`. Add checks at high-value points in your UI tests — landing pages, modals, flyouts, and wizard steps — rather than on every interaction.
+Scout supports automated accessibility (a11y) scanning via `page.checkA11y`. Add checks at high-value points in your UI tests (landing pages, modals, flyouts, wizard steps) rather than on every interaction.
 
 :::::{dropdown} Example
 
@@ -691,7 +691,7 @@ This pattern validates both endpoint behavior and the [permission model](#test-w
 
 ### Validate the response body (not just status) [dont-just-verify-the-status-code-validate-the-response-body]
 
-Status code assertions are necessary but not sufficient—also validate shape and key fields.
+Status code assertions are necessary but not sufficient. Also validate shape and key fields.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** assert only the status code:
