@@ -278,7 +278,7 @@ export class DashboardPlugin
           appUnMounted,
           element: params.element,
           mountContext,
-          setDashboardAppApi: this.dashboardAppApi$.next,
+          setDashboardAppApi: (api) => this.dashboardAppApi$.next(api),
         });
       },
     };
