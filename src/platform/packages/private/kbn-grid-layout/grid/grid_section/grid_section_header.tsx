@@ -182,13 +182,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       if (section && !section.isMainSection && !section.isCollapsed) {
         toggleIsCollapsed();
       }
-      // const section = gridLayoutStateManager.gridLayout$.getValue()[sectionId] as
-      //   | CollapsibleSection
-      //   | undefined;
-      //
-      // if (!section?.isCollapsed) {
-      //   toggleIsCollapsed();
-      // }
       startDrag(e);
     },
     [gridLayoutStateManager, sectionId, toggleIsCollapsed, startDrag]

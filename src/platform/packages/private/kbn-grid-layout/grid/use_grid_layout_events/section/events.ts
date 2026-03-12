@@ -48,7 +48,15 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
         return;
       }
       const onStart = () => {
-        startingPointer.current = getSensorPosition(e);
+        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
+        if (headerRef) {
+          const { left: clientX, top: clientY } = headerRef.getBoundingClientRect();
+          startingPointer.current = { clientX, clientY };
+        } else {
+          // fallback to previous behavior
+          startingPointer.current = getSensorPosition(e);
+        }
+
         startAction(e, gridLayoutStateManager, sectionId);
       };
 
