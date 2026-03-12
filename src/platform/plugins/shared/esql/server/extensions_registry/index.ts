@@ -183,7 +183,7 @@ export class ESQLExtensionsRegistry {
     const currentSourceCommand = getSourceCommandFromESQLQuery(queryString);
 
     const filteredQueries = matchedQueries.filter((recommendedQuery) => {
-      if (recommendedQuery.isStandalone || !currentSourceCommand) {
+      if (!currentSourceCommand) {
         return true;
       }
 

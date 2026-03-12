@@ -624,7 +624,7 @@ describe('ESQLExtensionsRegistry', () => {
       expect(result).toEqual([]);
     });
 
-    it('should include classic standalone queries in all solution views', () => {
+    it('should include classic standalone queries in all solution views when the source command matches', () => {
       const classicStandalone: RecommendedQuery = {
         name: 'Classic Standalone',
         query: 'TS metrics-*',
@@ -634,21 +634,21 @@ describe('ESQLExtensionsRegistry', () => {
       registry.setRecommendedQueries([classicStandalone], ESQL_CLASSIC_SOLUTION_ID);
 
       const resultOblt = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         'oblt'
       );
       expect(resultOblt).toEqual([classicStandalone]);
 
       const resultSecurity = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         'security'
       );
       expect(resultSecurity).toEqual([classicStandalone]);
 
       const resultClassic = registry.getRecommendedQueries(
-        'FROM logs-2023',
+        'TS metrics-*',
         availableDatasources,
         ESQL_CLASSIC_SOLUTION_ID
       );
@@ -685,7 +685,7 @@ describe('ESQLExtensionsRegistry', () => {
   });
 
   describe('isStandalone flag', () => {
-    it('should return standalone queries regardless of the current query index pattern', () => {
+    it('should not return standalone queries when the source command does not match', () => {
       availableDatasources = {
         indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
         data_streams: [],
@@ -709,7 +709,7 @@ describe('ESQLExtensionsRegistry', () => {
         availableDatasources,
         'oblt'
       );
-      expect(logsResult).toEqual([dynamicQuery, staticQuery]);
+      expect(logsResult).toEqual([dynamicQuery]);
     });
 
     it('should not return standalone queries for a different solution ID', () => {

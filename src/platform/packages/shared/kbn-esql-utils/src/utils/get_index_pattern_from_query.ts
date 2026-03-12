@@ -6,9 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser, isSubQuery, SOURCE_COMMANDS } from '@elastic/esql';
+import { Parser, isSubQuery } from '@elastic/esql';
 import { getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+
+const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
+const WHITESPACE_SEQUENCE_REGEX = /\s+/;
 
 function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
@@ -21,7 +24,7 @@ function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
 }
 
 function getSourcesFromAst(commands: ESQLCommand[]): string[] {
-  const sourceCommand = commands.find(({ name }) => SOURCE_COMMANDS.has(name.toUpperCase()));
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
   if (!sourceCommand) {
     return [];
   }
@@ -65,7 +68,10 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   allSources.push(...mainSources, ...promqlSources);
 
   // Get sources from subqueries
-  const sourceCommand = root.commands.find(({ name }) => SOURCE_COMMANDS.has(name.toUpperCase()));
+  const sourceCommand = root.commands.find(({ name }) =>
+    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
+  );
+
   if (sourceCommand) {
     const subquerySources = extractSubquerySources(sourceCommand);
     allSources.push(...subquerySources);
@@ -86,8 +92,9 @@ export function getSourceCommandFromESQLQuery(esql?: string): string {
     return '';
   }
 
-  const { root } = Parser.parse(esql);
-  const sourceCommand = root.commands.find(({ name }) => SOURCE_COMMANDS.has(name.toUpperCase()));
+  // Source commands are always the first token in the query.
+  const [firstToken = ''] = esql.trimStart().split(WHITESPACE_SEQUENCE_REGEX, 1);
+  const sourceCommand = firstToken.toUpperCase();
 
-  return sourceCommand?.name.toUpperCase() ?? '';
+  return INDEX_SOURCE_COMMANDS.has(sourceCommand) ? sourceCommand : '';
 }
