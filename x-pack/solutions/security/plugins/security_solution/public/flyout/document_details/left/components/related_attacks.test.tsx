@@ -69,16 +69,15 @@ describe('<RelatedAttacks />', () => {
           _id: 'attack-id-1',
           _index: 'index',
           fields: {
-            '@timestamp': ['2022-01-01'],
-            'kibana.alert.rule.name': ['Rule1'],
-            'kibana.alert.reason': ['Reason1'],
-            'kibana.alert.severity': ['Severity1'],
+            'kibana.alert.attack_discovery.title': ['Attack 1'],
+            'kibana.alert.workflow_status': ['open'],
+            'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
           },
         },
       ],
     });
 
-    const { getByTestId } = renderRelatedAttacks();
+    const { getAllByTestId, getByTestId } = renderRelatedAttacks();
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
@@ -86,8 +85,20 @@ describe('<RelatedAttacks />', () => {
       getByTestId(`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}InvestigateInTimeline`)
     ).toBeInTheDocument();
     expect(
+      getAllByTestId(`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`)
+    ).toHaveLength(1);
+    expect(
       getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).toBeInTheDocument();
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
+    ).toHaveTextContent('Attack 1');
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
+    ).toHaveTextContent('open');
+    expect(
+      getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
+    ).toHaveTextContent('2');
   });
 
   it('should render no data message', () => {
