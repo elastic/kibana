@@ -78,12 +78,6 @@ const ENV_DOCS = [
     example: 'KBN_EVALS_PREFLIGHT_EXPORT=false',
   },
   {
-    name: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA',
-    description:
-      'Opt-in to managing the golden cluster schema (template + data stream). Not allowed on Buildkite PR builds.',
-    example: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true',
-  },
-  {
     name: 'SELECTED_EVALUATORS',
     description:
       'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',

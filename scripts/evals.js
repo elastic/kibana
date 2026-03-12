@@ -290,12 +290,6 @@ var ENV_DOCS = [
     example: 'KBN_EVALS_PREFLIGHT_EXPORT=false',
   },
   {
-    name: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA',
-    description:
-      'Opt-in to managing the golden cluster schema (template + data stream). Not allowed on Buildkite PR builds.',
-    example: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true',
-  },
-  {
     name: 'SELECTED_EVALUATORS',
     description: 'Comma-separated list of evaluator names to run.',
     example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
@@ -348,7 +342,6 @@ function runFastHelp() {
   logInfo('');
   logInfo('Commands:');
   logInfo('  init                          Set up connectors for local evals');
-  logInfo('  manage-schema                 Manage golden cluster schema (operators/weekly)');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
@@ -362,7 +355,6 @@ function runFastHelp() {
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
-  logInfo('  node scripts/evals manage-schema --rollover-if-needed');
   logInfo('  node scripts/evals start --suite agent-builder --model eis-gpt-4.1');
   logInfo('  node scripts/evals stop');
   logInfo('  node scripts/evals logs --service scout');

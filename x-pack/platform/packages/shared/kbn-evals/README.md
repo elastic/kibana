@@ -622,22 +622,7 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` will export documents into the `kibana-evaluations` data stream.
 
-By default, when exporting to an external cluster (`EVALUATIONS_ES_URL`/`EVALUATIONS_ES_API_KEY`), `@kbn/evals` will **not** attempt to create/update templates or create the data stream. Instead it validates that:
-
-- The `kibana-evaluations-template` schema is compatible (including schema version)
-- The latest backing index is compatible (meaning rollover has already occurred)
-- The API key has the privileges needed to export results
-
-To explicitly opt-in to schema management (intended for operators / scheduled pipelines), set:
-
-```bash
-KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true
-```
-
-Recommended approach: use **two** API keys
-
-- **Writer key (PR CI + most runs)**: can export results but cannot mutate schema
-- **Schema manager key (weekly + operators)**: can update templates and roll over data streams when intentional schema changes land
+When exporting to an external cluster (`EVALUATIONS_ES_URL`/`EVALUATIONS_ES_API_KEY`), `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs a **preflight export check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
 
 #### Writer key (minimal)
 
@@ -674,49 +659,6 @@ POST /_security/api_key
 Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
 
 `@kbn/evals` also runs a preflight check that writes a single sentinel document (with a deterministic ID) to validate that exports will succeed. It attempts to delete the document afterwards, but deletion failures are ignored (so the writer key does not need `delete`). Any leftover preflight document uses `run_id:"kbn-evals-preflight"` and `evaluator.name:"preflight"` and should not interfere with normal analysis.
-
-#### Schema manager key (weekly/operators)
-
-This key is only needed for intentional schema changes. It can update the index template and roll over the `kibana-evaluations` data stream.
-
-```http
-POST /_security/api_key
-{
-  "name": "kbn-evals-golden-cluster-schema-manager",
-  "expiration": "365d",
-  "role_descriptors": {
-    "kbn-evals-evaluations-schema-manager": {
-      "cluster": ["manage_index_templates"],
-      "indices": [
-        {
-          "names": ["kibana-evaluations*"],
-          "privileges": [
-            "auto_configure",
-            "create_index",
-            "create_doc",
-            "read",
-            "view_index_metadata",
-            "manage"
-          ]
-        }
-      ]
-    }
-  },
-  "metadata": {
-    "application": "kbn-evals",
-    "purpose": "manage evaluation results schema",
-    "environment": "ci"
-  }
-}
-```
-
-Run schema management (and roll over only if needed):
-
-```bash
-node scripts/evals manage-schema --rollover-if-needed
-```
-
-> Note: `manage-schema` will fall back to **validate-only** when run with a writer-only API key (403). In that mode it will not update templates or roll over, but it will still fail if the golden cluster schema is incompatible.
 
 ### Exporting to a separate Elasticsearch cluster
 

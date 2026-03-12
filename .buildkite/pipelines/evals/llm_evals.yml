@@ -44,7 +44,6 @@ steps:
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
-          KBN_EVALS_RUN_MANAGE_SCHEMA: '1'
           FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'

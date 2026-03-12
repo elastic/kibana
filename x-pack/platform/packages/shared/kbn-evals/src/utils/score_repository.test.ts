@@ -92,6 +92,7 @@ describe('EvaluationScoreRepository', () => {
 
     mockEsClient = {
       indices: {
+        existsIndexTemplate: jest.fn().mockResolvedValue(false),
         putIndexTemplate: jest.fn().mockResolvedValue({}),
         getIndexTemplate: jest.fn().mockResolvedValue({
           index_templates: [
@@ -123,9 +124,11 @@ describe('EvaluationScoreRepository', () => {
         getMapping: jest.fn().mockResolvedValue({
           '.ds-kibana-evaluations-000001': {
             mappings: {
+              _meta: { kbn_evals: { schema_version: 1 } },
               properties: {
                 example: { properties: { input: { enabled: false } } },
                 task: { properties: { output: { enabled: false } } },
+                evaluator: { properties: { metadata: { type: 'flattened' } } },
               },
             },
           },
@@ -323,9 +326,7 @@ describe('EvaluationScoreRepository', () => {
       try {
         await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
 
-        expect(mockEsClient.indices.getIndexTemplate).toHaveBeenCalled();
-        expect(mockEsClient.security.hasPrivileges).toHaveBeenCalled();
-        expect(mockEsClient.indices.getDataStream).toHaveBeenCalled();
+        expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
         expect(mockEsClient.indices.getMapping).toHaveBeenCalled();
         expect(mockEsClient.create).toHaveBeenCalledWith(
           expect.objectContaining({

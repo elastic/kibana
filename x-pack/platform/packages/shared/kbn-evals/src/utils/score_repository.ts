@@ -86,6 +86,9 @@ export interface EvaluationScoreDocument {
 
 type BuildkiteCiMetadata = NonNullable<NonNullable<EvaluationScoreDocument['ci']>['buildkite']>;
 
+/**
+ * Optional metadata enrichment for exported evaluation score documents.
+ */
 export interface ExportScoresOptions {
   /**
    * Optional suite identifier to attach to exported documents.
@@ -183,133 +186,79 @@ interface RunStatsAggregations {
 const EVALUATIONS_DATA_STREAM_ALIAS = 'kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
-const EVALUATIONS_SCHEMA_VERSION = 1;
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
-  private isBuildkitePullRequest(): boolean {
-    const pr = process.env.BUILDKITE_PULL_REQUEST;
-    return Boolean(pr && pr !== 'false');
+  private getLatestBackingIndexNameFromMappings(
+    mappingsByIndex: Record<string, any>
+  ): string | null {
+    const indexNames = Object.keys(mappingsByIndex ?? {});
+    if (indexNames.length === 0) return null;
+
+    // Data stream backing indices are typically `.ds-<ds>-YYYY.MM.DD-000001`.
+    // Lexicographic order reliably places the latest generation last.
+    indexNames.sort();
+    return indexNames[indexNames.length - 1];
   }
 
-  private shouldManageSchema(): boolean {
-    // If we're exporting to a separate (shared) cluster, default to *not* mutating cluster schema.
-    // CI jobs for PRs should not update templates or create/rollover data streams on the golden cluster.
-    const isExternalEvaluationsCluster = Boolean(
-      process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY
-    );
-
-    // Opt-in for operators / weekly pipeline when schema changes are intended.
-    if (process.env.KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA === 'true') {
-      if (this.isBuildkitePullRequest()) {
-        throw new Error(
-          'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true is not allowed on Buildkite PR builds. ' +
-            'Schema management must be performed by the weekly pipeline or an operator using the schema manager key.'
-        );
-      }
-      return true;
-    }
-
-    // Safe by default for local Scout test clusters (no external EVAL cluster configured).
-    return !isExternalEvaluationsCluster;
+  private isExportingToExternalCluster(): boolean {
+    return Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
   }
 
-  private async assertIndexTemplateCompatible(): Promise<void> {
-    let response: any;
+  private async assertLatestBackingIndexCompatible(): Promise<void> {
+    let mappingResponse: any;
     try {
-      response = await this.esClient.indices.getIndexTemplate({
-        name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+      // Use the backing index mapping (not index template APIs) so a writer-only key can validate
+      // compatibility with only `view_index_metadata` on `kibana-evaluations*`.
+      mappingResponse = await this.esClient.indices.getMapping({
+        index: EVALUATIONS_DATA_STREAM_ALIAS,
       });
     } catch (error: any) {
       if (error?.statusCode === 404) {
         throw new Error(
-          `Elasticsearch index template ${EVALUATIONS_DATA_STREAM_TEMPLATE} does not exist. ` +
-            `The golden cluster must be initialized by a schema manager before PR CI can export results.`
+          `Elasticsearch data stream ${EVALUATIONS_DATA_STREAM_ALIAS} does not exist. ` +
+            `Ensure the data stream and index template (${EVALUATIONS_DATA_STREAM_TEMPLATE}) exist before exporting results.`
         );
       }
       throw error;
     }
 
-    const indexTemplate = response?.index_templates?.[0]?.index_template;
-    const mappings = indexTemplate?.template?.mappings;
+    const latestIndex = this.getLatestBackingIndexNameFromMappings(mappingResponse);
+    if (!latestIndex) {
+      throw new Error(
+        `Unable to determine backing index mapping for data stream ${EVALUATIONS_DATA_STREAM_ALIAS}.`
+      );
+    }
+
+    const mappings = mappingResponse?.[latestIndex]?.mappings;
     const properties = mappings?.properties;
-    const meta = mappings?._meta;
 
     const exampleInputEnabled = properties?.example?.properties?.input?.enabled;
     const taskOutputEnabled = properties?.task?.properties?.output?.enabled;
     const evaluatorMetadataType = properties?.evaluator?.properties?.metadata?.type;
-    const schemaVersion = meta?.kbn_evals?.schema_version;
-
-    const schemaVersionOk =
-      schemaVersion === EVALUATIONS_SCHEMA_VERSION ||
-      (EVALUATIONS_SCHEMA_VERSION === 1 && schemaVersion == null);
 
     const ok =
       exampleInputEnabled === false &&
       taskOutputEnabled === false &&
-      evaluatorMetadataType === 'flattened' &&
-      schemaVersionOk;
+      evaluatorMetadataType === 'flattened';
 
     if (!ok) {
       throw new Error(
-        `Elasticsearch index template ${EVALUATIONS_DATA_STREAM_TEMPLATE} is incompatible with @kbn/evals. ` +
-          `Expected schema_version=${EVALUATIONS_SCHEMA_VERSION}, example.input.enabled=false, task.output.enabled=false, evaluator.metadata.type=flattened. ` +
+        `Latest backing index ${latestIndex} for ${EVALUATIONS_DATA_STREAM_ALIAS} is incompatible with @kbn/evals. ` +
+          `Expected example.input.enabled=false, task.output.enabled=false, evaluator.metadata.type=flattened. ` +
           `Got example.input.enabled=${String(exampleInputEnabled)}, task.output.enabled=${String(
             taskOutputEnabled
           )}, evaluator.metadata.type=${String(evaluatorMetadataType)}. ` +
-          `schema_version=${String(schemaVersion)}. ` +
-          `This usually means the golden cluster template is stale and needs an update + data stream rollover.`
-      );
-    }
-  }
-
-  private async assertExportPrivileges(): Promise<void> {
-    const hasPrivilegesResponse: any = await (this.esClient as any).security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [EVALUATIONS_DATA_STREAM_WILDCARD],
-            privileges: ['create_doc', 'read', 'view_index_metadata'],
-          },
-        ],
-      },
-    });
-
-    const ok = Boolean(hasPrivilegesResponse?.has_all_requested);
-    if (!ok) {
-      throw new Error(
-        `Elasticsearch export API key is missing required privileges on ${EVALUATIONS_DATA_STREAM_WILDCARD}. ` +
-          `Required: create_doc, read, view_index_metadata.`
-      );
-    }
-  }
-
-  private async assertLatestBackingIndexCompatible(): Promise<void> {
-    const ds: any = await this.esClient.indices.getDataStream({
-      name: EVALUATIONS_DATA_STREAM_ALIAS,
-    });
-    const dataStream = ds?.data_streams?.[0];
-    const latestIndex = dataStream?.indices?.slice(-1)?.[0]?.index_name;
-    if (!latestIndex) {
-      throw new Error(
-        `Unable to determine backing index for data stream ${EVALUATIONS_DATA_STREAM_ALIAS}.`
-      );
-    }
-
-    const mapping: any = await this.esClient.indices.getMapping({ index: latestIndex });
-    const m = mapping?.[latestIndex]?.mappings?.properties;
-    const exampleInputEnabled = m?.example?.properties?.input?.enabled;
-    const taskOutputEnabled = m?.task?.properties?.output?.enabled;
-
-    if (exampleInputEnabled !== false || taskOutputEnabled !== false) {
-      throw new Error(
-        `Latest backing index ${latestIndex} for ${EVALUATIONS_DATA_STREAM_ALIAS} is incompatible with @kbn/evals. ` +
-          `This usually means the template was updated but the data stream was not rolled over yet.`
+          `This usually means the golden cluster template is stale or the data stream was not rolled over after a schema change.`
       );
     }
   }
 
   private async ensureIndexTemplate(): Promise<void> {
+    if (this.isExportingToExternalCluster()) {
+      return;
+    }
+
     const templateBody = {
       index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
       data_stream: {},
@@ -318,12 +267,6 @@ export class EvaluationScoreRepository {
           refresh_interval: '5s',
         },
         mappings: {
-          _meta: {
-            kbn_evals: {
-              managed_by: 'kbn-evals',
-              schema_version: EVALUATIONS_SCHEMA_VERSION,
-            },
-          },
           properties: {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
@@ -421,7 +364,13 @@ export class EvaluationScoreRepository {
     };
 
     try {
-      if (this.shouldManageSchema()) {
+      const templateExists = await this.esClient.indices
+        .existsIndexTemplate({
+          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+        })
+        .catch(() => false);
+
+      if (!templateExists) {
         await this.esClient.indices.putIndexTemplate({
           name: EVALUATIONS_DATA_STREAM_TEMPLATE,
           index_patterns: templateBody.index_patterns,
@@ -429,39 +378,39 @@ export class EvaluationScoreRepository {
           template: templateBody.template as any,
         });
 
-        this.log.debug('Ensured Elasticsearch index template for evaluation scores');
-        return;
+        this.log.debug('Created Elasticsearch index template for evaluation scores');
       }
-
-      await this.assertIndexTemplateCompatible();
     } catch (error) {
-      this.log.error('Failed to ensure index template:', error);
+      this.log.error('Failed to create index template:', error);
       throw error;
     }
   }
 
   private async ensureDatastream(): Promise<void> {
+    if (this.isExportingToExternalCluster()) {
+      return;
+    }
+
     try {
       await this.esClient.indices.getDataStream({
         name: EVALUATIONS_DATA_STREAM_ALIAS,
       });
     } catch (error: any) {
       if (error?.statusCode === 404) {
-        if (!this.shouldManageSchema()) {
-          throw new Error(
-            `Elasticsearch data stream ${EVALUATIONS_DATA_STREAM_ALIAS} does not exist, and schema management is disabled. ` +
-              `This usually means the golden cluster is not initialized for @kbn/evals exports.`
-          );
-        }
-
         await this.esClient.indices.createDataStream({
           name: EVALUATIONS_DATA_STREAM_ALIAS,
         });
         this.log.debug(`Created datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`);
+        return;
       } else {
         throw error;
       }
     }
+  }
+
+  private async prepareLocalExportTarget(): Promise<void> {
+    await this.ensureIndexTemplate();
+    await this.ensureDatastream();
   }
 
   /**
@@ -469,18 +418,15 @@ export class EvaluationScoreRepository {
    * suite spends time on inference.
    *
    * For external (golden) clusters, this check is deliberately non-invasive:
-   * - Validates the index template schema version and required mapping invariants
-   * - Validates the latest backing index is compatible (rollover has occurred)
-   * - Validates the API key has the privileges needed to export results
+   * - Validates the data stream exists and has compatible mappings
+   * - Performs a small sentinel write (and best-effort cleanup) to validate write compatibility
    */
-  async preflightExport(runId: string): Promise<void> {
-    await this.ensureIndexTemplate();
-    await this.ensureDatastream();
+  async preflightExport(_runId: string): Promise<void> {
+    // For local (Scout) clusters, keep bootstrapping behavior unchanged.
+    await this.prepareLocalExportTarget();
 
-    if (!this.shouldManageSchema()) {
-      await this.assertExportPrivileges();
-      await this.assertLatestBackingIndexCompatible();
-    }
+    // For external clusters, do not attempt to create/update templates or create the data stream.
+    await this.assertLatestBackingIndexCompatible();
 
     const suiteId = process.env.EVAL_SUITE_ID ?? 'unknown-suite';
     const buildId = process.env.BUILDKITE_BUILD_ID ?? 'local';
@@ -491,13 +437,7 @@ export class EvaluationScoreRepository {
 
     // Prefer a deterministic ID to reduce leftover-document growth if deletion is not permitted.
     // Create conflicts (409) are treated as success.
-    const sentinelId = [
-      'preflight',
-      buildId,
-      jobId,
-      suiteId,
-      String(EVALUATIONS_SCHEMA_VERSION),
-    ].join('-');
+    const sentinelId = ['preflight', buildId, jobId, suiteId].join('-');
 
     const sentinelDoc: EvaluationScoreDocument = {
       '@timestamp': new Date().toISOString(),
@@ -524,7 +464,6 @@ export class EvaluationScoreRepository {
         input: {
           // Keep small + stable; when mappings are correct, this is ignored by ES (enabled:false).
           kind: 'preflight',
-          schema_version: EVALUATIONS_SCHEMA_VERSION,
         },
         dataset: {
           id: 'preflight',
@@ -536,7 +475,6 @@ export class EvaluationScoreRepository {
         repetition_index: 0,
         output: {
           kind: 'preflight',
-          schema_version: EVALUATIONS_SCHEMA_VERSION,
         },
         model: {
           id: 'kbn-evals-preflight',
@@ -549,7 +487,7 @@ export class EvaluationScoreRepository {
         score: 0,
         label: 'ok',
         explanation: null,
-        metadata: { preflight: true, schema_version: EVALUATIONS_SCHEMA_VERSION },
+        metadata: { preflight: true },
         trace_id: null,
         model: {
           id: 'kbn-evals-preflight',
@@ -607,8 +545,7 @@ export class EvaluationScoreRepository {
     options: ExportScoresOptions = {}
   ): Promise<void> {
     try {
-      await this.ensureIndexTemplate();
-      await this.ensureDatastream();
+      await this.prepareLocalExportTarget();
 
       if (documents.length === 0) {
         this.log.warning('No evaluation scores to export');

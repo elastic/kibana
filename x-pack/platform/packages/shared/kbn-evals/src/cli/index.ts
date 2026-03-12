@@ -17,7 +17,6 @@ import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
-import { manageSchemaCmd } from './commands/manage_schema';
 
 export async function run() {
   await new RunWithCommands(
@@ -26,7 +25,6 @@ export async function run() {
     },
     [
       initCmd,
-      manageSchemaCmd,
       startCmd,
       stopCmd,
       logsCmd,
