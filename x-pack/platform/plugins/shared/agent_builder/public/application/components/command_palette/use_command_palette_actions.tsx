@@ -24,8 +24,14 @@ const getShortcutSymbols = () => ({
 });
 
 const MAX_RECENT_CONVERSATIONS = 5;
+const MAX_SEARCH_RESULTS = 10;
 
-type CommandPaletteSection = 'quick' | 'conversations' | 'navigation' | 'shortcuts';
+type CommandPaletteSection =
+  | 'quick'
+  | 'searchResults'
+  | 'conversations'
+  | 'navigation'
+  | 'shortcuts';
 
 interface CommandPaletteAction {
   id: string;
@@ -36,12 +42,15 @@ interface CommandPaletteAction {
   onSelect: () => void;
 }
 
-const sectionLabels: Record<CommandPaletteSection, string> = {
+const getSectionLabels = (hasSearchQuery: boolean): Record<CommandPaletteSection, string> => ({
   quick: i18n.translate('xpack.agentBuilder.commandPalette.section.quickActions', {
     defaultMessage: 'Quick actions',
   }),
+  searchResults: i18n.translate('xpack.agentBuilder.commandPalette.section.searchResults', {
+    defaultMessage: 'Search results',
+  }),
   conversations: i18n.translate('xpack.agentBuilder.commandPalette.section.recentConversations', {
-    defaultMessage: 'Recents',
+    defaultMessage: hasSearchQuery ? 'Conversations' : 'Recents',
   }),
   navigation: i18n.translate('xpack.agentBuilder.commandPalette.section.navigation', {
     defaultMessage: 'Actions',
@@ -49,12 +58,14 @@ const sectionLabels: Record<CommandPaletteSection, string> = {
   shortcuts: i18n.translate('xpack.agentBuilder.commandPalette.section.keyboardShortcuts', {
     defaultMessage: 'Keyboard shortcuts',
   }),
-};
+});
 
 export const useCommandPaletteActions = ({
   onClose,
+  searchQuery = '',
 }: {
   onClose: () => void;
+  searchQuery?: string;
 }): EuiSelectableOption[] => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const {
@@ -64,29 +75,47 @@ export const useCommandPaletteActions = ({
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
   const { conversations = [] } = useConversationList();
 
-  const recentConversations = useMemo(() => {
-    return conversations.slice(0, MAX_RECENT_CONVERSATIONS);
-  }, [conversations]);
+  const trimmedQuery = searchQuery.trim();
+  const hasSearchQuery = trimmedQuery.length > 0;
+
+  const filteredConversations = useMemo(() => {
+    if (!hasSearchQuery) {
+      return conversations.slice(0, MAX_RECENT_CONVERSATIONS);
+    }
+    const lowerQuery = trimmedQuery.toLowerCase();
+    return conversations
+      .filter((c) => c.title?.toLowerCase().includes(lowerQuery))
+      .slice(0, MAX_SEARCH_RESULTS);
+  }, [conversations, hasSearchQuery, trimmedQuery]);
 
   const actions = useMemo<CommandPaletteAction[]>(() => {
     const shortcutSymbols = getShortcutSymbols();
+
+    const newChatLabel = hasSearchQuery
+      ? i18n.translate('xpack.agentBuilder.commandPalette.action.newChatWithQuery', {
+          defaultMessage: 'New chat "{query}"',
+          values: { query: trimmedQuery },
+        })
+      : i18n.translate('xpack.agentBuilder.commandPalette.action.newChat', {
+          defaultMessage: 'New chat',
+        });
+
     const items: CommandPaletteAction[] = [
       // Quick Actions
       {
         id: 'new-chat',
-        label: i18n.translate('xpack.agentBuilder.commandPalette.action.newChat', {
-          defaultMessage: 'New chat',
-        }),
-        icon: 'plus',
+        label: newChatLabel,
+        icon: 'plusInCircle',
         section: 'quick',
         onSelect: () => {
+          // TODO: Pass the query to the new chat if hasSearchQuery
           navigateToAgentBuilderUrl(appPaths.chat.new);
           onClose();
         },
       },
 
-      // Recent Conversations
-      ...recentConversations.map((conversation) => ({
+      // Conversations (filtered when searching, recent when not)
+      ...filteredConversations.map((conversation) => ({
         id: `conversation-${conversation.id}`,
         label:
           conversation.title ||
@@ -94,7 +123,7 @@ export const useCommandPaletteActions = ({
             defaultMessage: 'Untitled conversation',
           }),
         icon: 'discuss',
-        section: 'conversations' as const,
+        section: (hasSearchQuery ? 'searchResults' : 'conversations') as CommandPaletteSection,
         onSelect: () => {
           navigateToAgentBuilderUrl(
             appPaths.chat.conversation({ conversationId: conversation.id })
@@ -220,16 +249,33 @@ export const useCommandPaletteActions = ({
     application,
     isExperimentalFeaturesEnabled,
     hasAccessToGenAiSettings,
-    recentConversations,
+    filteredConversations,
+    hasSearchQuery,
+    trimmedQuery,
     onClose,
   ]);
 
   const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
     const options: EuiSelectableOption[] = [];
-    const sections: CommandPaletteSection[] = ['quick', 'conversations', 'navigation', 'shortcuts'];
+    const sectionLabels = getSectionLabels(hasSearchQuery);
+    const lowerQuery = trimmedQuery.toLowerCase();
+
+    // When searching, filter navigation items to match the query
+    // When not searching, show all items in their respective sections
+    const sections: CommandPaletteSection[] = hasSearchQuery
+      ? ['quick', 'searchResults', 'navigation']
+      : ['quick', 'conversations', 'navigation', 'shortcuts'];
 
     sections.forEach((section) => {
-      const sectionActions = actions.filter((action) => action.section === section);
+      let sectionActions = actions.filter((action) => action.section === section);
+
+      // When searching, filter navigation items by label match
+      if (hasSearchQuery && section === 'navigation') {
+        sectionActions = sectionActions.filter((action) =>
+          action.label.toLowerCase().includes(lowerQuery)
+        );
+      }
+
       if (sectionActions.length === 0) return;
 
       // Add section header
@@ -254,7 +300,7 @@ export const useCommandPaletteActions = ({
     });
 
     return options;
-  }, [actions]);
+  }, [actions, hasSearchQuery, trimmedQuery]);
 
   return selectableOptions;
 };

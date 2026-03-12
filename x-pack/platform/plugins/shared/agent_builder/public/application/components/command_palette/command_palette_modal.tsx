@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiModal,
@@ -26,7 +26,8 @@ interface CommandPaletteModalProps {
 export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'commandPaletteModal' });
   const { euiTheme } = useEuiTheme();
-  const selectableOptions = useCommandPaletteActions({ onClose });
+  const [searchValue, setSearchValue] = useState('');
+  const selectableOptions = useCommandPaletteActions({ onClose, searchQuery: searchValue });
 
   const handleChange = useCallback(
     (options: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
@@ -87,11 +88,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClos
         searchable
         searchProps={{
           placeholder: i18n.translate('xpack.agentBuilder.commandPalette.searchPlaceholder', {
-            defaultMessage: 'Search...',
+            defaultMessage: 'Search or start a chat',
           }),
           autoFocus: true,
+          value: searchValue,
+          onChange: (value) => setSearchValue(value),
           'data-test-subj': 'agentBuilderCommandPaletteSearch',
         }}
+        isPreFiltered
         options={selectableOptions}
         onChange={handleChange}
         singleSelection
