@@ -142,6 +142,7 @@
     "@kbn/scout",
     "@kbn/cps-utils",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/core-http-browser",
   ],
   "exclude": ["target/**/*"]
 }

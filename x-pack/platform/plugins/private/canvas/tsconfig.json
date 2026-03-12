@@ -80,7 +80,8 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/visualizations-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }
