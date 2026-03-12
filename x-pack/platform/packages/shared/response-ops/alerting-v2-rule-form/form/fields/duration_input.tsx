@@ -16,7 +16,7 @@ export interface DurationInputProps {
   /** Fallback duration string used when `value` is empty */
   fallback?: string;
   errors?: string;
-  numberLabel: string;
+  numberLabel?: string;
   unitAriaLabel: string;
   dataTestSubj: string;
   idPrefix: string;
@@ -74,12 +74,12 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
               value={intervalNumber}
               onChange={onNumberChange}
               fullWidth
-              prepend={[numberLabel]}
+              prepend={numberLabel ? [numberLabel] : undefined}
               isInvalid={!!errors}
               name="interval"
               data-test-subj={`${idPrefix}NumberInput`}
               id={`${idPrefix}NumberInput`}
-              aria-label={numberLabel}
+              aria-label={numberLabel || undefined}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
