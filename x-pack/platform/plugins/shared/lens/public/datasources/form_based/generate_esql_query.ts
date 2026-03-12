@@ -32,6 +32,8 @@ import {
   AUTO_TARGET_NUMBER_OF_BUCKETS,
   getTimeZoneAndInterval,
   hasDateRange,
+  T_END,
+  T_START,
 } from './date_histogram_esql';
 
 // esAggs column ID manipulation functions
@@ -106,8 +108,7 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   ms: '1ms',
 } as const;
 
-export const T_START = '?_tstart';
-export const T_END = '?_tend';
+export { T_START, T_END } from './date_histogram_esql';
 
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
 

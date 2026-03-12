@@ -13,6 +13,10 @@ export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
 /** Default date histogram interval when auto cannot be used. */
 export const DEFAULT_DATE_HISTOGRAM_INTERVAL = '1h';
 
+/** ES|QL query parameter names for date range (used in BUCKET and WHERE). */
+export const T_START = '?_tstart';
+export const T_END = '?_tend';
+
 export const hasDateRange = (dateRange: DateRange | undefined) => {
   return dateRange?.fromDate != null && dateRange?.toDate != null;
 };
