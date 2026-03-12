@@ -346,6 +346,7 @@ export const getSavedObjectTypes = (
           monitoring_diagnostics: { type: 'flattened', index: false },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
         },
       },
       migrations: {
@@ -447,6 +448,16 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -497,6 +508,7 @@ export const getSavedObjectTypes = (
           },
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
+          is_verifier: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -531,6 +543,16 @@ export const getSavedObjectTypes = (
             forwardCompatibility: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV3.extends({}, { unknowns: 'ignore' }),
           },
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_verifier: { type: 'boolean' },
+              },
+            },
+          ],
         },
       },
     },
@@ -1612,6 +1634,12 @@ export const getSavedObjectTypes = (
           packagePolicyCount: { type: 'integer' },
           created_at: { type: 'date' },
           updated_at: { type: 'date' },
+          verification_id: { type: 'keyword' },
+          verification_status: { type: 'keyword' },
+          verification_timestamp: { type: 'date' },
+          verification_started_at: { type: 'date' },
+          verification_failed_at: { type: 'date' },
+          verification_permissions: { type: 'flattened' },
         },
       },
       modelVersions: {
@@ -1708,6 +1736,56 @@ export const getSavedObjectTypes = (
               vars: schema.any(),
               created_at: schema.string(),
               updated_at: schema.string(),
+            }),
+          },
+        },
+        4: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                verification_id: { type: 'keyword' },
+                verification_status: { type: 'keyword' },
+                verification_timestamp: { type: 'date' },
+                verification_started_at: { type: 'date' },
+                verification_failed_at: { type: 'date' },
+                verification_permissions: { type: 'flattened' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                namespace: schema.maybe(schema.string()),
+                cloudProvider: schema.string(),
+                accountType: schema.maybe(schema.string()),
+                vars: schema.any(),
+                created_at: schema.string(),
+                updated_at: schema.string(),
+                verification_id: schema.maybe(schema.string()),
+                verification_status: schema.maybe(schema.string()),
+                verification_timestamp: schema.maybe(schema.string()),
+                verification_started_at: schema.maybe(schema.string()),
+                verification_failed_at: schema.maybe(schema.string()),
+                verification_permissions: schema.maybe(schema.any()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object({
+              name: schema.string(),
+              namespace: schema.maybe(schema.string()),
+              cloudProvider: schema.string(),
+              accountType: schema.maybe(schema.string()),
+              vars: schema.any(),
+              created_at: schema.string(),
+              updated_at: schema.string(),
+              verification_id: schema.maybe(schema.string()),
+              verification_status: schema.maybe(schema.string()),
+              verification_timestamp: schema.maybe(schema.string()),
+              verification_started_at: schema.maybe(schema.string()),
+              verification_failed_at: schema.maybe(schema.string()),
+              verification_permissions: schema.maybe(schema.any()),
             }),
           },
         },

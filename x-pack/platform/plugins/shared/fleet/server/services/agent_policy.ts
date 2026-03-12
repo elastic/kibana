@@ -6,7 +6,7 @@
  */
 import apm from 'elastic-apm-node';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
-import { v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
@@ -70,9 +70,12 @@ import type {
   OutputsForAgentPolicy,
   PostAgentPolicyPostUpdateCallback,
 } from '../types';
+import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import {
+  AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENT_POLICY_INDEX,
   agentPolicyStatuses,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -2504,6 +2507,149 @@ class AgentPolicyService {
       schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
       is_protected: false,
     };
+  }
+
+  public async createVerifierPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    connectorId: string,
+    packagePolicyIds: string[]
+  ): Promise<{ policyId: string; startedAt: string }> {
+    const logger = this.getLogger('createVerifierPolicy');
+    const shortId = uuidv4().slice(0, 8);
+    const policyName = `verifier-${connectorId}-${shortId}`;
+    const policyId = uuidv4();
+
+    logger.info(
+      `[OTelVerifier] Creating verifier policy ${policyName} for connector ${connectorId}`
+    );
+
+    const agentPolicy = await this.create(
+      soClient,
+      esClient,
+      {
+        name: policyName,
+        description: `OTel permission verifier for cloud connector ${connectorId}`,
+        inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+        supports_agentless: true,
+        is_verifier: true,
+        namespace: 'default',
+        monitoring_enabled: [],
+        keep_monitoring_alive: true,
+        is_protected: false,
+      },
+      { id: policyId, skipDeploy: true }
+    );
+
+    const otelPackagePolicy: NewPackagePolicy = {
+      name: `verifier-otel-${connectorId}-${shortId}`,
+      namespace: 'default',
+      enabled: true,
+      policy_ids: [agentPolicy.id],
+      package: {
+        name: 'filelog_otel',
+        title: 'File Log OpenTelemetry input',
+        version: '0.1.0',
+      },
+      inputs: [
+        {
+          type: 'otelcol',
+          policy_template: 'filelogreceiver',
+          enabled: true,
+          vars: {
+            include: { type: 'text', value: ['/var/log/*.log'] },
+            start_at: { type: 'select', value: 'end' },
+            include_file_name: { type: 'bool', value: true },
+            include_file_path: { type: 'bool', value: false },
+            poll_interval: { type: 'duration', value: '200ms' },
+          },
+          streams: [],
+        },
+      ],
+    };
+
+    logger.info(
+      `[OTelVerifier] Creating OTel package policy for verifier policy ${agentPolicy.id}`
+    );
+    await packagePolicyService.create(soClient, esClient, otelPackagePolicy, {
+      bumpRevision: false,
+      force: true,
+    });
+
+    for (const ppId of packagePolicyIds) {
+      const pp = await packagePolicyService.get(soClient, ppId);
+      if (!pp) {
+        logger.warn(`[OTelVerifier] Package policy ${ppId} not found, skipping`);
+        continue;
+      }
+      const updatedPolicyIds = [...(pp.policy_ids ?? []), agentPolicy.id];
+      await packagePolicyService.update(soClient, esClient, ppId, {
+        ...pp,
+        policy_ids: updatedPolicyIds,
+      });
+    }
+
+    logger.info(`[OTelVerifier] Deploying verifier policy ${agentPolicy.id}`);
+    await this.deployPolicy(soClient, agentPolicy.id, undefined, {
+      throwOnAgentlessError: true,
+    });
+
+    const startedAt = new Date().toISOString();
+
+    await soClient.update<CloudConnectorSOAttributes>(
+      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      connectorId,
+      {
+        verification_started_at: startedAt,
+      }
+    );
+
+    logger.info(
+      `[OTelVerifier] Created deployment for verifier policy ${agentPolicy.id}, verification ${verificationId}`
+    );
+
+    return { policyId: agentPolicy.id, startedAt };
+  }
+
+  public async deleteVerifierPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    policyId: string
+  ): Promise<void> {
+    const logger = this.getLogger('deleteVerifierPolicy');
+    logger.info(`[OTelVerifier] Deleting verifier policy ${policyId}`);
+
+    try {
+      await agentlessAgentService.deleteAgentlessAgent(policyId);
+    } catch (err) {
+      logger.info(`[OTelVerifier] Failed to delete agentless deployment for ${policyId}: ${err}`);
+    }
+
+    const allPolicies = await packagePolicyService.list(soClient, {
+      kuery: `ingest-package-policies.policy_ids: "${policyId}"`,
+      perPage: 1000,
+    });
+
+    for (const pp of allPolicies?.items ?? []) {
+      const updatedPolicyIds = (pp.policy_ids ?? []).filter((id) => id !== policyId);
+      try {
+        await packagePolicyService.update(soClient, esClient, pp.id, {
+          ...pp,
+          policy_ids: updatedPolicyIds,
+        });
+      } catch (err) {
+        logger.warn(
+          `[OTelVerifier] Failed to remove verifier policy from package policy ${pp.id}: ${err}`
+        );
+      }
+    }
+
+    try {
+      await this.delete(soClient, esClient, policyId, { force: true });
+      logger.info(`[OTelVerifier] Deleted verifier policy ${policyId}`);
+    } catch (err) {
+      logger.error(`[OTelVerifier] Failed to delete verifier agent policy ${policyId}: ${err}`);
+    }
   }
 }
 

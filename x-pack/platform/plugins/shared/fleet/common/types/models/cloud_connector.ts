@@ -47,6 +47,51 @@ export interface AzureCloudConnectorVars {
 
 export type CloudConnectorVars = AwsCloudConnectorVars | AzureCloudConnectorVars;
 
+export type VerificationStatus = 'pending' | 'in_progress' | 'success' | 'failed' | 'timeout';
+
+export type PermissionStatus = 'granted' | 'denied' | 'error';
+
+export interface VerificationPermissionResult {
+  action: string;
+  category: string;
+  status: PermissionStatus;
+  required: boolean;
+  error_code?: string;
+  error_message?: string;
+}
+
+export interface VerificationResultDocument {
+  '@timestamp': string;
+  cloud_connector_id: string;
+  policy: {
+    id: string;
+    name: string;
+  };
+  policy_template: string;
+  package: {
+    name: string;
+    title: string;
+    version: string;
+  };
+  package_policy: {
+    id: string;
+  };
+  namespace: string;
+  provider: {
+    type: string;
+    account: string;
+    region: string;
+  };
+  account_type: string;
+  permission: VerificationPermissionResult;
+  verification: {
+    method: string;
+    endpoint: string;
+    duration_ms: number;
+    verified_at: string;
+  };
+}
+
 export interface CloudConnector {
   id: string;
   name: string;
@@ -57,6 +102,12 @@ export interface CloudConnector {
   created_at: string;
   updated_at: string;
   namespace?: string;
+  verification_id?: string;
+  verification_status?: VerificationStatus;
+  verification_timestamp?: string;
+  verification_started_at?: string;
+  verification_failed_at?: string;
+  verification_permissions?: VerificationPermissionResult[];
 }
 
 export interface CloudConnectorListOptions {
