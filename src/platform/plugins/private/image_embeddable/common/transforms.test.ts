@@ -42,7 +42,7 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(legacy as any)).toEqual({
+    expect(transformOut(legacy)).toEqual({
       image_config: {
         src: {
           type: 'file',
@@ -76,7 +76,7 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(legacy as any)).toEqual({
+    expect(transformOut(legacy)).toEqual({
       image_config: {
         src: {
           type: 'url',
@@ -110,6 +110,6 @@ describe('transformOut', () => {
       },
     };
 
-    expect(transformOut(current as any)).toEqual(current);
+    expect(transformOut(current)).toEqual(current);
   });
 });
