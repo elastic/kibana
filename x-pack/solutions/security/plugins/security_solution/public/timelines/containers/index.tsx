@@ -418,6 +418,7 @@ export const useTimelineEventsHandler = ({
           runtimeMappings: runtimeMappings ?? {},
           ...timerange,
           ...deStructureEqlOptions(eqlOptions),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
