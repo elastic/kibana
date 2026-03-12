@@ -396,6 +396,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
         'xpack.genAiSettings.showSpacesIntegration (boolean?)',
         'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
+        'xpack.genAiSettings.showAnonymizationProfileSettings (boolean?)',
         'xpack.maintenanceWindows.enabled (boolean?)',
         /**
          * Rule form V2 feature flags
