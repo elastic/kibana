@@ -45,9 +45,11 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
+  selectEditorWorkflowLookup,
   selectEditorYaml,
   selectExecution,
   selectHasChanges,
+  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectStepExecutions,
@@ -215,6 +217,9 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+
+  const highlightedStepId = useSelector(selectHighlightedStepId);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -490,6 +495,22 @@ export const WorkflowYAMLEditor = ({
 
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
+
+  // Scroll editor to highlighted step when selected from execution flyout
+  useEffect(() => {
+    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+      return;
+    }
+    let lineStart: number | undefined;
+    if (highlightedStepId === '__trigger') {
+      lineStart = workflowLookup.triggersLineStart;
+    } else {
+      lineStart = workflowLookup.steps[highlightedStepId]?.lineStart;
+    }
+    if (lineStart) {
+      editorRef.current?.revealLineInCenter(lineStart);
+    }
+  }, [isEditorMounted, highlightedStepId, workflowLookup]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);

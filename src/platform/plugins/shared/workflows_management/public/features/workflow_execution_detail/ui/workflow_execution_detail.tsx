@@ -9,6 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -26,6 +27,7 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import { setHighlightedStepId } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useStepExecution } from '../model/use_step_execution';
 
@@ -38,6 +40,7 @@ export interface WorkflowExecutionDetailProps {
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
+    const dispatch = useDispatch();
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
@@ -82,6 +85,29 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
       selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
+
+    // Sync selected step execution to Redux highlightedStepId for editor scroll & decorations
+    useEffect(() => {
+      if (!selectedStepExecutionId || selectedStepExecutionId === '__overview') {
+        dispatch(setHighlightedStepId({ stepId: undefined }));
+        return;
+      }
+      if (selectedStepExecutionId === 'trigger') {
+        dispatch(setHighlightedStepId({ stepId: '__trigger' }));
+        return;
+      }
+      const stepExecution = workflowExecution?.stepExecutions?.find(
+        (step) => step.id === selectedStepExecutionId
+      );
+      dispatch(setHighlightedStepId({ stepId: stepExecution?.stepId }));
+    }, [selectedStepExecutionId, workflowExecution?.stepExecutions, dispatch]);
+
+    // Clear highlighted step when execution detail unmounts
+    useEffect(() => {
+      return () => {
+        dispatch(setHighlightedStepId({ stepId: undefined }));
+      };
+    }, [dispatch]);
 
     // Find the lightweight step from the polled execution (has status/duration but no I/O)
     const lightweightStep = useMemo(() => {

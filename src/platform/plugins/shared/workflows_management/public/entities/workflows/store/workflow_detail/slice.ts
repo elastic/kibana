@@ -78,7 +78,7 @@ const workflowDetailSlice = createSlice({
         state.computed.workflowLookup
       );
     },
-    setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
+    setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
