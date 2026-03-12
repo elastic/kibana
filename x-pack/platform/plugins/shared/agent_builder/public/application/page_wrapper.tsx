@@ -9,6 +9,7 @@ import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { AccessBoundary } from './components/access/access_boundary';
+import { CommandPaletteProvider } from './components/command_palette';
 
 const wrapperStyles = css`
   display: inherit;
@@ -20,7 +21,9 @@ const wrapperStyles = css`
 export const PageWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <div css={wrapperStyles} data-test-subj="agentBuilderWrapper">
-      <AccessBoundary>{children}</AccessBoundary>
+      <AccessBoundary>
+        <CommandPaletteProvider>{children}</CommandPaletteProvider>
+      </AccessBoundary>
     </div>
   );
 };
