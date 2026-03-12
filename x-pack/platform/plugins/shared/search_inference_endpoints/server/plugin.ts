@@ -19,6 +19,7 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
+import { InferenceEndpoints } from './inference_endpoints';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -125,11 +126,18 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
+    const internalRepo = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const endpoints = new InferenceEndpoints(this.featureRegistry, internalRepo, esClient);
+
     return {
       features: {
         get: this.featureRegistry.get.bind(this.featureRegistry),
         getAll: this.featureRegistry.getAll.bind(this.featureRegistry),
         register: this.featureRegistry.register.bind(this.featureRegistry),
+      },
+      endpoints: {
+        getForFeature: endpoints.getForFeature.bind(endpoints),
       },
     };
   }

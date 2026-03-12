@@ -7,9 +7,12 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 
-export type { InferenceTaskType };
+export type { InferenceInferenceEndpointInfo, InferenceTaskType };
 
 export interface InferenceFeatureConfig {
   featureId: string;
@@ -36,8 +39,13 @@ export interface SearchInferenceEndpointsPluginSetup {
   features: InferenceFeatureRegistryContract;
 }
 
+export interface InferenceEndpointsContract {
+  getForFeature: (featureId: string) => Promise<InferenceInferenceEndpointInfo[]>;
+}
+
 export interface SearchInferenceEndpointsPluginStart {
   features: InferenceFeatureRegistryStartContract;
+  endpoints: InferenceEndpointsContract;
 }
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
