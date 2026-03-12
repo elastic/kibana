@@ -29,8 +29,8 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
-import { PLUGIN_ID } from '../../../../common';
-import { useKibana } from '../../../hooks/use_kibana';
+import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
+import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import type { ChildWorkflowExecutionInfo } from '../model/use_child_workflow_executions';
 
@@ -39,8 +39,10 @@ interface WorkflowStepExecutionDetailsProps {
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
-  childWorkflowExecution?: ChildWorkflowExecutionInfo;
-  ownerChildExecution?: ChildWorkflowExecutionInfo;
+  /** When the step is workflow.execute, the child workflow execution (to link to) */
+  workflowExecution?: ChildWorkflowExecutionInfo;
+  /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
+  parentWorkflowExecution?: WorkflowExecutionLinkInfo;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
@@ -49,11 +51,27 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     stepExecution,
     workflowExecutionDuration,
     isLoadingStepData,
-    childWorkflowExecution,
-    ownerChildExecution,
+    workflowExecution,
+    parentWorkflowExecution,
   }) => {
-    const { application } = useKibana().services;
     const { euiTheme } = useEuiTheme();
+    const workflowNav = useNavigateToExecution(
+      workflowExecution
+        ? {
+            workflowId: workflowExecution.workflowId,
+            executionId: workflowExecution.executionId,
+          }
+        : { workflowId: '' }
+    );
+    const parentWorkflowNav = useNavigateToExecution(
+      parentWorkflowExecution
+        ? {
+            workflowId: parentWorkflowExecution.workflowId,
+            executionId: parentWorkflowExecution.executionId,
+          }
+        : { workflowId: '' }
+    );
+
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -65,21 +83,25 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       stepExecution?.stepType === 'workflow.execute' ||
       stepExecution?.stepType === 'workflow.executeAsync';
 
-    const navigateToChildExecution = useCallback(() => {
-      if (childWorkflowExecution) {
-        application.navigateToApp(PLUGIN_ID, {
-          path: `/${childWorkflowExecution.workflowId}?tab=executions&executionId=${childWorkflowExecution.executionId}`,
-        });
-      }
-    }, [application, childWorkflowExecution]);
+    const handleWorkflowLinkClick = useCallback(
+      (e: React.MouseEvent) => {
+        if (workflowExecution) {
+          e.preventDefault();
+          workflowNav.navigate();
+        }
+      },
+      [workflowExecution, workflowNav]
+    );
 
-    const navigateToOwnerExecution = useCallback(() => {
-      if (ownerChildExecution) {
-        application.navigateToApp(PLUGIN_ID, {
-          path: `/${ownerChildExecution.workflowId}?tab=executions&executionId=${ownerChildExecution.executionId}`,
-        });
-      }
-    }, [application, ownerChildExecution]);
+    const handleParentWorkflowLinkClick = useCallback(
+      (e: React.MouseEvent) => {
+        if (parentWorkflowExecution) {
+          e.preventDefault();
+          parentWorkflowNav.navigate();
+        }
+      },
+      [parentWorkflowExecution, parentWorkflowNav]
+    );
 
     // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
     const triggerType = isTriggerPseudoStep
@@ -153,64 +175,69 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {isWorkflowExecuteStep && childWorkflowExecution && (
+          {isWorkflowExecuteStep && workflowExecution && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, childWorkflowExecution.status)}
+                  {getExecutionStatusIcon(euiTheme, workflowExecution.status)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      <EuiLink onClick={navigateToChildExecution}>
-                        {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
+                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                      <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
+                        {`${stepExecution?.stepType}: ${workflowExecution.workflowName}`}
                       </EuiLink>
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="popout"
-                    size="s"
-                    color="primary"
-                    onClick={navigateToChildExecution}
-                    css={{ cursor: 'pointer' }}
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiLink
+                    href={workflowNav.href}
+                    onClick={handleWorkflowLinkClick}
                     aria-label={i18n.translate(
-                      'workflowsManagement.stepExecutionDetails.openChildExecution',
-                      { defaultMessage: 'Open child workflow execution' }
+                      'workflowsManagement.stepExecutionDetails.openWorkflowExecution',
+                      { defaultMessage: 'Open workflow execution' }
                     )}
-                  />
+                  >
+                    <EuiIcon type="popout" size="s" color="primary" aria-hidden={true} />
+                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          {ownerChildExecution && (
+          {parentWorkflowExecution && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, ownerChildExecution.status)}
+                  {getExecutionStatusIcon(euiTheme, parentWorkflowExecution.status)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
-                      <EuiLink onClick={navigateToOwnerExecution}>
-                        {`${ownerChildExecution.workflowName}: ${stepExecution?.stepId}`}
+                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                      <EuiLink
+                        href={parentWorkflowNav.href}
+                        onClick={handleParentWorkflowLinkClick}
+                      >
+                        {`${parentWorkflowExecution.workflowName}: ${stepExecution?.stepId}`}
                       </EuiLink>
                     </h3>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="popout"
-                    size="s"
-                    color="primary"
-                    onClick={navigateToOwnerExecution}
-                    css={{ cursor: 'pointer' }}
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiLink
+                    href={parentWorkflowNav.href}
+                    onClick={handleParentWorkflowLinkClick}
                     aria-label={i18n.translate(
-                      'workflowsManagement.stepExecutionDetails.openOwnerExecution',
+                      'workflowsManagement.stepExecutionDetails.openParentWorkflowExecution',
                       { defaultMessage: 'Open parent workflow execution' }
                     )}
-                  />
+                  >
+                    <EuiIcon type="popout" size="s" color="primary" aria-hidden={true} />
+                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

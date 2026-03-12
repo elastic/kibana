@@ -88,17 +88,17 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
 
     // Find the lightweight step from the polled execution (has status/duration but no I/O).
-    // If not found in parent steps, check child workflow execution steps.
+    // If not found in root steps, check child workflow execution steps.
     const {
       lightweightStep,
       stepExecutionId: resolvedExecutionId,
-      ownerChildExecution,
+      parentWorkflowExecution,
     } = useMemo(() => {
       if (!selectedStepExecutionId || isPseudoStep) {
         return {
           lightweightStep: undefined,
           stepExecutionId: executionId,
-          ownerChildExecution: undefined,
+          parentWorkflowExecution: undefined,
         };
       }
 
@@ -109,7 +109,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         return {
           lightweightStep: parentStep,
           stepExecutionId: executionId,
-          ownerChildExecution: undefined,
+          parentWorkflowExecution: undefined,
         };
       }
 
@@ -121,7 +121,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
           return {
             lightweightStep: childStep,
             stepExecutionId: childExec.executionId,
-            ownerChildExecution: childExec,
+            parentWorkflowExecution: childExec,
           };
         }
       }
@@ -129,7 +129,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return {
         lightweightStep: undefined,
         stepExecutionId: executionId,
-        ownerChildExecution: undefined,
+        parentWorkflowExecution: undefined,
       };
     }, [
       workflowExecution?.stepExecutions,
@@ -203,8 +203,8 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
-              childWorkflowExecution={selectedStepChildExecution}
-              ownerChildExecution={ownerChildExecution}
+              workflowExecution={selectedStepChildExecution}
+              parentWorkflowExecution={parentWorkflowExecution}
             />
           }
           minFlexPanelSize={200}
