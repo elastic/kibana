@@ -55,6 +55,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. */
+  openSidebarConversation?: () => void;
 }
 
 /**
