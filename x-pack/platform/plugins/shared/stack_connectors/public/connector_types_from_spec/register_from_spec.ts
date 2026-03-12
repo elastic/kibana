@@ -70,6 +70,7 @@ const createConnectorTypeFromSpec = (
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
     source: ACTION_TYPE_SOURCES.spec,
+    isExperimental: spec.metadata.isPreview,
     selectMessage: spec.metadata.description,
     iconClass: getIcon(spec),
     // Temporary workaround to hide workflows connector when workflows UI setting is disabled.

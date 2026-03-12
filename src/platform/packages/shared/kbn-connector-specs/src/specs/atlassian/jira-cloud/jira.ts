@@ -22,6 +22,7 @@ export const JiraConnector: ConnectorSpec = {
       defaultMessage: 'Connect to Jira to pull data from your project.',
     }),
     minimumLicense: 'enterprise',
+    isPreview: true,
     supportedFeatureIds: ['workflows'],
   },
   auth: {

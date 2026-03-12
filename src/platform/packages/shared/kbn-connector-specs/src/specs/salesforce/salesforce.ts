@@ -50,6 +50,7 @@ export const SalesforceConnector: ConnectorSpec = {
       defaultMessage: 'Connect to Salesforce to query and explore your org data',
     }),
     minimumLicense: 'enterprise',
+    isPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 
