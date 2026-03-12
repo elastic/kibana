@@ -100,7 +100,7 @@ export interface SmlTypeDefinition {
   ) => Promise<SmlConversationAttachment | undefined>;
 
   /**
-   * Optional: custom fetch frequency for the crawler.
+   * Optional: custom crawl interval for the crawler.
    * Defaults to '10m' if not provided.
    */
   fetchFrequency?: () => string;

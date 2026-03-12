@@ -56,7 +56,7 @@ export const createSmlAttachTool = ({
   tags: ['sml', 'attachment'],
   handler: async ({ items }, context) => {
     const smlService = getSmlService();
-    const { spaceId, savedObjectsClient, request, attachments, esClient } = context;
+    const { spaceId, savedObjectsClient, request, attachments, esClient, logger } = context;
 
     const accessMap = await smlService.checkItemsAccess({
       items: items.map((item) => ({ id: item.chunk_id, type: item.attachment_type })),
@@ -130,8 +130,13 @@ export const createSmlAttachTool = ({
             },
           };
         } catch (error) {
+          logger.error(
+            `sml_attach: error converting item '${item.chunk_id}' (type: ${
+              item.attachment_type
+            }): ${(error as Error).message}`
+          );
           return createErrorResult({
-            message: `Error converting SML item '${item.chunk_id}': ${(error as Error).message}`,
+            message: `Failed to convert SML item '${item.chunk_id}' to attachment`,
             metadata: { chunk_id: item.chunk_id, attachment_type: item.attachment_type },
           });
         }

@@ -201,8 +201,7 @@ describe('createSmlAttachTool', () => {
     )) as { results: unknown[] };
     expect(result.results).toHaveLength(1);
     expect((result.results[0] as { type: string }).type).toBe(ToolResultType.error);
-    expect((result.results[0] as ErrorResult).data.message).toContain('Error converting SML item');
-    expect((result.results[0] as ErrorResult).data.message).toContain('Conversion failed');
+    expect((result.results[0] as ErrorResult).data.message).toContain('Failed to convert SML item');
   });
 
   it('handles multiple items with mix of authorized and unauthorized', async () => {

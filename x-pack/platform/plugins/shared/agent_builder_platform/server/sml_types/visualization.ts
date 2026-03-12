@@ -48,6 +48,7 @@ const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
 
 export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_SML_TYPE,
+  fetchFrequency: () => '1h',
 
   list: async (context) => {
     const finder = context.savedObjectsClient.createPointInTimeFinder({
