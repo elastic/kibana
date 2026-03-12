@@ -18,13 +18,33 @@ import {
 } from './types';
 import type { ListPagesInput, GetPageInput, ListSpacesInput, GetSpaceInput } from './types';
 
+/** Bare subdomain: alphanumeric and hyphens only (no dots, no .atlassian.net suffix). */
+const BARE_SUBDOMAIN_REGEX = /^[a-z0-9-]+$/i;
+const ATLASSIAN_NET_SUFFIX = '.atlassian.net';
+
 /**
  * Builds the Confluence Cloud base URL from the connector config.
- * Subdomain is required by the connector schema and enforced by the front-end form;
- * no extra validation here so agents don't add redundant checks.
+ * Validates and normalizes subdomain: trims, strips optional .atlassian.net suffix,
+ * rejects empty, full hostnames (containing '.'), and invalid characters.
  */
-const buildBaseUrl = (ctx: ActionContext) =>
-  `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.atlassian.net`;
+const buildBaseUrl = (ctx: ActionContext): string => {
+  let sub = String(ctx.config?.subdomain ?? '').trim();
+  if (sub === '') {
+    throw new Error('Confluence Cloud subdomain is required');
+  }
+  if (sub.toLowerCase().endsWith(ATLASSIAN_NET_SUFFIX)) {
+    sub = sub.slice(0, -ATLASSIAN_NET_SUFFIX.length).trim();
+  }
+  if (sub.includes('.')) {
+    throw new Error(
+      'Confluence Cloud subdomain must be a bare subdomain (e.g. your-domain), not a full hostname'
+    );
+  }
+  if (!BARE_SUBDOMAIN_REGEX.test(sub)) {
+    throw new Error('Confluence Cloud subdomain may only contain letters, numbers, and hyphens');
+  }
+  return `https://${sub}${ATLASSIAN_NET_SUFFIX}`;
+};
 
 const CONFLUENCE_V2_PREFIX = '/wiki/api/v2';
 
@@ -72,7 +92,11 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
   schema: z.object({
     subdomain: z
       .string()
+      .trim()
       .min(1)
+      .regex(BARE_SUBDOMAIN_REGEX, {
+        message: 'Subdomain may only contain letters, numbers, and hyphens (e.g. your-domain)',
+      })
       .describe(
         i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
           defaultMessage: 'Your Atlassian subdomain',
