@@ -1268,7 +1268,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Download a file associated with a response action.
+    * Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+> info
+> Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
 
     */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
