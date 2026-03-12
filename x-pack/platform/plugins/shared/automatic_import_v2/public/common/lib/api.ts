@@ -206,6 +206,48 @@ export const getDataStreamResults = async ({
     }
   );
 
+export interface ChatEditPipelineRequest {
+  integrationId: string;
+  dataStreamId: string;
+  connectorId: string;
+  currentPipeline: Record<string, unknown>;
+  userMessage: string;
+  conversationHistory?: Array<{ role: string; content: string }>;
+}
+
+export interface ChatEditPipelineResponse {
+  updatedPipeline: Record<string, unknown>;
+  explanation: string;
+  validationResults: {
+    success_rate: number;
+    successful_samples: number;
+    failed_samples: number;
+    total_samples: number;
+    failure_details: Array<{ error: string; sample: string }>;
+  };
+}
+
+export const chatEditPipeline = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  connectorId,
+  currentPipeline,
+  userMessage,
+  conversationHistory = [],
+}: RequestDeps & ChatEditPipelineRequest): Promise<ChatEditPipelineResponse> =>
+  http.post<ChatEditPipelineResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/chat-edit-pipeline`,
+    {
+      version: '1',
+      body: JSON.stringify({ connectorId, currentPipeline, userMessage, conversationHistory }),
+      signal: abortSignal,
+    }
+  );
+
 export interface UpdateDataStreamPipelineRequest {
   integrationId: string;
   dataStreamId: string;

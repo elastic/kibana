@@ -11,6 +11,7 @@ export interface DataStreamResultsFlyoutProps {
   integrationId: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
+  connectorId?: string;
 }
 
 export type DataStreamResultsFlyoutComponent = React.ComponentType<DataStreamResultsFlyoutProps>;
