@@ -7,6 +7,7 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
@@ -364,7 +365,8 @@ describe('DispatcherService integration tests', () => {
     );
     npSoService = new NotificationPolicySavedObjectService(
       (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
-      undefined as unknown as SpacesPluginStart
+      undefined as unknown as SpacesPluginStart,
+      undefined as unknown as EncryptedSavedObjectsClient
     );
 
     await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
