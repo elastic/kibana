@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ActionsPluginsStart } from '../plugin';
 import { OAuthStateClient } from './oauth_state_client';
+import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 export const OAUTH_STATE_CLEANUP_TASK_TYPE = 'actions:oauth_state_cleanup';
 export const OAUTH_STATE_CLEANUP_TASK_ID = `Actions-${OAUTH_STATE_CLEANUP_TASK_TYPE}`;
@@ -64,7 +65,9 @@ function registerOAuthStateCleanupTask(
             try {
               const [coreStart, { encryptedSavedObjects }] = await core.getStartServices();
 
-              const unsecuredSavedObjectsClient = coreStart.savedObjects.createInternalRepository();
+              const unsecuredSavedObjectsClient = coreStart.savedObjects.createInternalRepository([
+                OAUTH_STATE_SAVED_OBJECT_TYPE,
+              ]);
               const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
                 includedHiddenTypes: ['oauth_state'],
               });

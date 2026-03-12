@@ -60,7 +60,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-  const { actionTypeId } = attributes;
+  const { actionTypeId, authMode } = attributes;
   const { name, config, secrets } = action;
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
@@ -163,7 +163,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
 
   try {
-    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id, authMode });
   } catch (e) {
     context.logger.error(
       `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`

@@ -101,6 +101,21 @@ export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
   },
 };
 
+export const userConnectorTokenMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    profileUid: {
+      type: 'keyword',
+    },
+    connectorId: {
+      type: 'keyword',
+    },
+    credentialType: {
+      type: 'keyword',
+    },
+  },
+};
+
 export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
@@ -120,9 +135,6 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     // redirectUri: {
     //   type: 'keyword',
     // },
-    // authorizationUrl: {
-    //   type: 'keyword',
-    // },
     // scope: {
     //   type: 'keyword',
     // },
@@ -133,6 +145,9 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     //   type: 'keyword',
     // },
     // kibanaReturnUrl: {
+    //   type: 'keyword',
+    // },
+    // spaceId: {
     //   type: 'keyword',
     // },
   },

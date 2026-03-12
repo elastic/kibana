@@ -11,10 +11,9 @@ export const rawOAuthStateSchema = schema.object({
   state: schema.string(),
   codeVerifier: schema.string(),
   connectorId: schema.string(),
-  redirectUri: schema.string(),
   scope: schema.maybe(schema.string()),
-  kibanaReturnUrl: schema.string(), // in case of OAuth success, redirect to this URL
-  spaceId: schema.string(), // the space where the connector exists
+  kibanaReturnUrl: schema.maybe(schema.string()), // when set, redirect to this URL on OAuth success/error; otherwise show callback page
+  spaceId: schema.string(), // the space where the connector exists and the authz was initiated from
   createdAt: schema.string(),
   expiresAt: schema.string(),
   createdBy: schema.maybe(schema.string()),

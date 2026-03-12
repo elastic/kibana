@@ -23,6 +23,7 @@ import type { KueryNode } from '@kbn/es-query';
 import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
@@ -37,6 +38,7 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
@@ -98,6 +100,7 @@ export interface ConstructorOptions {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
@@ -118,6 +121,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export interface ActionsClientContext {
@@ -127,6 +131,7 @@ export interface ActionsClientContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
+  authTypeRegistry: AuthTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
@@ -142,7 +147,10 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
 }
+
+const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
 
 export class ActionsClient {
   private readonly context: ActionsClientContext;
@@ -150,6 +158,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
     encryptedSavedObjectsClient,
@@ -167,10 +176,12 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    getCurrentUserProfileIdFromAPIKey,
   }: ConstructorOptions) {
     this.context = {
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -188,6 +199,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
     };
   }
 
@@ -429,6 +441,23 @@ export class ActionsClient {
     } else if (type === 'authorization_code') {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
+        let authMode: AuthMode | undefined;
+        try {
+          const rawConnector = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            tokenOpts.connectorId
+          );
+          authMode = rawConnector.attributes.authMode;
+        } catch (err) {
+          this.context.logger.debug(
+            `Failed to read authMode for connector ${tokenOpts.connectorId}: ${err.message}`
+          );
+        }
+
+        const profileUid = await this.context.getCurrentUserProfileIdFromAPIKey?.(
+          this.context.request
+        );
+
         accessToken = await getOAuthAuthorizationCodeAccessToken({
           connectorId: tokenOpts.connectorId,
           logger: this.context.logger,
@@ -439,6 +468,8 @@ export class ActionsClient {
           },
           connectorTokenClient: this.context.connectorTokenClient,
           scope: tokenOpts.scope,
+          authMode,
+          profileUid,
         });
 
         this.context.logger.debug(
@@ -509,17 +540,9 @@ export class ActionsClient {
       })
     );
 
-    try {
-      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
-      );
-    }
-
     const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const {
-      attributes: { actionTypeId, config },
+      attributes: { actionTypeId, config, authMode },
     } = rawAction;
 
     let actionType: ActionType | undefined;
@@ -554,6 +577,18 @@ export class ActionsClient {
         );
       }
     }
+
+    try {
+      await this.context.connectorTokenClient.deleteConnectorTokens({
+        connectorId: id,
+        authMode,
+      });
+    } catch (e) {
+      this.context.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
+      );
+    }
+
     return result;
   }
 

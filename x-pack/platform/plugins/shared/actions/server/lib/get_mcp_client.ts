@@ -8,6 +8,7 @@
 import type { AxiosHeaderValue } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { McpClient } from '@kbn/mcp-client';
+import type { AuthMode } from '@kbn/connector-specs';
 
 import type { AuthTypeRegistry } from '../auth_types';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -30,6 +31,8 @@ export interface CreateMcpClientFnOpts {
   secrets: Record<string, unknown>;
   additionalHeaders?: Record<string, AxiosHeaderValue>;
   connectorTokenClient?: ConnectorTokenClientContract;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 
 export type CreateMcpClientFn = (opts: CreateMcpClientFnOpts) => Promise<McpClient>;
@@ -42,6 +45,8 @@ interface Build401RetryFetchOpts {
   connectorTokenClient?: ConnectorTokenClientContract;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 
 /**
@@ -57,6 +62,8 @@ export function build401RetryFetch({
   connectorTokenClient,
   logger,
   configurationUtilities,
+  authMode,
+  profileUid,
 }: Build401RetryFetchOpts): FetchLike {
   if (authTypeId !== 'oauth_authorization_code' || !connectorTokenClient) {
     return baseFetch;
@@ -87,6 +94,8 @@ export function build401RetryFetch({
         },
         connectorTokenClient,
         scope,
+        authMode,
+        profileUid,
         forceRefresh: true,
       });
 
@@ -126,6 +135,8 @@ export const getMcpClientFactory = ({
     secrets,
     additionalHeaders,
     connectorTokenClient,
+    authMode,
+    profileUid,
   }: CreateMcpClientFnOpts): Promise<McpClient> => {
     let authTypeId: string | undefined;
     try {
@@ -141,6 +152,8 @@ export const getMcpClientFactory = ({
           logger,
           configurationUtilities,
           connectorTokenClient,
+          authMode,
+          profileUid,
         }),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
@@ -167,6 +180,8 @@ export const getMcpClientFactory = ({
         connectorTokenClient,
         logger,
         configurationUtilities,
+        authMode,
+        profileUid,
       });
 
       return new McpClient(

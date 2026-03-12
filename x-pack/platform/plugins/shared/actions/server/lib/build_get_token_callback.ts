@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
@@ -27,6 +27,8 @@ interface BuildGetTokenCallbackOpts {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   connectorTokenClient?: ConnectorTokenClientContract;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 
 /**
@@ -40,6 +42,8 @@ export const buildGetTokenCallback = ({
   logger,
   configurationUtilities,
   connectorTokenClient,
+  authMode,
+  profileUid,
 }: BuildGetTokenCallbackOpts) => {
   return async (opts: GetTokenOpts) => {
     if (authTypeId === 'oauth_authorization_code') {
@@ -62,6 +66,8 @@ export const buildGetTokenCallback = ({
         },
         connectorTokenClient,
         scope: opts.scope,
+        authMode,
+        profileUid,
       });
     }
 

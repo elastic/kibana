@@ -18,6 +18,7 @@ import {
   actionTaskParamsMappings,
   connectorTokenMappings,
   oauthStateMappings,
+  userConnectorTokenMappings,
 } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
@@ -30,13 +31,15 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   OAUTH_STATE_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
   actionTaskParamsModelVersions,
-  connectorModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
+  userConnectorTokenModelVersions,
 } from './model_versions';
+import { connectorModelVersions } from './model_versions/connector_model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -131,7 +134,7 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
-    modelVersions: connectorTokenModelVersions,
+    modelVersions: connectorTokenModelVersions(encryptedSavedObjects),
   });
 
   encryptedSavedObjects.registerType({
@@ -148,6 +151,32 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
+    name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: userConnectorTokenMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: userConnectorTokenModelVersions,
+  });
+
+  encryptedSavedObjects.registerType({
+    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['credentials']),
+    attributesToIncludeInAAD: new Set([
+      'profileUid',
+      'connectorId',
+      'credentialType',
+      'expiresAt',
+      'refreshTokenExpiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  });
+
+  savedObjects.registerType({
     name: OAUTH_STATE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
@@ -158,7 +187,6 @@ export function setupSavedObjects(
     },
     modelVersions: oauthStateModelVersions,
     excludeOnUpgrade: async () => {
-      // Clean up expired states older than 1 hour
       const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
       return {
         bool: {
@@ -174,11 +202,7 @@ export function setupSavedObjects(
     attributesToIncludeInAAD: new Set([
       'state',
       'connectorId',
-      'redirectUri',
-      'authorizationUrl',
-      'scope',
       'spaceId',
-      'createdAt',
       'expiresAt',
       'createdBy',
     ]),

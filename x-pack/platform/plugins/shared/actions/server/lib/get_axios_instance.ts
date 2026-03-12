@@ -8,6 +8,7 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -42,6 +43,8 @@ async function handleOAuth401Error({
   logger,
   configurationUtilities,
   axiosInstance,
+  authMode,
+  profileUid,
 }: {
   error: AxiosErrorWithRetry;
   connectorId: string;
@@ -50,6 +53,8 @@ async function handleOAuth401Error({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
+  authMode?: AuthMode;
+  profileUid?: string;
 }): Promise<never | AxiosInstance> {
   // Prevent retry loops - only attempt refresh once per request
   if (error.config._retry) {
@@ -83,6 +88,8 @@ async function handleOAuth401Error({
     },
     connectorTokenClient,
     scope,
+    authMode,
+    profileUid,
     forceRefresh: true,
   });
 
@@ -105,6 +112,8 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
   signal?: AbortSignal;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -120,6 +129,8 @@ export const getAxiosInstanceWithAuth = ({
     secrets,
     connectorTokenClient,
     signal,
+    authMode,
+    profileUid,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -163,34 +174,36 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
-      // add a response interceptor to clean up saved tokens if necessary
       if (connectorTokenClient) {
-        const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-          connectorTokenClient,
-          connectorId,
-        });
-        axiosInstance.interceptors.response.use(onFulfilled, onRejected);
-      }
-
-      // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
-      if (authTypeId === 'oauth_authorization_code' && connectorTokenClient) {
-        axiosInstance.interceptors.response.use(
-          (response) => response,
-          (error) => {
-            if (error.response?.status === 401) {
-              return handleOAuth401Error({
-                error,
-                connectorId,
-                secrets: secrets as OAuth2AuthCodeParams,
-                connectorTokenClient,
-                logger,
-                configurationUtilities,
-                axiosInstance,
-              });
+        if (authTypeId === 'oauth_authorization_code') {
+          // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
+          axiosInstance.interceptors.response.use(
+            (response) => response,
+            (error) => {
+              if (error.response?.status === 401) {
+                return handleOAuth401Error({
+                  error,
+                  connectorId,
+                  secrets: secrets as OAuth2AuthCodeParams,
+                  connectorTokenClient,
+                  logger,
+                  configurationUtilities,
+                  axiosInstance,
+                  authMode,
+                  profileUid,
+                });
+              }
+              return Promise.reject(error);
             }
-            return Promise.reject(error);
-          }
-        );
+          );
+        } else {
+          // add a response interceptor to clean up saved tokens if necessary
+          const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
+            connectorTokenClient,
+            connectorId,
+          });
+          axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+        }
       }
 
       const configureCtx = {
@@ -201,6 +214,8 @@ export const getAxiosInstanceWithAuth = ({
           logger,
           configurationUtilities,
           connectorTokenClient,
+          authMode,
+          profileUid,
         }),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),

@@ -37,6 +37,8 @@ export const generateExecutorFunction = ({
       secrets,
       logger,
       signal,
+      authMode,
+      profileUid,
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
@@ -62,6 +64,8 @@ export const generateExecutorFunction = ({
           : undefined,
         connectorTokenClient,
         signal,
+        authMode,
+        profileUid,
         clientConfig,
       });
       if (clientType.connect) {

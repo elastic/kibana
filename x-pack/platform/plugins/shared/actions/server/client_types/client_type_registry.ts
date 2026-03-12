@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ConnectorTokenClientContract } from '../types';
 
 export interface RegisteredClientType<TClient = unknown, TConfig = Record<string, unknown>> {
@@ -26,6 +27,8 @@ export interface CreateClientOpts {
   additionalHeaders?: Record<string, string>;
   connectorTokenClient?: ConnectorTokenClientContract;
   signal?: AbortSignal;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

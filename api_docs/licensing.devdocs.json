@@ -79,10 +79,6 @@
               "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
             {
-              "plugin": "monitoring",
-              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
-            },
-            {
               "plugin": "painlessLab",
               "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
             },
@@ -108,7 +104,7 @@
             },
             {
               "plugin": "slo",
-              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
+              "path": "x-pack/solutions/observability/plugins/slo/public/register_embeddables.ts"
             },
             {
               "plugin": "securitySolution",

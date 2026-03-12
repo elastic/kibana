@@ -19,8 +19,7 @@ interface OAuthStateAttributes {
   state: string;
   codeVerifier: string;
   connectorId: string;
-  redirectUri: string;
-  kibanaReturnUrl: string;
+  kibanaReturnUrl?: string;
   spaceId: string;
   createdAt: string;
   expiresAt: string;
@@ -39,8 +38,7 @@ interface ConstructorOptions {
 
 interface CreateStateOptions {
   connectorId: string;
-  redirectUri: string;
-  kibanaReturnUrl: string;
+  kibanaReturnUrl?: string;
   spaceId: string;
   createdBy?: string;
 }
@@ -79,7 +77,6 @@ export class OAuthStateClient {
    */
   public async create({
     connectorId,
-    redirectUri,
     kibanaReturnUrl,
     spaceId,
     createdBy,
@@ -103,7 +100,6 @@ export class OAuthStateClient {
             state,
             codeVerifier,
             connectorId,
-            redirectUri,
             kibanaReturnUrl,
             spaceId,
             createdAt: now.toISOString(),

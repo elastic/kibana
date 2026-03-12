@@ -27,6 +27,8 @@ const httpClientType = (
       connectorTokenClient: opts.connectorTokenClient,
       additionalHeaders: opts.additionalHeaders,
       signal: opts.signal,
+      authMode: opts.authMode,
+      profileUid: opts.profileUid,
     }),
 });
 
@@ -55,6 +57,8 @@ const mcpClientType = (
       secrets: opts.secrets,
       additionalHeaders: opts.additionalHeaders,
       connectorTokenClient: opts.connectorTokenClient,
+      authMode: opts.authMode,
+      profileUid: opts.profileUid,
     });
   },
   connect: async (client) => {
