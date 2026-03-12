@@ -145,10 +145,11 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
-  const resetLayout = (state?: DashboardState) => {
-    const { layout: layoutToApply, childState: childStateToApply } = state
-      ? deserializeLayout(state.panels, state.pinned_panels)
-      : { layout: lastSavedLayout, childState: lastSavedChildState };
+  const resetLayout = (state: DashboardState) => {
+    const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
+      state.panels,
+      state.pinned_panels
+    );
 
     layout$.next({ ...layoutToApply });
     currentChildState = { ...childStateToApply };

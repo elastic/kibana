@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { setDashboardAgentService } from '@kbn/dashboard-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type {
   DashboardAgentPluginPublicSetup,
@@ -15,6 +14,7 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
+import { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
@@ -27,6 +27,7 @@ export class DashboardAgentPlugin
 {
   private cleanupAttachmentUi?: () => void;
   private dashboardApi?: DashboardApi;
+  private dashboardAppApiSubscription: Subscription | undefined;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -41,6 +42,9 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
+    // TODO this causes async imports when plugin starts
+    // Please avoid this practice as it hides plugin size but impacts kibana load performance
+    // Please remove async import.
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
       const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
       const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
@@ -57,18 +61,16 @@ export class DashboardAgentPlugin
       });
     });
 
-    const service = {
-      attachDashboard: (dashboardApi: DashboardApi | undefined) => {
-        this.dashboardApi = dashboardApi;
-      },
-    };
-    setDashboardAgentService(service);
-    return service;
+    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe(api => {
+      this.dashboardApi = api;
+    });
+
+    return {};
   }
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.dashboardAppApiSubscription?.unsubscribe();
     this.dashboardApi = undefined;
-    setDashboardAgentService(undefined);
   }
 }
