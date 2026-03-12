@@ -551,7 +551,6 @@ describe('createSmlCrawler', () => {
     });
   });
 
-
   describe('data integrity check', () => {
     it('when state has items but countSmlDocuments returns 0, resets state to force re-index', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
