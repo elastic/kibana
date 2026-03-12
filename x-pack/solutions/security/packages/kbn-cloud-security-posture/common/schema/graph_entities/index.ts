@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './esql_utils';
-export * from './utils';
-export * from './enrichment_utils';
+export * as graphEntitiesV1 from './v1';
