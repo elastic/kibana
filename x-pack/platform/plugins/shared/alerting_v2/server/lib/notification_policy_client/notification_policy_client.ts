@@ -238,10 +238,6 @@ export class NotificationPolicyClient {
     this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
   }
 
-  /**
-   * Returns decrypted auth (apiKey, createdByUser) for the policy in the current request space.
-   * Returns null if the policy is not found or decryption fails.
-   */
   private async getDecryptedAuth(
     id: string
   ): Promise<{ apiKey: string; createdByUser: boolean } | null> {

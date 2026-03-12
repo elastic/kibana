@@ -62,17 +62,31 @@ export class ApiKeyService implements ApiKeyServiceContract {
     if (apiKeys.length === 0) {
       return;
     }
+    const apiKeysToInvalidate = apiKeys.map((key) => {
+      let apiKeyId: string;
+      let apiKeyValue: string | undefined;
+
+      const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
+
+      if (apiKey && isUiamCredential(apiKey)) {
+        apiKeyId = id;
+        apiKeyValue = apiKey;
+      } else {
+        apiKeyId = id;
+      }
+
+      return {
+        attributes: {
+          apiKeyId,
+          createdAt: new Date().toISOString(),
+          ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+        },
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+      };
+    });
 
     try {
-      await this.invalidationSavedObjectsClient.bulkCreate(
-        apiKeys.map((key) => ({
-          attributes: {
-            apiKeyId: Buffer.from(key, 'base64').toString().split(':')[0],
-            createdAt: new Date().toISOString(),
-          },
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-        }))
-      );
+      await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       this.logger.error(
         `Failed to bulk mark list of API keys [${apiKeys

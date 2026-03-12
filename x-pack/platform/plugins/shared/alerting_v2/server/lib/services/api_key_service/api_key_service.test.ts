@@ -252,6 +252,43 @@ describe('ApiKeyService', () => {
       });
     });
 
+    it('includes uiamApiKey for UIAM credentials', async () => {
+      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
+        saved_objects: [],
+      });
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const apiKeys = [Buffer.from('id123:essu_uiam_value').toString('base64')];
+
+      await service.markApiKeysForInvalidation(apiKeys);
+
+      const [savedObjects] = invalidationSavedObjectsClient.bulkCreate.mock.calls[0];
+      expect(savedObjects[0].attributes).toMatchObject({
+        apiKeyId: 'id123',
+        uiamApiKey: 'essu_uiam_value',
+      });
+    });
+
+    it('calls bulkCreate on invalidation SO client with decoded API keys', async () => {
+      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
+        saved_objects: [],
+      });
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+      const apiKeyBase64 = Buffer.from('key-id-1:key-secret-1').toString('base64');
+
+      await service.markApiKeysForInvalidation([apiKeyBase64]);
+
+      expect(invalidationSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      const [savedObjects] = invalidationSavedObjectsClient.bulkCreate.mock.calls[0];
+      expect(savedObjects).toHaveLength(1);
+      expect(savedObjects[0]).toMatchObject({
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+        attributes: {
+          apiKeyId: 'key-id-1',
+          createdAt: expect.any(String),
+        },
+      });
+    });
+
     it('logs error and does not throw when bulkCreate fails', async () => {
       const err = new Error('bulkCreate failed');
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
