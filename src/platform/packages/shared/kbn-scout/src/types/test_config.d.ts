@@ -26,5 +26,14 @@ export interface ScoutTestConfig {
     username: string;
     password: string;
   };
+  linkedProject?: {
+    hosts: {
+      elasticsearch: string;
+    };
+    auth: {
+      username: string;
+      password: string;
+    };
+  };
   metadata?: any;
 }
