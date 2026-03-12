@@ -33,11 +33,13 @@ all the "children" will be automatically included. However, when a "child" is ex
 
 ## Migrations and Backward compatibility
 
-As your plugin evolves, you may need to change your Saved Object 
+As your plugin evolves, you may need to change your Saved Object
 type in a breaking way (for example, changing the type of an attribute, or removing
 an attribute). If that happens, you should write a new model version to upgrade the Saved Objects that existed prior to the change.
 
 <DocLink id="kibDevTutorialSavedObject" section="migrations" text="Defining model versions" />.
+
+If you create or persist raw saved objects outside of Kibana (for example, via the deprecated Saved Objects HTTP CRUD APIs or NDJSON files), preserve `coreMigrationVersion` and `typeMigrationVersion` to retain forwards compatibility across Kibana versions. For more details, refer to the [Saved Objects](https://www.elastic.co/docs/extend/kibana/saved-objects) documentation.
 
 ## Security
 

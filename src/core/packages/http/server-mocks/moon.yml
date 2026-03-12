@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-http-server-mocks'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-http-server-mocks'
+  title: '@kbn/core-http-server-mocks'
   description: Moon project for @kbn/core-http-server-mocks
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/http/server-mocks
+  sourceRoot: src/core/packages/http/server-mocks
 dependsOn:
   - '@kbn/utility-types'
   - '@kbn/config-mocks'
@@ -33,6 +32,7 @@ dependsOn:
   - '@kbn/core-execution-context-server-mocks'
   - '@kbn/lazy-object'
   - '@kbn/core-doc-links-server-mocks'
+  - '@kbn/core-user-activity-server-mocks'
 tags:
   - shared-server
   - package
@@ -46,14 +46,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

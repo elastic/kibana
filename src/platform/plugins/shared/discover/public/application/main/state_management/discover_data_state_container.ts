@@ -43,7 +43,7 @@ import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -134,7 +134,6 @@ export interface DiscoverDataStateContainer {
   inspectorAdapters: {
     requests: RequestAdapter;
     lensRequests?: RequestAdapter;
-    cascadeRequests?: RequestAdapter;
   };
   /**
    * Return the initial fetch status
@@ -142,6 +141,10 @@ export interface DiscoverDataStateContainer {
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
   getInitialFetchStatus: () => FetchStatus;
+  /**
+   * Clean up ES|QL state when saved search changes
+   */
+  cleanupEsql: () => void;
 }
 
 /**
@@ -154,7 +157,6 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
-  savedSearchContainer,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -162,7 +164,6 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  savedSearchContainer: DiscoverSavedSearchContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
@@ -224,8 +225,7 @@ export function getDataStateContainer({
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
-  // Make sure to clean up the ES|QL state when the saved search changes
-  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+  // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -266,7 +266,14 @@ export function getDataStateContainer({
             subscription.unsubscribe();
           }
 
-          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+          const tabState = getCurrentTab();
+          const {
+            id: currentTabId,
+            resetDefaultProfileState,
+            dataRequestParams,
+            appState,
+            globalState,
+          } = tabState;
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
@@ -283,6 +290,13 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
+          const searchSource = createSearchSource({
+            dataView: currentDataView$.getValue(),
+            appState,
+            globalState,
+            services,
+          });
+
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
@@ -290,14 +304,13 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            savedSearch: savedSearchContainer.getState(),
+            searchSource,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
           };
 
-          abortController?.abort(AbortReason.REPLACED);
-          abortControllerFetchMore?.abort(AbortReason.REPLACED);
+          cancel(AbortReason.REPLACED);
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
@@ -328,6 +341,15 @@ export function getDataStateContainer({
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
+              },
+            })
+          );
+
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
+              cascadedDocumentsState: {
+                ...getCurrentTab().cascadedDocumentsState,
+                cascadedDocumentsMap: {},
               },
             })
           );
@@ -413,6 +435,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: newAvailableGroups,
                       selectedCascadeGroups: newSelectedGroups,
                     },
@@ -422,6 +445,7 @@ export function getDataStateContainer({
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.setCascadedDocumentsState)({
                     cascadedDocumentsState: {
+                      ...getCurrentTab().cascadedDocumentsState,
                       availableCascadeGroups: [],
                       selectedCascadeGroups: [],
                     },
@@ -520,9 +544,15 @@ export function getDataStateContainer({
     sendResetMsg(dataSubjects, getInitialFetchStatus());
   };
 
-  const cancel = () => {
-    abortController?.abort(AbortReason.CANCELED);
-    abortControllerFetchMore?.abort(AbortReason.CANCELED);
+  const cancel = (reason: AbortReason = AbortReason.CANCELED) => {
+    const { cascadedDocumentsFetcher$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
+
+    cascadedDocumentsFetcher$.getValue().cancelAllFetches();
+    abortController?.abort(reason);
+    abortControllerFetchMore?.abort(reason);
   };
 
   const getAbortController = () => {
@@ -542,5 +572,6 @@ export function getDataStateContainer({
     getInitialFetchStatus,
     cancel,
     getAbortController,
+    cleanupEsql,
   };
 }

@@ -71,6 +71,8 @@ export class ProductDocBasePlugin
     core: CoreStart,
     { licensing, taskManager }: ProductDocBaseStartDependencies
   ): ProductDocBaseStartContract {
+    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
@@ -88,6 +90,7 @@ export class ProductDocBasePlugin
       artifactRepositoryProxyUrl: this.context.config.get().artifactRepositoryProxyUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
+      isServerless,
     });
 
     const searchService = new SearchService({

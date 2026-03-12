@@ -66,6 +66,13 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
       }),
       required: false,
     },
+    ySortPredicate: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.ySortPredicate.help', {
+        defaultMessage: 'Specifies the sort order for the Y-axis (asc, desc)',
+      }),
+      required: false,
+    },
     // X-axis
     isXAxisLabelVisible: {
       types: ['boolean'],
@@ -89,6 +96,13 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: i18n.translate('expressionHeatmap.function.args.grid.xTitle.help', {
         defaultMessage: 'Specifies the title of the x axis',
+      }),
+      required: false,
+    },
+    xSortPredicate: {
+      types: ['string'],
+      help: i18n.translate('expressionHeatmap.function.args.grid.xSortPredicate.help', {
+        defaultMessage: 'Specifies the sort order for the X-axis (asc, desc)',
       }),
       required: false,
     },

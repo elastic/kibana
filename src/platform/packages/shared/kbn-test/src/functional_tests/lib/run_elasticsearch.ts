@@ -56,6 +56,7 @@ function getEsConfig({
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
+  const secureFiles: string[] | undefined = config.get('esTestCluster.secureFiles');
 
   const esServerlessOptions = serverless
     ? getESServerlessOptions(esServerlessImage, config)
@@ -75,6 +76,7 @@ function getEsConfig({
     ccsConfig,
     serverless,
     files,
+    secureFiles,
   };
 }
 
@@ -174,6 +176,7 @@ async function startEsNode({
     onEarlyExit,
     serverless: config.serverless,
     files: config.files,
+    secureFiles: config.secureFiles,
   });
 
   await cluster.start();

@@ -1,10 +1,10 @@
 ---
-navigation_title: Share
+navigation_title: Share across spaces
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html
 ---
 
-# Sharing saved objects [sharing-saved-objects]
+# Share across spaces [sharing-saved-objects]
 
 This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned 8.0 release of {{kib}}. It also describes how developers can take advantage of this feature.
 
@@ -451,9 +451,6 @@ Users will need a way to view what spaces your objects are currently assigned to
     ```
 
     If you do this, then your objects will be visible in the [Saved Objects Management page](docs-content://explore-analyze/find-and-organize/saved-objects.md), where users can assign them to multiple spaces.
-
-
-
 
 ## Frequently asked questions (FAQ) [sharing-saved-objects-faq]
 

@@ -11,17 +11,23 @@ import type {
   CreateTemplateInput,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/latest';
+import type {
+  TemplatesFindRequest,
+  TemplatesFindResponse,
+} from '../../../common/types/api/template/v1';
 import type { CasesClientArgs } from '../types';
 
 /**
  * API for interacting with templates.
  */
 export interface TemplatesSubClient {
-  getAllTemplates(filterById?: string, version?: string): Promise<Array<SavedObject<Template>>>;
+  getAllTemplates(params: TemplatesFindRequest): Promise<TemplatesFindResponse>;
   getTemplate(templateId: string, version?: string): Promise<SavedObject<Template> | undefined>;
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
+  getTags(): Promise<string[]>;
+  getAuthors(): Promise<string[]>;
 }
 
 /**
@@ -33,14 +39,16 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
   const { templatesService } = clientArgs.services;
 
   const templatesSubClient: TemplatesSubClient = {
-    getAllTemplates: (filterById?: string, version?: string) =>
-      templatesService.getAllTemplates(filterById, version),
+    getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
     getTemplate: (templateId: string, version?: string) =>
       templatesService.getTemplate(templateId, version),
-    createTemplate: (input: CreateTemplateInput) => templatesService.createTemplate(input),
+    createTemplate: (input: CreateTemplateInput) =>
+      templatesService.createTemplate(input, clientArgs.user.username ?? 'unknown'),
     updateTemplate: (templateId: string, input: UpdateTemplateInput) =>
       templatesService.updateTemplate(templateId, input),
     deleteTemplate: (templateId: string) => templatesService.deleteTemplate(templateId),
+    getTags: () => templatesService.getTags(),
+    getAuthors: () => templatesService.getAuthors(),
   };
 
   return Object.freeze(templatesSubClient);

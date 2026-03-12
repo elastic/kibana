@@ -57,7 +57,7 @@ export interface ControlEditorProps<State extends DataControlEditorState = DataC
   initialDefaultPanelTitle?: string;
   parentApi: unknown;
   onCancel: (newState: Partial<State>) => void;
-  onSave: (dataViewId?: string) => void;
+  onSave: (data_view_id?: string) => void;
   onUpdate: (newState: Partial<State>) => void;
   ariaLabelledBy: string;
   isPinned?: boolean;
@@ -99,8 +99,8 @@ const useControlActionRegistry = (): ControlActionRegistry => {
 };
 
 const CompatibleControlTypesComponent = ({
-  dataViewId,
-  fieldName,
+  data_view_id,
+  field_name,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
 }: Partial<DataControlEditorState> & {
@@ -114,9 +114,9 @@ const CompatibleControlTypesComponent = ({
     () => ({
       trigger: triggers[CONTROL_MENU_TRIGGER],
       embeddable: undefined, // parentApi isn't necessary for this
-      state: { dataViewId, fieldName },
+      state: { data_view_id, field_name },
     }),
-    [dataViewId, fieldName]
+    [data_view_id, field_name]
   );
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
@@ -170,7 +170,7 @@ const CompatibleControlTypesComponent = ({
               key={`disabled__${action.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
-                  fieldSelected: Boolean(dataViewId && fieldName),
+                  fieldSelected: Boolean(data_view_id && field_name),
                   controlType: action.type,
                 }
               )}
@@ -202,7 +202,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
 
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
-    initialDefaultPanelTitle ?? initialState.fieldName ?? ''
+    initialDefaultPanelTitle ?? initialState.field_name ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
@@ -227,23 +227,23 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     },
     error: fieldListError,
   } = useAsync(async () => {
-    if (!editorState.dataViewId) {
+    if (!editorState.data_view_id) {
       return;
     }
-    const dataView = await dataViewsService.get(editorState.dataViewId);
+    const dataView = await dataViewsService.get(editorState.data_view_id);
     return {
       selectedDataView: dataView,
     };
-  }, [editorState.dataViewId]);
+  }, [editorState.data_view_id]);
 
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType) return;
     const CustomSettings =
       controlActionRegistry[selectedControlType]?.extension?.CustomOptionsComponent;
-    if (!CustomSettings || !selectedDataView || !editorState.fieldName) return;
+    if (!CustomSettings || !selectedDataView || !editorState.field_name) return;
 
-    const field = editorState.fieldName
-      ? selectedDataView?.getFieldByName(editorState.fieldName)
+    const field = editorState.field_name
+      ? selectedDataView?.getFieldByName(editorState.field_name)
       : undefined;
     if (!field) return;
 
@@ -290,9 +290,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               ) : (
                 <DataViewPicker
                   dataViews={dataViewListItems}
-                  selectedDataViewId={editorState.dataViewId}
-                  onChangeDataViewId={(newDataViewId) => {
-                    setEditorState({ ...editorState, dataViewId: newDataViewId });
+                  selectedDataViewId={editorState.data_view_id}
+                  onChangeDataViewId={(newdata_view_id) => {
+                    setEditorState({ ...editorState, data_view_id: newdata_view_id });
                     setSelectedControlType(undefined);
                   }}
                   trigger={{
@@ -325,10 +325,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     ) && customPredicate
                   );
                 }}
-                selectedFieldName={editorState.fieldName}
+                selectedFieldName={editorState.field_name}
                 dataView={selectedDataView}
                 onSelectField={(field) => {
-                  setEditorState({ ...editorState, fieldName: field.name });
+                  setEditorState({ ...editorState, field_name: field.name });
 
                   /**
                    * make sure that the new field is compatible with the selected control type and, if it's not,
@@ -371,8 +371,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* wrapping in `div` so that focus gets passed properly to the form row */}
             <div>
               <CompatibleControlTypesComponent
-                dataViewId={editorState.dataViewId}
-                fieldName={editorState.fieldName}
+                data_view_id={editorState.data_view_id}
+                field_name={editorState.field_name}
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
               />
@@ -402,7 +402,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              aria-label={`cancel-${editorState.title ?? editorState.fieldName}`}
+              aria-label={`cancel-${editorState.title ?? editorState.field_name}`}
               data-test-subj="control-editor-cancel"
               onClick={() => {
                 onCancel(editorState);
@@ -413,7 +413,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              aria-label={`save-${editorState.title ?? editorState.fieldName}`}
+              aria-label={`save-${editorState.title ?? editorState.field_name}`}
               data-test-subj="control-editor-save"
               fill
               color="primary"
@@ -446,7 +446,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   // the control already exists with the expected type, so just update it
                   onUpdate(transformedState ?? editorState);
                 }
-                onSave(editorState.dataViewId);
+                onSave(editorState.data_view_id);
               }}
             >
               {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

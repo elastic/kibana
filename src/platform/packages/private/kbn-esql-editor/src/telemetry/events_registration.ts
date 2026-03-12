@@ -24,6 +24,8 @@ export const ESQL_RECOMMENDED_QUERY_CLICKED = 'esql.recommended_query_clicked';
 export const ESQL_CONTROL_FLYOUT_OPENED = 'esql.control_flyout_opened';
 export const ESQL_CONTROL_CANCELLED = 'esql.control_cancelled';
 export const ESQL_CONTROL_SAVED = 'esql.control_saved';
+export const ESQL_RESOURCE_BROWSER_OPENED = 'esql.resource_browser_opened';
+export const ESQL_RESOURCE_BROWSER_ITEM_TOGGLED = 'esql.resource_browser_item_toggled';
 
 /**
  * Registers the esql editor analytics events.
@@ -205,6 +207,42 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
           description:
             'The way how the control flyout was opened. Possible values are: question_mark|smart_suggestion',
         },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_RESOURCE_BROWSER_OPENED,
+    schema: {
+      browser_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Which resource browser was opened. Possible values: data_sources|fields',
+        },
+      },
+      opened_from: {
+        type: 'keyword',
+        _meta: {
+          description: 'Where the browser was opened from. Possible values: autocomplete|badge',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
+    schema: {
+      browser_type: {
+        type: 'keyword',
+        _meta: { description: 'Which resource browser emitted the toggle. data_sources|fields' },
+      },
+      opened_from: {
+        type: 'keyword',
+        _meta: { description: 'Where the browser was opened from. autocomplete|badge' },
+      },
+      action: {
+        type: 'keyword',
+        _meta: { description: 'Whether the item was added or removed. add|remove' },
       },
     },
   });

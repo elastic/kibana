@@ -340,15 +340,29 @@ export const ConfigSchema = schema.object({
         // to prevent potential misconfiguration.
         schema.maybe(schema.uri({ scheme: ['https', 'http'] }))
       ),
-      ssl: schema.object({
-        verificationMode: schema.oneOf(
-          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-          { defaultValue: 'full' }
-        ),
-        certificateAuthorities: schema.maybe(
-          schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-        ),
-      }),
+      ssl: schema.object(
+        {
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+        },
+        {
+          validate: (rawConfig) => {
+            if (rawConfig.certificate && !rawConfig.key) {
+              return 'must specify [ssl.key] when [ssl.certificate] is specified';
+            }
+            if (rawConfig.key && !rawConfig.certificate) {
+              return 'must specify [ssl.certificate] when [ssl.key] is specified';
+            }
+          },
+        }
+      ),
       sharedSecret: schema.conditional(
         schema.siblingRef('enabled'),
         true,

@@ -108,7 +108,12 @@ export function StreamsTreeTable({
       ) ?? [];
     return qualityFiters.length > 0
       ? rows.filter((row) =>
-          qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
+          qualityFiters.some(
+            (filter) =>
+              'value' in filter &&
+              typeof filter.value === 'string' &&
+              filter.value.includes(row.dataQuality)
+          )
         )
       : rows;
   }, [enrichedStreams, sortField, sortDirection, searchQuery?.ast?.clauses]);
@@ -183,7 +188,7 @@ export function StreamsTreeTable({
 
   // Reset pagination if streams change (e.g., after search/filter)
   React.useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
   }, [streams, searchQuery, sortField, sortDirection]);
 
   // Expand/Collapse all button for the name column header
@@ -311,7 +316,9 @@ export function StreamsTreeTable({
                     <EuiFlexItem grow={false}>
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.stream.name}`}
-                        href={router.link('/{key}', { path: { key: item.stream.name } })}
+                        href={router.link('/{key}/management/{tab}', {
+                          path: { key: item.stream.name, tab: 'significantEvents' },
+                        })}
                       >
                         <EuiHighlight search={searchQuery?.text ?? ''}>
                           {item.stream.name}
@@ -342,9 +349,23 @@ export function StreamsTreeTable({
                     return '-';
                   case TaskStatus.Completed:
                   case TaskStatus.Acknowledged:
-                    return <EuiIcon type="checkInCircleFilled" color="success" size="m" />;
+                    return (
+                      <EuiIcon
+                        type="checkInCircleFilled"
+                        color="success"
+                        size="m"
+                        aria-hidden={true}
+                      />
+                    );
                   case TaskStatus.Stale:
-                    return <EuiIcon type="checkInCircleFilled" color="subdued" size="m" />;
+                    return (
+                      <EuiIcon
+                        type="checkInCircleFilled"
+                        color="subdued"
+                        size="m"
+                        aria-hidden={true}
+                      />
+                    );
                   case TaskStatus.Failed:
                     return (
                       <EuiIconTip

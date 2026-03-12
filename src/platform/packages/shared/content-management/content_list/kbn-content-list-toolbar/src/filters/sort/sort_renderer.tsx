@@ -67,6 +67,12 @@ const i18nText = {
   nameDesc: i18n.translate('contentManagement.contentList.sortRenderer.nameDescLabel', {
     defaultMessage: 'Z-A',
   }),
+  dateAsc: i18n.translate('contentManagement.contentList.sortRenderer.dateAscLabel', {
+    defaultMessage: 'Oldest first',
+  }),
+  dateDesc: i18n.translate('contentManagement.contentList.sortRenderer.dateDescLabel', {
+    defaultMessage: 'Newest first',
+  }),
 };
 
 /** Fields that receive the `A-Z` / `Z-A` treatment by default. */
@@ -78,6 +84,27 @@ const isTitleLikeField = (field: string): boolean => {
   return TITLE_LIKE_FIELDS.has(lower) || lower.endsWith('.title');
 };
 
+/** Fields that receive the `Oldest first` / `Newest first` treatment by default. */
+const DATE_LIKE_FIELDS = new Set(['updatedat', 'createdat', 'date', 'timestamp']);
+
+/**
+ * Returns `true` when the field should default to date-oriented labels.
+ *
+ * Matches:
+ * - Known date fields (case-insensitive): `updatedAt`, `createdAt`, `date`, `timestamp`.
+ * - camelCase `*At` convention (case-sensitive): `deletedAt`, `publishedAt`, etc.
+ * - Fields ending in `date` (case-insensitive): `startDate`, `endDate`, etc.
+ */
+const isDateLikeField = (field: string): boolean => {
+  const lower = field.toLowerCase();
+  if (DATE_LIKE_FIELDS.has(lower) || lower.endsWith('date')) {
+    return true;
+  }
+  // Match camelCase timestamp convention: `updatedAt`, `createdAt`, `deletedAt`, etc.
+  // Must end with literal `At` (case-sensitive) and be at least 3 chars to avoid matching "At".
+  return field.length > 2 && field.endsWith('At');
+};
+
 /**
  * Generates sort options from an array of {@link SortField} configurations.
  *
@@ -85,10 +112,12 @@ const isTitleLikeField = (field: string): boolean => {
  *
  * 1. Explicit `ascLabel` / `descLabel` on the field (highest priority).
  * 2. Title-like fields (`title`, `name`, `*.title`) default to `A-Z` / `Z-A`.
- * 3. Everything else falls back to `"{name} (ascending)"` / `"{name} (descending)"`.
+ * 3. Date-like fields (`updatedAt`, `createdAt`, `*At`, `*date`) default to
+ *    `Oldest first` / `Newest first`.
+ * 4. Everything else falls back to `"{name} (ascending)"` / `"{name} (descending)"`.
  *
- * There is **no** heuristic for date fields. Consumers should provide explicit
- * labels for date or any other non-title field that needs domain-specific wording.
+ * Consumers can always override heuristic labels by providing explicit
+ * `ascLabel` / `descLabel` on the {@link SortField}.
  *
  * @param fields - Array of sort field configurations.
  * @returns Array of {@link SortItem} options for the sort selector.
@@ -101,14 +130,14 @@ const generateOptionsFromFields = (fields: SortField[]): SortItem[] => {
       label: ascLabel ?? getDefaultLabel(field, name, 'asc'),
       field,
       direction: 'asc',
-      append: <EuiIcon type="sortUp" />,
+      append: <EuiIcon type="sortUp" aria-hidden={true} />,
     });
 
     options.push({
       label: descLabel ?? getDefaultLabel(field, name, 'desc'),
       field,
       direction: 'desc',
-      append: <EuiIcon type="sortDown" />,
+      append: <EuiIcon type="sortDown" aria-hidden={true} />,
     });
   }
 
@@ -119,6 +148,7 @@ const generateOptionsFromFields = (fields: SortField[]): SortItem[] => {
  * Generates a default sort label when no explicit label is provided.
  *
  * - Title-like fields (`title`, `name`, `*.title`) → `A-Z` / `Z-A`.
+ * - Date-like fields (`updatedAt`, `createdAt`, `*At`, `*date`) → `Oldest first` / `Newest first`.
  * - All other fields → `"{name} (ascending)"` / `"{name} (descending)"`.
  *
  * @param field - The field identifier.
@@ -129,6 +159,10 @@ const generateOptionsFromFields = (fields: SortField[]): SortItem[] => {
 const getDefaultLabel = (field: string, name: string, direction: 'asc' | 'desc'): string => {
   if (isTitleLikeField(field)) {
     return direction === 'asc' ? i18nText.nameAsc : i18nText.nameDesc;
+  }
+
+  if (isDateLikeField(field)) {
+    return direction === 'asc' ? i18nText.dateAsc : i18nText.dateDesc;
   }
 
   return direction === 'asc'
@@ -171,7 +205,9 @@ export const SortRenderer = ({
         label: option.label,
         field: option.field,
         direction: option.direction,
-        append: <EuiIcon type={option.direction === 'asc' ? 'sortUp' : 'sortDown'} />,
+        append: (
+          <EuiIcon type={option.direction === 'asc' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
+        ),
       }));
     }
 
@@ -181,13 +217,13 @@ export const SortRenderer = ({
         label: i18nText.nameAsc,
         field: 'title',
         direction: 'asc',
-        append: <EuiIcon type="sortUp" />,
+        append: <EuiIcon type="sortUp" aria-hidden={true} />,
       },
       {
         label: i18nText.nameDesc,
         field: 'title',
         direction: 'desc',
-        append: <EuiIcon type="sortDown" />,
+        append: <EuiIcon type="sortDown" aria-hidden={true} />,
       },
     ];
   }, [sortingConfig]);

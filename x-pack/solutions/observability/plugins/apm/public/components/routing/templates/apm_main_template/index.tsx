@@ -21,6 +21,7 @@ import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
+import { ActionsMenu } from './actions_menu';
 import { getNoDataConfig } from '../no_data_config';
 
 // Paths that must skip the no data screen
@@ -41,6 +42,7 @@ export function ApmMainTemplate({
   pageHeader,
   children,
   environmentFilter = true,
+  showActionsMenu = false,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
   selectedNavButton,
@@ -50,6 +52,7 @@ export function ApmMainTemplate({
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
   environmentFilter?: boolean;
+  showActionsMenu?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
@@ -116,6 +119,7 @@ export function ApmMainTemplate({
 
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(showActionsMenu ? [<ActionsMenu />] : []),
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 

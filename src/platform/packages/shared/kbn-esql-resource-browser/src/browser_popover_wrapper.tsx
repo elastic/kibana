@@ -80,6 +80,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   isLoading: boolean;
   searchValue: string;
   setSearchValue: (value: string) => void;
+  isMultiSelect?: boolean;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
@@ -97,6 +98,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   isLoading,
   searchValue,
   setSearchValue,
+  isMultiSelect = true,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -104,15 +106,15 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     searchInputRef.current = node;
   };
 
-  // Focus the search input when popover opens
+  // Focus the search input as soon as the popover opens so that focus
+  // transfers away from the editor immediately (avoids visible flicker).
   useEffect(() => {
-    if (isOpen && !isLoading) {
-      // Use setTimeout to ensure the DOM is ready
-      setTimeout(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
         searchInputRef.current?.focus();
-      }, 0);
+      });
     }
-  }, [isOpen, isLoading]);
+  }, [isOpen]);
 
   const filterButton = (
     <EuiFilterButton
@@ -181,6 +183,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
             truncation: 'middle',
           },
         }}
+        singleSelection={!isMultiSelect}
       >
         {(list, search) => (
           <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>

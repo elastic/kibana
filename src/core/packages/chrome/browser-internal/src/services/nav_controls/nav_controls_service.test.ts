@@ -10,7 +10,7 @@
 import { take } from 'rxjs';
 import { NavControlsService } from './nav_controls_service';
 
-describe('RecentlyAccessed#start()', () => {
+describe('NavControlsService#start()', () => {
   const getStart = () => {
     return new NavControlsService().start();
   };

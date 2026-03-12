@@ -66,7 +66,11 @@ export const useDatasetQualityController = (
   }, [locators, definition.stream.name]);
 
   useEffect(() => {
-    async function getDatasetQualityDetailsController() {
+    let cleanupController: DatasetQualityDetailsController | undefined;
+    let cleanupSubscription: { unsubscribe: () => void } | undefined;
+    let isCancelled = false;
+
+    async function initController() {
       let initialState = getDatasetQualityDetailsStateFromUrl({
         urlStateStorageContainer,
         toastsService: toasts,
@@ -122,33 +126,34 @@ export const useDatasetQualityController = (
           streamsRepositoryClient,
           refreshDefinition,
         });
-      datasetQualityDetailsController.service.start();
 
-      setController(datasetQualityDetailsController);
-
-      if (!saveStateInUrl) {
-        return () => {
-          datasetQualityDetailsController.service.stop();
-        };
+      if (isCancelled) {
+        datasetQualityDetailsController.service.stop();
+        return;
       }
 
-      const datasetQualityStateSubscription = datasetQualityDetailsController.state$.subscribe(
-        (state) => {
+      cleanupController = datasetQualityDetailsController;
+      datasetQualityDetailsController.service.start();
+      setController(datasetQualityDetailsController);
+
+      if (saveStateInUrl) {
+        cleanupSubscription = datasetQualityDetailsController.state$.subscribe((state) => {
           updateUrlFromDatasetQualityDetailsState({
             urlStateStorageContainer,
             datasetQualityDetailsState: state,
             setTime: updateTimeRange,
           });
-        }
-      );
-
-      return () => {
-        datasetQualityDetailsController.service.stop();
-        datasetQualityStateSubscription.unsubscribe();
-      };
+        });
+      }
     }
 
-    getDatasetQualityDetailsController();
+    initController();
+
+    return () => {
+      isCancelled = true;
+      cleanupSubscription?.unsubscribe();
+      cleanupController?.service.stop();
+    };
   }, [
     datasetQuality,
     toasts,

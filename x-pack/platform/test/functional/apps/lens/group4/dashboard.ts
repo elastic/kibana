@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add a drilldown to the pie chart
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
-      await testSubjects.click('actionFactoryItem-OPEN_IN_DISCOVER_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-discover_drilldown');
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.closeFlyout();
       await header.waitUntilLoadingHasFinished();
@@ -355,7 +355,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that the drilldown is working now
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
 
       // save the dashboard
@@ -367,7 +369,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
     });
   });

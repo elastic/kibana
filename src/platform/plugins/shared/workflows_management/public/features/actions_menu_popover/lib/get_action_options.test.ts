@@ -8,8 +8,9 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { isDynamicConnector } from '@kbn/workflows';
+import { isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors } from '../../../../common/schema';
@@ -20,7 +21,11 @@ import { isActionGroup, isActionOption } from '../types';
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
 }));
+jest.mock('../../../trigger_schemas', () => ({
+  triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
+}));
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isDynamicConnector: jest.fn(),
 }));
 jest.mock('../../../shared/ui/step_icons/get_step_icon_type', () => ({
@@ -50,11 +55,7 @@ describe('getActionOptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockWorkflowsExtensions = {
-      getStepDefinition: jest.fn(),
-      getAllStepDefinitions: jest.fn(),
-      hasStepDefinition: jest.fn(),
-    };
+    mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
@@ -94,8 +95,15 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(3);
-      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual(['if', 'foreach', 'wait']);
+      expect(flowControlGroup.options).toHaveLength(6);
+      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
+        'if',
+        'foreach',
+        'while',
+        'wait',
+        'workflow.execute',
+        'workflow.executeAsync',
+      ]);
     }
   });
 
@@ -110,7 +118,7 @@ describe('getActionOptions', () => {
       label: 'Custom Connector Label',
       description: 'Custom Connector Description',
       icon: 'customIcon',
-      actionsMenuCatalog: 'kibana' as const,
+      category: StepCategory.Kibana,
       inputSchema: z.object({}),
       outputSchema: z.object({}),
     };
@@ -182,6 +190,54 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should pass tech_preview stability for kibana connectors with tech_preview stability', () => {
+    const mockConnector = {
+      type: 'kibana.streams.list',
+      summary: 'Get stream list',
+      description: 'Fetches list of all streams',
+      methods: ['GET'],
+      patterns: ['/api/streams'],
+      stability: 'tech_preview' as const,
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const option = kibanaGroup.options[0];
+      expect(option.id).toBe('kibana.streams.list');
+      expect(option.stability).toBe('tech_preview');
+    }
+  });
+
+  it('should not set stability for kibana connectors without stability', () => {
+    const mockConnector = {
+      type: 'kibana.saved_object',
+      summary: 'Kibana Saved Object',
+      description: 'A saved object',
+      methods: ['GET'],
+      patterns: ['/api/saved_objects'],
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const option = kibanaGroup.options[0];
+      expect(option.stability).toBeUndefined();
+    }
+  });
+
   it('should add dynamic connectors to external group', () => {
     const mockConnector = {
       type: 'slack.api',
@@ -238,7 +294,7 @@ describe('getActionOptions', () => {
     }
   });
 
-  it('should use default catalog when custom step definition has no catalog', () => {
+  it('should add connectors to the correct group based on category', () => {
     const mockConnector = {
       type: 'custom.connector',
       description: 'Custom Connector',
@@ -249,6 +305,7 @@ describe('getActionOptions', () => {
       label: 'Custom Connector Label',
       description: 'Custom Connector Description',
       icon: 'customIcon',
+      category: StepCategory.External,
       inputSchema: z.object({}),
       outputSchema: z.object({}),
     };
@@ -257,11 +314,12 @@ describe('getActionOptions', () => {
     mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
-    const kibanaGroup = result.find((group) => group.id === 'kibana');
+    const externalGroup = result.find((group) => group.id === 'external');
 
-    expect(kibanaGroup).toBeDefined();
-    if (kibanaGroup && isActionGroup(kibanaGroup)) {
-      expect(kibanaGroup.options).toHaveLength(1);
+    expect(externalGroup).toBeDefined();
+    if (externalGroup && isActionGroup(externalGroup)) {
+      expect(externalGroup.options).toHaveLength(1);
+      expect(externalGroup.options[0].id).toBe('custom.connector');
     }
   });
 });

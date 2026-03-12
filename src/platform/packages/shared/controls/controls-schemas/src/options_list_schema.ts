@@ -13,10 +13,10 @@ import { controlSchema, dataControlSchema } from './control_schema';
 
 export const optionsListDisplaySettingsSchema = schema.object({
   placeholder: schema.maybe(schema.string()),
-  hideActionBar: schema.maybe(schema.boolean()),
-  hideExclude: schema.maybe(schema.boolean()),
-  hideExists: schema.maybe(schema.boolean()),
-  hideSort: schema.maybe(schema.boolean()),
+  hide_action_bar: schema.maybe(schema.boolean()),
+  hide_exclude: schema.maybe(schema.boolean()),
+  hide_exists: schema.maybe(schema.boolean()),
+  hide_sort: schema.maybe(schema.boolean()),
 });
 
 export const optionsListSearchTechniqueSchema = schema.oneOf(
@@ -35,37 +35,39 @@ export const optionsListSortSchema = schema.object(
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()]);
 
 const optionsListControlBaseParameters = {
-  displaySettings: schema.maybe(optionsListDisplaySettingsSchema),
-  searchTechnique: schema.maybe(optionsListSearchTechniqueSchema),
-  sort: schema.maybe(optionsListSortSchema),
-  existsSelected: schema.maybe(schema.boolean({ defaultValue: false })),
-  runPastTimeout: schema.maybe(schema.boolean({ defaultValue: false })),
-  singleSelect: schema.maybe(schema.boolean({ defaultValue: false })),
-  exclude: schema.maybe(schema.boolean({ defaultValue: false })),
+  display_settings: schema.maybe(optionsListDisplaySettingsSchema),
+  single_select: schema.maybe(schema.boolean({ defaultValue: false })),
 };
 
 export const optionsListDSLControlSchema = dataControlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
-    selectedOptions: schema.maybe(schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })),
+    exclude: schema.maybe(schema.boolean({ defaultValue: false })),
+    exists_selected: schema.maybe(schema.boolean({ defaultValue: false })),
+    run_past_timeout: schema.maybe(schema.boolean({ defaultValue: false })),
+    search_technique: schema.maybe(optionsListSearchTechniqueSchema),
+    selected_options: schema.maybe(
+      schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })
+    ),
+    sort: schema.maybe(optionsListSortSchema),
   });
 
 export const optionsListESQLControlSchema = controlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
-    selectedOptions: schema.arrayOf(schema.string()),
-    variableName: schema.string(),
-    variableType: schema.oneOf([
+    selected_options: schema.arrayOf(schema.string()),
+    variable_name: schema.string(),
+    variable_type: schema.oneOf([
       schema.literal('fields'),
       schema.literal('values'),
       schema.literal('functions'),
       schema.literal('time_literal'),
       schema.literal('multi_values'),
     ]),
-    esqlQuery: schema.string(),
-    controlType: schema.oneOf([
+    esql_query: schema.string(),
+    control_type: schema.oneOf([
       schema.literal('STATIC_VALUES'),
       schema.literal('VALUES_FROM_QUERY'),
     ]),
-    availableOptions: schema.maybe(schema.arrayOf(schema.string())),
+    available_options: schema.maybe(schema.arrayOf(schema.string())),
   });

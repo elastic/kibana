@@ -20,9 +20,7 @@ export type {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
 export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';

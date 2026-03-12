@@ -1,5 +1,5 @@
 ---
-navigation_title: Delete
+navigation_title: Delete a type
 ---
 
 # Delete a Saved Object type [saved-objects-delete]

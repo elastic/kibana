@@ -5,16 +5,25 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import type {
+  FieldDefinitionType,
+  NamedFieldDefinitionConfig,
+  SampleDocument,
+} from '@kbn/streams-schema';
+import {
+  FIELD_DEFINITION_TYPES,
+  namedFieldDefinitionConfigSchema,
+  isDescendantOf,
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+} from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
-import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -30,6 +39,21 @@ import {
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
+  typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
+
+const isSimulatableFieldDefinition = (
+  field: NamedFieldDefinitionConfig
+): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } =>
+  isFieldDefinitionType(field.type);
+
+const getSimulatableFieldDefinitions = (fields: NamedFieldDefinitionConfig[]) =>
+  fields.filter(isSimulatableFieldDefinition);
+
+export const __test__ = {
+  getSimulatableFieldDefinitions,
+};
 
 interface SimulateIngestDoc {
   _source: SampleDocument;
@@ -151,9 +175,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({
@@ -167,7 +189,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -175,13 +200,16 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const streamDefinition = await streamsClient.getStream(params.path.name);
 
-    const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
-      // filter out potential system fields since we can't simulate them anyway
-      if (field.type === 'system') {
-        return [];
-      }
-      return [field];
-    });
+    // Only simulate mapping-affecting definitions; ignore doc-only overrides (`{ description }`)
+    // and system fields.
+    const userFieldDefinitions = getSimulatableFieldDefinitions(params.body.field_definitions);
+    if (userFieldDefinitions.length === 0) {
+      return {
+        status: 'success',
+        simulationError: null,
+        documentsWithRuntimeFieldsApplied: null,
+      };
+    }
 
     const propertiesForSample: Record<string, { type: 'keyword' }> = {};
     userFieldDefinitions.forEach((field) => {
@@ -213,32 +241,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    let sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> | undefined;
-    try {
-      sampleResults = await scopedClusterClient.asCurrentUser.search({
-        index: params.path.name,
-        // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-        runtime_mappings: propertiesForSample,
-        ...documentSamplesSearchBody,
-      });
-    } catch (error) {
-      /**
-       * If the error is due to time_series_dimension shadowing, we need to retry the request for sample documents without runtime_mappings
-       * because the runtime_mappings collides for time_series_dimension.
-       * See https://github.com/elastic/elasticsearch/issues/140882
-       *
-       * N.B. THIS IS A BANDAID FIX THAT SHOULD BE REMOVED AS QUICKLY AS POSSIBLE WHEN THE ISSUE IS FIXED.
-       *
-       */
-      if (error.message.includes('time_series_dimension')) {
-        sampleResults = await scopedClusterClient.asCurrentUser.search({
-          index: params.path.name,
-          ...documentSamplesSearchBody,
-        });
-      } else {
-        throw error;
-      }
-    }
+    const sampleResults: SearchResponse<
+      unknown,
+      Record<string, AggregationsAggregate>
+    > = await scopedClusterClient.asCurrentUser.search({
+      index: params.path.name,
+      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+      runtime_mappings: propertiesForSample,
+      ...documentSamplesSearchBody,
+    });
 
     if (sampleResults?.hits.hits.length === 0) {
       return {
@@ -248,8 +259,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    const propertiesForSimulation = Object.fromEntries(
-      userFieldDefinitions.map(({ name, ...field }) => [name, field])
+    const propertiesForSimulation: StreamsMappingProperties = Object.fromEntries(
+      userFieldDefinitions.map(({ name, description: _description, ...field }) => [name, field])
     );
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
@@ -270,7 +281,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
       return {
         _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-          ? LOGS_ROOT_STREAM_NAME
+          ? getRoot(params.path.name)
           : params.path.name,
         _id: hit._id,
         _source: sourceWithGeoPoints,
@@ -337,15 +348,16 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
     body: z.object({
-      field_definitions: z.array(
-        z.intersection(fieldDefinitionConfigSchema, z.object({ name: z.string() }))
-      ),
+      field_definitions: z.array(namedFieldDefinitionConfigSchema),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -359,8 +371,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       return { conflicts: [] };
     }
 
+    // Only check conflicts for fields that affect ES mappings
+    // Skip system fields and doc-only overrides (no type)
     const userFieldDefinitions = params.body.field_definitions.filter(
-      (field) => field.type !== 'system'
+      (field): field is typeof field & { type: string } => !!field.type && field.type !== 'system'
     );
 
     if (userFieldDefinitions.length === 0) {
@@ -385,8 +399,8 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       const fields = stream.ingest.wired.fields;
 
       for (const [fieldName, config] of Object.entries(fields)) {
-        // Skip system fields
-        if (config.type === 'system') {
+        // Skip system fields and doc-only overrides (no type)
+        if (!config.type || config.type === 'system') {
           continue;
         }
 
@@ -474,13 +488,14 @@ async function simulateIngest(
   };
   const isWiredStream = Streams.WiredStream.Definition.is(streamDefinition);
 
-  let pipelineSubstitutions: Record<string, { processors: any[] }>;
+  let pipelineSubstitutions: Record<string, { processors: Array<Record<string, unknown>> }>;
   let simulatePath: string;
 
   if (isWiredStream) {
     // For wired streams: override root logs processing pipeline to reroute, then noop child stream processing
+    const rootStream = getRoot(dataStreamName);
     pipelineSubstitutions = {
-      [getProcessingPipelineName(LOGS_ROOT_STREAM_NAME)]: {
+      [getProcessingPipelineName(rootStream)]: {
         processors: [
           {
             reroute: {

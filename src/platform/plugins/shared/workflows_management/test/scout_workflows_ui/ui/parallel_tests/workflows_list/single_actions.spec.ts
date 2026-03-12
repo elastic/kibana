@@ -22,13 +22,13 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should run enabled workflow', async ({ page, pageObjects, apiServices, scoutSpace }) => {
+  test('should run enabled workflow', async ({ page, pageObjects, apiServices }) => {
     const enabledWorkflow = {
       name: 'ThreeDotsTest Enabled Workflow',
       description: 'Enabled workflow for run test',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(enabledWorkflow));
+    await apiServices.workflows.create(getListTestWorkflowYaml(enabledWorkflow));
 
     // verify run via direct action button
     await pageObjects.workflowList.navigate();
@@ -49,13 +49,13 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(page.testSubj.locator('workflowDetailHeader')).toContainText(enabledWorkflow.name);
   });
 
-  test('should not run disabled workflow', async ({ pageObjects, apiServices, scoutSpace }) => {
+  test('should not run disabled workflow', async ({ pageObjects, apiServices }) => {
     const disabledWorkflow = {
       name: 'ThreeDotsTest Disabled Workflow',
       description: 'Disabled workflow for run test',
       enabled: false,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(disabledWorkflow));
+    await apiServices.workflows.create(getListTestWorkflowYaml(disabledWorkflow));
     await pageObjects.workflowList.navigate();
 
     // verify disabled via direct action button
@@ -71,18 +71,23 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(runThreeDotsAction).toBeDisabled();
   });
 
-  test('should enable disabled workflow via toggle', async ({
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should enable disabled workflow via toggle', async ({ pageObjects, apiServices }) => {
     const disabledWorkflow = {
       name: 'Toggle Enable Workflow',
       description: 'This workflow starts disabled and should be enabled via toggle',
       enabled: false,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(disabledWorkflow));
+    const anchorWorkflow = {
+      name: 'Toggle Enable Workflow Anchor',
+      description: 'Anchor workflow for table order stability',
+      enabled: true,
+    };
+    await apiServices.workflows.bulkCreate(
+      [disabledWorkflow, anchorWorkflow].map(getListTestWorkflowYaml)
+    );
     await pageObjects.workflowList.navigate();
+
+    const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflow.name);
     await expect(toggle).not.toBeChecked();
@@ -93,20 +98,28 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(
       pageObjects.workflowList.getWorkflowAction(disabledWorkflow.name, 'runWorkflowAction')
     ).toBeEnabled();
+
+    const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+    expect(orderAfter).toStrictEqual(orderBefore);
   });
 
-  test('should disable enabled workflow via toggle', async ({
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should disable enabled workflow via toggle', async ({ pageObjects, apiServices }) => {
     const enabledWorkflow = {
       name: 'Toggle Disable Workflow',
       description: 'This workflow starts enabled and should be disabled via toggle',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(enabledWorkflow));
+    const anchorWorkflow = {
+      name: 'Toggle Disable Workflow Anchor',
+      description: 'Anchor workflow for table order stability',
+      enabled: false,
+    };
+    await apiServices.workflows.bulkCreate(
+      [enabledWorkflow, anchorWorkflow].map(getListTestWorkflowYaml)
+    );
     await pageObjects.workflowList.navigate();
+
+    const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
 
     const toggle = pageObjects.workflowList.getWorkflowStateToggle(enabledWorkflow.name);
     await expect(toggle).toBeChecked();
@@ -117,19 +130,18 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(
       pageObjects.workflowList.getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
     ).toBeDisabled();
+
+    const orderAfter = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
+    expect(orderAfter).toStrictEqual(orderBefore);
   });
 
-  test('should open workflow for editing via edit action', async ({
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should open workflow for editing via edit action', async ({ pageObjects, apiServices }) => {
     const workflow = {
       name: 'Edit Action Test Workflow',
       description: 'This workflow should be opened for editing',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
+    await apiServices.workflows.create(getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
     // verify edit via direct action button
@@ -146,17 +158,13 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await pageObjects.workflowEditor.waitForEditorView();
   });
 
-  test('should clone workflow via three dots menu', async ({
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should clone workflow via three dots menu', async ({ pageObjects, apiServices }) => {
     const workflow = {
       name: 'Clone Action Test Workflow',
       description: 'This workflow should be cloned',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
+    await apiServices.workflows.create(getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
 
     const cloneAction = await pageObjects.workflowList.getThreeDotsMenuAction(
@@ -170,31 +178,21 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await expect(pageObjects.workflowList.getWorkflowRow(clonedWorkflowName)).toBeVisible();
   });
 
-  test('should delete workflow via three dots menu', async ({
-    page,
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should delete workflow via three dots menu', async ({ page, pageObjects, apiServices }) => {
     const workflow = {
       name: 'Delete Action Test Workflow',
       description: 'This workflow should be deleted',
       enabled: true,
     };
-    await apiServices.workflows.create(scoutSpace.id, getListTestWorkflowYaml(workflow));
+    await apiServices.workflows.create(getListTestWorkflowYaml(workflow));
     await pageObjects.workflowList.navigate();
-
-    // Set up dialog handler to accept the confirmation dialog
-    page.once('dialog', async (dialog) => {
-      expect(dialog.message()).toContain('Are you sure you want to delete');
-      await dialog.accept();
-    });
 
     const deleteAction = await pageObjects.workflowList.getThreeDotsMenuAction(
       workflow.name,
       'deleteWorkflowAction'
     );
     await deleteAction.click();
+    await page.testSubj.click('confirmModalConfirmButton');
 
     // Verify the workflow is removed from the list
     await expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toBeHidden();

@@ -12,18 +12,22 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
-  VisualizationRefAttachment,
+  VisualizationAttachment,
 } from './attachments';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
-  visualizationRefAttachmentDataSchema,
+  visualizationAttachmentDataSchema,
+  visualizationOriginDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
+  type ScreenContextTimeRange,
+  screenContextTimeRangeSchema,
   type EsqlAttachmentData,
-  type VisualizationRefAttachmentData,
+  type VisualizationAttachmentData,
+  type VisualizationOriginData,
 } from './attachment_types';
 
 export type {
@@ -34,6 +38,7 @@ export type {
   AttachmentRefActor,
   AttachmentDiff,
   VersionedAttachmentInput,
+  UpdateOriginResponse,
 } from './versioned_attachment';
 export {
   ATTACHMENT_REF_OPERATION,

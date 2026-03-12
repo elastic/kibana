@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-search-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-search-plugin'
+  title: '@kbn/unified-search-plugin'
   description: Moon project for @kbn/unified-search-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/unified_search
+  sourceRoot: src/platform/plugins/shared/unified_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -50,13 +49,9 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/react-kibana-context-render'
   - '@kbn/data-view-utils'
-  - '@kbn/esql-utils'
   - '@kbn/react-kibana-mount'
   - '@kbn/field-utils'
-  - '@kbn/language-documentation'
   - '@kbn/esql-types'
-  - '@kbn/aiops-utils'
-  - '@kbn/esql-language'
   - '@kbn/background-search'
   - '@kbn/split-button'
   - '@kbn/cps'
@@ -75,14 +70,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

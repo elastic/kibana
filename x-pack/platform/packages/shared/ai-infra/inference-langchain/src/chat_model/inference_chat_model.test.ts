@@ -39,6 +39,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     name: 'My connector',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
     ...parts,
   };
 };
@@ -306,6 +307,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',
@@ -411,19 +413,24 @@ describe('InferenceChatModel', () => {
       });
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
-      expect(chatComplete).toHaveBeenCalledWith({
-        connectorId: connector.connectorId,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        toolChoice: 'auto',
-        functionCalling: 'simulated',
-        temperature: 0,
-        modelName: 'some-other-model',
-        abortSignal: abortCtrl.signal,
-        stream: false,
-        metadata: {
-          connectorTelemetry: undefined,
-        },
-      });
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: connector.connectorId,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          functionCalling: 'simulated',
+          temperature: 0,
+          modelName: 'some-other-model',
+          abortSignal: abortCtrl.signal,
+          stream: false,
+          metadata: {
+            connectorTelemetry: undefined,
+          },
+        })
+      );
+
+      // We intentionally do not forward tool params unless tools are present.
+      expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
     });
   });
 
@@ -767,6 +774,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',

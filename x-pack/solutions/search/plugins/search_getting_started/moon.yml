@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-getting-started'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-getting-started'
+  title: '@kbn/search-getting-started'
   description: Moon project for @kbn/search-getting-started
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/plugins/search_getting_started
+  sourceRoot: x-pack/solutions/search/plugins/search_getting_started
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
@@ -49,6 +48,7 @@ tags:
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -56,4 +56,26 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    command: node
+    args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
+      - '--config'
+      - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      - '@group(src)'
+  jestCI:
+    command: node
+    args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
+      - '--config'
+      - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      - '@group(src)'

@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../../..',
+  roots: [
+    '<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-footer',
+  ],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/**/*.{ts,tsx}',
+    '!<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/**/*.test.{ts,tsx}',
+    '!<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/**/*.stories.{ts,tsx}',
+    '!<rootDir>/src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/index.ts',
+  ],
+};

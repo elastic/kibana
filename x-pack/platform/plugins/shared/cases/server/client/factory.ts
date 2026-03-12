@@ -53,6 +53,7 @@ import type { CasesClient } from '.';
 import { createCasesClient } from '.';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
@@ -72,6 +73,7 @@ interface CasesClientFactoryArgs {
   ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
@@ -112,13 +114,11 @@ export class CasesClientFactory {
   public async create({
     request,
     scopedClusterClient,
-    internalClusterClient,
     savedObjectsService,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
-    internalClusterClient: ElasticsearchClient;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -147,7 +147,6 @@ export class CasesClientFactory {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient: scopedClusterClient,
-      internalClusterClient,
       request,
       auditLogger,
       alertsClient,
@@ -167,6 +166,7 @@ export class CasesClientFactory {
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId:
@@ -174,6 +174,7 @@ export class CasesClientFactory {
       savedObjectsSerializer,
       fileService,
       usageCounter: this.options.usageCounter,
+      config: this.options.config,
     });
   }
 
@@ -187,7 +188,6 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient,
     savedObjectsSerializer,
     esClient,
-    internalClusterClient,
     request,
     auditLogger,
     alertsClient,
@@ -195,7 +195,6 @@ export class CasesClientFactory {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
-    internalClusterClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
     alertsClient: PublicMethodsOf<AlertsClient>;
@@ -206,13 +205,13 @@ export class CasesClientFactory {
       log: this.logger,
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: this.options.config,
     });
 
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
-      internalClusterClient,
     });
 
     const caseService = new CasesService({

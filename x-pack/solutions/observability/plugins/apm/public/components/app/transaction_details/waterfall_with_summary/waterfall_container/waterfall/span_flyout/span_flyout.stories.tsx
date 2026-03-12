@@ -94,8 +94,8 @@ export const TransactionSpan: StoryFn<Args> = () => {
       spanLinksCount={{ linkedChildren: 0, linkedParents: 0 }}
       parentTransactionId={data.spanEvent['parent.id']}
       onClose={() => {}}
-      start="fake-time"
-      end="fake-time"
+      rangeFrom="now-15m"
+      rangeTo="now"
     />
   );
 };

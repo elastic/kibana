@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
@@ -13,7 +12,8 @@ import { getFleetAgentsReadIntegrationsNoneRole } from '../fixtures/services/pri
 
 test.describe(
   'When the user has Fleet Agents Read built-in role',
-  { tag: [...tags.stateful.classic] },
+  // until QAF/Scout doesn't support custom roles in ECH
+  { tag: '@local-stateful-classic' },
   () => {
     test('is accessible but user cannot perform any write actions on agent tabs', async ({
       browserAuth,
@@ -36,11 +36,7 @@ test.describe(
       await expect(fleetHome.getAddFleetServerHeader()).toHaveCount(0);
     });
 
-    test('is accessible and user only see agents tab', async ({
-      browserAuth,
-      pageObjects,
-      config,
-    }) => {
+    test('is accessible and user only see agents tab', async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
       const { fleetHome } = pageObjects;
 
@@ -50,10 +46,8 @@ test.describe(
       // Verify agents tab exists
       await expect(fleetHome.getAgentsTab()).toBeVisible();
 
-      const defaultPolicyCount = config.isCloud ? 1 : 0;
-
-      await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(defaultPolicyCount);
-      await expect(fleetHome.getSettingsTab()).toHaveCount(defaultPolicyCount);
+      await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(0);
+      await expect(fleetHome.getSettingsTab()).toHaveCount(0);
       await expect(fleetHome.getUninstallTokensTab()).toHaveCount(0);
     });
   }

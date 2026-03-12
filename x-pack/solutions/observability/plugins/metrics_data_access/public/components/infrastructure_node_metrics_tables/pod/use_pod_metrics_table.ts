@@ -19,20 +19,70 @@ import {
   scaleUpPercentage,
   useInfrastructureNodeMetrics,
 } from '../shared';
+import {
+  ECS_POD_CPU_USAGE_LIMIT_PCT,
+  KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
+  KUBERNETES_NODE_MEMORY_USAGE_BYTES,
+  MEMORY_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+} from '../shared/constants';
 
-type PodMetricsField = 'kubernetes.pod.cpu.usage.limit.pct' | 'kubernetes.pod.memory.usage.bytes';
+type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
 
 const podMetricsQueryConfig: MetricsQueryOptions<PodMetricsField> = {
   sourceFilter: `event.dataset: "kubernetes.pod"`,
   groupByField: ['kubernetes.pod.uid', 'kubernetes.pod.name'],
   metricsMap: {
-    'kubernetes.pod.cpu.usage.limit.pct': {
+    [ECS_POD_CPU_USAGE_LIMIT_PCT]: {
       aggregation: 'avg',
-      field: 'kubernetes.pod.cpu.usage.limit.pct',
+      field: ECS_POD_CPU_USAGE_LIMIT_PCT,
     },
-    'kubernetes.pod.memory.usage.bytes': {
+    [MEMORY_LIMIT_UTILIZATION]: {
+      aggregation: 'custom',
+      field: MEMORY_LIMIT_UTILIZATION,
+      custom_metrics: [
+        {
+          name: 'A',
+          aggregation: 'max',
+          field: KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES,
+        },
+        {
+          name: 'B',
+          aggregation: 'avg',
+          field: KUBERNETES_NODE_MEMORY_USAGE_BYTES,
+        },
+      ],
+      equation: 'B / A',
+    },
+  },
+};
+
+type PodMetricsFieldsOtel =
+  | typeof SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION
+  | typeof MEMORY_LIMIT_UTILIZATION;
+
+const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
+  sourceFilter: 'event.dataset: "kubeletstatsreceiver.otel"',
+  groupByField: ['k8s.pod.uid', 'k8s.pod.name'],
+  metricsMap: {
+    // this is an optional field and wont populate unless specifically enabled in kubeletstatreceiver.
+    // There are not pod metrics that can derive this value.
+    [SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION]: {
       aggregation: 'avg',
-      field: 'kubernetes.pod.memory.usage.bytes',
+      field: SEMCONV_K8S_POD_CPU_LIMIT_UTILIZATION, // this is an opt-in field.
+    },
+    [MEMORY_LIMIT_UTILIZATION]: {
+      field: MEMORY_LIMIT_UTILIZATION,
+      aggregation: 'custom',
+      custom_metrics: [
+        {
+          name: 'A',
+          aggregation: 'avg',
+          field: SEMCONV_K8S_POD_MEMORY_LIMIT_UTILIZATION,
+        },
+      ],
+      equation: 'A',
     },
   },
 };
@@ -44,13 +94,14 @@ export interface PodNodeMetricsRow {
   id: string;
   name: string;
   averageCpuUsagePercent: number | null;
-  averageMemoryUsageMegabytes: number | null;
+  averageMemoryUsagePercent: number | null;
 }
 
 export function usePodMetricsTable({
   timerange,
   kuery,
   metricsClient,
+  isOtel,
 }: UseNodeMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<PodNodeMetricsRow>>({
@@ -63,8 +114,13 @@ export function usePodMetricsTable({
     [kuery]
   );
 
-  const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
-    metricsExplorerOptions: podMetricsOptions,
+  const { options: podMetricsOptionsOtel } = useMemo(
+    () => metricsToApiOptions(podMetricsQueryConfigOtel, kuery),
+    [kuery]
+  );
+
+  const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
+    metricsExplorerOptions: isOtel ? podMetricsOptionsOtel : podMetricsOptions,
     timerange,
     transform: seriesToPodNodeMetricsRow,
     sortState,
@@ -76,6 +132,7 @@ export function usePodMetricsTable({
     currentPageIndex,
     data,
     isLoading,
+    metricIndices,
     setCurrentPageIndex,
     setSortState,
     sortState,
@@ -101,12 +158,12 @@ function rowWithoutMetrics(id: string, name: string) {
     id,
     name,
     averageCpuUsagePercent: null,
-    averageMemoryUsageMegabytes: null,
+    averageMemoryUsagePercent: null,
   };
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+  const { averageCpuUsagePercentValues, averageMemoryUsagePercentValues } =
     collectMetricValues(rows);
 
   let averageCpuUsagePercent = null;
@@ -114,44 +171,41 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
     averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
   }
 
-  let averageMemoryUsageMegabytes = null;
-  if (averageMemoryUsageMegabytesValues.length !== 0) {
-    const averageInBytes = averageOfValues(averageMemoryUsageMegabytesValues);
-    const bytesPerMegabyte = 1000000;
-    averageMemoryUsageMegabytes = Math.floor(averageInBytes / bytesPerMegabyte);
+  let averageMemoryUsagePercent = null;
+  if (averageMemoryUsagePercentValues.length !== 0) {
+    averageMemoryUsagePercent = scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues));
   }
-
   return {
     averageCpuUsagePercent,
-    averageMemoryUsageMegabytes,
+    averageMemoryUsagePercent,
   };
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[]) {
   const averageCpuUsagePercentValues: number[] = [];
-  const averageMemoryUsageMegabytesValues: number[] = [];
+  const averageMemoryUsagePercentValues: number[] = [];
 
   rows.forEach((row) => {
-    const { averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+    const { averageCpuUsagePercent, averageMemoryUsagePercent } = unpackMetrics(row);
 
     if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
     }
 
-    if (averageMemoryUsageMegabytes !== null) {
-      averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
+    if (averageMemoryUsagePercent !== null) {
+      averageMemoryUsagePercentValues.push(averageMemoryUsagePercent);
     }
   });
 
   return {
     averageCpuUsagePercentValues,
-    averageMemoryUsageMegabytesValues,
+    averageMemoryUsagePercentValues,
   };
 }
 
 function unpackMetrics(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id' | 'name'> {
   return {
-    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.pod.cpu.usage.limit.pct'),
-    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.pod.memory.usage.bytes'),
+    averageCpuUsagePercent: unpackMetric(row, ECS_POD_CPU_USAGE_LIMIT_PCT),
+    averageMemoryUsagePercent: unpackMetric(row, MEMORY_LIMIT_UTILIZATION),
   };
 }

@@ -8,7 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 export function esqlResultToPlainObjects<
-  TDocument extends Record<string, any> = Record<string, unknown>
+  TDocument extends Record<string, unknown> = Record<string, unknown>
 >(result: ESQLSearchResponse): TDocument[] {
   return result.values.map((row): TDocument => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {

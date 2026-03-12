@@ -18,7 +18,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLLocation, ESQLProperNode } from '../../types';
+import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
 import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
@@ -110,6 +110,8 @@ export type GetColumnsByTypeFn = (
     openSuggestions?: boolean;
     addComma?: boolean;
     variableType?: ESQLVariableType;
+    /** When true, prepends a "Browse fields" suggestion with current columns as preloaded fields. */
+    isFieldsBrowserEnabled?: boolean;
   }
 ) => Promise<ISuggestionItem[]>;
 
@@ -186,7 +188,7 @@ export interface ICommandCallbacks {
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
-  isResourceBrowserEnabled?: () => Promise<boolean>;
+  canSuggestResourceBrowser?: () => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -203,6 +205,7 @@ export interface ICommandContext {
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
 }
 /**
@@ -292,6 +295,11 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the MMR command
+   */
+  MMR = 'mmr',
 
   /**
    * In the PROMQL command (PromQL query expression)

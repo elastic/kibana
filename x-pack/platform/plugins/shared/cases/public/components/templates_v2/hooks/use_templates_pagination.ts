@@ -7,13 +7,16 @@
 
 import { useCallback, useMemo } from 'react';
 import type { CriteriaWithPagination, Pagination } from '@elastic/eui';
-import type { Template } from '../../../../common/types/domain/template/v1';
-import type { QueryParams, SortField } from '../types';
+import type {
+  TemplatesFindRequest,
+  TemplateSortField,
+  TemplateListItem,
+} from '../../../../common/types/api/template/v1';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export interface UseTemplatesPagination {
-  queryParams: QueryParams;
-  setQueryParams: (params: Partial<QueryParams>) => void;
+  queryParams: TemplatesFindRequest;
+  setQueryParams: (params: Partial<TemplatesFindRequest>) => void;
   totalItemCount: number;
 }
 
@@ -36,11 +39,11 @@ export const useTemplatesPagination = ({
   );
 
   const onTableChange = useCallback(
-    ({ page, sort }: CriteriaWithPagination<Template>) => {
-      const newParams: Partial<QueryParams> = {};
+    ({ page, sort }: CriteriaWithPagination<TemplateListItem>) => {
+      const newParams: Partial<TemplatesFindRequest> = {};
 
       if (sort) {
-        newParams.sortField = sort.field as SortField;
+        newParams.sortField = sort.field as TemplateSortField;
         newParams.sortOrder = sort.direction;
       }
 

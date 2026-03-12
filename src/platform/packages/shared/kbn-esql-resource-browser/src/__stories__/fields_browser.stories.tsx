@@ -64,8 +64,8 @@ const InteractiveWrapper = ({
         setIsOpen(false);
         action('onClose')();
       }}
-      onSelect={(fieldNames, previousCount) => {
-        action('onSelect')(fieldNames, previousCount);
+      onSelect={(fieldName, change) => {
+        action('onSelect')(fieldName, change);
       }}
       allFields={mockFields}
       recommendedFields={recommendedFields}

@@ -22,13 +22,15 @@ import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
-import type { DockerOptions, ServerlessOptions } from './utils';
+import type { DockerOptions, DockerSnapshotOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
   log as defaultLog,
   NativeRealm,
   parseEsLog,
   runDockerContainer,
+  runDockerSnapshotContainer,
+  stopDockerSnapshotContainer,
   runServerlessCluster,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -111,6 +113,7 @@ export class Cluster {
   private process: execa.ExecaChildProcess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
+  private dockerSnapshotContainerName: string | null;
   private setupPromise: Promise<unknown> | null;
   private stdioTarget: NodeJS.WritableStream | null;
 
@@ -120,6 +123,8 @@ export class Cluster {
     this.stopCalled = false;
     // Serverless Elasticsearch node names, started via Docker
     this.serverlessNodes = [];
+    // Docker snapshot container name, if running via Docker
+    this.dockerSnapshotContainerName = null;
     // properties used exclusively for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
@@ -317,6 +322,11 @@ export class Cluster {
       return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
+    // Stop Docker snapshot container
+    if (this.dockerSnapshotContainerName) {
+      return await stopDockerSnapshotContainer(this.log, this.dockerSnapshotContainerName);
+    }
+
     // Stop local ES process
     if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
@@ -487,11 +497,11 @@ export class Cluster {
       if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
-          elasticPassword: options.password,
+          elasticPassword: options.password ?? 'changeme',
           client,
         });
 
-        await nativeRealm.setPasswords(options);
+        await nativeRealm.setPasswords(options as Record<string, unknown>);
 
         const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
         if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
@@ -641,5 +651,17 @@ export class Cluster {
     }
 
     await runDockerContainer(this.log, options);
+  }
+
+  /**
+   * Run an Elasticsearch Docker container with snapshot-equivalent semantics.
+   * Same defaults and native realm setup as the local snapshot flow.
+   */
+  async runDockerSnapshot(options: DockerSnapshotOptions) {
+    if (this.process || this.outcome) {
+      throw new Error('ES stateful cluster has already been started');
+    }
+
+    this.dockerSnapshotContainerName = await runDockerSnapshotContainer(this.log, options);
   }
 }

@@ -66,11 +66,22 @@ const timeUnitsLabels = {
   },
 };
 
+export type StreamsTimeUnit = keyof typeof timeUnitsLabels;
+
+export const getTimeUnitLabel = (
+  unit: StreamsTimeUnit,
+  { plural = true }: { plural?: boolean } = {}
+): string => {
+  const labels = timeUnitsLabels[unit];
+  return plural ? labels.plural : labels.singular;
+};
+
 export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
   let size = '';
   let unit = '';
 
-  const result = /^(\d+)([a-zA-Z]+)$/.exec(field);
+  const result = /^(-?\d+(?:\.\d+)?)([a-zA-Z]+)$/.exec(field);
+
   if (result) {
     size = result[1];
     unit = result[2];

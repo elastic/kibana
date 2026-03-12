@@ -70,13 +70,13 @@ export const OptionsListEditorOptions = ({
   field,
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
-  const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
+  const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
-    initialState.runPastTimeout ?? false
+    initialState.run_past_timeout ?? false
   );
 
   const [searchTechnique, setSearchTechnique] = useState<OptionsListSearchTechnique>(
-    initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
+    initialState.search_technique ?? DEFAULT_SEARCH_TECHNIQUE
   );
 
   const compatibleSearchTechniques = useMemo(
@@ -96,21 +96,21 @@ export const OptionsListEditorOptions = ({
      * if the selected search technique **isn't** valid, reset it to the default
      */
     const initialSearchTechniqueValid =
-      initialState.searchTechnique &&
-      compatibleSearchTechniques.includes(initialState.searchTechnique);
+      initialState.search_technique &&
+      compatibleSearchTechniques.includes(initialState.search_technique);
     const currentSearchTechniqueValid = compatibleSearchTechniques.includes(searchTechnique);
 
     if (initialSearchTechniqueValid) {
       // reset back to initial state if possible on field change
-      setSearchTechnique(initialState.searchTechnique!);
-      updateState({ searchTechnique: initialState.searchTechnique });
+      setSearchTechnique(initialState.search_technique!);
+      updateState({ search_technique: initialState.search_technique });
     } else if (currentSearchTechniqueValid) {
       // otherwise, if the current selection is valid, send that to the parent editor state
-      updateState({ searchTechnique });
+      updateState({ search_technique: searchTechnique });
     } else {
       // finally, if neither the initial or current search technique is valid, revert to the default
       setSearchTechnique(compatibleSearchTechniques[0]);
-      updateState({ searchTechnique: compatibleSearchTechniques[0] });
+      updateState({ search_technique: compatibleSearchTechniques[0] });
     }
 
     // Note: We only want to call this when compatible search techniques changes
@@ -130,7 +130,7 @@ export const OptionsListEditorOptions = ({
           onChange={(id) => {
             const newSingleSelect = id === 'single';
             setSingleSelect(newSingleSelect);
-            updateState({ singleSelect: newSingleSelect });
+            updateState({ single_select: newSingleSelect });
           }}
           name="selectionType"
         />
@@ -147,7 +147,7 @@ export const OptionsListEditorOptions = ({
             onChange={(id) => {
               const newSearchTechnique = id as OptionsListSearchTechnique;
               setSearchTechnique(newSearchTechnique);
-              updateState({ searchTechnique: newSearchTechnique });
+              updateState({ search_technique: newSearchTechnique });
             }}
             name="searchTechnique"
           />
@@ -166,7 +166,7 @@ export const OptionsListEditorOptions = ({
           onChange={() => {
             const newRunPastTimeout = !runPastTimeout;
             setRunPastTimeout(newRunPastTimeout);
-            updateState({ runPastTimeout: newRunPastTimeout });
+            updateState({ run_past_timeout: newRunPastTimeout });
           }}
           data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
         />

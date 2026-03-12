@@ -6,13 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '../../../../ast/is';
+import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '@elastic/esql/types';
 import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../../types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
+import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { validateInlineCasts } from './inline_cast';
 
 export const validateCommandArguments = (
@@ -40,7 +41,10 @@ export const validateCommandArguments = (
         messages.push(...validateOption(arg, command, ast, context, callbacks));
       } else if (isColumn(arg) || isIdentifier(arg)) {
         if (command.name === 'stats' || command.name === 'inline stats') {
-          messages.push(errors.unknownAggFunction(arg));
+          // In TS context, bare fields are allowed in STATS (implicitly aggregated)
+          if (!isTimeseriesSourceCommand(ast)) {
+            messages.push(errors.unknownAggFunction(arg));
+          }
         } else {
           messages.push(...validateColumnForCommand(arg, command.name, context));
         }

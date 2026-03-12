@@ -16,7 +16,9 @@ import {
   isAgentNotFoundError,
   createAgentNotFoundError,
   createHooksExecutionError,
+  createWorkflowExecutionError,
   isHooksExecutionError,
+  isWorkflowExecutionError,
 } from './errors';
 import { HookLifecycle, HookExecutionMode } from '../hooks/lifecycle';
 
@@ -266,6 +268,36 @@ describe('AgentBuilder errors', () => {
         hookId: 'my-hook',
         hookMode: HookExecutionMode.blocking,
       });
+    });
+  });
+
+  describe('isWorkflowExecutionError', () => {
+    it('should return true for a workflow execution error', () => {
+      const error = createWorkflowExecutionError('workflow failed', {
+        workflow: 'workflow-1',
+      });
+      expect(isWorkflowExecutionError(error)).toBe(true);
+    });
+
+    it('should return false for a hooks execution error', () => {
+      const error = createHooksExecutionError(
+        'hook failed',
+        HookLifecycle.beforeToolCall,
+        'my-hook',
+        HookExecutionMode.blocking
+      );
+      expect(isWorkflowExecutionError(error)).toBe(false);
+    });
+  });
+
+  describe('createWorkflowExecutionError', () => {
+    it('should create an error with the correct code and message', () => {
+      const error = createWorkflowExecutionError('workflow failed', {
+        workflow: 'workflow-1',
+      });
+      expect(error.code).toBe(AgentBuilderErrorCode.workflowExecutionFailed);
+      expect(error.message).toBe('workflow failed');
+      expect(error.meta).toEqual({ workflow: 'workflow-1' });
     });
   });
 });

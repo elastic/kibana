@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
-import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
+import type { ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
-import type { DiscoverEBTManager, ScopedDiscoverEBTManager } from '../../../../ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
+import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
+import { CascadedDocumentsFetcher } from '../../data_fetching/cascaded_documents_fetcher';
+import type { DiscoverServices } from '../../../../build_services';
+import { createSearchSource } from '../utils/create_search_source';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -37,6 +41,7 @@ interface TabRuntimeState {
   unifiedHistogramConfig: UnifiedHistogramConfig;
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
+  cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataView: DataView;
   unsubscribeFn: (() => void) | undefined;
 }
@@ -71,17 +76,24 @@ type InitialUnifiedHistogramLayoutPropsMap = Record<
 >;
 
 export const createTabRuntimeState = ({
-  profilesManager,
-  ebtManager,
+  services,
+  cascadedDocumentsStateManager,
   initialValues,
 }: {
-  profilesManager: ProfilesManager;
-  ebtManager: DiscoverEBTManager;
+  services: DiscoverServices;
+  cascadedDocumentsStateManager: CascadedDocumentsStateManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
 }): ReactiveTabRuntimeState => {
-  const scopedEbtManager = ebtManager.createScopedEBTManager();
+  const scopedEbtManager = services.ebtManager.createScopedEBTManager();
+  const scopedProfilesManager: ScopedProfilesManager =
+    services.profilesManager.createScopedProfilesManager({ scopedEbtManager });
+  const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
+    services,
+    scopedProfilesManager,
+    cascadedDocumentsStateManager
+  );
 
   return {
     stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
@@ -92,10 +104,9 @@ export const createTabRuntimeState = ({
       localStorageKeyPrefix: undefined,
       layoutPropsMap: initialValues?.unifiedHistogramLayoutPropsMap ?? {},
     }),
-    scopedProfilesManager$: new BehaviorSubject(
-      profilesManager.createScopedProfilesManager({ scopedEbtManager })
-    ),
+    scopedProfilesManager$: new BehaviorSubject(scopedProfilesManager),
     scopedEbtManager$: new BehaviorSubject(scopedEbtManager),
+    cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
@@ -117,20 +128,28 @@ export const selectIsDataViewUsedInMultipleRuntimeTabStates = (
 
 export const selectTabRuntimeInternalState = (
   runtimeStateManager: RuntimeStateManager,
-  tabId: string
+  tabId: string,
+  services: DiscoverServices
 ): TabState['initialInternalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const stateContainer = tabRuntimeState?.stateContainer$.getValue();
-  const savedSearch = stateContainer?.savedSearchState.getState();
+  const dataView = tabRuntimeState?.currentDataView$.getValue();
 
-  if (!stateContainer || !savedSearch) {
+  if (!stateContainer || !dataView) {
     return undefined;
   }
 
-  const { dataRequestParams } = selectTab(stateContainer.internalState.getState(), tabId);
+  const tabState = selectTab(stateContainer.internalState.getState(), tabId);
+  const { dataRequestParams, appState, globalState } = tabState;
+  const searchSource = createSearchSource({
+    dataView,
+    appState,
+    globalState,
+    services,
+  });
 
   return {
-    serializedSearchSource: savedSearch.searchSource.getSerializedFields(),
+    serializedSearchSource: searchSource.getSerializedFields(),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

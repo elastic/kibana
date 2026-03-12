@@ -30,10 +30,11 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  isLoadingStepData?: boolean;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, workflowExecutionDuration }) => {
+  ({ workflowExecutionId, stepExecution, workflowExecutionDuration, isLoadingStepData }) => {
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -47,10 +48,13 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ? stepExecution?.stepType?.replace('trigger_', '')
       : undefined;
 
+    const hasInput = Boolean(stepExecution?.input);
+    const hasError = Boolean(stepExecution?.error);
+
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
         const pseudoTabs: { id: string; name: string }[] = [];
-        if (stepExecution?.input) {
+        if (hasInput) {
           pseudoTabs.push({
             id: 'input',
             name: 'Input',
@@ -61,14 +65,14 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       return [
         {
           id: 'output',
-          name: stepExecution?.error ? 'Error' : 'Output',
+          name: hasError ? 'Error' : 'Output',
         },
         {
           id: 'input',
           name: 'Input',
         },
       ];
-    }, [stepExecution, isTriggerPseudoStep]);
+    }, [hasInput, hasError, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -128,68 +132,76 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           </EuiFlexItem>
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
-              {selectedTabId === 'output' && (
+              {isLoadingStepData ? (
+                <EuiPanel hasShadow={false} paddingSize="m">
+                  <EuiSkeletonText lines={4} />
+                </EuiPanel>
+              ) : (
                 <>
-                  {isTriggerPseudoStep && (
+                  {selectedTabId === 'output' && (
                     <>
-                      <EuiCallOut
-                        size="s"
-                        title={i18n.translate(
-                          'workflowsManagement.stepExecutionDetails.contextAccessTitle',
-                          {
-                            defaultMessage: 'Access this data in your workflow',
-                          }
-                        )}
-                        iconType="info"
-                        announceOnMount={false}
-                      >
-                        <FormattedMessage
-                          id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
-                          defaultMessage="You can reference these values using {code}"
-                          values={{
-                            code: <strong>{`{{ <field> }}`}</strong>,
-                          }}
-                        />
-                      </EuiCallOut>
-                      <EuiSpacer size="m" />
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.contextAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.contextAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: <strong>{`{{ <field> }}`}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="output" />
                     </>
                   )}
-                  <StepExecutionDataView stepExecution={stepExecution} mode="output" />
-                </>
-              )}
-              {selectedTabId === 'input' && (
-                <>
-                  {isTriggerPseudoStep && (
+                  {selectedTabId === 'input' && (
                     <>
-                      <EuiCallOut
-                        size="s"
-                        title={i18n.translate(
-                          'workflowsManagement.stepExecutionDetails.inputAccessTitle',
-                          {
-                            defaultMessage: 'Access this data in your workflow',
-                          }
-                        )}
-                        iconType="info"
-                        announceOnMount={false}
-                      >
-                        <FormattedMessage
-                          id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
-                          defaultMessage="You can reference these values using {code}"
-                          values={{
-                            code: (
-                              <strong>
-                                {triggerType === 'manual'
-                                  ? `{{ inputs.<field> }}`
-                                  : `{{ event.<field> }}`}
-                              </strong>
-                            ),
-                          }}
-                        />
-                      </EuiCallOut>
-                      <EuiSpacer size="m" />
+                      {isTriggerPseudoStep && (
+                        <>
+                          <EuiCallOut
+                            size="s"
+                            title={i18n.translate(
+                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              {
+                                defaultMessage: 'Access this data in your workflow',
+                              }
+                            )}
+                            iconType="info"
+                            announceOnMount={false}
+                          >
+                            <FormattedMessage
+                              id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                              defaultMessage="You can reference these values using {code}"
+                              values={{
+                                code: (
+                                  <strong>
+                                    {triggerType === 'manual'
+                                      ? `{{ inputs.<field> }}`
+                                      : `{{ event.<field> }}`}
+                                  </strong>
+                                ),
+                              }}
+                            />
+                          </EuiCallOut>
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
+                      <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                     </>
                   )}
-                  <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                 </>
               )}
             </EuiFlexItem>

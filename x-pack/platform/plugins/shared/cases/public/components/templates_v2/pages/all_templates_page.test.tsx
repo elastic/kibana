@@ -15,6 +15,31 @@ import * as api from '../api/api';
 
 jest.mock('../api/api');
 
+jest.mock('../../use_breadcrumbs', () => ({
+  useCasesTemplatesBreadcrumbs: jest.fn(),
+}));
+
+const mockNavigateToCasesCreateTemplate = jest.fn();
+const mockNavigateToCasesEditTemplate = jest.fn();
+
+jest.mock('../../../common/navigation/hooks', () => ({
+  useCasesCreateTemplateNavigation: () => ({
+    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
+    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+  }),
+}));
+
+jest.mock('../../../common/navigation', () => ({
+  useCasesCreateTemplateNavigation: () => ({
+    getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
+    navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+  }),
+  useCasesEditTemplateNavigation: () => ({
+    getCasesEditTemplateUrl: jest.fn().mockReturnValue('/templates/edit'),
+    navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
+  }),
+}));
+
 const apiMock = api as jest.Mocked<typeof api>;
 
 describe('AllTemplatesPage', () => {
@@ -34,6 +59,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-01T00:00:00.000Z',
         usageCount: 10,
         isDefault: true,
+        fieldSearchMatches: false,
       },
       {
         templateId: 'template-2',
@@ -49,6 +75,7 @@ describe('AllTemplatesPage', () => {
         lastUsedAt: '2024-01-02T00:00:00.000Z',
         usageCount: 5,
         isDefault: false,
+        fieldSearchMatches: false,
       },
     ],
     page: 1,

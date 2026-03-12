@@ -71,7 +71,6 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = React.memo(
           onTextLangQueryChange={onQueryChange}
           onTextLangQuerySubmit={onQuerySubmit}
           dataErrorsControl={dataErrorsControl}
-          hideRunQueryText
           disableSubmitAction
           hideQueryHistory
           hasOutline

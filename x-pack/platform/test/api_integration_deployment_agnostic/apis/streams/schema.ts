@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { emptyAssets, type RoutingStatus } from '@kbn/streams-schema';
+import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
@@ -32,7 +33,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ['log.level']: 'warning',
       };
 
-      await indexDocument(esClient, 'logs', doc);
+      await indexDocument(esClient, 'logs.otel', doc);
     });
 
     after(async () => {
@@ -45,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('GET /internal/streams/{name}/schema/unmapped_fields', {
             params: {
               path: {
-                name: 'logs',
+                name: 'logs.otel',
               },
             },
           })
@@ -139,7 +140,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             params: {
               path: {
-                name: 'logs',
+                name: 'logs.otel',
               },
               body: {
                 field_definitions: [{ name: 'body.text', type: 'boolean' }],
@@ -158,7 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             params: {
               path: {
-                name: 'logs',
+                name: 'logs.otel',
               },
               body: {
                 field_definitions: [{ name: 'body.text', type: 'keyword' }],
@@ -171,10 +172,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.simulationError).to.be(null);
         expect(response.body.documentsWithRuntimeFieldsApplied).length(1);
       });
+      it('Ignores typeless (description-only) field definitions', async () => {
+        const response = await apiClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            params: {
+              path: {
+                name: 'logs.otel',
+              },
+              body: {
+                field_definitions: [{ name: 'body.text', description: 'docs-only override' }],
+              },
+            },
+          }
+        );
+
+        // Description-only overrides should never be simulated (no mapping changes to validate)
+        expect(response.body.status).to.be('success');
+        expect(response.body.simulationError).to.be(null);
+        expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
+      });
+      it('Ignores typeless definitions but still simulates mapping-affecting ones', async () => {
+        const response = await apiClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            params: {
+              path: {
+                name: 'logs.otel',
+              },
+              body: {
+                field_definitions: [
+                  { name: 'body.text', description: 'docs-only override' },
+                  { name: 'body.text', type: 'keyword' },
+                ],
+              },
+            },
+          }
+        );
+
+        expect(response.body.status).to.be('success');
+        expect(response.body.simulationError).to.be(null);
+        expect(response.body.documentsWithRuntimeFieldsApplied).length(1);
+      });
       it('Returns unknown status when documents are missing and status cannot be determined', async () => {
         const forkBody = {
           stream: {
-            name: 'logs.nginx',
+            name: 'logs.otel.nginx',
           },
           where: {
             field: 'attributes.log.logger',
@@ -183,13 +226,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           status: 'enabled' as RoutingStatus,
         };
 
-        await forkStream(apiClient, 'logs', forkBody);
+        await forkStream(apiClient, 'logs.otel', forkBody);
         const response = await apiClient.fetch(
           'POST /internal/streams/{name}/schema/fields_simulation',
           {
             params: {
               path: {
-                name: 'logs.nginx',
+                name: 'logs.otel.nginx',
               },
               body: {
                 field_definitions: [{ name: 'body.text', type: 'keyword' }],
@@ -203,29 +246,136 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
       });
 
+      it('Works when time_series_dimension is present on non-TSDB mappings (no runtime_mappings fallback)', async () => {
+        const dataStreamName = 'logs.otel';
+        const componentTemplateName = 'streams_tsdim_non_tsdb_test';
+        const shadowedField = 'attributes.tsdim_runtime_shadow';
+        // Streams index templates use a max-long priority; keep it as a string to avoid JS precision loss.
+        const safeMaxPriority = `${MAX_PRIORITY}` as unknown as number;
+
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+          name: dataStreamName,
+        });
+        const indexTemplateName = dataStreams[0].template;
+
+        const existingIndexTemplateResponse = await esClient.indices.getIndexTemplate({
+          name: indexTemplateName,
+        });
+        const existingIndexTemplate =
+          existingIndexTemplateResponse.index_templates[0].index_template;
+
+        const ignoreMissingComponentTemplates: string[] | undefined = Array.isArray(
+          existingIndexTemplate.ignore_missing_component_templates
+        )
+          ? existingIndexTemplate.ignore_missing_component_templates
+          : existingIndexTemplate.ignore_missing_component_templates
+          ? [existingIndexTemplate.ignore_missing_component_templates]
+          : undefined;
+
+        // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
+        // when updating templates. Build a "put-safe" body from the known writable properties.
+        const putSafeIndexTemplateBody = {
+          index_patterns: existingIndexTemplate.index_patterns,
+          template: existingIndexTemplate.template,
+          composed_of: existingIndexTemplate.composed_of,
+          priority: safeMaxPriority,
+          version: existingIndexTemplate.version,
+          _meta: existingIndexTemplate._meta,
+          data_stream: existingIndexTemplate.data_stream,
+          allow_auto_create: existingIndexTemplate.allow_auto_create,
+          ignore_missing_component_templates: ignoreMissingComponentTemplates,
+        };
+
+        await esClient.cluster.putComponentTemplate({
+          name: componentTemplateName,
+          template: {
+            mappings: {
+              properties: {
+                [shadowedField]: {
+                  type: 'keyword',
+                  time_series_dimension: true,
+                },
+              },
+            },
+          },
+          _meta: {
+            description:
+              'Test-only component template for non-TSDB indices with time_series_dimension: true',
+          },
+        });
+
+        const patchedIndexTemplateBody = {
+          ...putSafeIndexTemplateBody,
+          composed_of: [...(existingIndexTemplate.composed_of ?? []), componentTemplateName],
+        };
+
+        // NOTE: `getIndexTemplate` wraps the response under `index_template`, but `putIndexTemplate`
+        // expects the template fields at the top-level request body.
+        await esClient.indices.putIndexTemplate({
+          name: indexTemplateName,
+          ...patchedIndexTemplateBody,
+        });
+
+        try {
+          // Force a new backing index so the updated template is applied.
+          await esClient.indices.rollover({ alias: dataStreamName });
+
+          await indexDocument(esClient, dataStreamName, {
+            '@timestamp': '2024-01-01T00:00:17.000Z',
+            message: 'time_series_dimension runtime shadow test',
+            tsdim_runtime_shadow: 'abc',
+          });
+
+          const response = await apiClient
+            .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
+              params: {
+                path: {
+                  name: dataStreamName,
+                },
+                body: {
+                  field_definitions: [{ name: shadowedField, type: 'keyword' }],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(response.body.status).to.be('success');
+          expect(response.body.simulationError).to.be(null);
+          expect(response.body.documentsWithRuntimeFieldsApplied).to.be.an('array');
+          expect(response.body.documentsWithRuntimeFieldsApplied).not.to.be.empty();
+        } finally {
+          await esClient.indices.putIndexTemplate({
+            name: indexTemplateName,
+            ...putSafeIndexTemplateBody,
+            composed_of: existingIndexTemplate.composed_of,
+          });
+          await esClient.cluster.deleteComponentTemplate({ name: componentTemplateName });
+        }
+      });
+
       describe('Geo point fields', () => {
         before(async () => {
           // Flattened lat/lon
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:11.000Z',
             'client.geo.lat': 40.7,
             'client.geo.lon': -74.0,
           });
 
           // Already normalized object
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:12.000Z',
             'server.location': { lat: 51.5, lon: -0.125 },
           });
 
           // WKT string format
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:13.000Z',
             'origin.point': 'POINT (-122.4194 37.7749)',
           });
 
           // Multiple geo_point fields in same doc
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:14.000Z',
             'source.geo.lat': 48.8566,
             'source.geo.lon': 2.3522,
@@ -234,7 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           // Mix of geo_point and regular fields
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:15.000Z',
             'event.location.lat': 34.0522,
             'event.location.lon': -118.2437,
@@ -242,7 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           // Only lat exists (partial - should not match)
-          await indexDocument(esClient, 'logs', {
+          await indexDocument(esClient, 'logs.otel', {
             '@timestamp': '2024-01-01T00:00:16.000Z',
             'partial.geo.lat': 40.0,
           });
@@ -253,7 +403,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'attributes.client.geo', type: 'geo_point' }],
                 },
@@ -286,7 +436,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'attributes.server.location', type: 'geo_point' }],
                 },
@@ -317,7 +467,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'attributes.origin.point', type: 'geo_point' }],
                 },
@@ -348,7 +498,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'attributes.source.geo', type: 'geo_point' },
@@ -389,7 +539,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'attributes.event.location', type: 'geo_point' },
@@ -432,7 +582,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'POST /internal/streams/{name}/schema/fields_simulation',
             {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'attributes.partial.geo', type: 'geo_point' }],
                 },
@@ -452,7 +602,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'service.name', type: 'keyword' },
@@ -471,7 +621,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'user.id', type: 'keyword' }],
                 },
@@ -486,7 +636,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'description', type: 'match_only_text' }],
                 },
@@ -501,7 +651,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'http.response.status_code', type: 'long' },
@@ -519,7 +669,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'event.duration', type: 'long' }],
                 },
@@ -534,7 +684,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'metrics.cpu_percent', type: 'double' },
@@ -552,7 +702,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'transaction.duration.us', type: 'double' }],
                 },
@@ -567,7 +717,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'event.success', type: 'boolean' }],
                 },
@@ -582,7 +732,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'event.success', type: 'boolean' },
@@ -601,7 +751,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'event.created', type: 'date' }],
                 },
@@ -616,7 +766,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'event.created', type: 'date' },
@@ -635,7 +785,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'source.ip', type: 'ip' },
@@ -653,7 +803,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'client.ip', type: 'ip' }],
                 },
@@ -670,7 +820,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'field_keyword', type: 'keyword' },
@@ -693,7 +843,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'deeply.nested.field.name', type: 'keyword' },
@@ -711,7 +861,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [
                     { name: 'http.request.method', type: 'keyword' },
@@ -734,7 +884,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'test.field', type: 'invalid_type' }] as any,
                 },
@@ -747,7 +897,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const response = await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [],
                 },
@@ -780,7 +930,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ type: 'keyword' }] as any,
                 },
@@ -793,7 +943,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await apiClient
             .fetch('POST /internal/streams/{name}/schema/fields_simulation', {
               params: {
-                path: { name: 'logs' },
+                path: { name: 'logs.otel' },
                 body: {
                   field_definitions: [{ name: 'test.field' }] as any,
                 },
@@ -809,7 +959,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [{ name: 'unique.field.name', type: 'keyword' }],
               },
@@ -824,7 +974,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [],
               },
@@ -852,7 +1002,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [{ type: 'keyword' }] as any,
               },
@@ -865,7 +1015,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [{ name: 'test.field' }] as any,
               },
@@ -878,7 +1028,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [{ name: 'test.field', type: 'invalid_type' }] as any,
               },
@@ -891,7 +1041,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [
                   { name: 'field.one', type: 'keyword' },
@@ -910,7 +1060,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [{ name: 'system.field', type: 'system' }],
               },
@@ -925,7 +1075,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('POST /internal/streams/{name}/schema/fields_conflicts', {
             params: {
-              path: { name: 'logs' },
+              path: { name: 'logs.otel' },
               body: {
                 field_definitions: [
                   { name: 'field.keyword', type: 'keyword' },

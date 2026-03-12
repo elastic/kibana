@@ -10,7 +10,7 @@ import { ServiceHealthStatus } from '../service_health_status';
 import { transformToReactFlow } from './transform_to_react_flow';
 import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { GroupedNodeData } from './react_flow_types';
+import type { GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR } from './constants';
 
 // Helper to create a minimal raw response

@@ -147,8 +147,8 @@ export class EsqlStarredQueriesService {
       status: favoriteItem.metadata.status,
       id: favoriteItem.id,
     });
-    this.queries$.next(starredQueries);
     this.starredQueries = starredQueries;
+    this.queries$.next(starredQueries);
     await this.client.addFavorite(favoriteItem);
 
     // telemetry, add favorite click event

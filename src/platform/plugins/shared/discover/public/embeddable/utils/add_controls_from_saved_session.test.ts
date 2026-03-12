@@ -8,12 +8,12 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import { addControlsFromSavedSession } from './add_controls_from_saved_session';
 
 describe('addControlsFromSavedSession', () => {
   let mockContainer: CanAddNewPanel & PublishesESQLVariables & { controlGroupApi$?: unknown };
@@ -56,7 +56,7 @@ describe('addControlsFromSavedSession', () => {
       await addControlsFromSavedSession(
         containerWithoutESQL,
         JSON.stringify({
-          panel1: { variableName: 'var1', type: 'control' },
+          panel1: { variable_name: 'var1', type: 'control' },
         })
       );
       expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe('addControlsFromSavedSession', () => {
       await addControlsFromSavedSession(
         containerWithoutControlGroup,
         JSON.stringify({
-          panel1: { variableName: 'var1', type: 'control' },
+          panel1: { variable_name: 'var1', type: 'control' },
         })
       );
       expect(mockContainer.addNewPanel).not.toHaveBeenCalled();
@@ -88,17 +88,17 @@ describe('addControlsFromSavedSession', () => {
       panel1: {
         type: 'control',
         order: 0,
-        variableName: 'var1',
+        variable_name: 'var1',
       },
       panel2: {
         type: 'control',
         order: 1,
-        variableName: 'var2',
+        variable_name: 'var2',
       },
       panel3: {
         type: 'control',
         order: 2,
-        variableName: 'nonExistentVar',
+        variable_name: 'nonExistentVar',
       },
     });
 
@@ -111,7 +111,7 @@ describe('addControlsFromSavedSession', () => {
         {
           panelType: ESQL_CONTROL,
           serializedState: {
-            variableName: 'nonExistentVar',
+            variable_name: 'nonExistentVar',
             type: 'control',
           },
         },
@@ -125,7 +125,7 @@ describe('addControlsFromSavedSession', () => {
       const addedPanels = (
         mockContainer.addNewPanel as jest.MockedFunction<CanAddNewPanel['addNewPanel']>
       ).mock.calls.map(
-        (call) => (call[0]?.serializedState as { variableName?: string })?.variableName
+        (call) => (call[0]?.serializedState as { variable_name?: string })?.variable_name
       );
 
       expect(addedPanels).not.toContain(['var1', 'var2']);

@@ -72,12 +72,13 @@ export interface SavedSearchAttributes {
   chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
 }
 
 export type SavedSearchByValueAttributes = SavedSearchAttributes & {
-  references: Reference[];
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
 };
 
 /** @internal **/
@@ -128,7 +129,7 @@ export interface DiscoverSessionTab {
   chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
 }
 
 export interface DiscoverSession {

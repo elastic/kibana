@@ -12,7 +12,7 @@ import { createSAMLResponse } from '@kbn/mock-idp-utils';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot control the UIAM session lifetime to reduce it (it's 1h by default).
 apiTest.describe(

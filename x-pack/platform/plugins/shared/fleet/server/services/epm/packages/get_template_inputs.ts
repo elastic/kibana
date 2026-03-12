@@ -100,7 +100,8 @@ export async function getTemplateInputs(
   format: 'yml',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<string>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -109,7 +110,8 @@ export async function getTemplateInputs(
   format: 'json',
   isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting?: boolean
 ): Promise<{ inputs: TemplateAgentPolicyInput[] }>;
 export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
@@ -118,7 +120,8 @@ export async function getTemplateInputs(
   format: Format,
   isInputIncluded: (input: TemplateAgentPolicyInput) => boolean = () => true,
   prerelease?: boolean,
-  ignoreUnverified?: boolean
+  ignoreUnverified?: boolean,
+  injectWiredStreamsRouting: boolean = false
 ) {
   const experimentalFeature = appContextService.getExperimentalFeatures();
 
@@ -194,6 +197,28 @@ export async function getTemplateInputs(
     packagePolicyWithInputs.inputs as PackagePolicyInput[],
     inputIdsDestinationMap
   ).filter(isInputIncluded);
+
+  if (injectWiredStreamsRouting) {
+    for (const input of inputs) {
+      const inputStreams = input.streams as Array<{
+        data_stream?: { type?: string };
+        processors?: Array<Record<string, unknown>>;
+      }>;
+      if (inputStreams) {
+        for (const stream of inputStreams) {
+          if (stream.data_stream?.type === 'logs') {
+            stream.processors = stream.processors || [];
+            stream.processors.unshift({
+              add_fields: {
+                target: '@metadata',
+                fields: { raw_index: 'logs.ecs' },
+              },
+            });
+          }
+        }
+      }
+    }
+  }
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {

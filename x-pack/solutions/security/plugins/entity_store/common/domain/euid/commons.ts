@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-import type { EuidAttribute } from '../definitions/entity_schema';
+import { get } from 'lodash';
+import type { EuidAttribute, FieldEvaluationSource } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
 }
 
-export function getFieldValue(doc: any, field: string): string | undefined {
-  const brokenFields = field.split('.');
+/**
+ * Assumes the document has previously been validated
+ * to not be null or undefined.
+ */
+export function getDocument(doc: any): any {
+  if (doc._source && typeof doc._source === 'object') {
+    return doc._source;
+  }
+  return doc;
+}
 
-  let fieldInObject = doc;
-  for (const brokenField of brokenFields) {
-    fieldInObject = fieldInObject[brokenField];
-    if (!fieldInObject) {
-      return undefined;
-    }
+function isEmpty(value: any): boolean {
+  return value === undefined || value === null || value === '';
+}
+
+export function getFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+
+  if (isEmpty(fieldInObject)) {
+    return undefined;
   }
 
   // In theory we should not have multi valued fields.
@@ -27,17 +40,25 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   // client returns an array of values.
   if (Array.isArray(fieldInObject)) {
     if (fieldInObject.length > 0) {
-      return fieldInObject[0];
+      return String(fieldInObject[0]);
     } else {
       throw new Error(`Field ${field} is an array but has no values`);
     }
   }
 
   if (typeof fieldInObject === 'object') {
-    throw new Error(`Field ${field} is an object, can't convert to value`);
+    throw new Error(
+      `Field ${field} is an object, can't convert to value (value: ${JSON.stringify(
+        fieldInObject
+      )})`
+    );
   }
 
   return String(fieldInObject);
+}
+
+export function getCompositionFields(composition: EuidAttribute[]): string[] {
+  return composition.filter(isEuidField).map((attr) => attr.field);
 }
 
 export function getFieldsToBeFilteredOn(
@@ -45,8 +66,8 @@ export function getFieldsToBeFilteredOn(
   euidFields: EuidAttribute[][]
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
-    const composedFields = euidFields[i];
-    const fieldAttrs = composedFields.filter(isEuidField);
+    const composition = euidFields[i];
+    const fieldAttrs = composition.filter(isEuidField);
     const composedFieldValues = fieldAttrs.reduce(
       (acc, attr) => ({
         ...acc,
@@ -67,9 +88,7 @@ export function getFieldsToBeFilteredOut(
   fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
 ): string[] {
   const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
-  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap((composedFields) =>
-    composedFields.filter(isEuidField).map((attr) => attr.field)
-  );
+  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap(getCompositionFields);
 
   const toFilterOut: string[] = [];
   for (const field of fieldsNotInTheId) {
@@ -85,5 +104,21 @@ export function isEuidField(attr: EuidAttribute) {
 }
 
 export function isEuidSeparator(attr: EuidAttribute) {
-  return 'separator' in attr;
+  return 'sep' in attr;
+}
+
+export function getSourceFieldNames(sources: FieldEvaluationSource[]): {
+  exactMatchFields: string[];
+  prefixMatchFields: string[];
+} {
+  const exactMatchFields: string[] = [];
+  const prefixMatchFields: string[] = [];
+  for (const source of sources) {
+    if ('field' in source) {
+      exactMatchFields.push(source.field);
+    } else {
+      prefixMatchFields.push(source.firstChunkOfField);
+    }
+  }
+  return { exactMatchFields, prefixMatchFields };
 }

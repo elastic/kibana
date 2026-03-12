@@ -24,7 +24,10 @@ import type {
   IngestPipelineLowercaseProcessor,
   IngestPipelineTrimProcessor,
   IngestPipelineJoinProcessor,
+  IngestPipelineSplitProcessor,
+  IngestPipelineSortProcessor,
   IngestPipelineConcatProcessor,
+  IngestPipelineNetworkDirectionProcessor,
 } from '../../../../types/processors/ingest_pipeline_processors';
 
 type WithOptionalTracingTag<T> = T & { tag?: string };
@@ -45,8 +48,11 @@ export interface ActionToIngestType {
   lowercase: WithOptionalTracingTag<IngestPipelineLowercaseProcessor>;
   trim: WithOptionalTracingTag<IngestPipelineTrimProcessor>;
   join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
+  split: WithOptionalTracingTag<IngestPipelineSplitProcessor>;
+  sort: WithOptionalTracingTag<IngestPipelineSortProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
   redact: WithOptionalTracingTag<IngestPipelineRedactProcessor>;
   concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
+  network_direction: WithOptionalTracingTag<IngestPipelineNetworkDirectionProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

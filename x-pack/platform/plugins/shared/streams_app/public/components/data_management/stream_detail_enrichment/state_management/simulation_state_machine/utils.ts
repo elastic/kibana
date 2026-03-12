@@ -17,13 +17,19 @@ import { uniq } from 'lodash';
 import type {
   MappedSchemaField,
   SchemaField,
+  TypedMappedSchemaField,
   UnmappedSchemaField,
 } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 import { collectDescendantStepIds } from '../utils';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
-import type { DetectedField, Simulation, SimulationContext } from './types';
+import type {
+  DetectedField,
+  SampleDocumentWithUIAttributes,
+  Simulation,
+  SimulationContext,
+} from './types';
 
 export function getSourceField(
   processor: StreamlangProcessorDefinitionWithUIAttributes
@@ -80,7 +86,6 @@ export function collectDescendantProcessorIdsForCondition(
  */
 export function collectActiveDocumentsForSelectedCondition(
   documents: Simulation['documents'] | undefined,
-  steps: StreamlangStepWithUIAttributes[],
   selectedConditionId: string | undefined
 ): Simulation['documents'] {
   if (!documents) {
@@ -91,7 +96,10 @@ export function collectActiveDocumentsForSelectedCondition(
     return documents;
   }
 
-  const processorIds = collectDescendantProcessorIdsForCondition(steps, selectedConditionId);
+  // Condition filtering is based on the simulation-only noop processor that is tagged
+  // with the condition customIdentifier. This allows tracking match rates even when
+  // the subtree is empty or descendants are faulty.
+  const processorIds = [selectedConditionId];
 
   return collectDocumentsAffectedByProcessors(documents, processorIds);
 }
@@ -379,6 +387,48 @@ export function mapField(
   };
 }
 
+export function stageDocOnlyOverride(
+  context: SimulationContext,
+  params: { fieldName: string; description?: string }
+): {
+  detectedSchemaFields: SchemaField[];
+  detectedSchemaFieldsCache: Map<string, SchemaField>;
+} {
+  const updatedCache = new Map(context.detectedSchemaFieldsCache);
+
+  const updatedFields = (() => {
+    const existing = context.detectedSchemaFields.find((f) => f.name === params.fieldName);
+    if (!existing) {
+      const schemaField: SchemaField = {
+        name: params.fieldName,
+        parent: context.streamName,
+        status: 'unmapped',
+        description: params.description,
+      };
+      updatedCache.set(schemaField.name, schemaField);
+      return [...context.detectedSchemaFields, schemaField];
+    }
+
+    return context.detectedSchemaFields.map((field) => {
+      if (field.name !== params.fieldName) return field;
+
+      const schemaField: SchemaField = {
+        ...field,
+        status: 'unmapped',
+        type: undefined,
+        description: params.description,
+      };
+      updatedCache.set(schemaField.name, schemaField);
+      return schemaField;
+    });
+  })();
+
+  return {
+    detectedSchemaFields: updatedFields,
+    detectedSchemaFieldsCache: updatedCache,
+  };
+}
+
 export function unmapField(
   context: SimulationContext,
   fieldName: string
@@ -410,10 +460,34 @@ export function getUnmappedSchemaFields(fields: SchemaField[]) {
   return fields.filter((field) => field.status === 'unmapped');
 }
 
-export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefinition {
+export function convertToFieldDefinition(fields: TypedMappedSchemaField[]): FieldDefinition {
   return fields.reduce(
     (mappedFields, field) =>
       Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),
     {}
   );
+}
+
+/**
+ * Safely retrieves the original sample document for a given document index.
+ *
+ * This function handles the edge case where the samples array might have been
+ * re-filtered (e.g., when switching preview tabs from "Processed" to "Dropped")
+ * while a document is still selected in the flyout. In such cases, the
+ * currentDocIndex might be out of bounds for the new samples array.
+ *
+ * @param originalSamples - Array of sample documents with UI attributes, or undefined
+ * @param currentDocIndex - The index of the currently selected document, or undefined
+ * @returns The document at the given index, or undefined if samples is empty,
+ *          index is undefined, or index is out of bounds
+ */
+export function getOriginalSampleDocument(
+  originalSamples: SampleDocumentWithUIAttributes[] | undefined,
+  currentDocIndex: number | undefined
+): SampleDocumentWithUIAttributes['document'] | undefined {
+  if (!originalSamples || currentDocIndex === undefined) {
+    return undefined;
+  }
+  // Safe array access - returns undefined if index is out of bounds
+  return originalSamples[currentDocIndex]?.document;
 }

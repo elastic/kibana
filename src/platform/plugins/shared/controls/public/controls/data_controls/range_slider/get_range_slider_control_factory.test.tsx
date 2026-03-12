@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -20,7 +20,6 @@ import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PresentationContainer } from '@kbn/presentation-containers';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -98,9 +97,10 @@ describe('RangeSliderControlApi', () => {
   describe('appliedFilters$', () => {
     test('should not set appliedFilters$ when value is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -111,9 +111,10 @@ describe('RangeSliderControlApi', () => {
 
     test('should set appliedFilters$ when value is provided', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -149,9 +150,10 @@ describe('RangeSliderControlApi', () => {
 
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'notGonnaFindMeDataView',
-          fieldName: 'myFieldName',
+          data_view_id: 'notGonnaFindMeDataView',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -171,9 +173,10 @@ describe('RangeSliderControlApi', () => {
       min = null; // simulate no results by returning min aggregation value of null
       max = null; // simulate no results by returning max aggregation value of null
       const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           value: ['5', '10'],
         },
         finalizeApi,
@@ -190,9 +193,10 @@ describe('RangeSliderControlApi', () => {
   describe('min max', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
       const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -211,9 +215,10 @@ describe('RangeSliderControlApi', () => {
   describe('step state', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -225,9 +230,10 @@ describe('RangeSliderControlApi', () => {
 
     test('retains value from initial state', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
           step: 1024,
         },
         finalizeApi,

@@ -57,17 +57,24 @@ const setup = ({
 };
 
 describe('Navigation Plugin', () => {
-  it('should change the active solution navigation', async () => {
+  it('should init navigation when active space and definition are both available', async () => {
     const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
 
     spaces.getActiveSpace$ = jest
       .fn()
       .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
 
-    plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+    const navigationTree$ = of({ body: [] });
+    const { addSolutionNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
     await new Promise((resolve) => setTimeout(resolve));
 
-    expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith('es');
+    addSolutionNavigation({
+      id: 'es' as const,
+      title: 'Elasticsearch',
+      navigationTree$,
+    });
+
+    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
   });
 
   it('should not load the active space on non authenticated pages', async () => {
@@ -96,7 +103,7 @@ describe('Navigation Plugin', () => {
   });
 
   describe('addSolutionNavigation()', () => {
-    it('should update the solution navigation definitions', async () => {
+    it('should not init navigation until active space is set', async () => {
       const { plugin, coreStart, unifiedSearch, spaces } = setup();
 
       const { addSolutionNavigation } = plugin.start(coreStart, {
@@ -105,20 +112,37 @@ describe('Navigation Plugin', () => {
       });
       await new Promise((resolve) => setTimeout(resolve));
 
-      const definition = {
+      addSolutionNavigation({
         id: 'es' as const,
         title: 'Elasticsearch',
         navigationTree$: of({ body: [] }),
-      };
-      addSolutionNavigation(definition);
+      });
 
+      expect(coreStart.chrome.project.initNavigation).not.toHaveBeenCalled();
+    });
+
+    it('should init navigation when definition arrives after active space', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'oblt' } as Pick<Space, 'solution'>));
+
+      const navigationTree$ = of({ body: [] });
+      const { addSolutionNavigation } = plugin.start(coreStart, {
+        unifiedSearch,
+        cloud,
+        spaces,
+      });
       await new Promise((resolve) => setTimeout(resolve));
 
-      expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalledWith({
-        es: {
-          ...definition,
-        },
+      addSolutionNavigation({
+        id: 'oblt' as const,
+        title: 'Observability',
+        navigationTree$,
       });
+
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
     });
   });
 
@@ -175,77 +199,6 @@ describe('Navigation Plugin', () => {
       plugin.start(coreStart, { unifiedSearch, cloud, spaces });
       await new Promise((resolve) => setTimeout(resolve));
       expect(coreStart.chrome.setChromeStyle).toHaveBeenCalledWith('classic');
-    });
-  });
-
-  describe('set feedback button visibility', () => {
-    it('should set the feedback button visibility to "true" when space solution is a known solution', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(true);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should set the feedback button visibility to "false" for deployment in trial via endDate', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
-      const coreSetup = coreMock.createSetup();
-      const cloudSetup = cloudMock.createSetup();
-      cloudSetup.isInTrial.mockReturnValue(true);
-      plugin.setup(coreSetup, { cloud: cloudSetup });
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud: cloudStart, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(false);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-    it('should set the feedback button visibility to "false" for deployment in trial in serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud: cloudStart, spaces } = setup();
-      const coreSetup = coreMock.createSetup();
-      const cloudSetup = cloudMock.createSetup();
-      cloudSetup.isInTrial.mockReturnValue(true);
-      plugin.setup(coreSetup, { cloud: cloudSetup });
-
-      for (const solution of ['es', 'oblt', 'security']) {
-        spaces.getActiveSpace$ = jest
-          .fn()
-          .mockReturnValue(of({ solution } as Pick<Space, 'solution'>));
-        plugin.start(coreStart, { unifiedSearch, cloud: cloudStart, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).toHaveBeenCalledWith(false);
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should not set the feedback button visibility for classic or unknown solution', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
-
-      for (const solution of ['classic', 'unknown', undefined]) {
-        spaces.getActiveSpace$ = jest.fn().mockReturnValue(of({ solution }));
-        plugin.start(coreStart, { unifiedSearch, cloud, spaces });
-        await new Promise((resolve) => setTimeout(resolve));
-        expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).not.toHaveBeenCalled();
-        coreStart.chrome.sideNav.setIsFeedbackBtnVisible.mockReset();
-      }
-    });
-
-    it('should not set the feedback button visibility when on serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({ buildFlavor: 'serverless' });
-
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.sideNav.setIsFeedbackBtnVisible).not.toHaveBeenCalled();
     });
   });
 
@@ -345,45 +298,6 @@ describe('Navigation Plugin', () => {
 
       const isEnabled = await firstValueFrom(isSolutionNavEnabled$);
       expect(isEnabled).toBe(false);
-    });
-  });
-  describe('set feedback URL parameters', () => {
-    it('should set the relevant params when on serverless', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({
-        buildFlavor: 'serverless',
-      });
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'serverless',
-        })
-      );
-    });
-    it('should set the relevant params when on cloud', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup({});
-      cloud.isCloudEnabled = true;
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'ech',
-        })
-      );
-    });
-    it('should set the relevant params when on local', async () => {
-      const { plugin, coreStart, unifiedSearch, cloud } = setup();
-      cloud.isCloudEnabled = false;
-      plugin.start(coreStart, { unifiedSearch, cloud });
-      await new Promise((resolve) => setTimeout(resolve));
-      expect(coreStart.chrome.project.setFeedbackUrlParams).toHaveBeenCalledWith(
-        new URLSearchParams({
-          version: 'version',
-          type: 'local',
-        })
-      );
     });
   });
 });

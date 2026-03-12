@@ -47,6 +47,14 @@ export type MonacoMessage = monaco.editor.IMarkerData & {
 export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    /**
+     * Optional resolver to provide model-specific dependencies.
+     *
+     * Monaco language providers are global per language, but Kibana can render multiple ES|QL
+     * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
+     * pick the correct callbacks for the specific editor model requesting suggestions.
+     */
+    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLCallbacks | undefined;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
@@ -162,21 +170,27 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
+        const resolvedDeps = resolvedCallbacks
+          ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
+          : deps;
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
 
         const computeStart = performance.now();
-        const suggestions = await suggest(fullText, offset, deps);
+        const suggestions = await suggest(fullText, offset, resolvedDeps);
 
         const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
         if (suggestionsWithCustomCommands.length) {
-          deps?.telemetry?.onSuggestionsWithCustomCommandShown?.(suggestionsWithCustomCommands);
+          resolvedDeps?.telemetry?.onSuggestionsWithCustomCommandShown?.(
+            suggestionsWithCustomCommands
+          );
         }
 
         const result = wrapAsMonacoSuggestions(suggestions, fullText);
         const computeEnd = performance.now();
 
-        deps?.telemetry?.onSuggestionsReady?.(
+        resolvedDeps?.telemetry?.onSuggestionsReady?.(
           computeStart,
           computeEnd,
           model.getValueLength(),

@@ -168,6 +168,10 @@ function parseConfig(log) {
     opts['translate-timestamps'] !== undefined
       ? opts['translate-timestamps']
       : process.env.SYNC_TRANSLATE_TIMESTAMPS;
+  // getopts sets '' for missing string options; treat empty as unset so translation stays off by default
+  if (translateTimestampsRaw === '') {
+    translateTimestampsRaw = undefined;
+  }
   var translateTimestamps;
 
   if (translateTimestampsRaw !== undefined) {

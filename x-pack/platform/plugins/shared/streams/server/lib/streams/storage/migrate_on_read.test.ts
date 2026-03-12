@@ -33,6 +33,7 @@ const mockStreamsAsserts = Streams.all.Definition.asserts as jest.MockedFunction
   typeof Streams.all.Definition.asserts
 >;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-stream',
@@ -53,6 +54,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createCompleteClassicStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-classic-stream',
@@ -72,10 +74,13 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getRoutingFromResult(result: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (result as any).ingest?.wired?.routing;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createRoutingRule(overrides: any = {}) {
   return {
     destination: 'test.childstream',
@@ -258,6 +263,7 @@ describe('migrateOnRead', () => {
       };
 
       const result = migrateOnRead(definition);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.settings).toEqual({});
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -279,6 +285,7 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -300,6 +307,7 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.failure_store).toEqual({
         lifecycle: { enabled: { data_retention: '30d' } },
       });
@@ -321,7 +329,9 @@ describe('migrateOnRead', () => {
       };
 
       const result = migrateOnRead(definition);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.classic).toEqual({ someConfig: 'value' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result as any).ingest.unwired).toBeUndefined();
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
@@ -376,6 +386,7 @@ describe('migrateOnRead', () => {
   describe('ingest.processing.updated_at migration', () => {
     describe('Should add updated_at if missing', () => {
       it('for wired stream', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const definition = createCompleteWiredStreamDefinition() as any;
         delete definition.ingest?.processing?.updated_at;
 
@@ -385,6 +396,7 @@ describe('migrateOnRead', () => {
       });
 
       it('for classic stream', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const definition = createCompleteClassicStreamDefinition() as any;
         delete definition.ingest?.processing?.updated_at;
 

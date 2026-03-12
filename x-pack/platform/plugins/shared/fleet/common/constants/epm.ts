@@ -54,6 +54,7 @@ export const OTEL_TEMPLATE_SUFFIX = 'otel';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 export const DATA_STREAM_TYPE_VAR_NAME = 'data_stream.type';
+export const USE_APM_VAR_NAME = 'use_apm';
 
 export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
 

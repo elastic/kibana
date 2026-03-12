@@ -90,7 +90,7 @@ test.describe(
       );
     });
 
-    test('should display scrollable step executions with many iterations', async ({
+    test('should display post-foreach steps below all iterations after collapsing and re-expanding', async ({
       pageObjects,
     }) => {
       const workflowName = 'Scroll Test Workflow';
@@ -107,22 +107,34 @@ test.describe(
 
       await pageObjects.workflowExecution.expandStepsTree();
 
-      // Verify 50 leaf step executions (exclude the parent foreach step)
-      const stepButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
+      const iterationSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
         name: /^(?!foreach_).*hello_world_step/,
       });
-      await expect(stepButtons).toHaveCount(50);
+      await expect(iterationSteps).toHaveCount(50);
 
-      // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-      const firstStep = stepButtons.first();
-      // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
-      const lastStep = stepButtons.last();
+      const afterForeachStep = await pageObjects.workflowExecution.getStep('after_foreach_step');
 
-      await expect(firstStep).toBeVisible();
+      const foreachStep = await pageObjects.workflowExecution.getStep('foreach_loop');
+      const foreachArrow = foreachStep.locator('.euiTreeView__expansionArrow');
 
-      // Scroll to the last step to verify scrollability
-      await lastStep.scrollIntoViewIfNeeded();
-      await expect(lastStep).toBeVisible();
+      // Collapse then re-expand the foreach loop
+      await foreachArrow.click();
+      await expect(afterForeachStep).toBeVisible();
+      await foreachArrow.click();
+
+      // Compare vertical positions: the post-foreach step must render
+      // below the last iteration group, not interleaved among them.
+      const lastIterationGroup = await pageObjects.workflowExecution.getStep('foreach_loop > 49');
+      await lastIterationGroup.scrollIntoViewIfNeeded();
+      const lastIterationBox = await lastIterationGroup.boundingBox();
+
+      await afterForeachStep.scrollIntoViewIfNeeded();
+      const afterForeachBox = await afterForeachStep.boundingBox();
+
+      expect(lastIterationBox).toBeTruthy();
+      expect(afterForeachBox).toBeTruthy();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guarded by the assertions above
+      expect(afterForeachBox!.y).toBeGreaterThan(lastIterationBox!.y);
     });
   }
 );

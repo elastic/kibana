@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaActionStepImpl } from './kibana_action_step';
 import type { KibanaActionStep } from './kibana_action_step';
+import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -17,6 +17,34 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 // Mock fetch globally
 global.fetch = jest.fn();
 const mockedFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+
+function createMockReadableStream(data: string) {
+  const encoder = new TextEncoder();
+  const encoded = encoder.encode(data);
+  let consumed = false;
+  return {
+    getReader: () => ({
+      read: async () => {
+        if (consumed) return { done: true, value: undefined };
+        consumed = true;
+        return { done: false, value: encoded };
+      },
+      releaseLock: () => {},
+      cancel: jest.fn(),
+    }),
+  };
+}
+
+function createMockResponse(body: object, status = 200) {
+  const json = JSON.stringify(body);
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    json: jest.fn().mockResolvedValue(body),
+    text: jest.fn().mockResolvedValue(json),
+    body: createMockReadableStream(json),
+  } as any;
+}
 
 // Mock undici
 jest.mock('undici', () => ({
@@ -67,13 +95,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       logDebug: jest.fn(),
     } as any;
 
-    // Mock successful fetch response
-    mockedFetch.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: jest.fn().mockResolvedValue({ success: true }),
-      text: jest.fn().mockResolvedValue('OK'),
-    } as any);
+    // Mock successful fetch response with readable body stream
+    mockedFetch.mockResolvedValue(createMockResponse({ success: true }));
 
     jest.clearAllMocks();
   });
@@ -391,6 +414,248 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
+  describe('use_server_info option', () => {
+    it('should use server info URL when use_server_info is true', async () => {
+      mockContextManager.getCoreStart.mockReturnValue({
+        http: {
+          basePath: {
+            publicBaseUrl: 'https://public.kibana.example.com',
+            prepend: jest.fn((path: string) => `/base${path}`),
+          },
+          getServerInfo: jest.fn(() => ({
+            protocol: 'https',
+            hostname: 'internal-host',
+            port: 5601,
+          })),
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          use_server_info: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toBe('https://internal-host:5601/base/api/status');
+      expect(fetchedUrl).not.toContain('public.kibana.example.com');
+    });
+  });
+
+  describe('use_localhost option', () => {
+    it('should use localhost URL when use_localhost is true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          use_localhost: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toBe('http://localhost:5601/api/status');
+    });
+  });
+
+  describe('use_server_info and use_localhost mutual exclusion', () => {
+    it('should throw an error when both use_server_info and use_localhost are true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+          use_server_info: true,
+          use_localhost: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await expect((kibanaStep as any)._run(step.with)).rejects.toThrow(
+        'Cannot set both use_server_info and use_localhost'
+      );
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('debug option', () => {
+    it('should include _debug with fullUrl in output when debug is true', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test' },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug).toBeDefined();
+      expect(result.output._debug.fullUrl).toBe('https://localhost:5601/api/cases');
+      expect(result.output._debug.method).toBe('POST');
+    });
+
+    it('should not include _debug when debug is false or absent', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/status',
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug).toBeUndefined();
+    });
+
+    it('should include _debug in error details when debug is true and request fails', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({}, 500));
+
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'POST',
+          path: '/api/bad-endpoint',
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.details._debug).toBeDefined();
+      expect(result.error.details._debug.kibanaUrl).toBe('https://localhost:5601');
+    });
+
+    it('should include fullUrl with query params in _debug output', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'GET',
+          path: '/api/cases',
+          query: { page: '1', perPage: '10' },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.output._debug.fullUrl).toBe(
+        'https://localhost:5601/api/cases?page=1&perPage=10'
+      );
+    });
+  });
+
+  describe('meta params not forwarded to HTTP request', () => {
+    it('should not include use_server_info, use_localhost, or debug in request body', async () => {
+      const step: KibanaActionStep = {
+        name: 'test_step',
+        type: 'kibana.createCase',
+        spaceId: 'default',
+        with: {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'securitySolution',
+          use_server_info: false,
+          use_localhost: false,
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (kibanaStep as any)._run(step.with);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchOptions = fetchCall[1] as RequestInit;
+      const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
+
+      expect(requestBody.use_server_info).toBeUndefined();
+      expect(requestBody.use_localhost).toBeUndefined();
+      expect(requestBody.debug).toBeUndefined();
+      expect(requestBody.title).toBe('Test Case');
+    });
+  });
+
   describe('combined fetcher options', () => {
     it('should handle multiple fetcher options together', async () => {
       const { Agent } = await import('undici');
@@ -438,6 +703,208 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const fetchOptions = fetchCall[1] as RequestInit;
 
       expect(fetchOptions.redirect).toBe('manual');
+    });
+  });
+
+  describe('response size limit enforcement (Layer 1)', () => {
+    it('should abort fetch mid-stream when body exceeds max-step-size', async () => {
+      const largeBody = JSON.stringify({ data: 'x'.repeat(500) });
+      const cancelFn = jest.fn();
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        body: {
+          getReader: () => {
+            let consumed = false;
+            return {
+              read: async () => {
+                if (consumed) return { done: true, value: undefined };
+                consumed = true;
+                return { done: false, value: new TextEncoder().encode(largeBody) };
+              },
+              releaseLock: () => {},
+              cancel: cancelFn,
+            };
+          },
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'size_limit_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        'max-step-size': '100b',
+        with: {
+          request: { method: 'GET', path: '/api/status' },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.type).toBe('StepSizeLimitExceeded');
+      expect(cancelFn).toHaveBeenCalled();
+    });
+
+    it('should truncate large error response bodies', async () => {
+      const largeErrorBody = 'E'.repeat(2 * 1024 * 1024); // 2MB error
+      mockedFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        body: {
+          getReader: () => {
+            let consumed = false;
+            return {
+              read: async () => {
+                if (consumed) return { done: true, value: undefined };
+                consumed = true;
+                return { done: false, value: new TextEncoder().encode(largeErrorBody) };
+              },
+              releaseLock: () => {},
+              cancel: jest.fn(),
+            };
+          },
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'error_truncation_step',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: { method: 'GET', path: '/api/broken' },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
+      expect(result.error.message).toContain('... [truncated]');
+    });
+  });
+
+  describe('empty response body handling (204 No Content)', () => {
+    it('should succeed with empty output when response is 204 No Content', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({});
+    });
+
+    it('should include _debug info for empty responses when debug is true', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: {
+            method: 'DELETE',
+            path: '/api/alerting/rule/some-rule-id',
+          },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output._debug).toBeDefined();
+      expect(result.output._debug.method).toBe('DELETE');
+    });
+
+    it('should still parse JSON normally when response body is non-empty', async () => {
+      const jsonBody = JSON.stringify({ id: 'case-1', title: 'Test' });
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        body: {
+          getReader: () => {
+            let consumed = false;
+            return {
+              read: async () => {
+                if (consumed) return { done: true, value: undefined };
+                consumed = true;
+                return { done: false, value: new TextEncoder().encode(jsonBody) };
+              },
+              releaseLock: () => {},
+              cancel: jest.fn(),
+            };
+          },
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'create_case',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: {
+            method: 'POST',
+            path: '/api/cases',
+            body: { title: 'Test' },
+          },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
     });
   });
 });

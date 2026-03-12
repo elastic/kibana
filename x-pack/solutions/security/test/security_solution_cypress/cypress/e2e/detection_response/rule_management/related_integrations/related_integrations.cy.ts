@@ -41,6 +41,7 @@ import {
 import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
 import {
   clickEnableRuleSwitch,
+  goToAlertsTab,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
@@ -251,6 +252,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
         createDocument(DATA_STREAM_NAME, generateEvent());
 
         clickEnableRuleSwitch();
+        goToAlertsTab();
         waitForAlertsToPopulate();
 
         fetchRuleAlerts({

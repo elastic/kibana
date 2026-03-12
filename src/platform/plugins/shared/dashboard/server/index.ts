@@ -58,6 +58,7 @@ export type {
   DashboardUpdateResponseBody,
   GridData,
 } from './api';
+export type { DashboardDrilldownState } from './dashboard_drilldown/types';
 export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 export type { ScanDashboardsResult } from './scan_dashboards';
 export {

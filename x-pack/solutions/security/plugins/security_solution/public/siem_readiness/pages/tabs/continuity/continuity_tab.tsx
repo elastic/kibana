@@ -18,12 +18,13 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CATEGORY_ORDER, useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
 } from '../../components/category_accordion_table';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { ContinuityWarningPrompt } from './continuity_warning_prompt';
@@ -33,25 +34,21 @@ import {
   getContinuityCaseTags,
 } from './continuity_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import {
+  getFailureRateString,
+  isCriticalFailureRateFromString,
+} from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
-// Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
 }
 
-export const getDocInjectionFailRate = (failedDocsCount: number, docsCount: number): string => {
-  return docsCount > 0 ? ((failedDocsCount / docsCount) * 100).toFixed(1) : '0.0';
-};
-
-export const isCriticalFailureRate = (failureRate: string): boolean => {
-  return Number(failureRate) >= 1;
-};
-
-export const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
-  return isCriticalFailureRate(failureRate) ? 'critical' : 'healthy';
+const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
+  return isCriticalFailureRateFromString(failureRate) ? 'critical' : 'healthy';
 };
 
 export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
@@ -60,7 +57,9 @@ export const getIngestPipelineUrl = (basePath: string, pipelineName: string): st
   )}`;
 };
 
-export const ContinuityTab: React.FC = () => {
+export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
@@ -90,7 +89,7 @@ export const ContinuityTab: React.FC = () => {
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
-      const failureRate = getDocInjectionFailRate(pipeline.failedDocsCount, pipeline.docsCount);
+      const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
         ...pipeline,
@@ -113,9 +112,9 @@ export const ContinuityTab: React.FC = () => {
       });
     });
 
-    // Build result in category order, sorted by count descending
+    // Build result in category order, filtered by active categories
     const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
-    CATEGORY_ORDER.forEach((category) => {
+    activeCategories.forEach((category) => {
       const items = categoryPipelinesMap.get(category);
       if (!items) return;
 
@@ -126,7 +125,7 @@ export const ContinuityTab: React.FC = () => {
     });
 
     return result;
-  }, [pipelinesData, indexToCategoryMap]);
+  }, [pipelinesData, indexToCategoryMap, activeCategories]);
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -226,7 +225,7 @@ export const ContinuityTab: React.FC = () => {
             href={getIngestPipelineUrl(basePath, pipelineName)}
             target="_blank"
           >
-            {isCriticalFailureRate(item.failureRate)
+            {isCriticalFailureRateFromString(item.failureRate)
               ? i18n.translate(
                   'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
                   {
@@ -252,8 +251,8 @@ export const ContinuityTab: React.FC = () => {
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
-    const overallFailureRate = getDocInjectionFailRate(totalFailed, totalDocs);
-    const isCritical = isCriticalFailureRate(overallFailureRate);
+    const overallFailureRate = getFailureRateString(totalFailed, totalDocs);
+    const isCritical = isCriticalFailureRateFromString(overallFailureRate);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -369,6 +368,34 @@ export const ContinuityTab: React.FC = () => {
     );
   }
 
+  if (categorizedPipelines.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.siemReadiness.continuity.noCategoryData.title',
+            {
+              defaultMessage: 'No data available',
+            }
+          )}
+          color="primary"
+          iconType="iInCircle"
+          announceOnMount
+        >
+          <p>
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.noCategoryData.description',
+              {
+                defaultMessage: 'No pipeline data found for the selected categories.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -451,6 +478,7 @@ export const ContinuityTab: React.FC = () => {
         })}
         defaultSortField="docsCount"
         defaultSortDirection="desc"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );
