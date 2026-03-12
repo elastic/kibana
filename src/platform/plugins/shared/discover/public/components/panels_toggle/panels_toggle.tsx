@@ -109,7 +109,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         : i18n.translate('discover.panelsToggle.hideChartButton', {
             defaultMessage: 'Hide chart',
           }),
-      iconType: isChartHidden ? VizHiddenIcon : VizShownIcon,
+      iconType: isChartHidden || !isActualChartAvailable ? VizHiddenIcon : VizShownIcon,
       'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
       'aria-expanded': !isChartHidden,
       'aria-controls': 'unifiedHistogramCollapsablePanel',
@@ -125,7 +125,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         : i18n.translate('discover.panelsToggle.hideTableButton', {
             defaultMessage: 'Hide table',
           }),
-      iconType: isTableHidden || !isActualChartAvailable ? TableHiddenIcon : TableShownIcon,
+      iconType: isTableHidden ? TableHiddenIcon : TableShownIcon,
       'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
       'aria-expanded': !isTableHidden,
       'aria-controls': 'discoverDocTable',
