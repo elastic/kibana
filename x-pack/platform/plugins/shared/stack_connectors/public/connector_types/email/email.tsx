@@ -171,17 +171,17 @@ export function getConnectorType(
 
 function getToFields(actionParams: EmailActionParams): string[] {
   if (!Array.isArray(actionParams.to)) return [];
-  return actionParams.to;
+  return actionParams.to.filter((email) => email.trim().length > 0);
 }
 
 function getCcFields(actionParams: EmailActionParams): string[] {
   if (!Array.isArray(actionParams.cc)) return [];
-  return actionParams.cc;
+  return actionParams.cc.filter((email) => email.trim().length > 0);
 }
 
 function getBccFields(actionParams: EmailActionParams): string[] {
   if (!Array.isArray(actionParams.bcc)) return [];
-  return actionParams.bcc;
+  return actionParams.bcc.filter((email) => email.trim().length > 0);
 }
 
 function getReplyToFields(actionParams: EmailActionParams): string[] {

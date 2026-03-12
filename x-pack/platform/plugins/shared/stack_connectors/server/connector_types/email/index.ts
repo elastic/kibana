@@ -182,7 +182,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
-    throw new Error('no [to], [cc], or [bcc] entries');
+    throw new Error('at least one entry in [to], [cc], or [bcc] is required');
   }
 
   try {
@@ -301,7 +301,20 @@ async function executor(
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
-  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const validEmails = emails.filter((email) => email.trim().length > 0);
+
+  if (validEmails.length === 0) {
+    return {
+      status: 'error',
+      actionId,
+      message: i18n.translate('xpack.stackConnectors.email.noRecipientsErrorMessage', {
+        defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required',
+      }),
+      errorSource: TaskErrorSource.USER,
+    };
+  }
+
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(validEmails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
