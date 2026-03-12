@@ -11,10 +11,12 @@ import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorFieldSelector } from '../processor_field_selector';
+import { EnrichPolicySelector } from './enrich_policy_selector';
 
 export const EnrichProcessorForm = () => {
   return (
     <>
+      <EnrichPolicySelector />
       <ProcessorFieldSelector fieldKey="to" />
       <EuiSpacer size="m" />
       <FieldsAccordion>
