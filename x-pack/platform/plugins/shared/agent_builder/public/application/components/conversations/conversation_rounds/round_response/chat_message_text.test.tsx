@@ -7,8 +7,9 @@
 
 import React from 'react';
 import type { Node, Parent } from 'unist';
-import { render, screen } from '@testing-library/react';
-import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import { act, render, screen } from '@testing-library/react';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
@@ -19,10 +20,12 @@ import { ChatMessageText } from './chat_message_text';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
+import { useResolveAnonymizedValues } from '@kbn/anonymization-ui';
 
 jest.mock('../../../tools/esql/visualize_esql', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -46,6 +49,28 @@ jest.mock('../../../../context/conversation/conversation_context', () => ({
   useConversationContext: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(),
+}));
+
+jest.mock(
+  '@kbn/anonymization-ui',
+  () => ({
+    createAnonymizationReplacementsClient: jest.fn(() => ({
+      getReplacements: jest.fn(),
+      deanonymizeText: jest.fn(),
+      getTokenToOriginalMap: jest.fn(),
+    })),
+    useResolveAnonymizedValues: jest.fn(() => ({
+      tokenToOriginalMap: {},
+      resolveText: (value: string) => value,
+      isLoading: false,
+      error: undefined,
+    })),
+  }),
+  { virtual: true }
+);
+
 const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
 const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
   typeof useAgentBuilderServices
@@ -55,6 +80,10 @@ const useStepsFromPrevRoundsMock = useStepsFromPrevRounds as jest.MockedFunction
 >;
 const useConversationContextMock = useConversationContext as jest.MockedFunction<
   typeof useConversationContext
+>;
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useResolveAnonymizedValuesMock = useResolveAnonymizedValues as jest.MockedFunction<
+  typeof useResolveAnonymizedValues
 >;
 
 const toolResult: EsqlResults = {
@@ -98,6 +127,7 @@ function getAST(markdown: string) {
 describe('chat_message_text', () => {
   beforeEach(() => {
     mockVisualizeESQL.mockClear();
+    useResolveAnonymizedValuesMock.mockClear();
     useAgentBuilderServicesMock.mockReturnValue({
       agentService: {},
       chatService: {},
@@ -130,6 +160,18 @@ describe('chat_message_text', () => {
         clearLastRoundResponse: jest.fn(),
       },
     });
+    useKibanaMock.mockReturnValue({
+      services: {
+        http: {
+          externalUrl: {
+            isInternalUrl: jest.fn(() => true),
+          },
+        },
+        application: {
+          navigateToUrl: jest.fn(),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   describe('visualizationTagParser', () => {
@@ -413,6 +455,78 @@ Area Chart
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Line' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Bar' }));
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Area' }));
+    });
+
+    it('enables replacements lookup when replacements_id is present', () => {
+      render(<ChatMessageText content="response" steps={[]} replacementsId="repl-1" />);
+
+      expect(
+        useResolveAnonymizedValuesMock.mock.calls.some(
+          ([params]) => params.replacementsId === 'repl-1' && params.enabled === true
+        )
+      ).toBe(true);
+    });
+
+    it('does not enable replacements lookup when replacements_id is missing', () => {
+      render(<ChatMessageText content="response" steps={[]} />);
+
+      expect(
+        useResolveAnonymizedValuesMock.mock.calls.some(
+          ([params]) => params.replacementsId === undefined && params.enabled === false
+        )
+      ).toBe(true);
+      expect(
+        useResolveAnonymizedValuesMock.mock.calls.some(([params]) => params.enabled === true)
+      ).toBe(false);
+    });
+
+    it('holds streaming content while replacements are loading when enabled', () => {
+      useResolveAnonymizedValuesMock.mockReturnValueOnce({
+        tokenToOriginalMap: {},
+        resolveText: (value: string) => value,
+        isLoading: true,
+        error: undefined,
+      });
+
+      render(
+        <ChatMessageText
+          content="EMAIL_token"
+          steps={[]}
+          replacementsId="repl-1"
+          holdContentWhileResolvingReplacements
+        />
+      );
+
+      expect(screen.queryByText('EMAIL_token')).not.toBeInTheDocument();
+    });
+
+    it('renders content after hold timeout even if replacements are still loading', () => {
+      jest.useFakeTimers();
+      useResolveAnonymizedValuesMock.mockReturnValueOnce({
+        tokenToOriginalMap: {},
+        resolveText: (value: string) => value,
+        isLoading: true,
+        error: undefined,
+      });
+
+      render(
+        <ChatMessageText
+          content="EMAIL_token"
+          steps={[]}
+          replacementsId="repl-1"
+          holdContentWhileResolvingReplacements
+          holdContentMaxMs={10}
+        />
+      );
+
+      expect(screen.queryByText('EMAIL_token')).not.toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(15);
+      });
+
+      expect(screen.getByText('EMAIL_token')).toBeInTheDocument();
+      jest.useRealTimers();
     });
   });
 });

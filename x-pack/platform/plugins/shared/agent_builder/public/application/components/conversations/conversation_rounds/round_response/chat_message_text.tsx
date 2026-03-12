@@ -45,10 +45,14 @@ import {
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { ExternalLinkModal } from './external_link_modal';
+import { useResolvedMessageContent } from './use_resolved_message_content';
 
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
+  replacementsId?: string;
+  holdContentWhileResolvingReplacements?: boolean;
+  holdContentMaxMs?: number;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
@@ -61,6 +65,9 @@ interface Props {
 export function ChatMessageText({
   content,
   steps: stepsFromCurrentRound,
+  replacementsId,
+  holdContentWhileResolvingReplacements = false,
+  holdContentMaxMs = 600,
   conversationAttachments,
   attachmentRefs,
   conversationId,
@@ -88,6 +95,14 @@ export function ChatMessageText({
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+  const { displayContent } = useResolvedMessageContent({
+    content,
+    hasHttp: Boolean(http),
+    http,
+    replacementsId,
+    holdContentWhileResolvingReplacements,
+    holdContentMaxMs,
+  });
 
   const handleLinkClick = useCallback(
     (href: string, e: React.MouseEvent) => {
@@ -220,7 +235,7 @@ export function ChatMessageText({
           parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
         >
-          {content}
+          {displayContent}
         </EuiMarkdownFormat>
       </EuiText>
       <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
