@@ -30,6 +30,7 @@ export interface MetricVisParam {
     visuals?: string;
     baseline?: number | string;
     palette?: [string, string, string];
+    textPalette?: [string, string, string];
   };
   color?: string;
   icon?: string;

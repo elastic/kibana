@@ -88,7 +88,7 @@ export const createFormWrapper = (
 ) => {
   const queryClient = createTestQueryClient();
 
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
     const form = useForm<FormValues>({
       defaultValues: {
         ...defaultTestFormValues,

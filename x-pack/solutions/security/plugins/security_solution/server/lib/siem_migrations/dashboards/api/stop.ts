@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_DASHBOARD_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import {
   StopDashboardsMigrationRequestParams,

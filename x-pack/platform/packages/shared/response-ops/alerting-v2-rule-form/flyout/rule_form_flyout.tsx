@@ -35,12 +35,12 @@ export interface RuleFormFlyoutProps {
  * Use DynamicRuleFormFlyout or StandaloneRuleFormFlyout for pre-composed
  * flyouts that handle form submission and state management.
  */
-export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = ({
+export const RuleFormFlyout = ({
   push = true,
   onClose,
   isLoading = false,
   children,
-}) => {
+}: RuleFormFlyoutProps) => {
   return (
     <EuiFlyout
       session="start"

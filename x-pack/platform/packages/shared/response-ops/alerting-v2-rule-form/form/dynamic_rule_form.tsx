@@ -52,7 +52,7 @@ export interface DynamicRuleFormProps {
  * Uses react-hook-form's `values` prop to sync form state on each prop change,
  * with `resetOptions: { keepDirtyValues: true }` to preserve user input.
  */
-export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
+export const DynamicRuleForm = ({
   query,
   services,
   layout,
@@ -65,7 +65,7 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
   onCancel,
   submitLabel,
   cancelLabel,
-}) => {
+}: DynamicRuleFormProps) => {
   // Get default form values derived from the query
   const formValues = useFormDefaults({ query });
 

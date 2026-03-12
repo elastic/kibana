@@ -40,9 +40,11 @@ const RuleFormContext = createContext<RuleFormContextValue | undefined>(undefine
  *
  * `meta` defaults to `{ layout: 'page' }` when omitted.
  */
-export const RuleFormProvider: React.FC<
-  PropsWithChildren<{ services: RuleFormServices; meta?: RuleFormMeta }>
-> = ({ children, services, meta = DEFAULT_META }) => {
+export const RuleFormProvider = ({
+  children,
+  services,
+  meta = DEFAULT_META,
+}: PropsWithChildren<{ services: RuleFormServices; meta?: RuleFormMeta }>) => {
   const value = useMemo(() => ({ services, meta }), [services, meta]);
   return <RuleFormContext.Provider value={value}>{children}</RuleFormContext.Provider>;
 };

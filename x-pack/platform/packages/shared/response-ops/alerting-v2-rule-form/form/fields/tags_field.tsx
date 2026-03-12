@@ -11,7 +11,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
-export const TagsField: React.FC = () => {
+export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (

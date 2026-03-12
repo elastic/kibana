@@ -13,7 +13,7 @@ interface FieldGroupProps {
   children: React.ReactNode;
 }
 
-export const FieldGroup: React.FC<FieldGroupProps> = ({ title, children }) => {
+export const FieldGroup = ({ title, children }: FieldGroupProps) => {
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
       <EuiSplitPanel.Inner color="subdued" paddingSize="s">

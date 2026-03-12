@@ -13,7 +13,7 @@ import type { FormValues } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
 import { useRuleFormServices } from '../contexts';
 
-export const GroupFieldSelect: React.FC = () => {
+export const GroupFieldSelect = () => {
   const { data } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });

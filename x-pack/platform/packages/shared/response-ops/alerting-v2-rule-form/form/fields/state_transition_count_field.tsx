@@ -35,10 +35,10 @@ const TEST_SUBJS: Record<StateTransitionCountVariant, string> = {
   recovering: 'recoveryTransitionCountInput',
 };
 
-export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps> = ({
+export const StateTransitionCountField = ({
   prependLabel,
   variant = 'pending',
-}) => {
+}: StateTransitionCountFieldProps) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
   const fieldName = FIELD_NAMES[variant];
   const testSubj = TEST_SUBJS[variant];

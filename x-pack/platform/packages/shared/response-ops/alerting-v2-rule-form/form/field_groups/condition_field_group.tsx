@@ -35,9 +35,7 @@ interface ConditionFieldGroupProps {
  * The base query defines what data is being evaluated, while the
  * condition field defines the threshold or filter that triggers alerts.
  */
-export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
-  includeBase = false,
-}) => {
+export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
 
   // Read the base query from form state (initialized via useFormDefaults)
