@@ -1839,7 +1839,8 @@
         "typescript-fsa",
         "typescript-fsa-reducers",
         "type-fest",
-        "unidiff"
+        "unidiff",
+        "ulid"
       ],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
