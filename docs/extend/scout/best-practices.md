@@ -580,6 +580,22 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
+### Use `expect.soft` for independent checks [use-expect-soft-for-independent-checks]
+
+When a test verifies multiple independent items (KPI tiles, chart counts, table columns), use `expect.soft()` so the test continues checking everything instead of stopping at the first failure. Playwright still fails the test at the end if any soft assertion failed.
+
+:::::{dropdown} Example
+
+```ts
+test('Overview tab shows all KPI values', async ({ pageObjects }) => {
+  await pageObjects.nodeDetails.clickOverviewTab();
+  await expect.soft(pageObjects.nodeDetails.getKPI('cpuUsage')).toHaveText('50.0%');
+  await expect.soft(pageObjects.nodeDetails.getKPI('memoryUsage')).toHaveText('35.0%');
+  await expect.soft(pageObjects.nodeDetails.getKPI('diskUsage')).toHaveText('80.0%');
+});
+```
+:::::
+
 ### Use EUI wrappers as class fields in page objects [use-eui-wrappers-as-class-fields-in-page-objects]
 
 If you must interact with EUI internals, use wrappers from Scout to keep that complexity out of tests.
