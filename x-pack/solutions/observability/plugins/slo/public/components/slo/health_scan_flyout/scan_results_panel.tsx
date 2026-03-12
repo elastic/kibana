@@ -121,7 +121,11 @@ export function ScanResultsPanel({ scanId }: Props) {
     if (!isLoading && data) {
       const scanPending = data.scan.status !== 'completed';
       setIsPending(scanPending);
-      if (scanPending && prevTotalRef.current !== undefined && data.total !== prevTotalRef.current) {
+      if (
+        scanPending &&
+        prevTotalRef.current !== undefined &&
+        data.total !== prevTotalRef.current
+      ) {
         setSearchAfter(undefined);
         setSearchAfterHistory([]);
       }
