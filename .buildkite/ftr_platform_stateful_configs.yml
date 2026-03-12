@@ -239,7 +239,9 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group9/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
   - x-pack/platform/test/functional/apps/lens/group11/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group1/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group2/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
@@ -404,6 +406,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/search/config.ts
+  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts

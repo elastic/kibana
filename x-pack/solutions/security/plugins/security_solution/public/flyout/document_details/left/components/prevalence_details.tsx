@@ -6,10 +6,11 @@
  */
 
 import dateMath from '@elastic/datemath';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -31,6 +33,8 @@ import { InvestigateInTimelineButton } from '../../../../common/components/event
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
+  PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID,
@@ -59,6 +63,13 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
+
+// This variable is used to track if the cold/frozen tier callout has been dismissed in the current tab session.
+let isColdFrozenTierCalloutDismissedInTab = false;
+// This function is used in tests to reset the callout dismissed state between tests, as the variable is shared across the entire tab session.
+export const resetColdFrozenTierCalloutDismissedStateForTests = () => {
+  isColdFrozenTierCalloutDismissedInTab = false;
+};
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -345,7 +356,11 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, uiSettings, serverless } = useKibana().services;
+  const isServerless = !!serverless;
+  const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
 
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
@@ -369,28 +384,39 @@ export const PrevalenceDetails: React.FC = () => {
   const [absoluteEnd, setAbsoluteEnd] = useState(
     (dateMath.parse(timeSavedInLocalStorage?.end || DEFAULT_TO) || new Date()).toISOString()
   );
+  const [isColdFrozenTierCalloutDismissed, setIsColdFrozenTierCalloutDismissed] = useState(
+    isColdFrozenTierCalloutDismissedInTab
+  );
 
   // TODO update the logic to use a single set of start/end dates
   //  currently as we're using this InvestigateInTimelineButton component we need to pass the timeRange
   //  as an AbsoluteTimeRange, which requires from/to values
-  const onTimeChange = ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
-    if (isInvalid) return;
+  const onTimeChange = useCallback(
+    ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
+      if (isInvalid) return;
 
-    storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE, { start: s, end: e });
+      storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE, { start: s, end: e });
 
-    setStart(s);
-    setEnd(e);
+      setStart(s);
+      setEnd(e);
 
-    const from = dateMath.parse(s);
-    if (from && from.isValid()) {
-      setAbsoluteStart(from.toISOString());
-    }
+      const from = dateMath.parse(s);
+      if (from && from.isValid()) {
+        setAbsoluteStart(from.toISOString());
+      }
 
-    const to = dateMath.parse(e);
-    if (to && to.isValid()) {
-      setAbsoluteEnd(to.toISOString());
-    }
-  };
+      const to = dateMath.parse(e);
+      if (to && to.isValid()) {
+        setAbsoluteEnd(to.toISOString());
+      }
+    },
+    [storage]
+  );
+
+  const onDismiss = useCallback(() => {
+    isColdFrozenTierCalloutDismissedInTab = true;
+    setIsColdFrozenTierCalloutDismissed(true);
+  }, []);
 
   const { loading, error, data } = usePrevalence({
     dataFormattedForFieldBrowser,
@@ -437,10 +463,61 @@ export const PrevalenceDetails: React.FC = () => {
     </>
   );
 
+  const coldFrozenTierCallout = (
+    <>
+      <EuiCallOut
+        data-test-subj={PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.calloutTitle"
+            defaultMessage="{state}"
+            values={{
+              state: isColdAndFrozenTiersExcluded
+                ? 'Some data excluded'
+                : 'Performance optimization',
+            }}
+          />
+        }
+        iconType="snowflake"
+      >
+        <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.calloutDescription"
+              defaultMessage="{state}, go to Advanced Settings or contact your administrator."
+              values={{
+                state: isColdAndFrozenTiersExcluded
+                  ? 'Cold and frozen tiers are excluded to improve performance. To include them'
+                  : 'This view loads more slowly because cold and frozen tiers are included. To change this',
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.dismissButtonAriaLabel',
+                { defaultMessage: 'Dismiss cold and frozen tier callout' }
+              )}
+              data-test-subj={PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID}
+              onClick={onDismiss}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.dismissButtonLabel"
+                defaultMessage="Dismiss"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
+  );
+
   return (
     <>
       {!error && !isPlatinumPlus && upsell}
       <EuiPanel>
+        {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
         <EuiSuperDatePicker
           start={start}
           end={end}
