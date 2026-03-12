@@ -205,7 +205,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:random-version : Error: This case mock-id-1 has been updated. Please refresh before saving additional updates."`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:random-version : Error: This case mock-id-1 have been updated. Please refresh before saving additional updates."`
     );
   });
 
