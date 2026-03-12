@@ -21,6 +21,9 @@ import { getMvExpandFields } from '@kbn/securitysolution-utils';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+jest.mock('./utils/validate_esql_query', () => ({
+  validateEsqlQuery: jest.fn().mockResolvedValue(true),
+}));
 jest.mock('@kbn/securitysolution-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-utils'),
   getMvExpandFields: jest.fn().mockReturnValue([]),
@@ -201,6 +204,12 @@ describe('esqlExecutor', () => {
         'doc1',
         'doc2',
       ]);
+    });
+
+    it('should store lastQuery in returned state', async () => {
+      const result = await esqlExecutor(mockedArguments);
+
+      expect(result.state).toHaveProperty('lastQuery', params.query);
     });
   });
 });
