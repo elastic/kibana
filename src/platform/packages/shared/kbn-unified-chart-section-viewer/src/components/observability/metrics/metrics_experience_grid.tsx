@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { useMetricsInfo } from './hooks/use_metrics_info';
+import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
@@ -44,16 +44,20 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
   } = useMetricsExperienceState();
 
-  // TODO simplify the dimensions to a string array
-  const { metricsInfo, loading: isDiscoverLoading } = useMetricsInfo({
+  const {
+    metricItems,
+    allDimensions,
+    loading: isDiscoverLoading,
+  } = useFetchMetricsData({
     fetchParams,
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
   });
-  const allMetricFields = metricsInfo?.metricFields ?? [];
-  const visibleMetricFields = metricsInfo?.metricFields ?? [];
-  const dimensions = metricsInfo?.allDimensionFields.map((name) => ({ name })) ?? [];
+
+  const visibleMetricFields = metricItems.map((item) => ({ name: item.metricName }));
+  // TODO: simplify the dimensions to a string array
+  const dimensions = allDimensions.map((name) => ({ name }));
 
   useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
 
@@ -67,7 +71,7 @@ export const MetricsExperienceGrid = ({
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
-    if (!isDiscoverLoading && allMetricFields.length > 0) {
+    if (!isDiscoverLoading && metricItems.length > 0) {
       onPageReady({
         meta: {
           rangeFrom: fetchParams.timeRange?.from,
@@ -75,12 +79,12 @@ export const MetricsExperienceGrid = ({
         },
         customMetrics: {
           key1: 'metric_experience_fields_count',
-          value1: allMetricFields.length,
+          value1: metricItems.length,
         },
       });
     }
   }, [
-    allMetricFields.length,
+    metricItems.length,
     onPageReady,
     fetchParams.timeRange?.from,
     fetchParams.timeRange?.to,
@@ -88,7 +92,7 @@ export const MetricsExperienceGrid = ({
   ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    allMetricFields,
+    metricItems,
     dimensions,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
@@ -105,7 +109,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0 && isDiscoverLoading) {
+  if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 

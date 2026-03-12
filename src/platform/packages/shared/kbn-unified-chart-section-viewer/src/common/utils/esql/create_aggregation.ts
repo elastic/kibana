@@ -89,6 +89,10 @@ export function getAggregationTemplate({
     return `${customFunction}(??${placeholderName})`;
   }
 
+  console.log('[log] -create-aggregation type', type);
+  console.log('[log] -create-aggregation instrument', instrument);
+  console.log('[log] -create-aggregation isLegacyHistogram', isLegacyHistogram(type, instrument));
+  console.log('[log] -create-aggregation customFunction', customFunction);
   if (isLegacyHistogram(type, instrument)) {
     return `PERCENTILE(TO_TDIGEST(??${placeholderName}), 95)`;
   }

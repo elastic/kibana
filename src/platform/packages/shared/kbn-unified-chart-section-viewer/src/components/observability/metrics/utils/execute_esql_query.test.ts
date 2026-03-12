@@ -12,8 +12,7 @@ import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
-import { fetchMetricsInfo } from './fetch_metrics_info';
+import { executeEsqlQuery } from './execute_esql_query';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: jest.fn(),
@@ -32,9 +31,9 @@ const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLR
 const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
 const mockGetTime = getTime as jest.MockedFunction<typeof getTime>;
 
-describe('fetchMetricsInfo', () => {
+describe('executeEsqlQuery', () => {
   const mockSearch = jest.fn();
-  const mockUiSettings = {} as Parameters<typeof fetchMetricsInfo>[0]['uiSettings'];
+  const mockUiSettings = {} as Parameters<typeof executeEsqlQuery>[0]['uiSettings'];
   const mockResponse = { columns: [], values: [] };
 
   beforeEach(() => {
@@ -51,7 +50,7 @@ describe('fetchMetricsInfo', () => {
     const timeRange = { from: 'now-15m', to: 'now' };
     const variables = [{ key: 'x', value: 'y', type: ESQLVariableType.VALUES }];
 
-    await fetchMetricsInfo({
+    await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       signal,
@@ -75,7 +74,7 @@ describe('fetchMetricsInfo', () => {
   });
 
   it('returns the response from getESQLResults', async () => {
-    const result = await fetchMetricsInfo({
+    const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       dataView: dataViewWithTimefieldMock,
@@ -92,7 +91,7 @@ describe('fetchMetricsInfo', () => {
     } as RangeFilter;
     mockGetTime.mockReturnValue(timeFilter);
 
-    await fetchMetricsInfo({
+    await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       dataView: dataViewWithTimefieldMock,
@@ -117,7 +116,7 @@ describe('fetchMetricsInfo', () => {
   it('passes no filter when no time range and no filters', async () => {
     mockGetTime.mockReturnValue(undefined);
 
-    await fetchMetricsInfo({
+    await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       dataView: dataViewWithTimefieldMock,

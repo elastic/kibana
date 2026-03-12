@@ -18,12 +18,9 @@ import { MetricsExperienceFieldsCapsProvider } from './context/metrics_experienc
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
-      <MetricsExperienceFieldsCapsProvider
-        fetchParams={props.fetchParams}
-        metricsInfo={props.metricsInfo}
-      >
-        <MetricsExperienceGrid {...props} />
-      </MetricsExperienceFieldsCapsProvider>
+      {/* <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams} metrics={props.metrics}> */}
+      <MetricsExperienceGrid {...props} />
+      {/* </MetricsExperienceFieldsCapsProvider> */}
     </PerformanceContextProvider>
   );
 };

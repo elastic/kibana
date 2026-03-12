@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import _ from 'lodash';
-
-/**
- * Normalises a value to a string array: single value or array → only string elements; empty or no strings → `['']`.
- * Returns `null` when the input is `null`.
- */
-export function normaliseToStringArray(value: unknown): string[] | null {
-  if (value === null) {
-    return null;
-  }
-  const result = _.castArray(value).filter(_.isString);
-  return _.isEmpty(result) ? [''] : result;
-}
+export const toArray = (value: string | string[] | null | undefined): string[] => {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+};

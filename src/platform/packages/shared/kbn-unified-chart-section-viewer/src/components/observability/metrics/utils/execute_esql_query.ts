@@ -16,8 +16,9 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { esqlResultToPlainObjects } from './esql_result_to_plan_objects';
 
-export interface FetchMetricsInfoParams {
+export interface ExecuteEsqlParams {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
@@ -29,10 +30,9 @@ export interface FetchMetricsInfoParams {
 }
 
 /**
- * Fetches METRICS_INFO result by running the given ES|QL query (expected to end with | METRICS_INFO).
- * Applies the same time range and filter semantics as the main Discover ES|QL request.
+ * Executes an ES|QL query using the data plugin's search service.
  */
-export async function fetchMetricsInfo({
+export async function executeEsqlQuery({
   esqlQuery,
   search,
   signal,
@@ -41,7 +41,7 @@ export async function fetchMetricsInfo({
   filters = [],
   variables,
   uiSettings,
-}: FetchMetricsInfoParams): Promise<ESQLSearchResponse> {
+}: ExecuteEsqlParams): Promise<ESQLSearchResponse> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
     timeRange && dataView?.timeFieldName
@@ -62,5 +62,7 @@ export async function fetchMetricsInfo({
     variables,
   });
 
-  return response;
+  const plainObjects = esqlResultToPlainObjects(response);
+
+  return plainObjects;
 }

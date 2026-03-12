@@ -60,7 +60,7 @@ export const MetricsGrid = ({
   const [expandedMetric, setExpandedMetric] = useState<
     | {
         index: number;
-        metric: MetricField;
+        metric: ParsedMetricItem;
         esqlQuery: string;
       }
     | undefined
@@ -176,7 +176,7 @@ interface ChartItemProps
     'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
   > {
   id: string;
-  metric: MetricField;
+  metricItem: MetricField;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
@@ -194,7 +194,7 @@ interface ChartItemProps
 const ChartItem = React.memo(
   ({
     id,
-    metric,
+    metricItem,
     index,
     size,
     dimensions,
@@ -219,6 +219,7 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
+    console.log('[log] -chart-item metric', metricItem);
     const esqlQuery = useMemo(() => {
       const metricType = getPrimaryValue(metric.metricTypes);
       const isSupported = metricType !== 'unsigned_long';

@@ -40,12 +40,13 @@ export const MetricsExperienceFieldsContext =
 
 export interface MetricsExperienceFieldsProviderProps {
   fetchParams: ChartSectionProps['fetchParams'];
-  metricsInfo?: ParsedMetricsInfo | null;
+  metricItems: ParsedMetricItem[];
 }
 
 export const MetricsExperienceFieldsProvider = ({
   fetchParams,
-  metricsInfo,
+  metricItems,
+  allDimensions,
   children,
 }: PropsWithChildren<MetricsExperienceFieldsProviderProps>) => {
   const { table, query } = fetchParams;
@@ -55,26 +56,26 @@ export const MetricsExperienceFieldsProvider = ({
   );
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
-  const { metricFields, dimensions } = useMemo(() => {
-    if (metricsInfo?.metricFields?.length) {
-      return {
-        metricFields: metricsInfo.metricFields,
-        dimensions: metricsInfo?.allDimensionFields?.map((name) => ({ name })) ?? [],
-      };
-    }
+  // const { metricFields, dimensions } = useMemo(() => {
+  //   if (metricItems?.length) {
+  //     return {
+  //       metricFields: metricsInfo.metricFields,
+  //       dimensions: metricsInfo?.allDimensionFields?.map((name) => ({ name })) ?? [],
+  //     };
+  //   }
 
-    return { metricFields: [], dimensions: [] };
-  }, [metricsInfo]);
+  //   return { metricFields: [], dimensions: [] };
+  // }, [metricItems]);
 
   const rows = useMemo(() => table?.rows ?? [], [table?.rows]);
-  const metricFieldNames = useMemo(() => metricFields.map((f) => f.name), [metricFields]);
+  const metricNames = useMemo(() => metricItems.map((f) => f.metricName), [metricItems]);
   const sampleRowIndex = useMemo(
     () =>
       createSampleRowByField({
         rows,
         fieldNames: metricFieldNames,
       }),
-    [rows, metricFieldNames]
+    [rows, metricItems]
   );
 
   const getSampleRow = useCallback(
