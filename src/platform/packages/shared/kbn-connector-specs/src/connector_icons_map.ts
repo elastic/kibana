@@ -137,4 +137,10 @@ export const ConnectorIconsMap: Map<
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
+  [
+    '.snowflake',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconSnowflake" */ './specs/snowflake/icon')
+    ),
+  ],
 ]);

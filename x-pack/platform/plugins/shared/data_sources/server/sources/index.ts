@@ -20,6 +20,7 @@ import { zendeskDataSource } from './zendesk';
 import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
 import { tavilyDataSource } from './tavily';
+import { snowflakeDataSource } from './snowflake';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(figmaDataSource);
@@ -37,4 +38,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(servicenowDataSource);
   dataCatalog.register(pagerdutyDataSource);
   dataCatalog.register(tavilyDataSource);
+  dataCatalog.register(snowflakeDataSource);
 }
