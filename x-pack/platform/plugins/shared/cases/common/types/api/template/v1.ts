@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { TemplateSchema } from '../../domain/template/v1';
 /**
  * Sort field for templates.
@@ -46,6 +46,7 @@ export const TemplatesFindRequestSchema = z.object({
   search: z.optional(z.string()).default(''),
   tags: z.optional(z.array(z.string())).default([]),
   author: z.optional(z.array(z.string())).default([]),
+  owner: z.optional(z.array(z.string())).default([]),
   isDeleted: z.optional(z.boolean()).default(false),
 });
 
