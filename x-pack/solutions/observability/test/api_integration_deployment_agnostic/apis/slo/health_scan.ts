@@ -507,17 +507,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         let scanResults: any;
         await retry.tryWithRetries(
-          'wait for health scan to complete',
+          'wait for health scan to complete with results',
           async () => {
             const results = await sloApi.getHealthScanResults(scanId, adminRoleAuthc);
             expect(results.scan.status).to.eql('completed');
+            expect(results.total).to.be.greaterThan(0);
             scanResults = results;
           },
           { retryCount: 30, retryDelay: 4000 }
         );
 
         expect(scanResults.results).to.be.an('array');
-        expect(scanResults.total).to.be.greaterThan(0);
 
         const slo1Health = scanResults.results.find((r: any) => r.slo.id === slo1Id);
         const slo2Health = scanResults.results.find((r: any) => r.slo.id === slo2Id);
