@@ -16,14 +16,26 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.MemberExpression} MemberExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Node} Node */
 
-const ERROR_MSG =
-  'Dangerous use of http.delete(). Use buildPath() from `@kbn/core-http-browser` or encodeURIComponent() so path params are encoded safely.';
+const HTTP_REQUEST_METHOD_NAMES = new Set([
+  'delete',
+  'fetch',
+  'get',
+  'head',
+  'options',
+  'patch',
+  'post',
+  'put',
+]);
+const WARN_MSG =
+  'Dangerous use of dynamic http path. Use buildPath() from `@kbn/core-http-browser` or encodeURIComponent() so path params are encoded safely.';
 
 /**
  * Limitations:
- * - This rule only inspects inline path expressions passed as the first argument to `http.delete(...)`.
+ * - This rule only inspects inline path expressions passed directly as the first argument to `http` request calls,
+ *   or inline `path` properties in the object overload (for example `http.get({ path: ... })`).
  * - It does not perform data-flow analysis, so `const path = \`/api/${id}\`; http.delete(path)` is not flagged.
- * - It only targets `.delete(...)` calls on `http`-like receivers (`http`, `this.http`, `foo.http`, etc.).
+ * - It only targets standard HTTP verb calls and `http.fetch(...)` on `http`-like receivers
+ *   (`http`, `this.http`, `foo.http`, etc.).
  * - It treats `encodeURIComponent(...)` as a safe escape hatch, but it does not verify that callers are
  *   encoding the correct path segment or using the best API shape for the route.
  */
@@ -116,14 +128,10 @@ const isSafePathSegmentExpression = (node) => {
 };
 
 /**
- * @param {Expression | import("@typescript-eslint/typescript-estree").TSESTree.SpreadElement} node
+ * @param {Expression} node
  * @returns {boolean}
  */
 const isDynamicPathExpression = (node) => {
-  if (node.type === esTypes.SpreadElement) {
-    return false;
-  }
-
   if (node.type === esTypes.TemplateLiteral) {
     return !isSafePathSegmentExpression(node);
   }
@@ -143,12 +151,12 @@ const isDynamicPathExpression = (node) => {
  * @param {CallExpression} node
  * @returns {boolean}
  */
-const isHttpDeleteCall = (node) => {
+const isHttpRequestCall = (node) => {
   if (
     node.callee.type !== esTypes.MemberExpression ||
     node.callee.computed ||
     node.callee.property.type !== esTypes.Identifier ||
-    node.callee.property.name !== 'delete'
+    !HTTP_REQUEST_METHOD_NAMES.has(node.callee.property.name)
   ) {
     return false;
   }
@@ -156,13 +164,43 @@ const isHttpDeleteCall = (node) => {
   return isHttpReference(node.callee.object);
 };
 
+/**
+ * @param {Expression | import("@typescript-eslint/typescript-estree").TSESTree.SpreadElement} node
+ * @returns {Expression | undefined}
+ */
+const getPathExpression = (node) => {
+  if (node.type === esTypes.SpreadElement) {
+    return undefined;
+  }
+
+  if (node.type !== esTypes.ObjectExpression) {
+    return node;
+  }
+
+  for (const property of node.properties) {
+    if (property.type !== esTypes.Property || property.computed || property.kind !== 'init') {
+      continue;
+    }
+
+    const isPathKey =
+      (property.key.type === esTypes.Identifier && property.key.name === 'path') ||
+      (property.key.type === esTypes.Literal && property.key.value === 'path');
+
+    if (isPathKey) {
+      return property.value;
+    }
+  }
+
+  return undefined;
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
-    type: 'problem',
+    type: 'suggestion',
     docs: {
       description:
-        'Disallow dynamically building inline paths in http.delete calls so callers use buildPath instead',
+        'Disallow dynamically building inline paths in http request calls so callers use buildPath instead',
     },
     schema: [],
   },
@@ -170,18 +208,19 @@ module.exports = {
     return {
       CallExpression(_) {
         const node = /** @type {CallExpression} */ (_);
-        if (!isHttpDeleteCall(node) || node.arguments.length === 0) {
+        if (!isHttpRequestCall(node) || node.arguments.length === 0) {
           return;
         }
 
-        const [pathArgument] = node.arguments;
-        if (!isDynamicPathExpression(pathArgument)) {
+        const [firstArgument] = node.arguments;
+        const pathExpression = getPathExpression(firstArgument);
+        if (!pathExpression || !isDynamicPathExpression(pathExpression)) {
           return;
         }
 
         context.report({
-          node: pathArgument,
-          message: ERROR_MSG,
+          node: pathExpression,
+          message: WARN_MSG,
         });
       },
     };
