@@ -24,7 +24,7 @@ const createMockLead = (overrides: Partial<Lead> = {}): Lead => ({
   title: 'Test Lead',
   byline: 'A test byline',
   description: 'A test description',
-  entities: [{ record: {} as never, type: 'user', name: 'alice' }],
+  entities: [{ record: {} as never, type: 'user', name: 'alice', id: 'euid-alice' }],
   tags: ['risk'],
   priority: 7,
   chatRecommendations: ['Investigate user alice'],
@@ -87,7 +87,14 @@ describe('generate_leads helpers', () => {
 
     it('strips the full entity record, keeping only type and name', () => {
       const lead = createMockLead({
-        entities: [{ record: { some: 'full-record' } as never, type: 'host', name: 'server-01' }],
+        entities: [
+          {
+            record: { some: 'full-record' } as never,
+            type: 'host',
+            name: 'server-01',
+            id: 'euid-server-01',
+          },
+        ],
       });
       const result = formatLeadForResponse(lead, 'exec-1');
 
