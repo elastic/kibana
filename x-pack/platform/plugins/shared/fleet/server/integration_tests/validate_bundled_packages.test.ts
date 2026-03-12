@@ -24,7 +24,11 @@ describe('validate bundled packages', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
 
   beforeEach(() => {
-    mockContract = createAppContextStartContractMock({ registryUrl });
+    mockContract = createAppContextStartContractMock({
+      registryUrl,
+      // Required so getBundledPackages() does not throw; registry is used when path is missing
+      developer: { bundledPackageLocation: '/tmp/fleet_bundled_packages' },
+    });
     appContextService.start(mockContract);
   });
 
