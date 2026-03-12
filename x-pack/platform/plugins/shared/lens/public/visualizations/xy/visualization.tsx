@@ -71,7 +71,11 @@ import type {
 } from './types';
 import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
+import {
+  getAccessorColorConfigs,
+  getColorAssignments,
+  getLayerPaletteName,
+} from './color_assignment';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
@@ -1369,7 +1373,7 @@ function getVisualizationInfo(
         if (!layer.collapseFn) {
           palette.push(
             ...paletteService
-              .get(layer.palette?.name || 'default')
+              .get(getLayerPaletteName(layer))
               .getCategoricalColors(10, layer.palette?.params)
           );
         }

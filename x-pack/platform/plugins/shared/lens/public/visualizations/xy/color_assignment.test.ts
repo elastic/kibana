@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { getColorAssignments } from './color_assignment';
+import { getAssignedColorConfig, getColorAssignments } from './color_assignment';
 import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { XYDataLayerConfig } from './types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { KbnPalette } from '@kbn/palettes';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -225,6 +227,56 @@ describe('color_assignment', () => {
       );
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
       expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
+    });
+  });
+
+  describe('colorMapping palette support', () => {
+    it('should group layers by colorMapping.paletteId when present', () => {
+      const lineLayer: XYDataLayerConfig = {
+        ...layers[0],
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+
+      const assignments = getColorAssignments([lineLayer], data, formatFactory);
+
+      expect(assignments[KbnPalette.ElasticLineOptimized].totalSeriesCount).toEqual(2 * 3);
+      expect(assignments.palette1).toBeUndefined();
+    });
+
+    it('should resolve assigned accessor colors from colorMapping.paletteId', () => {
+      const lineLayer: XYDataLayerConfig = {
+        ...layers[0],
+        splitAccessors: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: KbnPalette.ElasticLineOptimized,
+        },
+      };
+      const assignments = getColorAssignments([lineLayer], data, formatFactory);
+      const getCategoricalColor = jest.fn(() => '#16c5c0');
+      const paletteService = {
+        get: jest.fn().mockReturnValue({ getCategoricalColor }),
+      };
+
+      getAssignedColorConfig(
+        lineLayer,
+        'y1',
+        assignments,
+        {
+          datasourceLayers: {
+            [lineLayer.layerId]: {
+              getOperationForColumnId: () => undefined,
+            },
+          },
+        } as never,
+        paletteService as never
+      );
+
+      expect(paletteService.get).toHaveBeenCalledWith(KbnPalette.ElasticLineOptimized);
+      expect(getCategoricalColor).toHaveBeenCalled();
     });
   });
 });
