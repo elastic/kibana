@@ -29,6 +29,7 @@ export {
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
 } from './utils/query_parsing_helpers';
 export {
   getIndexPatternFromESQLQuery,
