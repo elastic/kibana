@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 export const confluenceCloudDataSource: DataSource = {
   id: 'confluence-cloud',
-  name: 'Confluence Cloud',
+  name: i18n.translate('xpack.dataSources.confluenceCloud.name', {
+    defaultMessage: 'Confluence Cloud',
+  }),
   description: i18n.translate('xpack.dataSources.confluenceCloud.description', {
     defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
   }),
