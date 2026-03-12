@@ -542,6 +542,44 @@ describe('get_tracked_alerts', () => {
       });
     });
 
+    it('logs error and returns partial results when fetchAlertsByIds fails', async () => {
+      const searchError = new Error('search failure');
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce({
+          hits: [makeExecutionHit('exec-1')],
+        })
+        .mockResolvedValueOnce({
+          hits: [],
+        })
+        .mockRejectedValueOnce(searchError);
+
+      const result = await getTrackedAlerts({
+        ruleId,
+        lookBackWindow: 20,
+        maxAlertLimit: 1000,
+        ...makeStateFromUuids(['uuid-1']),
+        search,
+        logger,
+        ruleInfoMessage,
+        logTags,
+      });
+
+      expect(Object.keys(result.all)).toHaveLength(0);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Found 1 alerts in task state'),
+        logTags
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error fetching missing tracked alerts'),
+        expect.objectContaining({
+          tags: logTags.tags,
+          error: expect.objectContaining({ stack_trace: searchError.stack }),
+        })
+      );
+    });
+
     it('handles multiple missing alerts', async () => {
       const search = jest
         .fn()

@@ -68,14 +68,21 @@ export async function getTrackedAlerts<AlertData extends RuleAlertData>({
       `Found ${missingUuids.length} alerts in task state not returned by tracked alerts query ${ruleInfoMessage}. Fetching them directly to restore tracking info.`,
       logTags
     );
+    try {
+      const missingHits = await fetchAlertsByIds({
+        ruleId,
+        alertUuids: missingUuids,
+        search,
+      });
 
-    const missingHits = await fetchAlertsByIds({
-      ruleId,
-      alertUuids: missingUuids,
-      search,
-    });
-
-    populateTrackedAlerts(trackedAlerts, missingHits);
+      populateTrackedAlerts(trackedAlerts, missingHits);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      logger.error(`Error fetching missing tracked alerts ${ruleInfoMessage} - ${errorMessage}`, {
+        tags: logTags.tags,
+        error: { stack_trace: err.stack },
+      });
+    }
   }
 
   return trackedAlerts;
