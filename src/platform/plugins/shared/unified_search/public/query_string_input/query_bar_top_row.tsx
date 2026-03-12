@@ -43,6 +43,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiFilterButton,
+  EuiIcon,
   EuiIconTip,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
@@ -927,17 +928,20 @@ export const QueryBarTopRow = React.memo(
               delay="long"
             >
               <EuiFilterButton
-                iconType="filter"
                 aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
                   defaultMessage: 'Toggle filters panel',
                 })}
                 onClick={handleFilterToggleClick}
                 size="s"
+                color="text"
                 isSelected={props.isFiltersVisible}
                 hasActiveFilters={hasFilters}
+                numFilters={filterCount}
                 numActiveFilters={filterCount > 0 ? filterCount : undefined}
                 data-test-subj="unifiedFilterPanelToggle"
-              />
+              >
+                <EuiIcon type="filter" />
+              </EuiFilterButton>
             </EuiToolTip>
             {props.addFilterOpenFromToggle !== undefined && (
               <AddFilterPopover
