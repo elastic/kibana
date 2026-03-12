@@ -20,8 +20,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { useHasActionMenu } from './header_action_menu';
-import { useHasAppMenuConfig } from './use_has_app_menu_config';
+import { useChromeComponentsDeps } from '../context';
 
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
@@ -114,12 +113,31 @@ export function useHelpMenu(): HelpMenuState {
 }
 
 /**
+ * Whether a legacy action menu mount point is currently set.
+ * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
+ */
+export function useHasLegacyActionMenu(): boolean {
+  const { application } = useChromeComponentsDeps();
+  return !!useObservable(application.currentActionMenu$, undefined);
+}
+
+/** Whether the current app menu (registered via `chrome.setAppMenu()`) has items configured. */
+export function useHasAppMenuConfig(): boolean {
+  const { appMenu$ } = useChromeComponentsDeps();
+  const hasConfig$ = useMemo(
+    () => appMenu$.pipe(map((config) => !!config && !!config.items && config.items.length > 0)),
+    [appMenu$]
+  );
+  return useObservable(hasConfig$, false);
+}
+
+/**
  * Returns `true` when an app menu is currently active — either a legacy action
  * menu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`
  * registered via `chrome.setAppMenu()`.
  */
 export function useHasAppMenu(): boolean {
-  const hasActionMenu = useHasActionMenu();
+  const hasLegacyActionMenu = useHasLegacyActionMenu();
   const hasAppMenuConfig = useHasAppMenuConfig();
-  return hasActionMenu || hasAppMenuConfig;
+  return hasLegacyActionMenu || hasAppMenuConfig;
 }
