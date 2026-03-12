@@ -42,7 +42,7 @@ const gaugeStateSharedOptionsSchema = {
           {
             type: schema.oneOf([
               schema.literal('circle'),
-              schema.literal('semiCircle'),
+              schema.literal('semi_circle'),
               schema.literal('arc'),
             ]),
           },

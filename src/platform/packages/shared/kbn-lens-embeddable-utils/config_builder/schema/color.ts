@@ -223,10 +223,10 @@ const colorFromPaletteSchema = schema.object(
 
 const colorCodeSchema = schema.object(
   {
-    type: schema.literal('colorCode'),
+    type: schema.literal('color_code'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'colorCode', title: 'Color Code' } }
+  { meta: { id: 'color_code', title: 'Color Code' } }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
