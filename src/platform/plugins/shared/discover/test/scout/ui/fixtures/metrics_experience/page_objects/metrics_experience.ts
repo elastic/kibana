@@ -22,6 +22,7 @@ import { createShareHelper } from './share_helper';
 export class MetricsExperiencePage {
   public readonly container: Locator;
   public readonly grid: Locator;
+  public readonly fullscreen: Locator;
   public readonly cards: Locator;
   public readonly pagination: PaginationLocators;
   public readonly flyout: MetricsFlyout;
@@ -31,6 +32,7 @@ export class MetricsExperiencePage {
   public readonly chartActions: ChartActions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
+  public readonly fullscreenButton: Locator;
   private readonly page: ScoutPage;
 
   constructor(page: ScoutPage) {
@@ -38,6 +40,7 @@ export class MetricsExperiencePage {
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
+    this.fullscreen = page.testSubj.locator('metricsGridWrapper-fullScreen');
     this.cards = this.grid.locator('[data-chart-index]');
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
@@ -47,6 +50,7 @@ export class MetricsExperiencePage {
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
     this.share = createShareHelper(page);
+    this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
   }
 
   public getCardByIndex(index: number): Locator {
@@ -82,6 +86,10 @@ export class MetricsExperiencePage {
 
   public getVisibleCardCount(): Promise<number> {
     return this.cards.count();
+  }
+
+  public async toggleFullscreen(): Promise<void> {
+    await this.fullscreenButton.click();
   }
 
   /**
@@ -141,5 +149,16 @@ export class MetricsExperiencePage {
     return this.getCardByIndex(index)
       .locator('.echLegendItem__label')
       .filter({ hasText: legendLabel });
+  }
+
+  /**
+   * Opens the inspector flyout by triggering "Inspect" from the chart
+   * actions menu of the given card.
+   */
+  public async openInspectorFlyout(cardIndex: number): Promise<void> {
+    await this.openCardContextMenu(cardIndex);
+    await this.getCardByIndex(cardIndex)
+      .locator('[data-test-subj="embeddablePanelAction-openInspector"]')
+      .click();
   }
 }
