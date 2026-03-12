@@ -31,6 +31,11 @@ import {
   errorAction,
   structuredAnswerAction,
 } from './actions';
+import { extractReplacementsId } from './replacements_id';
+
+const getResponseReplacementsId = (message: AIMessageChunk): string | undefined => {
+  return extractReplacementsId(message.additional_kwargs);
+};
 
 export const processResearchResponse = (
   message: AIMessageChunk
@@ -128,7 +133,7 @@ export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | A
 
   const textContent = extractTextContent(message);
   if (textContent) {
-    return answerAction(extractTextContent(message));
+    return answerAction(extractTextContent(message), getResponseReplacementsId(message));
   } else {
     return errorAction(
       createAgentExecutionError(
@@ -141,14 +146,15 @@ export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | A
 };
 
 export const processStructuredAnswerResponse = (
-  response: unknown
+  response: unknown,
+  replacementsId?: string
 ): StructuredAnswerAction | AnswerAction | AgentErrorAction => {
   try {
     if (response && typeof response === 'object') {
-      const action = structuredAnswerAction(response);
+      const action = structuredAnswerAction(response, replacementsId);
       return action;
     } else if (typeof response === 'string') {
-      return answerAction(response);
+      return answerAction(response, replacementsId);
     } else {
       return errorAction(
         createAgentExecutionError(

@@ -26,6 +26,7 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
+      replacements_id: types.keyword({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
@@ -41,6 +42,7 @@ export interface ConversationProperties {
   title: string;
   created_at: string;
   updated_at: string;
+  replacements_id?: string;
   conversation_rounds: PersistentConversationRound[];
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;

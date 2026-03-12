@@ -32,6 +32,7 @@ export const generateTitle = ({
         previousRounds: conversation.rounds,
         nextInput,
         chatModel,
+        replacementsId: conversation.replacementsId,
       });
     } catch (e) {
       return conversation.title;
@@ -43,10 +44,12 @@ const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
+  replacementsId,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
+  replacementsId?: string;
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
@@ -79,7 +82,9 @@ Now, generate a title for the following conversation.`,
         createUserMessage(nextInput.message ?? '[no message]'),
       ];
 
-      const { title } = await structuredModel.invoke(prompt);
+      const { title } = await structuredModel.invoke(prompt, {
+        anonymization: replacementsId ? { replacementsId } : undefined,
+      });
 
       span?.setAttribute('output.value', title);
 

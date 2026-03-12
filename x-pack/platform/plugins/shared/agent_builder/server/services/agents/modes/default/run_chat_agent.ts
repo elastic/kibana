@@ -15,6 +15,7 @@ import {
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import type { ChatCompleteAnonymizationMetadata } from '@kbn/inference-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
@@ -188,6 +189,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
   });
 
+  const anonymizationMetadata: ChatCompleteAnonymizationMetadata = {
+    ...(conversation?.replacementsId ? { replacementsId: conversation.replacementsId } : {}),
+    ...(processedConversation.anonymizationTarget
+      ? { target: processedConversation.anonymizationTarget }
+      : {}),
+  };
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -199,6 +207,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     processedConversation,
     promptFactory,
+    anonymizationMetadata,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

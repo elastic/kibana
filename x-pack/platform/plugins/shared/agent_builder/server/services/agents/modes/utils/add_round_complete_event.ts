@@ -87,6 +87,10 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
+          const replacementsId = events
+            .filter(isMessageCompleteEvent)
+            .map((event) => event.data.replacements_id)
+            .find((value): value is string => Boolean(value));
           const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const round = pendingRound
             ? resumeRound({
@@ -118,6 +122,7 @@ export const addRoundCompleteEvent = ({
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(replacementsId ? { replacements_id: replacementsId } : {}),
             },
           };
 
@@ -319,6 +324,7 @@ const createRound = ({
       ? {
           message: lastMessage.message_content,
           structured_output: lastMessage.structured_output,
+          replacements_id: lastMessage.replacements_id,
         }
       : { message: '' },
     configuration_overrides: configurationOverrides,

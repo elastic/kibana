@@ -326,6 +326,7 @@ const buildPersistenceEvents = ({
       agentId,
       conversationClient,
       conversationId: conversationId || conversation.id,
+      replacementsId: conversation.replacementsId,
       title$,
       roundCompletedEvents$,
     });

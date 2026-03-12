@@ -69,11 +69,13 @@ export type ResearchAgentAction =
 export interface AnswerAction {
   type: AgentActionType.Answer;
   message: string;
+  replacements_id?: string;
 }
 
 export interface StructuredAnswerAction {
   type: AgentActionType.StructuredAnswer;
   data: object;
+  replacements_id?: string;
 }
 
 export type AnswerAgentAction = AnswerAction | StructuredAnswerAction | AgentErrorAction;
@@ -152,16 +154,21 @@ export function handoverAction(message: string, forceful: boolean = false): Hand
   };
 }
 
-export function answerAction(message: string): AnswerAction {
+export function answerAction(message: string, replacementsId?: string): AnswerAction {
   return {
     type: AgentActionType.Answer,
     message,
+    ...(replacementsId ? { replacements_id: replacementsId } : {}),
   };
 }
 
-export function structuredAnswerAction(data: object): StructuredAnswerAction {
+export function structuredAnswerAction(
+  data: object,
+  replacementsId?: string
+): StructuredAnswerAction {
   return {
     type: AgentActionType.StructuredAnswer,
     data,
+    ...(replacementsId ? { replacements_id: replacementsId } : {}),
   };
 }
