@@ -9,7 +9,12 @@
       "filter": [
         {
           "term": {
-            "winlog.event_data.LogonType": "10"
+            "event.category": "process"
+          }
+        },
+        {
+          "term": {
+            "event.type": "start"
           }
         }
       ],
@@ -19,16 +24,16 @@
             "should": [
               {
                 "match": {
-                  "event.type": {
-                    "query": "authentication_success",
+                  "host.os.family": {
+                    "query": "windows",
                     "operator": "OR"
                   }
                 }
               },
               {
                 "match": {
-                  "event.action": {
-                    "query": "logged-in",
+                  "host.os.type": {
+                    "query": "windows",
                     "operator": "OR"
                   }
                 }
@@ -37,22 +42,7 @@
           }
         }
       ],
-      "must_not": {
-        "terms": {
-          "process.name": [
-            "elastic-agent.exe",
-            "elastic-agent",
-            "metricbeat.exe",
-            "metricbeat",
-            "filebeat.exe",
-            "filebeat",
-            "packetbeat.exe",
-            "packetbeat",
-            "winlogbeat.exe",
-            "winlogbeat"
-          ]
-        }
-      }
+      "must_not": { "terms": { "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"] } }
     }
   }
 }
