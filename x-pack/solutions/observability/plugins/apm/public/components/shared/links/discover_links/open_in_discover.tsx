@@ -9,12 +9,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getESQLQuery } from './get_esql_query';
 import type { ESQLQueryParams } from './get_esql_query';
+import { useDiscoverHref } from './use_discover_href';
 
 const linkStyle = css`
   height: 24px;
@@ -45,26 +43,16 @@ export function OpenInDiscover({
   queryParams,
   label = OPEN_IN_DISCOVER_LABEL,
 }: OpenInDiscoverProps) {
-  const { share } = useApmPluginContext();
-  const { indexSettings = [], indexSettingsStatus } = useApmIndexSettingsContext();
+  const { indexSettingsStatus } = useApmIndexSettingsContext();
 
-  const esqlQuery = getESQLQuery({
+  const discoverHref = useDiscoverHref({
     indexType,
-    params: queryParams,
-    indexSettings,
+    rangeFrom,
+    rangeTo,
+    queryParams,
   });
 
-  const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
-    timeRange: {
-      from: rangeFrom,
-      to: rangeTo,
-    },
-    query: {
-      esql: esqlQuery,
-    },
-  });
-
-  const isDisabled = !esqlQuery || !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+  const isDisabled = !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
 
   if (variant === 'outlinedButton') {
     return (
