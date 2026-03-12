@@ -168,7 +168,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   const scoutRunCommandForReporting = getScoutRunCommandForReporting(process.argv);
 
-  const pwGrepTag = getPlaywrightGrepTag(options.mode);
+  const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
   const pwConfigPath = options.configPath;
   const pwTestFiles = options.testFiles || [];
   const pwProject = getPlaywrightProject(options.testTarget);
