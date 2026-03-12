@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/hardening-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/hardening-plugin'
+  title: '@kbn/hardening-plugin'
   description: Moon project for @kbn/hardening-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/hardening
+  sourceRoot: src/platform/test/plugin_functional/plugins/hardening
 dependsOn:
   - '@kbn/core'
 tags:
