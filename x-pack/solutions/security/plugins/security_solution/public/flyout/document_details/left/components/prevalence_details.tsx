@@ -55,6 +55,8 @@ import { IS_OPERATOR } from '../../../../../common/types';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getField, getHostEntityIdentifiers, getUserEntityIdentifiers } from '../../shared/utils';
+import type { EntityIdentifiers } from '../../shared/utils';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
@@ -94,6 +96,24 @@ interface PrevalenceDetailsRow extends PrevalenceData {
    * True if user have the correct timeline read privilege
    */
   canUseTimeline: boolean;
+  /**
+   * Host entity identifiers from the current document (for EUID / entity store).
+   * Used when the prevalence row value matches this document's host so the flyout gets full identifiers.
+   */
+  documentHostEntityIdentifiers?: EntityIdentifiers | null;
+  /**
+   * User entity identifiers from the current document (for EUID / entity store).
+   * Used when the prevalence row value matches this document's user so the flyout gets full identifiers.
+   */
+  documentUserEntityIdentifiers?: EntityIdentifiers | null;
+  /**
+   * host.name from the current document, used to match prevalence row value for enrichment.
+   */
+  documentHostName?: string | null;
+  /**
+   * user.name from the current document, used to match prevalence row value for enrichment.
+   */
+  documentUserName?: string | null;
 }
 
 const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
@@ -119,19 +139,31 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => (
-          <EuiFlexItem key={value}>
-            <CellActions field={data.field} value={value}>
-              <PreviewLink
-                entityIdentifiers={{ [data.field]: value }}
-                scopeId={data.scopeId}
-                data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
-              >
-                <EuiText size="xs">{value}</EuiText>
-              </PreviewLink>
-            </CellActions>
-          </EuiFlexItem>
-        ))}
+        {data.values.map((value) => {
+          const entityIdentifiers: EntityIdentifiers =
+            data.field === 'host.name' &&
+            value === data.documentHostName &&
+            data.documentHostEntityIdentifiers
+              ? data.documentHostEntityIdentifiers
+              : data.field === 'user.name' &&
+                value === data.documentUserName &&
+                data.documentUserEntityIdentifiers
+              ? data.documentUserEntityIdentifiers
+              : { [data.field]: value };
+          return (
+            <EuiFlexItem key={value}>
+              <CellActions field={data.field} value={value}>
+                <PreviewLink
+                  entityIdentifiers={entityIdentifiers}
+                  scopeId={data.scopeId}
+                  data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+                >
+                  <EuiText size="xs">{value}</EuiText>
+                </PreviewLink>
+              </CellActions>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     ),
     width: '20%',
@@ -346,8 +378,13 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
 export const PrevalenceDetails: React.FC = () => {
   const { storage } = useKibana().services;
 
-  const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
-    useDocumentDetailsContext();
+  const {
+    dataFormattedForFieldBrowser,
+    investigationFields,
+    scopeId,
+    getFieldsData,
+    dataAsNestedObject,
+  } = useDocumentDetailsContext();
 
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -400,7 +437,19 @@ export const PrevalenceDetails: React.FC = () => {
     },
   });
 
-  // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns
+  const documentHostEntityIdentifiers = useMemo(
+    () => (dataAsNestedObject ? getHostEntityIdentifiers(dataAsNestedObject, getFieldsData) : null),
+    [dataAsNestedObject, getFieldsData]
+  );
+  const documentUserEntityIdentifiers = useMemo(
+    () => (dataAsNestedObject ? getUserEntityIdentifiers(dataAsNestedObject, getFieldsData) : null),
+    [dataAsNestedObject, getFieldsData]
+  );
+  const documentHostName = useMemo(() => getField(getFieldsData('host.name')), [getFieldsData]);
+  const documentUserName = useMemo(() => getField(getFieldsData('user.name')), [getFieldsData]);
+
+  // add timeRange to pass it down to timeline and license to drive the rendering of the last 2 prevalence columns.
+  // When a row value matches the current document's host/user, pass full document entity identifiers (EUID) to the flyout.
   const items = useMemo(
     () =>
       data.map((item) => ({
@@ -410,8 +459,23 @@ export const PrevalenceDetails: React.FC = () => {
         isPlatinumPlus,
         scopeId,
         canUseTimeline,
+        documentHostEntityIdentifiers: documentHostEntityIdentifiers ?? undefined,
+        documentUserEntityIdentifiers: documentUserEntityIdentifiers ?? undefined,
+        documentHostName: documentHostName ?? undefined,
+        documentUserName: documentUserName ?? undefined,
       })),
-    [data, absoluteStart, absoluteEnd, canUseTimeline, isPlatinumPlus, scopeId]
+    [
+      data,
+      absoluteStart,
+      absoluteEnd,
+      canUseTimeline,
+      isPlatinumPlus,
+      scopeId,
+      documentHostEntityIdentifiers,
+      documentUserEntityIdentifiers,
+      documentHostName,
+      documentUserName,
+    ]
   );
 
   const upsell = (

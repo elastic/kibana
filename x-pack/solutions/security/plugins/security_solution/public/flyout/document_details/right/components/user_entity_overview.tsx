@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,8 +20,8 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { euid } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -134,23 +134,58 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [from, to]
   );
 
+  // Stabilize entityIdentifiers by content so hooks (useRiskScore, useObservedUserDetails, etc.)
+  // don't receive a new reference every render and trigger effect loops (max update depth).
+  const entityIdentifiersStableKey = useMemo(
+    () =>
+      entityIdentifiers != null && Object.keys(entityIdentifiers).length > 0
+        ? JSON.stringify(
+            Object.fromEntries(
+              Object.entries(entityIdentifiers).sort(([a], [b]) => a.localeCompare(b))
+            )
+          )
+        : '',
+    [entityIdentifiers]
+  );
+  const entityIdentifiersRef = useRef<{ key: string; value: Record<string, string> }>({
+    key: '',
+    value: {},
+  });
+  const stableEntityIdentifiers = useMemo((): Record<string, string> => {
+    if (entityIdentifiersRef.current.key !== entityIdentifiersStableKey) {
+      entityIdentifiersRef.current = {
+        key: entityIdentifiersStableKey,
+        value: entityIdentifiers ?? {},
+      };
+    }
+    return entityIdentifiersRef.current.value;
+  }, [entityIdentifiersStableKey, entityIdentifiers]);
+
   const userName =
-    entityIdentifiers['user.name'] ||
-    entityIdentifiers['user.id'] ||
-    entityIdentifiers['user.email'] ||
-    entityIdentifiers['user.entity.id'] ||
-    Object.values(entityIdentifiers)[0];
-  const filterQuery = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers) as ESQuery;
+    stableEntityIdentifiers['user.name'] ||
+    stableEntityIdentifiers['user.id'] ||
+    stableEntityIdentifiers['user.email'] ||
+    stableEntityIdentifiers['user.entity.id'] ||
+    Object.values(stableEntityIdentifiers)[0];
+  const riskScoreFilterQuery = useMemo(
+    () => (userName ? (buildUserNamesFilter([userName]) as ESQuery) : undefined),
+    [userName]
+  );
 
   const entityFromStore = useEntityFromStore({
-    entityIdentifiers,
+    entityIdentifiers: stableEntityIdentifiers,
     entityType: 'user',
     skip: !entityStoreV2Enabled,
   });
   const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
+  const riskFromEntityRecord = useMemo(
+    () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
+    [entityRecord]
+  );
+
   const [isUserDetailsLoading, { userDetails }] = useObservedUserDetails({
-    entityIdentifiers,
+    entityIdentifiers: stableEntityIdentifiers,
     userName,
     endDate: to,
     indexNames: selectedPatterns,
@@ -163,9 +198,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     isAuthorized: isRiskScoreAuthorized,
     loading: isRiskScoreLoading,
   } = useRiskScore({
-    filterQuery,
+    filterQuery: riskScoreFilterQuery,
     riskEntity: EntityType.user,
-    skip: entityStoreV2Enabled,
+    skip: entityStoreV2Enabled && riskFromEntityRecord != null,
     timerange,
   });
   const userRiskFromSearch = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
@@ -193,17 +228,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(stableEntityIdentifiers)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityIdentifiers,
+    entityIdentifiers: stableEntityIdentifiers,
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    entityIdentifiers,
+    entityIdentifiers: stableEntityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -263,7 +298,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const isLoading = entityStoreV2Enabled
-    ? entityFromStore.isLoading
+    ? entityFromStore.isLoading || (riskFromEntityRecord == null && isRiskScoreLoading)
     : isUserDetailsLoading || isRiskScoreLoading;
 
   const [userRiskLevel] = useMemo(() => {
@@ -308,7 +343,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink
-              entityIdentifiers={entityIdentifiers}
+              entityIdentifiers={stableEntityIdentifiers}
               scopeId={scopeId}
               data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
             >
@@ -318,7 +353,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                {entityIdentifiers['user.name']}
+                {stableEntityIdentifiers['user.name']}
               </EuiText>
             </PreviewLink>
           </EuiFlexItem>
@@ -358,12 +393,12 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         )}
       </EuiFlexItem>
       <AlertCountInsight
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={stableEntityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        entityIdentifiers={entityIdentifiers}
+        entityIdentifiers={stableEntityIdentifiers}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}

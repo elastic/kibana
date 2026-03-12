@@ -89,6 +89,7 @@ export const EntitiesDetails: React.FC = () => {
                 entityIdentifiers={hostEntityIdentifiers}
                 timestamp={timestamp}
                 scopeId={scopeId}
+                hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
               />
             </EuiFlexItem>
           )}

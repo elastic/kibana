@@ -155,6 +155,11 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   });
   const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
+  const riskFromEntityRecord = useMemo(
+    () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
+    [entityRecord]
+  );
+
   const {
     data: hostRisk,
     isAuthorized: isRiskScoreAuthorized,
@@ -162,7 +167,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   } = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
-    skip: entityStoreV2Enabled || hostName == null,
+    skip: (entityStoreV2Enabled && riskFromEntityRecord != null) || hostName == null,
     timerange,
   });
   const hostRiskFromSearch = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
@@ -250,7 +255,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const isLoading = entityStoreV2Enabled
-    ? entityFromStore.isLoading
+    ? entityFromStore.isLoading || (riskFromEntityRecord == null && isRiskScoreLoading)
     : isRiskScoreLoading || isHostDetailsLoading;
 
   const [hostRiskLevel] = useMemo(() => {

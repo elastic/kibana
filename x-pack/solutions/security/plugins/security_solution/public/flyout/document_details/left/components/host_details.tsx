@@ -89,6 +89,8 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityIdentifiers } from '../../shared/utils';
+import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import type { HostItem } from '../../../../../common/search_strategy';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import {
@@ -121,6 +123,11 @@ export interface HostDetailsProps {
    * Set to false for attack flyout so multiple entity panels start collapsed.
    */
   expandedOnFirstRender?: boolean;
+  /**
+   * When provided (e.g. from EntitiesDetails), use this for entity/risk so the left panel
+   * shows host risk level even when global time is still initializing.
+   */
+  hostEntityFromStoreResult?: EntityFromStoreResult<HostItem> | null;
 }
 
 /**
@@ -131,6 +138,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
+  hostEntityFromStoreResult: hostEntityFromStoreResultProp,
 }) => {
   // Get the primary field value (first key in priority order, following EUID logic)
   const primaryField = Object.keys(entityIdentifiers)[0] || 'host.name';
@@ -197,12 +205,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const entityFromStoreResult = useEntityFromStore({
     entityIdentifiers,
     entityType: 'host',
-    skip: !entityStoreV2Enabled || isInitializing,
+    skip: !entityStoreV2Enabled,
   });
+  const effectiveHostEntityFromStore =
+    hostEntityFromStoreResultProp ?? entityFromStoreResult;
   const observedHost = useObservedHost(
     entityIdentifiers,
     scopeId,
-    entityStoreV2Enabled ? entityFromStoreResult : undefined
+    entityStoreV2Enabled ? effectiveHostEntityFromStore : undefined
   );
 
   const spaceId = useSpaceId();
@@ -228,13 +238,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
   );
-  const { data: hostRisk } = useRiskScore({
+  const riskScoreStateFromApi = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
-    skip: entityStoreV2Enabled || hostName == null,
+    skip: hostName == null,
     timerange,
   });
-  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const hostRiskData =
+    riskScoreStateFromApi.data && riskScoreStateFromApi.data.length > 0
+      ? riskScoreStateFromApi.data[0]
+      : undefined;
   const hostDetails = entityStoreV2Enabled ? observedHost.details : hostDetailsArgs.hostDetails;
   const isHostLoading = entityStoreV2Enabled ? observedHost.isLoading : isHostLoadingFromDetails;
   const hostRiskScoreStateFromEntityStore = useMemo(
@@ -244,6 +257,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             refetch: observedHost.refetchEntityStore ?? (() => {}),
             isLoading: observedHost.isLoading,
             error: null,
+            inspect: effectiveHostEntityFromStore?.inspect,
           })
         : undefined,
     [
@@ -251,8 +265,18 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       observedHost.entityRecord,
       observedHost.refetchEntityStore,
       observedHost.isLoading,
+      effectiveHostEntityFromStore?.inspect,
     ]
   );
+  const effectiveRiskScoreState = useMemo(
+    () =>
+      hostRiskScoreStateFromEntityStore ??
+      (riskScoreStateFromApi.data?.length
+        ? riskScoreStateFromApi
+        : undefined),
+    [hostRiskScoreStateFromEntityStore, riskScoreStateFromApi]
+  );
+
   const isRiskScoreExist =
     entityStoreV2Enabled && observedHost.entityRecord
       ? !!getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level
@@ -451,12 +475,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
             inspect={
-              entityStoreV2Enabled ? entityFromStoreResult?.inspect : hostDetailsArgs.inspect
+              entityStoreV2Enabled
+                ? effectiveHostEntityFromStore?.inspect
+                : hostDetailsArgs.inspect
             }
             deleteQuery={deleteQuery}
             scopeId={scopeId}
             isFlyoutOpen={true}
-            riskScoreState={hostRiskScoreStateFromEntityStore}
+            riskScoreState={effectiveRiskScoreState}
             firstSeenFromEntityStore={
               entityStoreV2Enabled ? observedHost.firstSeen?.date ?? undefined : undefined
             }

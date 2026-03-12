@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { inputsModel } from '../../../../../common/store';
 import * as i18n from './translations';
 import type { InspectResponse } from '../../../../../types';
@@ -50,15 +50,41 @@ export const useObservedUserDetails = ({
   startDate,
   userName,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
+  // Stabilize entityIdentifiers by content so that when the parent passes a new object reference
+  // with the same key-value pairs (e.g. from getUserEntityIdentifiers), we don't create a new
+  // userDetailsRequest every render and trigger the search effect in a loop (max update depth).
+  const entityIdentifiersStableKey = useMemo(
+    () =>
+      entityIdentifiersProp != null && Object.keys(entityIdentifiersProp).length > 0
+        ? JSON.stringify(
+            Object.fromEntries(
+              Object.entries(entityIdentifiersProp).sort(([a], [b]) => a.localeCompare(b))
+            )
+          )
+        : userName != null && userName !== ''
+        ? `userName:${userName}`
+        : '',
+    [entityIdentifiersProp, userName]
+  );
+
+  const entityIdentifiersRef = useRef<{ key: string; value: EntityIdentifiers }>({
+    key: '',
+    value: {},
+  });
   const entityIdentifiers = useMemo((): EntityIdentifiers => {
+    let value: EntityIdentifiers;
     if (entityIdentifiersProp != null && Object.keys(entityIdentifiersProp).length > 0) {
-      return entityIdentifiersProp;
+      value = entityIdentifiersProp;
+    } else if (userName != null && userName !== '') {
+      value = { 'user.name': userName };
+    } else {
+      value = {};
     }
-    if (userName != null && userName !== '') {
-      return { 'user.name': userName };
+    if (entityIdentifiersRef.current.key !== entityIdentifiersStableKey) {
+      entityIdentifiersRef.current = { key: entityIdentifiersStableKey, value };
     }
-    return {};
-  }, [entityIdentifiersProp, userName]);
+    return entityIdentifiersRef.current.value;
+  }, [entityIdentifiersStableKey, entityIdentifiersProp, userName]);
 
   const {
     loading,
