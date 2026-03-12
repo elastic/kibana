@@ -416,7 +416,7 @@ For the Elastic Security 9.2.7 release information, refer to [Elastic Security S
 * Improves handling of `204` responses [#251090]({{kib-pull}}251090).
 
 **Dashboards and Visualizations**:
-* Applies embeddable transforms to embeddable elements [#252191]({{kib-pull}}252191).
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
 * Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
 
 **Data ingestion and Fleet**:
