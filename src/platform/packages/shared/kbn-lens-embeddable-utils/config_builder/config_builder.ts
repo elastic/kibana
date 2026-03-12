@@ -145,6 +145,14 @@ export class LensConfigBuilder {
     return type in this.apiConvertersByChart;
   }
 
+  getCompatibleType(type: string): string | null {
+    const compatType = compatibilityMap[type];
+
+    if (compatType) return compatType;
+
+    throw new Error(`No compatible type found for type: ${type}`);
+  }
+
   getType<C extends ChartTypeLike>(config: C): string | undefined | null {
     if (config == null) {
       return null;

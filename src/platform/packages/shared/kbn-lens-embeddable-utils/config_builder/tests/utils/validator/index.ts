@@ -15,4 +15,12 @@ export const validator = {
   tagcloud: validateTransformsFn('tagcloud'),
   metric: validateTransformsFn('metric'),
   legacyMetric: validateTransformsFn('legacyMetric'),
+  xy: validateTransformsFn('xy'),
+  heatmap: validateTransformsFn('heatmap'),
+  regionMap: validateTransformsFn('regionMap'),
+  datatable: validateTransformsFn('datatable'),
+  mosaic: validateTransformsFn('mosaic'),
+  pie: validateTransformsFn('pie'),
+  treemap: validateTransformsFn('treemap'),
+  waffle: validateTransformsFn('waffle'),
 } satisfies Record<string, ValidateTransform>;

@@ -20,6 +20,13 @@ const chartCanonicalizers = {
   tagcloud: canonicalizeTagcloud,
   metric: canonicalizeMetric,
   legacyMetric: canonicalizeLegacyMetric,
+  heatmap: (state) => state,
+  regionMap: (state) => state,
+  datatable: (state) => state,
+  mosaic: (state) => state,
+  pie: (state) => state,
+  treemap: (state) => state,
+  waffle: (state) => state,
 } satisfies Record<string, Canonicalizer>;
 
 export function getChartCanonicalizer(chartType: string): Canonicalizer | undefined {

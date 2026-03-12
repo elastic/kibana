@@ -110,8 +110,6 @@ function isPrimaryMetric(metric: MetricState['metrics'][number]): metric is Prim
 
 function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
-  const subtitle = layer.metric.sub_label;
-
   const [primaryMetric, secondaryMetric] = layer.metrics;
 
   if (isSecondaryMetric(primaryMetric)) {
@@ -121,6 +119,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
   if (secondaryMetric && isPrimaryMetric(secondaryMetric)) {
     throw new Error('The second metric must be the secondary metric.');
   }
+
+  const subtitle = primaryMetric.sub_label;
 
   return {
     layerId: DEFAULT_LAYER_ID,

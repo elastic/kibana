@@ -91,8 +91,8 @@ export function fromColorByValueLensStateToAPI(
   }
   return {
     type: 'dynamic',
-    min: color.params.rangeMin!,
-    max: color.params.rangeMax!,
+    min: color.params.rangeMin ?? 0,
+    max: color.params.rangeMax ?? 100,
     range: rangeType,
     steps:
       color.params.stops?.map((step, index) => {
