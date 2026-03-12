@@ -65,7 +65,7 @@ export function fromColorByValueAPIToLensState(
   const rangeMin = colorStops.at(0)?.stop ?? null;
   const rangeMax = stops.at(-1)?.stop ?? null;
 
-  const isLegacy = config.type === 'legacy-dynamic';
+  const isLegacy = config.type === 'legacy_dynamic';
   const name = isLegacy ? config.palette : 'custom';
   const needsPaletteShift = isLegacy && config.shift;
 
@@ -183,7 +183,7 @@ export function fromColorByValueLensStateToAPI(
 
   if (isLegacy) {
     return {
-      type: 'legacy-dynamic',
+      type: 'legacy_dynamic',
       range,
       palette,
       shift: needsPaletteShift,
@@ -416,7 +416,7 @@ export function fromColorMappingAPIToLensState(
 
 export function isColorByValueColor(color?: AllColoringTypes): color is ColorByValueType {
   if (!color || !('type' in color)) return false;
-  return color.type === 'dynamic' || color.type === 'legacy-dynamic';
+  return color.type === 'dynamic' || color.type === 'legacy_dynamic';
 }
 
 export function isColorByValueAbsolute(color?: AllColoringTypes): color is ColorByValueAbsolute {

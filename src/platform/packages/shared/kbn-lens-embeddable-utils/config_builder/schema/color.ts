@@ -131,7 +131,7 @@ const colorByValueBaseSchema = schema.object({
 
 export const legacyColorByValueSchema = colorByValueBaseSchema.extends(
   {
-    type: schema.literal('legacy-dynamic'),
+    type: schema.literal('legacy_dynamic'),
 
     palette: schema.string({
       meta: {
