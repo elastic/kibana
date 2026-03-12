@@ -8,11 +8,7 @@
  */
 
 import { Parser } from '@elastic/esql';
-import {
-  appendToESQLQuery,
-  appendWhereClauseToESQLQuery,
-  hasTransformationalCommand,
-} from '@kbn/esql-utils';
+import { appendToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
