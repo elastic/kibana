@@ -11,11 +11,11 @@ import type { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './co
 export interface AttackDetailsProps extends FlyoutPanelProps {
   key: typeof AttackDetailsRightPanelKey;
   path?: PanelPath;
-  params?: { attackId: string; indexName: string };
+  params?: { attackId: string; indexName: string; isPreviewMode?: boolean };
 }
 
 export interface AttackDetailsLeftPanelProps extends FlyoutPanelProps {
   key: typeof AttackDetailsLeftPanelKey;
   path?: PanelPath;
-  params?: { attackId: string; indexName: string };
+  params?: { attackId: string; indexName: string; isPreviewMode?: boolean };
 }

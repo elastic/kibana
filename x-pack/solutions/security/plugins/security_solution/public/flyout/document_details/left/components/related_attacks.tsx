@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import {
   CorrelationsDetailsAlertsTable,
   type CorrelationsCustomTableColumn,
 } from './correlations_details_alerts_table';
 import { CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID } from './test_ids';
+import { AttackDetailsRightPanelKey } from '../../../attack_details/constants/panel_keys';
 
 export interface RelatedAttacksProps {
   /**
@@ -36,16 +39,36 @@ export interface RelatedAttacksProps {
  */
 export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scopeId, eventId }) => {
   const { dataView } = useDataView(PageScope.attacks);
+  const { openPreviewPanel } = useExpandableFlyoutApi();
   const attackIndexName = useMemo(() => dataView.getIndexPattern(), [dataView]);
+  const openAttackPreview = useCallback(
+    (attackId: string, indexName: string) => {
+      openPreviewPanel({
+        id: AttackDetailsRightPanelKey,
+        params: {
+          attackId,
+          indexName,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
   const columns = useMemo<Array<CorrelationsCustomTableColumn>>(
     () => [
       {
         render: (row: Record<string, unknown>) => (
-          <AlertPreviewButton
-            id={row.id as string}
-            indexName={row.index as string}
+          <EuiButtonIcon
+            iconType="expand"
             data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
-            scopeId={scopeId}
+            onClick={() => openAttackPreview(row.id as string, row.index as string)}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.correlations.relatedAttacksPreviewButtonLabel',
+              {
+                defaultMessage: 'Preview attack with id {id}',
+                values: { id: row.id as string },
+              }
+            )}
           />
         ),
         width: '5%',
@@ -87,7 +110,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         render: (value: unknown) => (Array.isArray(value) ? value.length : ''),
       },
     ],
-    [scopeId]
+    [openAttackPreview]
   );
 
   return (

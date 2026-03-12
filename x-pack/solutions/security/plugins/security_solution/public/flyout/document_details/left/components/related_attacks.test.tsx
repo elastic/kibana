@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import {
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID,
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
@@ -23,9 +25,11 @@ import {
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
+import { AttackDetailsRightPanelKey } from '../../../attack_details/constants/panel_keys';
 
 jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../../data_view_manager/hooks/use_data_view');
+jest.mock('@kbn/expandable-flyout');
 
 const attackIds = ['attack-id-1'];
 const scopeId = 'scopeId';
@@ -52,6 +56,8 @@ const renderRelatedAttacks = () =>
 
 describe('<RelatedAttacks />', () => {
   beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    jest.mocked(mockFlyoutApi.openPreviewPanel).mockReset();
     jest.mocked(useDataView).mockReturnValue({
       dataView: getMockDataViewWithMatchedIndices([
         '.alerts-security.attack.discovery.alerts-default',
@@ -87,6 +93,17 @@ describe('<RelatedAttacks />', () => {
     expect(
       getAllByTestId(`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`)
     ).toHaveLength(1);
+    getAllByTestId(
+      `${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`
+    )[0].click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: AttackDetailsRightPanelKey,
+      params: {
+        attackId: 'attack-id-1',
+        indexName: 'index',
+        isPreviewMode: true,
+      },
+    });
     expect(
       getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).toBeInTheDocument();

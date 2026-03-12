@@ -28,23 +28,28 @@ export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
  */
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
-  const { openRightPanel } = useExpandableFlyoutApi();
-  const { attackId, indexName } = useAttackDetailsContext();
+  const { openRightPanel, openPreviewPanel } = useExpandableFlyoutApi();
+  const { attackId, indexName, isPreviewMode = false } = useAttackDetailsContext();
   const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
   const setSelectedTabId = useCallback(
     (tabId: AttackDetailsPanelTabType['id']) => {
-      openRightPanel({
+      const panel = {
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId, indexName },
-      });
+        params: { attackId, indexName, isPreviewMode },
+      };
+      if (isPreviewMode) {
+        openPreviewPanel(panel);
+      } else {
+        openRightPanel(panel);
+      }
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
-    [attackId, indexName, openRightPanel, storage]
+    [attackId, indexName, isPreviewMode, openPreviewPanel, openRightPanel, storage]
   );
 
   return (

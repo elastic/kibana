@@ -52,6 +52,10 @@ export interface AttackDetailsContext {
    * Refetches the attack document from the server
    */
   refetch: () => Promise<void>;
+  /**
+   * Indicates the panel is rendered in preview context.
+   */
+  isPreviewMode?: boolean;
 }
 
 /**
@@ -67,7 +71,7 @@ export type AttackDetailsProviderProps = {
 } & Partial<AttackDetailsProps['params']>;
 
 export const AttackDetailsProvider = memo(
-  ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
+  ({ attackId, indexName, isPreviewMode, children }: AttackDetailsProviderProps) => {
     const scopeId = useSpaceId();
     // data view side: browserFields + field-browser data
     const {
@@ -102,6 +106,7 @@ export const AttackDetailsProvider = memo(
               getFieldsData,
               dataFormattedForFieldBrowser,
               refetch,
+              isPreviewMode: isPreviewMode ?? false,
             }
           : undefined,
       [
@@ -114,6 +119,7 @@ export const AttackDetailsProvider = memo(
         searchHit,
         getFieldsData,
         refetch,
+        isPreviewMode,
       ]
     );
 
