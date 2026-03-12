@@ -56,22 +56,23 @@ export async function readArtifactsState(): Promise<string | undefined> {
   }
 }
 
-export interface RestoreStrategy {
-  shouldRestore: boolean;
-  bestSha: string | undefined;
-}
+export type RestoreStrategy =
+  | { shouldRestore: true; bestSha: string }
+  | { shouldRestore: false; bestSha?: undefined };
 
 /**
- * Finds the closest available GCS archive SHA for the current checkout.
- * Called when the local effective rebuild count exceeds the threshold, to
- * check whether a GCS archive would actually reduce the work before downloading.
+ * Fetches upstream, lists available GCS archive SHAs, and returns the subset
+ * of local git candidates that have a matching archive — ordered most to least
+ * recent. Shared by resolveBestGcsSha and the full-discovery restore path so
+ * the matching logic stays in one place.
  */
-async function resolveBestGcsSha(
+async function resolveGcsMatchedShas(
   log: SomeDevLog,
-  gcsFs: GcsFileSystem
-): Promise<string | undefined> {
-  const upstreamRemote = await resolveUpstreamRemote();
-
+  gcsFs: GcsFileSystem,
+  currentSha: string | undefined,
+  history: string[],
+  upstreamRemote: string | undefined
+): Promise<string[]> {
   const fetchUpstream = upstreamRemote
     ? execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], { cwd: REPO_ROOT })
         .then(() => log.verbose(`Fetched latest main from ${upstreamRemote}.`))
@@ -84,12 +85,7 @@ async function resolveBestGcsSha(
         })
     : Promise.resolve();
 
-  const [availableShas, currentSha, history] = await Promise.all([
-    gcsFs.listAvailableCommitShas(),
-    resolveCurrentCommitSha(),
-    readRecentCommitShas(MAX_COMMITS_TO_CHECK),
-    fetchUpstream,
-  ]);
+  const [availableShas] = await Promise.all([gcsFs.listAvailableCommitShas(), fetchUpstream]);
 
   if (availableShas.size === 0) {
     log.warning('GCS returned 0 archives. The bucket may be temporarily unavailable.');
@@ -100,7 +96,34 @@ async function resolveBestGcsSha(
     : [];
 
   const candidates = buildCandidateShaList(currentSha, [...history, ...mainShas]);
-  return candidates.find((sha) => availableShas.has(sha));
+  const matched = candidates.filter((sha) => availableShas.has(sha));
+
+  if (matched.length === 0 && candidates.length > 0 && availableShas.size > 0) {
+    log.info(
+      `None of the ${candidates.length} candidate commit(s) matched ` +
+        `the ${availableShas.size} archived commit(s) in GCS.`
+    );
+  }
+
+  return matched;
+}
+
+/**
+ * Finds the closest available GCS archive SHA for the current checkout.
+ * Called when the local effective rebuild count exceeds the threshold, to
+ * check whether a GCS archive would actually reduce the work before downloading.
+ */
+async function resolveBestGcsSha(
+  log: SomeDevLog,
+  gcsFs: GcsFileSystem
+): Promise<string | undefined> {
+  const upstreamRemote = await resolveUpstreamRemote();
+  const [currentSha, history] = await Promise.all([
+    resolveCurrentCommitSha(),
+    readRecentCommitShas(MAX_COMMITS_TO_CHECK),
+  ]);
+  const matched = await resolveGcsMatchedShas(log, gcsFs, currentSha, history, upstreamRemote);
+  return matched[0];
 }
 
 /**
@@ -141,7 +164,12 @@ export async function resolveRestoreStrategy(
 
   if (!hasLocalArtifacts) {
     log.info('[Cache check] No local TypeScript artifacts found — will restore from GCS.');
-    return { shouldRestore: true, bestSha: await resolveBestGcsSha(log, gcsFs) };
+    const bestSha = await resolveBestGcsSha(log, gcsFs);
+    if (!bestSha) {
+      log.info('[Cache check] No GCS archive available — tsc will build from scratch.');
+      return { shouldRestore: false };
+    }
+    return { shouldRestore: true, bestSha };
   }
 
   if (!localStateSha) {
@@ -151,7 +179,12 @@ export async function resolveRestoreStrategy(
     log.info(
       '[Cache check] Local artifacts found but their state is unknown — will restore from GCS.'
     );
-    return { shouldRestore: true, bestSha: await resolveBestGcsSha(log, gcsFs) };
+    const bestSha = await resolveBestGcsSha(log, gcsFs);
+    if (!bestSha) {
+      log.info('[Cache check] No GCS archive available — tsc will handle staleness incrementally.');
+      return { shouldRestore: false };
+    }
+    return { shouldRestore: true, bestSha };
   }
 
   // Phase 2: staleness check — git diff, no network I/O.
@@ -198,7 +231,7 @@ export async function resolveRestoreStrategy(
     log.info(
       `[Cache check] No GCS archive found — proceeding with ${effectiveRebuildSet.size} local rebuilds.`
     );
-    return { shouldRestore: true, bestSha: undefined };
+    return { shouldRestore: false };
   }
 
   // Second git diff: how many projects are stale relative to the GCS archive SHA?
@@ -350,30 +383,13 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog, specificSha?: str
         );
       }
 
-      const fetchUpstream = upstreamRemote
-        ? execa('git', ['fetch', upstreamRemote, 'main', '--quiet'], { cwd: REPO_ROOT })
-            .then(() => {
-              log.verbose(`Fetched latest main from ${upstreamRemote}.`);
-            })
-            .catch((fetchError: unknown) => {
-              const details = fetchError instanceof Error ? fetchError.message : String(fetchError);
-              log.warning(`Failed to fetch ${upstreamRemote}/main: ${details}`);
-            })
-        : Promise.resolve();
-
-      const gcsListPromise = gcsFs.listAvailableCommitShas();
-
-      const [, availableShas] = await Promise.all([fetchUpstream, gcsListPromise]);
-
-      if (availableShas.size === 0) {
-        log.warning('GCS returned 0 archives. The bucket may be temporarily unavailable.');
-      }
-
-      const mainShas = upstreamRemote
-        ? await readMainBranchCommitShas(MAX_COMMITS_TO_CHECK, upstreamRemote)
-        : [];
-      const gcsCandidateShas = buildCandidateShaList(currentSha, [...history, ...mainShas]);
-      const matchedShas = gcsCandidateShas.filter((sha) => availableShas.has(sha));
+      const matchedShas = await resolveGcsMatchedShas(
+        log,
+        gcsFs,
+        currentSha,
+        history,
+        upstreamRemote
+      );
 
       if (matchedShas.length > 0) {
         const bestMatch = matchedShas[0];
@@ -403,13 +419,11 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog, specificSha?: str
         });
 
         if (restored) {
+          // Record the restored SHA so subsequent runs accurately assess
+          // staleness rather than treating the artifacts as unknown state.
+          await writeArtifactsState(restored);
           return;
         }
-      } else if (availableShas.size > 0) {
-        log.info(
-          `None of the ${gcsCandidateShas.length} candidate commit(s) matched ` +
-            `the ${availableShas.size} archived commit(s) in GCS.`
-        );
       }
 
       log.info('Falling back to local cache.');
@@ -461,5 +475,11 @@ export async function checkForExistingBuildArtifacts(): Promise<boolean> {
     }
   });
 
+  // `some(Boolean)` is intentionally conservative: a single sampled project
+  // having a target/types directory is enough to conclude artifacts exist. This
+  // can produce a false positive if the developer previously ran only a partial
+  // type check, but Phase 2's state-SHA comparison corrects for that — if the
+  // sampled project's artifacts are from a different commit, the effective
+  // rebuild count will reflect that and trigger a fresh GCS restore if needed.
   return (await Promise.all(checks)).some(Boolean);
 }

@@ -167,6 +167,47 @@ describe('restoreTSBuildArtifacts', () => {
     expect(log.warning).toHaveBeenCalledWith('Failed to restore TypeScript build artifacts: boom');
   });
 
+  describe('full-discovery GCS restore', () => {
+    it('writes the state file after a successful GCS restore', async () => {
+      const log = createLog();
+      const restoredSha = 'abc123def456gh78';
+      const candidateShas = [restoredSha, 'other-sha'];
+
+      mockedResolveCurrentCommitSha.mockResolvedValueOnce(restoredSha);
+      mockedReadRecentCommitShas.mockResolvedValueOnce(['other-sha']);
+      mockedBuildCandidateShaList
+        .mockReturnValueOnce(candidateShas) // outer candidateShas (early exit check)
+        .mockReturnValueOnce(candidateShas); // resolveGcsMatchedShas internal candidates
+
+      const mockGcsRestore = jest.fn().mockResolvedValue(restoredSha);
+      (GcsFileSystem as jest.MockedClass<typeof GcsFileSystem>).mockImplementationOnce(
+        () =>
+          ({
+            listAvailableCommitShas: jest.fn().mockResolvedValue(new Set([restoredSha])),
+            restoreArchive: mockGcsRestore,
+          } as unknown as GcsFileSystem)
+      );
+
+      const mkdirSpy = jest.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
+      const writeFileSpy = jest.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
+
+      await restoreTSBuildArtifacts(log);
+
+      expect(mockGcsRestore).toHaveBeenCalledTimes(1);
+      // State file must be written so subsequent runs don't treat the restored
+      // artifacts as "unknown state" and trigger a redundant GCS restore.
+      expect(writeFileSpy).toHaveBeenCalledWith(
+        expect.stringContaining('kbn-ts-type-check-oblt-artifacts.sha'),
+        restoredSha,
+        'utf8'
+      );
+      expect(restoreSpy).not.toHaveBeenCalled();
+
+      mkdirSpy.mockRestore();
+      writeFileSpy.mockRestore();
+    });
+  });
+
   describe('direct restore (specificSha)', () => {
     it('calls gcsFs.restoreArchive with the specific SHA and skips existence check', async () => {
       const log = createLog();
@@ -258,7 +299,7 @@ describe('resolveRestoreStrategy', () => {
     accessSpy.mockRestore();
   });
 
-  it('returns shouldRestore: true when no local artifacts exist', async () => {
+  it('returns shouldRestore: true with bestSha when no local artifacts exist', async () => {
     const log = createLog();
     const result = await resolveRestoreStrategy(log, []);
 
@@ -266,7 +307,17 @@ describe('resolveRestoreStrategy', () => {
     expect(result.bestSha).toBe('ancestor-sha');
   });
 
-  it('returns shouldRestore: true when local artifacts exist but state file is missing', async () => {
+  it('returns shouldRestore: false when no local artifacts exist and GCS has no archive', async () => {
+    gcsListMock.mockResolvedValue(new Set());
+
+    const log = createLog();
+    const result = await resolveRestoreStrategy(log, []);
+
+    expect(result.shouldRestore).toBe(false);
+    expect(result.bestSha).toBeUndefined();
+  });
+
+  it('returns shouldRestore: true with bestSha when local artifacts exist but state file is missing', async () => {
     // Artifacts exist on disk (access succeeds), but no state file (readFile throws ENOENT).
     accessSpy.mockResolvedValue(undefined);
     readFileSpy.mockImplementation(makeReadFileMock(null, ['some/tsconfig.json']));
@@ -276,6 +327,18 @@ describe('resolveRestoreStrategy', () => {
 
     expect(result.shouldRestore).toBe(true);
     expect(result.bestSha).toBe('ancestor-sha');
+  });
+
+  it('returns shouldRestore: false when local artifacts exist with unknown state and GCS has no archive', async () => {
+    accessSpy.mockResolvedValue(undefined);
+    readFileSpy.mockImplementation(makeReadFileMock(null, ['some/tsconfig.json']));
+    gcsListMock.mockResolvedValue(new Set());
+
+    const log = createLog();
+    const result = await resolveRestoreStrategy(log, []);
+
+    expect(result.shouldRestore).toBe(false);
+    expect(result.bestSha).toBeUndefined();
   });
 
   it('does NOT call GCS when local artifacts are up-to-date', async () => {
@@ -321,7 +384,7 @@ describe('resolveRestoreStrategy', () => {
     );
   });
 
-  it('returns shouldRestore: true with bestSha: undefined when GCS has no matching archive', async () => {
+  it('returns shouldRestore: false when above threshold but GCS has no matching archive', async () => {
     // Artifacts exist but >10 stale projects → triggers GCS lookup → GCS has nothing.
     accessSpy.mockResolvedValue(undefined);
     readFileSpy.mockImplementation(makeReadFileMock('known-sha', ['some/tsconfig.json']));
@@ -333,7 +396,7 @@ describe('resolveRestoreStrategy', () => {
     const log = createLog();
     const result = await resolveRestoreStrategy(log, []);
 
-    expect(result.shouldRestore).toBe(true);
+    expect(result.shouldRestore).toBe(false);
     expect(result.bestSha).toBeUndefined();
   });
 

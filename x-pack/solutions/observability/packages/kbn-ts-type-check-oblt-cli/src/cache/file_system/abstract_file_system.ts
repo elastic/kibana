@@ -44,11 +44,7 @@ export abstract class AbstractFileSystem {
     const fileListPath = Path.join(TMP_DIR, 'ts-artifacts.list');
     const nullDelimiter = '\0';
 
-    const archiveEntries = files;
-    const fileListContent = Buffer.from(
-      `${archiveEntries.join(nullDelimiter)}${nullDelimiter}`,
-      'utf8'
-    );
+    const fileListContent = Buffer.from(`${files.join(nullDelimiter)}${nullDelimiter}`, 'utf8');
 
     await Fs.promises.mkdir(TMP_DIR, { recursive: true });
 

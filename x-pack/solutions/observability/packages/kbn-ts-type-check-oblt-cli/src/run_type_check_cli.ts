@@ -159,7 +159,7 @@ run(
 
       Examples:
         # check types in all projects
-        node node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js
+        node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js
 
         # check types in a single project
         node x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli/type_check.js --project packages/kbn-pm/tsconfig.json
