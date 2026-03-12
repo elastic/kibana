@@ -19,8 +19,10 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiPageTemplate,
+  EuiPageSection,
+  EuiSpacer,
   EuiTitle,
+  useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -31,6 +33,7 @@ import * as i18n from './translations';
 
 export const DatasetsListPage: React.FC = () => {
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
@@ -115,16 +118,16 @@ export const DatasetsListPage: React.FC = () => {
   };
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.PAGE_TITLE}
-        rightSideItems={[
-          <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
-            {i18n.CREATE_DATASET_BUTTON}
-          </EuiButton>,
-        ]}
-      />
-      <EuiPageTemplate.Section>
+    <>
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+              {i18n.CREATE_DATASET_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
         <EuiBasicTable<DatasetSummary>
           items={data?.datasets ?? []}
           columns={columns}
@@ -136,7 +139,7 @@ export const DatasetsListPage: React.FC = () => {
             style: { cursor: 'pointer' },
           })}
         />
-      </EuiPageTemplate.Section>
+      </EuiPageSection>
       {isCreateFlyoutOpen ? (
         <EuiFlyout onClose={closeCreateFlyout} size="s">
           <EuiFlyoutHeader hasBorder>
@@ -186,6 +189,6 @@ export const DatasetsListPage: React.FC = () => {
           </EuiFlyoutFooter>
         </EuiFlyout>
       ) : null}
-    </EuiPageTemplate>
+    </>
   );
 };
