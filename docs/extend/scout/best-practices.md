@@ -21,6 +21,7 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 | How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
 | How should I **name** my tests?          | [Write descriptive test names](#write-descriptive-test-names)                                                          |
 | Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
+| Are my **archives** actually used?        | [Only load archives your tests actually use](#only-load-archives-your-tests-actually-use)                              |
 | Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
 | Where should **shared values** live?     | [Use constants for shared test values](#use-constants-for-shared-test-values)                                          |
 | What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
@@ -131,6 +132,33 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
   await esArchiver.loadIfNeeded(MY_ARCHIVE);
 });
 ```
+
+### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
+
+It’s common for test suites to load Elasticsearch or Kibana archives that are barely used—or not used at all. Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Audit your archive imports periodically and remove any that aren’t exercised by assertions.
+
+:::::{dropdown} Examples
+❌ **Don’t:** load archives that no test in the suite relies on:
+
+```ts
+test.beforeAll(async ({ esArchiver }) => {
+  await esArchiver.load('large_metrics_archive');
+  await esArchiver.load('user_actions_archive');
+});
+
+test('shows metrics dashboard', async ({ page }) => {
+  // only uses large_metrics_archive — user_actions_archive is never referenced
+});
+```
+
+✔️ **Do:** load only what the suite needs:
+
+```ts
+test.beforeAll(async ({ esArchiver }) => {
+  await esArchiver.load('large_metrics_archive');
+});
+```
+:::::
 
 ### Keep cleanup in hooks [put-cleanup-code-in-hooks-not-in-the-test-body]
 
