@@ -8,16 +8,15 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
+import { buildGetTokenCallback, type OAuth2AuthCodeParams } from './build_get_token_callback';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -33,14 +32,6 @@ interface AxiosErrorWithRetry {
   config: InternalAxiosRequestConfig & { _retry?: boolean };
   response?: { status: number };
   message: string;
-}
-
-interface OAuth2AuthCodeParams {
-  clientId?: string;
-  clientSecret?: string;
-  tokenUrl?: string;
-  scope?: string;
-  useBasicAuth?: boolean;
 }
 
 async function handleOAuth401Error({
@@ -204,51 +195,13 @@ export const getAxiosInstanceWithAuth = ({
 
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
-        getToken: async (opts: GetTokenOpts) => {
-          // Use different token retrieval method based on auth type
-          if (authTypeId === 'oauth_authorization_code') {
-            // For authorization code flow, retrieve stored tokens from callback
-            if (!connectorTokenClient) {
-              throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
-            }
-            return await getOAuthAuthorizationCodeAccessToken({
-              connectorId,
-              logger,
-              configurationUtilities,
-              credentials: {
-                config: {
-                  clientId: opts.clientId,
-                  tokenUrl: opts.tokenUrl,
-                  ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
-                },
-                secrets: {
-                  clientSecret: opts.clientSecret,
-                },
-              },
-              connectorTokenClient,
-              scope: opts.scope,
-            });
-          }
-
-          // For client credentials flow, request new token each time
-          return await getOAuthClientCredentialsAccessToken({
-            connectorId,
-            logger,
-            tokenUrl: opts.tokenUrl,
-            oAuthScope: opts.scope,
-            configurationUtilities,
-            credentials: {
-              config: {
-                clientId: opts.clientId,
-                ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
-              },
-              secrets: {
-                clientSecret: opts.clientSecret,
-              },
-            },
-            connectorTokenClient,
-          });
-        },
+        getToken: buildGetTokenCallback({
+          authTypeId,
+          connectorId,
+          logger,
+          configurationUtilities,
+          connectorTokenClient,
+        }),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
         sslSettings: configurationUtilities.getSSLSettings(),

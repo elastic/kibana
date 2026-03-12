@@ -8,13 +8,13 @@
 import type { AxiosHeaderValue } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { McpClient } from '@kbn/mcp-client';
-import type { GetTokenOpts } from '@kbn/connector-specs';
 
 import type { AuthTypeRegistry } from '../auth_types';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
-import { buildCustomFetch } from './build_custom_fetch';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
+import { buildCustomFetch, type FetchLike } from './build_custom_fetch';
+import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
+import { buildGetTokenCallback, type OAuth2AuthCodeParams } from './build_get_token_callback';
 
 const MCP_CLIENT_VERSION = '0.0.1';
 
@@ -33,6 +33,74 @@ export interface CreateMcpClientFnOpts {
 }
 
 export type CreateMcpClientFn = (opts: CreateMcpClientFnOpts) => Promise<McpClient>;
+
+interface Build401RetryFetchOpts {
+  baseFetch: FetchLike;
+  authTypeId: string;
+  connectorId: string;
+  secrets: Record<string, unknown>;
+  connectorTokenClient?: ConnectorTokenClientContract;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}
+
+/**
+ * Wraps a base fetch with 401 retry logic for OAuth authorization code flow.
+ * Mirrors the Axios 401 interceptor in {@link getAxiosInstanceWithAuth}.
+ * For non-OAuth auth types, returns the base fetch unchanged (zero overhead).
+ */
+export function build401RetryFetch({
+  baseFetch,
+  authTypeId,
+  connectorId,
+  secrets,
+  connectorTokenClient,
+  logger,
+  configurationUtilities,
+}: Build401RetryFetchOpts): FetchLike {
+  if (authTypeId !== 'oauth_authorization_code' || !connectorTokenClient) {
+    return baseFetch;
+  }
+
+  return async (url: string | URL, init?: RequestInit): Promise<Response> => {
+    const response = await baseFetch(url, init);
+
+    if (response.status === 401) {
+      logger.debug(
+        `MCP client received 401 for connectorId ${connectorId}, attempting token refresh`
+      );
+
+      const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } =
+        secrets as OAuth2AuthCodeParams;
+
+      if (!clientId || !clientSecret || !tokenUrl) {
+        return response;
+      }
+
+      const freshToken = await getOAuthAuthorizationCodeAccessToken({
+        connectorId,
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: { clientId, tokenUrl, useBasicAuth },
+          secrets: { clientSecret },
+        },
+        connectorTokenClient,
+        scope,
+        forceRefresh: true,
+      });
+
+      if (freshToken) {
+        logger.debug(`Token refreshed for connectorId ${connectorId}, retrying MCP request`);
+        const headers = new Headers(init?.headers);
+        headers.set('Authorization', freshToken);
+        return baseFetch(url, { ...init, headers });
+      }
+    }
+
+    return response;
+  };
+}
 
 /**
  * Creates a factory function that produces configured, **unconnected** McpClient
@@ -67,25 +135,13 @@ export const getMcpClientFactory = ({
       const authContext = {
         getCustomHostSettings: (hostUrl: string) =>
           configurationUtilities.getCustomHostSettings(hostUrl),
-        getToken: async (opts: GetTokenOpts) => {
-          return await getOAuthClientCredentialsAccessToken({
-            connectorId,
-            logger,
-            tokenUrl: opts.tokenUrl,
-            oAuthScope: opts.scope,
-            configurationUtilities,
-            credentials: {
-              config: {
-                clientId: opts.clientId,
-                ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
-              },
-              secrets: {
-                clientSecret: opts.clientSecret,
-              },
-            },
-            connectorTokenClient,
-          });
-        },
+        getToken: buildGetTokenCallback({
+          authTypeId,
+          connectorId,
+          logger,
+          configurationUtilities,
+          connectorTokenClient,
+        }),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
         sslSettings: configurationUtilities.getSSLSettings(),
@@ -103,13 +159,22 @@ export const getMcpClientFactory = ({
       }
 
       const customFetch = buildCustomFetch(configurationUtilities, logger, url);
+      const fetchWithRetry = build401RetryFetch({
+        baseFetch: customFetch,
+        authTypeId,
+        connectorId,
+        secrets,
+        connectorTokenClient,
+        logger,
+        configurationUtilities,
+      });
 
       return new McpClient(
         logger,
         { name: `kibana-v2-${connectorId}`, version: MCP_CLIENT_VERSION, url },
         {
           headers,
-          fetch: customFetch,
+          fetch: fetchWithRetry,
         }
       );
     } catch (err) {

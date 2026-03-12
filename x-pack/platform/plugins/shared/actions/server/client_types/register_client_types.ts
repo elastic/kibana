@@ -34,7 +34,14 @@ const mcpClientType = (
   createMcpClient: CreateMcpClientFn
 ): RegisteredClientType<McpClient, McpClientTypeConfig> => ({
   id: 'mcp',
-  supportedAuthTypes: ['bearer', 'basic', 'api_key_header', 'none', 'oauth_client_credentials'],
+  supportedAuthTypes: [
+    'bearer',
+    'basic',
+    'api_key_header',
+    'none',
+    'oauth_client_credentials',
+    'oauth_authorization_code',
+  ],
   create: async (opts) => {
     const url = opts.config[opts.clientConfig.urlField] as string | undefined;
     if (!url) {
