@@ -12,48 +12,6 @@ Scout is built on Playwright, so the official [Playwright Best Practices](https:
 **New to Scout?** Start with our [Scout introduction page](../scout.md).
 :::::
 
-## Quick reference [quick-reference]
-
-**UI and API tests**
-
-| Question                                 | Section                                                                                                                |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| How should I **organize** my test files? | [Organize test suites by role and user flow](#organize-test-suites-by-role-and-user-flow)                              |
-| How should I **name** my tests?          | [Write descriptive test names](#write-descriptive-test-names)                                                          |
-| Where should **shared setup** go?        | [Move repeated one-time setup to a global setup hook](#move-repeated-one-time-setup-operations-to-a-global-setup-hook) |
-| Are my **archives** actually used?        | [Only load archives your tests actually use](#only-load-archives-your-tests-actually-use)                              |
-| Where should **cleanup code** go?        | [Put cleanup code in hooks, not in the test body](#put-cleanup-code-in-hooks-not-in-the-test-body)                     |
-| Where should **shared values** live?     | [Use constants for shared test values](#use-constants-for-shared-test-values)                                          |
-| What **permissions** should my test use? | [Test with minimal permissions](#test-with-minimal-permissions-avoid-admin-when-possible)                              |
-| How do I know if my test is **flaky**?   | [Run tests multiple times to catch flakiness](#use-the-flaky-test-runner-to-catch-flaky-tests-early)                   |
-
-**UI tests**
-
-| Question                                                             | Section                                                                                                 |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| What should I test in **UI tests** vs **API tests**?                 | [Focus UI tests on behavior, not data correctness](#focus-ui-tests-on-behavior-not-data-correctness)    |
-| Should my tests run in **parallel** or **sequentially**?             | [Run tests in parallel whenever possible](#run-tests-in-parallel-whenever-possible)                     |
-| Should I split into multiple `test()` blocks or use **`test.step`**? | [Use `test.step` for multi-step flows](#use-teststep-for-multi-step-flows)                              |
-| How should I set up **test data**?                                   | [Prefer Kibana APIs over UI for setup and teardown](#prefer-kibana-apis-over-ui-for-setup-and-teardown) |
-| Do I need to add explicit **waits** everywhere?                      | [Leverage Playwright auto-waiting](#leverage-playwright-auto-waiting)                                   |
-| How do I **wait for the UI** to be ready?                            | [Wait for UI updates after actions](#wait-for-ui-updates-when-the-next-action-requires-it)              |
-| How do I test **tables** and **complex components**?                 | [Wait for complex components to fully render](#wait-for-complex-components-to-fully-render)             |
-| What **locators** should I use?                                      | [Locate UI elements reliably](#locate-ui-elements-reliably)                                             |
-| Should I change Scout's default **timeouts**?                        | [Use Scout's default timeouts](#use-scouts-default-timeouts)                                            |
-| How do I write good **page objects**?                                | [Use existing page objects](#use-existing-page-objects-to-interact-with-the-kibana-ui)                  |
-| My test keeps failing — should I add **retries**?                    | [Don't use manual retry loops — fix the source code](#dont-use-manual-retry-loops)                      |
-| How do I skip **onboarding screens**?                                | [Skip onboarding flows with `addInitScript`](#skip-onboarding-flows-with-addinitscript)                 |
-| Should I **contribute** my page object to Scout?                     | [Contribute to Scout when possible](#contribute-to-scout-when-possible)                                 |
-
-**API tests**
-
-| Question                        | Section                                                                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Which **fixture** should I use? | [Validate endpoints with `apiClient`](#validate-endpoints-with-apiclient-for-readable-and-scoped-tests)                       |
-| What should I **assert**?       | [Don't just verify the status code, validate the response body](#dont-just-verify-the-status-code-validate-the-response-body) |
-
----
-
 ## UI & API tests [ui-and-api-tests]
 
 Best practices that apply to both UI and API tests.
