@@ -132,7 +132,7 @@ describe('convertDatatableColumnsToFieldSpecs', () => {
       },
     ];
     const result = convertDatatableColumnsToFieldSpecs(columns);
-    
+
     expect(result).toEqual({
       field1: expect.objectContaining({
         name: 'field1',
@@ -172,7 +172,7 @@ describe('convertDatatableColumnsToFieldSpecs', () => {
       },
     ];
     const result = convertDatatableColumnsToFieldSpecs(columns);
-    
+
     expect(Object.keys(result)).toHaveLength(1);
     expect(result.duplicate.type).toBe('number');
   });

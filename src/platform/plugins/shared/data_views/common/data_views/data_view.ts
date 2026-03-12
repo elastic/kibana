@@ -98,16 +98,16 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * @example
    * ```typescript
    * import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-   * 
+   *
    * const baseDataView = await dataViews.get('my-index-pattern');
    * const esqlColumns: DatatableColumn[] = [...]; // from ES|QL query response
-   * 
+   *
    * // Convert ES|QL columns to field specs
    * const fields: Record<string, FieldSpec> = {};
    * for (const column of esqlColumns) {
    *   fields[column.name] = convertDatatableColumnToDataViewFieldSpec(column);
    * }
-   * 
+   *
    * const clonedDataView = baseDataView.cloneWithFields(fields);
    * ```
    */
