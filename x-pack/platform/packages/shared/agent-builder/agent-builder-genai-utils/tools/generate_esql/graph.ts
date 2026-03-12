@@ -14,7 +14,12 @@ import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
-import { extractEsqlQueries, executeEsql, validateEsqlQuery, buildTimeRangeParams } from '../utils/esql';
+import {
+  extractEsqlQueries,
+  executeEsql,
+  validateEsqlQuery,
+  buildTimeRangeParams,
+} from '../utils/esql';
 import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
