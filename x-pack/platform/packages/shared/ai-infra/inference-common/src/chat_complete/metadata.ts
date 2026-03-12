@@ -31,6 +31,21 @@ export interface ChatCompleteAnonymizationTarget {
   targetId: string;
 }
 
+const CHAT_COMPLETE_ANONYMIZATION_TARGET_TYPES = new Set<
+  ChatCompleteAnonymizationTarget['targetType']
+>(['data_view', 'index_pattern', 'index']);
+
+export const isChatCompleteAnonymizationTargetType = (
+  value: unknown
+): value is ChatCompleteAnonymizationTarget['targetType'] => {
+  return (
+    typeof value === 'string' &&
+    CHAT_COMPLETE_ANONYMIZATION_TARGET_TYPES.has(
+      value as ChatCompleteAnonymizationTarget['targetType']
+    )
+  );
+};
+
 /**
  * Optional anonymization metadata consumers can pass so inference can resolve
  * field-based policy for a target.
