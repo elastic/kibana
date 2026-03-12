@@ -81,7 +81,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
       async (context, request, response) => {
         try {
           const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
