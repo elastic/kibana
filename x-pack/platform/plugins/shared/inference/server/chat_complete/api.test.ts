@@ -171,6 +171,22 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('response mode', () => {
+    const recoveringShardError = {
+      statusCode: 503,
+      meta: {
+        statusCode: 503,
+        body: {
+          error: {
+            type: 'illegal_index_shard_state_exception',
+            reason:
+              'CurrentState[RECOVERING] operations only allowed when shard state is one of [POST_RECOVERY, STARTED]',
+          },
+        },
+      },
+      message:
+        'no_shard_available_action_exception: CurrentState[RECOVERING] operations only allowed when shard state is one of [POST_RECOVERY, STARTED]',
+    };
+
     it('reuses carried replacementsId when found', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
@@ -192,6 +208,53 @@ describe('createChatCompleteApi', () => {
       expect(mockEsClient.update).toHaveBeenCalledTimes(1);
       expect(mockEsClient.index).toHaveBeenCalledTimes(0);
       expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
+    });
+
+    it('retries transient shard-recovery failures when fetching carried replacements', async () => {
+      mockEsClient.get.mockRejectedValueOnce(recoveringShardError);
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'existing-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.get.mock.calls.length).toBeGreaterThanOrEqual(2);
+      expect(mockEsClient.get.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ id: 'existing-replacements-id' })
+      );
+      expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
+    });
+
+    it('does not retry non-retryable replacements errors', async () => {
+      mockEsClient.get.mockRejectedValueOnce({
+        statusCode: 400,
+        meta: { statusCode: 400 },
+        message: 'bad request',
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            anonymization: {
+              replacementsId: 'existing-replacements-id',
+            },
+          },
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({ message: 'bad request' });
+
+      expect(mockEsClient.get).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(0);
     });
 
     it('reuses carried replacementsId by creating document when carried one is missing', async () => {
