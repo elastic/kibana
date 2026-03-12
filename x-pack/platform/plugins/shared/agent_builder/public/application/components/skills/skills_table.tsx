@@ -141,7 +141,7 @@ const useSkillsTableColumns = ({
 }: {
   onDelete: (skillId: string) => void;
 }): Array<EuiBasicTableColumn<PublicSkillSummary>> => {
-  const { manageTools } = useUiPrivileges();
+  const { manageSkills } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const handleSkillClick = useCallback(
@@ -199,10 +199,10 @@ const useSkillsTableColumns = ({
         width: '60px',
         align: 'right' as const,
         render: (skill: PublicSkillSummary) => (
-          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageTools} />
+          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageSkills} />
         ),
       },
     ],
-    [manageTools, handleSkillClick, onDelete]
+    [manageSkills, handleSkillClick, onDelete]
   );
 };
