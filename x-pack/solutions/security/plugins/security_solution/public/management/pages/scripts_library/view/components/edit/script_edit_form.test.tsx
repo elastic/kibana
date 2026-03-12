@@ -10,8 +10,8 @@ import userEvent from '@testing-library/user-event';
 import { act, fireEvent } from '@testing-library/react';
 import { EndpointScriptEditForm, type EndpointScriptEditFormProps } from './script_edit_form';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 
@@ -29,6 +29,7 @@ describe('EndpointScriptEditForm', () => {
 
     onChangeMock = jest.fn();
     defaultProps = {
+      isUploading: false,
       onChange: onChangeMock,
       'data-test-subj': 'test',
     };
@@ -46,7 +47,7 @@ describe('EndpointScriptEditForm', () => {
 
     expect(getByTestId('test')).toBeInTheDocument();
     const rows = renderResult.getAllByTestId(/test-.*-row/);
-    expect(rows.length).toBe(9);
+    expect(rows.length).toBe(10);
 
     // file and checkbox don't have labels
     expect(getByTestId('test-file-picker-row')).toBeInTheDocument();
@@ -57,10 +58,11 @@ describe('EndpointScriptEditForm', () => {
       .filter((label) => !!label);
 
     expect(visibleRowLabels).toEqual([
+      'File type',
+      'Path to executable file (only for archive files)',
       'Name',
       'Operating systems',
       'Types',
-      'Path to executable file (only for archive files)',
       'Description',
       'Instructions',
       'Examples',
