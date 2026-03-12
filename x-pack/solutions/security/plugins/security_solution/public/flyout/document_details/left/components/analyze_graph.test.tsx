@@ -66,6 +66,11 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
 const FLYOUT_KEY = 'securitySolution';
+const mockExperimentalFeatureFlags = (flags: Record<string, boolean>) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (flag: string) => flags[flag] ?? false
+  );
+};
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -114,7 +119,10 @@ describe('<AnalyzeGraph />', () => {
     mockUiSettingsGet.mockReturnValue(true);
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    mockExperimentalFeatureFlags({
+      newDataViewPickerEnabled: true,
+      newFlyoutSystemEnabled: false,
+    });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({
@@ -286,7 +294,10 @@ describe('<AnalyzeGraph />', () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      mockExperimentalFeatureFlags({
+        newDataViewPickerEnabled: false,
+        newFlyoutSystemEnabled: false,
+      });
     });
 
     it('should show loading spinner while sourcerer data view is loading', () => {
