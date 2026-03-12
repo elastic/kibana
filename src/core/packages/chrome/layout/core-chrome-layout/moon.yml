@@ -18,6 +18,9 @@ project:
   metadata:
     sourceRoot: src/core/packages/chrome/layout/core-chrome-layout
 dependsOn:
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-custom-branding-browser'
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-chrome-browser-internal'

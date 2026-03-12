@@ -19,7 +19,13 @@ project:
     sourceRoot: src/core/packages/chrome/browser-internal-types
 dependsOn:
   - '@kbn/core-chrome-browser'
-  - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-application-browser'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-custom-branding-common'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-mount-utils-browser'
+  - '@kbn/recently-accessed'
 tags:
   - shared-common
   - package
