@@ -939,6 +939,14 @@ export const QueryBarTopRow = React.memo(
                 numFilters={filterCount}
                 numActiveFilters={filterCount > 0 ? filterCount : undefined}
                 data-test-subj="unifiedFilterPanelToggle"
+                css={css({
+                  padding: 0,
+                  minWidth: 0,
+                  '&, & .euiFilterButton__text': {
+                    minWidth: 0,
+                    lineHeight: 1,
+                  },
+                })}
               >
                 <EuiIcon type="filter" />
               </EuiFilterButton>
