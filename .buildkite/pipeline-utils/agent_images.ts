@@ -39,10 +39,8 @@ const getFIPSImage = () => {
   }
 
   return {
-    provider: 'gcp',
+    ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
-    imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-    diskSizeGb: 105,
   };
 };
 
