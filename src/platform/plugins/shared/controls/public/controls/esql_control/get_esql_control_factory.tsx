@@ -10,11 +10,14 @@
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  ESQL_CONTROL,
+} from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import {
-  type PublishingSubject,
   apiHasPinnedPanels,
   initializeStateManager,
   initializeUnsavedChanges,
@@ -122,16 +125,11 @@ export const getESQLControlFactory = (): EmbeddableFactory<
       });
 
       const componentStaticState = {
-        single_select: state.single_select ?? true,
-        exclude: false,
-        exists_selected: false,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE, // this is spread just to satisfy types
+        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
         requestSize: 0,
-        sort: undefined,
-        run_past_timeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
         field_name: state.variable_name,
-        use_global_filters: false,
-        ignore_validations: false,
         data_view_id: '',
         blockingError: undefined,
         filtersLoading: false,
@@ -154,6 +152,8 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         isPinnable: true,
         uuid,
         setDataLoading,
+        // ...componentStaticStateManager.api,
+
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;
           if (singleSelect && key) {
@@ -171,8 +171,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
           }
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
-        ...componentStaticStateManager.api,
-        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
+        singleSelect$: selections.api.singleSelect$,
         invalidSelections$: selections.internalApi.invalidSelections$,
         deselectOption: (key?: string) => {
           const incompatibleSelections = selections.internalApi.invalidSelections$.value;

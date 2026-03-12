@@ -8,6 +8,7 @@
  */
 
 import type { PinnedControlState } from '@kbn/controls-schemas';
+import { DEFAULT_DASHBOARD_STATE } from '../../../../public/dashboard_api/default_dashboard_state';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
@@ -53,6 +54,7 @@ describe('transformDashboardOut', () => {
       title: 'my title',
     };
     expect(transformDashboardOut(input)).toEqual<DashboardState>({
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'my title',
     });
   });

@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_DASHBOARD_STATE } from '../../public/dashboard_api/default_dashboard_state';
 import { stripUnmappedKeys } from './scope_tooling';
 
 const mockGetTransforms = jest.fn();
@@ -33,6 +34,7 @@ describe('stripUnmappedKeys', () => {
       };
     });
     const dashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'my dashboard',
       panels: [
         {
@@ -75,6 +77,7 @@ describe('stripUnmappedKeys', () => {
 
   it('should drop unmapped panel types', () => {
     const dashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'my dashboard',
       panels: [
         {
@@ -115,6 +118,7 @@ describe('stripUnmappedKeys', () => {
       };
     });
     const dashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'my dashboard',
       panels: [
         {
@@ -154,6 +158,7 @@ describe('stripUnmappedKeys', () => {
       };
     });
     const dashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'my dashboard',
       panels: [
         {

@@ -115,6 +115,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       from: 'now-15m',
     },
     panels: [],
+    pinned_panels: [],
     ...overrides,
   };
 }

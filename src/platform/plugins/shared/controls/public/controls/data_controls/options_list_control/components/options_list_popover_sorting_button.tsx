@@ -21,7 +21,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
 import type { OptionsListSortingType } from '@kbn/controls-schemas';
 
 import { getCompatibleSortingTypes } from '../../../../../common/options_list/suggestions_sorting';
@@ -61,7 +60,7 @@ export const OptionsListPopoverSortingButton = ({
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
   const [sort, field] = useBatchedPublishingSubjects(componentApi.sort$, componentApi.field$);
 
-  const selectedSort = useMemo(() => sort ?? OPTIONS_LIST_DEFAULT_SORT, [sort]);
+  const selectedSort = useMemo(() => sort, [sort]);
 
   const [sortByOptions, setSortByOptions] = useState<SortByItem[]>(() => {
     return getCompatibleSortingTypes(field?.type).map((key) => {
@@ -132,7 +131,7 @@ export const OptionsListPopoverSortingButton = ({
                 isIconOnly
                 buttonSize="compressed"
                 options={sortOrderOptions}
-                idSelected={selectedSort.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction}
+                idSelected={selectedSort.direction}
                 legend={OptionsListStrings.editorAndPopover.getSortDirectionLegend()}
                 onChange={(value) => {
                   componentApi.setSort({

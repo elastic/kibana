@@ -90,24 +90,24 @@ export function initializeESQLControlManager(
   const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.available_options ?? []);
-  const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options ?? []);
+  const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
-  const singleSelect$ = new BehaviorSubject<boolean>(initialState.single_select ?? true);
-  const variableName$ = new BehaviorSubject<string>(initialState.variable_name ?? '');
+  const singleSelect$ = new BehaviorSubject<boolean>(initialState.single_select);
+  const variableName$ = new BehaviorSubject<string>(initialState.variable_name);
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
-    (initialState.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES
+    initialState.variable_type as ESQLVariableType
   );
   const controlType$ = new BehaviorSubject<EsqlControlType>(
-    (initialState.control_type as EsqlControlType) ?? ''
+    initialState.control_type as EsqlControlType
   );
-  const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query ?? '');
+  const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query);
   let valuesColumnType: string | undefined;
   const totalCardinality$ = new BehaviorSubject<number>(
     initialState.available_options?.length ?? 0
   );
 
   const searchString$ = new BehaviorSubject<string>('');
-  const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(
+  const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions>(
     initialState.available_options?.map((value) => ({ value })) ?? []
   );
 
@@ -335,7 +335,7 @@ export function initializeESQLControlManager(
       };
     },
     internalApi: {
-      selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
+      selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[]>,
       availableOptions$: displayedAvailableOptions$,
       totalCardinality$,
       setSelectedOptions,

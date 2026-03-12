@@ -8,6 +8,7 @@
  */
 
 import type { PinnedControlState } from '@kbn/controls-schemas';
+import { DEFAULT_DASHBOARD_STATE } from '../../../../public/dashboard_api/default_dashboard_state';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
@@ -101,6 +102,7 @@ describe('transformDashboardIn', () => {
 
   it('should not provide default values for optional properties', () => {
     const dashboardState: DashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'title',
     };
 
@@ -125,6 +127,7 @@ describe('transformDashboardIn', () => {
 
   it('should transform project_routing to attributes', () => {
     const dashboardState: DashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'title',
       project_routing: '_alias:_origin',
     };
@@ -136,6 +139,7 @@ describe('transformDashboardIn', () => {
 
   it('should not include projectRouting in attributes when it is undefined', () => {
     const dashboardState: DashboardState = {
+      ...DEFAULT_DASHBOARD_STATE,
       title: 'title',
     };
 

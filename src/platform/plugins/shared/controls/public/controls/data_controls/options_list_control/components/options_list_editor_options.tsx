@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
-import { DEFAULT_SEARCH_TECHNIQUE } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
@@ -76,7 +76,7 @@ export const OptionsListEditorOptions = ({
   );
 
   const [searchTechnique, setSearchTechnique] = useState<OptionsListSearchTechnique>(
-    initialState.search_technique ?? DEFAULT_SEARCH_TECHNIQUE
+    initialState.search_technique ?? DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique
   );
 
   const compatibleSearchTechniques = useMemo(

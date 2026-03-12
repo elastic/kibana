@@ -33,8 +33,8 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableInvalidSelectionsUnusedState &
   Pick<OptionsListComponentState, 'field_name'> & {
-    use_global_filters?: boolean;
-    ignore_validations?: boolean;
+    use_global_filters: boolean;
+    ignore_validations: boolean;
     data_view_id: string;
     blockingError?: Error;
     filtersLoading: boolean;

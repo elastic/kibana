@@ -13,6 +13,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 import type { DashboardCreateRequestBody, DashboardUpdateRequestBody } from './api';
+import { DEFAULT_DASHBOARD_STATE } from '../public/dashboard_api/default_dashboard_state';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
@@ -125,6 +126,7 @@ describe('DashboardPlugin', () => {
       mockCoreContext.savedObjects.client.create = jest.fn().mockResolvedValue(mockSavedObject);
 
       const createBody: DashboardCreateRequestBody = {
+        ...DEFAULT_DASHBOARD_STATE,
         title: 'Test Dashboard',
         description: 'Test Description',
       };
@@ -172,6 +174,7 @@ describe('DashboardPlugin', () => {
       mockCoreContext.savedObjects.client.update = jest.fn().mockResolvedValue(mockUpdatedObject);
 
       const updateBody: DashboardUpdateRequestBody = {
+        ...DEFAULT_DASHBOARD_STATE,
         title: 'Updated Dashboard',
         description: 'Updated Description',
       };

@@ -80,11 +80,10 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
+            ...DEFAULT_PINNED_CONTROL_STATE,
             uid: 'control1',
             type: 'optionsListControl',
             order: 0,
-            width: DEFAULT_PINNED_CONTROL_STATE.width,
-            grow: DEFAULT_PINNED_CONTROL_STATE.grow,
           }}
           parentApi={parentApi}
           setControlPanelRef={jest.fn()}
