@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,10 +25,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
+import type { DataStreamResponse, TaskStatus } from '@kbn/automatic-import-v2-plugin/common';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
 import { useStartServices } from '../../../../../hooks';
+
+import { ManageIntegrationActions } from './manage_integration_actions';
+import type { ReviewIntegrationDetails } from './manage_integration_actions';
 
 export interface CreatedIntegrationRow {
   integrationId: string;
@@ -38,10 +43,15 @@ export interface CreatedIntegrationRow {
   version?: string;
   createdBy: string;
   createdByProfileUid?: string;
-  status: string;
+  status: TaskStatus;
 }
 
-function getStatusDisplay(status: string): {
+const isIntegrationPackageReady = (item: CreatedIntegrationRow): boolean =>
+  item.totalDataStreamCount > 0 &&
+  item.successfulDataStreamCount === item.totalDataStreamCount &&
+  (item.status === 'completed' || item.status === 'approved');
+
+function getStatusDisplay(status: TaskStatus): {
   color: 'success' | 'danger' | 'default' | 'hollow';
   iconType?: string;
   label: string;
@@ -65,8 +75,16 @@ export const ManageIntegrationsTable: React.FC<{
   integrations: CreatedIntegrationRow[];
   isLoading: boolean;
   isError: boolean;
-}> = ({ integrations, isLoading, isError }) => {
-  const { application, userProfile: userProfileService } = useStartServices();
+  onRefetch: () => void;
+}> = ({ integrations, isLoading, isError, onRefetch }) => {
+  const { euiTheme } = useEuiTheme();
+  const {
+    application,
+    automaticImportVTwo,
+    http,
+    notifications,
+    userProfile: userProfileService,
+  } = useStartServices();
 
   const uniqueProfileUids = useMemo(() => {
     const uids = integrations
@@ -96,6 +114,142 @@ export const ManageIntegrationsTable: React.FC<{
     }
   );
 
+  const goToEditIntegration = useCallback(
+    (integrationId: string) => {
+      application.navigateToApp('automaticImportVTwo', {
+        path: `/edit/${integrationId}`,
+      });
+    },
+    [application]
+  );
+
+  const getEditIntegrationHref = useCallback(
+    (integrationId: string) =>
+      application.getUrlForApp('automaticImportVTwo', {
+        path: `/edit/${integrationId}`,
+      }),
+    [application]
+  );
+
+  const deleteIntegration = useCallback(
+    async (integrationId: string) => {
+      try {
+        await http.delete(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`,
+          { version: '1' }
+        );
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.deleteSuccessTitle',
+            { defaultMessage: 'Integration deleted' }
+          ),
+        });
+        onRefetch();
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.deleteErrorTitle', {
+            defaultMessage: 'Failed to delete integration',
+          }),
+        });
+        throw error;
+      }
+    },
+    [http, notifications, onRefetch]
+  );
+
+  const fetchIntegrationReviewDetails = useCallback(
+    async (integrationId: string): Promise<ReviewIntegrationDetails> => {
+      const response = await http.get<{
+        integrationResponse: {
+          title: string;
+          version?: string;
+          dataStreams: DataStreamResponse[];
+        };
+      }>(`/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`, {
+        version: '1',
+      });
+
+      const integrationResponse = response.integrationResponse;
+      return {
+        title: integrationResponse.title,
+        version: integrationResponse.version,
+        dataStreams: integrationResponse.dataStreams ?? [],
+      };
+    },
+    [http]
+  );
+
+  const downloadZipPackage = useCallback(
+    async (integrationId: string) => {
+      try {
+        const response = await http.get(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          {
+            version: '1',
+            headers: { Accept: 'application/zip' },
+            asResponse: true,
+          }
+        );
+        const contentDisposition = response.response?.headers?.get('content-disposition') ?? '';
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        const filename = filenameMatch?.[1] ?? `${integrationId}.zip`;
+
+        const blob = response.body as unknown as Blob;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.downloadZipErrorTitle',
+            { defaultMessage: 'Failed to download .zip package' }
+          ),
+        });
+      }
+    },
+    [http, notifications]
+  );
+
+  const approveAndDeployIntegration = useCallback(
+    async (integrationId: string, version: string) => {
+      try {
+        await http.post(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/approve`,
+          {
+            version: '1',
+            body: JSON.stringify({ version }),
+          }
+        );
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.approveSuccessTitle',
+            {
+              defaultMessage: 'Integration approved and ready to deploy',
+            }
+          ),
+        });
+        onRefetch();
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.approveErrorTitle',
+            {
+              defaultMessage: 'Failed to approve integration',
+            }
+          ),
+        });
+        throw error;
+      }
+    },
+    [http, notifications, onRefetch]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
       {
@@ -118,13 +272,7 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink
-                href={application.getUrlForApp('automaticImportVTwo', {
-                  path: `/edit/${item.integrationId}`,
-                })}
-              >
-                {title}
-              </EuiLink>
+              <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -133,7 +281,7 @@ export const ManageIntegrationsTable: React.FC<{
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.dataStreams"
-            defaultMessage="Data streams"
+            defaultMessage="Data Streams"
           />
         ),
         render: (item: CreatedIntegrationRow) => (
@@ -187,11 +335,14 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Status"
           />
         ),
-        render: (status: string) => {
+        render: (status: TaskStatus) => {
           const { color, iconType, label, isInProgress } = getStatusDisplay(status);
           if (isInProgress) {
             return (
-              <EuiBadge color={color}>
+              <EuiBadge
+                color={color}
+                style={{ backgroundColor: euiTheme.colors.backgroundLightText }}
+              >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="s" />
@@ -208,8 +359,85 @@ export const ManageIntegrationsTable: React.FC<{
           );
         },
       },
+      {
+        name: '',
+        render: (item: CreatedIntegrationRow) => {
+          if (isIntegrationPackageReady(item)) {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                isPackageReady={true}
+                inlineActionType="reviewApprove"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
+              />
+            );
+          }
+
+          if (item.status === 'failed' || item.status === 'cancelled') {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                isPackageReady={false}
+                inlineActionType="editIntegration"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
+              />
+            );
+          }
+
+          return null;
+        },
+      },
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.table.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '80px',
+        render: (item: CreatedIntegrationRow) => (
+          <ManageIntegrationActions
+            integration={item}
+            isPackageReady={isIntegrationPackageReady(item)}
+            onEdit={goToEditIntegration}
+            onDelete={deleteIntegration}
+            DataStreamResultsFlyoutComponent={
+              automaticImportVTwo?.components.DataStreamResultsFlyout
+            }
+            onFetchReviewDetails={fetchIntegrationReviewDetails}
+            onApproveAndDeploy={approveAndDeployIntegration}
+            onDownloadZip={downloadZipPackage}
+          />
+        ),
+      },
     ],
-    [application, userProfiles]
+    [
+      getEditIntegrationHref,
+      goToEditIntegration,
+      deleteIntegration,
+      fetchIntegrationReviewDetails,
+      approveAndDeployIntegration,
+      downloadZipPackage,
+      automaticImportVTwo?.components.DataStreamResultsFlyout,
+      euiTheme.colors.backgroundLightText,
+      userProfiles,
+    ]
   );
 
   if (isLoading) {

@@ -24,7 +24,7 @@ import {
   ConfigSchema,
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -168,6 +168,7 @@ export async function executor(
     logger,
     connectorUsageCollector,
     services,
+    signal,
   } = execOptions;
 
   const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
@@ -240,6 +241,11 @@ export async function executor(
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
+      ...(fetcher?.max_content_length != null && {
+        maxContentLength: fetcher.max_content_length,
+        maxBodyLength: fetcher.max_content_length,
+      }),
+      signal,
     })
   );
 

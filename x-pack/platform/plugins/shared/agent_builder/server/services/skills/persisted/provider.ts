@@ -40,8 +40,8 @@ export const createPersistedSkillProvider = ({
         throw e;
       }
     },
-    async list() {
-      const skills = await skillClient.list();
+    async list(options) {
+      const skills = await skillClient.list(options);
       return skills.map(convertPersistedSkill);
     },
     async create(createRequest) {

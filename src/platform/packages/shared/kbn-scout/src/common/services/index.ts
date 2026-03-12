@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getEsClient, getKbnClient } from './clients';
+export { getEsClient, getLinkedEsClient, getKbnClient } from './clients';
 export { createScoutConfig } from './config';
-export { getEsArchiver } from './es_archiver';
+export { getEsArchiver, getLinkedEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
 
