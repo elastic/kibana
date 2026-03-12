@@ -5,13 +5,31 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import type { TopNodesRequest } from '../../../../common/http_api/overview_api';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const createTopNodesQuery = (
   options: TopNodesRequest,
-  source: MetricsSourceConfiguration
+  source: MetricsSourceConfiguration,
+  schema?: DataSchemaFormat | null
+) => {
+  const effectiveSchema = schema ?? 'ecs';
+  const inventoryModel = findInventoryModel('host');
+  const nodeFilters = inventoryModel.nodeFilter?.({ schema: effectiveSchema }) ?? [];
+
+  if (effectiveSchema === 'semconv') {
+    return createSemconvTopNodesQuery(options, nodeFilters);
+  }
+  return createEcsTopNodesQuery(options, nodeFilters);
+};
+
+const createEcsTopNodesQuery = (
+  options: TopNodesRequest,
+  nodeFilters: estypes.QueryDslQueryContainer[]
 ) => {
   const nestedSearchFields: { [key: string]: string } = {
     rx: 'rx>bytes',
@@ -23,6 +41,7 @@ export const createTopNodesQuery = (
     : 'uptime';
   const sortField = sortByHost ? '_key' : metricsSortField;
   const sortDirection = options.sortDirection ?? 'asc';
+
   return {
     runtime_mappings: {
       rx_bytes_per_period: {
@@ -61,9 +80,7 @@ export const createTopNodesQuery = (
               },
             },
           },
-          {
-            match_phrase: { 'event.module': 'system' },
-          },
+          ...nodeFilters,
         ],
       },
     },
@@ -185,6 +202,134 @@ export const createTopNodesQuery = (
                       field: 'tx_bytes_per_period',
                     },
                   },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
+const createSemconvTopNodesQuery = (
+  options: TopNodesRequest,
+  nodeFilters: estypes.QueryDslQueryContainer[]
+) => {
+  const sortByHost = options.sort && options.sort === 'name';
+  const metricsSortField = options.sort || 'cpu';
+  const sortField = sortByHost ? '_key' : metricsSortField;
+  const sortDirection = options.sortDirection ?? 'asc';
+
+  return {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [TIMESTAMP_FIELD]: {
+                gte: options.timerange.from,
+                lte: options.timerange.to,
+                format: 'epoch_millis',
+              },
+            },
+          },
+          ...nodeFilters,
+        ],
+      },
+    },
+    aggs: {
+      nodes: {
+        terms: {
+          field: 'host.name',
+          size: options.size,
+          order: { [sortField]: sortDirection },
+        },
+        aggs: {
+          metadata: {
+            top_metrics: {
+              metrics: [
+                { field: 'host.os.platform' },
+                { field: 'host.name' },
+                { field: 'cloud.provider' },
+              ],
+              sort: { [TIMESTAMP_FIELD]: 'desc' },
+              size: 1,
+            },
+          },
+          cpu_idle: {
+            terms: {
+              field: 'state',
+              include: ['idle', 'wait'],
+            },
+            aggs: {
+              avg: {
+                avg: {
+                  field: 'system.cpu.utilization',
+                },
+              },
+            },
+          },
+          cpu_idle_total: {
+            sum_bucket: {
+              buckets_path: 'cpu_idle>avg',
+            },
+          },
+          cpu: {
+            bucket_script: {
+              buckets_path: {
+                cpuIdleTotal: 'cpu_idle_total',
+              },
+              script: '1 - params.cpuIdleTotal',
+              gap_policy: 'skip',
+            },
+          },
+          load: {
+            avg: {
+              field: 'system.cpu.load_average.15m',
+            },
+          },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: options.bucketSize,
+              extended_bounds: {
+                min: options.timerange.from,
+                max: options.timerange.to,
+              },
+            },
+            aggs: {
+              cpu_idle: {
+                terms: {
+                  field: 'state',
+                  include: ['idle', 'wait'],
+                },
+                aggs: {
+                  avg: {
+                    avg: {
+                      field: 'system.cpu.utilization',
+                    },
+                  },
+                },
+              },
+              cpu_idle_total: {
+                sum_bucket: {
+                  buckets_path: 'cpu_idle>avg',
+                },
+              },
+              cpu: {
+                bucket_script: {
+                  buckets_path: {
+                    cpuIdleTotal: 'cpu_idle_total',
+                  },
+                  script: '1 - params.cpuIdleTotal',
+                  gap_policy: 'skip',
+                },
+              },
+              load: {
+                avg: {
+                  field: 'system.cpu.load_average.15m',
                 },
               },
             },
