@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, EuiSelect, htmlIdGenerator } from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
@@ -181,39 +181,39 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               defaultMessage: 'Color by value',
             })}
           >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-                defaultMessage: 'Color by value',
-              })}
+            <EuiSelect
               data-test-subj="lnsDatatable_dynamicColoring_groups"
-              buttonSize="compressed"
               options={[
                 {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
+                  value: 'none',
+                  text: i18n.translate('xpack.lens.table.dynamicColoring.none', {
                     defaultMessage: 'None',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
                 },
                 {
-                  id: `${idPrefix}cell`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
+                  value: 'cell',
+                  text: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
                     defaultMessage: 'Cell',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
                 },
                 {
-                  id: `${idPrefix}text`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
+                  value: 'text',
+                  text: i18n.translate('xpack.lens.table.dynamicColoring.text', {
                     defaultMessage: 'Text',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
+                },
+                {
+                  value: 'badge',
+                  text: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
+                    defaultMessage: 'Badge',
+                  }),
                 },
               ]}
-              idSelected={`${idPrefix}${currentColorMode}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
+              compressed
+              fullWidth
+              value={currentColorMode}
+              onChange={(event) => {
+                const newMode = event.target.value as ColumnType['colorMode'];
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };

@@ -1364,8 +1364,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
-      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
+      await testSubjects.selectValue('lnsDatatable_dynamicColoring_groups', coloringType);
     },
 
     async openPalettePanel() {

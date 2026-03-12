@@ -272,6 +272,17 @@ describe('datatable cell renderer', () => {
       });
     });
 
+    it('should render badge when enabled', () => {
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      setCellProps.mockClear();
+      renderCellComponent(columnConfig, {});
+
+      expect(screen.getByText('formatted 123')).toBeInTheDocument();
+      expect(setCellProps).not.toHaveBeenCalled();
+    });
+
     it('should not color the cell when color function returns null', () => {
       setCellProps.mockClear();
       innerCellColorFnMock.mockReturnValueOnce(null);
