@@ -8,13 +8,13 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { Subscription } from 'rxjs';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import type { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
@@ -61,7 +61,7 @@ export class DashboardAgentPlugin
       });
     });
 
-    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe(api => {
+    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
       this.dashboardApi = api;
     });
 
