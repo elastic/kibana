@@ -25,10 +25,9 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   { defaultMessage: 'Enter a command' }
 );
 
-const ARIA_LABEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.inputCapture.ariaLabel',
-  { defaultMessage: 'Response actions console command input' }
-);
+const ARIA_LABEL_MESSAGE = i18n.translate('xpack.securitySolution.inputCapture.ariaLabel', {
+  defaultMessage: 'Response actions console command input',
+});
 
 const deSelectTextOnPage = () => {
   const selection = getSelection();
