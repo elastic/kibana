@@ -15,6 +15,10 @@ import type {
   RuleSavedObjectAttributes,
   NotificationPolicySavedObjectAttributes,
 } from '../../../saved_objects';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+} from '../../../saved_objects';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
@@ -365,13 +369,17 @@ describe('DispatcherService integration tests', () => {
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
     rulesSoService = new RulesSavedObjectService(
-      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
+      kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      }),
       undefined as unknown as SpacesPluginStart
     );
     npSoService = new NotificationPolicySavedObjectService(
-      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
+      kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+      }),
       undefined as unknown as SpacesPluginStart,
-      mockEncryptedSavedObjectsClient
+      undefined as unknown as EncryptedSavedObjectsClient
     );
 
     await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
