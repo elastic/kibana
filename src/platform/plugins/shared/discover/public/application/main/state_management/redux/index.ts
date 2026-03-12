@@ -33,7 +33,8 @@ export const internalStateActions = {
     internalStateSlice.actions,
     'setTabs',
     'setDefaultProfileAdHocDataViewIds',
-    'setAppState'
+    'setAppState',
+    'syncPreviousStateSnapshots'
   ),
   ...actions,
   syncLocallyPersistedTabState,

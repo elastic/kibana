@@ -104,6 +104,26 @@ const setPreviousStateSnapshotField = <TField extends DefaultProfileStateField>(
   snapshot[field] = value;
 };
 
+const syncPreviousStateSnapshots = (
+  tab: TabState,
+  profileId: string,
+  compareWithPreviousAppState: boolean
+) => {
+  const previousStateSnapshots = tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
+  const previousStateSnapshot = previousStateSnapshots[profileId] ?? {};
+
+  for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+    if (
+      !compareWithPreviousAppState ||
+      !isEqual(tab.previousAppState[field], tab.appState[field])
+    ) {
+      setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+    }
+  }
+
+  previousStateSnapshots[profileId] = previousStateSnapshot;
+};
+
 export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
@@ -264,18 +284,13 @@ export const internalStateSlice = createSlice({
         tab.appState = appState;
 
         if (!action.payload.isSystemTriggered) {
-          const previousStateSnapshots =
-            tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
-          const previousStateSnapshot = previousStateSnapshots[action.payload.profileId] ?? {};
-
-          for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
-            if (!isEqual(tab.previousAppState[field], tab.appState[field])) {
-              setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
-            }
-          }
-
-          previousStateSnapshots[action.payload.profileId] = previousStateSnapshot;
+          syncPreviousStateSnapshots(tab, action.payload.profileId, true);
         }
+      }),
+
+    syncPreviousStateSnapshots: (state, action: TabAction<{ profileId: string }>) =>
+      withTab(state, action.payload, (tab) => {
+        syncPreviousStateSnapshots(tab, action.payload.profileId, false);
       }),
 
     /**

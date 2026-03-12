@@ -84,6 +84,42 @@ describe('tab_state actions', () => {
     });
   });
 
+  describe('syncPreviousStateSnapshots', () => {
+    it('should sync previousStateSnapshotsByProfileId for the current profile when triggered separately', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            columns: ['message'],
+            hideChart: true,
+          },
+          isSystemTriggered: true,
+        })
+      );
+
+      expect(
+        Object.values(
+          selectTab(internalState.getState(), tabId).resetDefaultProfileState
+            .previousStateSnapshotsByProfileId
+        )
+      ).toContainEqual({});
+
+      internalState.dispatch(internalStateActions.syncPreviousStateSnapshots({ tabId }));
+
+      expect(
+        Object.values(
+          selectTab(internalState.getState(), tabId).resetDefaultProfileState
+            .previousStateSnapshotsByProfileId
+        )
+      ).toContainEqual({
+        columns: ['message'],
+        hideChart: true,
+      });
+    });
+  });
+
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, tabId } = await setup();
