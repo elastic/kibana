@@ -40,7 +40,6 @@ export const LENS_HEATMAP_GROUP_ID = {
   CELL: 'cell',
 } as const;
 
-export const HEATMAP_NAME = 'heatmap';
 export const HEATMAP_LEGEND_NAME = 'heatmap_legend';
 export const HEATMAP_GRID_NAME = 'heatmap_grid';
 
