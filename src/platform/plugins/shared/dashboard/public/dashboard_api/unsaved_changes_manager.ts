@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -38,7 +38,7 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
-  forcePublishOnReset$,
+  setState,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -48,7 +48,7 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  forcePublishOnReset$: Subject<void>;
+  setState: (state: DashboardState) => void;
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -58,7 +58,6 @@ export function initializeUnsavedChangesManager({
   internalApi: {
     getLastSavedState: () => DashboardState;
     onSave: (savedState: DashboardState) => void;
-    reinitialize: (state: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
@@ -99,25 +98,10 @@ export function initializeUnsavedChangesManager({
   const getLastSavedStateForChild = (childId: string) =>
     layoutManager.internalApi.getLastSavedStateForPanel(childId);
 
-  const applyStateToManagers = (
-    state: DashboardState,
-    resetLayout = () => layoutManager.internalApi.reset()
-  ) => {
-    resetLayout();
-    unifiedSearchManager.internalApi.reset(state);
-    projectRoutingManager?.internalApi.reset(state);
-    settingsManager.internalApi.reset(state);
-
-    // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
-    if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-      forcePublishOnReset$.next();
-    }
-  };
-
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        applyStateToManagers(lastSavedState$.value);
+        setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -132,8 +116,6 @@ export function initializeUnsavedChangesManager({
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
       },
-      reinitialize: (state: DashboardState) =>
-        applyStateToManagers(state, () => layoutManager.internalApi.reset(state)),
     },
   };
 }
