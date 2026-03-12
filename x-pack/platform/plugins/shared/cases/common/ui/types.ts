@@ -263,6 +263,7 @@ export type UpdateKey = keyof Pick<
   | 'assignees'
   | 'category'
   | 'customFields'
+  | 'extended_fields'
 >;
 
 export interface UpdateByKey {

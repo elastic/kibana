@@ -31,6 +31,7 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
       type: node.stepType,
       spaceId: '',
       with: node.configuration.with || {},
+      'max-step-size': node.configuration['max-step-size'],
     };
     super(dataSetStep, stepExecutionRuntime, undefined, workflowRuntime);
   }
