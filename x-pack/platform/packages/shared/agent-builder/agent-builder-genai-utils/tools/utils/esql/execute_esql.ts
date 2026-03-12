@@ -32,9 +32,7 @@ export const executeEsql = async ({
     query,
     drop_null_columns: true,
     allow_partial_results: true,
-    ...(params && params.length > 0
-      ? { params: params as unknown as FieldValue[] }
-      : {}),
+    ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
   });
   return {
     columns: response.columns,
