@@ -41,6 +41,7 @@
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "build": "node --no-experimental-require-module scripts/build --all-platforms",
     "build:apidocs": "node --no-experimental-require-module scripts/build_api_docs",
+    "build:lens-docs": "node scripts/capture_oas_snapshot --include-path /api/visualizations --no-serverless --update",
     "checkLicenses": "node --no-experimental-require-module scripts/check_licenses --dev",
     "debug": "node --no-experimental-require-module --nolazy --inspect scripts/kibana --dev",
     "debug-break": "node --no-experimental-require-module --nolazy --inspect-brk scripts/kibana --dev",

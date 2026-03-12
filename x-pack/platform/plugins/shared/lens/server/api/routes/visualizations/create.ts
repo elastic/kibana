@@ -8,7 +8,7 @@
 import { boomify, isBoom } from '@hapi/boom';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
@@ -25,7 +25,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const createRoute = router.post({
     path: `${LENS_VIS_API_PATH}/{id?}`,
-    access: 'internal', // to go public in 9.4
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Create Lens visualization',
     description: 'Create a new Lens visualization.',

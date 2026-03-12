@@ -7,7 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
+import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
@@ -18,7 +18,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
 ) => {
   const deleteRoute = router.delete({
     path: `${LENS_VIS_API_PATH}/{id}`,
-    access: 'internal', // to go public in 9.4
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Delete Lens visualization',
     description: 'Delete a Lens visualization by id.',
