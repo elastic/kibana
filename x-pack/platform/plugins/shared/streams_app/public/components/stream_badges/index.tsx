@@ -216,26 +216,39 @@ export function LifecycleBadge({
   return <DataRetentionTooltip>{badge}</DataRetentionTooltip>;
 }
 
+interface DiscoverBadgeButtonBaseProps {
+  hasDataStream?: boolean;
+  spellOut?: boolean;
+}
+
+interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
+  indexMode: IndicesIndexMode;
+}
+
+interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.QueryStream.Definition;
+  indexMode?: never;
+}
+
+type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
+
 export function DiscoverBadgeButton({
   stream,
   hasDataStream = false,
   spellOut = false,
   indexMode,
-}: {
-  stream: Streams.all.Definition;
-  hasDataStream?: boolean;
-  spellOut?: boolean;
-  indexMode?: IndicesIndexMode;
-}) {
+}: DiscoverBadgeButtonProps) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
+  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
   const { features } = useStreamsPrivileges();
   const esqlQuery = getDiscoverEsqlQuery({
     definition: stream,
-    indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
+    indexMode: isIngestStream ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
     useViews: features.wiredStreamViews.enabled,
   });
