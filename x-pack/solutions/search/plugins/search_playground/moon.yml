@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-playground'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-playground'
+  title: '@kbn/search-playground'
   description: Moon project for @kbn/search-playground
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/plugins/search_playground
+  sourceRoot: x-pack/solutions/search/plugins/search_playground
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'

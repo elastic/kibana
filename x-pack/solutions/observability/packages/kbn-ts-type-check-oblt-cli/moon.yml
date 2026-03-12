@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ts-type-check-oblt-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/observability-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ts-type-check-oblt-cli'
+  title: '@kbn/ts-type-check-oblt-cli'
   description: Moon project for @kbn/ts-type-check-oblt-cli
   channel: ''
   owner: '@elastic/observability-ui'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli
+  sourceRoot: x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
@@ -39,14 +38,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
