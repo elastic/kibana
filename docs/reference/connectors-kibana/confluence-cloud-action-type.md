@@ -70,4 +70,4 @@ To use the Confluence Cloud connector, you need an Atlassian API token:
 2. Go to **Security** > **API tokens** (or open [API token management](https://id.atlassian.com/manage-profile/security/api-tokens) directly).
 3. Select **Create API token**.
 4. Enter a label (for example, `Kibana Confluence connector`) and select **Create**.
-5. Copy the token and store it securely. Enter this value as the **API key** when configuring the connector in {{kib}}. The email address associated with your Atlassian account is used as the username for Basic authentication.
+5. Copy the token and store it securely. Enter this value as the **API token** when configuring the connector in {{kib}}. The email address associated with your Atlassian account is used as the username for Basic authentication.
