@@ -130,7 +130,7 @@ export const legendConfigFunction: LegendConfigFn = {
       help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {
         defaultMessage: 'Specifies the legend layout.',
       }),
-      options: [LegendLayout.Table, LegendLayout.List],
+      options: [LegendLayout.List],
       strict: true,
     },
   },

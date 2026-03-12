@@ -22,7 +22,12 @@ import {
 } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
-import { LegendLayout, type LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
+import {
+  LegendLayout,
+  getLegendLayout,
+  type LegendSize,
+  type XYLegendValue,
+} from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
@@ -355,7 +360,12 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   const isTableLayout = layout === undefined && shouldDisplayTable(legendStats);
   const showsLegendLayoutSetting =
     isLegendNotHidden && location !== 'inside' && isHorizontalLegend && Boolean(onLayoutChange);
-  const usesWidthLimitTruncation = location !== 'inside' && layout === LegendLayout.List;
+  const effectiveLayout = getLegendLayout({
+    isInside: location === 'inside',
+    position,
+    layout,
+  });
+  const usesWidthLimitTruncation = effectiveLayout === LegendLayout.List;
 
   const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
 

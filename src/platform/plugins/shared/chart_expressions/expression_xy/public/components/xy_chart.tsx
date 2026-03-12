@@ -54,6 +54,7 @@ import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  getLegendLayout,
   getAccessorByDimension,
   getColumnByAccessor,
   getOverridesFor,
@@ -847,7 +848,11 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
-              legendLayout={legend.layout}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
