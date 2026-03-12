@@ -43,14 +43,14 @@ const servers = {
   elasticsearch: {
     protocol: 'http',
     hostname: 'localhost',
-    port: process.env.TEST_ES_PORT ? parseInt(process.env.TEST_ES_PORT, 10) : 9220,
+    port: 9220,
     username: 'kibana_system',
     password: 'changeme',
   },
   kibana: {
     protocol: 'http',
     hostname: 'localhost',
-    port: process.env.TEST_KIBANA_PORT ? parseInt(process.env.TEST_KIBANA_PORT, 10) : 5620,
+    port: 5620,
     username: 'elastic',
     password: 'changeme',
   },
