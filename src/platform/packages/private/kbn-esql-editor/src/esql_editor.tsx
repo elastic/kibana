@@ -372,12 +372,17 @@ const ESQLEditorInternal = function ESQLEditor({
   const onPrettifyQuery = useCallback(() => {
     const qs = editorRef.current?.getValue();
     if (qs) {
-      const prettyCode = prettifyQuery(qs);
+      const editor = editorRef.current;
+      const charWidth =
+        editor?.getOption(monaco.editor.EditorOption.fontInfo).typicalHalfwidthCharacterWidth ?? 8;
+      const lineWidthChars =
+        measuredEditorWidth > 0 ? Math.floor(measuredEditorWidth / charWidth) : undefined;
+      const prettyCode = prettifyQuery(qs, lineWidthChars);
       if (qs !== prettyCode) {
         onQueryUpdate(prettyCode);
       }
     }
-  }, [onQueryUpdate]);
+  }, [onQueryUpdate, measuredEditorWidth]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editorRef?.current?.getSelection();
