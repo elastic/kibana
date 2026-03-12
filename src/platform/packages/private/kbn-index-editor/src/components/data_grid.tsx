@@ -8,6 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -162,7 +163,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       return props.dataView;
     }
 
-    return props.dataView.cloneAndUseEsqlColumnsAsFields(props.columns);
+    const fields = convertDatatableColumnsToFieldSpecs(props.columns);
+    return props.dataView.cloneWithFields(fields);
   }, [props.dataView, props.columns]);
 
   // We render an editable header for columns that are not saved in the index.

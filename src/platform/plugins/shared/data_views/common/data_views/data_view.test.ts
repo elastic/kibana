@@ -8,7 +8,6 @@
  */
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
@@ -814,22 +813,26 @@ describe('IndexPattern', () => {
     });
   });
 
-  describe('cloneAndUseEsqlColumnsAsFields', () => {
-    test('should create a new DataView with fields from ES|QL columns', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'field1',
+  describe('cloneWithFields', () => {
+    test('should create a new DataView with provided fields', () => {
+      const fields: Record<string, FieldSpec> = {
+        field1: {
           name: 'field1',
-          meta: { type: 'string', esType: 'keyword' },
+          type: 'string',
+          esTypes: ['keyword'],
+          searchable: true,
+          aggregatable: false,
         },
-        {
-          id: 'field2',
+        field2: {
           name: 'field2',
-          meta: { type: 'number', esType: 'long' },
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: false,
         },
-      ];
+      };
 
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+      const clonedDataView = indexPattern.cloneWithFields(fields);
 
       expect(clonedDataView).toBeInstanceOf(DataView);
       expect(clonedDataView.id).toEqual(indexPattern.id);
@@ -839,67 +842,6 @@ describe('IndexPattern', () => {
       expect(clonedDataView.fields.getByName('field2')).toBeDefined();
       expect(clonedDataView.fields.getByName('field1')?.type).toEqual('string');
       expect(clonedDataView.fields.getByName('field2')?.type).toEqual('number');
-    });
-
-    test('should mark computed columns correctly', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'regular_field',
-          name: 'regular_field',
-          meta: { type: 'string', esType: 'keyword' },
-          isComputedColumn: false,
-        },
-        {
-          id: 'computed_field',
-          name: 'computed_field',
-          meta: { type: 'number' },
-          isComputedColumn: true,
-        },
-      ];
-
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
-
-      expect(clonedDataView.fields.getByName('regular_field')?.isComputedColumn).toBe(false);
-      expect(clonedDataView.fields.getByName('computed_field')?.isComputedColumn).toBe(true);
-    });
-
-    test('should handle counter types correctly', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'counter_field',
-          name: 'counter_field',
-          meta: { type: 'number', esType: 'counter_long' },
-        },
-      ];
-
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
-
-      const field = clonedDataView.fields.getByName('counter_field');
-      expect(field).toBeDefined();
-      expect(field?.esTypes).toContain('long');
-      expect(field?.timeSeriesMetric).toEqual('counter');
-    });
-
-    test('should handle isNull flag', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'null_field',
-          name: 'null_field',
-          meta: { type: 'string' },
-          isNull: true,
-        },
-        {
-          id: 'non_null_field',
-          name: 'non_null_field',
-          meta: { type: 'string' },
-          isNull: false,
-        },
-      ];
-
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
-
-      expect(clonedDataView.fields.getByName('null_field')?.isNull).toBe(true);
-      expect(clonedDataView.fields.getByName('non_null_field')?.isNull).toBe(false);
     });
 
     test('should preserve metaFields and shortDotsEnable from original DataView', () => {
@@ -914,48 +856,33 @@ describe('IndexPattern', () => {
         metaFields: ['_source', '_id', '_index'],
       });
 
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'field1',
+      const fields: Record<string, FieldSpec> = {
+        field1: {
           name: 'field1',
-          meta: { type: 'string' },
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
         },
-      ];
+      };
 
-      const clonedDataView = dataView.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+      const clonedDataView = dataView.cloneWithFields(fields);
 
       expect(clonedDataView.metaFields).toEqual(['_source', '_id', '_index']);
       expect(clonedDataView.shortDotsEnable).toBe(true);
     });
 
-    test('should handle columns without esType', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'field_no_esType',
-          name: 'field_no_esType',
-          meta: { type: 'string' },
-        },
-      ];
-
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
-
-      const field = clonedDataView.fields.getByName('field_no_esType');
-      expect(field).toBeDefined();
-      expect(field?.type).toEqual('string');
-      expect(field?.esTypes).toBeUndefined();
-    });
-
     test('should not mutate the original DataView', () => {
       const originalFieldsLength = indexPattern.fields.length;
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'new_field',
+      const fields: Record<string, FieldSpec> = {
+        new_field: {
           name: 'new_field',
-          meta: { type: 'string' },
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
         },
-      ];
+      };
 
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+      const clonedDataView = indexPattern.cloneWithFields(fields);
 
       expect(indexPattern.fields.length).toEqual(originalFieldsLength);
       expect(clonedDataView.fields.length).toEqual(1);
@@ -963,17 +890,17 @@ describe('IndexPattern', () => {
     });
 
     test('should clone fieldFormats service correctly', () => {
-      const esqlColumns: DatatableColumn[] = [
-        {
-          id: 'field1',
+      const fields: Record<string, FieldSpec> = {
+        field1: {
           name: 'field1',
-          meta: { type: 'string' },
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
         },
-      ];
+      };
 
-      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+      const clonedDataView = indexPattern.cloneWithFields(fields);
 
-      // Verify that the cloned DataView can get field formatters
       const field = clonedDataView.fields.getByName('field1');
       expect(field).toBeDefined();
 

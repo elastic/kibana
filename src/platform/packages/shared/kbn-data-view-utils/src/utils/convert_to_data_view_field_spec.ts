@@ -46,3 +46,26 @@ export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColum
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
   };
 }
+
+/**
+ * Convert an array of datatable columns to a record of DataViewFieldSpecs
+ *
+ * @param columns - The datatable columns from ES|QL response
+ * @returns A record of FieldSpecs keyed by field name, ready to use with DataView.cloneWithFields()
+ *
+ * @example
+ * ```typescript
+ * const esqlColumns: DatatableColumn[] = [...];
+ * const fields = convertDatatableColumnsToFieldSpecs(esqlColumns);
+ * const enrichedDataView = baseDataView.cloneWithFields(fields);
+ * ```
+ */
+export function convertDatatableColumnsToFieldSpecs(
+  columns: DatatableColumn[]
+): Record<string, FieldSpec> {
+  const fields: Record<string, FieldSpec> = {};
+  for (const column of columns) {
+    fields[column.name] = convertDatatableColumnToDataViewFieldSpec(column);
+  }
+  return fields;
+}

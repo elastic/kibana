@@ -8,7 +8,10 @@
  */
 
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
+import {
+  convertDatatableColumnToDataViewFieldSpec,
+  convertDatatableColumnsToFieldSpecs,
+} from './convert_to_data_view_field_spec';
 
 describe('convertDatatableColumnToDataViewFieldSpec', () => {
   it('should return a DataViewField object for a counter column', () => {
@@ -105,5 +108,72 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result.isComputedColumn).toBe(false);
+  });
+});
+
+describe('convertDatatableColumnsToFieldSpecs', () => {
+  it('should convert multiple columns to a record of field specs', () => {
+    const columns = [
+      {
+        id: 'field1',
+        name: 'field1',
+        meta: {
+          esType: 'keyword',
+          type: 'string' as DatatableColumnType,
+        },
+      },
+      {
+        id: 'field2',
+        name: 'field2',
+        meta: {
+          esType: 'long',
+          type: 'number' as DatatableColumnType,
+        },
+      },
+    ];
+    const result = convertDatatableColumnsToFieldSpecs(columns);
+    
+    expect(result).toEqual({
+      field1: expect.objectContaining({
+        name: 'field1',
+        type: 'string',
+        esTypes: ['keyword'],
+      }),
+      field2: expect.objectContaining({
+        name: 'field2',
+        type: 'number',
+        esTypes: ['long'],
+      }),
+    });
+  });
+
+  it('should return an empty record for an empty array', () => {
+    const result = convertDatatableColumnsToFieldSpecs([]);
+    expect(result).toEqual({});
+  });
+
+  it('should handle columns with same name (last one wins)', () => {
+    const columns = [
+      {
+        id: 'field1',
+        name: 'duplicate',
+        meta: {
+          esType: 'keyword',
+          type: 'string' as DatatableColumnType,
+        },
+      },
+      {
+        id: 'field2',
+        name: 'duplicate',
+        meta: {
+          esType: 'long',
+          type: 'number' as DatatableColumnType,
+        },
+      },
+    ];
+    const result = convertDatatableColumnsToFieldSpecs(columns);
+    
+    expect(Object.keys(result)).toHaveLength(1);
+    expect(result.duplicate.type).toBe('number');
   });
 });

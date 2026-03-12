@@ -11,6 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
+import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -226,7 +227,8 @@ export function initializeFetch({
             // Create enriched DataView with ES|QL column fields if available
             let esqlDataView;
             if (result.esqlQueryColumns && result.esqlQueryColumns.length > 0) {
-              esqlDataView = dataView.cloneAndUseEsqlColumnsAsFields(result.esqlQueryColumns);
+              const fields = convertDatatableColumnsToFieldSpecs(result.esqlQueryColumns);
+              esqlDataView = dataView.cloneWithFields(fields);
             }
 
             return {

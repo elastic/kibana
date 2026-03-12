@@ -29,6 +29,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
@@ -68,7 +69,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       return props.dataView;
     }
 
-    return props.dataView.cloneAndUseEsqlColumnsAsFields(props.columns);
+    const fields = convertDatatableColumnsToFieldSpecs(props.columns);
+    return props.dataView.cloneWithFields(fields);
   }, [props.dataView, props.columns]);
 
   const onSetColumns = useCallback((columns: string[]) => {

@@ -12,8 +12,6 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { each, mapValues, pick, pickBy, reject } from 'lodash';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
@@ -83,61 +81,38 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
-   * Clones this DataView and uses ES|QL query columns as its fields.
+   * Clones this DataView and replaces its fields with the provided field specifications.
    *
-   * This creates a cloned DataView where all fields are replaced with fields from the ES|QL
-   * query response. This is useful for ES|QL mode where:
-   * - Computed fields may not exist in the original index pattern
-   * - Type overrides may be applied (e.g., treating a number field as a keyword)
-   * - Only a subset of fields from the original index are selected in the query
+   * This creates a new DataView instance with the same configuration (title, timeFieldName, etc.)
+   * but with a completely different set of fields. This is useful for scenarios like ES|QL mode
+   * where the query result columns may differ from the original index pattern fields.
    *
    * The cloned DataView reuses configuration from this DataView:
    * - metaFields: Taken directly from this DataView (e.g., _source, _id)
    * - shortDotsEnable: Taken directly from this DataView
+   * - fieldFormats: Taken directly from this DataView
    *
-   * @param esqlQueryColumns - The columns returned from the ES|QL query response
-   * @returns A new DataView instance with fields derived from esqlQueryColumns
+   * @param fields - A record of field specifications keyed by field name
+   * @returns A new DataView instance with the provided fields
    *
    * @example
    * ```typescript
+   * import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+   * 
    * const baseDataView = await dataViews.get('my-index-pattern');
-   * const esqlQueryColumns: DatatableColumn[] = [
-   *   { id: 'message', name: 'message', meta: { type: 'string', esType: 'keyword' } },
-   *   { id: 'computed', name: 'computed', meta: { type: 'number' }, isComputedColumn: true }
-   * ];
-   *
-   * const enrichedDataView = baseDataView.cloneAndUseEsqlColumnsAsFields(esqlQueryColumns);
-   * // enrichedDataView.fields now contains only 'message' and 'computed'
+   * const esqlColumns: DatatableColumn[] = [...]; // from ES|QL query response
+   * 
+   * // Convert ES|QL columns to field specs
+   * const fields: Record<string, FieldSpec> = {};
+   * for (const column of esqlColumns) {
+   *   fields[column.name] = convertDatatableColumnToDataViewFieldSpec(column);
+   * }
+   * 
+   * const clonedDataView = baseDataView.cloneWithFields(fields);
    * ```
    */
-  public cloneAndUseEsqlColumnsAsFields(esqlQueryColumns: DatatableColumn[]): DataView {
+  public cloneWithFields(fields: Record<string, FieldSpec>): DataView {
     const baseSpec = this.toSpec(false);
-
-    // Convert ES|QL columns to field specs
-    const fields: Record<string, FieldSpec> = {};
-    for (const column of esqlQueryColumns) {
-      let esType = column.meta?.esType;
-      let timeSeriesMetric: MappingTimeSeriesMetricType | undefined;
-
-      // Handle counter types: 'counter_integer', 'counter_long', 'counter_double'...
-      if (esType?.startsWith('counter_')) {
-        esType = esType?.replace('counter_', '');
-        timeSeriesMetric = 'counter';
-      }
-
-      const fieldSpec: FieldSpec = {
-        name: column.name,
-        type: column.meta?.type ?? 'unknown',
-        esTypes: esType ? [esType] : undefined,
-        searchable: true,
-        aggregatable: false,
-        isNull: Boolean(column?.isNull),
-        isComputedColumn: Boolean(column?.isComputedColumn),
-        ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
-      };
-
-      fields[column.name] = fieldSpec;
-    }
 
     const enrichedSpec: DataViewSpec = {
       ...baseSpec,

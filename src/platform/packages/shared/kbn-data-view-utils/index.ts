@@ -8,7 +8,9 @@
  */
 
 export * from './src/constants';
-export { convertDatatableColumnToDataViewFieldSpec } from './src/utils/convert_to_data_view_field_spec';
+export {
+  convertDatatableColumnToDataViewFieldSpec,
+  convertDatatableColumnsToFieldSpecs,
+} from './src/utils/convert_to_data_view_field_spec';
 export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
 export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';
-export { createEnrichedEsqlDataViewSpec } from './src/utils/create_enriched_esql_data_view_spec';

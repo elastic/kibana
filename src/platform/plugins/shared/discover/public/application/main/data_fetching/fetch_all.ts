@@ -10,6 +10,7 @@
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
+import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -190,7 +191,8 @@ export function fetchAll(
         // Create enriched DataView with ES|QL column fields if available
         let esqlDataView;
         if (esqlQueryColumns && esqlQueryColumns.length > 0) {
-          esqlDataView = dataView.cloneAndUseEsqlColumnsAsFields(esqlQueryColumns);
+          const fields = convertDatatableColumnsToFieldSpecs(esqlQueryColumns);
+          esqlDataView = dataView.cloneWithFields(fields);
         }
 
         dataSubjects.documents$.next({
