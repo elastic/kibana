@@ -8,7 +8,8 @@
 import { v4, v7 } from 'uuid';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { HEALTH_DATA_STREAM_NAME } from '../../../../common/constants';
+/** Matches @kbn/slo-plugin common/constants HEALTH_DATA_STREAM_NAME */
+const HEALTH_DATA_STREAM_NAME = '.slo-observability.health-v3.6';
 import { test } from '../fixtures';
 
 /** Exceeds scan results panel PAGE_SIZE (25) so pagination controls appear */
@@ -90,8 +91,12 @@ test.describe(
         const resultsTable = page.getByTestId('healthScanResultsTable');
         await expect(resultsTable).toBeVisible({ timeout: 15000 });
         await expect(page.getByText(`Showing 1-25 of ${PROBLEMATIC_COUNT}`)).toBeVisible();
-        await expect(resultsTable.getByRole('link', { name: /Problematic SLO 1/ })).toBeVisible();
-        await expect(resultsTable.getByRole('link', { name: /Problematic SLO 25/ })).toBeVisible();
+        await expect(
+          resultsTable.getByRole('link', { name: /Problematic SLO 1(?!\d)/ })
+        ).toBeVisible();
+        await expect(
+          resultsTable.getByRole('link', { name: /Problematic SLO 25(?!\d)/ })
+        ).toBeVisible();
       });
 
       await test.step('Previous button is disabled on first page', async () => {
@@ -105,8 +110,12 @@ test.describe(
         await expect(
           page.getByText(`Showing 26-${PROBLEMATIC_COUNT} of ${PROBLEMATIC_COUNT}`)
         ).toBeVisible();
-        await expect(resultsTable.getByRole('link', { name: /Problematic SLO 26/ })).toBeVisible();
-        await expect(resultsTable.getByRole('link', { name: /Problematic SLO 30/ })).toBeVisible();
+        await expect(
+          resultsTable.getByRole('link', { name: /Problematic SLO 26(?!\d)/ })
+        ).toBeVisible();
+        await expect(
+          resultsTable.getByRole('link', { name: /Problematic SLO 30(?!\d)/ })
+        ).toBeVisible();
       });
 
       await test.step('Next button is disabled on last page', async () => {
@@ -117,7 +126,9 @@ test.describe(
         await pageObjects.slo.clickPreviousPage();
         const resultsTable = page.getByTestId('healthScanResultsTable');
         await expect(page.getByText(`Showing 1-25 of ${PROBLEMATIC_COUNT}`)).toBeVisible();
-        await expect(resultsTable.getByRole('link', { name: /Problematic SLO 1/ })).toBeVisible();
+        await expect(
+          resultsTable.getByRole('link', { name: /Problematic SLO 1(?!\d)/ })
+        ).toBeVisible();
       });
     });
   }
