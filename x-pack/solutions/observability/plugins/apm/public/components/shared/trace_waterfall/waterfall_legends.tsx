@@ -29,13 +29,19 @@ const LEGEND_LABELS = {
   }),
 };
 export function WaterfallLegends({ serviceName, legends, type }: Props) {
+  console.log('===> serviceName', serviceName);
+  console.log('===> legends', legends);
+  console.log('===> type', type);
+
   const displayedLegends = legends.filter((legend) => legend.type === type);
 
-  // default to serviceName if value is empty, e.g. for transactions (which don't
-  // have span.type or span.subtype)
+  console.log('===> displayedLegends', displayedLegends);
+
   const legendsWithFallbackLabel = displayedLegends.map((legend) => {
-    return { ...legend, value: !legend.value ? serviceName : legend.value };
+    return { ...legend, value: legend.value || serviceName };
   });
+
+  console.log('===> legendsWithFallbackLabel', legendsWithFallbackLabel);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" wrap>

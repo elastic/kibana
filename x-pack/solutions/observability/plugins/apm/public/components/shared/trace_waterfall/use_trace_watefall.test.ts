@@ -608,16 +608,22 @@ describe('getColorByType', () => {
     expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
   });
 
-  it('returns color by type if only one service is present', () => {
+  it('returns color by type if only one service is present and types have values', () => {
     const legends = getLegends(traceItems.slice(3));
 
     expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
   });
 
-  it('defaults to color by type if no legends provided', () => {
+  it('returns color by service name if only one service is present and types are empty', () => {
+    const legends = getLegends(traceItems.slice(0, 1));
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
+  });
+
+  it('defaults to color by service name if no legends provided', () => {
     const legends = getLegends([]);
 
-    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
   });
 });
 
