@@ -217,7 +217,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  await setupUpgradeManagedPackagePolicies(soClient, esClient);
+  await setupUpgradeManagedPackagePolicies(soClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');

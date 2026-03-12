@@ -616,7 +616,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
