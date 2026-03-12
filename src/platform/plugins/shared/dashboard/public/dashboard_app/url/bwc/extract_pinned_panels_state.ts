@@ -183,7 +183,8 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    pinned_panels: standardizedPinnedPanels.length || hasExplicitPinnedPanels
+    pinned_panels:
+      standardizedPinnedPanels.length || hasExplicitPinnedPanels
         ? standardizedPinnedPanels
         : undefined,
   };
