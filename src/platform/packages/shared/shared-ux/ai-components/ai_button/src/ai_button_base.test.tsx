@@ -27,7 +27,7 @@ jest.mock('./svg_ai_gradient_defs', () => ({
 const defaultSvgGradient = {
   gradientId: 'test-gradient',
   iconGradientCss: undefined,
-  stops: { startColor: '#000', endColor: '#fff', startOffsetPercent: 0, endOffsetPercent: 100 },
+  colors: { startColor: '#000', endColor: '#fff' },
 };
 
 beforeEach(() => {
@@ -42,22 +42,18 @@ describe('<AiButtonBase />', () => {
 
     expect(screen.getByText('AI Assistant')).toBeInTheDocument();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: false, variant: 'base' })
+      expect.objectContaining({ variant: 'base' })
     );
-    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: false, variant: 'base' })
-    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith({ variant: 'base' });
   });
 
   it('accent variant renders EuiButton with fill', () => {
     render(<AiButtonBase variant="accent">AI Assistant</AiButtonBase>);
 
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: true, variant: 'accent' })
+      expect.objectContaining({ variant: 'accent' })
     );
-    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: true, variant: 'accent' })
-    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith({ variant: 'accent' });
   });
 
   it('empty variant uses EuiButtonEmpty', () => {
@@ -65,14 +61,12 @@ describe('<AiButtonBase />', () => {
 
     expect(container.querySelector('.euiButtonEmpty')).toBeTruthy();
     expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: false, variant: 'empty' })
+      expect.objectContaining({ variant: 'empty' })
     );
-    expect(mockUseSvgAiGradient).toHaveBeenCalledWith(
-      expect.objectContaining({ isFilled: false, variant: 'empty' })
-    );
+    expect(mockUseSvgAiGradient).toHaveBeenCalledWith({ variant: 'empty' });
   });
 
-  it('iconOnly variant renders EuiButtonIcon', () => {
+  it('iconOnly variant renders EuiButtonIcon and passes iconOnly to hooks', () => {
     const { container } = render(
       <AiButtonBase
         variant="base"
@@ -84,33 +78,31 @@ describe('<AiButtonBase />', () => {
     );
 
     expect(container.querySelector('button.euiButtonIcon')).toBeInTheDocument();
+    expect(mockUseAiButtonGradientStyles).toHaveBeenCalledWith({
+      variant: 'base',
+      iconOnly: true,
+    });
   });
 
-  it.each([{ iconGradientCss: css``, iconGradientCssState: 'set' }])(
-    'renders gradient defs only when iconGradientCss is $iconGradientCssState',
-    ({ iconGradientCss }) => {
-      mockUseSvgAiGradient.mockReturnValue({
-        ...defaultSvgGradient,
-        iconGradientCss,
-      });
+  it('renders gradient defs only when iconGradientCss is set', () => {
+    mockUseSvgAiGradient.mockReturnValue({
+      ...defaultSvgGradient,
+      iconGradientCss: css``,
+    });
 
-      render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
+    render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
 
-      expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
-    }
-  );
+    expect(screen.getByTestId('svg-ai-gradient-defs')).toBeInTheDocument();
+  });
 
-  it.each([{ iconGradientCss: undefined, iconGradientCssState: 'unset' }])(
-    "doesn't render gradient defs when iconGradientCss is $iconGradientCssState",
-    ({ iconGradientCss }) => {
-      mockUseSvgAiGradient.mockReturnValue({
-        ...defaultSvgGradient,
-        iconGradientCss,
-      });
+  it("doesn't render gradient defs when iconGradientCss is undefined", () => {
+    mockUseSvgAiGradient.mockReturnValue({
+      ...defaultSvgGradient,
+      iconGradientCss: undefined,
+    });
 
-      render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
+    render(<AiButtonBase variant="base">Gradient check</AiButtonBase>);
 
-      expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
-    }
-  );
+    expect(screen.queryByTestId('svg-ai-gradient-defs')).not.toBeInTheDocument();
+  });
 });

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/streams-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/streams-plugin'
+  title: '@kbn/streams-plugin'
   description: Moon project for @kbn/streams-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/streams
+  sourceRoot: x-pack/platform/plugins/shared/streams
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-pricing-common'
@@ -57,7 +56,6 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/ai-tools'
-  - '@kbn/logging-mocks'
   - '@kbn/grok-heuristics'
   - '@kbn/dissect-heuristics'
   - '@kbn/streamlang'
@@ -74,13 +72,13 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/console-plugin'
   - '@kbn/actions-plugin'
-  - '@kbn/apm-utils'
   - '@kbn/alerting-types'
   - '@kbn/core-http-common'
   - '@kbn/scout'
   - '@kbn/esql-language'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
@@ -98,14 +96,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

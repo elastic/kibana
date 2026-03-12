@@ -38,7 +38,13 @@ export const bulkCreate = async (
   casesClient: CasesClient
 ): Promise<BulkCreateCasesResponse> => {
   const {
-    services: { caseService, userActionService, licensingService, notificationService },
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      notificationService,
+      templatesService,
+    },
     user,
     logger,
     authorization: auth,
@@ -133,6 +139,22 @@ export const bulkCreate = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
       await notificationService.bulkNotifyAssignees(assigneesPerCase);
     }
+
+    const templateIds = [
+      ...new Set(
+        casesSOs.map((c) => c.attributes.template?.id).filter((id): id is string => id != null)
+      ),
+    ];
+
+    await Promise.allSettled(
+      templateIds.map(async (templateId) => {
+        try {
+          await templatesService.incrementUsageStats(templateId);
+        } catch (error) {
+          logger.warn(`Failed to update template usage stats for template ${templateId}: ${error}`);
+        }
+      })
+    );
 
     return decodeOrThrow(BulkCreateCasesResponseRt)({ cases: res });
   } catch (error) {
