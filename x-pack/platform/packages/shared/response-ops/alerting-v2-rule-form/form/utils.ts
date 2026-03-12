@@ -10,7 +10,7 @@ import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 
 type TimeUnit = 's' | 'm' | 'h' | 'd';
 export const POSITIVE_INTEGER_REGEX = /^[1-9][0-9]*$/;
-export const INVALID_NUMBER_KEYS = ['-', '+', '.', 'e', 'E'];
+export const INVALID_NUMBER_KEYS = ['-', '+', ',', '.', 'e', 'E'];
 
 const TIME_UNITS: Record<TimeUnit, string> = {
   s: i18n.translate('xpack.alertingV2.ruleForm.timeUnits.seconds', {
