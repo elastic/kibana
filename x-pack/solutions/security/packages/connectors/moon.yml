@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-connectors'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting-investigations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-connectors'
+  title: '@kbn/security-solution-connectors'
   description: Moon project for @kbn/security-solution-connectors
   channel: ''
   owner: '@elastic/security-threat-hunting-investigations'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/connectors
+  sourceRoot: x-pack/solutions/security/packages/connectors
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/ai-assistant-connector-selector-action'
@@ -37,14 +36,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
