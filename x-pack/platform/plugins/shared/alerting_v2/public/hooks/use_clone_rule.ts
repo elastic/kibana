@@ -16,9 +16,9 @@ export function useCloneRule() {
   const notifications = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation(
-    ['cloneRule'],
-    (rule: RuleApiResponse) => {
+  return useMutation({
+    mutationKey: ['cloneRule'],
+    mutationFn: (rule: RuleApiResponse) => {
       const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = rule;
       return rulesApi.createRule({
         ...rest,
@@ -28,22 +28,20 @@ export function useCloneRule() {
         },
       });
     },
-    {
-      onError: (error) => {
-        notifications?.toasts.addError(error as Error, {
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneError', {
-            defaultMessage: 'Unable to clone rule',
-          }),
-        });
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneSuccess', {
-            defaultMessage: 'Rule cloned',
-          }),
-        });
-      },
-    }
-  );
+    onError: (error) => {
+      notifications?.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneError', {
+          defaultMessage: 'Unable to clone rule',
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
+      notifications?.toasts.addSuccess({
+        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleCloneSuccess', {
+          defaultMessage: 'Rule cloned',
+        }),
+      });
+    },
+  });
 }

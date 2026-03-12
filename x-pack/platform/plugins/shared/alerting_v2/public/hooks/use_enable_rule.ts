@@ -16,28 +16,24 @@ export function useEnableRule() {
   const notifications = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation(
-    ['enableRule'],
-    ({ id }: { id: string }) => {
-      return rulesApi.enableRule(id);
+  return useMutation({
+    mutationKey: ['enableRule'],
+    mutationFn: ({ id }: { id: string }) => rulesApi.enableRule(id),
+    onError: (error) => {
+      notifications?.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableError', {
+          defaultMessage: 'Unable to enable rule',
+        }),
+      });
     },
-    {
-      onError: (error) => {
-        notifications?.toasts.addError(error as Error, {
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableError', {
-            defaultMessage: 'Unable to enable rule',
-          }),
-        });
-      },
-      onSuccess: (_data, { id }) => {
-        queryClient.invalidateQueries({ queryKey: ruleKeys.detail(id), exact: false });
-        queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableSuccess', {
-            defaultMessage: 'Rule enabled',
-          }),
-        });
-      },
-    }
-  );
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ruleKeys.detail(id), exact: false });
+      queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
+      notifications?.toasts.addSuccess({
+        title: i18n.translate('xpack.alertingV2.ruleDetails.ruleEnableSuccess', {
+          defaultMessage: 'Rule enabled',
+        }),
+      });
+    },
+  });
 }
