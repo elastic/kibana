@@ -15,15 +15,13 @@ export const STATUS_LABELS: Record<
   [LocationHealthStatusValue.MissingPackagePolicy]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingPackagePolicy',
     {
-      defaultMessage:
-        'The Fleet package policy for this monitor/location pair does not exist.',
+      defaultMessage: 'The Fleet package policy for this monitor/location pair does not exist.',
     }
   ),
   [LocationHealthStatusValue.MissingAgentPolicy]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingAgentPolicy',
     {
-      defaultMessage:
-        'The agent policy referenced by this private location no longer exists.',
+      defaultMessage: 'The agent policy referenced by this private location no longer exists.',
     }
   ),
   [LocationHealthStatusValue.AgentPolicyMismatch]: i18n.translate(
@@ -36,8 +34,7 @@ export const STATUS_LABELS: Record<
   [LocationHealthStatusValue.MissingLocation]: i18n.translate(
     'xpack.synthetics.monitorHealth.status.missingLocation',
     {
-      defaultMessage:
-        'The monitor references a private location that no longer exists.',
+      defaultMessage: 'The monitor references a private location that no longer exists.',
     }
   ),
   [LocationHealthStatusValue.PackageNotInstalled]: i18n.translate(

@@ -35,14 +35,13 @@ const STATUS_REASONS: Record<
     'The package policy exists but is attached to a different agent policy than expected.',
   [LocationHealthStatusValue.MissingLocation]:
     'The monitor references a private location that no longer exists.',
-  [LocationHealthStatusValue.PackageNotInstalled]:
-    'The synthetics Fleet package is not installed.',
+  [LocationHealthStatusValue.PackageNotInstalled]: 'The synthetics Fleet package is not installed.',
 };
 
-type FoundMonitor = {
+interface FoundMonitor {
   id: string;
   so: SavedObject<EncryptedSyntheticsMonitorAttributes>;
-};
+}
 
 export class MonitorIntegrationHealthApi {
   constructor(
@@ -133,8 +132,9 @@ export class MonitorIntegrationHealthApi {
         }
 
         const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
-        const attachedPolicyIds =
-          existingPackagePolicy.policy_ids ?? [existingPackagePolicy.policy_id];
+        const attachedPolicyIds = existingPackagePolicy.policy_ids ?? [
+          existingPackagePolicy.policy_id,
+        ];
         if (!attachedPolicyIds.includes(expectedAgentPolicyId)) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
@@ -155,9 +155,7 @@ export class MonitorIntegrationHealthApi {
       return {
         configId: so.id,
         monitorName: so.attributes[ConfigKey.NAME],
-        isUnhealthy: locationStatuses.some(
-          (s) => s.status !== LocationHealthStatusValue.Healthy
-        ),
+        isUnhealthy: locationStatuses.some((s) => s.status !== LocationHealthStatusValue.Healthy),
         locations: locationStatuses,
       };
     });

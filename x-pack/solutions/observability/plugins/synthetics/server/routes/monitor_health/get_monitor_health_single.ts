@@ -19,8 +19,9 @@ export const getMonitorHealthRoute: SyntheticsRestApiRouteFactory = () => ({
   },
   handler: async (routeContext) => {
     const { monitorId } = routeContext.request.params;
-    const { monitors, errors } =
-      await routeContext.monitorIntegrationHealthApi.getHealth([monitorId]);
+    const { monitors, errors } = await routeContext.monitorIntegrationHealthApi.getHealth([
+      monitorId,
+    ]);
 
     if (monitors.length === 0) {
       const error = errors.find((e) => e.configId === monitorId);

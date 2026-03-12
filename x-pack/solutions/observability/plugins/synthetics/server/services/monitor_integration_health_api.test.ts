@@ -61,10 +61,7 @@ const createPrivateLocation = (
   isServiceManaged: false,
 });
 
-const createPackagePolicy = (
-  policyId: string,
-  agentPolicyIds: string[]
-): PackagePolicy =>
+const createPackagePolicy = (policyId: string, agentPolicyIds: string[]): PackagePolicy =>
   ({
     id: policyId,
     policy_ids: agentPolicyIds,
@@ -80,13 +77,12 @@ const buildApi = (overrides: {
 
   const fleetAgentPolicyGetByIds =
     overrides.fleetAgentPolicyGetByIds ??
-    jest.fn().mockImplementation(async (_soClient: any, ids: string[]) =>
-      ids.map((id) => ({ id }))
-    );
+    jest
+      .fn()
+      .mockImplementation(async (_soClient: any, ids: string[]) => ids.map((id) => ({ id })));
 
   const fleetGetInstallation =
-    overrides.fleetGetInstallation ??
-    jest.fn().mockResolvedValue({ install_status: 'installed' });
+    overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
 
   const server = {
     coreStart: {
@@ -180,9 +176,7 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
-      expect(result.errors).toEqual([
-        { configId: 'mon-1', error: 'Failed to fetch monitor' },
-      ]);
+      expect(result.errors).toEqual([{ configId: 'mon-1', error: 'Failed to fetch monitor' }]);
     });
   });
 
@@ -433,9 +427,7 @@ describe('MonitorIntegrationHealthApi', () => {
       const fleetGetByIDs = jest
         .fn()
         .mockResolvedValue([createPackagePolicy(expectedPolicyId1, ['existing-agent'])]);
-      const fleetAgentPolicyGetByIds = jest
-        .fn()
-        .mockResolvedValue([{ id: 'existing-agent' }]);
+      const fleetAgentPolicyGetByIds = jest.fn().mockResolvedValue([{ id: 'existing-agent' }]);
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
@@ -528,15 +520,14 @@ describe('MonitorIntegrationHealthApi', () => {
 
       mockedGetPrivateLocations.mockResolvedValue([privateLoc1, privateLoc2]);
 
-      const fleetGetByIDs = jest.fn().mockResolvedValue([
-        createPackagePolicy(`mon-1-loc-1-${SPACE_ID}`, ['agent-1']),
-        createPackagePolicy(`mon-2-loc-1-${SPACE_ID}`, ['agent-1']),
-      ]);
-
-      const getMock = jest
+      const fleetGetByIDs = jest
         .fn()
-        .mockResolvedValueOnce(so1)
-        .mockResolvedValueOnce(so2);
+        .mockResolvedValue([
+          createPackagePolicy(`mon-1-loc-1-${SPACE_ID}`, ['agent-1']),
+          createPackagePolicy(`mon-2-loc-1-${SPACE_ID}`, ['agent-1']),
+        ]);
+
+      const getMock = jest.fn().mockResolvedValueOnce(so1).mockResolvedValueOnce(so2);
 
       const api = buildApi({
         monitorConfigRepository: { get: getMock },

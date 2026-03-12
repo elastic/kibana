@@ -139,11 +139,7 @@ export const PrivateLocationsTable = ({
           name: RESET_MONITORS_LABEL,
           description: RESET_MONITORS_LABEL,
           render: (item: ListItem) => {
-            return (
-              <ResetLocationMonitors
-                locationId={item.id}
-              />
-            );
+            return <ResetLocationMonitors locationId={item.id} />;
           },
           isPrimary: false,
           'data-test-subj': 'action-reset',
