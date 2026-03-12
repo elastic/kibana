@@ -554,8 +554,8 @@ describe('updateRuleDataSchema', () => {
 
     const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
     expect(nullArtifacts).toMatchObject({ artifacts: null });
-    
-    expect(nullArtifacts.artifacts).toBeNull();
+  });
+
   it('accepts an enabled field set to true', () => {
     const result = updateRuleDataSchema.parse({ enabled: true });
     expect(result).toEqual({ enabled: true });
