@@ -62,10 +62,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const getPackagePoliciesForMonitor = async (
       monitorId: string,
-      locationId: string,
-      spaceId = 'default'
+      locationId: string
     ): Promise<PackagePolicy | undefined> => {
-      const policyId = `${monitorId}-${locationId}-${spaceId}`;
+      const policyId = `${monitorId}-${locationId}`;
       const apiResponse = await supertestWithAuth.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
       );
@@ -123,17 +122,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const mon1 = await saveMonitor(httpMonitorJson as MonitorFields);
         const mon2 = await saveMonitor(httpMonitorJson as MonitorFields);
         try {
-          const policy1Before = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
-          const policy2Before = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
-          expect(policy1Before).to.not.be(undefined);
-          expect(policy2Before).to.not.be(undefined);
+          let revision1Before = 0;
+          let revision2Before = 0;
+          await retry.try(async () => {
+            const policy1Before = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
+            const policy2Before = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
+            expect(policy1Before).to.not.be(undefined);
+            expect(policy2Before).to.not.be(undefined);
+            revision1Before = policy1Before!.revision;
+            revision2Before = policy2Before!.revision;
+          });
 
           await bulkResetMonitors([mon1.id, mon2.id]);
 
-          const policy1After = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
-          const policy2After = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
-          expect(policy1After!.revision).to.be.greaterThan(policy1Before!.revision);
-          expect(policy2After!.revision).to.be.greaterThan(policy2Before!.revision);
+          await retry.try(async () => {
+            const policy1After = await getPackagePoliciesForMonitor(mon1.id, testPolicyId);
+            const policy2After = await getPackagePoliciesForMonitor(mon2.id, testPolicyId);
+            expect(policy1After!.revision).to.be.greaterThan(revision1Before);
+            expect(policy2After!.revision).to.be.greaterThan(revision2Before);
+          });
         } finally {
           await monitorTestService.deleteMonitor(editorUser, mon1.id, 200, 'default');
           await monitorTestService.deleteMonitor(editorUser, mon2.id, 200, 'default');
@@ -144,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const mon1 = await saveMonitor(httpMonitorJson as MonitorFields);
         const mon2 = await saveMonitor(httpMonitorJson as MonitorFields);
         try {
-          const policyId = `${mon1.id}-${testPolicyId}-default`;
+          const policyId = `${mon1.id}-${testPolicyId}`;
           await deletePackagePolicyDirectly(policyId);
 
           await retry.try(async () => {
