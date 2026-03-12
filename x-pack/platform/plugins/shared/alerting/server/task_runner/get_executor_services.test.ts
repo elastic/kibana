@@ -30,7 +30,7 @@ jest.mock('../lib/wrap_async_search_client', () => ({
   wrapAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn(), getMetrics: jest.fn() }),
 }));
 
-const projectRouting: SpaceNPRERouting = { projectRouting: 'space' };
+const projectRouting: SpaceNPRERouting = { projectRouting: 'space-npre' };
 
 function createMockContext(): jest.Mocked<TaskRunnerContext> {
   const elasticsearch = elasticsearchServiceMock.createInternalStart();

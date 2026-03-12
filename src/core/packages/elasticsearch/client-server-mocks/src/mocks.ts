@@ -9,12 +9,7 @@
 
 import type { Client, TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
-import type {
-  ElasticsearchClient,
-  ICustomClusterClient,
-  ScopeableRequest,
-  AsScopedOptions,
-} from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
 import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -325,9 +320,7 @@ const createScopedClusterClientMock = () => {
 
 export interface ClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
-  asScoped: jest.MockedFunction<
-    (request: ScopeableRequest, opts?: AsScopedOptions) => ScopedClusterClientMock
-  >;
+  asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
 const createClusterClientMock = () => {

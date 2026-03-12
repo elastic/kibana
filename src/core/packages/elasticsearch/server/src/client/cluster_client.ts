@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from './client';
 import type { ScopeableRequest, ScopeableUrlRequest } from './types';
 import type { IScopedClusterClient } from './scoped_cluster_client';
@@ -152,19 +151,6 @@ export interface IClusterClient {
     request: ScopeableRequest,
     opts?: OriginOnlyRouting | AllProjectsRouting
   ): IScopedClusterClient;
-  /**
-   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
-   * forwarding the request's authentication headers to Elasticsearch.
-   *
-   * In CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`
-   * is injected into outgoing requests. See {@link AsScopedOptions} for details.
-   *
-   * @param request - The incoming {@link KibanaRequest | request} whose credentials are used
-   *   to authenticate Elasticsearch calls.
-   * @param opts - Optional {@link AsScopedOptions | options} to configure CPS routing behavior.
-   *   Defaults to `'origin-only'` when not specified.
-   */
-  asScoped(request: KibanaRequest, opts?: AsScopedOptions): IScopedClusterClient;
 }
 
 /**

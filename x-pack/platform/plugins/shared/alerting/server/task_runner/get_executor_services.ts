@@ -55,9 +55,9 @@ export interface ExecutorServices {
   ) => AsyncSearchClient<T>;
 }
 
-// Default project routing for rules when CPS is enabled is 'space'
+// Default project routing for rules when CPS is enabled is 'space-npre'
 // If there is no default routing defined for the space, it falls back to 'all' when CPS is enabled
-const PROJECT_ROUTING_FOR_RULES = 'space';
+const PROJECT_ROUTING_FOR_RULES = 'space-npre';
 const projectRouting: SpaceNPRERouting = {
   projectRouting: PROJECT_ROUTING_FOR_RULES,
 };

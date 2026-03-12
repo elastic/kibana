@@ -140,15 +140,15 @@ describe('Search service', () => {
         expect(asScopedSpy).toHaveBeenCalledWith(request);
       });
 
-      it('calls elasticsearch.client.asScoped with request and projectRouting: "space" when opts.projectRouting is "space"', () => {
+      it('calls elasticsearch.client.asScoped with request and projectRouting: "space-npre" when opts.projectRouting is "space-npre"', () => {
         const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
         asScopedSpy.mockClear();
 
         const request = { url: new URL('https://kibana/s/my-space') } as any;
-        searchPluginStart.asScoped(request, { projectRouting: 'space' });
+        searchPluginStart.asScoped(request, { projectRouting: 'space-npre' });
 
         expect(asScopedSpy).toHaveBeenCalledTimes(1);
-        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'space-npre' });
       });
 
       it('calls elasticsearch.client.asScoped with request and projectRouting: "all" when opts.projectRouting is "all"', () => {
