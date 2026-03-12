@@ -70,7 +70,7 @@ export const createMockEsClient = () => {
       explainLifecycle: jest.fn(),
     },
     indices: {
-      get: jest.fn(),
+      exists: jest.fn(),
     },
     security: {
       hasPrivileges: jest.fn(),
@@ -167,7 +167,7 @@ export const setupPointInTime = (
 ) => {
   mockEsClient.openPointInTime.mockResolvedValue({ id: pitId });
   mockEsClient.closePointInTime.mockResolvedValue({});
-  mockEsClient.indices.get.mockResolvedValue({ 'test-index': {} });
+  mockEsClient.indices.exists.mockResolvedValue(true);
   mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true });
 };
 
