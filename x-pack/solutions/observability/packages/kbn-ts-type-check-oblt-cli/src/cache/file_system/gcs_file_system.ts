@@ -170,7 +170,7 @@ export class GcsFileSystem extends AbstractFileSystem {
       stopBar();
 
       const elapsed = Date.now() - start;
-      const totalSize = contentLength ?? bytesReceived;
+      const totalSize = contentLength ?? 0;
 
       const speedLabel =
         totalSize && elapsed > 0

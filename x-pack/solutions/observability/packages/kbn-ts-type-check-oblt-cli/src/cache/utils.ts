@@ -14,12 +14,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import globby from 'globby';
 import { asyncForEachWithLimit } from '@kbn/std';
-import {
-  CACHE_IGNORE_GLOBS,
-  TYPES_DIRECTORY_GLOB,
-  TYPE_CHECK_CONFIG_GLOB,
-} from './constants';
-export type { ArchiveMetadata } from './archive/file_system/types';
+import { CACHE_IGNORE_GLOBS, TYPES_DIRECTORY_GLOB, TYPE_CHECK_CONFIG_GLOB } from './constants';
+export type { ArchiveMetadata } from './file_system/types';
 
 export const getPullRequestNumber = (): string | undefined => {
   const value = process.env.BUILDKITE_PULL_REQUEST ?? '';
@@ -107,7 +103,6 @@ export async function readMainBranchCommitShas(limit: number, remote?: string): 
 export function isCiEnvironment() {
   return (process.env.CI ?? '').toLowerCase() === 'true';
 }
-
 
 export function buildCandidateShaList(currentSha: string | undefined, history: string[]): string[] {
   const uniqueShas = new Set<string>();
