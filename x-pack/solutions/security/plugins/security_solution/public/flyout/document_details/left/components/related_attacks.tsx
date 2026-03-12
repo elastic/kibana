@@ -70,6 +70,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
           />
         ),
         truncateText: true,
+        width: '100px',
         render: (value?: unknown) => String(value ?? ''),
       },
       {
@@ -82,6 +83,7 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({ attackIds, scope
         ),
         truncateText: true,
         preserveArray: true,
+        width: '100px',
         render: (value: unknown) => (Array.isArray(value) ? value.length : ''),
       },
     ],
