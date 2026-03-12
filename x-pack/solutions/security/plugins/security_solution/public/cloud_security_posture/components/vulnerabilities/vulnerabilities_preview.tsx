@@ -80,9 +80,7 @@ export const VulnerabilitiesPreview = ({
       ? euidApi.buildGenericEntityFlyoutPreviewQuery
       : null;
   const { data } = useVulnerabilitiesPreview({
-    query: buildPreviewQuery
-      ? buildPreviewQuery(entityIdentifiers)
-      : { bool: { filter: [] } },
+    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
     sort: [],
     enabled: !!buildPreviewQuery,
     pageSize: 1,

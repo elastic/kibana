@@ -62,7 +62,9 @@ const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
  */
 const buildTimelineFiltersFromEntityIdentifiers = (
   entityIdentifiers: EntityIdentifiers,
-  api: { buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[] } | null
+  api: {
+    buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[];
+  } | null
 ): Filter[] => {
   if (!api) return [];
   const esFilters = api.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);

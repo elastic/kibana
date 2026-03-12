@@ -14,11 +14,17 @@ export interface EntityStoreEuidApi {
   euid: {
     getEuidFromObject: (entityType: string, doc: unknown) => string | undefined;
     getEuidPainlessEvaluation: (entityType: string) => string;
-    getEuidPainlessRuntimeMapping: (entityType: string) => { type: 'keyword'; script: { source: string } };
+    getEuidPainlessRuntimeMapping: (entityType: string) => {
+      type: 'keyword';
+      script: { source: string };
+    };
     getEuidDslFilterBasedOnDocument: (entityType: string, doc: unknown) => unknown;
     getEuidDslDocumentsContainsIdFilter: (entityType: string) => unknown;
     getEuidSourceFields: (entityType: string) => IdentitySourceFields;
-    getEntityIdentifiersFromDocument: (entityType: string, doc: unknown) => Record<string, string> | undefined;
+    getEntityIdentifiersFromDocument: (
+      entityType: string,
+      doc: unknown
+    ) => Record<string, string> | undefined;
   };
   buildEntityFiltersFromEntityIdentifiers: (
     entityIdentifiers: Record<string, string>
@@ -32,9 +38,7 @@ export interface EntityStoreEuidApi {
 
 const EntityStoreEuidApiContext = createContext<EntityStoreEuidApi | null>(null);
 
-export function EntityStoreEuidApiProvider({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export function EntityStoreEuidApiProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [api, setApi] = useState<EntityStoreEuidApi | null>(null);
 
   useEffect(() => {
@@ -54,9 +58,7 @@ export function EntityStoreEuidApiProvider({
   }, []);
 
   return (
-    <EntityStoreEuidApiContext.Provider value={api}>
-      {children}
-    </EntityStoreEuidApiContext.Provider>
+    <EntityStoreEuidApiContext.Provider value={api}>{children}</EntityStoreEuidApiContext.Provider>
   );
 }
 

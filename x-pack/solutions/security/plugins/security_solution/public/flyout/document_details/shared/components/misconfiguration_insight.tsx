@@ -73,9 +73,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
       ? euidApi.buildGenericEntityFlyoutPreviewQuery
       : null;
   const { data } = useMisconfigurationPreview({
-    query: buildPreviewQuery
-      ? buildPreviewQuery(entityIdentifiers)
-      : { bool: { filter: [] } },
+    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
     sort: [],
     enabled: !!buildPreviewQuery,
     pageSize: 1,
