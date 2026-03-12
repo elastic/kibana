@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
+import { type HttpStart } from '@kbn/core-http-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type {

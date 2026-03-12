@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
@@ -32,7 +33,7 @@ export const markdownClient = {
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
-    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${id}`, {
+    return coreServices.http.delete(buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }), {
       version: MARKDOWN_API_VERSION,
     });
   },
