@@ -36,10 +36,6 @@ import { getConnectorById } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
-import {
-  shouldLogAnonymizationDebug,
-  stringifyForLogs,
-} from './chat_complete/anonymization/debug_logging';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -122,7 +118,6 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
-    const isAnonymizationDebugLoggingEnabled = shouldLogAnonymizationDebug();
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
 
     if (anonymizationEnabled) {
@@ -156,28 +151,7 @@ export class InferencePlugin
       await policyService.ensureGlobalProfile(namespace);
       const globalProfile = await policyService.getGlobalProfile(namespace);
       if (!globalProfile) {
-        if (isAnonymizationDebugLoggingEnabled) {
-          this.logger.debug(
-            `[inference.anonymization.profile] namespace=${namespace} global_profile=none source=policy_service`
-          );
-        }
         return [];
-      }
-
-      if (isAnonymizationDebugLoggingEnabled) {
-        const enabledRegexRules = globalProfile.rules.regexRules.filter((rule) => rule.enabled);
-        const enabledNerRules = globalProfile.rules.nerRules.filter((rule) => rule.enabled);
-        this.logger.debug(
-          `[inference.anonymization.profile] namespace=${namespace} global_profile_id=${
-            globalProfile.id
-          } global_profile_name=${globalProfile.name} enabled_regex_rules=${
-            enabledRegexRules.length
-          } enabled_ner_rules=${enabledNerRules.length} regex_entity_classes=${stringifyForLogs(
-            enabledRegexRules.map((rule) => rule.entityClass)
-          )} ner_allowed_entity_classes=${stringifyForLogs(
-            enabledNerRules.flatMap((rule) => rule.allowedEntityClasses)
-          )}`
-        );
       }
 
       const regexRules: AnonymizationRule[] = globalProfile.rules.regexRules.map((rule) => ({
@@ -221,32 +195,12 @@ export class InferencePlugin
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!anonymizationEnabled || !policyService || !target) {
-              if (isAnonymizationDebugLoggingEnabled) {
-                this.logger.debug(
-                  `[inference.anonymization.policy] namespace=${namespace} target=${
-                    target ? stringifyForLogs(target) : 'none'
-                  } effective_policy_entries=0 reason=no_target_or_policy_service`
-                );
-              }
               return undefined;
             }
-            const effectivePolicy = await policyService.resolveEffectivePolicy(namespace, {
+            return policyService.resolveEffectivePolicy(namespace, {
               type: target.targetType,
               id: target.targetId,
             });
-            if (isAnonymizationDebugLoggingEnabled) {
-              const anonymizeFields = Object.entries(effectivePolicy)
-                .filter(([, policy]) => policy.action === 'anonymize')
-                .map(([field]) => field);
-              this.logger.debug(
-                `[inference.anonymization.policy] namespace=${namespace} target=${stringifyForLogs(
-                  target
-                )} effective_policy_entries=${
-                  Object.keys(effectivePolicy).length
-                } anonymize_fields=${stringifyForLogs(anonymizeFields)}`
-              );
-            }
-            return effectivePolicy;
           },
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
