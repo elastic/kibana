@@ -19,7 +19,7 @@ import {
   type ToolSelection,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { hasVisibilityAccessOverrideFromRequest, getUserFromRequest } from '../../../utils';
+import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentCreateRequest,
   AgentDeleteRequest,
@@ -34,6 +34,7 @@ import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
   hasReadAccess,
@@ -46,6 +47,7 @@ export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinition>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
+  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
@@ -74,7 +76,7 @@ export const createClient = async ({
     security,
     esClient: scopedClient.asCurrentUser,
   });
-  const hasVisibilityAccessOverride = await hasVisibilityAccessOverrideFromRequest({
+  const isAdmin = await isAdminFromRequest({
     esClient: scopedClient.asCurrentUser,
   });
   const esClient = scopedClient.asInternalUser;
@@ -83,7 +85,7 @@ export const createClient = async ({
   return new AgentClientImpl({
     storage,
     user,
-    hasVisibilityAccessOverride,
+    isAdmin,
     request,
     space,
     toolsService,
@@ -97,14 +99,14 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
-  private readonly hasVisibilityAccessOverride: boolean;
+  private readonly isAdmin: boolean;
   private readonly logger: Logger;
 
   constructor({
     storage,
     toolsService,
     user,
-    hasVisibilityAccessOverride,
+    isAdmin,
     request,
     space,
     logger,
@@ -112,7 +114,7 @@ class AgentClientImpl implements AgentClient {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
-    hasVisibilityAccessOverride: boolean;
+    isAdmin: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -121,7 +123,7 @@ class AgentClientImpl implements AgentClient {
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
-    this.hasVisibilityAccessOverride = hasVisibilityAccessOverride;
+    this.isAdmin = isAdmin;
     this.space = space;
     this.logger = logger;
   }
@@ -165,7 +167,7 @@ class AgentClientImpl implements AgentClient {
 
   async list(options: AgentListOptions = {}): Promise<PersistedAgentDefinition[]> {
     const filters = [createSpaceDslFilter(this.space)];
-    if (!this.hasVisibilityAccessOverride) {
+    if (!this.isAdmin) {
       filters.push(buildVisibilityReadFilter({ user: this.user }));
     }
 
@@ -212,6 +214,32 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
+  async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+    // Intentionally skipping access checks when ensuring an agent exists
+    const defaultAgent = await this._get(profile.id);
+    if (defaultAgent) {
+      return fromEs(defaultAgent);
+    }
+
+    const now = new Date();
+    const documentId = `${this.space}_${profile.id}`;
+    const attributes = createRequestToEs({
+      profile,
+      space: this.space,
+      creationDate: now,
+      user: {
+        username: SYSTEM_USER_ID,
+      },
+    });
+
+    await this.storage.getClient().index({
+      id: documentId,
+      document: attributes,
+    });
+
+    return this.get(profile.id);
+  }
+
   async update(
     agentId: string,
     profileUpdate: AgentUpdateRequest
@@ -224,7 +252,7 @@ class AgentClientImpl implements AgentClient {
         source,
         update: profileUpdate,
         user: this.user,
-        hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+        isAdmin: this.isAdmin,
       })
     ) {
       throw createAgentNotFoundError({ agentId });
@@ -289,12 +317,12 @@ class AgentClientImpl implements AgentClient {
         ? hasReadAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            isAdmin: this.isAdmin,
           })
         : hasWriteAccess({
             source: document._source,
             user: this.user,
-            hasVisibilityAccessOverride: this.hasVisibilityAccessOverride,
+            isAdmin: this.isAdmin,
           });
 
     if (!hasRequestedAccess) {
