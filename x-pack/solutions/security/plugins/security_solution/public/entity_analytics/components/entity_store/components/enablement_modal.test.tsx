@@ -169,9 +169,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should not show entity engine missing privileges warning when no missing privileges', () => {
       renderComponent();
-      expect(
-        screen.queryByTestId('callout-missing-entity-store-privileges')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('callout-missing-privileges-callout')).not.toBeInTheDocument();
     });
 
     it('should not show risk engine missing privileges warning when no missing privileges', () => {
@@ -194,7 +192,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should show entity engine missing privileges warning when missing privileges', () => {
       renderComponent();
-      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
     });
 
     it('should show risk engine missing privileges warning when missing privileges', () => {
@@ -215,7 +213,7 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should disabled the "enable" button', async () => {
       renderComponent();
-      expect(screen.getByTestId('callout-missing-entity-store-privileges')).toBeInTheDocument();
+      expect(screen.getByTestId('callout-missing-privileges-callout')).toBeInTheDocument();
 
       const enableButton = screen.getByRole('button', { name: /Enable/i });
       expect(enableButton).toBeDisabled();

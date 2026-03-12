@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
-import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/types';
+import { DEFAULT_TIME_RANGE } from '../../../common/lib';
+import type { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -22,11 +20,6 @@ interface Arguments {
   title: string | null;
   timerange: TimeRangeArg | null;
 }
-
-const defaultTimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
@@ -73,7 +66,7 @@ export function savedMap(): ExpressionFunctionDefinition<
         input: {
           id: args.id,
           savedObjectId: args.id,
-          timeRange: args.timerange || defaultTimeRange,
+          timeRange: args.timerange || DEFAULT_TIME_RANGE,
           mapCenter: args.center
             ? {
                 lat: args.center.lat,

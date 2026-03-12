@@ -26,6 +26,7 @@ import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_pref
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { OpenInDiscover } from '../../links/discover_links/open_in_discover';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -160,19 +161,40 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.apm.errorRate', {
-                defaultMessage: 'Failed transaction rate',
-              })}
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.errorRate', {
+                    defaultMessage: 'Failed transaction rate',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={errorRateI18n} position="right" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiIconTip content={errorRateI18n} position="right" />
+          <OpenInDiscover
+            dataTestSubj="apmFailedTransactionRateChartOpenInDiscover"
+            variant="link"
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

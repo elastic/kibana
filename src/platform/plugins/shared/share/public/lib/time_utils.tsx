@@ -25,6 +25,15 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   const mathPart = dateString.split('/')[0]; // Ignore rounding part for matching
   const roundingPart = dateString.includes('/') ? dateString.split('/')[1] : undefined;
 
+  // Handle plain 'now' without offset
+  if (mathPart === 'now') {
+    return {
+      value: 0,
+      unit: 'second',
+      roundingUnit: roundingPart ? unitMap.get(roundingPart) : undefined,
+    };
+  }
+
   const match = mathPart.match(/^now([+-]\d+)([smhdwMy])$/);
   if (!match) return;
 
@@ -37,16 +46,22 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   };
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeDate = (dateString?: string) => {
+export const convertRelativeTimeStringToAbsoluteTimeDate = (
+  dateString?: string,
+  options?: { roundUp?: boolean }
+) => {
   if (!dateString) return;
-  const valueParsed = dateMath.parse(dateString);
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed?.isValid() ? valueParsed.toDate() : undefined;
 };
 
-export const convertRelativeTimeStringToAbsoluteTimeString = (dateString?: string) => {
+export const convertRelativeTimeStringToAbsoluteTimeString = (
+  dateString?: string,
+  options?: { roundUp?: boolean }
+) => {
   if (!dateString) return dateString;
-  const valueParsed = dateMath.parse(dateString);
+  const valueParsed = dateMath.parse(dateString, options);
 
   return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
 };

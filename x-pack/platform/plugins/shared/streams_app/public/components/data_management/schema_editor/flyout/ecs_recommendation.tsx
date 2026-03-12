@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 const EcsRecommendationText = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.ecsRecommendationText',
-  { defaultMessage: 'ECS recommendation' }
+  { defaultMessage: 'Recommended type' }
 );
 
 const UknownEcsFieldText = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.uknownEcsFieldText',
-  { defaultMessage: 'Not an ECS field' }
+  { defaultMessage: 'No recommendation available' }
 );
 
 const LoadingText = i18n.translate(

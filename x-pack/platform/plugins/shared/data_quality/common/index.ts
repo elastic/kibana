@@ -12,10 +12,3 @@ export const PLUGIN_FEATURE_ID = 'dataQuality';
 export const PLUGIN_NAME = i18n.translate('xpack.dataQuality.name', {
   defaultMessage: 'Data Set Quality',
 });
-
-export {
-  DATA_QUALITY_URL_STATE_KEY,
-  datasetQualityUrlSchemaV1,
-  datasetQualityDetailsUrlSchemaV1,
-  datasetQualityDetailsUrlSchemaV2,
-} from './url_schema';

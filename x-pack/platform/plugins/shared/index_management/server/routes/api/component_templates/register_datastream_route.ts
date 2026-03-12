@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
@@ -30,18 +30,19 @@ async function getDatastreamsForComponentTemplate(
 
   const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
 
-  const datastreamNames = indexTemplates
+  // Collect index patterns from index templates that reference the component template.
+  const indexPatterns = indexTemplates
     .filter((indexTemplate) => indexTemplate.index_template?.composed_of?.includes(name))
-    .map((indexTemplate) => indexTemplate.index_template.index_patterns)
-    .flat()
-    .join(',');
+    .map((indexTemplate) => indexTemplate.index_template.index_patterns ?? [])
+    .flat();
 
-  if (datastreamNames.length < 0) {
+  // If there are no patterns, there can't be any impacted data streams.
+  if (indexPatterns.length === 0) {
     return [];
   }
 
   const { data_streams: dataStreams } = await esClient.indices.getDataStream({
-    name: datastreamNames,
+    name: indexPatterns.join(','),
   });
 
   return dataStreams;

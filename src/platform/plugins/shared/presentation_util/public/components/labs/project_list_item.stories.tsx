@@ -11,8 +11,9 @@ import { action } from '@storybook/addon-actions';
 import { mapValues } from 'lodash';
 import React from 'react';
 
-import { EnvironmentStatus, ProjectConfig, ProjectID, ProjectStatus } from '../../../common';
-import { ProjectListItem, Props } from './project_list_item';
+import type { EnvironmentStatus, ProjectConfig, ProjectID, ProjectStatus } from '../../../common';
+import type { Props } from './project_list_item';
+import { ProjectListItem } from './project_list_item';
 
 import { projects as projectConfigs } from '../../../common';
 import { applyProjectStatus } from '../../services/presentation_labs_service';

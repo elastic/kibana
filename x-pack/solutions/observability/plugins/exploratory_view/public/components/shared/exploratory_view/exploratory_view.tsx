@@ -15,8 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from './hooks/use_kibana';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';

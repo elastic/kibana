@@ -8,65 +8,94 @@
 import { uniq } from 'lodash';
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSelectOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
-import { RegistrationServices } from '..';
+import {
+  CONNECTOR_ID,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+} from '@kbn/connector-schemas/email/constants';
+import type { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
+import type { RegistrationServices } from '..';
 
-const emailServices: EuiSelectOption[] = [
+export const emailServices: Array<EuiSelectOption & { 'kbn-setting-value': string }> = [
   {
     text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
       defaultMessage: 'Gmail',
     }),
     value: 'gmail',
+    ['kbn-setting-value']: emailKbnSettings.gmail,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.outlookServerTypeLabel', {
       defaultMessage: 'Outlook',
     }),
     value: 'outlook365',
+    ['kbn-setting-value']: emailKbnSettings.outlook365,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.amazonSesServerTypeLabel', {
       defaultMessage: 'Amazon SES',
     }),
     value: 'ses',
+    ['kbn-setting-value']: emailKbnSettings.ses,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.elasticCloudServerTypeLabel', {
       defaultMessage: 'Elastic Cloud',
     }),
     value: 'elastic_cloud',
+    ['kbn-setting-value']: emailKbnSettings.elastic_cloud,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.exchangeServerTypeLabel', {
       defaultMessage: 'MS Exchange Server',
     }),
     value: 'exchange_server',
+    ['kbn-setting-value']: emailKbnSettings.exchange_server,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.otherServerTypeLabel', {
       defaultMessage: 'Other',
     }),
     value: 'other',
+    ['kbn-setting-value']: emailKbnSettings.other,
   },
 ];
 
-export function getEmailServices(isCloudEnabled: boolean) {
-  return isCloudEnabled
+// Return the current service regardless of its enabled state to allow users to:
+// 1. View the current service in the dropdown UI
+// 2. Update the service configuration if needed
+// Note: The connector update endpoint will reject updates where the service
+// remains unchanged but is disabled.
+export function getEmailServices(
+  isCloudEnabled: boolean,
+  enabledEmailsServices: string[],
+  currentService?: string
+): Array<EuiSelectOption & { 'kbn-setting-value': string }> {
+  const allEmailServices = isCloudEnabled
     ? emailServices
     : emailServices.filter((service) => service.value !== 'elastic_cloud');
+
+  if (enabledEmailsServices.includes('*')) {
+    return allEmailServices;
+  }
+
+  return allEmailServices.filter(
+    (service) =>
+      service.value === currentService ||
+      enabledEmailsServices.includes(service['kbn-setting-value'])
+  );
 }
 
 export function getConnectorType(
   services: RegistrationServices
 ): ConnectorTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
   return {
-    id: '.email',
+    id: CONNECTOR_ID,
     iconClass: 'email',
     selectMessage: i18n.translate('xpack.stackConnectors.components.email.selectMessageText', {
       defaultMessage: 'Send email from your server.',
@@ -82,9 +111,11 @@ export function getConnectorType(
         to: new Array<string>(),
         cc: new Array<string>(),
         bcc: new Array<string>(),
+        replyTo: new Array<string>(),
         message: new Array<string>(),
         subject: new Array<string>(),
       };
+
       const validationResult = { errors };
 
       if (!actionParams.message?.length) {
@@ -97,6 +128,7 @@ export function getConnectorType(
       const toEmails = getToFields(actionParams);
       const ccEmails = getCcFields(actionParams);
       const bccEmails = getBccFields(actionParams);
+      const replyTo = getReplyToFields(actionParams);
 
       if (toEmails.length === 0 && ccEmails.length === 0 && bccEmails.length === 0) {
         const errorText = translations.TO_CC_REQUIRED;
@@ -105,7 +137,7 @@ export function getConnectorType(
         errors.bcc.push(errorText);
       }
 
-      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails));
+      const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails)).concat(replyTo ?? []);
       const validatedEmails = services.validateEmailAddresses(allEmails, {
         treatMustacheTemplatesAsValid: true,
       });
@@ -113,6 +145,7 @@ export function getConnectorType(
       const toEmailSet = new Set(toEmails);
       const ccEmailSet = new Set(ccEmails);
       const bccEmailSet = new Set(bccEmails);
+      const replyToSet = new Set(replyTo);
 
       for (const validated of validatedEmails) {
         if (!validated.valid) {
@@ -125,6 +158,7 @@ export function getConnectorType(
           if (toEmailSet.has(email)) errors.to.push(message);
           if (ccEmailSet.has(email)) errors.cc.push(message);
           if (bccEmailSet.has(email)) errors.bcc.push(message);
+          if (replyToSet.has(email)) errors.replyTo.push(message);
         }
       }
 
@@ -136,16 +170,21 @@ export function getConnectorType(
 }
 
 function getToFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.to instanceof Array)) return [];
+  if (!Array.isArray(actionParams.to)) return [];
   return actionParams.to;
 }
 
 function getCcFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.cc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.cc)) return [];
   return actionParams.cc;
 }
 
 function getBccFields(actionParams: EmailActionParams): string[] {
-  if (!(actionParams.bcc instanceof Array)) return [];
+  if (!Array.isArray(actionParams.bcc)) return [];
   return actionParams.bcc;
+}
+
+function getReplyToFields(actionParams: EmailActionParams): string[] {
+  if (!Array.isArray(actionParams.replyTo)) return [];
+  return actionParams.replyTo;
 }

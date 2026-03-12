@@ -29,6 +29,8 @@
         "label": "REPOSITORY_TYPES",
         "description": [],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -46,6 +48,8 @@
           "\"/api/snapshot_restore/\""
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -61,6 +65,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -76,6 +82,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -91,6 +99,8 @@
           "string[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -106,6 +116,8 @@
           "\"none\""
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -121,6 +133,8 @@
           "\"8.0.0\""
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,6 +151,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +169,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -169,6 +187,8 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -183,6 +203,8 @@
         "label": "PLUGIN",
         "description": [],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,6 +216,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,6 +232,8 @@
               "\"basic\""
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,6 +248,8 @@
               "(i18n: any) => string"
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -236,6 +264,8 @@
                   "any"
                 ],
                 "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+                "lineNumber": 16,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -254,6 +284,8 @@
         "label": "REPOSITORY_PLUGINS_MAP",
         "description": [],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -275,6 +307,8 @@
               ".hdfs"
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -289,6 +323,8 @@
         "label": "TIME_UNITS",
         "description": [],
         "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -303,6 +339,8 @@
               "\"d\""
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -317,6 +355,8 @@
               "\"h\""
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -331,6 +371,8 @@
               "\"m\""
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -345,6 +387,8 @@
               "\"s\""
             ],
             "path": "x-pack/platform/plugins/private/snapshot_restore/common/constants.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -20,7 +20,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { CompatibleModule } from '../../../common/constants/app';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
-import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
 import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
 import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
@@ -109,7 +108,6 @@ export class DataRecognizer {
   private _dataViewsService: DataViewsService;
   private _request: KibanaRequest;
 
-  private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
   private _indexPatternId: string | undefined = undefined;
@@ -150,7 +148,6 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
-    this._authorizationHeader = getAuthorizationHeader(request);
     this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
@@ -555,7 +552,7 @@ export class DataRecognizer {
     end?: number,
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
-    estimateModelMemory: boolean = true,
+    estimateModelMemory?: boolean,
     applyToAllSpaces: boolean = false
   ) {
     // load the config from disk
@@ -917,13 +914,10 @@ export class DataRecognizer {
   }
 
   private async _saveDatafeed(datafeed: ModuleDatafeed) {
-    return this._mlClient.putDatafeed(
-      {
-        datafeed_id: datafeed.id,
-        ...datafeed.config,
-      },
-      this._authorizationHeader
-    );
+    return this._mlClient.putDatafeed({
+      datafeed_id: datafeed.id,
+      ...datafeed.config,
+    });
   }
 
   private async _startDatafeeds(
@@ -1205,7 +1199,7 @@ export class DataRecognizer {
    */
   private async _updateModelMemoryLimits(
     moduleConfig: Module,
-    estimateMML: boolean,
+    estimateMML?: boolean,
     start?: number,
     end?: number
   ) {
@@ -1213,7 +1207,7 @@ export class DataRecognizer {
       return;
     }
 
-    if (estimateMML && this._jobsForModelMemoryEstimation.length > 0) {
+    if (estimateMML !== false && this._jobsForModelMemoryEstimation.length > 0) {
       try {
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField =
@@ -1255,11 +1249,27 @@ export class DataRecognizer {
             latestMs
           );
 
-          if (!job.config.analysis_limits) {
-            job.config.analysis_limits = Object.create(null) as AnalysisLimits;
+          const existingLimit = job.config.analysis_limits?.model_memory_limit;
+          let shouldUseEstimate = false;
+
+          if (!existingLimit || estimateMML === true) {
+            // Use estimate if no existing limit or estimateMML is explicitly true
+            shouldUseEstimate = true;
+          } else if (estimateMML === undefined && existingLimit) {
+            // Compare existing limit with estimate and use the larger one
+            // @ts-expect-error numeral missing value
+            const existingMMLBytes: number = numeral(existingLimit.toUpperCase()).value();
+            // @ts-expect-error numeral missing value
+            const estimateMMLBytes: number = numeral(modelMemoryLimit.toUpperCase()).value();
+            shouldUseEstimate = estimateMMLBytes > existingMMLBytes;
           }
 
-          job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+          if (shouldUseEstimate) {
+            if (!job.config.analysis_limits) {
+              job.config.analysis_limits = Object.create(null) as AnalysisLimits;
+            }
+            job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+          }
         }
       } catch (error) {
         mlLog.warn(

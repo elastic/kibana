@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
@@ -26,25 +26,22 @@ export const EntitiesOverview: React.FC = () => {
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));
 
-  const { navigateToLeftPanel, isEnabled: isLinkEnabled } = useNavigateToLeftPanel({
+  const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
     subTab: ENTITIES_TAB_ID,
   });
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: navigateToLeftPanel,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
-                defaultMessage="Show all entities"
-              />
-            ),
-          }
-        : undefined,
-    [navigateToLeftPanel, isLinkEnabled]
+    () => ({
+      callback: navigateToLeftPanel,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
+          defaultMessage="Show all entities"
+        />
+      ),
+    }),
+    [navigateToLeftPanel]
   );
 
   return (

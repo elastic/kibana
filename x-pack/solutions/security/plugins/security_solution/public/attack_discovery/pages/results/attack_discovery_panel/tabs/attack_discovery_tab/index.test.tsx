@@ -202,7 +202,7 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
     );
   });
 
-  describe('when configurations capabilities is defined (for AI4DSOC)', () => {
+  describe('when configurations capabilities is defined (for EASE)', () => {
     beforeEach(() => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {

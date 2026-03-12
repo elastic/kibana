@@ -8,20 +8,20 @@
 import type { AxiosResponse, AxiosError } from 'axios';
 import { isEmpty, isObjectLike, get } from 'lodash';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
-import * as i18n from './translations';
+import { CONNECTOR_NAME } from '@kbn/connector-schemas/cases_webhook';
 
-export const createServiceError = (error: AxiosError, message: string) => {
+export const addServiceMessageToError = (error: AxiosError, message: string) => {
   const serverResponse =
     error.response && error.response.data ? JSON.stringify(error.response.data) : null;
 
-  return new Error(
-    getErrorMessage(
-      i18n.NAME,
-      `${message}. Error: ${error.message}. ${serverResponse != null ? serverResponse : ''} ${
-        error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
-      }`
-    )
+  error.message = getErrorMessage(
+    CONNECTOR_NAME,
+    `${message}. Error: ${error.message}. ${serverResponse != null ? serverResponse : ''} ${
+      error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
+    }`
   );
+
+  return error;
 };
 
 export const getObjectValueByKeyAsString = (
@@ -42,6 +42,11 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   const requiredContentType = 'application/json';
   const contentType = res.headers['content-type'];
   const data = res.data;
+
+  // If status is 204 and there is no data, we just return
+  if (res.status === 204 && isEmpty(data) && requiredAttributesToBeInTheResponse.length === 0) {
+    return;
+  }
 
   /**
    * Check that the content-type of the response is application/json.

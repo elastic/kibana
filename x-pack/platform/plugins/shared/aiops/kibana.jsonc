@@ -11,6 +11,7 @@
     "id": "aiops",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "aiops"],
     "requiredPlugins": [
       "charts",
       "data",
@@ -27,14 +28,13 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "cps"
     ],
     "requiredBundles": [
-      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "embeddable",
       "cases"
     ]
   }

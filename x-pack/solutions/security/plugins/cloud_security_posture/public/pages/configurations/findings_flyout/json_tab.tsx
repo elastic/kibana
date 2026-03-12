@@ -13,7 +13,7 @@ import { EuiPanel } from '@elastic/eui';
 
 export const JsonTab = ({ data }: { data: CspFinding }) => (
   <EuiPanel>
-    <div style={{ height: '100vh' }}>
+    <div css={{ height: '100vh' }}>
       <CodeEditor
         isCopyable
         allowFullScreen

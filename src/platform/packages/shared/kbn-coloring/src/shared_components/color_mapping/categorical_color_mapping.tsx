@@ -11,12 +11,12 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import { KbnPalettes } from '@kbn/palettes';
-import { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializedValue } from '@kbn/data-plugin/common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedValue } from '@kbn/data-plugin/common';
 import { colorMappingReducer, updateModel } from './state/color_mapping';
 import { Container } from './components/container/container';
-import { ColorMapping } from './config';
+import type { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
 
 export interface ColorMappingInputCategoricalData {

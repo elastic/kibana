@@ -9,8 +9,8 @@
 
 import type { Position } from '@elastic/charts';
 import type { ChartsPluginSetup, Style, Labels, ColorSchemas } from '@kbn/charts-plugin/public';
-import { Range } from '@kbn/expressions-plugin/public';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { Range } from '@kbn/expressions-plugin/public';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 
 export interface HeatmapTypeProps {
   showElasticChartsOptions?: boolean;

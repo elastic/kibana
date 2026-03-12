@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 // Plugin information
 export const PLUGIN_ID = 'automaticImport';

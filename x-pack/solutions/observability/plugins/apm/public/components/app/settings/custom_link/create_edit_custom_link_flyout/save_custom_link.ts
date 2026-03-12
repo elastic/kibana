@@ -27,7 +27,9 @@ export async function saveCustomLink({
     const customLink: CustomLink = {
       label,
       url,
-      filters: filters.filter(({ key, value }) => key && value),
+      filters: filters
+        .filter(({ key, value }) => key && value)
+        .map(({ key, value }) => ({ key, value })),
     };
 
     if (id) {

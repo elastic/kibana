@@ -25,9 +25,12 @@ export * from './actions/response_actions/execute';
 export * from './actions/response_actions/upload';
 export * from './actions/response_actions/scan';
 export * from './actions/response_actions/run_script';
+export * from './actions/response_actions/cancel';
 
 export * from './metadata';
 
 export * from './policy';
 
 export * from './suggestions';
+
+export * from './scripts_library';

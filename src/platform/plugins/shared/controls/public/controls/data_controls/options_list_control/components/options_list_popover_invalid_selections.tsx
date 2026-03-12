@@ -9,24 +9,19 @@
 
 import React, { useEffect, useState } from 'react';
 
+import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -38,15 +33,13 @@ const optionsListPopoverInvalidSelectionsStyles = {
 };
 
 export const OptionsListPopoverInvalidSelections = () => {
-  const { componentApi } = useOptionsListContext();
-  const styles = useMemoizedStyles(optionsListPopoverInvalidSelectionsStyles);
+  const { componentApi, customStrings } = useOptionsListContext();
+  const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
-  const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
+  const [invalidSelections, fieldFormatter, label] = useBatchedPublishingSubjects(
     componentApi.invalidSelections$,
-    componentApi.fieldFormatter
-  );
-  const defaultPanelTitle = useStateFromPublishingSubject(
-    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.fieldFormatter,
+    componentApi.label$
   );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
@@ -57,12 +50,18 @@ export const OptionsListPopoverInvalidSelections = () => {
         key: String(key),
         label: fieldFormatter(key),
         checked: 'on',
+        css: css`
+          .euiSelectableListItem__prepend {
+            margin-inline-end: 0;
+          }
+        `,
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
           <EuiScreenReaderOnly>
             <div>
-              {OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              {customStrings?.invalidSelectionsLabel ||
+                OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               {'" "'} {/* Adds a pause for the screen reader */}
             </div>
           </EuiScreenReaderOnly>
@@ -70,34 +69,41 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [fieldFormatter, invalidSelections]);
+  }, [fieldFormatter, invalidSelections, customStrings]);
 
   return (
     <>
       <EuiSpacer size="s" />
       <EuiTitle size="xxs" data-test-subj="optionList__invalidSelectionLabel" css={styles.title}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="warning"
-              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
+              title={
+                customStrings?.invalidSelectionsLabel ||
+                OptionsListStrings.popover.getInvalidSelectionScreenReaderText()
+              }
               size="s"
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <label>
-              {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
+              {customStrings?.invalidSelectionsLabel ||
+                OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTitle>
       <EuiSelectable
-        aria-label={OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
-          defaultPanelTitle ?? '',
-          invalidSelections.size
-        )}
+        aria-label={
+          customStrings?.invalidSelectionsLabel ||
+          OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
+            label,
+            invalidSelections.size
+          )
+        }
         options={selectableOptions}
-        listProps={{ onFocusBadge: false, isVirtualized: false }}
+        listProps={{ onFocusBadge: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
           componentApi.deselectOption(changedOption.key);

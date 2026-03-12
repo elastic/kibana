@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -23,6 +23,8 @@ import type {
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { SpanStatusCode, type SpanOptions } from '@opentelemetry/api';
+import { withActiveSpan } from '@kbn/tracing-utils';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
@@ -99,7 +101,7 @@ export class TelemetryCollectionManagerPlugin
    * Checks if Kibana is in a healthy state to attempt the Telemetry report generation:
    * - Elasticsearch is active.
    * - SavedObjects client is active.
-   * @private
+   * @internal
    */
   private async shouldGetTelemetry() {
     const { elasticsearch, savedObjects } = await firstValueFrom(this.coreStatus$);
@@ -142,7 +144,7 @@ export class TelemetryCollectionManagerPlugin
    * It may return undefined if the ES and SO clients are not initialised yet.
    * @param config {@link StatsGetterConfig}
    * @param usageCollection {@link UsageCollectionSetup}
-   * @private
+   * @internal
    */
   private getStatsCollectionConfig(
     config: StatsGetterConfig,
@@ -163,7 +165,7 @@ export class TelemetryCollectionManagerPlugin
    * depending on whether the request is encrypted or not:
    * If the request is unencrypted, we intentionally scope the results to "what the user can see".
    * @param config {@link StatsGetterConfig}
-   * @private
+   * @internal
    */
   private getElasticsearchClient(config: StatsGetterConfig): ElasticsearchClient | undefined {
     return this.elasticsearchClient?.asInternalUser;
@@ -174,7 +176,7 @@ export class TelemetryCollectionManagerPlugin
    * depending on whether the request is encrypted or not:
    * If the request is unencrypted, we intentionally scope the results to "what the user can see"
    * @param config {@link StatsGetterConfig}
-   * @private
+   * @internal
    */
   private getSavedObjectsClient(config: StatsGetterConfig): SavedObjectsClientContract | undefined {
     if (this.savedObjectsService) {
@@ -261,58 +263,101 @@ export class TelemetryCollectionManagerPlugin
     config: EncryptedStatsGetterConfig
   ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getStats(config: StatsGetterConfig) {
-    const retrieveSnapshotTelemetryTransaction = apm.startTransaction(
+    // This is a horrible API, but it's the only way to get the context to work correctly: https://github.com/open-telemetry/opentelemetry-js/issues/3558#issuecomment-1598313139
+    return await withActiveSpan(
       'Retrieve Snapshot Telemetry',
-      'telemetry'
-    );
-    retrieveSnapshotTelemetryTransaction.addLabels({
-      unencrypted: config.unencrypted,
-      refresh: config.refreshCache,
-    });
-    if (!this.usageCollection) {
-      retrieveSnapshotTelemetryTransaction.end('skipped');
-      return [];
-    }
-    const collection = this.collectionStrategy;
-    if (collection) {
-      // Build the context (clients and others) to send to the CollectionStrategies
-      const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
-      if (statsCollectionConfig) {
-        try {
-          retrieveSnapshotTelemetryTransaction.startSpan('Fetch usage');
-          const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          this.logger.debug(`Received Usage using ${collection.title} collection.`);
-
-          retrieveSnapshotTelemetryTransaction.startSpan('Prepare response');
-          const results = await Promise.all(
-            usageData.map(async (clusterStats) => {
-              const { cluster_uuid: clusterUuid } = clusterStats;
-
-              return {
-                clusterUuid,
-                stats: config.unencrypted
-                  ? clusterStats
-                  : await encryptTelemetry(clusterStats, {
-                      useProdKey: this.isDistributable,
-                    }),
-              };
-            })
-          );
-          retrieveSnapshotTelemetryTransaction.end('success');
-          return results;
-        } catch (err) {
-          this.logger.debug(
-            `Failed to collect any usage with registered collection ${collection.title}.`
-          );
-          retrieveSnapshotTelemetryTransaction.end('error');
+      {
+        attributes: {
+          unencrypted: config.unencrypted,
+          refresh: config.refreshCache,
+          'transaction.type': 'telemetry',
+        },
+      },
+      async (retrieveSnapshotTelemetryOTelSpan) => {
+        const retrieveSnapshotTelemetryTransaction = apm.startTransaction(
+          'Retrieve Snapshot Telemetry',
+          'telemetry'
+        );
+        retrieveSnapshotTelemetryTransaction.addLabels({
+          unencrypted: config.unencrypted,
+          refresh: config.refreshCache,
+        });
+        if (!this.usageCollection) {
+          retrieveSnapshotTelemetryTransaction.end('skipped');
+          retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.UNSET });
+          retrieveSnapshotTelemetryOTelSpan?.setAttribute('skipped', true);
+          retrieveSnapshotTelemetryOTelSpan?.end();
           return [];
         }
+        const collection = this.collectionStrategy;
+        if (collection) {
+          // Build the context (clients and others) to send to the CollectionStrategies
+          const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
+          if (statsCollectionConfig) {
+            const commonSpanOptions: SpanOptions = {
+              attributes: {
+                collection: collection.title,
+                'transaction.type': 'telemetry',
+              },
+            };
+            try {
+              retrieveSnapshotTelemetryTransaction.startSpan('Fetch usage');
+              const usageData = await withActiveSpan(
+                'Fetch usage',
+                commonSpanOptions,
+
+                () => this.getUsageForCollection(collection, statsCollectionConfig)
+              );
+              this.logger.debug(`Received Usage using ${collection.title} collection.`);
+
+              retrieveSnapshotTelemetryTransaction.startSpan('Prepare response');
+              const results = await withActiveSpan(
+                'Prepare response',
+                commonSpanOptions,
+
+                async () =>
+                  await Promise.all(
+                    usageData.map(async (clusterStats) => {
+                      const { cluster_uuid: clusterUuid } = clusterStats;
+
+                      return {
+                        clusterUuid,
+                        stats: config.unencrypted
+                          ? clusterStats
+                          : await encryptTelemetry(clusterStats, {
+                              useProdKey: this.isDistributable,
+                            }),
+                      };
+                    })
+                  )
+              );
+
+              retrieveSnapshotTelemetryTransaction.end('success');
+              // The 2 lines below are not needed because the withActiveSpan will set the status and end the span.
+              // However, we keep them to keep consistency with the rest of the branches (where we set to UNSET or ERROR even when not throwing an error).
+              retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.OK });
+              retrieveSnapshotTelemetryOTelSpan?.end();
+              return results;
+            } catch (err) {
+              this.logger.debug(
+                `Failed to collect any usage with registered collection ${collection.title}.`
+              );
+              retrieveSnapshotTelemetryTransaction.end('error');
+              retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.ERROR });
+              retrieveSnapshotTelemetryOTelSpan?.end();
+              return [];
+            }
+          }
+        }
+
+        retrieveSnapshotTelemetryTransaction.end('skipped');
+        retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.UNSET });
+        retrieveSnapshotTelemetryOTelSpan?.setAttribute('skipped', true);
+        retrieveSnapshotTelemetryOTelSpan?.end();
+
+        return [];
       }
-    }
-
-    retrieveSnapshotTelemetryTransaction.end('skipped');
-
-    return [];
+    );
   }
 
   private createCacheKey(collectionSource: string, clustersDetails: ClusterDetails[]) {

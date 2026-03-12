@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import {
   CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION,
   CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH,

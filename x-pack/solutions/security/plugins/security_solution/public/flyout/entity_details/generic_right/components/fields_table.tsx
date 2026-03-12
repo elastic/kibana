@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
@@ -67,8 +74,21 @@ const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => 
   localStorage.setItem(storageKey, JSON.stringify(fields));
 };
 
-export const usePinnedFields = (storageKey: string) => {
+export const usePinnedFields = (storageKey: string, defaultPinnedFields?: string[]) => {
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const hasStoredPinnedFields = !!getPinnedFieldsFromLocalStorage(storageKey)?.length;
+    const hasDefaultPinnedFields = !!defaultPinnedFields?.length;
+
+    // If no pinned fields exist in localStorage, set the default fields
+    if (!hasStoredPinnedFields && hasDefaultPinnedFields) {
+      setPinnedFieldsInLocalStorage(storageKey, defaultPinnedFields);
+      queryClient.setQueryData(['pinnedFields', storageKey], defaultPinnedFields);
+      queryClient.invalidateQueries(['pinnedFields', storageKey]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: pinnedFields = [] } = useQuery<string[]>({
     queryKey: ['pinnedFields', storageKey],
@@ -109,6 +129,11 @@ export interface FieldsTableProps {
    * Optional key to override component's defaults or set custom behaviors.
    */
   euiInMemoryTableProps?: Partial<EuiInMemoryTableProps>;
+
+  /**
+   * Set default fields if storage key does not exist.
+   */
+  defaultPinnedFields?: string[];
 }
 
 /**
@@ -118,8 +143,12 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
   document,
   tableStorageKey,
   euiInMemoryTableProps,
+  defaultPinnedFields,
 }) => {
-  const { pinnedFields, togglePin } = usePinnedFields(tableStorageKey || 'fields-table-pins');
+  const { pinnedFields, togglePin } = usePinnedFields(
+    tableStorageKey || 'fields-table-pins',
+    defaultPinnedFields
+  );
 
   const sortedItems: FlattenedItem[] = useMemo(
     () => getSortedFlattenedItems(document, pinnedFields),
@@ -169,7 +198,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Value',
         }),
         render: (value: unknown) => (
-          <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
+          <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
         ),
       },
     ],
@@ -178,6 +207,9 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
 
   return (
     <EuiInMemoryTable<FlattenedItem>
+      tableCaption={i18n.translate('xpack.securitySolution.fieldsTable.tableCaption', {
+        defaultMessage: 'Fields',
+      })}
       // @ts-ignore
       items={sortedItems}
       columns={columns}

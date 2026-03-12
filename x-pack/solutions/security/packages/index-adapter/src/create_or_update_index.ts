@@ -214,6 +214,8 @@ export interface CreateOrUpdateSpacesIndexParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  /** whether to expand index names based on pattern */
+  expandIndexPattern?: boolean;
 }
 
 export async function updateIndices({
@@ -222,6 +224,7 @@ export async function updateIndices({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  expandIndexPattern = false,
 }: CreateOrUpdateSpacesIndexParams): Promise<void> {
   logger.info(`Updating indices - ${name}`);
 
@@ -239,12 +242,13 @@ export async function updateIndices({
       throw error;
     }
   }
+
   if (indices.length > 0) {
     await updateIndexMappings({
       logger,
       esClient,
       totalFieldsLimit,
-      indexNames: indices,
+      indexNames: expandIndexPattern ? indices : [name],
       writeIndexOnly,
     });
   }

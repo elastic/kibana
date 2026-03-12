@@ -8,6 +8,7 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
+import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
@@ -19,10 +20,23 @@ export const buildResultsQuery = ({
   sort,
   startDate,
   pagination: { activePage, querySize },
+  integrationNamespaces,
+  scheduleId,
+  executionCount,
 }: ResultsRequestOptions): ISearchRequestParams => {
-  const actionIdQuery = `action_id: ${actionId}`;
-  const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-  let filter = actionIdQuery + agentQuery;
+  const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
+
+  let filter: string;
+  if (scheduleId != null && executionCount != null) {
+    const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
+    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
+    filter = scheduleQuery + agentQuery;
+  } else {
+    const actionIdQuery = `action_id: ${actionId}`;
+    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
+    filter = actionIdQuery + agentQuery;
+  }
+
   if (!isEmpty(kuery)) {
     filter = filter + ` AND ${kuery}`;
   }
@@ -32,7 +46,7 @@ export const buildResultsQuery = ({
       ? [
           {
             range: {
-              '@timestamp': {
+              'event.ingested': {
                 gte: startDate,
                 lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
               },
@@ -42,9 +56,19 @@ export const buildResultsQuery = ({
       : [];
   const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
 
+  let index: string;
+
+  if (integrationNamespaces && integrationNamespaces.length > 0) {
+    index = integrationNamespaces
+      .map((namespace) => buildIndexNameWithNamespace(baseIndex, namespace))
+      .join(',');
+  } else {
+    index = baseIndex;
+  }
+
   return {
     allow_no_indices: true,
-    index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+    index,
     ignore_unavailable: true,
     aggs: {
       count_by_agent_id: {

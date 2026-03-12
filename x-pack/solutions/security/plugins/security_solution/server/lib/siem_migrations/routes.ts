@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { registerSiemRuleMigrationsRoutes } from './rules/api';
+import { registerSiemDashboardMigrationsRoutes } from './dashboards/api';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
 
@@ -17,5 +18,9 @@ export const registerSiemMigrationsRoutes = (
 ) => {
   if (!config.experimentalFeatures.siemMigrationsDisabled) {
     registerSiemRuleMigrationsRoutes(router, config, logger);
+
+    if (config.experimentalFeatures.automaticDashboardsMigration) {
+      registerSiemDashboardMigrationsRoutes(router, config, logger);
+    }
   }
 };

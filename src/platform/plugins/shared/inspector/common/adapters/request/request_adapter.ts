@@ -10,7 +10,8 @@
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 import { RequestResponder } from './request_responder';
-import { Request, RequestParams, RequestStatus } from './types';
+import type { Request, RequestParams } from './types';
+import { RequestStatus } from './types';
 
 /**
  * An generic inspector adapter to log requests.
@@ -83,6 +84,10 @@ export class RequestAdapter extends EventEmitter {
 
   public getRequests(): Request[] {
     return Array.from(this.requests.values());
+  }
+
+  public getRequestsSince(time: number): Request[] {
+    return Array.from(this.requests.values().filter((req) => req.startTime >= time));
   }
 
   public getRequestEntries(): Array<[Request, RequestResponder]> {

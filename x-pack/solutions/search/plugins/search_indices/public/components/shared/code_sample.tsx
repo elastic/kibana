@@ -8,15 +8,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import React from 'react';
-import {
-  EuiCodeBlock,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiThemeProvider,
-} from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 
 export interface CodeSampleProps {
   id?: string;
@@ -61,27 +53,20 @@ export const CodeSample = ({
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiThemeProvider colorMode="dark">
-        <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
-          <div onClick={onCodeClick}>
-            <EuiCodeBlock
-              data-test-subj={`${id}-code-block`}
-              language={language}
-              fontSize="m"
-              paddingSize="m"
-              isCopyable
-              transparentBackground
-              css={{
-                '*::selection': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                },
-              }}
-            >
-              {code}
-            </EuiCodeBlock>
-          </div>
-        </EuiPanel>
-      </EuiThemeProvider>
+      <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
+        <div onClick={onCodeClick}>
+          <EuiCodeBlock
+            data-test-subj={`${id}-code-block`}
+            language={language}
+            fontSize="m"
+            paddingSize="m"
+            isCopyable
+            transparentBackground
+          >
+            {code}
+          </EuiCodeBlock>
+        </div>
+      </EuiPanel>
     </EuiFlexItem>
   );
 };

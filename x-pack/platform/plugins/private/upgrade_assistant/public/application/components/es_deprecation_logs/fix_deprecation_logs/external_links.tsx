@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
-import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
+import type { FunctionComponent } from 'react';
+import React, { useState, useEffect } from 'react';
+import type { PhrasesFilter } from '@kbn/es-query';
+import { buildPhrasesFilter } from '@kbn/es-query';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiSpacer, EuiText, EuiButton } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../../../../common/constants';
-import { DataPublicPluginStart } from '../../../../shared_imports';
+import type { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { uiMetricService, UIM_DISCOVER_CLICK } from '../../../lib/ui_metric';
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -15,10 +16,9 @@ import {
   EuiFlyoutHeader,
   EuiSelect,
   EuiSuperDatePicker,
-  EuiSuperDatePickerProps,
   EuiTitle,
 } from '@elastic/eui';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -26,9 +26,9 @@ import type {
   EmbeddableComponent as LensEmbeddableComponent,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getLensAttributes } from './lens_attributes';
 

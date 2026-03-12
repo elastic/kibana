@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -119,7 +119,7 @@ export const checkForUnknownDocs =
     UnknownDocsFound | {}
   > =>
   () => {
-    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery.bool);
+    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery?.bool);
     return getAggregatedTypesDocuments(client, indexName, excludeQuery)
       .then((unknownDocs) => {
         if (unknownDocs.length) {

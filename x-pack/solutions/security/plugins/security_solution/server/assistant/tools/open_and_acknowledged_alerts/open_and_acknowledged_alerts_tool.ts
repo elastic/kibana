@@ -19,12 +19,13 @@ import {
 import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
-  alertsIndexPattern: string;
-  size: number;
-}
+export type OpenAndAcknowledgedAlertsToolParams = Require<
+  AssistantToolParams,
+  'alertsIndexPattern' | 'size'
+>;
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
@@ -50,7 +51,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       !sizeIsOutOfRange(size)
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const {
@@ -81,25 +82,25 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
           return Promise.resolve(localReplacements);
         };
 
-        return JSON.stringify(
-          result.hits?.hits?.map((hit) => {
-            const transformed = transformRawData({
-              anonymizationFields,
-              currentReplacements: localReplacements, // <-- the latest local replacements
-              getAnonymizedValue,
-              onNewReplacements: localOnNewReplacements, // <-- the local callback
-              rawData: getRawDataOrDefault(hit.fields),
-            });
+        const content = result.hits?.hits?.map((hit) => {
+          const transformed = transformRawData({
+            anonymizationFields,
+            currentReplacements: localReplacements, // <-- the latest local replacements
+            getAnonymizedValue,
+            onNewReplacements: localOnNewReplacements, // <-- the local callback
+            rawData: getRawDataOrDefault(hit.fields),
+          });
 
-            const hitId = hit._id;
-            const reference = hitId
-              ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
-              : undefined;
-            const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
+          const hitId = hit._id;
+          const reference = hitId
+            ? contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+            : undefined;
+          const citation = reference && `\nCitation,${contentReferenceBlock(reference)}`;
 
-            return `${transformed}${citation ?? ''}`;
-          })
-        );
+          return `${transformed}${citation ?? ''}`;
+        });
+
+        return JSON.stringify(content);
       },
       {
         name: 'OpenAndAcknowledgedAlertsTool',

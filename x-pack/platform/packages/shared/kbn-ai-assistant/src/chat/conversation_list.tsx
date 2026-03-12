@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCollapsibleNavGroup,
   EuiFlexGroup,
@@ -17,12 +18,12 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   EuiText,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
@@ -331,6 +332,7 @@ export function ConversationList({
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                   <NewChatButton
                     href={newConversationHref}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     onClick={(event) => onClickConversation(event)}
                   />
                 </EuiFlexItem>

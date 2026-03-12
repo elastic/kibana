@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Expand } from '../../../../common/utils/objects/types';
 import type {
   EngineStatus,
   InitEntityEngineRequestBody,
@@ -13,21 +12,18 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import { DEFAULT_INTERVAL } from './tasks/field_retention_enrichment/constants';
 
-export const DEFAULT_LOOKBACK_PERIOD = '24h';
+export const DEFAULT_LOOKBACK_PERIOD = '3h';
 export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
 export const DEFAULT_SYNC_DELAY = '1m';
 export const DEFAULT_TIMEOUT = '180s';
 export const DEFAULT_FREQUENCY = '1m';
-export const DEFAULT_DOCS_PER_SECOND = undefined;
+export const DEFAULT_DOCS_PER_SECOND = -1; // disabled docs per second by default
+export const DEFAULT_MAX_PAGE_SEARCH_SIZE = 500;
 export const DEFAULT_INDEX_PATTERNS = '';
 export const DEFAULT_KQL_FILTER = '';
 export const DEFAULT_TIMESTAMP_FIELD = '@timestamp';
 
-export const defaultOptions: Expand<
-  Required<Omit<InitEntityEngineRequestBody, 'docsPerSecond'>> & {
-    docsPerSecond: number | undefined;
-  }
-> = {
+export const defaultOptions: Required<InitEntityEngineRequestBody> = {
   delay: DEFAULT_SYNC_DELAY,
   timeout: DEFAULT_TIMEOUT,
   frequency: DEFAULT_FREQUENCY,
@@ -38,6 +34,7 @@ export const defaultOptions: Expand<
   filter: DEFAULT_KQL_FILTER,
   enrichPolicyExecutionInterval: DEFAULT_INTERVAL,
   timestampField: DEFAULT_TIMESTAMP_FIELD,
+  maxPageSearchSize: DEFAULT_MAX_PAGE_SEARCH_SIZE,
 };
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -117,7 +118,7 @@ export const NewConnectorTemplate: React.FC<Props> = ({
                     )}
                     fullWidth
                     disabled={disabled}
-                    isInvalid={false}
+                    isInvalid={formInvalid}
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus

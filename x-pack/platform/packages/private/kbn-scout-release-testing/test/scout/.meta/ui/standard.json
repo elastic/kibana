@@ -1,0 +1,201 @@
+{
+  "sha1": "ac6052bfc470cf0f0467d31052e10920279247b5",
+  "tests": [
+    {
+      "id": "01d528d0a32d16a-05a1663c9e84f0e",
+      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Custom visualization panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-5bc4d2dca5fe437",
+      "title": "Dashboard app should edit existing dashboard and add map and custom visualization panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 102,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-9ea798142ce5f12",
+      "title": "Dashboard app should duplicate an existing dashboard and preserve panels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-fe6fc7c70a3ff03",
+      "title": "Dashboard app should save a copy of a dashboard from edit mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 154,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-a7c5a51f98d68fc",
+      "title": "Dashboard app should add dashboard and URL link types to a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 181,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-35a51aa188d3e2f",
+      "title": "Dashboard app should perform lens panel custom actions - explore in Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 205,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-bcdad0fceea3733",
+      "title": "Dashboard app should enter and exit fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 245,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-7acd9d3da5a3661",
+      "title": "Dashboard app should update dashboard settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 262,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-14cd26637b0157d",
+      "title": "Dashboard app should export dashboard as PDF and download the report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 319,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-7a1924f2c5bba9a",
+      "title": "Dashboard app should export dashboard as PNG and download the report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 356,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-45f3f311a244eb4",
+      "title": "Dashboard app should maximize a panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 393,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-ec5bf11a3d3bb38",
+      "title": "Dashboard app should display created by for a newly created dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 405,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-f52ee7d56f99c26",
+      "title": "Dashboard app should add panels from library to dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 436,
+        "column": 7
+      }
+    },
+    {
+      "id": "01d528d0a32d16a-5c728f3f7520ee5",
+      "title": "Dashboard app should add a URL drilldown to a lens panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/dashboard_tests/dashboard.spec.ts",
+        "line": 468,
+        "column": 7
+      }
+    }
+  ]
+}

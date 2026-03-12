@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommonAlertState } from '../../../common/types/alerts';
+import type { CommonAlertState } from '../../../common/types/alerts';
 
 export function sortByNewestAlert(a: CommonAlertState, b: CommonAlertState) {
   if (a.state.ui.triggeredMS === b.state.ui.triggeredMS) {

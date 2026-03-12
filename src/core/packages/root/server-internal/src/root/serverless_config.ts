@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, type Type } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-groups';
 

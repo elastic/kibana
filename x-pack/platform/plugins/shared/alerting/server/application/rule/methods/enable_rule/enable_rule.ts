@@ -5,19 +5,20 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import {
   updateMeta,
   createNewAPIKeySet,
   scheduleTask,
-  migrateLegacyActions,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -40,7 +41,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
-  let references: SavedObjectReference[];
 
   try {
     enableRuleParamsSchema.validate(params);
@@ -49,6 +49,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const { id } = params;
+  let alert: SavedObject<RawRule>;
   try {
     const decryptedAlert =
       await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -61,17 +62,13 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
-    references = decryptedAlert.references;
+    alert = decryptedAlert;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      id
-    );
+    alert = await context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
     attributes = alert.attributes;
     version = alert.version;
-    references = alert.references;
   }
 
   const validationPayload = await validateScheduleLimit({
@@ -112,6 +109,22 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     throw error;
   }
 
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+  const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
+  const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+
+  if (isLifecycleAlert && context.alertsService) {
+    try {
+      await context.alertsService.clearAlertFlappingHistory({
+        indices,
+        ruleIds: [id],
+      });
+    } catch (error) {
+      // Don't throw if we can't clear the flapping history for whatever reason
+      context.logger.error(`Failure to clear flapping history from rule ${id} - ${error.message}`);
+    }
+  }
+
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.ENABLE,
@@ -123,27 +136,34 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
+    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
     const now = new Date();
 
     const schedule = attributes.schedule as IntervalSchedule;
 
-    const updateAttributes = updateMeta(context, {
-      ...attributes,
-      ...(!existingApiKey &&
-        (await createNewAPIKeySet(context, {
+    const apiKeyAttributes = !existingApiKey
+      ? await createNewAPIKeySet(context, {
           id: attributes.alertTypeId,
           ruleName: attributes.name,
           username,
           shouldUpdateApiKey: true,
-        }))),
+        })
+      : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
+
+    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+      attributes.tags,
+      existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
+      existingApiKey ? attributes.apiKeyCreatedByUser : apiKeyAttributes.apiKeyCreatedByUser,
+      context.isServerless,
+      context.featureFlags
+    );
+
+    const updateAttributes = updateMeta(context, {
+      ...attributes,
+      ...apiKeyAttributes,
+      tags: tagsWithUiamCheck,
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
@@ -163,20 +183,15 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     try {
       // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
       // we call create with overwrite=true
-      if (migratedActions.hasLegacyActions) {
+      if (migratedIds.includes(alert.id)) {
         await context.unsecuredSavedObjectsClient.create<RawRule>(
           RULE_SAVED_OBJECT_TYPE,
-          {
-            ...updateAttributes,
-            actions: migratedActions.resultedActions,
-            throttle: undefined,
-            notifyWhen: undefined,
-          },
+          updateAttributes,
           {
             id,
             overwrite: true,
             version,
-            references: migratedActions.resultedReferences,
+            references: alert.references,
           }
         );
       } else {

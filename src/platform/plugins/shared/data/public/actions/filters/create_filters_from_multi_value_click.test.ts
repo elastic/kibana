@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromMultiValueClickAction } from './create_filters_from_multi_value_click';
-import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { BooleanRelation, Filter } from '@kbn/es-query';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { BytesFormat } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { BooleanRelation } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',
@@ -89,18 +91,17 @@ describe('createFiltersFromMultiValueClickAction', () => {
     ];
 
     const dataStart = dataPluginMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.get = jest.fn().mockResolvedValue({
+      id: 'logstash-*',
+      fields: {
+        getByName: () => mockField,
+        filter: () => [mockField],
+      },
+      getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+    });
     setSearchService(dataStart.search);
-    setIndexPatterns({
-      ...dataStart.indexPatterns,
-      get: async () => ({
-        id: 'logstash-*',
-        fields: {
-          getByName: () => mockField,
-          filter: () => [mockField],
-        },
-        getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
-      }),
-    } as unknown as DataViewsContract);
+    setIndexPatterns(dataViews);
   });
 
   test('ignores event when value for rows is not provided', async () => {

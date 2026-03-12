@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { forwardRef, Ref, useImperativeHandle } from 'react';
-import { ShapeDrawerProps, ShapeRef } from './shape_factory';
+import type { Ref } from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
+import type { ShapeDrawerProps, ShapeRef } from './shape_factory';
 
 function ShapeDrawerComponent(props: ShapeDrawerProps, ref: Ref<ShapeRef>) {
   const { shapeType, getShape } = props;

@@ -5,97 +5,104 @@
  * 2.0.
  */
 
-import { mockHttpRequest, pageHelpers } from './helpers';
+import { fireEvent, screen, within } from '@testing-library/react';
 
+import { mockHttpRequest, renderJobCreate } from './helpers';
 import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
-const { setup } = pageHelpers.jobCreate;
-
 describe('Create Rollup Job, step 4: Histogram', () => {
-  let find;
-  let exists;
-  let actions;
-  let getEuiStepsHorizontalActive;
-  let goToStep;
-  let table;
-  let form;
   let startMock;
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  const setInputValue = (testId, value) => {
+    const input = screen.getByTestId(testId);
+    fireEvent.change(input, { target: { value } });
+    fireEvent.blur(input);
+  };
+
+  const clickNext = () => fireEvent.click(screen.getByTestId('rollupJobNextButton'));
+  const clickBack = () => fireEvent.click(screen.getByTestId('rollupJobBackButton'));
+
+  const goToStep4 = async () => {
+    // Step 1: Logistics
+    setInputValue('rollupJobName', 'test-job');
+    setInputValue('rollupIndexPattern', 'kibana*');
+    setInputValue('rollupIndexName', 'rollup-index');
+    await screen.findByTestId('fieldIndexPatternSuccessMessage');
+    clickNext();
+    await screen.findByTestId('rollupJobCreateDateHistogramTitle');
+
+    // Step 2: Date histogram
+    setInputValue('rollupJobInterval', '10m');
+    clickNext();
+    await screen.findByTestId('rollupJobCreateTermsTitle');
+
+    // Step 3: Terms (optional)
+    clickNext();
+    await screen.findByTestId('rollupJobCreateHistogramTitle');
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
-  beforeEach(() => {
-    // Set "default" mock responses by not providing any arguments
     mockHttpRequest(startMock.http);
-
-    ({ find, exists, actions, getEuiStepsHorizontalActive, goToStep, table, form } = setup());
-  });
-
-  afterEach(() => {
-    startMock.http.get.mockClear();
-    startMock.http.post.mockClear();
-    startMock.http.put.mockClear();
+    renderJobCreate();
+    await screen.findByTestId('rollupJobCreateLogisticsTitle');
   });
 
   const numericFields = ['a-numericField', 'b-numericField'];
 
   const goToStepAndOpenFieldChooser = async () => {
-    await goToStep(4);
-    find('rollupJobShowFieldChooserButton').simulate('click');
+    await goToStep4();
+    fireEvent.click(screen.getByTestId('rollupJobShowFieldChooserButton'));
+    await screen.findByTestId('rollupJobHistogramFieldChooser');
   };
 
   describe('layout', () => {
     beforeEach(async () => {
-      await goToStep(4);
+      await goToStep4();
     });
 
     it('should have the horizontal step active on "Histogram"', () => {
-      expect(getEuiStepsHorizontalActive()).toContain('Histogram');
+      expect(screen.getByTestId(/createRollupStep4--active/)).toHaveTextContent('Histogram');
     });
 
     it('should have the title set to "Terms"', () => {
-      expect(exists('rollupJobCreateHistogramTitle')).toBe(true);
+      expect(screen.getByTestId('rollupJobCreateHistogramTitle')).toBeInTheDocument();
     });
 
     it('should have a link to the documentation', () => {
-      expect(exists('rollupJobCreateHistogramDocsButton')).toBe(true);
+      expect(screen.getByTestId('rollupJobCreateHistogramDocsButton')).toBeInTheDocument();
     });
 
     test('should have a deprecation callout', () => {
-      expect(exists('rollupDeprecationCallout')).toBe(true);
+      expect(screen.getByTestId('rollupDeprecationCallout')).toBeInTheDocument();
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(exists('rollupJobBackButton')).toBe(true);
-      expect(exists('rollupJobNextButton')).toBe(true);
-      expect(exists('rollupJobSaveButton')).toBe(false);
+      expect(screen.getByTestId('rollupJobBackButton')).toBeInTheDocument();
+      expect(screen.getByTestId('rollupJobNextButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('rollupJobSaveButton')).not.toBeInTheDocument();
     });
 
     it('should go to the "Terms" step when clicking the back button', async () => {
-      actions.clickPreviousStep();
-      expect(getEuiStepsHorizontalActive()).toContain('Terms');
+      clickBack();
+      expect(await screen.findByTestId('rollupJobCreateTermsTitle')).toBeInTheDocument();
     });
 
     it('should go to the "Metrics" step when clicking the next button', async () => {
-      actions.clickNextStep();
-      expect(getEuiStepsHorizontalActive()).toContain('Metrics');
+      clickNext();
+      expect(await screen.findByTestId('rollupJobCreateMetricsTitle')).toBeInTheDocument();
     });
 
     it('should have a button to display the list of histogram fields to chose from', () => {
-      expect(exists('rollupJobHistogramFieldChooser')).toBe(false);
+      expect(screen.queryByTestId('rollupJobHistogramFieldChooser')).not.toBeInTheDocument();
 
-      find('rollupJobShowFieldChooserButton').simulate('click');
+      fireEvent.click(screen.getByTestId('rollupJobShowFieldChooserButton'));
 
-      expect(exists('rollupJobHistogramFieldChooser')).toBe(true);
+      expect(screen.getByTestId('rollupJobHistogramFieldChooser')).toBeInTheDocument();
     });
   });
 
@@ -106,15 +113,17 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should have the title set to "Add histogram fields"', async () => {
-        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add histogram fields');
+        expect(screen.getByTestId('rollupJobCreateFlyoutTitle')).toHaveTextContent(
+          'Add histogram fields'
+        );
       });
 
       it('should have a button to close the flyout', () => {
-        expect(exists('rollupJobHistogramFieldChooser')).toBe(true);
+        expect(screen.getByTestId('rollupJobHistogramFieldChooser')).toBeInTheDocument();
 
-        find('euiFlyoutCloseButton').simulate('click');
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
-        expect(exists('rollupJobHistogramFieldChooser')).toBe(false);
+        expect(screen.queryByTestId('rollupJobHistogramFieldChooser')).not.toBeInTheDocument();
       });
     });
 
@@ -122,10 +131,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       it('should indicate it to the user', async () => {
         mockHttpRequest(startMock.http, { indxPatternVldtResp: { numericFields: [] } });
         await goToStepAndOpenFieldChooser();
-
-        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
-
-        expect(tableCellsValues).toEqual([['No items found']]);
+        expect(screen.getByText('No items found')).toBeInTheDocument();
       });
     });
 
@@ -136,98 +142,80 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should display the histogram fields available', async () => {
-        const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldChooser-table');
-
-        expect(tableCellsValues).toEqual([['a-numericField'], ['b-numericField']]);
+        const chooserTable = screen.getByTestId('rollupJobHistogramFieldChooser-table');
+        expect(chooserTable).toHaveTextContent('a-numericField');
+        expect(chooserTable).toHaveTextContent('b-numericField');
       });
 
       it('should add histogram field to the field list when clicking on it', () => {
-        let { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
-        expect(tableCellsValues).toEqual([['No histogram fields added']]); // make sure the field list is empty
+        expect(screen.getByText('No histogram fields added')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('a-numericField'));
 
-        const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
-        rows[0].reactWrapper.simulate('click'); // Select first row
-
-        ({ tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList'));
-        const [firstRow] = tableCellsValues;
-        expect(firstRow[0]).toEqual('a-numericField');
+        const fieldList = screen.getByTestId('rollupJobHistogramFieldList');
+        expect(fieldList).toHaveTextContent('a-numericField');
       });
     });
   });
 
   describe('fields list', () => {
     it('should have an empty field list', async () => {
-      await goToStep(4);
-
-      const { tableCellsValues } = table.getMetaData('rollupJobHistogramFieldList');
-      expect(tableCellsValues).toEqual([['No histogram fields added']]);
+      await goToStep4();
+      expect(screen.getByText('No histogram fields added')).toBeInTheDocument();
     });
 
     it('should have a delete button on each row to remove an histogram field', async () => {
       // First let's add a term to the list
       mockHttpRequest(startMock.http, { indxPatternVldtResp: { numericFields } });
       await goToStepAndOpenFieldChooser();
-      const { rows: fieldChooserRows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
-      fieldChooserRows[0].reactWrapper.simulate('click');
+      fireEvent.click(screen.getByText('a-numericField'));
 
-      // Make sure rows value has been set
-      let { rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList');
-      expect(fieldListRows[0].columns[0].value).not.toEqual('No histogram fields added');
+      const fieldList = screen.getByTestId('rollupJobHistogramFieldList');
+      const removeButtons = within(fieldList).getAllByRole('button', { name: /remove/i });
+      fireEvent.click(removeButtons[0]);
 
-      const columnsFirstRow = fieldListRows[0].columns;
-      // The last column is the eui "actions" column
-      const deleteButton = columnsFirstRow[columnsFirstRow.length - 1].reactWrapper.find('button');
-      deleteButton.simulate('click');
-
-      ({ rows: fieldListRows } = table.getMetaData('rollupJobHistogramFieldList'));
-      expect(fieldListRows[0].columns[0].value).toEqual('No histogram fields added');
+      expect(screen.getByText('No histogram fields added')).toBeInTheDocument();
     });
   });
 
   describe('interval', () => {
-    const addHistogramFieldToList = () => {
-      find('rollupJobShowFieldChooserButton').simulate('click');
-      const { rows } = table.getMetaData('rollupJobHistogramFieldChooser-table');
-      rows[0].reactWrapper.simulate('click');
-    };
-
     beforeEach(async () => {
       mockHttpRequest(startMock.http, { indxPatternVldtResp: { numericFields } });
-      await goToStep(4);
-      addHistogramFieldToList();
+      await goToStep4();
+      fireEvent.click(screen.getByTestId('rollupJobShowFieldChooserButton'));
+      await screen.findByTestId('rollupJobHistogramFieldChooser-table');
+      fireEvent.click(screen.getByText('a-numericField'));
+      expect(await screen.findByTestId('rollupJobCreateHistogramInterval')).toBeInTheDocument();
     });
 
     describe('input validation', () => {
       afterEach(() => {
-        expect(find('rollupJobNextButton').props().disabled).toBe(true);
+        expect(screen.getByTestId('rollupJobNextButton')).toBeDisabled();
       });
 
       it('should display errors when clicking "next" without filling the interval', () => {
-        expect(exists('rollupJobCreateStepError')).toBeFalsy();
-
-        actions.clickNextStep();
-
-        expect(exists('rollupJobCreateStepError')).toBeTruthy();
-        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        expect(screen.queryByTestId('rollupJobCreateStepError')).not.toBeInTheDocument();
+        clickNext();
+        expect(screen.getByTestId('rollupJobCreateStepError')).toBeInTheDocument();
+        expect(document.body.textContent).toContain('Interval must be a whole number.');
       });
 
       it('should be a whole number', () => {
-        form.setInputValue('rollupJobCreateHistogramInterval', 5.5);
-        actions.clickNextStep();
-        expect(form.getErrorsMessages()).toEqual(['Interval must be a whole number.']);
+        setInputValue('rollupJobCreateHistogramInterval', '5.5');
+        clickNext();
+        expect(document.body.textContent).toContain('Interval must be a whole number.');
       });
 
       it('should be greater than zero', () => {
-        form.setInputValue('rollupJobCreateHistogramInterval', -1);
-        actions.clickNextStep();
-        expect(form.getErrorsMessages()).toEqual(['Interval must be greater than zero.']);
+        setInputValue('rollupJobCreateHistogramInterval', '-1');
+        clickNext();
+        expect(document.body.textContent).toContain('Interval must be greater than zero.');
       });
     });
 
     it('should go to next "Metrics" step if value is valid', () => {
-      form.setInputValue('rollupJobCreateHistogramInterval', 3);
-      actions.clickNextStep();
-      expect(getEuiStepsHorizontalActive()).toContain('Metrics');
+      setInputValue('rollupJobCreateHistogramInterval', '3');
+      clickNext();
+      expect(screen.getByTestId(/createRollupStep5--active/)).toHaveTextContent('Metrics');
     });
   });
 });

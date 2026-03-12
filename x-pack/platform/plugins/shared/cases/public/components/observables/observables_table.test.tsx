@@ -18,6 +18,7 @@ describe('ObservablesTable', () => {
       observables: mockObservables,
     },
     isLoading: false,
+    onExtractObservablesChanged: jest.fn(),
   };
 
   beforeEach(() => {
@@ -30,8 +31,8 @@ describe('ObservablesTable', () => {
     expect(screen.getByTestId('cases-observables-table')).toBeInTheDocument();
 
     expect(screen.getByText('Showing 2 observables')).toBeInTheDocument();
-    expect(screen.getByText('Observable type')).toBeInTheDocument();
-    expect(screen.getByText('Observable value')).toBeInTheDocument();
+    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Name')).toBeInTheDocument();
   });
 
   it('renders loading indicator when loading', async () => {

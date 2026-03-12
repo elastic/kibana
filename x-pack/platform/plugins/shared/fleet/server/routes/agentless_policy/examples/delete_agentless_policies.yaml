@@ -1,0 +1,33 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          createAgentlessPoliciesResponseExample:
+            description: 'Example response showing the successful result of communication initialisation over MCP protocol'
+            value:
+              item:
+                id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictErrorResponseExample:
+            description: 'Example of a conflict error response'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'An error message describing what went wrong'

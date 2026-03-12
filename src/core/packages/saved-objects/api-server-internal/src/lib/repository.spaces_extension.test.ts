@@ -23,18 +23,18 @@ import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import {
+import type {
   SavedObjectsResolveResponse,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import {
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import type {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsEncryptionExtension,
   SavedObject,
-  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
   createRegistry,

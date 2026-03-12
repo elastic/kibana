@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../common/constants';
 
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
@@ -51,7 +52,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -107,6 +108,13 @@ export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRunTitle',
   {
     defaultMessage: 'Manual run',
+  }
+);
+
+export const BULK_ACTION_FILL_RULE_GAPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillGapsTitle',
+  {
+    defaultMessage: 'Fill gaps',
   }
 );
 
@@ -187,6 +195,34 @@ export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.alertSuppressionTitle',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
+  {
+    defaultMessage: 'Apply alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
+  {
+    defaultMessage: 'Apply alert suppression to threshold rules',
+  }
+);
+
+export const BULK_ACTION_DELETE_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteAlertSuppression',
+  {
+    defaultMessage: 'Remove alert suppression',
+  }
+);
+
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
@@ -238,6 +274,29 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastTitle',
+  {
+    defaultMessage: 'Scheduling gap fills',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: 'Scheduling gap fills for {rulesCount, plural, =1 {# rule} other {# rules}}.',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastNotifyButtonLabel',
+  {
+    defaultMessage: `Notify me when done`,
+  }
+);
+
 export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
@@ -253,6 +312,16 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: num
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'The gaps of {rulesCount, plural, =1 {# rule} other {# rules}} cannot be filled',
     }
   );
 
@@ -316,10 +385,24 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
     }
   );
 
-export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkFillRuleGapsConfirmation.confirmButtonLabel',
   {
-    defaultMessage: 'This action can only be applied',
+    defaultMessage: 'Schedule gap fills',
+  }
+);
+
+export const BULK_ACTION_LIMIT_ERROR_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionErrorModalMessage',
+  {
+    defaultMessage: 'Cannot execute the bulk action',
+  }
+);
+
+export const BULK_ACTION_ERROR_MODAL_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkActionErrorModalCloseButton',
+  {
+    defaultMessage: 'Close',
   }
 );
 
@@ -329,16 +412,19 @@ export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}.',
     }
   );
 
-export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
+export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Cannot schedule gap fills for more than {rulesCount, plural, =1 {# rule} other {# rules}}.',
+    }
+  );
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -513,6 +599,15 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.transla
   }
 );
 
+export const RULES_TABLE_MAX_RULES_WITH_GAPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.rulesTable.maxRulesWithGapsWarningMessage',
+  {
+    values: { maxRules: MAX_RULES_WITH_GAPS_TO_FETCH },
+    defaultMessage:
+      'Showing up to the first {maxRules} rules with gaps in the selected time range. Adjust your filters to narrow down the selection.',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
   {
@@ -577,6 +672,13 @@ export const CLEAR_SELECTION = i18n.translate(
   }
 );
 
+export const RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tableCaption',
+  {
+    defaultMessage: 'Detection rules',
+  }
+);
+
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
     values: { selectedRules },
@@ -597,10 +699,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+export const LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaRulesFeaturePrivileges',
   {
-    defaultMessage: 'You do not have Kibana Security privileges',
+    defaultMessage: 'You do not have Kibana Rules privileges',
   }
 );
 
@@ -622,6 +724,28 @@ export const EXPORT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription',
   {
     defaultMessage: 'Export rule',
+  }
+);
+
+export const REVERT_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleDescription',
+  {
+    defaultMessage: 'Revert to Elastic version',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipTitle',
+  {
+    defaultMessage: 'Unable to revert rule',
+  }
+);
+
+export const REVERT_RULE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.revertRuleTooltipContent',
+  {
+    defaultMessage:
+      "This rule hasn't been updated in a while and there's no available version to revert to. We recommend updating this rule instead.",
   }
 );
 
@@ -772,20 +896,6 @@ export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
   }
 );
 
-export const RULES_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.rules',
-  {
-    defaultMessage: 'Rules',
-  }
-);
-
-export const MONITORING_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
-  {
-    defaultMessage: 'Rule Monitoring',
-  }
-);
-
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
   {
@@ -874,6 +984,34 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
+export const GAP_FILL_STATUS_FILTER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
+  {
+    defaultMessage: 'Gap fill status',
+  }
+);
+
+export const GAP_FILL_STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_FILL_STATUS_UNFILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_FILL_STATUS_FILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
   }
 );
 
@@ -1061,13 +1199,6 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
     defaultMessage: 'Automatically refresh table',
-  }
-);
-
-export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
-  {
-    defaultMessage: 'Refresh settings',
   }
 );
 
@@ -1332,6 +1463,58 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
   );
 
 /**
+ * Bulk fill gaps for rules
+ */
+
+export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
+  {
+    defaultMessage: 'Gap fills successfully scheduled',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_ALL_SKIPPED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle.allSkipped',
+  {
+    defaultMessage: 'No gap fills were scheduled',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling gap fills',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (succeeded: number, skipped: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
+    {
+      values: { succeededRulesCount: succeeded, skippedRulesCount: skipped },
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully scheduled gap fills for # rule. } other {You've successfully scheduled gap fills for # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was excluded from the bulk schedule gap fill action.} other { # rules were excluded from the bulk schedule gap fill action.}}`,
+    }
+  );
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_ALL_RULES_SKIPPED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription.allSkipped',
+  {
+    defaultMessage: 'No gaps were detected for the selected time range.',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        'Unable to schedule gap fills for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+    }
+  );
+
+/**
  * Bulk Edit
  */
 
@@ -1407,10 +1590,17 @@ export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
 );
 
 export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetailsV2',
   {
     defaultMessage:
-      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
+      'Please provide a comprehensive analysis of each selected Elastic Security detection rule. For each rule, include:\n' +
+      '- The rule name and a brief summary of its purpose.\n' +
+      '- The full detection query as published in Elastic’s official detection rules repository.\n' +
+      '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
+      '- The relevance of the rule to modern threats or attack techniques (e.g., MITRE ATT&CK mapping).\n' +
+      '- Typical implications and recommended response actions for an organization if this rule triggers.\n' +
+      '- Any notable false positive considerations or tuning recommendations.\n' +
+      'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.',
   }
 );
 
@@ -1481,5 +1671,12 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
   {
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
+  }
+);
+
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
+  {
+    defaultMessage: 'Settings',
   }
 );

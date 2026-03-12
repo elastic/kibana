@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
-import { MonitorSummary, Ping } from '../../../../../common/runtime_types';
+import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
+import type { MonitorSummary, Ping } from '../../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
@@ -25,8 +25,8 @@ export const getInfraContainerHref = (
 
   return containerId
     ? locator.getRedirectUrl({
-        assetType: 'container',
-        assetId: containerId,
+        entityType: 'container',
+        entityId: containerId,
       })
     : undefined;
 };
@@ -46,8 +46,8 @@ export const getInfraKubernetesHref = (
 
   return podId
     ? locator.getRedirectUrl({
-        assetType: 'pod',
-        assetId: podId,
+        entityType: 'pod',
+        entityId: podId,
       })
     : undefined;
 };

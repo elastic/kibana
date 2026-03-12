@@ -17,10 +17,7 @@ import {
 } from '../..';
 
 import { Error as FleetError } from '../../../../../../../components';
-import {
-  useKibanaVersion,
-  useShowCompleteAgentInstructions,
-} from '../../../../../../../../../hooks';
+import { useKibanaVersion } from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
   ConfigureStandaloneAgentStep,
@@ -28,6 +25,8 @@ import {
 import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
 import { useFetchFullPolicy } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
+
+import { getAgentPoliciesWithNonFipsIntegrations } from '../../../../../../../hooks/use_agent_policies_with_fips';
 
 import type { InstallAgentPageProps } from './types';
 
@@ -40,9 +39,6 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
 
   const { yaml, onCreateApiKey, isCreatingApiKey, apiKey, downloadYaml } =
     useFetchFullPolicy(agentPolicy);
-
-  const { onChangeShowCompleteAgentInstructions, showCompleteAgentInstructions } =
-    useShowCompleteAgentInstructions();
 
   if (!agentPolicy) {
     return (
@@ -58,10 +54,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
     );
   }
 
-  const installManagedCommands = StandaloneInstructions({
-    agentVersion: kibanaVersion,
-    showCompleteAgentInstructions,
-  });
+  const installManagedCommands = StandaloneInstructions({ agentVersion: kibanaVersion });
 
   const steps = [
     ConfigureStandaloneAgentStep({
@@ -80,8 +73,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
-      onChangeShowCompleteAgentInstructions,
-      showCompleteAgentInstructions,
+      nonFipsIntegrations: getAgentPoliciesWithNonFipsIntegrations(agentPolicy),
     }),
   ];
 

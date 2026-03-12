@@ -20,13 +20,14 @@ import {
 } from '@elastic/eui';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
-import { SettingsTabs } from '@kbn/management-settings-types/tab';
+import type { SettingsTabs } from '@kbn/management-settings-types/tab';
 import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
 import { readOnlyBadge } from './read_only_badge';
 import { useScopeFields } from './hooks/use_scope_fields';
-import { QueryInput, QueryInputProps } from './query_input';
+import type { QueryInputProps } from './query_input';
+import { QueryInput } from './query_input';
 import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
@@ -141,7 +142,7 @@ export const SettingsApplication = () => {
             ))}
           </EuiTabs>
           <EuiSpacer size="xl" />
-          <EuiCallOut title={selectedTab.callOutTitle} iconType="warning">
+          <EuiCallOut announceOnMount={false} title={selectedTab.callOutTitle} iconType="warning">
             <p>{selectedTab.callOutText}</p>
           </EuiCallOut>
         </>

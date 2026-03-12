@@ -16,12 +16,6 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { BoldCode, StyledTime } from './styles';
 import { GeneratedText } from '../generated_text';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -35,6 +29,7 @@ import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
+import type { ResolverCellActionRenderer } from '../../types';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -47,11 +42,13 @@ export const EventDetail = memo(function EventDetail({
   id,
   nodeID,
   eventCategory: eventType,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
   /** The event type to show in the breadcrumbs */
   eventCategory: string;
+  renderCellActions: ResolverCellActionRenderer;
 }) {
   const isEventLoading = useSelector((state: State) =>
     selectors.isCurrentRelatedEventLoading(state.analyzer[id])
@@ -80,6 +77,7 @@ export const EventDetail = memo(function EventDetail({
       event={event}
       processEvent={processEvent}
       eventType={eventType}
+      renderCellActions={renderCellActions}
     />
   ) : (
     <PanelContentError id={id} translatedErrorMessage={eventDetailRequestError} />
@@ -97,6 +95,7 @@ const EventDetailContents = memo(function ({
   event,
   eventType,
   processEvent,
+  renderCellActions,
 }: {
   id: string;
   nodeID: string;
@@ -106,6 +105,7 @@ const EventDetailContents = memo(function ({
    */
   eventType: string;
   processEvent: SafeResolverEvent | undefined;
+  renderCellActions: ResolverCellActionRenderer;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
   const formattedDate =
@@ -152,7 +152,7 @@ const EventDetailContents = memo(function ({
         </GeneratedText>
       </StyledDescriptiveName>
       <EuiSpacer size="l" />
-      <EventDetailFields event={event} id={id} />
+      <EventDetailFields event={event} id={id} renderCellActions={renderCellActions} />
     </div>
   );
 });
@@ -162,7 +162,15 @@ interface EventDetailsTableView {
   description: string;
 }
 
-function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string }) {
+function EventDetailFields({
+  event,
+  id,
+  renderCellActions,
+}: {
+  event: SafeResolverEvent;
+  id: string;
+  renderCellActions: ResolverCellActionRenderer;
+}) {
   const descriptions = useMemo(() => {
     const returnValue: EventDetailsTableView[] = [];
     const expandedEventObject: object = expandDottedObject(event);
@@ -213,21 +221,12 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
         />
       ),
       render(data: EventDetailsTableView) {
-        return (
-          <SecurityCellActions
-            data={{
-              field: data.title,
-              value: data.description,
-            }}
-            visibleCellActions={5}
-            triggerId={SecurityCellActionsTrigger.DEFAULT}
-            mode={CellActionsMode.HOVER_DOWN}
-            sourcererScopeId={getSourcererScopeId(id)}
-            metadata={{ scopeId: id }}
-          >
-            {data.description}
-          </SecurityCellActions>
-        );
+        return renderCellActions({
+          field: data.title,
+          value: data.description,
+          children: data.description,
+          scopeId: id,
+        });
       },
     },
   ];
@@ -238,6 +237,12 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
       search={search}
       pagination={true}
       sorting
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.panel.eventDetail.eventFieldsCaption',
+        {
+          defaultMessage: 'Event fields',
+        }
+      )}
     />
   );
 }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MemoryHistory, createMemoryHistory } from 'history';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -24,7 +25,7 @@ jest.mock('../dashboard_top_nav');
 describe('Dashboard App', () => {
   dataService.query.filterManager.getFilters = jest.fn().mockImplementation(() => []);
 
-  const { api: dashboardApi, cleanup } = buildMockDashboardApi();
+  const { api: dashboardApi, internalApi: dashboardInternalApi, cleanup } = buildMockDashboardApi();
   let mockHistory: MemoryHistory;
   // this is in url_utils dashboardApi expandedPanel subscription
   let historySpy: jest.SpyInstance;
@@ -44,7 +45,7 @@ describe('Dashboard App', () => {
       ({ onApiAvailable }: DashboardRendererProps) => {
         // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
         useEffect(() => {
-          onApiAvailable?.(dashboardApi);
+          onApiAvailable?.(dashboardApi, dashboardInternalApi);
         }, [onApiAvailable]);
 
         return <div>Test renderer</div>;

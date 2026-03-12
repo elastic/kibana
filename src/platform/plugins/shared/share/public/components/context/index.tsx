@@ -7,26 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, createContext, useContext } from 'react';
+import React, { type PropsWithChildren, createContext, useContext, useState } from 'react';
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
 export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
   onClose: () => void;
   shareMenuItems: ShareConfigs[];
+  isSaving?: boolean;
 }
 
-const ShareTabsContext = createContext<IShareContext | null>(null);
+const ShareContext = createContext<IShareContext | null>(null);
 
-export const ShareMenuProvider = ({
+export const ShareProvider = ({
   shareContext,
   children,
 }: PropsWithChildren<{ shareContext: IShareContext }>) => {
-  return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
+  // If consumers provide an onSave function, we need to manage the state internally
+  const isStateful = Boolean(shareContext.onSave);
+  const [internalIsDirty, setInternalIsDirty] = useState(shareContext.isDirty);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (shareContext.onSave) {
+      setIsSaving(true);
+      try {
+        await shareContext.onSave();
+        setInternalIsDirty(false);
+      } catch (error) {
+        // onSave function is responsible for handling the error
+        // In case it doesn't, we still want to catch it to
+        // make sure the loading state is reset and allow retries.
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  };
+
+  const value: IShareContext = {
+    ...shareContext,
+    isDirty: isStateful ? internalIsDirty : shareContext.isDirty,
+    isSaving,
+    onSave: isStateful ? handleSave : undefined,
+  };
+
+  return <ShareContext.Provider value={value}>{children}</ShareContext.Provider>;
 };
 
 export const useShareContext = () => {
-  const context = useContext(ShareTabsContext);
+  const context = useContext(ShareContext);
 
   if (!context) {
     throw new Error(
@@ -37,7 +66,7 @@ export const useShareContext = () => {
   return context;
 };
 
-export const useShareTabsContext = <
+export const useShareTypeContext = <
   T extends Exclude<ShareTypes, 'legacy'>,
   G extends T extends 'integration' ? string : never
 >(
@@ -53,7 +82,10 @@ export const useShareTabsContext = <
     ? Array<Extract<ShareConfigs, { shareType: T; groupId?: G }>>
     : Extract<ShareConfigs, { shareType: T }> = (
     shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
-  ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
+  ).call(
+    shareMenuItems,
+    (item) => item.shareType === shareType && item?.groupId === (groupId ?? item?.groupId)
+  );
 
   type ObjectTypeMetaConfig = IShareContext['objectTypeMeta']['config'];
 

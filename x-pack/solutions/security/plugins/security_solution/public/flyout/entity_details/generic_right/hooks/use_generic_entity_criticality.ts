@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   CriticalityLevelWithUnassigned,
   IdField,
@@ -82,16 +82,18 @@ export const useGenericEntityCriticality = ({
       );
 
       queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, {
-        criticality_level: params.criticalityLevel,
+        criticality_level: params?.criticalityLevel || 'unassigned',
       });
 
       return { previousData };
     },
 
     onError: (_error, _params, context) => {
-      if (context?.previousData !== undefined) {
-        queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, context.previousData);
-      }
+      if (context?.previousData === undefined) {
+        queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, {
+          criticality_level: 'unassigned',
+        });
+      } else queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, context?.previousData);
     },
 
     onSuccess: () => {

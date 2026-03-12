@@ -45,7 +45,7 @@ const FIELDS = [
     }),
   },
   {
-    field: 'host.hostname',
+    field: 'host.name',
     label: i18n.translate('xpack.infra.nodeDetails.labels.hostname', {
       defaultMessage: 'Hostname',
     }),
@@ -95,8 +95,7 @@ const getValueForField = (metadata: InfraMetadata, { field, isBoolean }: FieldDe
       ? i18n.translate('xpack.infra.nodeDetails.yes', { defaultMessage: 'Yes' })
       : i18n.translate('xpack.infra.nodeDetails.no', { defaultMessage: 'No' });
   }
-  const value = get(metadata.info, field, '--');
-  return value;
+  return get(metadata.info, field, '--');
 };
 
 interface Props {

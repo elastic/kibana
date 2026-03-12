@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ChecklistFlyoutStep } from './checklist_step';
+export { ChecklistFlyoutStep } from './checklist_reindex_step';
+export { ChecklistModalStep } from './checklist_readonly_step';

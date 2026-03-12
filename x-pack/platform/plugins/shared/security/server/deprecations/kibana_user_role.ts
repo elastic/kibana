@@ -13,6 +13,7 @@ import type {
 import type {
   DeprecationsDetails,
   DeprecationsServiceSetup,
+  DocLinksServiceStart,
   ElasticsearchClient,
   Logger,
   PackageInfo,
@@ -30,6 +31,7 @@ interface Deps {
   license: SecurityLicense;
   logger: Logger;
   packageInfo: PackageInfo;
+  docLinks: DocLinksServiceStart;
 }
 
 function getDeprecationTitle() {
@@ -52,6 +54,7 @@ export const registerKibanaUserRoleDeprecation = ({
   logger,
   license,
   packageInfo,
+  docLinks,
 }: Deps) => {
   deprecationsService.registerDeprecations({
     getDeprecations: async (context) => {
@@ -61,8 +64,18 @@ export const registerKibanaUserRoleDeprecation = ({
       }
 
       return [
-        ...(await getUsersDeprecations(context.esClient.asCurrentUser, logger, packageInfo)),
-        ...(await getRoleMappingsDeprecations(context.esClient.asCurrentUser, logger, packageInfo)),
+        ...(await getUsersDeprecations(
+          context.esClient.asCurrentUser,
+          logger,
+          packageInfo,
+          docLinks
+        )),
+        ...(await getRoleMappingsDeprecations(
+          context.esClient.asCurrentUser,
+          logger,
+          packageInfo,
+          docLinks
+        )),
       ];
     },
   });
@@ -71,7 +84,8 @@ export const registerKibanaUserRoleDeprecation = ({
 async function getUsersDeprecations(
   client: ElasticsearchClient,
   logger: Logger,
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  docLinks: DocLinksServiceStart
 ): Promise<DeprecationsDetails[]> {
   let users: SecurityGetUserResponse;
   try {
@@ -88,7 +102,7 @@ async function getUsersDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(packageInfo, err, docLinks);
   }
 
   const usersWithKibanaUserRole = Object.values(users)
@@ -98,16 +112,13 @@ async function getUsersDeprecations(
     return [];
   }
 
-  // TODO: remove when docs support "main"
-  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
-
   return [
     {
       title: getDeprecationTitle(),
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${docsBranch}/built-in-roles.html`,
+      documentationUrl: docLinks.links.security.roles,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -135,7 +146,8 @@ async function getUsersDeprecations(
 async function getRoleMappingsDeprecations(
   client: ElasticsearchClient,
   logger: Logger,
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  docLinks: DocLinksServiceStart
 ): Promise<DeprecationsDetails[]> {
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
@@ -152,7 +164,7 @@ async function getRoleMappingsDeprecations(
         )}.`
       );
     }
-    return deprecationError(packageInfo, err);
+    return deprecationError(packageInfo, err, docLinks);
   }
 
   const roleMappingsWithKibanaUserRole = Object.entries(roleMappings)
@@ -162,16 +174,13 @@ async function getRoleMappingsDeprecations(
     return [];
   }
 
-  // TODO: remove when docs support "main"
-  const docsBranch = packageInfo.branch === 'main' ? 'master' : packageInfo.branch;
-
   return [
     {
       title: getDeprecationTitle(),
       message: getDeprecationMessage(),
       level: 'warning',
       deprecationType: 'feature',
-      documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${docsBranch}/built-in-roles.html`,
+      documentationUrl: docLinks.links.security.roles,
       correctiveActions: {
         api: {
           method: 'POST',
@@ -196,7 +205,11 @@ async function getRoleMappingsDeprecations(
   ];
 }
 
-function deprecationError(packageInfo: PackageInfo, error: Error): DeprecationsDetails[] {
+function deprecationError(
+  packageInfo: PackageInfo,
+  error: Error,
+  docLinks: DocLinksServiceStart
+): DeprecationsDetails[] {
   const title = getDeprecationTitle();
 
   // TODO: remove when docs support "main"

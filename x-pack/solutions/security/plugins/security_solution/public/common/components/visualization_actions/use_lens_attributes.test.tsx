@@ -26,6 +26,11 @@ import { SecurityPageName } from '../../../app/types';
 import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
@@ -46,6 +51,10 @@ const params = {
   euiTheme: {} as EuiThemeComputed,
 };
 describe('useLensAttributes', () => {
+  beforeAll(() => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*']));
+  });
+
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
@@ -259,7 +268,7 @@ describe('useLensAttributes', () => {
     ]);
   });
 
-  it('should not set splitAccessor if stackByField is undefined', () => {
+  it('should not set splitAccessors if stackByField is undefined', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -272,13 +281,15 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessor: undefined }),
+          expect.objectContaining({ seriesType: 'bar_stacked', splitAccessors: undefined }),
         ]),
       })
     );
   });
 
   it('should return null if no indices exist', () => {
+    jest.mocked(useDataView).mockImplementation(defaultImplementation);
+
     (useSourcererDataView as jest.Mock).mockReturnValue({
       dataViewId: 'security-solution-default',
       indicesExist: false,

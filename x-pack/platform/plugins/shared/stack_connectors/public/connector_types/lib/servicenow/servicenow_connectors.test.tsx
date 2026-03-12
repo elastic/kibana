@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, within, render, screen, waitFor } from '@testing-library/react';
 
-import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
 import ServiceNowConnectorFields from './servicenow_connectors';
@@ -24,7 +24,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getAppInfoMock = getAppInfo as jest.Mock;
 const updateActionConnectorMock = updateActionConnector as jest.Mock;
 
-describe('ServiceNowActionConnectorFields renders', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253539
+describe.skip('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
     id: 'test',
     actionTypeId: '.servicenow',

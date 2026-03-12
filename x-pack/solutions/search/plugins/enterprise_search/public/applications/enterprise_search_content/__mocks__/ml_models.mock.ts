@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   MlTrainedModelDeploymentStats,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
+import type { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 export const nerModel: TrainedModelConfigResponse = {
   inference_config: {

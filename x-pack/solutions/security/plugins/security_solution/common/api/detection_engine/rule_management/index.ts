@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './bulk_actions/bulk_actions_types';
+export type * from './bulk_actions/bulk_actions_types';
 export * from './bulk_actions/bulk_actions_route.gen';
 export * from './coverage_overview/coverage_overview_route';
 export * from './crud/create_rule/create_rule_route.gen';
@@ -13,6 +13,7 @@ export * from './crud/create_rule/request_schema_validation';
 export * from './crud/delete_rule/delete_rule_route.gen';
 export * from './crud/patch_rule/patch_rule_route.gen';
 export * from './crud/patch_rule/request_schema_validation';
+export type * from './crud/patch_rule/patch_rule_with_read_privileges';
 export * from './crud/read_rule/read_rule_route.gen';
 export * from './crud/update_rule/request_schema_validation';
 export * from './crud/update_rule/update_rule_route.gen';

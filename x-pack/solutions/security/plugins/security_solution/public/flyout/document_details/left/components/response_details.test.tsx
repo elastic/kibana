@@ -12,7 +12,9 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { rawEventData, TestProviders } from '../../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -58,6 +60,10 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
+const NO_PRIVILEGES_MESSAGE =
+  'ResponsesPermission deniedTo access these results, ask your administrator for Elastic Defend Kibana privileges.';
 const NO_DATA_MESSAGE =
   "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actions(external, opens in a new tab or window).";
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
@@ -106,7 +112,27 @@ describe('<ResponseDetails />', () => {
     // TODO mock osquery results
   });
 
+  it('should show permission denied message if user does not have access to endpoint actions log management', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canAccessEndpointActionsLogManagement: false,
+      },
+    });
+    const wrapper = renderResponseDetails(contextWithResponseActions);
+
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
+
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_PRIVILEGES_MESSAGE);
+  });
+
   it('should render the empty information', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canAccessEndpointActionsLogManagement: true,
+      },
+    });
     const wrapper = renderResponseDetails(defaultContextValue);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
@@ -117,7 +143,7 @@ describe('<ResponseDetails />', () => {
   });
 
   it('should render preview message if flyout is in preview', () => {
-    const wrapper = renderResponseDetails({ ...defaultContextValue, isPreview: true });
+    const wrapper = renderResponseDetails({ ...defaultContextValue, isRulePreview: true });
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });

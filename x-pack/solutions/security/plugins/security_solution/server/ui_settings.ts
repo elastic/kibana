@@ -9,10 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
+} from '@kbn/management-settings-ids';
+import { snakeCase } from 'lodash';
+import { DefaultClosingReasonSchema } from '../common/types';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
+  DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
+  DEFAULT_ALERT_CLOSE_REASONS_KEY,
+  DEFAULT_ALERT_CLOSE_REASONS_VALUE,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -29,20 +37,25 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
-  ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -90,7 +103,7 @@ export const initUiSettings = (
         value: schema.number(),
         pause: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
@@ -111,7 +124,7 @@ export const initUiSettings = (
         from: schema.string(),
         to: schema.string(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
@@ -130,7 +143,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 50 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -151,7 +164,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 10 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -170,7 +183,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
@@ -185,30 +198,9 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
-    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer',
-        {
-          defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
-        }
-      ),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
-        {
-          defaultMessage:
-            '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
-          values: { p: (chunks) => `<p>${chunks}</p>` },
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solution: 'security',
-    },
+    ...getDefaultColdAndFrozenTiersSettings(),
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
         defaultMessage: 'Enable graph visualization',
@@ -216,8 +208,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
         }
       ),
       type: 'boolean',
@@ -225,8 +216,33 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
     },
+    ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
+      [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentLabel',
+          {
+            defaultMessage: 'Enable alerts and attacks alignment',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentDescription',
+          {
+            defaultMessage:
+              'Enabling this setting will reveal a new Attacks page under the Detections navigation item. Similarly, the Alerts page will be part of the Detections navigation item.',
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -234,8 +250,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
         }
       ),
       type: 'boolean',
@@ -243,7 +258,29 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
     },
+    ...(experimentalFeatures.siemReadinessDashboard && {
+      [ENABLE_SIEM_READINESS_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+          defaultMessage: 'Enable SIEM Readiness Dashboard',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+          {
+            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',
@@ -251,15 +288,16 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
         }
       ),
       type: 'boolean',
-      value: false,
+      value: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
@@ -284,8 +322,28 @@ export const initUiSettings = (
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.deHealthUIEnabled && {
+      [ENABLE_DE_HEALTH_UI_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.deHealthUIEnabledLabel', {
+          defaultMessage: 'Enable Detection Engine Health UI',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.deHealthUIEnabledDescription',
+          {
+            defaultMessage: `Enable the Detection Engine Health UI within Security Solution. When enabled, you can access the new Detection Engine Health page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
@@ -299,7 +357,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.string(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [IP_REPUTATION_LINKS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.ipReputationLinks', {
@@ -323,22 +381,48 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
-    [ENABLE_CCS_READ_WARNING_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
-        defaultMessage: 'CCS Rule Privileges Warning',
-      }),
-      value: true,
-      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
-        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
-        values: { p: (chunks) => `<p>${chunks}</p>` },
-      }),
-      type: 'boolean',
+    [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+        {
+          defaultMessage: 'Default suppression behavior on alert closure',
+        }
+      ),
+      value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+        {
+          defaultMessage:
+            'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+        }
+      ),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+      ]),
+      options: [
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+      ],
+      optionLabels: {
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+          {
+            defaultMessage: 'Restart suppression',
+          }
+        ),
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+          {
+            defaultMessage: 'Continue suppression until window ends',
+          }
+        ),
+      },
       category: [APP_ID],
       requiresPageReload: false,
-      schema: schema.boolean(),
-      solution: 'security',
     },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
@@ -356,7 +440,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ALERT_TAGS_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertTagsLabel', {
@@ -372,57 +456,78 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
-    [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
+    [DEFAULT_ALERT_CLOSE_REASONS_KEY]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertCloseReasonsLabel', {
+        defaultMessage: 'Alert close reasons',
+      }),
+      sensitive: true,
+      value: DEFAULT_ALERT_CLOSE_REASONS_VALUE,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.defaultAlertCloseReasonsDescription',
         {
-          defaultMessage: 'Exclude cold or frozen data tier from rule execution',
+          defaultMessage:
+            '<p>List of additional close reason options for use with alerts generated by Security Solution rules.</p><p>Predefined options include: Duplicate, False positive, True positive, Benign positive, and Other.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.arrayOf(
+        schema.string({
+          validate: (value) => {
+            // default reasons are stored as snake case
+            const asSnakeCase = snakeCase(value);
+            if (asSnakeCase in DefaultClosingReasonSchema.enum) {
+              return i18n.translate(
+                'xpack.securitySolution.uiSettings.closingReasonValidationError',
+                {
+                  defaultMessage: '"{reason}" is an invalid closing reason.',
+                  values: { reason: value },
+                }
+              );
+            }
+          },
+          minLength: 1,
+        }),
+        {
+          validate: (values) => {
+            const uniqueCount = new Set(values).size;
+            if (uniqueCount !== values.length) {
+              return i18n.translate('xpack.securitySolution.uiSettings.duplicateClosingReason', {
+                defaultMessage: 'No duplicate values.',
+              });
+            }
+          },
+        }
+      ),
+      solutionViews: ['classic', 'security'],
+    },
+    [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionLabel',
+        {
+          defaultMessage: 'Include data stream namespaces in rule execution',
         }
       ),
       description: i18n.translate(
-        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
         {
-          defaultMessage: `
-          When configured, events from the specified data tiers are not searched during rules executions.
-          <br/>This might help to improve rule performance or reduce execution time.
-          <br/>If you specify multiple data tiers, separate values with commas. For example: data_frozen,data_cold`,
+          defaultMessage:
+            'When configured, only events from the specified data stream namespaces are searched during rule execution. Provide an array of namespace strings, e.g. "namespace1","namespace2"',
         }
       ),
       type: 'array',
-      schema: schema.arrayOf(
-        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
-      ),
-      value: [],
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
+      value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
       category: [APP_ID],
       requiresPageReload: false,
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
+    ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
-              {
-                defaultMessage: 'Extended rule execution logging',
-              }
-            ),
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
-              {
-                defaultMessage:
-                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
-                values: { p: (chunks) => `<p>${chunks}</p>` },
-              }
-            ),
-            type: 'boolean',
-            schema: schema.boolean(),
-            value: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            solution: 'security',
-          },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
               'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
@@ -447,7 +552,7 @@ export const initUiSettings = (
               schema.literal(LogLevelSetting.debug),
               schema.literal(LogLevelSetting.trace),
             ]),
-            value: LogLevelSetting.error,
+            value: LogLevelSetting.info,
             options: [
               LogLevelSetting.off,
               LogLevelSetting.error,
@@ -496,7 +601,7 @@ export const initUiSettings = (
             },
             category: [APP_ID],
             requiresPageReload: false,
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
         }
       : {}),
@@ -504,29 +609,124 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
-  connectors.length > 0
-    ? {
-        [DEFAULT_AI_CONNECTOR]: {
-          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-            defaultMessage: 'Default AI Connector',
-          }),
-          // TODO, make Elastic LLM the default value once fully available in serverless
-          value: connectors[0].id,
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
-            {
-              // TODO update this copy, waiting on James Spiteri's input
-              defaultMessage: 'Default AI connector for serverless AI features (AI for SOC)',
-            }
-          ),
-          type: 'select',
-          options: connectors.map(({ id }) => id),
-          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-          category: [APP_ID],
-          requiresPageReload: true,
-          schema: schema.string(),
-          solution: 'security',
-        },
+
+export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
+  [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer', {
+      defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
+      {
+        defaultMessage:
+          '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
       }
-    : null;
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+  },
+  [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
+      {
+        defaultMessage: 'Exclude cold or frozen data tier from rule execution',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
+      {
+        defaultMessage: `
+          When configured, events from the specified data tiers are not searched during rules executions.
+          <br/>This might help to improve rule performance or reduce execution time.
+          <br/>If you specify multiple data tiers, separate values with commas. For example: data_frozen,data_cold`,
+      }
+    ),
+    type: 'array',
+    schema: schema.arrayOf(
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+    ),
+    value: [],
+    category: [APP_ID],
+    requiresPageReload: false,
+    solutionViews: ['classic', 'security'],
+  },
+  [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalence',
+      {
+        defaultMessage: 'Exclude cold and frozen tiers in Prevalence',
+      }
+    ),
+    value: false,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInPrevalenceDescription',
+      {
+        defaultMessage:
+          '<p>When enabled, cold and frozen tiers will be skipped in prevalence queries</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+  },
+});
+
+export const getDefaultValueReportSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
+      defaultMessage: 'Value report minutes per alert',
+    }),
+    value: 8,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.defaultValueMinutesDescription',
+      {
+        defaultMessage:
+          'The average review time for an analyst to review an alert. Used for calculations in the Value report.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
+      defaultMessage: 'Value report analyst hourly rate',
+    }),
+    value: 75,
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateDescription', {
+      defaultMessage:
+        'The average hourly rate for a security analyst. Used for calculations in the Value report.',
+    }),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleLabel', {
+      defaultMessage: 'Value report title',
+    }),
+    value: i18n.translate('xpack.securitySolution.reports.uiSettings.defaultValueTitleTitle', {
+      defaultMessage: 'Elastic AI value report',
+    }),
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleDescription', {
+      defaultMessage: 'The title of the Value report.',
+    }),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+  },
+});

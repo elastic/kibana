@@ -24,7 +24,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
@@ -84,10 +84,7 @@ describe('<EntitiesOverview />', () => {
     mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
     mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
     mockUseFirstLastSeen.mockReturnValue([false, { lastSeen: null }]);
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
   });
   it('should render wrapper component', () => {
     const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
@@ -108,17 +105,6 @@ describe('<EntitiesOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Entities');
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should not render link if navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-    const { getByTestId, queryByTestId } = renderEntitiesOverview(mockContextValue);
-
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render user and host', () => {

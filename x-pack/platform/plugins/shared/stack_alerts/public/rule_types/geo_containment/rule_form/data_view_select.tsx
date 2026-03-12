@@ -37,7 +37,7 @@ export const DataViewSelect = (props: Props) => {
         }
         try {
           setIsLoading(true);
-          const dataView = await props.data.indexPatterns.get(dataViewId);
+          const dataView = await props.data.dataViews.get(dataViewId);
           if (isMounted()) {
             props.onChange(dataView);
             setIsLoading(false);

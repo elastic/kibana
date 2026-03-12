@@ -31,7 +31,7 @@ export const createRuleDataClientMock = (
     indexName,
     kibanaVersion: '7.16.0',
     isWriteEnabled: jest.fn(() => true),
-    indexNameWithNamespace: jest.fn((namespace: string) => indexName + namespace),
+    indexNameWithNamespace: jest.fn((namespace: string) => `${indexName}-${namespace}`),
 
     // @ts-ignore 4.3.5 upgrade
     getReader: jest.fn((_options?: { namespace?: string }) => ({

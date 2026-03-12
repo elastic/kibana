@@ -133,6 +133,7 @@ export const DocumentCountContent: FC<Props> = ({
                   content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
                     defaultMessage: 'Sampling options',
                   })}
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     size="xs"
@@ -152,7 +153,12 @@ export const DocumentCountContent: FC<Props> = ({
             >
               <EuiPanel style={{ maxWidth: 400 }}>
                 <EuiFlexItem grow={true}>
-                  <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color={'primary'}
+                    title={calloutInfoMessage}
+                  />
                 </EuiFlexItem>
                 <EuiSpacer size="m" />
 

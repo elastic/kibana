@@ -63,7 +63,7 @@ export const TemplateContentIndicator = ({
     <>
       <EuiToolTip content={mappingsText}>
         <>
-          <EuiBadge color={getColor(mappings)} aria-label={mappingsText}>
+          <EuiBadge tabIndex={0} color={getColor(mappings)} aria-label={mappingsText}>
             M
           </EuiBadge>
           &nbsp;
@@ -71,14 +71,14 @@ export const TemplateContentIndicator = ({
       </EuiToolTip>
       <EuiToolTip content={settingsText}>
         <>
-          <EuiBadge color={getColor(settings)} aria-label={settingsText}>
+          <EuiBadge tabIndex={0} color={getColor(settings)} aria-label={settingsText}>
             S
           </EuiBadge>
           &nbsp;
         </>
       </EuiToolTip>
       <EuiToolTip content={aliasesText}>
-        <EuiBadge color={getColor(aliases)} aria-label={aliasesText}>
+        <EuiBadge tabIndex={0} color={getColor(aliases)} aria-label={aliasesText}>
           A
         </EuiBadge>
       </EuiToolTip>

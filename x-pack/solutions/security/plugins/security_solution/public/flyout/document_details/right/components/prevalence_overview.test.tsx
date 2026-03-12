@@ -16,25 +16,32 @@ import {
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import {
+  EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
+const mockUiSettingsGet = jest.fn();
+let mockServerless: unknown;
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(PREVALENCE_TEST_ID);
+const RIGHT_SECTION_TEXT_TEST_ID =
+  EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID(PREVALENCE_TEST_ID);
 
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
@@ -49,15 +56,26 @@ const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockCon
 
 describe('<PrevalenceOverview />', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
       data: [],
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: true,
-    });
+    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
+    mockServerless = undefined;
+    (useKibana as jest.Mock).mockImplementation(() => ({
+      services: {
+        storage: {
+          get: () => undefined,
+        },
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+        serverless: mockServerless,
+      },
+    }));
+    mockUiSettingsGet.mockReturnValue(true);
   });
 
   it('should render wrapper component', () => {
@@ -69,6 +87,52 @@ describe('<PrevalenceOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should show default time range badge', () => {
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
+  });
+
+  it('should show custom time range badge', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ from: 'now-7d', to: 'now-3d' }),
+        },
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+      },
+    });
+
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Custom time range applied');
+  });
+
+  it('should show badge for excluded cold and frozen tiers', () => {
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Cold/Frozen tiers off');
+  });
+
+  it('should show badge for included cold and frozen tiers', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Cold/Frozen tiers on');
+  });
+
+  it('should not show cold and frozen tiers badge in serverless and still show time range badge', () => {
+    mockServerless = {};
+
+    const { getByTestId } = renderPrevalenceOverview();
+
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).not.toHaveTextContent('Cold/Frozen tiers');
+    expect(getByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toHaveTextContent('Time range applied');
+  });
+
   it('should render link without icon if isPreviewMode is true', () => {
     const { getByTestId, queryByTestId } = renderPrevalenceOverview({
       ...mockContextValue,
@@ -76,17 +140,6 @@ describe('<PrevalenceOverview />', () => {
     });
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should not render link if navigation is disabled', () => {
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
-      navigateToLeftPanel: mockNavigateToLeftPanel,
-      isEnabled: false,
-    });
-
-    const { getByTestId, queryByTestId } = renderPrevalenceOverview(mockContextValue);
-    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {
@@ -190,5 +243,36 @@ describe('<PrevalenceOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+  });
+
+  it('should use default interval values to fetch prevalence data', () => {
+    renderPrevalenceOverview();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-30d', to: 'now' },
+      })
+    );
+  });
+
+  it('should use values from local storage to fetch prevalence data', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ start: 'now-7d', end: 'now-3d' }),
+        },
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+      },
+    });
+
+    renderPrevalenceOverview();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-7d', to: 'now-3d' },
+      })
+    );
   });
 });

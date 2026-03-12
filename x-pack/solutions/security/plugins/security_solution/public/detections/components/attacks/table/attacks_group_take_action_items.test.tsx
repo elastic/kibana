@@ -1,0 +1,257 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { TestProviders } from '../../../../common/mock';
+import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
+import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
+import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
+import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
+import { useAttackAssigneesContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
+import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
+import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items'
+);
+
+const mockUseAttackViewInAiAssistantContextMenuItems =
+  useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
+    typeof useAttackViewInAiAssistantContextMenuItems
+  >;
+const mockUseAttackWorkflowStatusContextMenuItems =
+  useAttackWorkflowStatusContextMenuItems as jest.MockedFunction<
+    typeof useAttackWorkflowStatusContextMenuItems
+  >;
+const mockUseAttackAssigneesContextMenuItems =
+  useAttackAssigneesContextMenuItems as jest.MockedFunction<
+    typeof useAttackAssigneesContextMenuItems
+  >;
+const mockUseAttackTagsContextMenuItems = useAttackTagsContextMenuItems as jest.MockedFunction<
+  typeof useAttackTagsContextMenuItems
+>;
+const mockUseAttackInvestigateInTimelineContextMenuItems =
+  useAttackInvestigateInTimelineContextMenuItems as jest.MockedFunction<
+    typeof useAttackInvestigateInTimelineContextMenuItems
+  >;
+const mockUseAttackCaseContextMenuItems = useAttackCaseContextMenuItems as jest.MockedFunction<
+  typeof useAttackCaseContextMenuItems
+>;
+
+const mockAttack = getMockAttackDiscoveryAlerts()[0];
+
+function renderAttack(attack: AttackDiscoveryAlert) {
+  return render(
+    <TestProviders>
+      <AttacksGroupTakeActionItems
+        attack={attack}
+        telemetrySource="attacks_page_group_take_action"
+      />
+    </TestProviders>
+  );
+}
+
+describe('AttacksGroupTakeActionItems', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Default mock returns for context menu hooks
+    mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'View in AI Assistant',
+          key: 'viewInAiAssistant',
+          'data-test-subj': 'viewInAiAssistant',
+        },
+      ],
+    });
+    mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+      items: [
+        { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+        { name: 'Mark as closed', key: 'markAsClosed' },
+        { name: 'Mark as open', key: 'markAsOpen' },
+      ],
+      panels: [],
+    });
+    mockUseAttackAssigneesContextMenuItems.mockReturnValue({
+      items: [
+        { name: 'Assign alert', key: 'assignAlert' },
+        { name: 'Unassign alert', key: 'unassignAlert' },
+      ],
+      panels: [],
+    });
+    mockUseAttackTagsContextMenuItems.mockReturnValue({
+      items: [{ name: 'Apply alert tags', key: 'applyAlertTags' }],
+      panels: [],
+    });
+    mockUseAttackInvestigateInTimelineContextMenuItems.mockReturnValue({
+      items: [{ name: 'Investigate in timeline', key: 'investigateInTimeline' }],
+      panels: [],
+    });
+    mockUseAttackCaseContextMenuItems.mockReturnValue({
+      items: [],
+      panels: [],
+    });
+  });
+
+  describe('telemetry', () => {
+    it('passes telemetrySource to all hooks', () => {
+      renderAttack(mockAttack);
+      const expectedTelemetrySource = 'attacks_page_group_take_action';
+
+      expect(mockUseAttackViewInAiAssistantContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackWorkflowStatusContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackAssigneesContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackTagsContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackInvestigateInTimelineContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ telemetrySource: expectedTelemetrySource })
+      );
+    });
+  });
+
+  describe('workflow items', () => {
+    describe("when attack's status is open", () => {
+      const openAttack = { ...mockAttack, alertWorkflowStatus: 'open' };
+
+      it('should render the `acknowledged` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
+      });
+      it('should render the `close` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as closed')).toBeInTheDocument();
+      });
+      it('should NOT render the `open` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+            { name: 'Mark as closed', key: 'markAsClosed' },
+          ],
+          panels: [],
+        });
+        const { queryByText } = renderAttack(openAttack);
+        expect(queryByText('Mark as open')).not.toBeInTheDocument();
+      });
+    });
+    describe("when attack's status is closed", () => {
+      const openAttack = { ...mockAttack, alertWorkflowStatus: 'closed' };
+
+      it('should render the `acknowledged` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as acknowledged')).toBeInTheDocument();
+      });
+      it('should NOT render the `close` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as acknowledged', key: 'markAsAcknowledged' },
+            { name: 'Mark as open', key: 'markAsOpen' },
+          ],
+          panels: [],
+        });
+        const { queryByText } = renderAttack(openAttack);
+        expect(queryByText('Mark as closed')).not.toBeInTheDocument();
+      });
+      it('should render the `open` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as open')).toBeInTheDocument();
+      });
+    });
+    describe("when attack's status is acknowledged", () => {
+      const openAttack = { ...mockAttack, alertWorkflowStatus: 'acknowledged' };
+
+      it('should NOT render the `acknowledged` action item', async () => {
+        mockUseAttackWorkflowStatusContextMenuItems.mockReturnValue({
+          items: [
+            { name: 'Mark as closed', key: 'markAsClosed' },
+            { name: 'Mark as open', key: 'markAsOpen' },
+          ],
+          panels: [],
+        });
+        const { queryByText } = renderAttack(openAttack);
+        expect(queryByText('Mark as acknowledged')).not.toBeInTheDocument();
+      });
+      it('should render the `close` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as closed')).toBeInTheDocument();
+      });
+      it('should render the `open` action item', async () => {
+        const { findByText } = renderAttack(openAttack);
+        expect(await findByText('Mark as open')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('assignment', () => {
+    it('should render the `assign` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Assign alert')).toBeInTheDocument();
+    });
+    it('should render the `unassign` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Unassign alert')).toBeInTheDocument();
+    });
+  });
+
+  describe('tags', () => {
+    it('should render the `apply tags` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Apply alert tags')).toBeInTheDocument();
+    });
+  });
+
+  describe('investigate in timeline', () => {
+    it('should render the `Investigate in timeline` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+    });
+  });
+
+  describe('view in ai assistant', () => {
+    it('should render the `View in AI Assistant` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+    });
+
+    it('should not render the action item when hook returns no items', async () => {
+      mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+        items: [],
+      });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+    });
+  });
+});

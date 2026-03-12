@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, skip } from 'rxjs';
-import { PublishingSubject, ValueFromPublishingSubject } from './types';
+import type { PublishingSubject, ValueFromPublishingSubject } from './types';
 
 /**
  * Declares a publishing subject, allowing external code to subscribe to react state changes.

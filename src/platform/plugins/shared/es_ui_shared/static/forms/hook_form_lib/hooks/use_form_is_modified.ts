@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
 
-import { FieldHook, FormHook } from '../types';
+import type { FieldHook, FormHook } from '../types';
 import { useFormContext } from '../form_context';
 import { useFormData } from './use_form_data';
 

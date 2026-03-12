@@ -12,7 +12,7 @@ import { cursor } from '../../common/cursor';
 import { filter } from '../../common/filter';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const findListSchema = t.exact(
   t.partial({

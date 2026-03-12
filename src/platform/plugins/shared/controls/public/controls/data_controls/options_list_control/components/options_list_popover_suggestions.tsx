@@ -9,14 +9,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EuiHighlight, EuiSelectable, UseEuiTheme, useEuiTheme } from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
-import { OptionsListSuggestions } from '../../../../../common/options_list/types';
-import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
@@ -32,11 +33,11 @@ export const OptionsListPopoverSuggestions = ({
 }: OptionsListPopoverSuggestionsProps) => {
   const {
     componentApi,
-    displaySettings: { hideExists },
+    displaySettings: { hide_exists },
   } = useOptionsListContext();
 
   const { euiTheme } = useEuiTheme();
-  const styles = useMemoizedStyles(optionListPopoverSuggestionsStyles);
+  const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
   const [
     sort,
@@ -50,7 +51,6 @@ export const OptionsListPopoverSuggestions = ({
     totalCardinality,
     loading,
     fieldFormatter,
-    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     componentApi.sort$,
     componentApi.searchString$,
@@ -62,19 +62,18 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.availableOptions$,
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
-    componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.fieldFormatter
   );
 
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo<boolean>(
     () =>
-      allowExpensiveQueries && totalCardinality && !showOnlySelected // && searchString.valid
+      totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
+    [availableOptions, totalCardinality, showOnlySelected]
   );
 
   const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
@@ -82,7 +81,7 @@ export const OptionsListPopoverSuggestions = ({
   }, [availableOptions, selectedOptions, showOnlySelected]);
 
   const existsSelectableOption = useMemo<EuiSelectableOption | undefined>(() => {
-    if (hideExists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
+    if (hide_exists || (!existsSelected && (showOnlySelected || suggestions?.length === 0))) return;
 
     return {
       key: 'exists-option',
@@ -91,7 +90,7 @@ export const OptionsListPopoverSuggestions = ({
       css: styles.optionsListExistsFilter,
       'data-test-subj': 'optionsList-control-selection-exists',
     };
-  }, [suggestions, existsSelected, showOnlySelected, hideExists, styles]);
+  }, [suggestions, existsSelected, showOnlySelected, hide_exists, styles]);
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -162,7 +161,7 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+      if (searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -170,7 +169,7 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    [searchTechnique, allowExpensiveQueries]
+    [searchTechnique]
   );
 
   useEffect(() => {

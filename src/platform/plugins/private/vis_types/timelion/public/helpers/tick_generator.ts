@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAxis } from './panel_utils';
+import type { IAxis } from './panel_utils';
 
 export function generateTicksProvider() {
   function floorInBase(n: number, base: number) {

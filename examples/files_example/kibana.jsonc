@@ -3,6 +3,8 @@
   "id": "@kbn/files-example-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin integrating with files plugin",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "filesExample",
     "server": true,

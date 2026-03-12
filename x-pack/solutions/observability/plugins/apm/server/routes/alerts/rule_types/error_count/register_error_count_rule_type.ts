@@ -26,6 +26,8 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -249,8 +251,10 @@ export function registerErrorCountRuleType({
             [PROCESSOR_EVENT]: ProcessorEvent.error,
             [ALERT_EVALUATION_VALUE]: errorCount,
             [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
+            [ALERT_GROUPING]: groupingObject,
             [ERROR_GROUP_ID]: ruleParams.errorGroupingKey,
             [ALERT_REASON]: alertReason,
+            [ALERT_INDEX_PATTERN]: indices.error,
             ...sourceFields,
             ...groupByFields,
           };
@@ -286,10 +290,8 @@ export function registerErrorCountRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as ErrorCountRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.ErrorCount,
           groupByFieldsOfRecoveredAlert
@@ -314,7 +316,8 @@ export function registerErrorCountRuleType({
           relativeViewInAppUrl
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        const groupingObject = unflattenObject(groupByFields);
+        const groupingObjectFromRecoveredAlert =
+          alertHits?.[ALERT_GROUPING] ?? unflattenObject(groupByFields);
 
         const recoveredContext = {
           alertDetailsUrl,
@@ -328,7 +331,7 @@ export function registerErrorCountRuleType({
           threshold: ruleParams.threshold,
           triggerValue: alertHits?.[ALERT_EVALUATION_VALUE],
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: groupingObjectFromRecoveredAlert,
           ...groupByActionVariables,
         };
 

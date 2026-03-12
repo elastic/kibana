@@ -30,17 +30,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   getInheritedViewMode,
   getDescription,
   getTitle,
-  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { FiltersDetails } from './filters_details';
 
 interface TimePickerQuickRange {
@@ -53,10 +53,12 @@ export const CustomizePanelEditor = ({
   api,
   onClose,
   focusOnTitle,
+  ariaLabelledBy,
 }: {
   onClose: () => void;
   focusOnTitle?: boolean;
   api: CustomizePanelActionApi;
+  ariaLabelledBy?: string;
 }) => {
   /**
    * eventually the panel editor could be made to use state from the API instead (which will allow us to use a push flyout)
@@ -69,6 +71,7 @@ export const CustomizePanelEditor = ({
   const [timeRange, setTimeRange] = useState(
     api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
+  const [isPanelBorderless, setIsPanelBorderless] = useState(api.hideBorder$?.value);
 
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
@@ -99,8 +102,15 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== api.title$?.value) api.setTitle?.(panelTitle);
+    // If the panel title matches the default title, we set api.title to undefined to indicate there's no custom title.
+    // This ensures the panel stays in sync with the centrally saved object's title and reflects any updates to its title.
+    if (panelTitle === api?.defaultTitle$?.value) {
+      api.setTitle?.(undefined);
+    } else if (panelTitle !== api.title$?.value) {
+      api.setTitle?.(panelTitle);
+    }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
+    if (isPanelBorderless !== api.hideBorder$?.value) api.setHideBorder?.(isPanelBorderless);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
@@ -274,6 +284,25 @@ export const CustomizePanelEditor = ({
     );
   };
 
+  const renderBorderlessToggleComponent = () => {
+    return (
+      <EuiFormRow>
+        <EuiSwitch
+          checked={!isPanelBorderless}
+          data-test-subj="customizePanelBorderlessToggle"
+          id="borderlessToggle"
+          label={
+            <FormattedMessage
+              defaultMessage="Show panel border"
+              id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.borderlessToggleSwitch"
+            />
+          }
+          onChange={(e) => setIsPanelBorderless(!e.target.checked)}
+        />
+      </EuiFormRow>
+    );
+  };
+
   const renderFilterDetails = () => {
     if (!apiPublishesUnifiedSearch(api)) return null;
 
@@ -289,7 +318,7 @@ export const CustomizePanelEditor = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="presentationPanel.action.customizePanel.flyout.title"
               defaultMessage="Settings"
@@ -300,6 +329,7 @@ export const CustomizePanelEditor = ({
       <EuiFlyoutBody>
         <EuiForm data-test-subj="customizePanelForm">
           {renderCustomTitleComponent()}
+          {renderBorderlessToggleComponent()}
           {renderCustomTimeRangeComponent()}
           {renderFilterDetails()}
         </EuiForm>

@@ -10,7 +10,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import { css } from '@emotion/react';
 
 export interface LegendToggleProps {

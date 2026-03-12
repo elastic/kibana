@@ -8,7 +8,10 @@
 import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  EsqlEsqlShardFailure,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEsqlRequest } from '../utils/logged_requests';
@@ -29,16 +32,18 @@ export interface EsqlResultColumn {
   type: 'date' | 'keyword';
 }
 
-type AsyncEsqlResponse = {
-  id: string;
-  is_running: boolean;
-} & EsqlTable;
-
 export type EsqlResultRow = Array<string | null>;
 
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const performEsqlRequest = async ({
@@ -63,27 +68,28 @@ export const performEsqlRequest = async ({
 }): Promise<EsqlTable> => {
   let pollInterval = 10 * 1000; // Poll every 10 seconds
   let pollCount = 0;
-  let queryId: string = '';
+  let queryId: string | undefined;
 
   try {
     loggedRequests?.push({
       request: logEsqlRequest(requestBody, requestQueryParams),
       description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+      request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
-    const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({
-      method: 'POST',
-      path: '/_query/async',
-      body: requestBody,
-      querystring: requestQueryParams,
+    const asyncEsqlResponse = await esClient.esql.asyncQuery({
+      ...requestBody,
+      ...requestQueryParams,
     });
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);
-
     queryId = asyncEsqlResponse.id;
-    const isRunning = asyncEsqlResponse.is_running;
 
-    if (!isRunning) {
-      return asyncEsqlResponse;
+    if (!asyncEsqlResponse.is_running) {
+      return asyncEsqlResponse as EsqlTable;
+    }
+
+    if (!queryId) {
+      throw new Error('Async ES|QL query is running but no query ID was returned');
     }
 
     // Poll for long-executing query
@@ -95,14 +101,13 @@ export const performEsqlRequest = async ({
         description: i18n.ESQL_POLL_REQUEST_DESCRIPTION,
       });
       const pollStarted = performance.now();
-      const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
-        method: 'GET',
-        path: `/_query/async/${queryId}`,
+      const pollResponse = await esClient.esql.asyncQueryGet({
+        id: queryId,
       });
       setLatestRequestDuration(pollStarted, loggedRequests);
 
       if (!pollResponse.is_running) {
-        return pollResponse;
+        return pollResponse as EsqlTable;
       }
 
       pollCount++;
@@ -129,10 +134,7 @@ export const performEsqlRequest = async ({
         description: i18n.ESQL_DELETE_REQUEST_DESCRIPTION,
       });
       const deleteStarted = performance.now();
-      await esClient.transport.request({
-        method: 'DELETE',
-        path: `/_query/async/${queryId}`,
-      });
+      await esClient.esql.asyncQueryDelete({ id: queryId });
       setLatestRequestDuration(deleteStarted, loggedRequests);
     }
   }

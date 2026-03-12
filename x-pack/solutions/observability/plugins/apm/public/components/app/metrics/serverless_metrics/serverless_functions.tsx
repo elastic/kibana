@@ -153,6 +153,12 @@ export function ServerlessFunctions() {
             columns={columns}
             pagination={{ showPerPageOptions: false, pageSize: 5 }}
             sorting={sorting}
+            tableCaption={i18n.translate(
+              'xpack.apm.serverlessMetrics.serverlessFunctions.tableCaption',
+              {
+                defaultMessage: 'Lambda functions overview',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

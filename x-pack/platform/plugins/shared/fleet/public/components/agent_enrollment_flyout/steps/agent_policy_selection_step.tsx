@@ -18,6 +18,7 @@ import { SelectCreateAgentPolicy } from '../agent_policy_select_create';
 export const AgentPolicySelectionStep = ({
   agentPolicies,
   selectedPolicy,
+  selectedPolicyId,
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
@@ -26,6 +27,7 @@ export const AgentPolicySelectionStep = ({
 }: {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
@@ -40,7 +42,7 @@ export const AgentPolicySelectionStep = ({
       <>
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
-          selectedPolicyId={selectedPolicy?.id}
+          selectedPolicyId={selectedPolicyId}
           setSelectedPolicyId={setSelectedPolicyId}
           withKeySelection={setSelectedAPIKeyId ? true : false}
           selectedApiKeyId={selectedApiKeyId}

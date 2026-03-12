@@ -7,32 +7,63 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from '../../../../common';
-import { extractControlGroupState } from './extract_control_group_state';
-import { extractSettings } from './extract_dashboard_settings';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardCreationOptions } from '../../../dashboard_api/types';
+import { extractPinnedPanelsState } from './extract_pinned_panels_state';
+import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 
-export function extractDashboardState(state?: unknown): Partial<DashboardState> {
-  let dashboardState: Partial<DashboardState> = {};
+export function extractDashboardState(
+  state?: unknown
+): ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> {
+  let dashboardState: ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
-    const controlGroupState = extractControlGroupState(stateAsObject);
-    if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
+    const { pinned_panels, autoApplyFilters } = extractPinnedPanelsState(stateAsObject);
+
+    if (pinned_panels) dashboardState.pinned_panels = pinned_panels;
+    if (
+      dashboardState.options?.auto_apply_filters === undefined &&
+      typeof autoApplyFilters === 'boolean'
+    ) {
+      // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+      dashboardState.options = { ...dashboardState.options, auto_apply_filters: autoApplyFilters };
+    }
+
+    if (typeof stateAsObject.description === 'string') {
+      dashboardState.description = stateAsObject.description;
+    }
+
+    if (Array.isArray(stateAsObject.tags)) {
+      dashboardState.tags = stateAsObject.tags;
+    }
+
+    if (typeof stateAsObject.title === 'string') {
+      dashboardState.title = stateAsObject.title;
+    }
 
     if (Array.isArray(stateAsObject.references))
       dashboardState.references = stateAsObject.references;
 
     if (typeof stateAsObject.viewMode === 'string')
-      dashboardState.viewMode = stateAsObject.viewMode as DashboardState['viewMode'];
+      dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
+
+    const options = extractOptions(stateAsObject);
 
     dashboardState = {
       ...dashboardState,
-      ...extractPanelsState(stateAsObject),
       ...extractSearchState(stateAsObject),
-      ...extractSettings(stateAsObject),
+      ...(Object.keys(options).length && { options }),
     };
+
+    const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
+    if (panels?.length) dashboardState.panels = panels;
+    if (savedObjectReferences?.length) {
+      dashboardState.references = [...(dashboardState.references ?? []), ...savedObjectReferences];
+    }
   }
+
   return dashboardState;
 }

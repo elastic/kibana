@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { DegradedFieldAnalysis } from '../../../../common/api_types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { DegradedFieldAnalysis } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
 import { getDataStreamMapping } from './get_datastream_mappings';
 import { getDataStreamSettings } from './get_datastream_settings';

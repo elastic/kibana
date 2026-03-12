@@ -14,16 +14,17 @@ import {
   EuiPopover,
   EuiSelectable,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
-import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
-import { useKibanaFeatureFlags } from '../../../../../../use_kibana_feature_flags';
 import * as i18n from './translations';
+import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
+import { useInvalidateFindAttackDiscoveries } from '../../../../../../use_find_attack_discoveries';
+import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
 
 const LIST_PROPS = {
   isVirtualized: false,
@@ -39,8 +40,8 @@ interface SharedBadgeOptionData {
 }
 
 const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
 
   const onBadgeButtonClick = useCallback(() => {
     setIsPopoverOpen((isOpen) => !isOpen);
@@ -73,6 +74,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         description: i18n.ONLY_VISIBLE_TO_YOU,
       },
       'data-test-subj': 'notShared',
+      disabled: isShared,
       label: i18n.NOT_SHARED,
     },
     {
@@ -81,6 +83,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         description: i18n.VISIBLE_TO_YOUR_TEAM,
       },
       'data-test-subj': 'shared',
+      disabled: isShared,
       label: i18n.SHARED,
     },
   ]);
@@ -151,44 +154,63 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
 
         await attackDiscoveryBulk({
-          attackDiscoveryAlertsEnabled,
           ids: [attackDiscovery.id],
           visibility,
         });
+
+        // disable all options if the new visibility is 'shared'
+        if (visibility === 'shared') {
+          setItems(
+            newOptions.map((item) => ({
+              ...item,
+              disabled: true, // prevent further changes
+            }))
+          );
+        }
+
+        invalidateFindAttackDiscoveries();
       }
     },
-    [attackDiscovery, attackDiscoveryAlertsEnabled, attackDiscoveryBulk]
+    [attackDiscovery, attackDiscoveryBulk, invalidateFindAttackDiscoveries]
   );
 
+  const allItemsDisabled = useMemo(() => items.every((item) => item.disabled), [items]);
+
   return (
-    <EuiPopover
-      button={button}
-      closePopover={closePopover}
-      data-test-subj="sharedBadgePopover"
-      id={filterGroupPopoverId}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
+    <EuiToolTip
+      content={isPopoverOpen && allItemsDisabled ? i18n.THE_VISIBILITY_OF_SHARED : undefined}
+      data-test-subj="sharedBadgeTooltip"
+      position="top"
     >
-      <EuiSelectable
-        aria-label={i18n.VISIBILITY}
-        data-test-subj="sharedBadge"
-        listProps={LIST_PROPS}
-        options={items}
-        onChange={onSelectableChange}
-        renderOption={renderOption}
-        singleSelection={true}
+      <EuiPopover
+        button={button}
+        closePopover={closePopover}
+        data-test-subj="sharedBadgePopover"
+        id={filterGroupPopoverId}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
       >
-        {(list) => (
-          <div
-            css={css`
-              width: 230px;
-            `}
-          >
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+        <EuiSelectable
+          aria-label={i18n.VISIBILITY}
+          data-test-subj="sharedBadge"
+          listProps={LIST_PROPS}
+          options={items}
+          onChange={onSelectableChange}
+          renderOption={renderOption}
+          singleSelection={true}
+        >
+          {(list) => (
+            <div
+              css={css`
+                width: 230px;
+              `}
+            >
+              {list}
+            </div>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiToolTip>
   );
 };
 

@@ -28,7 +28,7 @@ export const logCategorizationRouteFactory = (
   id: 'log_categorization',
   path: createPath(ML_PAGES.AIOPS_LOG_CATEGORIZATION),
   title: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
-    defaultMessage: 'Log Pattern Analysis',
+    defaultMessage: 'Log pattern analysis',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
@@ -36,7 +36,7 @@ export const logCategorizationRouteFactory = (
     getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.aiops.logCategorization.docTitle', {
-        defaultMessage: 'Log Pattern Analysis',
+        defaultMessage: 'Log pattern analysis',
       }),
     },
   ],

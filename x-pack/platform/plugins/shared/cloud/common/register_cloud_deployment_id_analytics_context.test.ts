@@ -43,12 +43,13 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
     });
   });
 
-  test('it registers the context provider and emits the cloudId, projectId and project type', async () => {
+  test('it registers the context provider and emits the cloudId, projectId, project type, and product tier', async () => {
     registerCloudDeploymentMetadataAnalyticsContext(analytics, {
       id: 'cloud_id',
       serverless: {
         project_id: 'a-project-id',
         project_type: 'security',
+        product_tier: 'complete',
       },
     });
     expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
@@ -57,6 +58,7 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
       cloudId: 'cloud_id',
       projectId: 'a-project-id',
       projectType: 'security',
+      productTier: 'complete',
     });
   });
 });

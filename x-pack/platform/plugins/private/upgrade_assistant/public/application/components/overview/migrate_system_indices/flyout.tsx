@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { startCase } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -25,11 +27,10 @@ import {
   EuiButtonIcon,
   EuiDescriptionList,
   EuiScreenReaderOnly,
-  EuiBasicTableColumn,
   EuiCallOut,
 } from '@elastic/eui';
 
-import {
+import type {
   SystemIndicesMigrationStatus,
   SystemIndicesMigrationFeature,
   MIGRATION_STATUS,
@@ -90,6 +91,12 @@ const i18nTexts = {
     'xpack.upgradeAssistant.overview.systemIndices.statusTableColumn',
     {
       defaultMessage: 'Status',
+    }
+  ),
+  tableCaption: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.featuresTableCaption',
+    {
+      defaultMessage: 'System indices migration status',
     }
   ),
   errorTooltipLabel: i18n.translate(
@@ -256,6 +263,7 @@ export const SystemIndicesFlyout = ({
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         {migrationStatus === 'NO_MIGRATION_NEEDED' && (
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.migrationNotNeeded}
             iconType="cheer"
             color="success"
@@ -277,6 +285,7 @@ export const SystemIndicesFlyout = ({
               itemIdToExpandedRowMap={expandedRows}
               pagination={true}
               sorting={true}
+              tableCaption={i18nTexts.tableCaption}
             />
           </>
         )}

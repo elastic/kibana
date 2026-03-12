@@ -6,7 +6,7 @@
  */
 
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { RESET_GROUP_BY_FIELDS } from '../chart_panels/chart_settings_popover/configurations/default/translations';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 interface LegacyLensEmbeddable {

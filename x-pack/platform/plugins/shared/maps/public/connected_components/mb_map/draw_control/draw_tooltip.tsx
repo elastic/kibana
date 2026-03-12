@@ -6,7 +6,8 @@
  */
 
 import _ from 'lodash';
-import React, { Component, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';

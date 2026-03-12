@@ -8,7 +8,7 @@
 import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/bedrock';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
   logger,

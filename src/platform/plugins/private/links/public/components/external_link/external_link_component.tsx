@@ -10,18 +10,13 @@
 import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  DEFAULT_URL_DRILLDOWN_OPTIONS,
-  UrlDrilldownOptions,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 
-import {
-  EXTERNAL_LINK_TYPE,
-  LinksLayoutType,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../../common/content_management';
+import type { ExternalLinkOptions } from '../../../server';
+import type { LinksLayoutType } from '../../../common/content_management';
+import { EXTERNAL_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
 
 export const ExternalLinkComponent = ({
   link,
@@ -32,13 +27,13 @@ export const ExternalLinkComponent = ({
 }) => {
   const linkOptions = useMemo(() => {
     return {
-      ...DEFAULT_URL_DRILLDOWN_OPTIONS,
+      ...DEFAULT_EXTERNAL_LINK_OPTIONS,
       ...link.options,
-    } as UrlDrilldownOptions;
+    } as ExternalLinkOptions;
   }, [link.options]);
 
   const destination = useMemo(() => {
-    return link.destination && linkOptions.encodeUrl
+    return link.destination && linkOptions.encode_url
       ? encodeURI(link.destination)
       : link.destination;
   }, [linkOptions, link.destination]);
@@ -74,7 +69,7 @@ export const ExternalLinkComponent = ({
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
         if (!modifiedClick) {
           event.preventDefault();
-          if (linkOptions.openInNewTab) {
+          if (linkOptions.open_in_new_tab) {
             window.open(destination, '_blank');
           } else {
             await coreServices.application.navigateToUrl(destination);

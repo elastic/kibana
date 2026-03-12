@@ -36,6 +36,14 @@ describe('Duration Format', () => {
         input: 125,
         output: '2 minutes',
       },
+      {
+        input: null,
+        output: '(null)',
+      },
+      {
+        input: undefined,
+        output: '(null)',
+      },
     ],
   });
 
@@ -552,9 +560,9 @@ describe('Duration Format', () => {
     showSuffix: boolean | undefined;
     useShortSuffix?: boolean;
     includeSpaceWithSuffix?: boolean;
-    fixtures: Array<{ input: number; output: string }>;
+    fixtures: Array<{ input: number | null | undefined; output: string }>;
   }) {
-    fixtures.forEach((fixture: { input: number; output: string }) => {
+    fixtures.forEach((fixture: { input: number | null | undefined; output: string }) => {
       const input = fixture.input;
       const output = fixture.output;
 

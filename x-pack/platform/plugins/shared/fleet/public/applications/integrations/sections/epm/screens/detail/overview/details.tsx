@@ -33,7 +33,7 @@ import type {
   RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+import { useConfig, useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
@@ -68,6 +68,7 @@ const Replacements = euiStyled(EuiFlexItem)`
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { notifications } = useStartServices();
+  const config = useConfig();
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const {
     changelog,
@@ -139,9 +140,15 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     entries(packageInfo.assets).forEach(([service, typeToParts]) => {
       // Filter out assets we are not going to display
       // (currently we only display Kibana and Elasticsearch assets)
+      // and filter out dashboard references if configured
       const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
         (acc: any, [asset, value]) => {
-          if (DisplayedAssetsFromPackageInfo[service].includes(asset)) acc[asset] = value;
+          if (
+            DisplayedAssetsFromPackageInfo[service].includes(asset) &&
+            (!config?.hideDashboards || asset !== 'dashboard')
+          ) {
+            acc[asset] = value;
+          }
           return acc;
         },
         {}
@@ -163,12 +170,19 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
             <EuiFlexGroup direction="column" gutterSize="xs">
               {entries(filteredTypes).map(([_type, parts], index) => {
                 const type = _type as KibanaAssetType;
+                // For transforms, count unique transform modules since multiple files can belong to the same transform
+                // For all other asset types, count all parts
+                const assetCount =
+                  _type === 'transform'
+                    ? new Set(parts.map((part) => part.file)).size
+                    : parts.length;
+
                 return (
                   <EuiFlexItem key={`item-${index}`}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiNotificationBadge color="subdued">{parts.length}</EuiNotificationBadge>
+                        <EuiNotificationBadge color="subdued">{assetCount}</EuiNotificationBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
@@ -192,6 +206,29 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
           </EuiTextColor>
         ),
         description: dataStreamTypes.join(', '),
+      });
+    }
+
+    // Ingestion method details
+    const ingestionMethods = new Set<string>();
+    packageInfo.data_streams?.forEach((dataStream) => {
+      dataStream.streams?.forEach((stream) => {
+        if (stream.ingestion_method) {
+          ingestionMethods.add(stream.ingestion_method);
+        }
+      });
+    });
+    if (ingestionMethods.size > 0) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.epm.ingestionMethodsLabel"
+              defaultMessage="Ingestion methods"
+            />
+          </EuiTextColor>
+        ),
+        description: Array.from(ingestionMethods).join(', '),
       });
     }
 
@@ -307,6 +344,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.source?.license,
     packageInfo.owner.type,
     packageInfo.version,
+    config?.hideDashboards,
     toggleLicenseModal,
     toggleNoticeModal,
     toggleChangelogModal,

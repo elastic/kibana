@@ -7,11 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
-import { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
+import type { TypeOf } from '@kbn/config-schema';
+import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
+import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
-export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
+/** The attributes of a dashboard saved object. */
+export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema> & {
+  projectRouting?: string;
+} & {
+  /**
+   * To avoid defining a new SO version, I am adding the new key `pinned_panels` here
+   * rather than as part of the dashboard attributes schema
+   */
+  pinned_panels?: {
+    panels: {
+      [uuid: string]: {
+        type: string;
+        order: number;
+        width?: string;
+        grow?: boolean;
+        config: object;
+      };
+    };
+  };
+};
+
 export type GridData = TypeOf<typeof gridDataSchema>;
 
 /**

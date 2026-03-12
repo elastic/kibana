@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/synthtrace-client",
+  "version": "1.0.0",
+  "description": "Elastic synthetic data generator client library",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "private": true
+}

@@ -25,7 +25,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
@@ -33,6 +33,15 @@ jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
     trackUiMetric: jest.fn(),
   },
 }));
+
+const mockNavigateToGraphVisualization = jest.fn();
+jest.mock('../../shared/hooks/use_navigate_to_graph_visualization', () => {
+  return {
+    useNavigateToGraphVisualization: () => ({
+      navigateToGraphVisualization: mockNavigateToGraphVisualization,
+    }),
+  };
+});
 
 const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
@@ -89,7 +98,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
@@ -126,6 +135,13 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component for alert', async () => {
@@ -141,7 +157,7 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: ['eventId'],
       isAlert: true,
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -181,6 +197,12 @@ describe('<GraphPreviewContainer />', () => {
       METRIC_TYPE.LOADED,
       GRAPH_PREVIEW
     );
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component for event', async () => {
@@ -196,7 +218,7 @@ describe('<GraphPreviewContainer />', () => {
       timestamp,
       eventIds: ['eventId'],
       isAlert: false,
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview();
@@ -236,6 +258,12 @@ describe('<GraphPreviewContainer />', () => {
       METRIC_TYPE.LOADED,
       GRAPH_PREVIEW
     );
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+
+    expect(mockNavigateToGraphVisualization).toHaveBeenCalled();
   });
 
   it('should render component and without link in header in preview panel', async () => {
@@ -250,7 +278,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
@@ -268,8 +296,8 @@ describe('<GraphPreviewContainer />', () => {
       queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
@@ -304,13 +332,13 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: true,
+      shouldShowGraph: true,
       isAlert: true,
     });
 
     const { getByTestId, queryByTestId, findByTestId } = renderGraphPreview({
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     });
 
     // Using findByTestId to wait for the component to be rendered because it is a lazy loaded component
@@ -322,8 +350,8 @@ describe('<GraphPreviewContainer />', () => {
       queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
     expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
@@ -358,7 +386,7 @@ describe('<GraphPreviewContainer />', () => {
     (useGraphPreview as jest.Mock).mockReturnValue({
       timestamp,
       eventIds: [],
-      hasGraphRepresentation: false,
+      shouldShowGraph: false,
       isAlert: true,
     });
 

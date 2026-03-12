@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PaletteOutput, PaletteRegistry, CustomPaletteParams, ColorStop } from '@kbn/coloring';
 import {
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
   getPaletteStops,
   reversePalette,
-  ColorStop,
   CUSTOM_PALETTE,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
@@ -21,8 +18,9 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { defaultPaletteParams } from '../constants';
+import type { HeatmapSortPredicate } from '../../common/types';
 
 export function getDataMinMax(
   rangeType: CustomPaletteParams['rangeType'] | undefined,
@@ -119,30 +117,17 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
   return minMax;
 };
 
-interface SourceParams {
-  order?: string;
-  orderBy?: string;
-  otherBucket?: boolean;
-}
-
-export const getSortPredicate = (column: DatatableColumn) => {
-  const params = column.meta?.sourceParams?.params as SourceParams | undefined;
-  const sort: string | undefined = params?.orderBy;
-  if (params?.otherBucket || !sort) return 'dataIndex';
-  // metric sorting
-  if (sort && sort !== '_key') {
-    if (params?.order === 'desc') {
-      return 'numDesc';
-    } else {
-      return 'numAsc';
-    }
-    // alphabetical sorting
+export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSortPredicate) => {
+  if (!predicate) {
+    return 'dataIndex';
+  }
+  // for now sort only numerical types, and sort the rest as string.
+  // TODO pass an external comparator to correctly handle other type of data
+  // https://github.com/elastic/elastic-charts/issues/2782
+  if (['number'].includes(column.meta.type)) {
+    return predicate === 'asc' ? 'numAsc' : 'numDesc';
   } else {
-    if (params?.order === 'desc') {
-      return 'alphaDesc';
-    } else {
-      return 'alphaAsc';
-    }
+    return predicate === 'asc' ? 'alphaAsc' : 'alphaDesc';
   }
 };
 

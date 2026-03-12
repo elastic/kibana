@@ -71,8 +71,17 @@ describe('inspect index', () => {
         foo: [{ bar: 1 }, { bar: 2 }],
       },
     ],
+    [
+      {
+        foo: [{ bar: 1 }, { bar: 2 }],
+      },
+      '.',
+      {
+        foo: [{ bar: 1 }, { bar: 2 }],
+      },
+    ],
   ])(
-    'getEntriesAtKey input %s returns %s',
+    'for %s getEntriesAtKey input %s returns %s',
     (mapping: unknown, key: string, expectedResult: unknown) => {
       expect(getNestedValue(mapping, key)).toEqual(expectedResult);
     }

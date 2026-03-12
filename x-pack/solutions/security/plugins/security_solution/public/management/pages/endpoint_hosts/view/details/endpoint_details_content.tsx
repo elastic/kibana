@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { WorkflowInsights } from './components/insights/workflow_insights';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
@@ -45,14 +44,7 @@ interface EndpointDetailsContentProps {
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
     // Access control
-    const isWorkflowInsightsFeatureFlagEnabled = useIsExperimentalFeatureEnabled('defendInsights');
     const { canReadWorkflowInsights } = useUserPrivileges().endpointPrivileges;
-    const canAccessWorkflowInsights = useMemo(() => {
-      if (!isWorkflowInsightsFeatureFlagEnabled) {
-        return false;
-      }
-      return canReadWorkflowInsights;
-    }, [canReadWorkflowInsights, isWorkflowInsightsFeatureFlagEnabled]);
 
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
@@ -195,7 +187,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
     }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
     return (
       <div>
-        {canAccessWorkflowInsights && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
+        {canReadWorkflowInsights && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed

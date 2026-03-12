@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
+/** Configuration schema for the Dashboard plugin. */
 export const configSchema = schema.object({
   /**
    * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
@@ -39,7 +41,29 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
-export type { DashboardAttributes, DashboardPanel, DashboardSection } from './content_management';
-export type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+export type {
+  DashboardState,
+  DashboardPanel,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanel,
+  DashboardSection,
+  DashboardFilter,
+  DashboardOptions,
+  DashboardQuery,
+  DashboardCreateRequestBody,
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardSearchRequestBody,
+  DashboardSearchResponseBody,
+  DashboardUpdateResponseBody,
+  GridData,
+} from './api';
+export type { DashboardDrilldownState } from './dashboard_drilldown/types';
+export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
+export type { ScanDashboardsResult } from './scan_dashboards';
+export {
+  dashboardNavigationOptionsSchema,
+  type DashboardNavigationOptions,
+} from './dashboard_navigation';
 
-export { PUBLIC_API_PATH } from './api/constants';
+export { DASHBOARD_API_PATH } from '../common/constants';

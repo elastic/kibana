@@ -11,6 +11,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
+import type { AddToTimelineHandler } from '../../../types';
 
 const euiTabbedContentCss = {
   'div.euiTabs': {
@@ -27,6 +28,9 @@ interface ResultTabsProps {
   endDate?: string;
   liveQueryActionId?: string;
   error?: string;
+  addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -38,6 +42,9 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   startDate,
   liveQueryActionId,
   error,
+  addToTimeline,
+  scheduleId,
+  executionCount,
 }) => {
   const tabs = useMemo(
     () => [
@@ -54,6 +61,9 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             endDate={endDate}
             liveQueryActionId={liveQueryActionId}
             error={error}
+            addToTimeline={addToTimeline}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
         ),
       },
@@ -68,6 +78,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             agentIds={agentIds}
             expirationDate={endDate}
             error={error}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
         ),
         append: failedAgentsCount ? (
@@ -86,6 +98,9 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       liveQueryActionId,
       error,
       failedAgentsCount,
+      addToTimeline,
+      scheduleId,
+      executionCount,
     ]
   );
 

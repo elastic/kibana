@@ -8,13 +8,14 @@
  */
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  httpServiceMock,
+import type {
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from './capabilities_service';
 

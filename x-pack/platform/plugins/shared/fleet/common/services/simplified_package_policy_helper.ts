@@ -15,13 +15,26 @@ import type {
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
-import { AGENTLESS_DISABLED_INPUTS, DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME } from '../constants';
+
 import { PackagePolicyValidationError } from '../errors';
 
 import { packageToPackagePolicy } from '.';
-import { inputNotAllowedInAgentless } from './agentless_policy_helper';
+import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
-export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
+export type SimplifiedVars = Record<
+  string,
+  | string
+  | string[]
+  | boolean
+  | number
+  | number[]
+  | null
+  | {
+      isSecretRef: boolean;
+      id: string;
+    }
+>;
 
 export type SimplifiedPackagePolicyStreams = Record<
   string,
@@ -45,13 +58,16 @@ export interface SimplifiedPackagePolicy {
   policy_id?: string | null;
   policy_ids: string[];
   output_id?: string;
+  cloud_connector_id?: string | null;
   namespace: string;
   name: string;
   description?: string;
   vars?: SimplifiedVars;
+  var_group_selections?: Record<string, string>;
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
-  additional_datastreams_permissions?: string[];
+  supports_cloud_connector?: boolean | null;
+  additional_datastreams_permissions?: string[] | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -69,6 +85,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
   if (packagePolicy.vars) {
     formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
   }
+  if (packagePolicy.var_group_selections) {
+    (formattedPackagePolicy as any).var_group_selections = packagePolicy.var_group_selections;
+  }
 
   return formattedPackagePolicy;
 }
@@ -77,18 +96,25 @@ export function generateInputId(input: NewPackagePolicyInput) {
   return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
 }
 
-export function formatInputs(inputs: NewPackagePolicy['inputs'], supportsAgentless?: boolean) {
+export function formatInputs(
+  inputs: NewPackagePolicy['inputs'],
+  supportsAgentless?: boolean,
+  packageInfo?: PackageInfo
+) {
   return inputs.reduce((acc, input) => {
     const inputId = generateInputId(input);
     if (!acc) {
       acc = {};
     }
-    const enabled =
-      supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(input.type)
-        ? false
-        : input.enabled;
+
     acc[inputId] = {
-      enabled,
+      enabled: isInputAllowedForDeploymentMode(
+        input,
+        supportsAgentless ? 'agentless' : 'default',
+        packageInfo
+      )
+        ? input.enabled
+        : false,
       vars: formatVars(input.vars),
       streams: formatStreams(input.streams),
     };
@@ -150,6 +176,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   packageInfo: PackageInfo,
   options?: {
     experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+    policyTemplate?: string;
   }
 ): NewPackagePolicy {
   const {
@@ -161,7 +188,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     description,
     inputs = {},
     vars: packageLevelVars,
+    var_group_selections: varGroupSelections,
     supports_agentless: supportsAgentless,
+    supports_cloud_connector: supportsCloudConnector,
+    cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
   } = data;
   const packagePolicy = {
@@ -170,10 +200,14 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       policyId && isEmpty(policyIds) ? policyId : policyIds,
       namespace,
       name,
-      description
+      description,
+      options?.policyTemplate
     ),
     supports_agentless: supportsAgentless,
+    supports_cloud_connector: supportsCloudConnector,
+    cloud_connector_id: cloudConnectorId,
     output_id: outputId,
+    var_group_selections: varGroupSelections,
   };
 
   if (additionalDatastreamsPermissions) {
@@ -203,18 +237,18 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     const { enabled, streams = {}, vars: inputLevelVars } = val;
 
     const { input: packagePolicyInput, streams: streamsMap } = inputMap.get(inputId) ?? {};
+
     if (!packagePolicyInput || !streamsMap) {
       throw new PackagePolicyValidationError(`Input not found: ${inputId}`);
     }
 
-    if (
-      inputNotAllowedInAgentless(packagePolicyInput.type, packagePolicy?.supports_agentless) ||
-      enabled === false
-    ) {
-      packagePolicyInput.enabled = false;
-    } else {
-      packagePolicyInput.enabled = true;
-    }
+    const isInputAllowed = isInputAllowedForDeploymentMode(
+      packagePolicyInput,
+      packagePolicy?.supports_agentless ? 'agentless' : 'default',
+      packageInfo
+    );
+
+    packagePolicyInput.enabled = !isInputAllowed || enabled === false ? false : true;
 
     if (inputLevelVars) {
       assignVariables(inputLevelVars, packagePolicyInput.vars, `${inputId}`);
@@ -226,11 +260,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       if (!packagePolicyStream) {
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
       }
-
-      if (
-        streamEnabled === false ||
-        inputNotAllowedInAgentless(packagePolicyInput.type, packagePolicy?.supports_agentless)
-      ) {
+      if (streamEnabled === false || isInputAllowed === false) {
         packagePolicyStream.enabled = false;
       } else {
         packagePolicyStream.enabled = true;

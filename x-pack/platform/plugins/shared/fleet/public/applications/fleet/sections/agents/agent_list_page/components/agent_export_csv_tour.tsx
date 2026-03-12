@@ -5,37 +5,14 @@
  * 2.0.
  */
 
-import { EuiText, EuiTourStep } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { TOUR_STORAGE_CONFIG } from '../../../../constants';
-import { TOUR_STORAGE_KEYS } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
+import { useDismissableTour } from '../../../../hooks';
 
 export const AgentExportCSVTour: React.FC<{}> = () => {
-  const { storage, uiSettings } = useStartServices();
-
-  const [tourState, setTourState] = useState({ isOpen: true });
-
-  const isTourHidden =
-    uiSettings.get('hideAnnouncements', false) ||
-    (
-      storage.get(TOUR_STORAGE_KEYS.AGENT_EXPORT_CSV) as
-        | TOUR_STORAGE_CONFIG['AGENT_EXPORT_CSV']
-        | undefined
-    )?.active === false;
-
-  const setTourAsHidden = () => {
-    storage.set(TOUR_STORAGE_KEYS.AGENT_EXPORT_CSV, {
-      active: false,
-    } as TOUR_STORAGE_CONFIG['AGENT_EXPORT_CSV']);
-  };
-
-  const onFinish = () => {
-    setTourState({ isOpen: false });
-    setTourAsHidden();
-  };
+  const { isOpen, dismiss } = useDismissableTour('AGENT_EXPORT_CSV');
 
   return (
     <>
@@ -48,8 +25,8 @@ export const AgentExportCSVTour: React.FC<{}> = () => {
             />
           </EuiText>
         }
-        isStepOpen={!isTourHidden && tourState.isOpen}
-        onFinish={onFinish}
+        isStepOpen={isOpen}
+        onFinish={dismiss}
         minWidth={360}
         maxWidth={360}
         step={1}
@@ -59,6 +36,14 @@ export const AgentExportCSVTour: React.FC<{}> = () => {
             id="xpack.fleet.agentExportCSVTour.tourTitle"
             defaultMessage="Download CSV file"
           />
+        }
+        footerAction={
+          <EuiButtonEmpty onClick={dismiss}>
+            <FormattedMessage
+              id="xpack.fleet.genericTourPopover.dismissButton"
+              defaultMessage="Got it"
+            />
+          </EuiButtonEmpty>
         }
         anchorPosition="upLeft"
         anchor="#agentListSelectionText"

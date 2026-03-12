@@ -6,9 +6,11 @@
  */
 
 import dateMath from '@elastic/datemath';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,25 +24,30 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import {
-  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
   PREVALENCE_DETAILS_DATE_PICKER_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_UPSELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
@@ -49,13 +56,20 @@ import {
 } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { IS_OPERATOR } from '../../../../../common/types';
-import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { PreviewLink } from '../../../shared/components/preview_link';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
+
+// This variable is used to track if the cold/frozen tier callout has been dismissed in the current tab session.
+let isColdFrozenTierCalloutDismissedInTab = false;
+// This function is used in tests to reset the callout dismissed state between tests, as the variable is shared across the entire tab session.
+export const resetColdFrozenTierCalloutDismissedStateForTests = () => {
+  isColdFrozenTierCalloutDismissedInTab = false;
+};
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -65,7 +79,7 @@ export const LicenseProtectedCell: React.FC = () => {
   return (
     <div
       data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID}
-      style={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
+      css={{ height: '16px', width: '100%', background: euiTheme.colors.lightShade }}
     />
   );
 };
@@ -116,31 +130,20 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
     render: (data: PrevalenceDetailsRow) => (
       <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => {
-          if (hasPreview(data.field)) {
-            return (
-              <EuiFlexItem key={value}>
-                <CellActions field={data.field} value={value}>
-                  <PreviewLink
-                    field={data.field}
-                    value={value}
-                    scopeId={data.scopeId}
-                    data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
-                  >
-                    <EuiText size="xs">{value}</EuiText>
-                  </PreviewLink>
-                </CellActions>
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <EuiFlexItem key={value}>
-              <CellActions field={data.field} value={value}>
+        {data.values.map((value) => (
+          <EuiFlexItem key={value}>
+            <CellActions field={data.field} value={value}>
+              <PreviewLink
+                field={data.field}
+                value={value}
+                scopeId={data.scopeId}
+                data-test-subj={PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID}
+              >
                 <EuiText size="xs">{value}</EuiText>
-              </CellActions>
-            </EuiFlexItem>
-          );
-        })}
+              </PreviewLink>
+            </CellActions>
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
     ),
     width: '20%',
@@ -353,6 +356,12 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
+  const { storage, uiSettings, serverless } = useKibana().services;
+  const isServerless = !!serverless;
+  const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
+
   const { dataFormattedForFieldBrowser, investigationFields, scopeId } =
     useDocumentDetailsContext();
 
@@ -362,37 +371,52 @@ export const PrevalenceDetails: React.FC = () => {
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
+
   // these two are used by the usePrevalence hook to fetch the data
-  const [start, setStart] = useState(DEFAULT_FROM);
-  const [end, setEnd] = useState(DEFAULT_TO);
+  const [start, setStart] = useState(timeSavedInLocalStorage?.start || DEFAULT_FROM);
+  const [end, setEnd] = useState(timeSavedInLocalStorage?.end || DEFAULT_TO);
 
   // these two are used to pass to timeline
   const [absoluteStart, setAbsoluteStart] = useState(
-    (dateMath.parse(DEFAULT_FROM) || new Date()).toISOString()
+    (dateMath.parse(timeSavedInLocalStorage?.start || DEFAULT_FROM) || new Date()).toISOString()
   );
   const [absoluteEnd, setAbsoluteEnd] = useState(
-    (dateMath.parse(DEFAULT_TO) || new Date()).toISOString()
+    (dateMath.parse(timeSavedInLocalStorage?.end || DEFAULT_TO) || new Date()).toISOString()
+  );
+  const [isColdFrozenTierCalloutDismissed, setIsColdFrozenTierCalloutDismissed] = useState(
+    isColdFrozenTierCalloutDismissedInTab
   );
 
   // TODO update the logic to use a single set of start/end dates
   //  currently as we're using this InvestigateInTimelineButton component we need to pass the timeRange
   //  as an AbsoluteTimeRange, which requires from/to values
-  const onTimeChange = ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
-    if (isInvalid) return;
+  const onTimeChange = useCallback(
+    ({ start: s, end: e, isInvalid }: OnTimeChangeProps) => {
+      if (isInvalid) return;
 
-    setStart(s);
-    setEnd(e);
+      storage.set(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE, { start: s, end: e });
 
-    const from = dateMath.parse(s);
-    if (from && from.isValid()) {
-      setAbsoluteStart(from.toISOString());
-    }
+      setStart(s);
+      setEnd(e);
 
-    const to = dateMath.parse(e);
-    if (to && to.isValid()) {
-      setAbsoluteEnd(to.toISOString());
-    }
-  };
+      const from = dateMath.parse(s);
+      if (from && from.isValid()) {
+        setAbsoluteStart(from.toISOString());
+      }
+
+      const to = dateMath.parse(e);
+      if (to && to.isValid()) {
+        setAbsoluteEnd(to.toISOString());
+      }
+    },
+    [storage]
+  );
+
+  const onDismiss = useCallback(() => {
+    isColdFrozenTierCalloutDismissedInTab = true;
+    setIsColdFrozenTierCalloutDismissed(true);
+  }, []);
 
   const { loading, error, data } = usePrevalence({
     dataFormattedForFieldBrowser,
@@ -439,10 +463,61 @@ export const PrevalenceDetails: React.FC = () => {
     </>
   );
 
+  const coldFrozenTierCallout = (
+    <>
+      <EuiCallOut
+        data-test-subj={PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.calloutTitle"
+            defaultMessage="{state}"
+            values={{
+              state: isColdAndFrozenTiersExcluded
+                ? 'Some data excluded'
+                : 'Performance optimization',
+            }}
+          />
+        }
+        iconType="snowflake"
+      >
+        <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.calloutDescription"
+              defaultMessage="{state}, go to Advanced Settings or contact your administrator."
+              values={{
+                state: isColdAndFrozenTiersExcluded
+                  ? 'Cold and frozen tiers are excluded to improve performance. To include them'
+                  : 'This view loads more slowly because cold and frozen tiers are included. To change this',
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.dismissButtonAriaLabel',
+                { defaultMessage: 'Dismiss cold and frozen tier callout' }
+              )}
+              data-test-subj={PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID}
+              onClick={onDismiss}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.left.insights.prevalence.coldAndFrozenTiers.dismissButtonLabel"
+                defaultMessage="Dismiss"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
+    </>
+  );
+
   return (
     <>
       {!error && !isPlatinumPlus && upsell}
       <EuiPanel>
+        {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
         <EuiSuperDatePicker
           start={start}
           end={end}
@@ -456,7 +531,13 @@ export const PrevalenceDetails: React.FC = () => {
           columns={columns}
           loading={loading}
           data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          message={
+          tableCaption={i18n.translate(
+            'xpack.securitySolution.flyout.left.insights.prevalence.prevalenceCaption',
+            {
+              defaultMessage: 'Prevalence insights',
+            }
+          )}
+          noItemsMessage={
             <FormattedMessage
               id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."

@@ -15,14 +15,12 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
-
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -45,7 +43,7 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AttachToCaseButton } from '../actions/attach_to_case_button';
 import { SaveTimelineButton } from '../actions/save_timeline_button';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { PageScope } from '../../../../data_view_manager/constants';
 
 const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
 const autoOverflowXCSS = { 'overflow-x': 'auto' };
@@ -78,18 +76,12 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const { browserFields: sourcererBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
-      useSourcererDataView(SourcererScopeName.timeline);
-    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
-      DataViewManagerScopeName.timeline
-    );
-    const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
+      useSourcererDataView(PageScope.timeline);
+    const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
+    const experimentalBrowserFields = useBrowserFields(PageScope.timeline);
     const browserFields = useMemo(
       () => (newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields),
       [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]
-    );
-    const dataViewSpec: DataViewSpec = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
-      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
     );
 
     const { cases, uiSettings } = useKibana().services;
@@ -109,13 +101,23 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          dataViewSpec,
+          dataViewSpec: oldSourcererDataViewSpec,
+          dataView: experimentalDataView,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [browserFields, dataProviders, esQueryConfig, filters, kqlMode, kqlQueryObj, dataViewSpec]
+      [
+        browserFields,
+        dataProviders,
+        esQueryConfig,
+        experimentalDataView,
+        filters,
+        kqlMode,
+        kqlQueryObj,
+        oldSourcererDataViewSpec,
+      ]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 
@@ -196,7 +198,10 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
                 <SaveTimelineButton timelineId={timelineId} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
+                <EuiToolTip
+                  content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
+                  disableScreenReaderOutput
+                >
                   <EuiButtonIcon
                     aria-label={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
                     iconType="cross"

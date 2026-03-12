@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createVisualizeAppState } from './create_visualize_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { visualizeAppStateStub } from './stubs';

@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datum, TooltipAction, TooltipValue, XYChartSeriesIdentifier } from '@elastic/charts';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
-import { FormatFactory } from '@kbn/visualization-ui-components';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datum, TooltipAction, TooltipValue, XYChartSeriesIdentifier } from '@elastic/charts';
+import { getAccessorByDimension, getColumnByAccessor } from '@kbn/chart-expressions-common';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { BooleanRelation } from '@kbn/es-query';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isTimeChart } from '../../../common/helpers';
-import { CommonXYDataLayerConfig } from '../../../common';
-import { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
-import { MultiFilterEvent } from '../../types';
+import type { CommonXYDataLayerConfig } from '../../../common';
+import type { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
+import type { MultiFilterEvent } from '../../types';
 
 type XYTooltipValue = TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>;
 

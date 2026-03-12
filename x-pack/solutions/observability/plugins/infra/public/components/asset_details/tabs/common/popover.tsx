@@ -45,9 +45,10 @@ export const Popover = ({
           data-test-subj={props['data-test-subj']}
         >
           <EuiIcon
-            type="questionInCircle"
+            type={icon}
             color={iconColor ?? 'text'}
             size={iconSize ?? 'original'}
+            aria-hidden={true}
           />
         </button>
       }

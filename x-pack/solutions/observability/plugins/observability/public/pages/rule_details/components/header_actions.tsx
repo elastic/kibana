@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
@@ -24,6 +25,8 @@ import { useEnableRule } from '../../../hooks/use_enable_rule';
 import { useDisableRule } from '../../../hooks/use_disable_rule';
 import { useRunRule } from '../../../hooks/use_run_rule';
 import { useUpdateAPIKey } from '../../../hooks/use_update_api_key';
+import { useAppLink } from '../../../hooks/use_app_link';
+
 interface HeaderActionsProps {
   ruleId: string;
   isLoading: boolean;
@@ -119,6 +122,8 @@ export function HeaderActions({
     ruleId,
   });
 
+  const { linkUrl, buttonText } = useAppLink({ rule });
+
   if (!isRuleEditable || !rule) {
     return null;
   }
@@ -185,7 +190,11 @@ export function HeaderActions({
 
   return (
     <>
-      <EuiFlexGroup direction="rowReverse" alignItems="center">
+      <EuiFlexGroup
+        direction="rowReverse"
+        alignItems="center"
+        data-test-subj={`ruleType_${rule.ruleTypeId}`}
+      >
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
@@ -217,6 +226,19 @@ export function HeaderActions({
             />
           </EuiPopover>
         </EuiFlexItem>
+        {linkUrl ? (
+          <EuiFlexItem grow={false} data-test-subj="ruleSidebarViewInAppAction">
+            <EuiButtonEmpty
+              color={'primary'}
+              href={linkUrl}
+              data-test-subj="ruleViewLinkedObjectButton"
+              iconType={'eye'}
+              aria-label={buttonText}
+            >
+              {buttonText}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={1}>
           <EuiButtonIcon
             className="snoozeButton"
@@ -225,6 +247,9 @@ export function HeaderActions({
             onClick={() => {
               setSnoozeModalOpen(true);
             }}
+            aria-label={i18n.translate('xpack.observability.ruleDetails.snoozeButtonAriaLabel', {
+              defaultMessage: 'Manage rule snooze',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
