@@ -8,7 +8,7 @@
 import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
-import { useSolutionContext } from '@kbn/solution-context';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -78,8 +78,7 @@ export function RuleComponent({
     ruleTypeRegistry,
     actionTypeRegistry,
     getCasesPlugin,
-    cloud,
-    spaces,
+    chrome,
     data,
     http,
     notifications,
@@ -150,13 +149,12 @@ export function RuleComponent({
     executionStatusTranslations: rulesStatusesTranslationsMapping,
   });
 
-  const solutionContext = useSolutionContext(cloud, spaces);
-  const solution = solutionContext?.solution ?? 'classic';
+  const solutionNavId = useObservable(chrome.getActiveSolutionNavId$(), null);
 
   const casesOwner =
-    solution === 'observability'
+    solutionNavId === 'oblt'
       ? 'observability'
-      : solution === 'security'
+      : solutionNavId === 'security'
       ? 'securitySolution'
       : 'cases';
 
