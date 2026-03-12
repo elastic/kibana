@@ -255,7 +255,7 @@ describe('useESQLVariables', () => {
 
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledTimes(1);
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledWith({
-        panelType: 'esqlControl',
+        panelType: 'esql_control',
         serializedState: {
           ...mockControlState,
         },

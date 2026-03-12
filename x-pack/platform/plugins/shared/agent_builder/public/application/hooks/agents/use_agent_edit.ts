@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
+  AgentVisibility,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -35,6 +36,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  visibility: AgentVisibility.Public,
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -97,11 +99,13 @@ export function useAgentEdit({
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
+
       return;
     }
 
     if (agent) {
       const { type, ...agentState } = agent;
+      agentState.visibility = agentState.visibility ?? AgentVisibility.Public;
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
       }
@@ -112,15 +116,18 @@ export function useAgentEdit({
   const submit = useCallback(
     async (data: AgentEditState) => {
       const cleanedData = cleanInvalidToolReferences(data, tools);
+      const requestData = isExperimentalFeaturesEnabled
+        ? cleanedData
+        : { ...cleanedData, visibility: undefined };
 
       if (editingAgentId) {
-        const { id, ...updatedAgent } = cleanedData;
+        const { id, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
       } else {
-        await createMutation.mutateAsync(cleanedData);
+        await createMutation.mutateAsync(requestData);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools]
+    [editingAgentId, createMutation, updateMutation, tools, isExperimentalFeaturesEnabled]
   );
 
   const isLoading = agentId
