@@ -24,12 +24,11 @@ export function createNotificationPolicySavedObjectService(): {
   mockFindAllDecrypted: jest.SpyInstance;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const mockSavedObjectsClientFactory = jest.fn().mockReturnValue(mockSavedObjectsClient);
   const mockSpaces = spacesMock.createStart();
   const mockEncryptedSavedObjectsClient = createMockEncryptedSavedObjectsClient();
 
   const notificationPolicySavedObjectService = new NotificationPolicySavedObjectService(
-    mockSavedObjectsClientFactory,
+    mockSavedObjectsClient,
     mockSpaces,
     mockEncryptedSavedObjectsClient
   );
