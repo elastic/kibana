@@ -19,6 +19,9 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import { pick } from 'lodash';
+import { type RuleChange } from '../../../../rules_client/lib/change_tracking';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -176,7 +179,8 @@ const bulkEnableRulesWithOCC = async (
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
   let scheduleValidationError = '';
 
@@ -346,6 +350,35 @@ const bulkEnableRulesWithOCC = async (
         },
       })
   );
+
+  // Track history
+  const changes = rulesToEnable.reduce((acc, rule) => {
+    const updated = result.saved_objects.find((r) => r.id === rule.id);
+    if (updated && !updated.error) {
+      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      if (type?.trackChanges) {
+        const original = rulesFinderRules.find((r) => r.id === rule.id);
+        acc.push({
+          objectId: rule.id,
+          objectType: rule.type,
+          module: type.solution,
+          before: original ? pick(original, ['attributes', 'references']) : undefined,
+          after: pick(rule, ['attributes', 'references']),
+        });
+      }
+    }
+    return acc;
+  }, [] as RuleChange[]);
+  if (context.changeTrackingService && changes.length) {
+    await context.changeTrackingService?.logBulk(changes, {
+      action: RuleChangeTrackingAction.ruleEnable,
+      username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
+      spaceId: context.spaceId,
+      data: { metadata: { bulkCount: rulesToEnable.length } },
+      refresh: 'wait_for',
+    });
+  }
 
   // Get a map of all rules that failed to enable so we do not clear their flapping
   const ruleIdsFailedToEnable: Record<string, boolean> = {};

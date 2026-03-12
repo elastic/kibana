@@ -1,0 +1,301 @@
+{
+  "@timestamp": "2026-02-19T10:03:53.811Z",
+  "event": {
+    "id": "01KHTNP9JKYPYG4WQ1W2BV8QD1",
+    "type": "change",
+    "outcome": "success",
+    "module": "security",
+    "dataset": "alerting-rules",
+    "action": "rule-update",
+    "group": {
+      "id": "78f9db2cf960e0c38e9ae1ba86698e9b"
+    }
+  },
+  "user": {
+    "id": "elastic"
+  },
+  "object": {
+    "id": "7e571c5c-e110-4eb5-8433-216f2954bd5f",
+    "type": "alert",
+    "hash": "44a8e8eb95bbe9f1810c59fdf25398dfa15a4ef2832f415d3f2f9bfce307e7f3",
+    "fields": {
+      "masked": [
+        "attributes.apiKey"
+      ],
+      "changed": [
+        "attributes.name",
+        "attributes.params.ruleSource.customizedFields",
+        "attributes.params.riskScore",
+        "attributes.params.severity",
+        "attributes.updatedAt",
+        "attributes.apiKey",
+        "attributes.revision"
+      ],
+      "ignored": [
+        "attributes.mapped_params.risk_score",
+        "attributes.mapped_params.severity",
+        "attributes.executionStatus.status",
+        "attributes.executionStatus.lastDuration",
+        "attributes.executionStatus.lastExecutionDate",
+        "attributes.executionStatus.error",
+        "attributes.executionStatus.warning.reason",
+        "attributes.executionStatus.warning.message",
+        "attributes.monitoring.run.history",
+        "attributes.monitoring.run.calculated_metrics.success_ratio",
+        "attributes.monitoring.run.calculated_metrics.p99",
+        "attributes.monitoring.run.calculated_metrics.p50",
+        "attributes.monitoring.run.calculated_metrics.p95",
+        "attributes.monitoring.run.last_run.timestamp",
+        "attributes.monitoring.run.last_run.metrics.duration",
+        "attributes.monitoring.run.last_run.metrics.total_search_duration_ms",
+        "attributes.monitoring.run.last_run.metrics.total_indexing_duration_ms",
+        "attributes.monitoring.run.last_run.metrics.total_alerts_detected",
+        "attributes.monitoring.run.last_run.metrics.total_alerts_created",
+        "attributes.monitoring.run.last_run.metrics.gap_duration_s",
+        "attributes.lastRun.outcomeOrder",
+        "attributes.lastRun.alertsCount.new",
+        "attributes.lastRun.alertsCount.ignored",
+        "attributes.lastRun.alertsCount.recovered",
+        "attributes.lastRun.alertsCount.active",
+        "attributes.lastRun.outcomeMsg",
+        "attributes.lastRun.warning",
+        "attributes.lastRun.outcome",
+        "attributes.nextRun"
+      ]
+    },
+    "snapshot": {
+      "attributes": {
+        "name": "AWS Redshift Cluster Creation",
+        "tags": [
+          "Domain: Cloud",
+          "Data Source: AWS",
+          "Data Source: Amazon Web Services",
+          "Data Source: AWS Redshift",
+          "Use Case: Asset Visibility",
+          "Tactic: Persistence",
+          "Resources: Investigation Guide"
+        ],
+        "enabled": true,
+        "alertTypeId": "siem.queryRule",
+        "consumer": "siem",
+        "legacyId": null,
+        "schedule": {
+          "interval": "10m"
+        },
+        "actions": [],
+        "params": {
+          "author": [
+            "Elastic"
+          ],
+          "description": "Identifies the creation of an Amazon Redshift cluster. Unexpected creation of this cluster by a non-administrative user may indicate a permission or role issue with current users. If unexpected, the resource may not properly be configured and could introduce security vulnerabilities.",
+          "note": "## Triage and analysis\n\n> **Disclaimer**:\n> This investigation guide was created using generative AI technology and has been reviewed to improve its accuracy and relevance. While every effort has been made to ensure its quality, we recommend validating the content and adapting it to suit your specific environment and operational needs.\n\n### Investigating AWS Redshift Cluster Creation\n\nAmazon Redshift is a data warehousing service that allows for scalable data storage and analysis. In a secure environment, only authorized users should create Redshift clusters. Adversaries might exploit misconfigured permissions to create clusters, potentially leading to data exfiltration or unauthorized data processing. The detection rule monitors for successful cluster creation events, especially by non-admin users, to identify potential misuse or misconfigurations.\n\n### Possible investigation steps\n\n- Review the CloudTrail logs for the event.dataset:aws.cloudtrail and event.provider:redshift.amazonaws.com to confirm the details of the CreateCluster event, including the timestamp and the user who initiated the action.\n- Identify the IAM role or user associated with the event.action:CreateCluster and verify if this user is expected to have permissions to create Redshift clusters. Check for any recent changes to their permissions or roles.\n- Investigate the event.outcome:success to ensure that the cluster creation was indeed successful and determine the region and account where the cluster was created.\n- Examine the configuration of the newly created Redshift cluster to ensure it adheres to security best practices, such as encryption settings, VPC configurations, and access controls.\n- Cross-reference the user activity with other logs or alerts to identify any unusual patterns or behaviors that might indicate misuse or compromise, such as multiple cluster creation attempts or access from unfamiliar IP addresses.\n- Contact the user or team responsible for the account to verify if the cluster creation was intentional and authorized, and document their response for future reference.\n\n### False positive analysis\n\n- Routine maintenance or testing activities by non-admin users can trigger alerts. To manage this, create exceptions for specific users or roles known to perform these tasks regularly.\n- Automated scripts or third-party tools that create clusters as part of their normal operation may cause false positives. Identify these tools and exclude their associated user accounts or roles from the detection rule.\n- Development or staging environments where non-admin users are permitted to create clusters for testing purposes can lead to alerts. Implement environment-specific exclusions to prevent unnecessary alerts.\n- Temporary permissions granted to non-admin users for specific projects can result in cluster creation alerts. Monitor and document these permissions, and adjust the detection rule to account for these temporary changes.\n\n### Response and remediation\n\n- Immediately isolate the Redshift cluster to prevent any unauthorized access or data exfiltration. This can be done by modifying the security group rules to restrict inbound and outbound traffic.\n- Review the IAM roles and permissions associated with the user who created the cluster. Revoke any unnecessary permissions and ensure that the principle of least privilege is enforced.\n- Conduct a thorough audit of recent CloudTrail logs to identify any other unauthorized activities or anomalies associated with the same user or related accounts.\n- If data exfiltration is suspected, initiate a data integrity check and consider restoring from a known good backup to ensure no data tampering has occurred.\n- Notify the security team and relevant stakeholders about the incident for further investigation and to determine if additional security measures are needed.\n- Implement additional monitoring and alerting for Redshift cluster creation events, especially focusing on non-administrative users, to quickly detect similar activities in the future.\n- Consider enabling multi-factor authentication (MFA) for all users with permissions to create or modify Redshift clusters to add an extra layer of security.",
+          "falsePositives": [
+            "Valid clusters may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Cluster creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+          ],
+          "from": "now-1h",
+          "ruleId": "015cca13-8832-49ac-a01b-a396114809f6",
+          "immutable": true,
+          "ruleSource": {
+            "type": "external",
+            "isCustomized": true,
+            "customizedFields": [
+              {
+                "fieldName": "risk_score"
+              },
+              {
+                "fieldName": "severity"
+              }
+            ],
+            "hasBaseVersion": true
+          },
+          "license": "Elastic License v2",
+          "outputIndex": "",
+          "meta": {
+            "kibana_siem_app_url": ""
+          },
+          "maxSignals": 100,
+          "riskScore": 99,
+          "riskScoreMapping": [],
+          "severity": "critical",
+          "severityMapping": [],
+          "timestampOverride": "event.ingested",
+          "timestampOverrideFallbackDisabled": false,
+          "threat": [
+            {
+              "framework": "MITRE ATT&CK",
+              "tactic": {
+                "id": "TA0003",
+                "name": "Persistence",
+                "reference": "https://attack.mitre.org/tactics/TA0003/"
+              },
+              "technique": []
+            }
+          ],
+          "to": "now",
+          "references": [
+            "https://docs.aws.amazon.com/redshift/latest/APIReference/API_CreateCluster.html"
+          ],
+          "version": 207,
+          "exceptionsList": [],
+          "relatedIntegrations": [
+            {
+              "package": "aws",
+              "version": "^2.0.0",
+              "integration": "cloudtrail"
+            }
+          ],
+          "requiredFields": [
+            {
+              "name": "event.action",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.dataset",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.outcome",
+              "type": "keyword",
+              "ecs": true
+            },
+            {
+              "name": "event.provider",
+              "type": "keyword",
+              "ecs": true
+            }
+          ],
+          "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+          "type": "query",
+          "language": "kuery",
+          "index": [
+            "filebeat-*",
+            "logs-aws.cloudtrail-*"
+          ],
+          "query": "event.dataset:aws.cloudtrail and event.provider:redshift.amazonaws.com and event.action:CreateCluster and event.outcome:success\n",
+          "filters": []
+        },
+        "mapped_params": {
+          "risk_score": 99,
+          "severity": "80-critical"
+        },
+        "createdBy": "elastic",
+        "updatedBy": "elastic",
+        "createdAt": "2026-02-19T09:16:36.940Z",
+        "updatedAt": "2026-02-19T10:03:52.918Z",
+        "apiKey": "****************e67a829c15eb",
+        "apiKeyOwner": "elastic",
+        "apiKeyCreatedByUser": false,
+        "throttle": null,
+        "notifyWhen": null,
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "warning",
+          "lastDuration": 40,
+          "lastExecutionDate": "2026-02-19T09:58:27.858Z",
+          "error": null,
+          "warning": {
+            "reason": "ruleExecution",
+            "message": "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.,This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+          }
+        },
+        "monitoring": {
+          "run": {
+            "history": [
+              {
+                "duration": 41,
+                "success": true,
+                "timestamp": 1771493649272
+              },
+              {
+                "duration": 45,
+                "success": true,
+                "timestamp": 1771493800548
+              },
+              {
+                "duration": 40,
+                "success": true,
+                "timestamp": 1771494110925
+              },
+              {
+                "duration": 45,
+                "success": true,
+                "timestamp": 1771494340746
+              },
+              {
+                "duration": 40,
+                "success": true,
+                "timestamp": 1771495107858
+              }
+            ],
+            "calculated_metrics": {
+              "success_ratio": 1,
+              "p99": 45,
+              "p50": 41,
+              "p95": 45
+            },
+            "last_run": {
+              "timestamp": "2026-02-19T09:58:27.858Z",
+              "metrics": {
+                "duration": 40,
+                "total_search_duration_ms": null,
+                "total_indexing_duration_ms": null,
+                "total_alerts_detected": null,
+                "total_alerts_created": null,
+                "gap_duration_s": null
+              }
+            }
+          }
+        },
+        "snoozeSchedule": [],
+        "revision": 7,
+        "running": false,
+        "artifacts": {
+          "dashboards": [],
+          "investigation_guide": {
+            "blob": ""
+          }
+        },
+        "meta": {
+          "versionApiKeyLastmodified": "9.4.0"
+        },
+        "scheduledTaskId": "7e571c5c-e110-4eb5-8433-216f2954bd5f",
+        "lastRun": {
+          "outcomeOrder": 10,
+          "alertsCount": {
+            "new": 0,
+            "ignored": 0,
+            "recovered": 0,
+            "active": 0
+          },
+          "outcomeMsg": [
+            "This rule is attempting to query data from Elasticsearch indices listed in the \"Index patterns\" section of the rule definition, however no index matching: [\"filebeat-*\",\"logs-aws.cloudtrail-*\"] was found. This warning will continue to appear until a matching index is created or this rule is disabled."
+          ],
+          "warning": null,
+          "outcome": "warning"
+        },
+        "nextRun": "2026-02-19T10:08:27.832Z"
+      },
+      "references": []
+    },
+    "oldvalues": {
+      "attributes.name": "AWS Redshift Cluster Creation (test1)",
+      "attributes.params.ruleSource.customizedFields": [
+        {
+          "fieldName": "name"
+        }
+      ],
+      "attributes.params.riskScore": 21,
+      "attributes.params.severity": "low",
+      "attributes.updatedAt": "2026-02-19T09:58:43.027Z",
+      "attributes.apiKey": "****************4c8874e516f2",
+      "attributes.revision": 6
+    }
+  },
+  "kibana": {
+    "space_id": "default",
+    "version": "9.4.0"
+  }
+}

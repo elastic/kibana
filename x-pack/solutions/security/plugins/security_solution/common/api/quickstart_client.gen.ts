@@ -71,6 +71,11 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
+  RestoreRuleRequestQueryInput,
+  RuleHistoryRequestQueryInput,
+  RuleHistoryResponse,
+} from './detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
   GetRuleExecutionEventsRequestQueryInput,
   GetRuleExecutionEventsRequestParamsInput,
   GetRuleExecutionEventsResponse,
@@ -2766,6 +2771,23 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Restores a historical revision of a detection rule.
+   */
+  async restoreRule(props: RestoreRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RestoreRule`);
+    return this.kbnClient
+      .request({
+        path: '/api/detection_engine/rules/_history',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PATCH',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -2775,6 +2797,23 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieve a paginated list of historical rule revisions. By default, the first page is returned, with 20 results per page.
+   */
+  async ruleHistory(props: RuleHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleHistory`);
+    return this.kbnClient
+      .request<RuleHistoryResponse>({
+        path: '/api/detection_engine/rules/_history',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3709,6 +3748,12 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RestoreRuleProps {
+  query: RestoreRuleRequestQueryInput;
+}
+export interface RuleHistoryProps {
+  query: RuleHistoryRequestQueryInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;

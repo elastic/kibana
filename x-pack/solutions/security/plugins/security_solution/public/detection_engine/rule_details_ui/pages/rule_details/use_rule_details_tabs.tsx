@@ -10,6 +10,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -22,6 +23,7 @@ export enum RuleDetailTabs {
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
   executionEvents = 'execution_events',
+  history = 'history',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -31,6 +33,7 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
   [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
+  [RuleDetailTabs.history]: i18n.CHANGE_HISTORY_TAB,
 };
 
 export interface UseRuleDetailsTabsProps {
@@ -84,6 +87,12 @@ export const useRuleDetailsTabs = ({
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
       },
+      [RuleDetailTabs.history]: {
+        id: RuleDetailTabs.history,
+        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.history],
+        disabled: rule == null,
+        href: `/rules/id/${ruleId}/${RuleDetailTabs.history}`,
+      },
     }),
     [isExistingRule, rule, ruleId]
   );
@@ -91,6 +100,7 @@ export const useRuleDetailsTabs = ({
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
   const ruleExecutionSettings = useRuleExecutionSettings();
 
+  const isRuleChangeHistoryEnabled = useIsExperimentalFeatureEnabled('ruleChangeHistoryEnabled');
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
 
@@ -109,6 +119,9 @@ export const useRuleDetailsTabs = ({
     if (!canReadExceptions) {
       hiddenTabs.push(RuleDetailTabs.exceptions);
     }
+    if (!isRuleChangeHistoryEnabled) {
+      hiddenTabs.push(RuleDetailTabs.history);
+    }
     if (rule != null) {
       const hasEndpointList = (rule.exceptions_list ?? []).some(
         (list) => list.type === ExceptionListTypeEnum.ENDPOINT
@@ -122,6 +135,7 @@ export const useRuleDetailsTabs = ({
 
     setTabs(tabs);
   }, [
+    isRuleChangeHistoryEnabled,
     canReadEndpointExceptions,
     canReadExceptions,
     hasIndexRead,

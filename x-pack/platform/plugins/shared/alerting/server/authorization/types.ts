@@ -12,6 +12,7 @@ export enum AlertingAuthorizationEntity {
 
 export enum ReadOperations {
   Get = 'get',
+  GetHistory = 'getHistory',
   BulkGet = 'bulkGet',
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',

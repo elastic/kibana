@@ -4,14 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { pick } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type {
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -39,6 +45,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
+import { type RuleChange } from '../../../../rules_client/lib/change_tracking';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -73,7 +80,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         action: 'DISABLE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }),
+          bulkDisableRulesWithOCC(context, { filter: filterKueryNode, untrack }), // here
         filter: kueryNodeFilterWithAuth,
       })
   );
@@ -147,15 +154,18 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
+  const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
+        rulesFinderRules.push(...response.saved_objects);
         await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
         await pMap(response.saved_objects, async (rule) => {
           const ruleName = rule.attributes.name;
@@ -236,6 +246,35 @@ const bulkDisableRulesWithOCC = async (
         savedObjectsBulkCreateOptions: { overwrite: true },
       })
   );
+
+  // Track history
+  const changes = rulesToDisable.reduce((acc, rule) => {
+    const updated = result.saved_objects.find((r) => r.id === rule.id);
+    if (updated && !updated.error) {
+      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      if (type?.trackChanges) {
+        const original = rulesFinderRules.find((r) => r.id === rule.id);
+        acc.push({
+          objectId: rule.id,
+          objectType: rule.type,
+          module: type.solution,
+          before: original ? pick(original, ['attributes', 'references']) : undefined,
+          after: pick(rule, ['attributes', 'references']),
+        });
+      }
+    }
+    return acc;
+  }, [] as RuleChange[]);
+  if (context.changeTrackingService && changes.length) {
+    await context.changeTrackingService?.logBulk(changes, {
+      action: RuleChangeTrackingAction.ruleDisable,
+      username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
+      spaceId: context.spaceId,
+      data: { metadata: { bulkCount: rulesToDisable.length } },
+      refresh: 'wait_for',
+    });
+  }
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

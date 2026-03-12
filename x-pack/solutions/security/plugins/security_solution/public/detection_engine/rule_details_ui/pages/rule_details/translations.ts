@@ -67,6 +67,13 @@ export const EXECUTION_EVENTS_TAB = i18n.translate(
   }
 );
 
+export const CHANGE_HISTORY_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleHistoryTab',
+  {
+    defaultMessage: 'History',
+  }
+);
+
 export const DELETED_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
   {

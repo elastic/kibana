@@ -63,6 +63,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_URL_HISTORY,
 } from '../../../../common/constants';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -77,6 +78,7 @@ import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchCoverageOverviewProps,
+  FetchRuleHistoryProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
   FetchRulesProps,
@@ -92,6 +94,7 @@ import type {
 } from '../logic/types';
 import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
+import type { ChangeHistoryResponse } from './hooks/use_change_history';
 
 /**
  * Create provided Rule
@@ -244,6 +247,50 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
     method: 'GET',
     version: '2023-10-31',
     query: { id },
+    signal,
+  });
+
+/**
+ * Fetches rule history by id
+ * @param id Rule ID's (not rule_id)
+ * @returns Promise<ChangeHistoryResponse>
+ */
+export const fetchRuleChangeHistoryById = async ({
+  id,
+  page = 1,
+  perPage = 20,
+  signal,
+}: FetchRuleHistoryProps): Promise<ChangeHistoryResponse> => {
+  return KibanaServices.get().http.fetch<ChangeHistoryResponse>(
+    DETECTION_ENGINE_RULES_URL_HISTORY,
+    {
+      method: 'GET',
+      version: '2023-10-31',
+      query: { id, page, per_page: perPage },
+      signal,
+    }
+  );
+};
+
+/**
+ * Restores a rule to a previous revision
+ * @param id The rule ID (not rule_id)
+ * @param changeId The historical change id
+ * @returns A promised that gets settled when the restore action is completed
+ */
+export const restoreChangeById = async ({
+  id,
+  changeId,
+  signal,
+}: {
+  id: string;
+  changeId: string;
+  signal?: AbortSignal;
+}): Promise<{ ok: boolean }> =>
+  KibanaServices.get().http.fetch<{ ok: boolean }>(DETECTION_ENGINE_RULES_URL_HISTORY, {
+    method: 'PATCH',
+    version: '2023-10-31',
+    query: { id, changeId },
     signal,
   });
 

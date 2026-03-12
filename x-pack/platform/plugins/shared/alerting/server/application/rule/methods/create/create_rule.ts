@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { type ChangeTrackingAction, RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -47,6 +48,8 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
+  action?: ChangeTrackingAction;
+  originalId?: string;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -135,7 +138,8 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
@@ -254,6 +258,26 @@ export async function createRule<Params extends RuleParams = never>(
         returnRuleAttributes: true,
       })
   );
+
+  // Success? Track changes
+  if (context.changeTrackingService && ruleType.trackChanges) {
+    const change = {
+      objectId: id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      after: {
+        attributes: ruleAttributes,
+        references,
+      },
+    };
+    context.changeTrackingService.log(change, {
+      action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
+      username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
+      spaceId: context.spaceId,
+      data: { metadata: { originalRuleId: options?.originalId } },
+    });
+  }
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

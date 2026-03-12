@@ -7,7 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-
+import { SecurityRuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -63,6 +63,7 @@ export const upgradePrebuiltRule = async ({
         timeline_title: existingRule.timeline_title,
       },
       id: existingRule.id,
+      action: SecurityRuleChangeTrackingAction.ruleUpgrade,
     });
 
     return createdRule;
@@ -85,6 +86,7 @@ export const upgradePrebuiltRule = async ({
   const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: convertRuleResponseToAlertingRule(updatedRuleWithMergedExceptions, actionsClient),
+    action: SecurityRuleChangeTrackingAction.ruleUpgrade,
   });
 
   return convertAlertingRuleToRuleResponse(updatedInternalRule);
