@@ -20,18 +20,7 @@
       ],
       "must_not": {
         "terms": {
-          "process.name": [
-            "elastic-agent.exe",
-            "elastic-agent",
-            "metricbeat.exe",
-            "metricbeat",
-            "filebeat.exe",
-            "filebeat",
-            "packetbeat.exe",
-            "packetbeat",
-            "winlogbeat.exe",
-            "winlogbeat"
-          ]
+          "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
         }
       }
     }
