@@ -2462,9 +2462,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_113.2.1-childhistory.0.0.2.tgz":
-  version "113.2.1-childhistory.0.0.2"
-  resolved "file:./elastic_eui_113.2.1-childhistory.0.0.2.tgz#df32f8324039ce7625a636bbbd0e0b33242b44da"
+"@elastic/eui@file:./elastic_eui_113.2.1-childhistory.0.0.3.tgz":
+  version "113.2.1-childhistory.0.0.3"
+  resolved "file:./elastic_eui_113.2.1-childhistory.0.0.3.tgz#5bef70e88465b922cbeb78267980f2392f432867"
   dependencies:
     "@elastic/eui-theme-common" "8.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
