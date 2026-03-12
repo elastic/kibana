@@ -121,9 +121,9 @@ export const useLayoutStyles = () => {
         }
       }
 
-      // show accent border on hover of the section header
+      // show accent background on hover of the section header
       .kbnGridSectionHeader:hover {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
         border-radius: ${euiTheme.border.radius.medium};
       }
 
@@ -166,7 +166,7 @@ export const useLayoutStyles = () => {
         height: calc(100% + 2px);
       }
 
-      &:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle {
+      &:has(.kbnGridSection--blocked) .kbnGridSectionHeader {
         cursor: not-allowed !important;
       }
     `;
