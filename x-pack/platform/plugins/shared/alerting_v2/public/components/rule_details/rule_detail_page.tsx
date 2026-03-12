@@ -12,7 +12,6 @@ import {
   EuiHorizontalRule,
   EuiPageHeader,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
@@ -30,12 +29,12 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { RulesDeleteModalConfirmation } from '../common/rules_delete_modal_confirmation';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { ItemValueRuleSummary } from './item_value_rule_summary';
+import { RecoveryDescription } from './recovery_description';
+import { EMPTY_VALUE, formatAlertDelay } from './utils';
 
 export interface RuleDetailPageProps {
   rule: RuleApiResponse;
 }
-
-const EMPTY_VALUE = '-';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
@@ -43,15 +42,6 @@ const MODE_LABELS: Record<string, string> = {
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
     defaultMessage: 'Alert',
-  }),
-};
-
-const RECOVERY_TYPE_LABELS: Record<string, string> = {
-  query: i18n.translate('xpack.alertingV2.ruleDetails.recoveryTypeQuery', {
-    defaultMessage: 'ESQL recovery query',
-  }),
-  no_breach: i18n.translate('xpack.alertingV2.ruleDetails.recoveryTypeNoBreach', {
-    defaultMessage: 'No breach',
   }),
 };
 
@@ -66,48 +56,6 @@ const NO_DATA_BEHAVIOR_LABELS: Record<string, string> = {
     defaultMessage: 'Recover',
   }),
 };
-
-function formatAlertDelay(stateTransition: RuleApiResponse['state_transition']): string {
-  if (!stateTransition?.pending_count) return EMPTY_VALUE;
-  return i18n.translate('xpack.alertingV2.ruleDetails.alertDelayValue', {
-    defaultMessage: 'After {count} {count, plural, one {match} other {matches}}',
-    values: { count: stateTransition.pending_count },
-  });
-}
-
-function renderRecoveryDescription(
-  recoveryPolicy: RuleApiResponse['recovery_policy']
-): NonNullable<React.ReactNode> {
-  if (!recoveryPolicy) return EMPTY_VALUE;
-
-  const typeLabel = RECOVERY_TYPE_LABELS[recoveryPolicy.type] ?? recoveryPolicy.type;
-  const hasQuery =
-    recoveryPolicy.type === 'query' &&
-    (recoveryPolicy.query?.base || recoveryPolicy.query?.condition);
-
-  if (!hasQuery) {
-    return typeLabel;
-  }
-
-  const queryText = [recoveryPolicy.query?.base, recoveryPolicy.query?.condition]
-    .filter(Boolean)
-    .join('\n');
-
-  return (
-    <>
-      <EuiText size="s">{typeLabel}</EuiText>
-      <EuiSpacer size="xs" />
-      <EuiCodeBlock
-        language="esql"
-        isCopyable
-        paddingSize="m"
-        data-test-subj="alertingV2RuleDetailsRecoveryQuery"
-      >
-        {queryText}
-      </EuiCodeBlock>
-    </>
-  );
-}
 
 export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
@@ -211,7 +159,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
         defaultMessage: 'Recovery',
       }),
-      description: renderRecoveryDescription(rule.recovery_policy),
+      description: <RecoveryDescription recoveryPolicy={rule.recovery_policy} />,
     },
     ...(isAlertMode
       ? [
