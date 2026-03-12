@@ -17,6 +17,7 @@ import {
   getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
+  getTimelineApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -77,6 +78,11 @@ export const spaceTest = securityParallelFixtures.extend<
       });
       extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
         kbnClient,
+        scoutSpace,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
         scoutSpace,
       });
 

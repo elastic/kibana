@@ -214,6 +214,38 @@ export class StreamsApp {
     return null;
   }
 
+  /**
+   * Verifies that the Discover button for a wired stream links to the ES|QL view ($.streamname)
+   * rather than the raw glob pattern.
+   */
+  async verifyWiredStreamDiscoverLinkUsesView(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Wired streams should use the ES|QL view ($.streamname), not the raw pattern.
+    const decodedHref = decodeURIComponent(href);
+    const viewFragment = `FROM $.${streamName}`;
+    const rawFragment = `FROM ${streamName}, ${streamName}.*`;
+
+    if (decodedHref.includes(rawFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} still uses raw glob pattern. Expected view reference ($.${streamName}).`
+      );
+    }
+    if (!decodedHref.includes(viewFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} does not contain expected view fragment. href=${href} expected=FROM $.${streamName}`
+      );
+    }
+  }
+
   async verifyStreamsAreInTable(streamNames: string[]) {
     for (const name of streamNames) {
       await expect(
@@ -364,6 +396,7 @@ export class StreamsApp {
 
     // Use Monaco's model API to set value reliably (keyboard interactions can be flaky).
     // There can be multiple Monaco models on the page (e.g. YAML editor), so target the condition model.
+    // Condition editor uses YAML format with a "field:" property.
     const conditionModelIndex = await this.page.evaluate(() => {
       interface MonacoModel {
         getValue(): string;
@@ -381,7 +414,8 @@ export class StreamsApp {
       }
 
       const values: string[] = editorApi.getModels().map((model) => model.getValue());
-      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
+      // YAML condition format has "field:" at the start of a line
+      return values.findIndex((value) => /^field:/m.test(value));
     });
 
     await this.kibanaMonacoEditor.setCodeEditorValue(
@@ -995,7 +1029,7 @@ export class StreamsApp {
   async regenerateSuggestions() {
     const regenerateButton = this.page
       .getByTestId('streamsAppGenerateSuggestionButton')
-      .filter({ hasText: 'Regenerate' });
+      .filter({ hasText: 'Regenerate all' });
     await expect(regenerateButton).toBeVisible();
     await regenerateButton.click();
   }

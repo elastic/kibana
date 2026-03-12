@@ -12,10 +12,11 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
+import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -23,32 +24,54 @@ import { paths } from '../../constants';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
+const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNameSuffix', {
+  defaultMessage: ' (clone)',
+});
+
 export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
-  const isEditing = Boolean(ruleId);
+  const { search } = useLocation();
+  const cloneFromId = new URLSearchParams(search).get('cloneFrom');
 
-  if (isEditing && ruleId) {
-    return <EditRuleFormPageContent ruleId={ruleId} />;
+  if (ruleId) {
+    return <FetchedRuleFormPage ruleId={ruleId} mode="edit" />;
+  }
+
+  if (cloneFromId) {
+    return <FetchedRuleFormPage ruleId={cloneFromId} mode="clone" />;
   }
 
   return <RuleFormPageContent />;
 };
 
-const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
+interface FetchedRuleFormPageProps {
+  ruleId: string;
+  mode: 'edit' | 'clone';
+}
+
+const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
+  const isClone = mode === 'clone';
   const { data: rule, isLoading, isError, error } = useFetchRule(ruleId);
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
-  if (isError) {
+  if (isError || (!rule && !isLoading)) {
     return (
       <EuiCallOut
         title={
-          <FormattedMessage
-            id="xpack.alertingV2.ruleFormPage.loadErrorTitle"
-            defaultMessage="Failed to load rule"
-          />
+          isClone ? (
+            <FormattedMessage
+              id="xpack.alertingV2.ruleFormPage.cloneLoadErrorTitle"
+              defaultMessage="Failed to load source rule for cloning"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.alertingV2.ruleFormPage.loadErrorTitle"
+              defaultMessage="Failed to load rule"
+            />
+          )
         }
         color="danger"
         iconType="error"
@@ -59,16 +82,19 @@ const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
     );
   }
 
-  if (!rule) {
-    return null;
-  }
-
   const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
   const initialValues = mapRuleResponseToFormValues(rule);
 
+  if (isClone && initialValues.metadata) {
+    initialValues.metadata = {
+      ...initialValues.metadata,
+      name: `${initialValues.metadata.name}${CLONE_NAME_SUFFIX}`,
+    };
+  }
+
   return (
     <RuleFormPageContent
-      ruleId={ruleId}
+      ruleId={isClone ? undefined : ruleId}
       initialQuery={initialQuery}
       initialValues={initialValues}
     />
@@ -106,7 +132,6 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   );
 
   const onSuccess = useCallback(() => {
-    // Invalidate cached rule data so the next edit fetches fresh data
     queryClient.invalidateQueries(ruleKeys.lists());
     if (ruleId) {
       queryClient.invalidateQueries(ruleKeys.detail(ruleId));
@@ -118,23 +143,21 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     navigateToUrl(basePath.prepend(paths.ruleList));
   };
 
+  const pageTitle = isEditing ? (
+    <FormattedMessage id="xpack.alertingV2.createRule.editPageTitle" defaultMessage="Edit rule" />
+  ) : (
+    <FormattedMessage id="xpack.alertingV2.createRule.pageTitle" defaultMessage="Create rule" />
+  );
+
+  const submitLabel = isEditing ? (
+    <FormattedMessage id="xpack.alertingV2.createRule.saveLabel" defaultMessage="Save changes" />
+  ) : (
+    <FormattedMessage id="xpack.alertingV2.createRule.submitLabel" defaultMessage="Create rule" />
+  );
+
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          isEditing ? (
-            <FormattedMessage
-              id="xpack.alertingV2.createRule.editPageTitle"
-              defaultMessage="Edit rule"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.alertingV2.createRule.pageTitle"
-              defaultMessage="Create rule"
-            />
-          )
-        }
-      />
+      <EuiPageHeader pageTitle={pageTitle} />
       <EuiSpacer size="m" />
       <StandaloneRuleForm
         query={initialQuery ?? DEFAULT_QUERY}
@@ -146,19 +169,7 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
         onCancel={onCancel}
         ruleId={ruleId}
         initialValues={initialValues}
-        submitLabel={
-          isEditing ? (
-            <FormattedMessage
-              id="xpack.alertingV2.createRule.saveLabel"
-              defaultMessage="Save changes"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.alertingV2.createRule.submitLabel"
-              defaultMessage="Create rule"
-            />
-          )
-        }
+        submitLabel={submitLabel}
       />
     </>
   );

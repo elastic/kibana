@@ -34,6 +34,7 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
 import { paths } from '../../constants';
 
@@ -42,10 +43,18 @@ const DEFAULT_PER_PAGE = 20;
 interface RuleActionsMenuProps {
   rule: RuleApiResponse;
   onEdit: (rule: RuleApiResponse) => void;
+  onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
+  onToggleEnabled: (rule: RuleApiResponse) => void;
 }
 
-const RuleActionsMenu = ({ rule, onEdit, onDelete }: RuleActionsMenuProps) => {
+const RuleActionsMenu = ({
+  rule,
+  onEdit,
+  onClone,
+  onDelete,
+  onToggleEnabled,
+}: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
@@ -59,6 +68,34 @@ const RuleActionsMenu = ({ rule, onEdit, onDelete }: RuleActionsMenuProps) => {
       data-test-subj={`editRule-${rule.id}`}
     >
       {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="clone"
+      icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onClone(rule);
+      }}
+      data-test-subj={`cloneRule-${rule.id}`}
+    >
+      {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="toggleEnabled"
+      icon={<EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />}
+      onClick={() => {
+        setIsOpen(false);
+        onToggleEnabled(rule);
+      }}
+      data-test-subj={`toggleEnabledRule-${rule.id}`}
+    >
+      {rule.enabled
+        ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
+            defaultMessage: 'Disable',
+          })
+        : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
+            defaultMessage: 'Enable',
+          })}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="delete"
@@ -110,6 +147,7 @@ export const RulesListPage = () => {
 
   const { data, isLoading, isError, error } = useFetchRules({ page, perPage });
   const deleteRuleMutation = useDeleteRule();
+  const toggleEnabledMutation = useToggleRuleEnabled();
 
   const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
     setPage(tablePage.index + 1);
@@ -211,6 +249,27 @@ export const RulesListPage = () => {
       ),
     },
     {
+      field: 'enabled',
+      name: (
+        <FormattedMessage id="xpack.alertingV2.rulesList.column.status" defaultMessage="Status" />
+      ),
+      width: '10%',
+      render: (enabled: boolean) =>
+        enabled ? (
+          <EuiBadge color="success" data-test-subj="ruleStatusEnabled">
+            {i18n.translate('xpack.alertingV2.rulesList.statusEnabled', {
+              defaultMessage: 'Enabled',
+            })}
+          </EuiBadge>
+        ) : (
+          <EuiBadge color="default" data-test-subj="ruleStatusDisabled">
+            {i18n.translate('xpack.alertingV2.rulesList.statusDisabled', {
+              defaultMessage: 'Disabled',
+            })}
+          </EuiBadge>
+        ),
+    },
+    {
       name: (
         <FormattedMessage id="xpack.alertingV2.rulesList.column.actions" defaultMessage="Actions" />
       ),
@@ -220,7 +279,13 @@ export const RulesListPage = () => {
         <RuleActionsMenu
           rule={rule}
           onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
+          onClone={(r) =>
+            navigateToUrl(
+              basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
+            )
+          }
           onDelete={(r) => setRuleToDelete(r)}
+          onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         />
       ),
     },

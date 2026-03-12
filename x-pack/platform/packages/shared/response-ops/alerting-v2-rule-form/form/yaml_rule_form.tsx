@@ -37,12 +37,12 @@ export interface YamlRuleFormProps {
  * Provides a YAML editor for editing rule configuration with ES|QL autocomplete.
  * Validates the YAML on submission and converts it to FormValues.
  */
-export const YamlRuleForm: React.FC<YamlRuleFormProps> = ({
+export const YamlRuleForm = ({
   services,
   onSubmit,
   isDisabled = false,
   isSubmitting = false,
-}) => {
+}: YamlRuleFormProps) => {
   const { getValues } = useFormContext<FormValues>();
   const [yaml, setYaml] = useState<string>(() => {
     const values = getValues();

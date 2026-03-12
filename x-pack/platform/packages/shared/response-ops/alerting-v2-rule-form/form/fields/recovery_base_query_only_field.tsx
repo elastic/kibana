@@ -26,9 +26,7 @@ interface RecoveryBaseQueryOnlyFieldProps {
  * Validation logic is provided by the `useRecoveryValidation` hook via the
  * `validation` prop. Seeding is handled locally on mount.
  */
-export const RecoveryBaseQueryOnlyField: React.FC<RecoveryBaseQueryOnlyFieldProps> = ({
-  validation,
-}) => {
+export const RecoveryBaseQueryOnlyField = ({ validation }: RecoveryBaseQueryOnlyFieldProps) => {
   const { fullBaseQueryRules, groupingValidationError } = validation;
   const { getValues, setValue } = useFormContext<FormValues>();
 

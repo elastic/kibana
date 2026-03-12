@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedStyles } from '@emotion/serialize';
-import dfaImage from './analysis_monitors.png';
+import dfaImage from './analysis_monitors.svg';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';

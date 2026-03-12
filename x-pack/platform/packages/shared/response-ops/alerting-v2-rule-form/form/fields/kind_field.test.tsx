@@ -6,62 +6,59 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { KindField } from './kind_field';
 import { createFormWrapper } from '../../test_utils';
 
 describe('KindField', () => {
-  it('renders the rule kind label', () => {
+  it('renders the checkbox label', () => {
     render(<KindField />, { wrapper: createFormWrapper() });
 
-    // "Rule kind" appears twice (form label + button group legend), so use getAllByText
-    expect(screen.getAllByText('Rule kind')).toHaveLength(2);
+    expect(screen.getByText('Track active and recovered state over time')).toBeInTheDocument();
   });
 
-  it('renders help text', () => {
+  it('renders the description text', () => {
     render(<KindField />, { wrapper: createFormWrapper() });
 
-    expect(
-      screen.getByText('Choose whether this rule creates monitors or alerts.')
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Enables lifecycle management/)).toBeInTheDocument();
   });
 
-  it('renders Alert and Monitor options', () => {
-    render(<KindField />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByText('Alert')).toBeInTheDocument();
-    expect(screen.getByText('Monitor')).toBeInTheDocument();
-  });
-
-  it('selects Alert by default', () => {
+  it('is checked when kind is alert (default)', () => {
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
 
-    const alertButton = screen.getByText('Alert').closest('button');
-    expect(alertButton).toHaveClass('euiButtonGroupButton-isSelected');
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeChecked();
   });
 
-  it('selects Monitor when kind is signal', () => {
+  it('is unchecked when kind is signal', () => {
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'signal' }) });
 
-    const monitorButton = screen.getByText('Monitor').closest('button');
-    expect(monitorButton).toHaveClass('euiButtonGroupButton-isSelected');
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).not.toBeChecked();
   });
 
-  it('updates value when user clicks Monitor', () => {
+  it('changes kind from alert to signal when unchecked', async () => {
+    const user = userEvent.setup();
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'alert' }) });
 
-    const monitorButton = screen.getByText('Monitor');
-    fireEvent.click(monitorButton);
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeChecked();
 
-    expect(monitorButton.closest('button')).toHaveClass('euiButtonGroupButton-isSelected');
+    await user.click(checkbox);
+
+    expect(checkbox).not.toBeChecked();
   });
 
-  it('updates value when user clicks Alert', () => {
+  it('changes kind from signal to alert when checked', async () => {
+    const user = userEvent.setup();
     render(<KindField />, { wrapper: createFormWrapper({ kind: 'signal' }) });
 
-    const alertButton = screen.getByText('Alert');
-    fireEvent.click(alertButton);
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).not.toBeChecked();
 
-    expect(alertButton.closest('button')).toHaveClass('euiButtonGroupButton-isSelected');
+    await user.click(checkbox);
+
+    expect(checkbox).toBeChecked();
   });
 });

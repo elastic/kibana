@@ -5,38 +5,55 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
-import {
-  getDurationUnitValue,
-  getDurationNumberInItsUnit,
-  getTimeOptions,
-  INVALID_NUMBER_KEYS,
-  parsePositiveIntegerInput,
-} from '../utils';
 import type { FormValues } from '../types';
+import { DurationInput } from './duration_input';
+
+const TIMEFRAME_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitAriaLabel',
+  { defaultMessage: 'Time unit' }
+);
+
+export type StateTransitionTimeframeVariant = 'pending' | 'recovering';
 
 interface StateTransitionTimeframeFieldProps {
   numberPrependLabel?: string;
+  /** Which state transition field to bind to. Defaults to 'pending'. */
+  variant?: StateTransitionTimeframeVariant;
 }
 
-export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFieldProps> = ({
+const FIELD_NAMES: Record<
+  StateTransitionTimeframeVariant,
+  'stateTransition.pendingTimeframe' | 'stateTransition.recoveringTimeframe'
+> = {
+  pending: 'stateTransition.pendingTimeframe',
+  recovering: 'stateTransition.recoveringTimeframe',
+};
+
+const TEST_SUBJ_PREFIXES: Record<StateTransitionTimeframeVariant, string> = {
+  pending: 'stateTransitionTimeframe',
+  recovering: 'recoveryTransitionTimeframe',
+};
+
+export const StateTransitionTimeframeField = ({
   numberPrependLabel,
-}) => {
+  variant = 'pending',
+}: StateTransitionTimeframeFieldProps) => {
   const { control, getValues, setValue } = useFormContext<FormValues>();
+  const fieldName = FIELD_NAMES[variant];
 
   useEffect(() => {
-    const currentTimeframe = getValues('stateTransition.pendingTimeframe');
+    const currentTimeframe = getValues(fieldName);
     if (currentTimeframe == null) {
-      setValue('stateTransition.pendingTimeframe', '2m');
+      setValue(fieldName, '2m');
     }
-  }, [getValues, setValue]);
+  }, [getValues, setValue, fieldName]);
 
   return (
     <Controller
-      name="stateTransition.pendingTimeframe"
+      name={fieldName}
       control={control}
       rules={{
         required: i18n.translate(
@@ -47,89 +64,18 @@ export const StateTransitionTimeframeField: React.FC<StateTransitionTimeframeFie
         ),
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <StateTransitionTimeframeInput
-          value={value}
+        <DurationInput
+          ref={ref}
+          value={value ?? '2m'}
           onChange={onChange}
+          fallback="2m"
           errors={error?.message}
-          inputRef={ref}
-          numberPrependLabel={numberPrependLabel}
+          numberLabel={numberPrependLabel}
+          unitAriaLabel={TIMEFRAME_UNIT_ARIA_LABEL}
+          dataTestSubj={TEST_SUBJ_PREFIXES[variant]}
+          idPrefix={TEST_SUBJ_PREFIXES[variant]}
         />
       )}
     />
-  );
-};
-
-interface StateTransitionTimeframeInputProps {
-  value?: string;
-  onChange: (value: string | undefined) => void;
-  errors?: string;
-  inputRef?: React.Ref<HTMLInputElement>;
-  numberPrependLabel?: string;
-}
-
-const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps> = ({
-  value,
-  onChange,
-  errors,
-  inputRef,
-  numberPrependLabel,
-}) => {
-  const intervalNumber = useMemo(() => getDurationNumberInItsUnit(value || '2m'), [value]);
-
-  const intervalUnit = useMemo(() => getDurationUnitValue(value || '2m'), [value]);
-
-  const onIntervalNumberChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const parsedValue = parsePositiveIntegerInput(e.target.value);
-      if (parsedValue != null) {
-        onChange(`${parsedValue}${intervalUnit}`);
-      }
-    },
-    [intervalUnit, onChange]
-  );
-
-  const onIntervalUnitChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange(`${intervalNumber}${e.target.value}`);
-    },
-    [intervalNumber, onChange]
-  );
-
-  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (INVALID_NUMBER_KEYS.includes(e.key)) {
-      e.preventDefault();
-    }
-  }, []);
-
-  return (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={2}>
-        <EuiFieldNumber
-          fullWidth
-          isInvalid={!!errors}
-          value={intervalNumber}
-          onChange={onIntervalNumberChange}
-          onKeyDown={onKeyDown}
-          min={1}
-          step={1}
-          data-test-subj="stateTransitionTimeframeNumberInput"
-          inputRef={inputRef}
-          prepend={numberPrependLabel ? [numberPrependLabel] : undefined}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiSelect
-          fullWidth
-          value={intervalUnit}
-          options={getTimeOptions(intervalNumber)}
-          onChange={onIntervalUnitChange}
-          data-test-subj="stateTransitionTimeframeUnitInput"
-          aria-label={i18n.translate(
-            'xpack.alertingV2.ruleForm.stateTransition.timeframeUnitLabel',
-            { defaultMessage: 'Time unit' }
-          )}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };
