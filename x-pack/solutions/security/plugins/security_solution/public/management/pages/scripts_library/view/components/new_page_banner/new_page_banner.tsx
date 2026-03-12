@@ -41,6 +41,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
   const bannerStyle = useMemo(
     () => ({
       borderRadius: euiTheme.border.radius.medium,
+      padding: `${euiTheme.size.base} ${euiTheme.size.xxl} ${euiTheme.size.base} ${euiTheme.size.base}`,
     }),
     [euiTheme]
   );
