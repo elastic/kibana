@@ -10,8 +10,7 @@ import {
   generateFieldHintCases,
   formatJsonProperty,
   buildLookupJoinEsql,
-  buildEnrichPolicyEsql,
-} from './esql.utils';
+} from './esql_utils';
 
 describe('ESQL utils', () => {
   describe('getFieldNamespace', () => {
@@ -88,9 +87,6 @@ describe('ESQL utils', () => {
     it('should generate ESQL that outputs JSON property with comma prefix, or empty string if null', () => {
       const result = formatJsonProperty('name', 'entityName');
 
-      // Verify structure: COALESCE(CONCAT(",\"prop\":\"", var, "\""), "")
-      // - CONCAT with comma prefix for property chaining
-      // - COALESCE returns "" when value is null (property omitted)
       expect(result).toBe('COALESCE(CONCAT(",\\"name\\":\\"", entityName, "\\""), "")');
     });
 
@@ -133,39 +129,11 @@ describe('ESQL utils', () => {
       const indexMatches = result.match(new RegExp(indexName.replace(/\./g, '\\.'), 'g'));
       expect(indexMatches).toHaveLength(2);
     });
-  });
+    it('should preserve the lookup entity id aliases for both joins', () => {
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_test');
 
-  describe('buildEnrichPolicyEsql', () => {
-    it('should generate ENRICH statements with provided policy name', () => {
-      const result = buildEnrichPolicyEsql('entity_store_field_retention_generic_default_v1.0.0');
-
-      expect(result).toContain('// Use ENRICH policy for entity enrichment (deprecated fallback)');
-      expect(result).toContain(
-        '| ENRICH entity_store_field_retention_generic_default_v1.0.0 ON actorEntityId'
-      );
-      expect(result).toContain(
-        '| ENRICH entity_store_field_retention_generic_default_v1.0.0 ON targetEntityId'
-      );
-    });
-
-    it('should include two ENRICH statements for actor and target', () => {
-      const result = buildEnrichPolicyEsql('test_policy');
-
-      const enrichMatches = result.match(/\| ENRICH/g);
-      expect(enrichMatches).toHaveLength(2);
-    });
-
-    it('should include all required fields in WITH clause', () => {
-      const result = buildEnrichPolicyEsql('test_policy');
-
-      expect(result).toContain('actorEntityName = entity.name');
-      expect(result).toContain('actorEntityType = entity.type');
-      expect(result).toContain('actorEntitySubType = entity.sub_type');
-      expect(result).toContain('actorHostIp = host.ip');
-      expect(result).toContain('targetEntityName = entity.name');
-      expect(result).toContain('targetEntityType = entity.type');
-      expect(result).toContain('targetEntitySubType = entity.sub_type');
-      expect(result).toContain('targetHostIp = host.ip');
+      expect(result).toContain('| RENAME actorLookupEntityId = entity.id');
+      expect(result).toContain('| RENAME targetLookupEntityId = entity.id');
     });
   });
 });
