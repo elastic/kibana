@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
@@ -15,7 +15,6 @@ import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
-import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
 import { useSetUrlCategory } from './hooks/url_categories';
@@ -24,7 +23,6 @@ import {
   ManageIntegrationsTable,
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
-import { CreateNewIntegrationButton } from './components/create_new_integration';
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
@@ -124,32 +122,13 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {isManageIntegrationsView ? (
-            <StickyFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow>
-                  <EuiFieldSearch
-                    compressed
-                    placeholder={i18n.translate(
-                      'xpack.fleet.epmList.manageIntegrations.searchPlaceholder',
-                      { defaultMessage: 'Search integrations' }
-                    )}
-                    fullWidth
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CreateNewIntegrationButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </StickyFlexItem>
-          ) : (
-            <SearchAndFiltersBar
-              categories={mainCategories}
-              availableSubCategories={availableSubCategories}
-            />
-          )}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css`
+            padding: 8px;
+          `}
+        >
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
             grow={1}
