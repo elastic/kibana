@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransforms } from './transforms';
 
 jest.mock('@kbn/presentation-publishing', () => ({
   transformTitlesOut: <T>(state: T) => state,
 }));
 
-const identityDrilldownTransforms: DrilldownTransforms = {
+const identityDrilldownTransforms = {
   transformIn: (state) => ({ state, references: [] }),
   transformOut: (state) => state,
 };
