@@ -22,6 +22,13 @@ interface RunWithSpanParams<T> {
   cb: () => T;
 }
 
+interface WrapTaskRunParams<T> {
+  spanName: string;
+  namespace: string;
+  attributes?: Record<string, SpanAttributeValue>;
+  run: () => Promise<T>;
+}
+
 export const runWithSpan = <T>({ name, namespace, attributes = {}, cb }: RunWithSpanParams<T>): T =>
   withEntityStoreSpan(
     name,
@@ -33,3 +40,21 @@ export const runWithSpan = <T>({ name, namespace, attributes = {}, cb }: RunWith
     },
     cb
   );
+
+export const getTaskNamespace = (taskState: unknown): string => {
+  const namespace = (taskState as { namespace?: unknown })?.namespace;
+  return typeof namespace === 'string' && namespace.length > 0 ? namespace : 'unknown';
+};
+
+export const wrapTaskRun = <T>({
+  spanName,
+  namespace,
+  attributes = {},
+  run,
+}: WrapTaskRunParams<T>): Promise<T> =>
+  runWithSpan({
+    name: spanName,
+    namespace,
+    attributes,
+    cb: run,
+  });
