@@ -112,6 +112,8 @@
       "@kbn/anonymization-common/*": ["x-pack/platform/packages/shared/ai-infra/anonymization-common/*"],
       "@kbn/anonymization-plugin": ["x-pack/platform/plugins/shared/anonymization"],
       "@kbn/anonymization-plugin/*": ["x-pack/platform/plugins/shared/anonymization/*"],
+      "@kbn/anonymization-ui": ["x-pack/platform/packages/shared/ai-infra/anonymization-ui"],
+      "@kbn/anonymization-ui/*": ["x-pack/platform/packages/shared/ai-infra/anonymization-ui/*"],
       "@kbn/api-contracts": ["packages/kbn-api-contracts"],
       "@kbn/api-contracts/*": ["packages/kbn-api-contracts/*"],
       "@kbn/apm-config-loader": ["src/platform/packages/private/kbn-apm-config-loader"],

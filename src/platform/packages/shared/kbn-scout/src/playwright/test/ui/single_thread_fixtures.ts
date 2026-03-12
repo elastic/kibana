@@ -12,6 +12,7 @@ import {
   apiServicesFixture,
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
   synthtraceFixture,
   lighthouseFixture,
@@ -19,6 +20,7 @@ import {
 import type {
   ApiServicesFixture,
   EsArchiverFixture,
+  LinkedProjectFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -49,6 +51,7 @@ export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
+  linkedEsFixtures,
   uiSettingsFixture,
   synthtraceFixture,
   // api fixtures
@@ -77,6 +80,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   kbnClient: KbnClient;
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
+  linkedProject: LinkedProjectFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
   apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];

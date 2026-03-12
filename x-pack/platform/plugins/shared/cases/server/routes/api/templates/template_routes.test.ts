@@ -271,11 +271,12 @@ describe('Template Routes', () => {
         search: 'test-query',
         tags: ['security'],
         author: ['alice'],
+        owner: [],
         isDeleted: true,
       });
     });
 
-    it('coerces tags and author from comma-separated strings to arrays', async () => {
+    it('coerces tags, author, and owner from arrays', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
@@ -285,6 +286,7 @@ describe('Template Routes', () => {
           isDeleted: false,
           tags: ['security', 'network'],
           author: ['alice', 'bob'],
+          owner: ['securitySolution', 'observability'],
         },
       };
       const response = createMockResponse();
@@ -296,11 +298,12 @@ describe('Template Routes', () => {
         expect.objectContaining({
           tags: ['security', 'network'],
           author: ['alice', 'bob'],
+          owner: ['securitySolution', 'observability'],
         })
       );
     });
 
-    it('sends empty arrays for tags and author when they are not provided', async () => {
+    it('sends empty arrays for tags, author, and owner when they are not provided', async () => {
       const context = createMockContext();
       const casesClient = await (await context.cases).getCasesClient();
       const request = {
@@ -315,6 +318,7 @@ describe('Template Routes', () => {
         expect.objectContaining({
           tags: [],
           author: [],
+          owner: [],
         })
       );
     });
