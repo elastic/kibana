@@ -6,6 +6,11 @@
  */
 
 import { parse } from 'yaml';
+
+export const renderWorkflowTemplate = (
+  yaml: string,
+  templateVars: Record<string, string>
+): string => yaml.replace(/<%= ([^%]+) %>/g, (_, key) => templateVars[key.trim()] ?? '');
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
