@@ -31,15 +31,13 @@ export function AgentBuilderNavControl() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<EuiToolTip>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const handleTooltipMouseOut = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-  }, []);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
 
   const sidebarOptions = useCallback(
     () => ({
       onClose: () => {
         setIsSidebarOpen(false);
+        setTooltipVisible(true);
         if (document.activeElement?.matches(':focus-visible')) {
           buttonRef.current?.focus();
         }
@@ -48,8 +46,9 @@ export function AgentBuilderNavControl() {
     []
   );
 
-  const toggleSidebar = useCallback(() => {
+  const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();
+    setTooltipVisible(true);
     agentBuilder.toggleConversationFlyout(sidebarOptions());
     setIsSidebarOpen((prev) => !prev);
   }, [agentBuilder, sidebarOptions]);
@@ -76,10 +75,14 @@ export function AgentBuilderNavControl() {
     (event: KeyboardEvent) => {
       if (isSemicolon(event) && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        toggleSidebar();
+        handleClick();
+      }
+      if (event.key === 'Escape' && isSidebarOpen) {
+        setTooltipVisible(true);
+        buttonRef.current?.focus();
       }
     },
-    [toggleSidebar]
+    [handleClick, isSidebarOpen]
   );
 
   if (!hasShowPrivilege) {
@@ -94,55 +97,59 @@ export function AgentBuilderNavControl() {
     </div>
   );
 
+  const showTooltip = !isSidebarOpen && tooltipVisible;
   const variant = isSidebarOpen ? 'accent' : 'base';
-
-  const AgentBuilderButton = () => {
-    return (
-      <>
-        <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
-            <AiButton
-              buttonRef={buttonRef}
-              variant={variant}
-              size="s"
-              iconType="productAgent"
-              onClick={toggleSidebar}
-              data-test-subj="AgentBuilderNavControlButton"
-            >
-              <FormattedMessage
-                id="xpack.agentBuilder.navControl.linkLabel"
-                defaultMessage="AI Agent"
-              />
-            </AiButton>
-          </EuiToolTip>
-        </EuiShowFor>
-
-        <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip
-            content={fullTooltipContent}
-            ref={tooltipRef}
-            onMouseOut={handleTooltipMouseOut}
-          >
-            <AiButton
-              buttonRef={buttonRef}
-              iconOnly
-              variant={variant}
-              size="s"
-              iconType="productAgent"
-              onClick={toggleSidebar}
-              aria-label={buttonLabel}
-              data-test-subj="AgentBuilderNavControlButtonIcon"
-            />
-          </EuiToolTip>
-        </EuiShowFor>
-      </>
-    );
-  };
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      variant={variant}
+      size="s"
+      iconType="productAgent"
+      onClick={handleClick}
+      data-test-subj="AgentBuilderNavControlButton"
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    >
+      <FormattedMessage id="xpack.agentBuilder.navControl.linkLabel" defaultMessage="AI Agent" />
+    </AiButton>
+  );
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      variant={variant}
+      size="s"
+      iconType="productAgent"
+      onClick={handleClick}
+      aria-label={buttonLabel}
+      data-test-subj="AgentBuilderNavControlButtonIcon"
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    />
+  );
 
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <AgentBuilderButton />
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {showTooltip ? (
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
+      </EuiShowFor>
+
+      <EuiShowFor sizes={['xs', 's']}>
+        {showTooltip ? (
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
+      </EuiShowFor>
     </>
   );
 }

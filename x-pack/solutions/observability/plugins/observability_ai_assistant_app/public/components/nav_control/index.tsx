@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { v4 } from 'uuid';
@@ -140,7 +140,9 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     title: undefined,
     hideConversationList: false,
   };
-
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<EuiToolTip>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
       const hasModifier = isMac ? event.metaKey : event.ctrlKey;
@@ -150,6 +152,10 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           messages: [],
         });
       }
+      if (event.key === 'Escape' && isOpen) {
+        setTooltipVisible(true);
+        buttonRef.current?.focus();
+      }
     };
 
     window.addEventListener('keydown', keyboardListener);
@@ -157,14 +163,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     return () => {
       window.removeEventListener('keydown', keyboardListener);
     };
-  }, [service.conversations]);
-
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
-
-  const handleTooltipMouseOut = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-  }, []);
+  }, [service.conversations, isOpen, setFlyoutSettings, setIsOpen, setTooltipVisible]);
 
   const buttonLabel = i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
     defaultMessage: 'AI Assistant',
@@ -193,6 +192,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
+    setTooltipVisible(true);
     if (isOpen) {
       setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
       setIsOpen(false);
@@ -203,42 +203,58 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     }
   };
   const variant = isOpen ? 'accent' : 'base';
+  const showTooltip = !isOpen && tooltipVisible;
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      data-test-subj="observabilityAiAssistantAppNavControlButton"
+      isLoading={chatService.loading}
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    >
+      {buttonLabel}
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      aria-label={openAIAssistantLabel}
+      data-test-subj="observabilityAiAssistantAppNavControlButtonIcon"
+      isLoading={chatService.loading}
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+    />
+  );
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
-          <AiButton
-            buttonRef={buttonRef}
-            variant={variant}
-            size="s"
-            iconType="aiAssistantLogo"
-            onClick={handleClick}
-            data-test-subj="observabilityAiAssistantAppNavControlButton"
-            isLoading={chatService.loading}
-          >
-            {buttonLabel}
-          </AiButton>
-        </EuiToolTip>
+        {showTooltip ? (
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip
-          content={fullTooltipContent}
-          ref={tooltipRef}
-          onMouseOut={handleTooltipMouseOut}
-        >
-          <AiButton
-            buttonRef={buttonRef}
-            iconOnly
-            variant={variant}
-            size="s"
-            iconType="aiAssistantLogo"
-            onClick={handleClick}
-            aria-label={openAIAssistantLabel}
-            data-test-subj="observabilityAiAssistantAppNavControlButtonIcon"
-            isLoading={chatService.loading}
-          />
-        </EuiToolTip>
+        {showTooltip ? (
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
       </EuiShowFor>
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
@@ -251,6 +267,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             onClose={() => {
               setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
               setIsOpen(false);
+              setTooltipVisible(true);
               if (document.activeElement?.matches(':focus-visible')) {
                 buttonRef.current?.focus();
               }

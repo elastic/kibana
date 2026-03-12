@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { EuiShowFor, EuiToolTip } from '@elastic/eui';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
@@ -47,70 +47,102 @@ export const AssistantNavLink: FC = () => {
     completeOpenChat,
     isOverlayOpen,
   } = useAssistantContext();
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<EuiToolTip>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
 
-  const handleTooltipMouseOut = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-  }, []);
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
+      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+        event.preventDefault();
+        showAssistantOverlay({ showOverlay: !isOverlayOpen });
+      }
+      if (event.key === 'Escape' && isOverlayOpen) {
+        setTooltipVisible(true);
+        buttonRef.current?.focus();
+      }
+    };
 
-  const toggleOverlay = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-    showAssistantOverlay({ showOverlay: !isOverlayOpen });
+    window.addEventListener('keydown', keyboardListener);
+    return () => window.removeEventListener('keydown', keyboardListener);
   }, [showAssistantOverlay, isOverlayOpen]);
-
-  const openOverlay = useCallback(() => {
-    showAssistantOverlay({ showOverlay: true });
-  }, [showAssistantOverlay]);
 
   useEffect(() => {
     if (!openChatTrigger$) return;
     const sub = openChatTrigger$.subscribe((selection) => {
       if (selection === AIAssistantType.Security) {
-        openOverlay();
+        showAssistantOverlay({ showOverlay: true });
         completeOpenChat?.();
       }
     });
     return () => sub.unsubscribe();
-  }, [completeOpenChat, openChatTrigger$, openOverlay]);
+  }, [completeOpenChat, openChatTrigger$, showAssistantOverlay]);
 
   if (!assistantAvailability.hasAssistantPrivilege) {
     return null;
   }
 
+  const handleClick = () => {
+    tooltipRef.current?.hideToolTip();
+    setTooltipVisible(true);
+    showAssistantOverlay({ showOverlay: !isOverlayOpen });
+  };
+
+  const showTooltip = !isOverlayOpen && tooltipVisible;
   const variant = isOverlayOpen ? 'accent' : 'base';
+
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      data-test-subj="assistantNavLink"
+    >
+      {LINK_LABEL}
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      variant={variant}
+      size="s"
+      iconType="aiAssistantLogo"
+      onClick={handleClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      aria-label={OPEN_LABEL}
+      data-test-subj="assistantNavLinkButtonIcon"
+    />
+  );
 
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
-          <AiButton
-            variant={variant}
-            size="s"
-            iconType="aiAssistantLogo"
-            onClick={toggleOverlay}
-            data-test-subj="assistantNavLink"
-          >
-            {LINK_LABEL}
-          </AiButton>
-        </EuiToolTip>
+        {showTooltip ? (
+          <EuiToolTip content={SHORTCUT_LABEL} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip
-          content={FULL_TOOLTIP_CONTENT}
-          ref={tooltipRef}
-          onMouseOut={handleTooltipMouseOut}
-        >
-          <AiButton
-            iconOnly
-            variant={variant}
-            size="s"
-            iconType="aiAssistantLogo"
-            onClick={toggleOverlay}
-            aria-label={OPEN_LABEL}
-            data-test-subj="assistantNavLinkButtonIcon"
-          />
-        </EuiToolTip>
+        {showTooltip ? (
+          <EuiToolTip content={FULL_TOOLTIP_CONTENT} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
       </EuiShowFor>
     </>
   );

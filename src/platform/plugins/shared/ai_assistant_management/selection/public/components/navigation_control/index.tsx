@@ -142,7 +142,8 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
     }
   );
-
+  const tooltipRef = useRef<EuiToolTip>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(true);
   const fullTooltipContent = (
     <div style={{ textAlign: 'center' }}>
       <span>{openAIAssistantLabel}</span>
@@ -150,45 +151,64 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       <span>{shortcutLabel}</span>
     </div>
   );
-  const AiAssistantHeaderButton = () => {
-    return (
-      <>
-        <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={shortcutLabel}>
-            <AiButton
-              buttonRef={buttonRef}
-              onClick={() => setModalOpen(true)}
-              iconType="aiAssistantLogo"
-              variant="base"
-              size="s"
-              data-test-subj="aiAssistantHeaderButton"
-            >
-              {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
-                defaultMessage: 'AI Assistant',
-              })}
-            </AiButton>
-          </EuiToolTip>
-        </EuiShowFor>
-        <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip content={fullTooltipContent}>
-            <AiButton
-              buttonRef={buttonRef}
-              iconOnly
-              iconType="aiAssistantLogo"
-              onClick={() => setModalOpen(true)}
-              aria-label={openAIAssistantLabel}
-              variant="base"
-              size="s"
-              data-test-subj="aiAssistantHeaderButtonIcon"
-            />
-          </EuiToolTip>
-        </EuiShowFor>
-      </>
-    );
+
+  const handleButtonClick = () => {
+    tooltipRef.current?.hideToolTip();
+    setTooltipVisible(true);
+    setModalOpen(true);
   };
+
+  const textButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      onClick={handleButtonClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      iconType="aiAssistantLogo"
+      variant="base"
+      size="s"
+      data-test-subj="aiAssistantHeaderButton"
+    >
+      {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
+        defaultMessage: 'AI Assistant',
+      })}
+    </AiButton>
+  );
+
+  const iconButton = (
+    <AiButton
+      buttonRef={buttonRef}
+      iconOnly
+      iconType="aiAssistantLogo"
+      onClick={handleButtonClick}
+      onMouseLeave={() => setTooltipVisible(true)}
+      onBlur={() => setTooltipVisible(true)}
+      aria-label={openAIAssistantLabel}
+      variant="base"
+      size="s"
+      data-test-subj="aiAssistantHeaderButtonIcon"
+    />
+  );
   return (
     <>
-      <AiAssistantHeaderButton />
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        {tooltipVisible ? (
+          <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
+            {textButton}
+          </EuiToolTip>
+        ) : (
+          textButton
+        )}
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        {tooltipVisible ? (
+          <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
+            {iconButton}
+          </EuiToolTip>
+        ) : (
+          iconButton
+        )}
+      </EuiShowFor>
       {isModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={onModalClose} aria-labelledby={modalTitleId}>
