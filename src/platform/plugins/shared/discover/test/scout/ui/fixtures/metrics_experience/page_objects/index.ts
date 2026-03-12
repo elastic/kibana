@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DiscoverActions } from './discover_actions';
 export { MetricsExperiencePage } from './metrics_experience';

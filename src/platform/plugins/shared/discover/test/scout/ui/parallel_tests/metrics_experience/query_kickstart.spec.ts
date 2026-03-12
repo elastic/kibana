@@ -32,34 +32,37 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should apply Search all metrics recommended query', async ({ pageObjects }) => {
-      const { discover, discoverActions } = pageObjects;
+    spaceTest(
+      'should apply Search all metrics recommended query',
+      async ({ pageObjects, page }) => {
+        const { discover } = pageObjects;
 
-      await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
-        await discover.writeAndSubmitEsqlQuery(
-          `FROM ${testData.METRICS_TEST_INDEX_NAME} | LIMIT 100`
+        await spaceTest.step('submit a complete query to enable extensions fetch', async () => {
+          await discover.writeAndSubmitEsqlQuery(
+            `FROM ${testData.METRICS_TEST_INDEX_NAME} | LIMIT 100`
+          );
+        });
+
+        await spaceTest.step('verify Search all metrics is available and apply it', async () => {
+          await discover.runRecommendedEsqlQuery(
+            testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
+          );
+        });
+
+        await spaceTest.step('verify the recommended query popover closed', async () => {
+          await expect(page.testSubj.locator('esql-menu-popover')).toBeHidden();
+        });
+
+        await spaceTest.step(
+          'verify the recommended query replaced the editor content with a TS query',
+          async () => {
+            const editorValue = await discover.getEsqlQueryValue();
+            expect(editorValue).toContain('TS');
+            expect(editorValue).toContain('metrics-');
+          }
         );
-      });
-
-      await spaceTest.step('verify Search all metrics is available and apply it', async () => {
-        await discover.runRecommendedEsqlQuery(
-          testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
-        );
-      });
-
-      await spaceTest.step('verify the recommended query popover closed', async () => {
-        await expect(discoverActions.menuPopover).toBeHidden();
-      });
-
-      await spaceTest.step(
-        'verify the recommended query replaced the editor content with a TS query',
-        async () => {
-          const editorValue = await discover.getEsqlQueryValue();
-          expect(editorValue).toContain('TS');
-          expect(editorValue).toContain('metrics-');
-        }
-      );
-    });
+      }
+    );
 
     spaceTest(
       'should enter the metrics experience when typing a TS query directly',
