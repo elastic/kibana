@@ -31,7 +31,7 @@ interface ConnectorFormFieldsProps {
   isEdit: boolean;
 }
 
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
 
 const CONNECTOR_ID_EXISTS_ERROR = i18n.translate(
   'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdExists',
@@ -39,6 +39,8 @@ const CONNECTOR_ID_EXISTS_ERROR = i18n.translate(
     defaultMessage: 'A connector with this ID already exists. Please choose a different ID.',
   }
 );
+
+const CONNECTOR_ID_MAX_LENGTH = 36;
 
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.nameFieldLabel', {
@@ -82,6 +84,17 @@ const createIdConfig = (
           }
         )
       ),
+    },
+    {
+      validator: maxLengthField({
+        length: CONNECTOR_ID_MAX_LENGTH,
+        message: i18n.translate(
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdTooLong',
+          {
+            defaultMessage: 'Connector ID must be 36 characters or less.',
+          }
+        ),
+      }),
     },
     {
       validator: ({ value }) => {
