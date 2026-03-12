@@ -5,76 +5,57 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import type { FieldStatsType } from '../common/types';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldStatsType } from '../../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const jobId = `ec_population_1_${Date.now()}`;
+  const jobId = `categorization_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
   const jobDescription =
-    'Create population job based on the ecommerce sample dataset with 2h bucketspan over customer_id' +
-    ' - detectors: (Mean(products.base_price) by customer_gender), (Mean(products.quantity) by category.leyword)';
-  const jobGroups = ['automated', 'ecommerce', 'population'];
+    'Create categorization job based on the ft_categorization dataset with a count rare';
+  const jobGroups = ['automated', 'categorization'];
   const jobGroupsClone = [...jobGroups, 'clone'];
-  const populationField = 'customer_id';
-  const detectors = [
-    {
-      identifier: 'Mean(products.base_price)',
-      splitField: 'customer_gender',
-      frontCardTitle: 'FEMALE',
-      numberOfBackCards: 1,
-    },
-    {
-      identifier: 'Mean(products.quantity)',
-      splitField: 'category.keyword',
-      frontCardTitle: "Men's Clothing",
-      numberOfBackCards: 5,
-    },
-  ];
-  const fieldStatsEntries = [
-    {
-      fieldName: 'currency',
-      type: 'keyword' as FieldStatsType,
-      expectedValues: ['EUR'],
-    },
-  ];
-
-  const bucketSpan = '2h';
-  const memoryLimit = '8mb';
+  const detectorTypeIdentifier = 'Rare';
+  const categorizationFieldIdentifier = 'field1';
+  const categorizationExampleCount = 5;
+  const bucketSpan = '1d';
+  const memoryLimit = '15mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
     return {
       id: expectedJobId,
       description: jobDescription,
       jobGroups: [...new Set(expectedJobGroups)].sort(),
-      recordCount: '4,675',
+      recordCount: '1,000',
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2023-07-12 23:45:36',
+      latestTimestamp: '2019-11-21 00:01:13',
     };
   }
 
   function getExpectedCounts(expectedJobId: string) {
     return {
       job_id: expectedJobId,
-      processed_record_count: '4,675',
-      processed_field_count: '23,375',
-      input_bytes: '867.7 KB',
-      input_field_count: '23,375',
+      processed_record_count: '1,000',
+      processed_field_count: '1,000',
+      input_bytes: '148.8 KB',
+      input_field_count: '1,000',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
-      empty_bucket_count: '0',
+      empty_bucket_count: '23',
       sparse_bucket_count: '0',
-      bucket_count: '371',
-      earliest_record_timestamp: '2023-06-12 00:04:19',
-      latest_record_timestamp: '2023-07-12 23:45:36',
-      input_record_count: '4,675',
-      latest_bucket_timestamp: '2023-07-12 22:00:00',
+      bucket_count: '230',
+      earliest_record_timestamp: '2019-04-05 11:25:35',
+      latest_record_timestamp: '2019-11-21 00:01:13',
+      input_record_count: '1,000',
+      latest_bucket_timestamp: '2019-11-21 00:00:00',
+      latest_empty_bucket_timestamp: '2019-11-17 00:00:00',
     };
   }
 
@@ -83,22 +64,31 @@ export default function ({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      total_by_field_count: '25',
-      total_over_field_count: '92',
-      total_partition_field_count: '3',
+      // not checking total_by_field_count as the number of categories might change
+      total_over_field_count: '0',
+      total_partition_field_count: '2',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2023-07-12 20:00:00',
+      timestamp: '2019-11-20 00:00:00',
     };
   }
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('population', function () {
+  const fieldStatsEntries = [
+    {
+      fieldName: 'field1',
+      type: 'keyword' as FieldStatsType,
+    },
+  ];
+
+  describe('categorization', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
-      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/categorization_small'
+      );
+      await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -107,32 +97,33 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_categorization_small');
     });
 
-    it('job creation loads the population wizard for the source data', async () => {
+    it('job creation loads the categorization wizard for the source data', async () => {
       await ml.testExecution.logTestStep('job creation loads the job management page');
+      await ml.testExecution.logTestStep('');
       await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.testExecution.logTestStep('job creation loads the new job source selection page');
       await ml.jobManagement.navigateToNewJobSourceSelection();
 
       await ml.testExecution.logTestStep('job creation loads the job type selection page');
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_categorization_small');
 
-      await ml.testExecution.logTestStep('job creation loads the population job wizard page');
-      await ml.jobTypeSelection.selectPopulationJob();
+      await ml.testExecution.logTestStep('job creation loads the categorization job wizard page');
+      await ml.jobTypeSelection.selectCategorizationJob();
     });
 
-    it('job creation navigates through the population wizard and sets all needed fields', async () => {
+    it('job creation navigates through the categorization wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
       await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2023 @ 00:04:19.000',
-        'Jul 12, 2023 @ 23:45:36.000'
+        'Apr 5, 2019 @ 11:25:35.770',
+        'Nov 21, 2019 @ 00:01:13.923'
       );
 
       await ml.testExecution.logTestStep('job creation displays the event rate chart');
@@ -143,51 +134,29 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
       await ml.testExecution.logTestStep(
-        'job creation opens field stats flyout from population field input'
+        `job creation selects ${detectorTypeIdentifier} detector type`
       );
-      await ml.jobWizardPopulation.assertPopulationFieldInputExists();
-      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
-        await ml.jobWizardPopulation.assertFieldStatFlyoutContentFromPopulationFieldInputTrigger(
+      await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
+      await ml.jobWizardCategorization.selectCategorizationDetectorType(detectorTypeIdentifier);
+
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from categorization field input'
+      );
+      await ml.jobWizardCategorization.assertCategorizationFieldInputExists();
+      for (const { fieldName, type: fieldType } of fieldStatsEntries) {
+        await ml.jobWizardCategorization.assertFieldStatFlyoutContentFromCategorizationFieldInputTrigger(
           fieldName,
-          fieldType,
-          expectedValues
+          fieldType
         );
       }
 
-      await ml.testExecution.logTestStep('job creation selects the population field');
-      await ml.jobWizardPopulation.selectPopulationField(populationField);
-
-      await ml.testExecution.logTestStep(
-        'job creation selects detectors and displays detector previews'
+      await ml.testExecution.logTestStep(`job creation selects the categorization field`);
+      await ml.jobWizardCategorization.selectCategorizationField(categorizationFieldIdentifier);
+      await ml.jobWizardCategorization.assertCategorizationExamplesCallout(
+        CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID
       );
-      for (const [index, detector] of detectors.entries()) {
-        await ml.jobWizardCommon.assertAggAndFieldInputExists();
-        await ml.jobWizardCommon.selectAggAndField(detector.identifier, false);
-        await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
-      }
-
-      await ml.testExecution.logTestStep(
-        'job creation inputs detector split fields and displays split cards'
-      );
-      for (const [index, detector] of detectors.entries()) {
-        await ml.jobWizardPopulation.assertDetectorSplitFieldInputExists(index);
-        await ml.jobWizardPopulation.selectDetectorSplitField(index, detector.splitField);
-
-        await ml.jobWizardPopulation.assertDetectorSplitExists(index);
-        await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
-          index,
-          detector.frontCardTitle
-        );
-        await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
-          index,
-          detector.numberOfBackCards
-        );
-      }
-
-      await ml.testExecution.logTestStep('job creation displays the influencer field');
-      await ml.jobWizardCommon.assertInfluencerInputExists();
-      await ml.jobWizardCommon.assertInfluencerSelection(
-        [populationField].concat(detectors.map((detector) => detector.splitField))
+      await ml.jobWizardCategorization.assertCategorizationExamplesTable(
+        categorizationExampleCount
       );
 
       await ml.testExecution.logTestStep('job creation inputs the bucket span');
@@ -226,6 +195,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job creation displays the model plot switch');
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
+      await ml.jobWizardCommon.assertModelPlotSwitchEnabled(false);
+      await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
 
       await ml.testExecution.logTestStep('job creation enables the dedicated index switch');
       await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
@@ -264,27 +235,25 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await ml.testExecution.logTestStep('job creation has detector results');
-      for (let i = 0; i < detectors.length; i++) {
-        await ml.api.assertDetectorResultsExist(jobId, i);
-      }
+      await ml.api.assertDetectorResultsExist(jobId, 0);
     });
 
-    it('job cloning opens the existing job in the population wizard', async () => {
+    it('job cloning opens the existing job in the categorization wizard', async () => {
       await ml.testExecution.logTestStep(
-        'job cloning clicks the clone action and loads the population wizard'
+        'job cloning clicks the clone action and loads the single metric wizard'
       );
       await ml.jobTable.clickCloneJobAction(jobId);
-      await ml.jobTypeSelection.assertPopulationJobWizardOpen();
+      await ml.jobTypeSelection.assertCategorizationJobWizardOpen();
     });
 
-    it('job cloning navigates through the population wizard, checks and sets all needed fields', async () => {
+    it('job cloning navigates through the categorization wizard, checks and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
       await ml.testExecution.logTestStep('job cloning sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
-        'Jun 12, 2023 @ 00:04:19.000',
-        'Jul 12, 2023 @ 23:45:36.000'
+        'Apr 5, 2019 @ 11:25:35.770',
+        'Nov 21, 2019 @ 00:01:13.923'
       );
 
       await ml.testExecution.logTestStep('job cloning displays the event rate chart');
@@ -294,35 +263,8 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job cloning pre-fills the population field');
-      await ml.jobWizardPopulation.assertPopulationFieldInputExists();
-      await ml.jobWizardPopulation.assertPopulationFieldSelection([populationField]);
-
-      await ml.testExecution.logTestStep(
-        'job cloning pre-fills detectors and shows preview with split cards'
-      );
-      for (const [index, detector] of detectors.entries()) {
-        await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
-
-        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, [
-          detector.splitField,
-        ]);
-        await ml.jobWizardPopulation.assertDetectorSplitExists(index);
-        await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
-          index,
-          detector.frontCardTitle
-        );
-        await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
-          index,
-          detector.numberOfBackCards
-        );
-      }
-
-      await ml.testExecution.logTestStep('job cloning pre-fills influencers');
-      await ml.jobWizardCommon.assertInfluencerInputExists();
-      await ml.jobWizardCommon.assertInfluencerSelection(
-        [populationField].concat(detectors.map((detector) => detector.splitField))
-      );
+      await ml.testExecution.logTestStep('job cloning pre-fills field and aggregation');
+      await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
 
       await ml.testExecution.logTestStep('job cloning pre-fills the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
@@ -365,6 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('job cloning pre-fills the model plot switch');
       await ml.jobWizardCommon.assertModelPlotSwitchExists();
+      await ml.jobWizardCommon.assertModelPlotSwitchEnabled(false);
       await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
 
       await ml.testExecution.logTestStep('job cloning pre-fills the dedicated index switch');
@@ -406,9 +349,29 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await ml.testExecution.logTestStep('job cloning has detector results');
-      for (let i = 0; i < detectors.length; i++) {
-        await ml.api.assertDetectorResultsExist(jobId, i);
-      }
+      await ml.api.assertDetectorResultsExist(jobId, 0);
+    });
+
+    it('deletes the cloned job', async () => {
+      await ml.testExecution.logTestStep('job deletion has results for the job before deletion');
+      await ml.api.assertJobResultsExist(jobIdClone);
+
+      await ml.testExecution.logTestStep('job deletion triggers the delete action');
+      await ml.jobTable.clickDeleteJobAction(jobIdClone);
+
+      await ml.testExecution.logTestStep('job deletion confirms the delete modal');
+      await ml.jobTable.confirmDeleteJobModal();
+      await ml.api.waitForAnomalyDetectionJobNotToExist(jobIdClone, 30 * 1000);
+
+      await ml.testExecution.logTestStep(
+        'job deletion does not display the deleted job in the job list any more'
+      );
+      await ml.jobTable.filterWithSearchString(jobIdClone, 0);
+
+      await ml.testExecution.logTestStep(
+        'job deletion does not have results for the deleted job any more'
+      );
+      await ml.api.assertNoJobResultsExist(jobIdClone);
     });
   });
 }
