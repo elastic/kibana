@@ -108,8 +108,13 @@ export const useCommandPaletteActions = ({
         icon: 'plusInCircle',
         section: 'quick',
         onSelect: () => {
-          // TODO: Pass the query to the new chat if hasSearchQuery
-          navigateToAgentBuilderUrl(appPaths.chat.new);
+          if (hasSearchQuery) {
+            navigateToAgentBuilderUrl(appPaths.chat.new, undefined, {
+              initialMessage: trimmedQuery,
+            });
+          } else {
+            navigateToAgentBuilderUrl(appPaths.chat.new);
+          }
           onClose();
         },
       },
