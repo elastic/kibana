@@ -12,25 +12,8 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { IncomingHttpHeaders } from 'http';
 import type { AsyncSearchResponse } from './types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
-import type { AsyncSearchStatusResponse } from './types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { shimHitsTotal, getTotalLoaded } from '../../../../common';
-
-/**
- * Get the Kibana representation of an async search status response.
- */
-export function toAsyncKibanaSearchStatusResponse(
-  response: AsyncSearchStatusResponse,
-  warning?: string
-): IKibanaSearchResponse {
-  return {
-    id: response.id,
-    rawResponse: {},
-    isPartial: response.is_partial,
-    isRunning: response.is_running,
-    ...(warning ? { warning } : {}),
-  };
-}
 
 /**
  * Get the Kibana representation of an async search response.

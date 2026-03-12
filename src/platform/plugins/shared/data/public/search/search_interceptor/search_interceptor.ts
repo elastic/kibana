@@ -274,8 +274,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
-    if (combined.retrieveResults !== undefined)
-      serializableOptions.retrieveResults = combined.retrieveResults;
+    if (combined.retrieveIntermediateResults !== undefined)
+      serializableOptions.retrieveIntermediateResults = combined.retrieveIntermediateResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -433,7 +433,11 @@ export class SearchInterceptor {
           return from(
             this.runSearch(
               { id, ...request },
-              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
+              {
+                ...options,
+                abortSignal: new AbortController().signal,
+                retrieveIntermediateResults: true,
+              }
             )
           ).pipe(
             map((response) =>

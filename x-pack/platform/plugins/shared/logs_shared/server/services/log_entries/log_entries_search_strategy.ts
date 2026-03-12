@@ -122,7 +122,7 @@ export const logEntriesSearchStrategyProvider = ({
               esRequest,
               {
                 ...options,
-                retrieveResults: true, // the subsequent processing requires the actual search results
+                retrieveIntermediateResults: true, // the subsequent processing requires the actual search results
               },
               dependencies
             )

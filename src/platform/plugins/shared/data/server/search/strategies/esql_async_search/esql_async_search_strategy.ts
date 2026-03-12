@@ -136,8 +136,8 @@ export const esqlAsyncSearchStrategyProvider = (
     const { abortSignal, ...options } = searchOptions;
     const search = async () => {
       const response = await (!id
-        ? submitEsqlSearch(request, options, deps)
-        : options.retrieveResults
+        ? submitEsqlSearch({ id, ...request }, options, deps)
+        : options.retrieveIntermediateResults
         ? stopEsqlAsyncSearch(id, options, deps)
         : getEsqlAsyncSearch({ id, ...request }, options, deps));
 
