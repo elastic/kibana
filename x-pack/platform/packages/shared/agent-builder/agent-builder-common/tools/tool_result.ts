@@ -6,7 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { TimeRange } from '../base/time_range';
+import type { TimeRange } from '../attachments/attachment_types';
 
 export enum ToolResultType {
   resource = 'resource',
