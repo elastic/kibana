@@ -949,8 +949,7 @@ export const QueryBarTopRow = React.memo(
                 }
               />
             </EuiToolTip>
-            {filterCount > 0 && (
-              <EuiNotificationBadge
+            <EuiNotificationBadge
                 aria-hidden
                 size="s"
                 color="subdued"
@@ -963,8 +962,7 @@ export const QueryBarTopRow = React.memo(
                 }}
               >
                 {filterCount}
-              </EuiNotificationBadge>
-            )}
+            </EuiNotificationBadge>
             {props.addFilterOpenFromToggle !== undefined && (
               <AddFilterPopover
                 indexPatterns={props.indexPatterns}
