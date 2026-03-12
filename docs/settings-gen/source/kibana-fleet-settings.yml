@@ -1,0 +1,576 @@
+---
+# This file is used to generate "Fleet settings" page in the product docs
+
+product: Kibana
+collection: Fleet settings in Kibana
+id: fleet-settings-kb
+page_description: |
+  By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
+
+  Many {{fleet}} settings can also be configured directly through the {{fleet}} UI. See [Fleet UI settings](docs-content://reference/fleet/fleet-settings.md) for details.
+
+  Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more information about {{fleet}}.
+
+note: 'In {{ecloud}}, {{fleet}} flags are already configured. If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")'
+
+groups:
+  - group: General {{fleet}} settings
+    id: general-fleet-settings-kb
+    settings:
+
+      - setting: xpack.fleet.agents.enabled
+        description: |
+          Set to `true` (default) to enable {{fleet}}.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.isAirGapped
+        description: |
+          Set to `true` to indicate {{fleet}} is running in an air-gapped environment. Refer to [Air-gapped environments](docs-content://reference/fleet/air-gapped.md) for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.fleet.createArtifactsBulkBatchSize
+        description: |
+          Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
+        datatype: int
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: "{{package-manager}} settings"
+    id: fleet-data-visualizer-settings
+    settings:
+
+      - setting: xpack.fleet.registryUrl
+        description: |
+          The address to use to reach the {{package-manager}} registry.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.fleet.registryProxyUrl
+        description: |
+          The proxy address to use to reach the {{package-manager}} registry if an internet connection is not directly available. Refer to [Air-gapped environments](docs-content://reference/fleet/air-gapped.md) for details.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.fleet.packageVerification.gpgKeyPath
+        description: |
+          The path on disk to the GPG key used to verify {{package-manager}} packages. If the Elastic public key is ever reissued as a security precaution, you can use this setting to specify the new key.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: "{{fleet}} settings"
+    id: _fleet_settings
+    note: "The `xpack.fleet.agents.elasticsearch.*` settings are intended for a quickstart setup. For more advanced use cases, use the `xpack.fleet.outputs` setting to preconfigure outputs."
+    settings:
+
+      - setting: xpack.fleet.agents.fleet_server.hosts
+        description: |
+          Hostnames used by {{agent}} for accessing {{fleet-server}}.
+
+          If configured in your `kibana.yml`, this setting is grayed out and unavailable in the {{fleet}} UI. To make this setting editable in the UI, do not configure it in the configuration file.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.fleet.agents.elasticsearch.hosts
+        description: |
+          Hostnames used by {{agent}} for accessing {{es}}.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.fleet.agents.elasticsearch.ca_sha256
+        description: |
+          Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Preconfiguration settings (for advanced use cases)
+    id: _preconfiguration_settings_for_advanced_use_cases
+    description: |
+      Use these settings to pre-define integrations, agent policies, and {{fleet-server}} hosts or proxies that you want {{fleet}} to load up by default.
+    note: "These settings are not supported to pre-configure the Endpoint and Cloud Security integration."
+    settings:
+
+      - setting: xpack.fleet.packages
+        description: |
+          List of integrations that are installed when the {{fleet}} app starts up for the first time.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        example: |
+          ```yaml
+          xpack.fleet.packages:
+            - name: apache
+              version: 0.5.0
+
+          xpack.fleet.agentPolicies:
+            - name: Preconfigured Policy
+              id: preconfigured-policy
+              namespace: test
+              package_policies:
+                - package:
+                    name: system
+                  name: System Integration
+                  namespace: test
+                  id: preconfigured-system
+                  inputs:
+                    system-system/metrics:
+                      enabled: true
+                      vars:
+                        '[system.hostfs]': home/test
+                      streams:
+                        '[system.core]':
+                          enabled: true
+                          vars:
+                            period: 20s
+                    system-winlog:
+                      enabled: false
+          ```
+        settings:
+          - setting: "[n].name"
+            description: |
+              Required. Name of the integration from the package registry.
+            datatype: string
+
+          - setting: "[n].version"
+            description: |
+              Required.Either an exact semantic version, or the keyword `latest` to fetch the latest integration version.
+            datatype: string
+
+      - setting: xpack.fleet.agentPolicies
+        description: |
+          List of agent policies that are configured when the {{fleet}} app starts.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        settings:
+          - setting: "[n].id"
+            description: |
+              Required. Unique ID for this policy. The ID may be a number or string.
+            datatype: string
+
+          - setting: "[n].name"
+            description: |
+              Required. Name of the agent policy.
+            datatype: string
+
+          - setting: "[n].description"
+            description: |
+              Optional. Text description of this policy.
+            datatype: string
+
+          - setting: "[n].namespace"
+            description: |
+              Optional. String identifying this policy's namespace.
+            datatype: string
+
+          - setting: "[n].monitoring_enabled"
+            description: |
+              Optional. List of keywords that specify the monitoring data to collect. Valid values include `['logs']`, `['metrics']`, and `['logs', 'metrics']`.
+            datatype: string
+
+          - setting: "[n].keep_monitoring_alive"
+            description: |
+              Optional. If `true`, monitoring will be enabled, but logs/metrics collection will be disabled. Use this if you want to keep agent's monitoring server alive even when logs/metrics aren't being collected.
+            datatype: bool
+
+          - setting: "[n].is_managed"
+            description: |
+              Optional. If `true`, this policy is not editable by the user and can only be changed by updating the {{kib}} config.
+            datatype: bool
+
+          - setting: "[n].is_default"
+            description: |
+              Optional. If `true`, this policy is the default agent policy.
+            datatype: bool
+            applies_to:
+              - "stack: deprecated 8.1.0"
+            deprecation_details: "Deprecated in 8.1.0."
+
+          - setting: "[n].is_default_fleet_server"
+            description: |
+              Optional. If `true`, this policy is the default {{fleet-server}} agent policy.
+            datatype: bool
+            applies_to:
+              - "stack: deprecated 8.1.0"
+            deprecation_details: "Deprecated in 8.1.0."
+
+          - setting: "[n].data_output_id"
+            description: |
+              Optional. ID of the output to send data. (Need to be identical to `monitoring_output_id`)
+            datatype: string
+
+          - setting: "[n].monitoring_output_id"
+            description: |
+              Optional. ID of the output to send monitoring data. (Need to be identical to `data_output_id`)
+            datatype: string
+
+          - setting: "[n].fleet_server_host_id"
+            description: |
+              Optional. ID of the fleet server.
+            datatype: string
+
+          - setting: "[n].package_policies"
+            description: |
+              Optional. List of integration policies to add to this policy.
+            datatype: string
+            settings:
+              - setting: "[n].id"
+                description: |
+                  Unique ID of the integration policy. The ID may be a number or string.
+                datatype: string
+
+              - setting: "[n].name"
+                description: |
+                  Name of the integration policy.
+                datatype: string
+
+              - setting: "[n].package"
+                description: |
+                  Integration that this policy configures.
+                datatype: string
+                settings:
+                  - setting: name
+                    description: |
+                      Name of the integration associated with this policy.
+                    datatype: string
+
+              - setting: "[n].description"
+                description: |
+                  Text string describing this integration policy.
+                datatype: string
+
+              - setting: "[n].namespace"
+                description: |
+                  String identifying this policy's namespace.
+                datatype: string
+
+              - setting: "[n].inputs"
+                description: |
+                  Map of input for the integration. Follows the same schema as the package policy API inputs, with the exception that any object in `vars` can be passed `frozen: true` in order to prevent that specific `var` from being edited by the user.
+                datatype: string
+
+      - setting: xpack.fleet.outputs
+        description: |
+          List of outputs that are configured when the {{fleet}} app starts.
+
+          Certain types of outputs have additional required and optional settings. Refer to [Output settings](docs-content://reference/fleet/fleet-settings.md#output-settings) in the {{fleet}} and {{agent}} Guide for the full list of settings for each output type.
+
+          If configured in your `kibana.yml`, output settings are grayed out and unavailable in the {{fleet}} UI. To make these settings editable in the UI, do not configure them in the configuration file.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        note: "The `xpack.fleet.outputs` settings are intended for advanced configurations such as having multiple outputs. We recommend not enabling the `xpack.fleet.agents.elasticsearch.host` settings when using `xpack.fleet.outputs`."
+        example: |
+          ```yaml
+          xpack.fleet.outputs:
+            - id: my-logstash-output-with-a-secret
+              name: preconfigured logstash output with a secret
+              type:  logstash
+              hosts: ["localhost:9999"]
+              ssl:
+                certificate: xxxxxxxxxx
+              secrets:
+                ssl:
+                  key: securekey
+          ```
+        settings:
+          - setting: "[n].id"
+            description: |
+              Required. Unique ID for this output. The ID should be a string.
+            datatype: string
+
+          - setting: "[n].name"
+            description: |
+              Required. Name of the output.
+            datatype: string
+
+          - setting: "[n].type"
+            description: |
+              Required. Type of Output.
+            datatype: enum
+            options:
+              - option: elasticsearch
+              - option: logstash
+              - option: kafka
+              - option: remote_elasticsearch
+
+          - setting: "[n].hosts"
+            description: |
+              Optional.Array that contains the list of host for that output.
+            datatype: string
+
+          - setting: "[n].is_default"
+            description: |
+              Optional. If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent data unless there is another one configured specifically for the agent policy.
+            datatype: bool
+
+          - setting: "[n].is_default_monitoring"
+            description: |
+              Optional. If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent monitoring data unless there is another one configured specifically for the agent policy.
+            datatype: bool
+
+          - setting: "[n].is_internal"
+            description: |
+              Optional. If `true`, the output specified in `xpack.fleet.outputs` will not appear in the UI, and can only be managed via `kibana.yml` or the Fleet API.
+            datatype: bool
+
+          - setting: "[n].config"
+            description: |
+              Optional. Extra config for that output.
+            datatype: string
+
+          - setting: "[n].proxy_id"
+            description: |
+              Optional. Unique ID of a proxy to access the output.
+            datatype: string
+
+          - setting: "[n].ssl"
+            description: |
+              Optional. Set to enable authentication using the Secure Sockets Layer (SSL) protocol.
+            datatype: string
+            settings:
+              - setting: certificate
+                description: |
+                  The SSL certificate that {{agents}} use to authenticate with the output. Include the full contents of the certificate here.
+                datatype: string
+
+              - setting: certificate_authorities
+                description: |
+                  Certificate authority (CA) used to issue the certificate.
+                datatype: string
+
+          - setting: "[n].secrets"
+            description: |
+              Include here any values for preconfigured outputs that should be stored as secrets. A secret value is replaced in the `kibana.yml` settings file with a reference, with the original value stored externally as a secure hash. Note that this type of secret storage requires all configured {{fleet-server}}s to be on version 8.12.0 or later.
+            datatype: string
+            settings:
+              - setting: key
+                description: |
+                  The private certificate key that {{agents}} use to authenticate with the output.
+                datatype: string
+
+      - setting: xpack.fleet.fleetServerHosts
+        description: |
+          List of {{fleet-server}} hosts that are configured when the {{fleet}} app starts.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        settings:
+          - setting: "[n].id"
+            description: |
+              Required. Unique ID for the host server.
+            datatype: string
+
+          - setting: "[n].name"
+            description: |
+              Required. Name of the host server.
+            datatype: string
+
+          - setting: "[n].host_urls"
+            description: |
+              Required. Array of one or more host URLs that {{agents}} will use to connect to {{fleet-server}}.
+            datatype: string
+
+          - setting: "[n].is_default"
+            description: |
+              Optional. Whether or not this host should be the default to use for {{fleet-server}}.
+            datatype: bool
+
+          - setting: "[n].is_internal"
+            description: |
+              Optional. If `true` the host will not appear in the UI, and can only be managed through `kibana.yml` or the {{fleet}} API.
+            datatype: bool
+
+          - setting: "[n].proxy_id"
+            description: |
+              Optional. Unique ID of the proxy to access the {{fleet-server}} host.
+            datatype: string
+
+      - setting: xpack.fleet.proxy
+        description: |
+          List of proxies to access {{fleet-server}} that are configured when the {{fleet}} app starts.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+        settings:
+          - setting: "[n].id"
+            description: |
+              Required. Unique ID of the proxy to access the {{fleet-server}} host.
+            datatype: string
+
+          - setting: "[n].name"
+            description: |
+              Required. Name of the proxy to access the {{fleet-server}} host.
+            datatype: string
+
+          - setting: "[n].url"
+            description: |
+              Required. URL that {{agents}} use to connect to the proxy to access {{fleet-server}}.
+            datatype: string
+
+          - setting: "[n].proxy_headers"
+            description: |
+              Optional. Map of headers to use with the proxy.
+            datatype: string
+            settings:
+              - setting: key
+                description: |
+                  Key to use for the proxy header.
+                datatype: string
+
+              - setting: value
+                description: |
+                  Value to use for the proxy header.
+                datatype: string
+
+          - setting: "[n].certificate_authorities"
+            description: |
+              Optional. Certificate authority (CA) used to issue the certificate.
+            datatype: string
+
+          - setting: "[n].certificate"
+            description: |
+              Optional. The name of the certificate used to authenticate the proxy.
+            datatype: string
+
+          - setting: "[n].certificate_key"
+            description: |
+              Optional. The certificate key used to authenticate the proxy.
+            datatype: string
+
+      - setting: xpack.fleet.enableExperimental
+        description: |
+          List of experimental feature flag to enable in Fleet.
+          It is available in {{ecloud}} 8.6.0 and later versions.
+          From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features.
+        datatype: string
+        applies_to:
+          - "stack: deprecated 9.3.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "From 9.3.0 onwards, use `xpack.fleet.experimentalFeatures` to explicitly enable or disable experimental features."
+
+      - setting: xpack.fleet.experimentalFeatures
+        description: |
+          Set experimental feature flags to `true` or `false` to enable or disable them, respectively.
+        datatype: string
+        applies_to:
+          stack: ga 9.3.0
+          ech: ga
+          self: ga
+        note: "Experimental features should not be enabled in production environments. The features in this section are experimental and may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features."
+        example: |
+          ```yaml
+          xpack.fleet.experimentalFeatures:
+            useSpaceAwareness: false
+            enableAgentPrivilegeLevelChange: true
+          ```
+
+      - setting: xpack.fleet.enableManagedLogsAndMetricsDataviews
+        description: |
+          Set to `true` (default), to enable the automatic creation of global `logs-*` and `metrics-*` data views.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.autoUpgrades.taskInterval
+        description: |
+          Configure the interval of the automatic upgrade task for {{fleet}}-managed {{agents}}. Defaults to `30m`.
+        datatype: string
+        default: "30m"
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.autoUpgrades.retryDelays
+        description: |
+          Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
+        datatype: string
+        default: "['30m', '1h', '2h', '4h', '8h', '16h', '24h']"
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.integrationRollbackTTL
+        description: |
+          Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
+        datatype: string
+        default: "7d"
+        applies_to:
+          stack: ga 9.3
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions
+        description: |
+          The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+        datatype: int
+        default: 10
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.interval
+        description: |
+          The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+        datatype: string
+        default: "1h"
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
+
+      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run
+        description: |
+          The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
+        datatype: int
+        default: 100
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga
