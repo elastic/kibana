@@ -48,9 +48,14 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         defaults: {},
         overrides: {
           meta: {
+            username: {
+              label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.username.label', {
+                defaultMessage: 'Account email',
+              }),
+            },
             password: {
               label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.password.label', {
-                defaultMessage: 'API key',
+                defaultMessage: 'API token',
               }),
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.confluence.auth.password.helpText',
