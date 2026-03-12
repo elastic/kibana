@@ -27,41 +27,67 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ## 9.3.2 [elastic-kibana-9.3.2-release-notes]
 
 ### Features and enhancements [elastic-kibana-9.3.2-features-enhancements]
+
+**Connectivity**:
 * Adds Gemini 2.5 Flash Lite, Claude 4.5 Haiku, and Claude 4.6 Sonnet preconfigured connectors [#253109]({{kib-pull}}253109).
 
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
 ### Fixes [elastic-kibana-9.3.2-fixes]
-* Fixes report generation failing for multi-page Canvas workpads [#255022]({{kib-pull}}255022).
+
+**Alerting and cases**:
+* Fixes out-of-memory crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
+* Fixes EQL sequence rule alert merging to treat dot notation and nested notation as the same field path [#254830]({{kib-pull}}254830).
+* Fixes the Cases webhook connector to correctly handle `204 No Content` responses from external services [#251090]({{kib-pull}}251090).
+
+**Connectivity**:
+* Fixes MCP connectors ignoring proxy and SSL configuration from the `xpack.actions` settings [#255813]({{kib-pull}}255813).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
 * Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Fixes report generation failing for multi-page Canvas workpads [#255022]({{kib-pull}}255022).
 * Fixes Canvas workpads to correctly apply embeddable transforms to embedded panels, ensuring correct references and panel shapes [#252191]({{kib-pull}}252191).
 * Fixes the **Add from library** action in Canvas adding incorrect embeddable state [#257261]({{kib-pull}}257261).
 * Fixes Lens embeddable transforms in Canvas workpads [#257224]({{kib-pull}}257224).
 * Fixes Maps failing to load when the stored time filter contained an unsupported `mode` property [#255178]({{kib-pull}}255178).
 * Fixes Maps content management to correctly validate response schemas [#255181]({{kib-pull}}255181).
+
+**Data ingestion and Fleet**:
 * Fixes the Fleet unenroll inactive agents task to correctly find agents across all spaces [#255726]({{kib-pull}}255726).
 * Fixes incorrect installation of Fleet integration assets when upgrading integrations with custom datasets [#254923]({{kib-pull}}254923).
+
+**Discover**:
+* Fixes a rendering loop in the **Attributes** tab on the Discover traces flyout that caused UI glitches [#255173]({{kib-pull}}255173).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes an issue where saving a dashboard incorrectly applied access control metadata when a user profile was unavailable, such as when using proxy or anonymous authentication [#255065]({{kib-pull}}255065).
 * Fixes the spaces selector briefly displaying "No spaces match" text while loading [#255654]({{kib-pull}}255654).
 * Fixes the embeddable console auto-closing when interacting with navigation, flyouts, or other chrome elements [#253382]({{kib-pull}}253382).
 * Fixes a test timing issue with the privilege assignment button in **Spaces** management [#255094]({{kib-pull}}255094).
-* Fixes an issue where saving a dashboard incorrectly applied access control metadata when a user profile was unavailable, such as when using proxy or anonymous authentication [#255065]({{kib-pull}}255065).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with many unintended numbered keys when error metadata contained a scalar value [#256233]({{kib-pull}}256233).
+
+**Machine Learning**:
 * Fixes screen reader announcements for the **Export jobs** and **Synchronize saved objects** flyouts on the **Data Frame Analytics** page [#256409]({{kib-pull}}256409).
-* Improves screen reader accessibility for the **Index mode** field in the **Create index** modal [#256392]({{kib-pull}}256392).
+
+**Management**:
 * Fixes syntax highlighting in **Dev Tools Console** breaking when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
 * Fixes syntax highlighting in **Dev Tools Console** breaking after closing nested braces in JSON objects [#255426]({{kib-pull}}255426).
-* Fixes the **Run in Console** button styling on search tutorial cards [#256455]({{kib-pull}}256455).
+* Improves screen reader accessibility for the **Index mode** field in the **Create index** modal [#256392]({{kib-pull}}256392).
+
+**Search**:
+* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
+* Fixes content connector API key regeneration to correctly generate and display a new key [#256083]({{kib-pull}}256083).
 * Fixes Search Playground routes to enforce maximum size limits on input arrays [#255881]({{kib-pull}}255881).
 * Fixes focus not returning to the connector flyout when form validation errors occur [#255770]({{kib-pull}}255770).
-* Fixes a crash in APM apps when invalid values were passed to `rangeFrom` and `rangeTo` query parameters in the URL [#256887]({{kib-pull}}256887).
-* Fixes an error on the SLO burn rate alert details page for suppressed alerts [#256435]({{kib-pull}}256435).
-* Fixes a crash on the Infrastructure asset details **Dashboards** tab caused by incorrect locator parameters [#256412]({{kib-pull}}256412).
-* Fixes content connector API key regeneration to correctly generate and display a new key [#256083]({{kib-pull}}256083).
-* Fixes a bug in the `platform.core.search` tool and `index_search` tool type where nested fields were ignored when searching for matching documents [#255914]({{kib-pull}}255914).
-* Fixes MCP connectors ignoring proxy and SSL configuration from the `xpack.actions` settings [#255813]({{kib-pull}}255813).
-* Fixes a 500 error and infinite loading on the APM **Error group details** page when the related transaction is missing the `transaction.sampled` field [#255788]({{kib-pull}}255788).
-* Fixes a rendering loop in the **Attributes** tab on the Discover traces flyout that caused UI glitches [#255173]({{kib-pull}}255173).
-* Fixes EQL sequence rule alert merging to treat dot notation and nested notation as the same field path [#254830]({{kib-pull}}254830).
-* Fixes out-of-memory crashes and Kibana restarts caused by the gap auto-fill scheduler creating excessively large saved objects [#254788]({{kib-pull}}254788).
-* Fixes the **Related dashboards** feature crashing when dashboards contain collapsible sections [#254600]({{kib-pull}}254600).
-* Fixes the Cases webhook connector to correctly handle `204 No Content` responses from external services [#251090]({{kib-pull}}251090).
+* Fixes the **Run in Console** button styling on search tutorial cards [#256455]({{kib-pull}}256455).
 
 ## 9.3.1 [kibana-9.3.1-release-notes]
 
