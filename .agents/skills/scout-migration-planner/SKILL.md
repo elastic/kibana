@@ -148,7 +148,7 @@ Scan every test file for patterns that need attention during migration:
 | **Brittle CSS selectors** | `find.byCssSelector(...)`, `find.byClassName(...)`, text-based lookups without `data-test-subj` |
 | **Over-privileged execution** | Tests running as `superuser` that don't need elevated privileges |
 
-For each smell, note the file, line range, and relevant context for the executor.
+For each smell, note the file and relevant context.
 
 ### Step 11: Propose migration batches
 
@@ -161,7 +161,7 @@ Group tests into ordered batches that can be migrated independently:
 For each batch:
 
 - List the files included
-- Estimated effort (hours or story points) with reasoning
+- Human involvement: `autopilot` (executor can handle end-to-end), `guided` (needs a few human decisions or source code changes), or `hands-on` (significant manual work or missing infrastructure)
 - Dependencies on previous batches (e.g. "needs the page object created in batch 2")
 - Any blockers (missing Scout features, missing `data-test-subj` in source code)
 
