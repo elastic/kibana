@@ -123,13 +123,15 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   }
 
   private async checkPermissions(index: Indices) {
+    let exists = false;
     try {
-      const resp = await this.client.indices.get({ index });
-      if (Object.entries(resp).length === 0) {
-        throw new PermissionError('Index does not exist');
-      }
+      exists = await this.client.indices.exists({ index, allow_no_indices: false });
     } catch (e) {
       throw new PermissionError(`Error accessing index: ${e}`);
+    }
+
+    if (!exists) {
+      throw new PermissionError('Index does not exist');
     }
 
     try {
