@@ -42,7 +42,7 @@ const GraphCollectionOutputSchema = z.object({
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
     id: '.microsoft-teams',
-    displayName: 'Microsoft Teams (NEW)',
+    displayName: 'Microsoft Teams (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.metadata.description', {
       defaultMessage: 'Search Microsoft Teams channels, chats, and teams',
     }),

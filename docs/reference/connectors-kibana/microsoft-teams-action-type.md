@@ -66,7 +66,7 @@ The Microsoft Teams connector has the following actions:
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. Supports KQL syntax.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports KQL syntax.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.
@@ -82,19 +82,19 @@ To use the Microsoft Teams connector, you need a Microsoft Azure AD application 
 
 ### Bearer token (delegated auth)
 
-1. Sign in to the [Azure portal](https://portal.azure.com) and go to **Azure Active Directory → App registrations**.
+1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
 3. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
    - `Team.ReadBasic.All` — List joined teams and channels
    - `Chat.Read` — Read chat messages
    - `ChannelMessage.Read.All` — Read channel messages
    - `Chat.ReadBasic` — List chats
-4. Get a user access token using OAuth delegated flow (for example, Authorization Code flow).
+4. Obtain a user access token through the OAuth delegated flow (for example, Authorization Code flow).
 5. In the **Microsoft API token** field, enter your user access token.
 
 ### OAuth client credentials (app-only auth)
 
-1. Sign in to the [Azure portal](https://portal.azure.com) and go to **Azure Active Directory → App registrations**.
+1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
 3. Under **API permissions**, add the following **Application** permissions for Microsoft Graph:
    - `Team.ReadBasic.All` — List all teams in the tenant
