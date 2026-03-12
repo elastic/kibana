@@ -539,6 +539,61 @@ describe('prepareConversation', () => {
       expect(mockContext.logger.warn).not.toHaveBeenCalled();
     });
 
+    it('prefers current-turn target over historical conversation target context', async () => {
+      const existing: VersionedAttachment = {
+        id: 'existing-target',
+        type: 'security.alert',
+        active: true,
+        current_version: 1,
+        versions: [
+          {
+            version: 1,
+            data: {
+              anonymizationTarget: {
+                targetType: 'index_pattern',
+                targetId: 'alerts-*',
+              },
+            },
+            created_at: '2024-01-01T00:00:00.000Z',
+            content_hash: 'existing-hash',
+            estimated_tokens: 1,
+          },
+        ],
+      };
+      mockContext.attachmentStateManager = createAttachmentStateManager([existing], {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [
+            {
+              id: 'screen-context',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index',
+                  targetId: 'logs-*',
+                },
+              },
+            },
+          ],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toEqual({
+        targetType: 'index',
+        targetId: 'logs-*',
+      });
+    });
+
     it('dedupes duplicate targets and keeps a single target', async () => {
       const result = await prepareConversation({
         previousRounds: [],
@@ -646,6 +701,72 @@ describe('prepareConversation', () => {
         targetId: 'metrics-*',
       });
       expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('falls back to global-only when conversation context has multiple distinct targets and no current target', async () => {
+      const existing: VersionedAttachment[] = [
+        {
+          id: 'a-1',
+          type: 'security.alert',
+          active: true,
+          current_version: 1,
+          versions: [
+            {
+              version: 1,
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index',
+                  targetId: 'logs-*',
+                },
+              },
+              created_at: '2024-01-01T00:00:00.000Z',
+              content_hash: 'hash-1',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+        {
+          id: 'a-2',
+          type: 'security.alert',
+          active: true,
+          current_version: 1,
+          versions: [
+            {
+              version: 1,
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index_pattern',
+                  targetId: 'alerts-*',
+                },
+              },
+              created_at: '2024-01-01T00:00:00.000Z',
+              content_hash: 'hash-2',
+              estimated_tokens: 1,
+            },
+          ],
+        },
+      ];
+      mockContext.attachmentStateManager = createAttachmentStateManager(existing, {
+        getTypeDefinition: (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        }),
+      });
+
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Follow-up without attachment',
+          attachments: [],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toBeUndefined();
+      expect(mockContext.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('multiple_distinct_targets_detected=true')
+      );
     });
   });
 });

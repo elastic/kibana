@@ -265,14 +265,18 @@ export const prepareConversation = async ({
     .map((attachment) => toAttachmentInput(attachment))
     .filter((attachment): attachment is AttachmentInput => attachment !== undefined);
 
-  const anonymizationTarget = deriveAnonymizationTarget({
-    attachments: [
-      ...activeConversationAttachments,
-      ...previousAttachments,
-      ...nextInputAttachments,
-    ],
+  // Current-turn targets are authoritative when provided. If absent, fall back
+  // to prior conversation context for follow-up continuity.
+  const currentTurnAnonymizationTarget = deriveAnonymizationTarget({
+    attachments: nextInputAttachments,
     logger: context.logger,
   });
+  const conversationContextAnonymizationTarget = deriveAnonymizationTarget({
+    attachments: [...activeConversationAttachments, ...previousAttachments],
+    logger: context.logger,
+  });
+  const anonymizationTarget =
+    currentTurnAnonymizationTarget ?? conversationContextAnonymizationTarget;
 
   await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
   attachmentStateManager.clearAccessTracking();
