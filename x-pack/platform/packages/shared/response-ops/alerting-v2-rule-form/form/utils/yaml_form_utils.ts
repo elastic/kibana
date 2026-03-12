@@ -15,6 +15,25 @@ export interface YamlParseResult {
   error: string | null;
 }
 
+const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
+  if (!Array.isArray(artifacts)) return undefined;
+
+  const parsedArtifacts = artifacts.flatMap((artifact) => {
+    if (!artifact || typeof artifact !== 'object' || Array.isArray(artifact)) {
+      return [];
+    }
+
+    const { id, type, value } = artifact as Record<string, unknown>;
+    if (typeof id !== 'string' || typeof type !== 'string' || typeof value !== 'string') {
+      return [];
+    }
+
+    return [{ id, type, value }];
+  });
+
+  return parsedArtifacts.length ? parsedArtifacts : undefined;
+};
+
 /**
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility)
  */
@@ -38,6 +57,7 @@ export const formValuesToYamlObject = (values: FormValues): Record<string, unkno
     },
   },
   ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
+  ...(values.artifacts?.length && { artifacts: values.artifacts }),
 });
 
 /**
@@ -71,6 +91,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const evaluation = obj.evaluation as Record<string, unknown> | undefined;
   const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
+  const artifacts = parseArtifacts(obj.artifacts);
 
   // Validate kind
   const kind = obj.kind;
@@ -136,6 +157,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
+      artifacts,
     },
     error: null,
   };

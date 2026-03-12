@@ -17,6 +17,7 @@ export interface RuleMetadata {
   description?: string;
   owner?: string;
   labels?: string[];
+  runbook?: string;
 }
 
 export interface RuleSchedule {
@@ -40,6 +41,12 @@ export interface RecoveryPolicy {
     base?: string;
     condition?: string;
   };
+}
+
+export interface RuleArtifact {
+  id: string;
+  type: string;
+  value: string;
 }
 
 /**
@@ -66,4 +73,5 @@ export interface FormValues {
   grouping?: RuleGrouping;
   recoveryPolicy?: RecoveryPolicy;
   stateTransition?: StateTransition;
+  artifacts?: RuleArtifact[];
 }

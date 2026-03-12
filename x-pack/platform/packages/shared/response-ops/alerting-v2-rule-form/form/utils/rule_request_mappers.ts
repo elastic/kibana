@@ -13,6 +13,16 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
 
+const RUNBOOK_ARTIFACT_TYPE = 'runbook';
+const createRunbookArtifactId = () =>
+  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+// TEMP COMPAT:
+// Keep artifacts visible in this package until all consumers resolve updated schema types.
+type CreateRuleDataCompat = CreateRuleData & { artifacts?: RuleArtifactPayload };
+type UpdateRuleDataCompat = UpdateRuleData & { artifacts?: RuleArtifactPayload | null };
+type RuleResponseCompat = RuleResponse & { artifacts?: RuleArtifactPayload };
+
 // ---------------------------------------------------------------------------
 // FormValues → API request
 // ---------------------------------------------------------------------------
@@ -129,7 +139,34 @@ export interface RuleRequestCommon {
     recovering_count?: number;
     recovering_timeframe?: string;
   };
+  artifacts?: RuleArtifactPayload;
 }
+
+const mapArtifacts = (
+  metadata: FormValues['metadata'],
+  artifacts: FormValues['artifacts']
+): RuleRequestCommon['artifacts'] => {
+  const runbookValue = metadata.runbook?.trim(); // legacy fallback
+  const currentArtifacts = artifacts ?? [];
+  const existingRunbookArtifact = currentArtifacts.find(
+    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+  );
+
+  if (!runbookValue) {
+    return currentArtifacts.length ? currentArtifacts : undefined;
+  }
+
+  if (existingRunbookArtifact) {
+    return currentArtifacts.map((artifact) =>
+      artifact.type === RUNBOOK_ARTIFACT_TYPE ? { ...artifact, value: runbookValue } : artifact
+    );
+  }
+
+  return [
+    ...currentArtifacts,
+    { id: createRunbookArtifactId(), type: RUNBOOK_ARTIFACT_TYPE, value: runbookValue },
+  ];
+};
 
 /**
  * Maps `FormValues` to the common API request shape (snake_case) shared by
@@ -144,8 +181,10 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     grouping,
     recoveryPolicy,
     stateTransition,
+    artifacts,
     kind,
   } = formValues;
+  const mappedArtifacts = mapArtifacts(metadata, artifacts);
 
   return {
     metadata: mapMetadata(metadata),
@@ -155,6 +194,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     grouping: mapGrouping(grouping),
     recovery_policy: mapRecoveryPolicy(recoveryPolicy, evaluation),
     state_transition: mapStateTransition(kind, stateTransition),
+    ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
   };
 };
 
@@ -162,7 +202,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
  * Maps `FormValues` to the create API request payload.
  * Adds `kind` on top of the common request shape since it is required for creation.
  */
-export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleData => ({
+export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleDataCompat => ({
   kind: formValues.kind,
   ...mapFormValuesToRuleRequest(formValues),
 });
@@ -172,8 +212,8 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
  * Coerces absent optional fields to `null` so the API interprets them as
  * explicit removals (as opposed to `undefined` which omits the key entirely).
  */
-export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
-  const { grouping, recovery_policy, state_transition, ...rest } =
+export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleDataCompat => {
+  const { grouping, recovery_policy, state_transition, artifacts, ...rest } =
     mapFormValuesToRuleRequest(formValues);
 
   return {
@@ -181,6 +221,7 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
     grouping: grouping ?? null,
     recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
+    artifacts: artifacts ?? null,
   };
 };
 
@@ -238,5 +279,8 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
           recoveringTimeframe: rule.state_transition.recovering_timeframe,
         },
       }
+    : {}),
+  ...((rule as RuleResponseCompat).artifacts
+    ? { artifacts: (rule as RuleResponseCompat).artifacts }
     : {}),
 });

@@ -346,6 +346,11 @@ const createMockWorkflowsManagement = (): WorkflowsServerPluginSetup['management
   } as unknown as WorkflowsServerPluginSetup['management']);
 
 describe('DispatcherService integration tests', () => {
+  const mockEncryptedSavedObjectsClient = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  } as unknown as EncryptedSavedObjectsClient;
+
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;

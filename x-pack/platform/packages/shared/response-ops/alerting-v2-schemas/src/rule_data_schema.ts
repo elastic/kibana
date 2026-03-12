@@ -167,6 +167,16 @@ const notificationPolicyRefSchema = z
   })
   .strict();
 
+/** Artifacts (optional) */
+
+const artifactSchema = z
+  .object({
+    id: z.string().min(1).max(256).describe('Artifact identifier.'),
+    type: z.string().min(1).max(128).describe('Artifact type.'),
+    value: z.string().min(1).max(1024).describe('Artifact value.'),
+  })
+  .strict();
+
 /** Create rule API schema */
 
 /**
@@ -190,6 +200,7 @@ const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     notification_policies: z.array(notificationPolicyRefSchema).optional(),
+    artifacts: z.array(artifactSchema).optional(),
   })
   .strip();
 
@@ -250,6 +261,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
+    artifacts: z.array(artifactSchema).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
