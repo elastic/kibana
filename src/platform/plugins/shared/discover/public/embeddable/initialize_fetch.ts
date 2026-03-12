@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
@@ -150,6 +150,7 @@ export function initializeFetch({
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
+      debounceTime(0), // debounce to batch updates in the same tick
       tap(() => {
         // abort any in-progress requests
         if (abortController) {

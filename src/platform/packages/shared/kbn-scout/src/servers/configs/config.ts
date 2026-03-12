@@ -134,6 +134,24 @@ export class Config {
         password: this.get('servers.kibana.password'),
       },
 
+      ...(this.get('esServerlessOptions.cps', false) && this.get('servers.linkedElasticsearch.port')
+        ? {
+            linkedProject: {
+              hosts: {
+                elasticsearch: Url.format({
+                  protocol: this.get('servers.linkedElasticsearch.protocol'),
+                  hostname: this.get('servers.linkedElasticsearch.hostname'),
+                  port: this.get('servers.linkedElasticsearch.port'),
+                }),
+              },
+              auth: {
+                username: this.get('servers.linkedElasticsearch.username'),
+                password: this.get('servers.linkedElasticsearch.password'),
+              },
+            },
+          }
+        : {}),
+
       metadata: {
         generatedOn: formatCurrentDate(),
         config: this.getAll(),

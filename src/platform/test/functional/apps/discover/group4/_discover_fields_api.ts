@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dataGrid.clickRowToggle();
       await discover.isShowingDocViewer();
       await discover.clickDocViewerTab('doc_view_source');
-      await discover.expectSourceViewerToExist();
+      await discover.isInEsqlMode();
     });
   });
 }

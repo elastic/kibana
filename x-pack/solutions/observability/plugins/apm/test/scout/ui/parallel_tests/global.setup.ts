@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
@@ -14,14 +14,14 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
+import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
+import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
-globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
-
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
     const startTime = Date.now();
     if (!config.isCloud) {
@@ -71,6 +71,22 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
+
+    // Generate AWS Lambda service data for cold start chart tests
+    const awsLambdaData = awsLambda({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(awsLambdaData);
+    log.info('AWS Lambda service data indexed');
+
+    // Generate Azure Functions service data for cold start chart tests
+    const azureFunctionsData = azureFunctions({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(azureFunctionsData);
+    log.info('Azure Functions service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

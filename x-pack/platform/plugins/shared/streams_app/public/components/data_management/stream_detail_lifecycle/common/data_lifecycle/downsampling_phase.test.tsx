@@ -17,7 +17,7 @@ describe('DownsamplingPhase', () => {
   };
 
   it('should open popover on click', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={1} />);
+    render(<DownsamplingPhase downsample={downsample} stepNumber={1} canManageLifecycle />);
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);
@@ -28,7 +28,14 @@ describe('DownsamplingPhase', () => {
   });
 
   it('should display phase name in popover for ILM', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={1} phaseName="hot" />);
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        phaseName="hot"
+        canManageLifecycle
+      />
+    );
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);
@@ -38,11 +45,31 @@ describe('DownsamplingPhase', () => {
   });
 
   it('should display correct step number', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={2} />);
+    render(<DownsamplingPhase downsample={downsample} stepNumber={2} canManageLifecycle />);
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);
 
     expect(screen.getByTestId('downsamplingPopover-step2-title')).toBeInTheDocument();
+  });
+
+  it('should navigate to the step when edit flyout is open (no popover)', () => {
+    const onEditStep = jest.fn();
+
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        phaseName="hot"
+        onEditStep={onEditStep}
+        canManageLifecycle
+        isEditLifecycleFlyoutOpen
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+
+    expect(onEditStep).toHaveBeenCalledWith(1, 'hot');
+    expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
   });
 });

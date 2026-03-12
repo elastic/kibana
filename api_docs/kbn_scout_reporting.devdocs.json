@@ -133,7 +133,7 @@
                 "tags": [],
                 "label": "event",
                 "description": [
-                  "- Event to record"
+                  "{ScoutReportEvent} - Event to record"
                 ],
                 "signature": [
                   {
@@ -310,7 +310,7 @@
                 "tags": [],
                 "label": "failure",
                 "description": [
-                  "- test failure to record"
+                  "{TestFailure} - test failure to record"
                 ],
                 "signature": [
                   {
@@ -1011,6 +1011,43 @@
       },
       {
         "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.getGitSHA1ForPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getGitSHA1ForPath",
+        "description": [],
+        "signature": [
+          "(p: string) => Promise<string>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.getGitSHA1ForPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "p",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+            "lineNumber": 19,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
         "id": "def-common.getKibanaModuleData",
         "type": "Function",
         "tags": [],
@@ -1061,23 +1098,25 @@
       },
       {
         "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.getRunTarget",
+        "id": "def-common.getRunCommand",
         "type": "Function",
         "tags": [],
-        "label": "getRunTarget",
-        "description": [],
+        "label": "getRunCommand",
+        "description": [
+          "\nReturns the command line used to run Scout tests.\n\nWhen Scout starts Playwright, the Playwright process argv no longer contains the Scout CLI invocation.\nIn those cases, Scout sets SCOUT_RUN_COMMAND and we prefer it for reporting."
+        ],
         "signature": [
           "(argv: string[]) => string"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
-        "lineNumber": 29,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.getRunTarget.$1",
+            "id": "def-common.getRunCommand.$1",
             "type": "Array",
             "tags": [],
             "label": "argv",
@@ -1086,14 +1125,67 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
-            "lineNumber": 29,
-            "columnNumber": 30,
+            "lineNumber": 37,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.getTestTargetFromProcessArguments",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getTestTargetFromProcessArguments",
+        "description": [
+          "\nTries to determine the Scout test target from process attributes.\n"
+        ],
+        "signature": [
+          "(argv: string[]) => ",
+          {
+            "pluginId": "@kbn/scout-info",
+            "scope": "common",
+            "docId": "kibKbnScoutInfoPluginApi",
+            "section": "def-common.ScoutTestTarget",
+            "text": "ScoutTestTarget"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.getTestTargetFromProcessArguments.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "argv",
+            "description": [
+              "Process argument values"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "ScoutTestTarget if necessary information was found in process arguments\n\nThis won't return a target if '--grep' is not provided in the command line"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1263,7 +1355,7 @@
           "(commandArgs: string[]) => string"
         ],
         "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1279,7 +1371,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts",
-            "lineNumber": 10,
+            "lineNumber": 12,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1367,6 +1459,79 @@
             "label": "visibility",
             "description": [],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/helpers/read_manifest.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutConfigManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutConfigManifest",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutConfigManifest.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutConfigManifest.exists",
+            "type": "boolean",
+            "tags": [],
+            "label": "exists",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutConfigManifest.sha1",
+            "type": "string",
+            "tags": [],
+            "label": "sha1",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutConfigManifest.tests",
+            "type": "Array",
+            "tags": [],
+            "label": "tests",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; expectedStatus: string; tags: string[]; location: ",
+              "Location",
+              "; }[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
@@ -1806,6 +1971,249 @@
             "description": [],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestableModule",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutTestableModule",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModule.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModule.group",
+            "type": "string",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModule.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"package\" | \"plugin\""
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModule.visibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibility",
+            "description": [],
+            "signature": [
+              "\"shared\" | \"private\""
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModule.root",
+            "type": "string",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestableModuleWithConfigs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutTestableModuleWithConfigs",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-reporting",
+            "scope": "common",
+            "docId": "kibKbnScoutReportingPluginApi",
+            "section": "def-common.ScoutTestableModuleWithConfigs",
+            "text": "ScoutTestableModuleWithConfigs"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout-reporting",
+            "scope": "common",
+            "docId": "kibKbnScoutReportingPluginApi",
+            "section": "def-common.ScoutTestableModule",
+            "text": "ScoutTestableModule"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestableModuleWithConfigs.configs",
+            "type": "Array",
+            "tags": [],
+            "label": "configs",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              ", \"module\">[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutTestConfig",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.module",
+            "type": "Object",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModule",
+                "text": "ScoutTestableModule"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfig.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutConfigManifest",
+                "text": "ScoutConfigManifest"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2395,6 +2803,539 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.testableModules",
+        "type": "Object",
+        "tags": [],
+        "label": "testableModules",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testableModules.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModule",
+                "text": "ScoutTestableModule"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testableModules.allIncludingConfigs",
+            "type": "Array",
+            "tags": [],
+            "label": "allIncludingConfigs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModuleWithConfigs",
+                "text": "ScoutTestableModuleWithConfigs"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testableModules.ofType",
+            "type": "Function",
+            "tags": [],
+            "label": "ofType",
+            "description": [],
+            "signature": [
+              "(moduleType: \"package\" | \"plugin\") => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModule",
+                "text": "ScoutTestableModule"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testableModules.ofType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "moduleType",
+                "description": [],
+                "signature": [
+                  "\"package\" | \"plugin\""
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+                "lineNumber": 50,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testableModules.plugins",
+            "type": "Array",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModule",
+                "text": "ScoutTestableModule"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testableModules.packages",
+            "type": "Array",
+            "tags": [],
+            "label": "packages",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestableModule",
+                "text": "ScoutTestableModule"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/testable_module.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.testConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "testConfig",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfig.fromPath",
+            "type": "Function",
+            "tags": [],
+            "label": "fromPath",
+            "description": [],
+            "signature": [
+              "(configPath: string) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testConfig.fromPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "configPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+                "lineNumber": 28,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.testConfigManifests",
+        "type": "Object",
+        "tags": [],
+        "label": "testConfigManifests",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigManifests.findPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "findPaths",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/manifest.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.testConfigs",
+        "type": "Object",
+        "tags": [],
+        "label": "testConfigs",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs._configs",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_configs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              "[] | null"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.findPaths",
+            "type": "Function",
+            "tags": [],
+            "label": "findPaths",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs._load",
+            "type": "Function",
+            "tags": [],
+            "label": "_load",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.forModule",
+            "type": "Function",
+            "tags": [],
+            "label": "forModule",
+            "description": [],
+            "signature": [
+              "(name: string, type?: \"package\" | \"plugin\" | undefined) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testConfigs.forModule.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+                "lineNumber": 141,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testConfigs.forModule.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "\"package\" | \"plugin\" | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+                "lineNumber": 141,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.forPlugin",
+            "type": "Function",
+            "tags": [],
+            "label": "forPlugin",
+            "description": [],
+            "signature": [
+              "(pluginName: string) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testConfigs.forPlugin.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+                "lineNumber": 146,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.testConfigs.forPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "forPackage",
+            "description": [],
+            "signature": [
+              "(packageName: string) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfig",
+                "text": "ScoutTestConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.testConfigs.forPackage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "packageName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/registry/test_config.ts",
+                "lineNumber": 150,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

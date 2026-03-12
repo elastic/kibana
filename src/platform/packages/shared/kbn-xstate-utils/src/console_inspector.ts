@@ -18,7 +18,7 @@ import type {
   InspectedEventEvent,
   InspectedSnapshotEvent,
   InspectionEvent,
-} from 'xstate5';
+} from 'xstate';
 import { isDevMode } from './dev_tools';
 
 declare global {

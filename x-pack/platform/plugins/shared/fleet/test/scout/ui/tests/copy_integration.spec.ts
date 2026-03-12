@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 
-test.describe('Copy integration', { tag: ['@ess'] }, () => {
+test.describe('Copy integration', { tag: '@local-stateful-classic' }, () => {
+  // This test can take a bit longer on ECH
+  test.setTimeout(2 * 60 * 1000); // 2 minutes
   const testAgentPolicyName = 'Test Agent Policy for Copy';
   const packagePolicyName = 'nginx-test-copy';
   let agentPolicyId: string;
@@ -125,9 +127,9 @@ test.describe('Copy integration', { tag: ['@ess'] }, () => {
     const nameInput = copyIntegration.getPackagePolicyNameInput();
     await expect(nameInput).toBeVisible();
 
-    // Ensure agent policy select is loaded
+    // Ensure agent policy details are fully loaded (not just dropdown options)
     await expect(copyIntegration.getAgentPolicySelect()).toBeVisible();
-    await expect(copyIntegration.getAgentPolicySelectIsLoading()).toBeHidden();
+    await expect(copyIntegration.getAgentPolicyAgentsDescription()).toBeVisible();
 
     await expect(nameInput).toHaveValue(`copy-${packagePolicyName}`);
 

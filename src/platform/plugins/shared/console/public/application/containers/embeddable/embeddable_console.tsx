@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useMemo, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
@@ -22,6 +22,8 @@ import {
   useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 import { dynamic } from '@kbn/shared-ux-utility';
 
 import { Global } from '@emotion/react';
@@ -117,10 +119,42 @@ export const EmbeddableConsole = ({
     (consoleState.view === EmbeddableConsoleView.Console || alternateView === undefined);
   const showAlternateView =
     consoleState.view === EmbeddableConsoleView.Alternate && alternateView !== undefined;
-  const setIsConsoleOpen = (value: boolean) => {
-    consoleDispatch(value ? { type: 'open' } : { type: 'close' });
-  };
+  const setIsConsoleOpen = useCallback(
+    (value: boolean) => {
+      consoleDispatch(value ? { type: 'open' } : { type: 'close' });
+    },
+    [consoleDispatch]
+  );
   const toggleConsole = () => setIsConsoleOpen(!isOpen);
+
+  // Include chrome header and navigation in the focus trap so users can
+  // interact with global search, nav, etc. while the console is open.
+  const focusTrapShards = useMemo(() => {
+    return new Proxy([] as HTMLElement[], {
+      get(_, prop) {
+        const elements = Array.from(
+          document.querySelectorAll<HTMLElement>(euiIncludeSelectorInFocusTrap.selector)
+        );
+        const value = Reflect.get(elements, prop);
+        return typeof value === 'function' ? value.bind(elements) : value;
+      },
+    });
+  }, []);
+
+  const handleClickOutside = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      // Only close when clicking inside the main app content area,
+      // not on overlays (toasts, flyouts, modals) or chrome (header, nav, sidebar)
+      if (target.closest(`.${APP_WRAPPER_CLASS}`)) {
+        setIsConsoleOpen(false);
+      }
+    },
+    [setIsConsoleOpen]
+  );
+
   const clickAlternateViewActivateButton: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     switch (consoleState.view) {
@@ -146,7 +180,11 @@ export const EmbeddableConsole = ({
     <>
       <Global styles={styles.embeddableConsoleGlobal} />
       <EuiPortal>
-        <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isOpen}>
+        <EuiFocusTrap
+          onClickOutside={handleClickOutside}
+          disabled={!isOpen}
+          shards={focusTrapShards}
+        >
           <section
             aria-label={landmarkHeading}
             css={[

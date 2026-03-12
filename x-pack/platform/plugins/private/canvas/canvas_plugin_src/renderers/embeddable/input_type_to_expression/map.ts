@@ -24,9 +24,9 @@ export function toExpression(input: MapEmbeddableState & { id: string }): string
     );
   }
 
-  if (input.timeRange) {
+  if (input.time_range) {
     expressionParts.push(
-      `timerange={timerange from="${input.timeRange.from}" to="${input.timeRange.to}"}`
+      `timerange={timerange from="${input.time_range.from}" to="${input.time_range.to}"}`
     );
   }
 

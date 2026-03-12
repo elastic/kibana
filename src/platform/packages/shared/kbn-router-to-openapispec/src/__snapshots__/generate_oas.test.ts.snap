@@ -19,6 +19,7 @@ Object {
           "name",
           "other",
         ],
+        "title": "foo",
         "type": "object",
       },
     },
@@ -116,6 +117,7 @@ Object {
           ],
           "type": "object",
         },
+        "title": "myArray",
         "type": "array",
       },
       "myUnion": Object {
@@ -131,6 +133,7 @@ Object {
             "type": "number",
           },
         ],
+        "title": "myUnion",
       },
     },
     "securitySchemes": Object {
@@ -665,6 +668,7 @@ Object {
           "type",
           "value",
         ],
+        "title": "my-a-my-team",
         "type": "object",
       },
       "my-b-my-team": Object {
@@ -684,6 +688,7 @@ Object {
           "type",
           "value",
         ],
+        "title": "my-b-my-team",
         "type": "object",
       },
       "my-catch-all-my-team": Object {
@@ -700,6 +705,7 @@ Object {
           "type",
           "value",
         ],
+        "title": "my-catch-all-my-team",
         "type": "object",
         "x-oas-discriminator-default-case": true,
       },
@@ -785,6 +791,7 @@ Object {
           "name",
           "self",
         ],
+        "title": "recursive",
         "type": "object",
       },
     },

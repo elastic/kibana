@@ -6,8 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { RecommendedQuery, RecommendedField, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+import type {
+  RecommendedQuery,
+  RecommendedField,
+  ResolveIndexResponse,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
+import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { ESQLExtensionsRegistry } from '.';
 
 describe('ESQLExtensionsRegistry', () => {
@@ -31,7 +36,7 @@ describe('ESQLExtensionsRegistry', () => {
       };
     });
     it('should add recommended queries to the registry', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId: ESQLRegistrySolutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Query 1', query: 'FROM logs-2023 | STATS count()' },
         { name: 'Query 2', query: 'FROM metrics-* | STATS avg(value)' },
@@ -54,7 +59,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should skip malformed recommended queries (missing name or query)', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId: ESQLRegistrySolutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Valid Query', query: 'FROM my_index | STATS count()' },
         { name: 'Missing Query' } as RecommendedQuery, // Malformed
@@ -75,7 +80,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should skip queries if no index pattern is found from the query string', () => {
-      const solutionId: SolutionId = 'es';
+      const solutionId: ESQLRegistrySolutionId = 'es';
       const queries: RecommendedQuery[] = [
         { name: 'Valid Query', query: 'FROM my_index | STATS count()' },
         { name: 'No Pattern Query', query: 'STATS count()' }, // No index pattern, malformed
@@ -102,7 +107,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should not add duplicate recommended queries for the same registryId and query', () => {
-      const solutionId: SolutionId = 'es';
+      const solutionId: ESQLRegistrySolutionId = 'es';
       const queryA: RecommendedQuery = {
         name: 'Query A',
         query: 'FROM another_index | STATS count()',
@@ -254,7 +259,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should remove recommended queries from the registry', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId: ESQLRegistrySolutionId = 'oblt';
       const queries: RecommendedQuery[] = [
         { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
         { name: 'Metrics Query 1', query: `FROM metrics-* | STATS max(bytes)` },
@@ -306,8 +311,8 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should only remove queries for the specified solution ID', () => {
-      const obltSolutionId: SolutionId = 'oblt';
-      const securitySolutionId: SolutionId = 'security';
+      const obltSolutionId: ESQLRegistrySolutionId = 'oblt';
+      const securitySolutionId: ESQLRegistrySolutionId = 'security';
       const metricsQuery = {
         name: 'Metrics Query',
         query: `FROM metrics-* | STATS max(bytes)`,
@@ -336,7 +341,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should handle unset for non-existent index pattern gracefully', () => {
-      const solutionId: SolutionId = 'oblt';
+      const solutionId: ESQLRegistrySolutionId = 'oblt';
       const logsQuery = { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' };
 
       registry.setRecommendedQueries([logsQuery], solutionId);
@@ -370,7 +375,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should add recommended fields to the registry', () => {
-      const solutionId: SolutionId = 'security';
+      const solutionId: ESQLRegistrySolutionId = 'security';
       const fields: RecommendedField[] = [
         { name: 'user.id', pattern: 'logs-web' },
         { name: 'http.request.method', pattern: 'logs-web' },
@@ -395,7 +400,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should skip malformed recommended fields (missing name or pattern)', () => {
-      const solutionId: SolutionId = 'security';
+      const solutionId: ESQLRegistrySolutionId = 'security';
       const fields: RecommendedField[] = [
         { name: 'valid_field', pattern: 'user-activity' },
         { name: 'Missing Pattern' } as RecommendedField, // Malformed (missing pattern)
@@ -413,7 +418,7 @@ describe('ESQLExtensionsRegistry', () => {
     });
 
     it('should not add duplicate recommended fields for the same registryId and field name', () => {
-      const solutionId: SolutionId = 'security';
+      const solutionId: ESQLRegistrySolutionId = 'security';
       const fieldA: RecommendedField = { name: 'event.duration', pattern: 'app-events' };
       const fields: RecommendedField[] = [fieldA, { ...fieldA }]; // Duplicate entry
 
@@ -558,6 +563,172 @@ describe('ESQLExtensionsRegistry', () => {
         'security'
       );
       expect(result).toEqual([commonField]); // Should only return one instance of the field
+    });
+  });
+
+  describe('classic solution ID', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should return classic queries when activeSolutionId is classic', () => {
+      const classicQuery: RecommendedQuery = {
+        name: 'Classic Query',
+        query: 'FROM logs-2023 | STATS count()',
+      };
+
+      registry.setRecommendedQueries([classicQuery], ESQL_CLASSIC_SOLUTION_ID);
+
+      const result = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        ESQL_CLASSIC_SOLUTION_ID
+      );
+      expect(result).toEqual([classicQuery]);
+    });
+
+    it('should include classic queries when a solution is active', () => {
+      const classicQuery: RecommendedQuery = {
+        name: 'Classic Query',
+        query: 'FROM logs-2023 | STATS count()',
+      };
+      const obltQuery: RecommendedQuery = {
+        name: 'Oblt Query',
+        query: 'FROM logs-2023 | LIMIT 10',
+      };
+
+      registry.setRecommendedQueries([classicQuery], ESQL_CLASSIC_SOLUTION_ID);
+      registry.setRecommendedQueries([obltQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries('FROM logs-2023', availableDatasources, 'oblt');
+      expect(result).toEqual([obltQuery, classicQuery]);
+    });
+
+    it('should not include solution-specific queries when in classic mode', () => {
+      const obltQuery: RecommendedQuery = {
+        name: 'Oblt Query',
+        query: 'FROM logs-2023 | LIMIT 10',
+      };
+
+      registry.setRecommendedQueries([obltQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        ESQL_CLASSIC_SOLUTION_ID
+      );
+      expect(result).toEqual([]);
+    });
+
+    it('should include classic standalone queries in all solution views', () => {
+      const classicStandalone: RecommendedQuery = {
+        name: 'Classic Standalone',
+        query: 'TS metrics-*',
+        isStandalone: true,
+      };
+
+      registry.setRecommendedQueries([classicStandalone], ESQL_CLASSIC_SOLUTION_ID);
+
+      const resultOblt = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        'oblt'
+      );
+      expect(resultOblt).toEqual([classicStandalone]);
+
+      const resultSecurity = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        'security'
+      );
+      expect(resultSecurity).toEqual([classicStandalone]);
+
+      const resultClassic = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        ESQL_CLASSIC_SOLUTION_ID
+      );
+      expect(resultClassic).toEqual([classicStandalone]);
+    });
+
+    it('should include classic recommended fields in all solution views', () => {
+      availableDatasources = {
+        indices: [{ name: 'logs-web' }],
+        data_streams: [],
+        aliases: [],
+      };
+
+      const classicField: RecommendedField = { name: 'message', pattern: 'logs-web' };
+      const obltField: RecommendedField = { name: 'error.message', pattern: 'logs-web' };
+
+      registry.setRecommendedFields([classicField], ESQL_CLASSIC_SOLUTION_ID);
+      registry.setRecommendedFields([obltField], 'oblt');
+
+      const resultOblt = registry.getRecommendedFields(
+        'FROM logs-web',
+        availableDatasources,
+        'oblt'
+      );
+      expect(resultOblt).toEqual([obltField, classicField]);
+
+      const resultClassic = registry.getRecommendedFields(
+        'FROM logs-web',
+        availableDatasources,
+        ESQL_CLASSIC_SOLUTION_ID
+      );
+      expect(resultClassic).toEqual([classicField]);
+    });
+  });
+
+  describe('isStandalone flag', () => {
+    it('should return standalone queries regardless of the current query index pattern', () => {
+      availableDatasources = {
+        indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
+        data_streams: [],
+        aliases: [],
+      };
+
+      const staticQuery: RecommendedQuery = {
+        name: 'Search all metrics',
+        query: 'TS metrics-*',
+        isStandalone: true,
+      };
+      const dynamicQuery: RecommendedQuery = {
+        name: 'Logs Query',
+        query: 'FROM logs-2023 | STATS count()',
+      };
+
+      registry.setRecommendedQueries([staticQuery, dynamicQuery], 'oblt');
+
+      const logsResult = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        'oblt'
+      );
+      expect(logsResult).toEqual([dynamicQuery, staticQuery]);
+    });
+
+    it('should not return standalone queries for a different solution ID', () => {
+      availableDatasources = {
+        indices: [{ name: 'logs-2023' }],
+        data_streams: [],
+        aliases: [],
+      };
+
+      const staticQuery: RecommendedQuery = {
+        name: 'Search all metrics',
+        query: 'TS metrics-*',
+        isStandalone: true,
+      };
+
+      registry.setRecommendedQueries([staticQuery], 'oblt');
+
+      const result = registry.getRecommendedQueries('FROM logs-2023', availableDatasources, 'es');
+      expect(result).toEqual([]);
     });
   });
 });

@@ -27,12 +27,12 @@ export function KeyValueTable({
           const asArray = castArray(value);
           const valueList =
             asArray.length <= 1 ? (
-              <FormattedValue value={asArray[0]} />
+              <FormattedValue value={asArray[0]} keyName={key} />
             ) : (
               <ul>
                 {asArray.map((val, index) => (
                   <li>
-                    <FormattedValue key={index} value={val} />
+                    <FormattedValue key={index} value={val} keyName={key} />
                   </li>
                 ))}
               </ul>

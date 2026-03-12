@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import type { RecommendedQuery, RecommendedField, ResolveIndexResponse } from '@kbn/esql-types';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+import type {
+  RecommendedQuery,
+  RecommendedField,
+  ResolveIndexResponse,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
+import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { checkSourceExistence, findMatchingIndicesFromPattern } from './utils';
 
@@ -31,7 +36,7 @@ export class ESQLExtensionsRegistry {
   private setRecommendedItems<T extends { name: string }>(
     map: Map<string, T[]>,
     items: T[],
-    activeSolutionId: SolutionId,
+    activeSolutionId: ESQLRegistrySolutionId,
     getIndexPattern: (item: T) => string | undefined,
     isDuplicate: (existingItems: T[], newItem: T) => boolean,
     itemTypeName: string // e.g., 'query' or 'field' for error messages
@@ -74,7 +79,7 @@ export class ESQLExtensionsRegistry {
     map: Map<string, T[]>,
     queryString: string,
     availableDatasources: ResolveIndexResponse,
-    activeSolutionId: SolutionId,
+    activeSolutionId: ESQLRegistrySolutionId,
     uniqByProperty: keyof T // Property name for lodash's uniqBy
   ): T[] {
     // Validates that the index pattern extracted from the ES|QL `FROM` command
@@ -101,13 +106,25 @@ export class ESQLExtensionsRegistry {
           })
           .flat()
       );
+
+      // Items registered under 'classic' are visible everywhere
+      if (activeSolutionId !== ESQL_CLASSIC_SOLUTION_ID) {
+        recommendedItems.push(
+          ...matchingIndices
+            .map((index) => {
+              const classicRegistryId = `${ESQL_CLASSIC_SOLUTION_ID}>${index}`;
+              return map.get(classicRegistryId) || [];
+            })
+            .flat()
+        );
+      }
     }
     return uniqBy(recommendedItems, uniqByProperty);
   }
 
   setRecommendedQueries(
     recommendedQueries: RecommendedQuery[],
-    activeSolutionId: SolutionId
+    activeSolutionId: ESQLRegistrySolutionId
   ): void {
     this.setRecommendedItems(
       this.recommendedQueries,
@@ -128,20 +145,47 @@ export class ESQLExtensionsRegistry {
   getRecommendedQueries(
     queryString: string,
     availableDatasources: ResolveIndexResponse,
-    activeSolutionId: SolutionId
+    activeSolutionId: ESQLRegistrySolutionId
   ): RecommendedQuery[] {
-    return this.getRecommendedItems(
+    const matchedQueries = this.getRecommendedItems(
       this.recommendedQueries,
       queryString,
       availableDatasources,
       activeSolutionId,
       'query'
     );
+
+    const solutionPrefix = `${activeSolutionId}>`;
+    for (const [key, queries] of this.recommendedQueries) {
+      if (key.startsWith(solutionPrefix)) {
+        for (const q of queries) {
+          if (q.isStandalone) {
+            matchedQueries.push(q);
+          }
+        }
+      }
+    }
+
+    // Standalone queries registered under 'classic' are visible everywhere
+    if (activeSolutionId !== ESQL_CLASSIC_SOLUTION_ID) {
+      const classicPrefix = `${ESQL_CLASSIC_SOLUTION_ID}>`;
+      for (const [key, queries] of this.recommendedQueries) {
+        if (key.startsWith(classicPrefix)) {
+          for (const q of queries) {
+            if (q.isStandalone) {
+              matchedQueries.push(q);
+            }
+          }
+        }
+      }
+    }
+
+    return uniqBy(matchedQueries, 'query');
   }
 
   unsetRecommendedQueries(
     recommendedQueries: RecommendedQuery[],
-    activeSolutionId: SolutionId
+    activeSolutionId: ESQLRegistrySolutionId
   ): void {
     if (!Array.isArray(recommendedQueries)) {
       throw new Error(`Recommended queries must be an array`);
@@ -177,7 +221,10 @@ export class ESQLExtensionsRegistry {
     }
   }
 
-  setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {
+  setRecommendedFields(
+    recommendedFields: RecommendedField[],
+    activeSolutionId: ESQLRegistrySolutionId
+  ): void {
     this.setRecommendedItems(
       this.recommendedFields,
       recommendedFields,
@@ -197,7 +244,7 @@ export class ESQLExtensionsRegistry {
   getRecommendedFields(
     queryString: string,
     availableDatasources: ResolveIndexResponse,
-    activeSolutionId: SolutionId
+    activeSolutionId: ESQLRegistrySolutionId
   ): RecommendedField[] {
     return this.getRecommendedItems(
       this.recommendedFields,

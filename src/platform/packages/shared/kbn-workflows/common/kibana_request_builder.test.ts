@@ -315,6 +315,44 @@ describe('buildKibanaRequest', () => {
     });
   });
 
+  describe('Meta params stripping', () => {
+    it('should not include use_server_info, use_localhost, or debug in body for connector types', () => {
+      const result = buildKibanaRequest(
+        'kibana.createCase',
+        {
+          title: 'Test Case',
+          description: 'Test Description',
+          owner: 'cases',
+          use_server_info: true,
+          use_localhost: false,
+          debug: true,
+        },
+        'test-space'
+      );
+
+      expect(result.body).toBeDefined();
+      expect(result.body!.use_server_info).toBeUndefined();
+      expect(result.body!.use_localhost).toBeUndefined();
+      expect(result.body!.debug).toBeUndefined();
+      expect(result.body!.title).toBe('Test Case');
+    });
+
+    it('should not include meta params in query for connector types', () => {
+      const result = buildKibanaRequest(
+        'kibana.getCase',
+        {
+          caseId: 'test-case-123',
+          use_server_info: true,
+          debug: true,
+        },
+        'default'
+      );
+
+      expect(result.query?.use_server_info).toBeUndefined();
+      expect(result.query?.debug).toBeUndefined();
+    });
+  });
+
   describe('Real-world scenarios', () => {
     it('should handle case creation in security space', () => {
       const result = buildKibanaRequest(

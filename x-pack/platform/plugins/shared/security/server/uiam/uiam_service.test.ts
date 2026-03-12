@@ -9,6 +9,7 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -16,7 +17,6 @@ import {
   UiamService,
 } from './uiam_service';
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
-import { HTTPAuthorizationHeader } from '../authentication';
 import { ConfigSchema } from '../config';
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
@@ -45,7 +45,8 @@ describe('UiamService', () => {
           },
         },
         { serverless: true }
-      ).uiam
+      ).uiam,
+      'https://es.example.com'
     );
   });
 
@@ -90,7 +91,7 @@ describe('UiamService', () => {
       ).toThrowError('UIAM shared secret is not configured.');
     });
 
-    it('does not create custom dispatcher for `full` verification without custom CAs', () => {
+    it('does not create custom dispatcher for `full` verification without custom TLS settings', () => {
       agentSpy.mockClear();
       new UiamService(loggingSystemMock.createLogger(), {
         enabled: true,
@@ -189,6 +190,54 @@ describe('UiamService', () => {
         connect: { allowPartialTrustChain: true, rejectUnauthorized: false },
       });
     });
+
+    it('creates a custom dispatcher with client certificate and key for mTLS', () => {
+      agentSpy.mockClear();
+      new UiamService(loggingSystemMock.createLogger(), {
+        enabled: true,
+        url: 'https://uiam.service',
+        sharedSecret: 'secret',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
+
+    it('creates a custom dispatcher with mTLS client cert and CAs', () => {
+      agentSpy.mockClear();
+      new UiamService(loggingSystemMock.createLogger(), {
+        enabled: true,
+        url: 'https://uiam.service',
+        sharedSecret: 'secret',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: '/some/ca/path',
+        },
+      });
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          cert: 'mocked file content for /path/to/cert.pem',
+          key: 'mocked file content for /path/to/key.pem',
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
   });
 
   describe('#getAuthenticationHeaders', () => {
@@ -200,20 +249,11 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#getUserProfileGrant', () => {
-    it('includes shared secret in a profile grant', () => {
-      expect(uiamService.getUserProfileGrant('some-token')).toEqual({
-        type: 'uiamAccessToken',
-        accessToken: 'some-token',
-        sharedSecret: 'secret',
-      });
-    });
-  });
-
-  describe('#getEsClientAuthenticationHeader', () => {
-    it('returns the ES client authentication header with shared secret', () => {
-      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+  describe('#getClientAuthentication', () => {
+    it('includes shared secret in client authentication', () => {
+      expect(uiamService.getClientAuthentication()).toEqual({
+        scheme: 'SharedSecret',
+        value: 'secret',
       });
     });
   });
@@ -592,6 +632,149 @@ describe('UiamService', () => {
           dispatcher: AGENT_MOCK,
         }
       );
+    });
+  });
+
+  describe('#convertApiKeys', () => {
+    it('properly calls UIAM service to convert API keys with injected endpoint', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success',
+            id: 'converted-key-id',
+            key: 'essu_converted_key',
+            description: 'converted key',
+            organization_id: 'org-123',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+        ],
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.convertApiKeys(['es-api-key-base64'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
+          ],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('properly calls UIAM service to convert multiple API keys with injected endpoint', async () => {
+      const mockResponse = {
+        results: [
+          {
+            status: 'success',
+            id: 'key-1',
+            key: 'essu_key_1',
+            description: 'key 1',
+            organization_id: 'org-1',
+            internal: true,
+            role_assignments: {},
+            creation_date: '2026-01-01T00:00:00Z',
+            expiration_date: null,
+          },
+          {
+            status: 'failed',
+            code: 'ES_API_KEY_AUTHENTICATION_FAILED',
+            message: 'Auth failed',
+            resource: null,
+            type: 'UNKNOWN',
+          },
+        ],
+      };
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(uiamService.convertApiKeys(['valid-key', 'invalid-key'])).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com' },
+            { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com' },
+          ],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('throws when elasticsearchUrl is not configured', async () => {
+      const serviceWithoutUrl = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { certificateAuthorities: '/some/ca/path' },
+            },
+          },
+          { serverless: true }
+        ).uiam
+      );
+
+      await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('throws error if conversion fails with 400 status code', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 400,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Must authenticate using mTLS' } }),
+      });
+
+      await expect(uiamService.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+        'Must authenticate using mTLS'
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+        },
+        body: JSON.stringify({
+          keys: [{ type: 'elasticsearch', key: 'es-api-key', endpoint: 'https://es.example.com' }],
+        }),
+        dispatcher: AGENT_MOCK,
+      });
     });
   });
 });

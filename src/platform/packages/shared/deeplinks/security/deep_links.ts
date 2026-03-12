@@ -13,6 +13,7 @@ export enum SecurityPageName {
   attacks = 'attacks',
   aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
+  aiRuleCreation = 'ai_rule_creation',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
 
@@ -27,6 +28,7 @@ export enum SecurityPageName {
   case = 'cases', // must match `CasesDeepLinkId.cases`
   caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
   caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
+  caseTemplates = 'cases_templates', // must match `CasesDeepLinkId.casesTemplates`
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts
@@ -97,6 +99,7 @@ export enum SecurityPageName {
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsLanding = 'entity_analytics-landing',
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
+  entityAnalyticsWatchlists = 'entity_analytics-watchlists',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsThreatHunting = 'entity_analytics-threat_hunting',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
@@ -107,4 +110,10 @@ export enum SecurityPageName {
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',
   configurationsBasicRules = 'configurations-basic_rules',
+
+  /**
+   * Detection Engine Health UI Pages
+   */
+  spaceRulesHealth = 'space-rules-health',
+  ruleHealth = 'rule-health',
 }

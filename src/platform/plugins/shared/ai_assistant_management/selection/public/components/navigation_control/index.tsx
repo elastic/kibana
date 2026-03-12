@@ -30,7 +30,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RobotIcon } from '@kbn/ai-assistant-icon';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
@@ -267,7 +266,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<RobotIcon size="xxl" />}
+                    icon={<EuiIcon type="productAgent" size="xxl" />}
                     data-test-subj="aiAssistantAgentCard"
                     isDisabled={!hasAgentBuilder}
                   />

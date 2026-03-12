@@ -17,26 +17,18 @@ export const SectionPanel = ({ topCard, bottomCard, children }: SectionPanelProp
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      grow={false}
-      paddingSize="none"
-      css={{ minHeight: '320px' }}
-    >
-      <EuiFlexGroup gutterSize="none" css={{ minHeight: '320px' }}>
+    <EuiPanel hasShadow={false} hasBorder grow={false} paddingSize="none">
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={2}>
           <EuiFlexGroup gutterSize="none" direction="column" css={{ height: '100%' }}>
-            <EuiFlexItem grow={1} css={{ minHeight: '160px' }}>
-              {topCard}
-            </EuiFlexItem>
-            <EuiFlexItem grow={1} css={{ borderTop: euiTheme.border.thin, minHeight: '160px' }}>
+            <EuiFlexItem grow={1}>{topCard}</EuiFlexItem>
+            <EuiFlexItem grow={1} css={{ borderTop: euiTheme.border.thin }}>
               {bottomCard}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={5} css={{ minHeight: '320px' }}>
-          <EuiFlexGroup direction="column" css={{ height: '100%' }}>
+        <EuiFlexItem grow={5}>
+          <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
             <EuiFlexItem grow>{children}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

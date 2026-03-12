@@ -71,7 +71,10 @@ describe('loadConnectorsThunk', () => {
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse1.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse1.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
   });
@@ -89,7 +92,10 @@ describe('loadConnectorsThunk', () => {
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse2.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse2.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse2.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse2);
   });
@@ -179,7 +185,10 @@ describe('loadConnectorsThunk', () => {
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse1.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse1.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
   });

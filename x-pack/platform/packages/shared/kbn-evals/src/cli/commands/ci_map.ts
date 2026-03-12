@@ -23,14 +23,21 @@ export const ciMapCmd: Command<void> = {
   },
   run: ({ log, flagsReader }) => {
     const suites = readSuiteMetadata(process.cwd(), log);
-    const entries = suites.flatMap((suite) => {
-      const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-      return labels.map((label) => ({
-        label,
-        suiteId: suite.id,
-        command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
-      }));
-    });
+    const entries = [
+      {
+        label: 'evals:all',
+        suiteId: '*',
+        command: 'Add GH label evals:all to run all eval suites in PR CI',
+      },
+      ...suites.flatMap((suite) => {
+        const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+        return labels.map((label) => ({
+          label,
+          suiteId: suite.id,
+          command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
+        }));
+      }),
+    ];
 
     if (flagsReader.boolean('json')) {
       process.stdout.write(`${JSON.stringify(entries, null, 2)}\n`);

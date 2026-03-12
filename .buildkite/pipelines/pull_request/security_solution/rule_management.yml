@@ -4,20 +4,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
@@ -25,20 +21,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
@@ -46,20 +38,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
@@ -67,20 +55,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
@@ -88,20 +72,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -109,20 +89,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
@@ -130,20 +106,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
@@ -151,20 +123,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
@@ -172,20 +140,16 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
@@ -193,18 +157,14 @@ steps:
     agents:
       machineType: n2-standard-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-b,us-central1-a
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     timeout_in_minutes: 60
     parallelism: 1
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

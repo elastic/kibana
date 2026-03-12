@@ -66,21 +66,27 @@ export const getRuleIntegrationCoverage = (
   };
 };
 
-export const useDetectionRulesByIntegration = (integrationPackages: string | string[]) => {
-  const { getDetectionRules } = useSiemReadinessApi();
+export const useDetectionRulesByIntegration = (integrationPackages?: string | string[]) => {
+  const { getDetectionRules, getIntegrations } = useSiemReadinessApi();
   const enabledRulesQuery = getDetectionRules;
+
+  const installedPackages = useMemo(() => {
+    if (integrationPackages !== undefined) {
+      return Array.isArray(integrationPackages) ? integrationPackages : [integrationPackages];
+    }
+    return (
+      getIntegrations?.data?.items
+        ?.filter((pkg) => pkg.status === 'installed')
+        .map((pkg) => pkg.name) || []
+    );
+  }, [integrationPackages, getIntegrations?.data?.items]);
 
   const ruleIntegrationCoverage = useMemo(() => {
     if (!enabledRulesQuery.data?.data) {
       return null;
     }
-
-    const installedPackages = Array.isArray(integrationPackages)
-      ? integrationPackages
-      : [integrationPackages];
-
     return getRuleIntegrationCoverage(enabledRulesQuery.data.data, installedPackages);
-  }, [enabledRulesQuery.data?.data, integrationPackages]);
+  }, [enabledRulesQuery.data?.data, installedPackages]);
 
   return {
     ruleIntegrationCoverage,

@@ -18,6 +18,8 @@ export enum AgentExecutionErrorCode {
   unknownError = 'unknown_error',
   /** invalid workflow state - should never be surfaced */
   invalidState = 'invalid_state',
+  /** connector returned an HTTP error (4xx, 5xx) - status propagated to client */
+  connectorError = 'connector_error',
 }
 
 export interface ToolNotFoundErrorMeta {
@@ -36,6 +38,10 @@ export interface TooValidationErrorMeta {
   validationError?: string;
 }
 
+export interface ConnectorErrorMeta {
+  statusCode: number;
+}
+
 interface ExecutionErrorMetaMap {
   [AgentExecutionErrorCode.toolNotFound]: ToolNotFoundErrorMeta;
   [AgentExecutionErrorCode.toolValidationError]: TooValidationErrorMeta;
@@ -43,6 +49,7 @@ interface ExecutionErrorMetaMap {
   [AgentExecutionErrorCode.unknownError]: {};
   [AgentExecutionErrorCode.invalidState]: {};
   [AgentExecutionErrorCode.emptyResponse]: {};
+  [AgentExecutionErrorCode.connectorError]: ConnectorErrorMeta;
 }
 
 export type ExecutionErrorMetaOf<ErrCode extends AgentExecutionErrorCode> =

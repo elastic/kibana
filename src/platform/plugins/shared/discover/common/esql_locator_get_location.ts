@@ -29,7 +29,7 @@ export const esqlLocatorGetLocation = async ({
     query: `FROM ${indexName}`,
     http,
   });
-  const esql = getInitialESQLQuery(dataView, true);
+  const esql = getInitialESQLQuery(dataView);
 
   const params = {
     query: { esql },

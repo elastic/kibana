@@ -26,7 +26,7 @@ export const getAnnouncementsSettings = (): Record<string, UiSettingsParams> => 
           defaultMessage:
             'This setting is deprecated and will be removed in Kibana 10.0. Use the global setting "Hide announcements" instead.',
         }),
-        docLinksKey: 'uiSettings',
+        docLinksKey: 'generalSettings',
       },
       schema: schema.boolean(),
     },

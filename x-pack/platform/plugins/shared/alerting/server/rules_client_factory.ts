@@ -14,12 +14,16 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
+import type {
+  GrantAPIKeyResult,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -58,6 +62,9 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
+  shouldGrantUiam: boolean;
+  isServerless: boolean;
+  featureFlags: CoreStart['featureFlags'];
 }
 
 export class RulesClientFactory {
@@ -84,6 +91,9 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
+  private shouldGrantUiam: boolean = false;
+  private isServerless: boolean = false;
+  private featureFlags!: CoreStart['featureFlags'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -112,6 +122,9 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
+    this.shouldGrantUiam = options.shouldGrantUiam;
+    this.isServerless = options.isServerless;
+    this.featureFlags = options.featureFlags;
   }
 
   /**
@@ -146,6 +159,60 @@ export class RulesClientFactory {
     });
   }
 
+  /**
+   * Attempts to create a UIAM API key when shouldGrantUiam is true and the request has UIAM credentials.
+   * Logs errors and returns undefined if grant fails or credentials are missing/invalid.
+   */
+  private async createUiamApiKey(
+    request: KibanaRequest,
+    name: string
+  ): Promise<GrantAPIKeyResult | undefined> {
+    if (!this.shouldGrantUiam) {
+      return;
+    }
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      this.logger.error(
+        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+      );
+      return;
+    }
+    try {
+      const result = await this.securityService.authc.apiKeys.uiam?.grant(request, {
+        name: `uiam-${name}`,
+      });
+      if (!result) {
+        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+        return;
+      }
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`
+      );
+      return;
+    }
+  }
+
+  /**
+   * Invalidates a UIAM API key by id. Logs an error if invalidation fails.
+   */
+  private async invalidateUiamApiKey(
+    request: KibanaRequest,
+    ruleName: string,
+    id: string
+  ): Promise<void> {
+    const result = await this.securityService.authc.apiKeys.uiam?.invalidate(request, { id });
+    if (result && result.error_count > 0) {
+      this.logger.error(
+        `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
+          ?.map((error) => error.reason)
+          .join(', ')}  `
+      );
+    }
+  }
+
   private async createInternal({
     request,
     savedObjects,
@@ -158,6 +225,7 @@ export class RulesClientFactory {
     isExplicitSpaceOverride: boolean;
   }): Promise<RulesClient> {
     const { securityPluginSetup, securityService, securityPluginStart, actions, eventLog } = this;
+    const factory = this;
 
     if (!this.authorization) {
       throw new Error('AlertingAuthorizationClientFactory is not defined');
@@ -198,6 +266,9 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
+      shouldGrantUiam: this.shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: this.featureFlags,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -210,21 +281,36 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
-          request,
-          {
+        const createUiamApiKeyResult = await factory.createUiamApiKey(request, name);
+
+        let createEsAPIKeyResult;
+        try {
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+          });
+        } catch (err) {
+          // if the ES API key creation failed, we need to invalidate the UIAM API key
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
           }
-        );
-        if (!createAPIKeyResult) {
+          // rethrow the error to be handled by the caller
+          throw err;
+        }
+
+        // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
+        if (!createEsAPIKeyResult) {
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+          }
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
-          result: createAPIKeyResult,
+          result: createEsAPIKeyResult,
+          ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },
       async getActionsClient() {
@@ -250,15 +336,37 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+          const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
+
+          if (!apiKeyId || !apiKey) {
+            throw new Error(
+              `Failed to parse API key credentials from authorization header for alerting rule : ${name}`
+            );
+          }
+
+          if (isUiamCredential(apiKey) && !this.shouldGrantUiam) {
+            throw new Error('UIAM API keys should only be used in serverless environments');
+          }
+
+          if (isUiamCredential(apiKey)) {
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                id: apiKeyId,
+                api_key: apiKey,
+              },
+            };
+          }
+
           return {
             apiKeysEnabled: true,
             result: {
               name,
-              id: apiKey[0],
-              api_key: apiKey[1],
+              id: apiKeyId,
+              api_key: apiKey,
             },
           };
         }

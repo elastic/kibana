@@ -7,10 +7,11 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
-import { FailureStoreChartBarSeries } from '../common/chart_components';
+import { FailureStoreChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
 import { IngestionRatePanel } from '../common/ingestion_rate_panel';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export function FailureStoreIngestionRate({
   definition,
@@ -27,16 +28,28 @@ export function FailureStoreIngestionRate({
   aggregations?: StreamAggregations;
   statsError: Error | undefined;
 }) {
+  const { isServerless } = useKibana();
+
   return (
     <IngestionRatePanel isLoading={isLoadingStats} hasAggregations={Boolean(aggregations)}>
-      <FailureStoreChartBarSeries
-        definition={definition}
-        stats={stats}
-        timeState={timeState}
-        isLoadingStats={isLoadingStats}
-        statsError={statsError}
-        aggregations={aggregations}
-      />
+      {isServerless ? (
+        <FailureStoreChartBarSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+          statsError={statsError}
+          aggregations={aggregations}
+        />
+      ) : (
+        <ChartBarPhasesSeries
+          definition={definition}
+          stats={stats}
+          timeState={timeState}
+          isLoadingStats={isLoadingStats}
+          statsError={statsError}
+        />
+      )}
     </IngestionRatePanel>
   );
 }

@@ -23,9 +23,11 @@ import { IlmLink } from '../ilm_link';
 export const RetentionCard = ({
   definition,
   openEditModal,
+  isEditLifecycleFlyoutOpen = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   openEditModal: () => void;
+  isEditLifecycleFlyoutOpen?: boolean;
 }) => {
   const lifecycle = definition.effective_lifecycle;
 
@@ -120,7 +122,7 @@ export const RetentionCard = ({
           size="s"
           color="text"
           onClick={openEditModal}
-          disabled={!definition.privileges.lifecycle}
+          disabled={!definition.privileges.lifecycle || isEditLifecycleFlyoutOpen}
           aria-label={i18n.translate(
             'xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethodAriaLabel',
             {

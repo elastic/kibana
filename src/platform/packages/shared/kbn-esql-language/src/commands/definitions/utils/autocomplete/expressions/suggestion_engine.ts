@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunctionExpression, within } from '@elastic/esql';
 import { getExpressionType, getFunctionDefinition } from '../..';
-import { isFunctionExpression } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
 import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
@@ -21,7 +20,7 @@ import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
 import type { MapParameters } from '../map_expression';
 import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
-import { SignatureAnalyzer } from './signature_analyzer';
+import { extractSignatureMapParams } from '../../signatures';
 import type {
   ExpressionComputedMetadata,
   ExpressionContext,
@@ -215,7 +214,7 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
 
   const functionName = getLastFunctionName(innerText);
   const functionDef = functionName && getFunctionDefinition(functionName);
-  const mapParamsStr = functionDef && SignatureAnalyzer.extractMapParams(functionDef.signatures);
+  const mapParamsStr = functionDef && extractSignatureMapParams(functionDef.signatures);
 
   if (!mapParamsStr) {
     return null;

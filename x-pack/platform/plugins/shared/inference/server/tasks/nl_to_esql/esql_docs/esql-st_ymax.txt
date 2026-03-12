@@ -1,6 +1,6 @@
 # ST_YMAX
 
-Extracts the maximum value of the `y` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this corresponds to the maximum `latitude` value.
+Extracts the maximum value of the `y` coordinates from the supplied geometry. For `geo_point` or `geo_shape` types, this is equivalent to extracting the maximum latitude value.
 
 ## Syntax
 
@@ -8,15 +8,13 @@ Extracts the maximum value of the `y` coordinates from the supplied geometry. Fo
 
 ### Parameters
 
-#### `point`
+#### point
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-Extracting the bounding box coordinates of a city boundary
-
-The following query calculates the bounding box of the city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates:
+Calculate the minimum and maximum x and y coordinates for the city boundary of the airport with abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -25,3 +23,9 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
+
+**This example extracts the envelope of the city boundary geometry, then calculates the minimum and maximum x and y coordinates, including the maximum y (latitude) using `ST_YMAX`.**
+
+## Limitations
+
+Spatial types such as `geo_point`, `geo_shape`, `cartesian_point`, and `cartesian_shape` are not supported in the `SORT` processing command. Attempting to sort on these types will result in an error.

@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 import { BlockListFlyout } from '../../../block_list/containers/flyout';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
-import { AddToNewCase } from '../../../cases/components/add_to_new_case';
-import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
+import { AddToNewCase } from '../../../../../cases/attachments/indicator/components/add_to_new_case';
+import { AddToExistingCase } from '../../../../../cases/attachments/indicator/components/add_to_existing_case';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
 import {

@@ -245,7 +245,7 @@ describe('RetentionCard', () => {
           <RetentionCard
             openModal={jest.fn()}
             canManageFailureStore={true}
-            streamName="logs.nginx-test"
+            streamName="logs.otel.nginx-test"
             failureStoreConfig={mockWiredInheritConfig}
           />
         );
@@ -261,7 +261,7 @@ describe('RetentionCard', () => {
           <RetentionCard
             openModal={jest.fn()}
             canManageFailureStore={true}
-            streamName="logs.nginx-test"
+            streamName="logs.otel.nginx-test"
             failureStoreConfig={mockWiredOverrideConfig}
           />
         );

@@ -195,7 +195,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.debug('Query executed. Sending query stats EBT', {
         queryName: query.name,
         traceId: stats.traceId,
-        statistics: stats,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
@@ -203,7 +202,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       statistics.push(stats);
     }
 
-    this.logger.debug('Finished running health diagnostic task', { statistics } as LogMeta);
+    this.logger.debug('Finished running health diagnostic task');
 
     return statistics;
   }

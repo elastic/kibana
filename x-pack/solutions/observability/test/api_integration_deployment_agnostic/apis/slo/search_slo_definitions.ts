@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { DEFAULT_SLO, TEST_SPACE_ID, createDummySummaryDoc } from './fixtures/slo';
-import { DATA_FORGE_CONFIG } from './helpers/dataforge';
+import { TEST_SPACE_ID, createDummySummaryDoc } from './fixtures/slo';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
   const sloApi = getService('sloApi');
-  const logger = getService('log');
   const samlAuth = getService('samlAuth');
-  const dataViewApi = getService('dataViewApi');
-
-  const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
-  const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
 
@@ -49,49 +42,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Search SLO Definitions', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-
-      await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
-
-      await dataViewApi.create({
-        roleAuthc: adminRoleAuthc,
-        name: DATA_VIEW,
-        id: DATA_VIEW_ID,
-        title: DATA_VIEW,
-      });
-
-      await sloApi.deleteAllSLOs(adminRoleAuthc);
     });
 
     after(async () => {
-      await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
-      await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
       await cleanupSummaryDocs();
-      await sloApi.deleteAllSLOs(adminRoleAuthc);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
+    afterEach(async () => {
+      await cleanupSummaryDocs();
+    });
+
     it('searches SLO definitions by name', async () => {
-      const slo1 = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO Alpha',
-        tags: ['alpha'],
-      };
-      const slo2 = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO Beta',
-        tags: ['beta'],
-      };
-
-      const [response1, response2] = await Promise.all([
-        sloApi.create(slo1, adminRoleAuthc),
-        sloApi.create(slo2, adminRoleAuthc),
-      ]);
-
-      // Wait for summary documents to be indexed
       const now = new Date().toISOString();
       await insertSummaryDocs([
-        createDummySummaryDoc(response1.id, '*', now, TEST_SPACE_ID),
-        createDummySummaryDoc(response2.id, '*', now, TEST_SPACE_ID),
+        createDummySummaryDoc('slo-alpha', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO Alpha',
+          tags: ['alpha'],
+        }),
+        createDummySummaryDoc('slo-beta', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO Beta',
+          tags: ['beta'],
+        }),
       ]);
 
       // Search for "Alpha"
@@ -100,53 +72,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       expect(searchResults.results).to.have.length(1);
-      expect(searchResults.results[0].id).to.eql(response1.id);
+      expect(searchResults.results[0].id).to.eql('slo-alpha');
       expect(searchResults.results[0].name).to.eql('Test SLO Alpha');
     });
 
     it('returns all SLO definitions when no search term is provided', async () => {
-      const slo1 = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO Gamma',
-      };
-      const slo2 = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO Delta',
-      };
-
-      const [response1, response2] = await Promise.all([
-        sloApi.create(slo1, adminRoleAuthc),
-        sloApi.create(slo2, adminRoleAuthc),
-      ]);
-
-      // Wait for summary documents to be indexed
       const now = new Date().toISOString();
       await insertSummaryDocs([
-        createDummySummaryDoc(response1.id, '*', now, TEST_SPACE_ID),
-        createDummySummaryDoc(response2.id, '*', now, TEST_SPACE_ID),
+        createDummySummaryDoc('slo-gamma', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO Gamma',
+        }),
+        createDummySummaryDoc('slo-delta', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO Delta',
+        }),
       ]);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {});
 
       expect(searchResults.results.length).to.be.greaterThan(1);
       const resultIds = searchResults.results.map((r) => r.id);
-      expect(resultIds).to.contain(response1.id);
-      expect(resultIds).to.contain(response2.id);
+      expect(resultIds).to.contain('slo-gamma');
+      expect(resultIds).to.contain('slo-delta');
     });
 
     it('respects the size parameter', async () => {
-      const slos = Array.from({ length: 5 }, (_, i) => ({
-        ...DEFAULT_SLO,
-        name: `Test SLO Size ${i}`,
-      }));
-
-      const responses = await Promise.all(slos.map((slo) => sloApi.create(slo, adminRoleAuthc)));
-
-      // Wait for summary documents to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs(
-        responses.map((r: { id: string }) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
+      const docs = Array.from({ length: 5 }, (_, i) =>
+        createDummySummaryDoc(`slo-size-${i}`, '*', now, TEST_SPACE_ID, {
+          name: `Test SLO Size ${i}`,
+        })
       );
+
+      await insertSummaryDocs(docs);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
         size: 2,
@@ -156,18 +113,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('handles pagination with searchAfter', async () => {
-      const slos = Array.from({ length: 3 }, (_, i) => ({
-        ...DEFAULT_SLO,
-        name: `Test SLO Pagination ${i}`,
-      }));
-
-      const responses = await Promise.all(slos.map((slo) => sloApi.create(slo, adminRoleAuthc)));
-
-      // Wait for summary documents to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs(
-        responses.map((r: { id: string }) => createDummySummaryDoc(r.id, '*', now, TEST_SPACE_ID))
+      const docs = Array.from({ length: 3 }, (_, i) =>
+        createDummySummaryDoc(`slo-pagination-${i}`, '*', now, TEST_SPACE_ID, {
+          name: `Test SLO Pagination ${i}`,
+        })
       );
+
+      await insertSummaryDocs(docs);
 
       // First page
       const firstPage = await sloApi.searchDefinitions(adminRoleAuthc, {
@@ -190,24 +143,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('normalizes groupBy array correctly', async () => {
-      const sloWithGroupBy = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO with GroupBy',
-        groupBy: ['host', 'service'],
-      };
-
-      const response = await sloApi.create(sloWithGroupBy, adminRoleAuthc);
-
-      // Wait for summary document to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs([createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID)]);
+      await insertSummaryDocs([
+        createDummySummaryDoc('slo-groupby', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO with GroupBy',
+          groupBy: ['host', 'service'],
+        }),
+      ]);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
         search: 'GroupBy',
       });
 
       expect(searchResults.results.length).to.be.greaterThan(0);
-      const result = searchResults.results.find((r) => r.id === response.id);
+      const result = searchResults.results.find((r) => r.id === 'slo-groupby');
       expect(result).to.not.be(undefined);
       expect(result?.groupBy).to.be.an('array');
       expect(result?.groupBy).to.contain('host');
@@ -215,24 +164,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('handles SLOs with ALL_VALUE groupBy', async () => {
-      const sloWithAllValue = {
-        ...DEFAULT_SLO,
-        name: 'Test SLO with All Value',
-        groupBy: '*',
-      };
-
-      const response = await sloApi.create(sloWithAllValue, adminRoleAuthc);
-
-      // Wait for summary document to be indexed
       const now = new Date().toISOString();
-      await insertSummaryDocs([createDummySummaryDoc(response.id, '*', now, TEST_SPACE_ID)]);
+      await insertSummaryDocs([
+        createDummySummaryDoc('slo-allvalue', '*', now, TEST_SPACE_ID, {
+          name: 'Test SLO with All Value',
+          groupBy: '*',
+        }),
+      ]);
 
       const searchResults = await sloApi.searchDefinitions(adminRoleAuthc, {
         search: 'All Value',
       });
 
       expect(searchResults.results.length).to.be.greaterThan(0);
-      const result = searchResults.results.find((r) => r.id === response.id);
+      const result = searchResults.results.find((r) => r.id === 'slo-allvalue');
       expect(result).to.not.be(undefined);
       expect(result?.groupBy).to.be.an('array');
       expect(result?.groupBy.length).to.eql(0);

@@ -11,12 +11,12 @@
         "label": "generateFormFields",
         "description": [],
         "signature": [
-          "({\n  schema,\n  formConfig = {},\n}: ",
+          "({\n  schema,\n  formConfig = {},\n  metaFunctions,\n}: ",
           "GenerateFormFieldsParams",
-          "<TSchema>) => React.JSX.Element[]"
+          "<TSchema>) => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
-        "lineNumber": 36,
+        "path": "x-pack/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26,14 +26,14 @@
             "id": "def-public.generateFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  schema,\n  formConfig = {},\n}",
+            "label": "{\n  schema,\n  formConfig = {},\n  metaFunctions,\n}",
             "description": [],
             "signature": [
               "GenerateFormFieldsParams",
               "<TSchema>"
             ],
-            "path": "src/platform/packages/shared/response-ops/form-generator/src/form.tsx",
-            "lineNumber": 36,
+            "path": "x-pack/platform/packages/shared/response-ops/form-generator/src/form.tsx",
+            "lineNumber": 66,
             "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,

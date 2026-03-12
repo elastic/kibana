@@ -15,6 +15,7 @@ import type {
   VisualizationState,
   SupportedDatasourceId,
   TypedLensSerializedState,
+  LensDocument,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -22,16 +23,17 @@ import type { CoreStart } from '@kbn/core/public';
 import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
+  type ColumnRoles,
 } from '../../../datasources/form_based/generate_esql_query';
 import {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
 } from '../../../datasources/form_based/to_esql_failure_reasons';
-import type { ConvertibleLayer } from './convert_to_esql_modal';
+import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
-import { useLensSelector } from '../../../state_management';
+import { useLensSelector, selectPersistedDoc } from '../../../state_management';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 interface EsqlConversionSettings {
@@ -76,6 +78,7 @@ export const useEsqlConversionCheck = (
 ): EsqlConversionSettings => {
   // Get datasourceStates from Redux
   const { datasourceStates } = useLensSelector((state) => state.lens);
+  const persistedDoc = useLensSelector(selectPersistedDoc);
 
   return useMemo(() => {
     const datasourceState = datasourceStates[datasourceId]?.state as FormBasedPrivateState;
@@ -85,6 +88,13 @@ export const useEsqlConversionCheck = (
     }
 
     const { state } = visualization;
+
+    // Guard: charts saved to the library
+    if (isSavedToLibrary(persistedDoc)) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages.saved_to_library_not_supported
+      );
+    }
 
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
@@ -124,9 +134,18 @@ export const useEsqlConversionCheck = (
     const [, esAggEntries] = partition(
       columnEntries,
       ([, col]) =>
-        operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-        operationDefinitionMap[col.operationType]?.input === 'managedReference'
+        (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+          operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
+        // Keep static_value columns - they'll be converted to EVAL statements
+        col.operationType !== 'static_value'
     );
+
+    // Extract column roles from visualization state for semantic ES|QL column naming
+    const columnRoles: ColumnRoles = {};
+    const visState = state as Record<string, unknown>;
+    if (visState.maxAccessor && typeof visState.maxAccessor === 'string') {
+      columnRoles[visState.maxAccessor] = 'max_value';
+    }
 
     let esqlLayer;
     try {
@@ -136,7 +155,8 @@ export const useEsqlConversionCheck = (
         framePublicAPI.dataViews.indexPatterns[singleLayer.indexPatternId],
         coreStart.uiSettings,
         framePublicAPI.dateRange,
-        startDependencies.data.nowProvider.get()
+        startDependencies.data.nowProvider.get(),
+        columnRoles
       );
     } catch (e) {
       // Layer remains non-convertible
@@ -196,6 +216,7 @@ export const useEsqlConversionCheck = (
     showConvertToEsqlButton,
     startDependencies.data.nowProvider,
     visualization,
+    persistedDoc,
   ]);
 };
 
@@ -222,4 +243,8 @@ function isValidDatasourceState(
       'layers' in datasourceState &&
       (datasourceState as { layers?: unknown }).layers !== undefined
   );
+}
+
+function isSavedToLibrary(persistedDoc: LensDocument | undefined) {
+  return Boolean(persistedDoc && persistedDoc.savedObjectId);
 }

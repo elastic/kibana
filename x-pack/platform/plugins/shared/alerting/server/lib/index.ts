@@ -51,6 +51,7 @@ export {
   AlertAuditAction,
   operationAlertAuditActionMap,
   alertAuditEvent,
+  workflowStatusAuditActionMap,
   alertAuditSystemEvent,
 } from './alert_audit_events';
 export { wrapAsyncSearchClient } from './wrap_async_search_client';

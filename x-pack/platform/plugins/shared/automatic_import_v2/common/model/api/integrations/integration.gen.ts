@@ -14,10 +14,11 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../primitive.gen';
 import {
+  LangSmithOptions,
   DataStream,
   AllIntegrationsResponseIntegration,
   InputType,
@@ -31,6 +32,10 @@ export const ApproveIntegrationRequest = z
      * The version of the integration
      */
     version: NonEmptyString,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
   })
   .strict();
 
@@ -77,6 +82,10 @@ export const CreateAutoImportIntegrationRequestBody = z
      */
     description: NonEmptyString,
     /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
+    /**
      * The logo of the integration
      */
     logo: NonEmptyString.optional(),
@@ -113,6 +122,19 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
 });
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
+>;
+
+export type DownloadAutoImportIntegrationRequestParams = z.infer<
+  typeof DownloadAutoImportIntegrationRequestParams
+>;
+export const DownloadAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestParams
 >;
 
 export type GetAllAutoImportIntegrationsResponse = z.infer<
@@ -166,6 +188,10 @@ export const UpdateAutoImportIntegrationRequestBody = z
      * Integration logo image blob
      */
     logo: NonEmptyString.optional(),
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
     /**
      * The data streams of the integration
      */

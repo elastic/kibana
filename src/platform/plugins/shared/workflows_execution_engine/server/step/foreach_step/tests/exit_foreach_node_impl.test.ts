@@ -62,9 +62,7 @@ describe('ExitForeachNodeImpl', () => {
   describe('when there are more items to process', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
         index: 1,
-        item: 'item2',
         total: 3,
       });
     });
@@ -86,9 +84,7 @@ describe('ExitForeachNodeImpl', () => {
   describe('when no more items to process', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
         index: 2,
-        item: 'item3',
         total: 3,
       });
     });
@@ -109,9 +105,79 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting foreach step ${node.stepId} after processing all items.`,
+        `Exiting foreach step \"${node.stepId}\" after processing all items. Processed 3 of 3 items.`,
         { workflow: { step_id: node.stepId } }
       );
+    });
+
+    it('should throw an error if max-iterations limit is reached with on-limit fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+      expect(() => underTest.run()).toThrow(
+        `Foreach step "${node.stepId}" exceeded max-iterations limit of 2. Processed 2 of 5 items.`
+      );
+    });
+
+    it('should not finish the step when on-limit is fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+      try {
+        underTest.run();
+      } catch {
+        // expected
+      }
+      expect(stepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+    });
+
+    it('should finish and navigate to next node when max-iterations reached with on-limit continue', async () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'continue';
+
+      await underTest.run();
+
+      expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+    });
+
+    it('should log that max-iterations limit was reached when on-limit is continue', async () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'continue';
+
+      await underTest.run();
+
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        `Exiting foreach step "${node.stepId}" after reached max-iterations limit of 2. Processed 2 of 5 items.`,
+        { workflow: { step_id: node.stepId } }
+      );
+    });
+
+    it('should not navigate back to start node when max-iterations reached with on-limit continue', async () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'continue';
+
+      await underTest.run();
+
+      expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
     });
   });
 });

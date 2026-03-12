@@ -40,7 +40,7 @@ import {
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
-import { ConfirmDeployAgentPolicyModal } from '../components';
+import { ConfirmDeployAgentPolicyModal, IncompatibleAgentVersionCallout } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
@@ -52,7 +52,7 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -71,6 +71,7 @@ import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -118,7 +119,7 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
-  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessAgentPolicy, getAgentlessStatusForPackage } = useAgentless();
   const {
     // data
     agentPolicies: existingAgentPolicies,
@@ -146,18 +147,21 @@ export const EditPackagePolicyForm = memo<{
     () =>
       existingAgentPolicies.length === 1
         ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
-          isAgentlessIntegration(packageInfo)
+          getAgentlessStatusForPackage(packageInfo).isAgentless
         : false,
-    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, getAgentlessStatusForPackage]
   );
 
   // Derive var_group_selections from policy for edit mode
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
+    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -212,6 +216,15 @@ export const EditPackagePolicyForm = memo<{
     [agentPoliciesToRemove]
   );
 
+  const selectedExistingPolicies = useMemo(() => {
+    return existingAgentPolicies.filter((existingPolicy) =>
+      agentPolicies.find((policy) => policy.id === existingPolicy.id)
+    );
+  }, [agentPolicies, existingAgentPolicies]);
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    selectedExistingPolicies
+  );
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   const [impactedAgentCount, setImpactedAgentCount] = useState<number>(0);
@@ -592,6 +605,15 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {incompatibleAgentVersion.status !== 'NONE' && (
+              <>
+                <IncompatibleAgentVersionCallout
+                  incompatibility={incompatibleAgentVersion.status}
+                  versionCondition={incompatibleAgentVersion.versionCondition}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />

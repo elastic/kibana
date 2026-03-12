@@ -164,7 +164,7 @@ describe('useMetricFields', () => {
       expect(cpuField?.dimensions).toEqual([{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]);
     });
 
-    it('filters out legacy histogram metric types', () => {
+    it('returns legacy histogram metric types', () => {
       const sampleRows = new Map([
         ['cpu.usage', { 'cpu.usage': 0.75 }],
         ['http.request.duration', { 'http.request.duration': 150 }],
@@ -189,10 +189,10 @@ describe('useMetricFields', () => {
 
       const { result } = renderHook(() => useMetricFields());
 
-      expect(result.current.allMetricFields).toHaveLength(2);
+      expect(result.current.allMetricFields).toHaveLength(3);
       expect(
         result.current.allMetricFields.find((f) => f.name === 'http.request.duration')
-      ).toBeUndefined();
+      ).toBeDefined();
       expect(result.current.allMetricFields.find((f) => f.name === 'cpu.usage')).toBeDefined();
       expect(result.current.allMetricFields.find((f) => f.name === 'memory.used')).toBeDefined();
     });

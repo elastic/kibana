@@ -8,9 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { MessageRole } from '@kbn/inference-common';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceConnector } from '@kbn/inference-common';
 import dedent from 'dedent';
-import { concat, of } from 'rxjs';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -18,7 +17,7 @@ import type {
 } from '../../../types';
 import { fetchApmErrorContext } from './fetch_apm_error_context';
 import { getEntityLinkingInstructions } from '../../../agent/register_observability_agent';
-import type { AiInsightResult, ContextEvent } from '../types';
+import { createAiInsightResult, type AiInsightResult } from '../types';
 
 function getErrorAiInsightSystemPrompt({ urlPrefix }: { urlPrefix: string }) {
   return dedent(`
@@ -76,6 +75,7 @@ export interface GenerateErrorAiInsightParams {
   logger: Logger;
   request: KibanaRequest;
   inferenceClient: BoundInferenceClient;
+  connector: InferenceConnector;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }
 
@@ -90,6 +90,7 @@ export async function generateErrorAiInsight({
   logger,
   request,
   inferenceClient,
+  connector,
   dataRegistry,
 }: GenerateErrorAiInsightParams): Promise<AiInsightResult> {
   const urlPrefix = core.http.basePath.get(request);
@@ -120,13 +121,5 @@ export async function generateErrorAiInsight({
     stream: true,
   });
 
-  const streamWithContext$ = concat(
-    of<ContextEvent>({ type: 'context', context: errorContext }),
-    events$
-  );
-
-  return {
-    events$: streamWithContext$,
-    context: errorContext,
-  };
+  return createAiInsightResult(errorContext, connector, events$);
 }

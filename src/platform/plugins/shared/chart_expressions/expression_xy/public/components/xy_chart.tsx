@@ -850,6 +850,7 @@ export function XYChart({
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
+              legendActionOnHover={interactive}
               theme={[
                 {
                   barSeriesStyle: {

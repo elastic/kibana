@@ -13,8 +13,7 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
-import { searchStepExecutions } from './search_step_executions';
+import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 interface GetWorkflowExecutionParams {
@@ -24,6 +23,8 @@ interface GetWorkflowExecutionParams {
   stepsExecutionIndex: string;
   workflowExecutionId: string;
   spaceId: string;
+  includeInput?: boolean;
+  includeOutput?: boolean;
 }
 
 export const getWorkflowExecution = async ({
@@ -33,6 +34,8 @@ export const getWorkflowExecution = async ({
   stepsExecutionIndex,
   workflowExecutionId,
   spaceId,
+  includeInput = false,
+  includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
     // Use direct GET by _id for O(1) lookup performance instead of search
@@ -62,26 +65,17 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    let stepExecutions = await searchStepExecutions({
+    const sourceExcludes: string[] = [];
+    if (!includeInput) sourceExcludes.push('input');
+    if (!includeOutput) sourceExcludes.push('output');
+
+    const stepExecutions = await getStepExecutionsByWorkflowExecution({
       esClient,
-      logger,
       stepsExecutionIndex,
       workflowExecutionId,
-      spaceId,
+      stepExecutionIds: doc.stepExecutionIds,
+      sourceExcludes,
     });
-
-    // If workflow is in terminal status but no steps found, refresh and retry
-    // Steps may not be visible yet due to refresh: false on writes
-    if (isTerminalStatus(doc.status) && stepExecutions.length === 0) {
-      await esClient.indices.refresh({ index: stepsExecutionIndex });
-      stepExecutions = await searchStepExecutions({
-        esClient,
-        logger,
-        stepsExecutionIndex,
-        workflowExecutionId,
-        spaceId,
-      });
-    }
 
     return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
   } catch (error) {
@@ -112,7 +106,8 @@ function transformToWorkflowExecutionDetailDto(
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
     stepExecutions,
-    triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
+    executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
+    triggeredBy: workflowExecution.triggeredBy,
     yaml,
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,

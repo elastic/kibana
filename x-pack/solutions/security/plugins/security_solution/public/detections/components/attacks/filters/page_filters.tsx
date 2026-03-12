@@ -21,12 +21,12 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
     persist: true,
-    displaySettings: {
-      hideActionBar: true,
-      hideExists: true,
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
     },
   },
 ];

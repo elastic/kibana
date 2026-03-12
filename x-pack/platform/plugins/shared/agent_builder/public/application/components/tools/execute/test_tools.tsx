@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiCodeBlock,
+  EuiComboBox,
   EuiDatePicker,
   EuiFieldNumber,
   EuiFieldText,
@@ -24,7 +25,9 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  keys,
   useIsWithinBreakpoints,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -82,6 +85,9 @@ const i18nMessages = {
   responseTitle: i18n.translate('xpack.agentBuilder.tools.testTool.responseTitle', {
     defaultMessage: 'Response',
   }),
+  arrayStringHint: i18n.translate('xpack.agentBuilder.tools.testTool.arrayStringHint', {
+    defaultMessage: 'Wrap values in quotes to keep them as strings.',
+  }),
 };
 
 interface ToolParameter {
@@ -124,24 +130,45 @@ const getParameters = (tool?: ToolDefinitionWithSchema): Array<ToolParameter> =>
   return Object.entries(properties).map(([paramName, paramSchema]) => {
     let type = 'string'; // default fallback
 
-    if (paramSchema && 'type' in paramSchema && paramSchema.type) {
-      if (Array.isArray(paramSchema.type)) {
-        type = paramSchema.type[0];
-      } else if (typeof paramSchema.type === 'string') {
-        type = paramSchema.type;
+    const schema = typeof paramSchema === 'object' ? paramSchema : undefined;
+
+    if (schema && 'type' in schema && schema.type) {
+      if (Array.isArray(schema.type)) {
+        type = schema.type[0];
+      } else if (typeof schema.type === 'string') {
+        type = schema.type;
       }
     }
 
     return {
       name: paramName,
-      label: paramSchema?.title || paramName,
+      label: schema?.title || paramName,
       value: '',
-      description: paramSchema?.description || '',
+      description: schema?.description || '',
       type,
-      format: (paramSchema && 'format' in paramSchema && paramSchema.format) || undefined,
+      format: (schema && 'format' in schema && schema.format) || undefined,
       optional: !requiredParams.has(paramName),
     };
   });
+};
+
+/**
+ * It identifies the type of array values.
+ * It allows forcing numeric values like 123 to be parsed as string by wrapping them in quotes.
+ */
+export const parseArrayEntry = (rawValue: string): string | number | undefined => {
+  const trimmed = rawValue.trim();
+  if (!trimmed) return;
+
+  const hasMatchingQuotes =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"));
+  if (hasMatchingQuotes) {
+    return trimmed.slice(1, -1);
+  }
+
+  const numericValue = Number(trimmed);
+  return Number.isNaN(numericValue) ? trimmed : numericValue;
 };
 
 export const parseFormData = (
@@ -207,7 +234,7 @@ const renderFormField = ({
               data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={(value as number) ?? ''}
               type="number"
-              onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
+              onChange={(e) => onChange(e.target.valueAsNumber ?? e.target.value)}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
@@ -237,7 +264,6 @@ const renderFormField = ({
         return (
           <Controller
             {...commonProps}
-            defaultValue={new Date().toISOString()}
             render={({ field: { onChange, value, ref, ...field } }) => (
               <EuiDatePicker
                 {...field}
@@ -249,6 +275,53 @@ const renderFormField = ({
                 onChange={(date) => onChange(date ? date.toISOString() : undefined)}
               />
             )}
+          />
+        );
+      }
+
+      if (type === 'array') {
+        return (
+          <Controller
+            {...commonProps}
+            render={({ field: { onChange, value } }) => {
+              const arrayValue: Array<string | number> = Array.isArray(value) ? value : [];
+
+              const selectedOptions: Array<EuiComboBoxOptionOption<string | number>> =
+                arrayValue.map((item) => ({
+                  label: String(item),
+                  value: item,
+                }));
+
+              const handleChange = (selected: Array<EuiComboBoxOptionOption<string | number>>) => {
+                onChange(selected.map((opt) => opt.value ?? opt.label));
+              };
+
+              const handleCreateOption = (searchValue: string) => {
+                const newValue = parseArrayEntry(searchValue);
+                if (newValue === undefined) return;
+                onChange([...arrayValue, newValue]);
+              };
+
+              return (
+                <EuiComboBox<string | number>
+                  options={[]}
+                  selectedOptions={selectedOptions}
+                  onChange={handleChange}
+                  onCreateOption={handleCreateOption}
+                  fullWidth
+                  noSuggestions
+                  aria-label={label}
+                  data-test-subj={`agentBuilderToolTestInput-${name}`}
+                  delimiter=","
+                  onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === keys.ENTER) {
+                      // Enter key should not submit the form, instead it should add a new option
+                      event.preventDefault();
+                    }
+                  }}
+                />
+              );
+            }}
           />
         );
       }
@@ -382,6 +455,12 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
                             <>
                               <code>{type}</code>
                               {description && ` - ${description}`}
+                              {type === 'array' && (
+                                <>
+                                  <br />
+                                  {i18nMessages.arrayStringHint}
+                                </>
+                              )}
                             </>
                           }
                           isInvalid={!!errors[name]}

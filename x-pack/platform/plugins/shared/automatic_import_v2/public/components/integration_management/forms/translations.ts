@@ -45,6 +45,12 @@ export const DATA_STREAM_TITLE_REQUIRED = i18n.translate(
     defaultMessage: 'Data stream title is required',
   }
 );
+export const DATA_STREAM_TITLE_ALREADY_EXISTS = i18n.translate(
+  'xpack.automaticImportV2.forms.dataStream.titleAlreadyExists',
+  {
+    defaultMessage: 'A data stream with this name already exists',
+  }
+);
 export const DATA_STREAM_DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.automaticImportV2.forms.dataStream.descriptionRequired',
   {

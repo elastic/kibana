@@ -22,7 +22,6 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
 > = (_services: ProfileProviderServices) => {
   return {
     profileId: SECURITY_PROFILE_ID.document,
-    experimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);

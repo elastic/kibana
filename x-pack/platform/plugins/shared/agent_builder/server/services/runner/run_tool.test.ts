@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type {
   ScopedRunnerRunToolsParams,
   AgentBuilderToolEvent,
   ToolHandlerFn,
+  HooksServiceStart,
 } from '@kbn/agent-builder-server';
 import type { ScopedRunnerRunInternalToolParams } from '@kbn/agent-builder-server/runner';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -20,9 +21,12 @@ import {
   createMockedTool,
   createToolRegistryMock,
 } from '../../test_utils';
+import type { AnalyticsService } from '../../telemetry';
 import { RunnerManager } from './runner';
+import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { HookLifecycle } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -37,10 +41,12 @@ describe('runTool', () => {
   let registry: ToolRegistryMock;
   let tool: MockedTool;
   let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let hooksRunMock: jest.MockedFunction<HooksServiceStart['run']>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
+    hooksRunMock = runnerDeps.hooks.run as jest.MockedFunction<HooksServiceStart['run']>;
 
     getToolResultIdMock.mockReturnValue('some-result-id');
 
@@ -217,6 +223,80 @@ describe('runTool', () => {
         message: 'some progress',
       },
     });
+  });
+
+  it('when hooks are present: beforeToolCall is called and updated toolParams are passed to the tool handler', async () => {
+    hooksRunMock.mockImplementation(async (lifecycle, context) =>
+      lifecycle === HookLifecycle.beforeToolCall
+        ? { ...context, toolParams: { foo: 'from-beforeToolCall-hook' } }
+        : context
+    );
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(hooksRunMock).toHaveBeenCalledWith(
+      HookLifecycle.beforeToolCall,
+      expect.objectContaining({
+        toolId: 'test-tool',
+        toolParams: { foo: 'bar' },
+        source: 'unknown',
+      })
+    );
+    expect(toolHandler).toHaveBeenCalledWith(
+      { foo: 'from-beforeToolCall-hook' },
+      expect.any(Object)
+    );
+  });
+
+  it('when hooks are present: afterToolCall is called and its return is used as the result', async () => {
+    const modifiedToolReturn = {
+      results: [
+        {
+          tool_result_id: 'some-result-id',
+          type: ToolResultType.other,
+          data: { from: 'afterToolCall-hook' },
+        },
+      ],
+    };
+    hooksRunMock.mockImplementation(async (lifecycle, context) =>
+      lifecycle === HookLifecycle.afterToolCall
+        ? { ...context, toolReturn: modifiedToolReturn }
+        : context
+    );
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { original: true } }],
+    });
+
+    const results = await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(results).toEqual(modifiedToolReturn);
+    expect(hooksRunMock).toHaveBeenCalledWith(
+      HookLifecycle.afterToolCall,
+      expect.objectContaining({
+        toolId: 'test-tool',
+        toolReturn: expect.objectContaining({
+          results: expect.arrayContaining([expect.objectContaining({ data: { original: true } })]),
+        }),
+        toolHandlerContext: expect.any(Object),
+      })
+    );
   });
 });
 
@@ -479,5 +559,278 @@ describe('runInternalTool - confirmation policy', () => {
       expect(result1.prompt?.id).toBe('tools.test-tool.confirmation.call-1');
       expect(result2.prompt?.id).toBe('tools.test-tool.confirmation.call-2');
     });
+  });
+});
+
+describe('runInternalTool - telemetry', () => {
+  let runnerDeps: CreateScopedRunnerDepsMock;
+  let runnerManager: RunnerManager;
+  let tool: MockedTool;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let analyticsService: jest.Mocked<
+    Pick<AnalyticsService, 'reportToolCallSuccess' | 'reportToolCallError'>
+  >;
+
+  beforeEach(() => {
+    runnerDeps = createScopedRunnerDepsMock();
+
+    analyticsService = {
+      reportToolCallSuccess: jest.fn(),
+      reportToolCallError: jest.fn(),
+    };
+    (runnerDeps as any).analyticsService = analyticsService;
+
+    runnerManager = new RunnerManager(runnerDeps);
+
+    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+
+    toolHandler = jest.fn().mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { value: 42 } }],
+    });
+
+    tool = createMockedTool({});
+    tool.getSchema.mockReturnValue(z.object({ foo: z.string() }));
+    tool.getHandler.mockReturnValue(toolHandler);
+  });
+
+  it('reports a success event for a standard tool return', async () => {
+    toolHandler.mockReturnValue({
+      results: [
+        { type: ToolResultType.other, data: { hello: true } },
+        { type: ToolResultType.other, data: { foo: 'bar' } },
+      ],
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-1',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledTimes(1);
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolId: tool.id,
+        toolCallId: 'call-1',
+        source: 'agent',
+        resultTypes: [ToolResultType.other, ToolResultType.other],
+        duration: expect.any(Number),
+      })
+    );
+    expect(analyticsService.reportToolCallError).not.toHaveBeenCalled();
+  });
+
+  it('reports an error event when all results are of type error', async () => {
+    toolHandler.mockReturnValue({
+      results: [
+        { type: ToolResultType.error, data: { message: 'something went wrong' } },
+        { type: ToolResultType.error, data: { message: 'another error' } },
+      ],
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-2',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledTimes(1);
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolId: tool.id,
+        toolCallId: 'call-2',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: 'something went wrong',
+        duration: expect.any(Number),
+      })
+    );
+    expect(analyticsService.reportToolCallSuccess).not.toHaveBeenCalled();
+  });
+
+  it('reports a success event when only some results are errors', async () => {
+    toolHandler.mockReturnValue({
+      results: [
+        { type: ToolResultType.error, data: { message: 'partial error' } },
+        { type: ToolResultType.other, data: { ok: true } },
+      ],
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-3',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledTimes(1);
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resultTypes: [ToolResultType.error, ToolResultType.other],
+      })
+    );
+    expect(analyticsService.reportToolCallError).not.toHaveBeenCalled();
+    expect(analyticsService.reportToolCallError).not.toHaveBeenCalled();
+  });
+
+  it('does not report telemetry for HITL (prompt) returns', async () => {
+    toolHandler.mockReturnValue({
+      prompt: {
+        type: AgentPromptType.confirmation,
+        id: 'some-prompt-id',
+        message: 'please confirm',
+      },
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-4',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).not.toHaveBeenCalled();
+    expect(analyticsService.reportToolCallError).not.toHaveBeenCalled();
+  });
+
+  it('does not report telemetry when analyticsService is not available', async () => {
+    (runnerDeps as any).analyticsService = undefined;
+    const manager = new RunnerManager(runnerDeps);
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-5',
+        source: 'agent',
+      },
+      parentManager: manager,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).not.toHaveBeenCalled();
+    expect(analyticsService.reportToolCallError).not.toHaveBeenCalled();
+  });
+
+  it('extracts agentId from the run context stack', async () => {
+    const contextWithAgent = forkContextForAgentRun({
+      agentId: 'my-custom-agent',
+      parentContext: runnerManager.context,
+    });
+    const managerWithAgent = new RunnerManager(runnerDeps, contextWithAgent);
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-6',
+        source: 'agent',
+      },
+      parentManager: managerWithAgent,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'my-custom-agent',
+      })
+    );
+  });
+
+  it('passes undefined agentId when no agent is in the context stack', async () => {
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-7',
+        source: 'user',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: undefined,
+      })
+    );
+  });
+
+  it('reports an error event when the tool handler throws', async () => {
+    toolHandler.mockImplementation(() => {
+      throw new Error('handler exploded');
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-8',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledTimes(1);
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        toolId: tool.id,
+        toolCallId: 'call-8',
+        source: 'agent',
+        errorType: 'tool_error',
+        errorMessage: 'handler exploded',
+        duration: expect.any(Number),
+      })
+    );
+    expect(analyticsService.reportToolCallSuccess).not.toHaveBeenCalled();
+  });
+
+  it('does not let telemetry failure affect tool execution and logs a warning', async () => {
+    analyticsService.reportToolCallSuccess.mockImplementation(() => {
+      throw new Error('telemetry boom');
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-9',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(runnerDeps.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to report tool call telemetry')
+    );
+  });
+
+  it('includes the duration in the telemetry event', async () => {
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-10',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    const { duration } = analyticsService.reportToolCallSuccess.mock.calls[0][0];
+    expect(typeof duration).toBe('number');
+    expect(duration).toBeGreaterThanOrEqual(0);
   });
 });

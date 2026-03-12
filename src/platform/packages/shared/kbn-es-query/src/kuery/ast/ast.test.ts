@@ -277,7 +277,8 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    describe('performance', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/217598
+    describe.skip('performance', () => {
       const NUM_RUNS = 100;
       it('with simple expression', () => {
         const start = performance.now();

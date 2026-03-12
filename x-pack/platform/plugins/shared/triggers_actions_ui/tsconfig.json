@@ -77,11 +77,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-actions-browser",
-    "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
     "@kbn/esql-utils",
-    "@kbn/esql-language",
     "@kbn/response-ops-alerts-delete",
     "@kbn/content-management-plugin",
     "@kbn/esql-types",
@@ -96,6 +93,9 @@
     "@kbn/kql",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/deeplinks-observability",
+    "@kbn/cps-utils",
+    "@kbn/cps",
+    "@kbn/security-plugin",
   ],
   "exclude": ["target/**/*"]
 }

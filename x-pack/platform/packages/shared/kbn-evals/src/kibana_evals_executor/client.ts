@@ -6,37 +6,25 @@
  */
 
 import pLimit from 'p-limit';
-import objectHash from 'object-hash';
-import { omitBy, isEmpty } from 'lodash';
+import { v5 as uuidv5 } from 'uuid';
 import { randomUUID } from 'crypto';
 import { withInferenceContext } from '@kbn/inference-tracing';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
+import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
 import type {
   EvalsExecutorClient,
   Evaluator,
   EvaluationDataset,
+  EvaluationDatasetWithId,
   ExperimentTask,
-  Example,
   RanExperiment,
   TaskOutput,
 } from '../types';
+import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
-function normalizeExample(example: Example) {
-  return {
-    input: example.input,
-    output: example.output ?? null,
-    // keep parity with prior normalization: drop empty metadata keys
-    metadata: omitBy(example.metadata ?? {}, isEmpty),
-  };
-}
-
-function computeDatasetId(dataset: EvaluationDataset): string {
-  return objectHash({
-    name: dataset.name,
-    description: dataset.description,
-    examples: dataset.examples.map(normalizeExample),
-  });
+function computeDatasetId(name: string): string {
+  return uuidv5(name, DATASET_UUID_NAMESPACE);
 }
 
 export class KibanaEvalsClient implements EvalsExecutorClient {
@@ -48,8 +36,41 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       model: Model;
       runId: string;
       repetitions?: number;
+      upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
+      getDatasetByName?: (
+        datasetName: string
+      ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
     }
   ) {}
+
+  private async resolveDataset(
+    dataset: EvaluationDataset,
+    trustUpstreamDataset: boolean
+  ): Promise<EvaluationDataset> {
+    if (!trustUpstreamDataset) {
+      return dataset;
+    }
+
+    if (!this.options.getDatasetByName) {
+      throw new Error(
+        'KibanaEvalsClient runExperiment called with trustUpstreamDataset=true, but getDatasetByName is not configured'
+      );
+    }
+
+    const upstreamDataset = await this.options.getDatasetByName(dataset.name);
+    if (!upstreamDataset) {
+      throw new Error(
+        `KibanaEvalsClient could not resolve upstream dataset by name: "${dataset.name}"`
+      );
+    }
+
+    const { name, description, examples } = upstreamDataset;
+    return {
+      name,
+      description,
+      examples,
+    };
+  }
 
   async runExperiment<
     TEvaluationDataset extends EvaluationDataset,
@@ -60,7 +81,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       task,
       metadata: experimentMetadata,
       concurrency,
-      trustUpstreamDataset: _trustUpstreamDataset,
+      trustUpstreamDataset = false,
     }: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
@@ -71,10 +92,13 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment> {
     return withInferenceContext(async () => {
-      const datasetId = computeDatasetId(dataset);
+      const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
+      await this.options.upsertDataset?.(resolvedDataset);
+
+      const datasetId = computeDatasetId(resolvedDataset.name);
       const experimentId = randomUUID();
-      const repetitions = this.options.repetitions ?? 5;
-      const runConcurrency = Math.max(1, concurrency ?? 1);
+      const repetitions = this.options.repetitions ?? 3;
+      const runConcurrency = Math.max(1, concurrency ?? 5);
       const limiter = pLimit(runConcurrency);
 
       const evaluationRuns: RanExperiment['evaluationRuns'] = [];
@@ -83,11 +107,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const runJobs: Array<Promise<void>> = [];
 
       this.options.log.info(
-        `🧪 Starting experiment "Run ID: ${this.options.runId} - Dataset: ${dataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
+        `🧪 Starting experiment "Run ID: ${this.options.runId} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
       );
 
       for (let rep = 0; rep < repetitions; rep++) {
-        dataset.examples.forEach((example, exampleIndex) => {
+        resolvedDataset.examples.forEach((example, exampleIndex) => {
           runJobs.push(
             limiter(async () => {
               const runKey = `${exampleIndex}-${rep}-${randomUUID()}`;
@@ -96,7 +120,14 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 `🔧 Running task "task" on dataset "${datasetId}" (exampleIndex=${exampleIndex}, repetition=${rep})`
               );
 
-              const taskOutput = await task(example);
+              const { taskOutput, traceId } = await withTaskSpan('task', {}, async () => {
+                const _traceId = getCurrentTraceId();
+                const _taskOutput = await task(example);
+                return {
+                  taskOutput: _taskOutput,
+                  traceId: _traceId,
+                };
+              });
 
               runs[runKey] = {
                 exampleIndex,
@@ -105,6 +136,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                 expected: example.output ?? null,
                 metadata: example.metadata ?? {},
                 output: taskOutput,
+                traceId,
               };
 
               this.options.log.info(
@@ -116,23 +148,37 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `🧠 Evaluating run (exampleIndex=${exampleIndex}, repetition=${rep}) with evaluator "${evaluator.name}"`
                   );
-                  const result = await evaluator.evaluate({
-                    input: example.input,
-                    output: taskOutput,
-                    expected: example.output ?? null,
-                    metadata: example.metadata ?? {},
-                  });
+                  const { result, evaluatorTraceId } = await withEvaluatorSpan(
+                    evaluator.name,
+                    {},
+                    async () => {
+                      const _traceId = getCurrentTraceId();
+                      const _result = await evaluator.evaluate({
+                        input: example.input,
+                        output: taskOutput,
+                        expected: example.output ?? null,
+                        metadata: example.metadata ?? {},
+                      });
+                      return {
+                        result: _result,
+                        evaluatorTraceId: _traceId,
+                      };
+                    }
+                  );
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result };
+                  return { evaluatorName: evaluator.name, result, evaluatorTraceId };
                 })
               );
 
-              results.forEach(({ evaluatorName, result }) => {
+              results.forEach(({ evaluatorName, result, evaluatorTraceId }) => {
                 evaluationRuns.push({
                   name: evaluatorName,
                   result,
+                  experimentRunId: runKey,
+                  traceId: evaluatorTraceId,
+                  exampleId: example.id,
                 });
               });
             })
@@ -146,8 +192,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const ranExperiment: RanExperiment = {
         id: experimentId,
         datasetId,
-        datasetName: dataset.name,
-        datasetDescription: dataset.description,
+        datasetName: resolvedDataset.name,
+        datasetDescription: resolvedDataset.description,
         runs,
         evaluationRuns,
         experimentMetadata: {

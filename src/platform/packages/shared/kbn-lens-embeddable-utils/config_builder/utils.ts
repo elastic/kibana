@@ -370,3 +370,9 @@ export function isEsqlTableTypeDataset(
 ): dataset is Extract<DatasetType, { type: 'esql' | 'table' }> {
   return dataset.type === 'esql' || dataset.type === 'table';
 }
+
+export function groupIsNotCollapsed(def: {
+  collapse_by?: string;
+}): def is { collapse_by: undefined } {
+  return def.collapse_by == null;
+}

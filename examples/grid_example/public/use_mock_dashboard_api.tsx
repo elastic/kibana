@@ -13,9 +13,8 @@ import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import type { TimeRange } from '@kbn/es-query';
-import type { PanelPackage } from '@kbn/presentation-containers';
 
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode, PanelPackage } from '@kbn/presentation-publishing';
 import type {
   MockDashboardApi,
   MockSerializedDashboardState,

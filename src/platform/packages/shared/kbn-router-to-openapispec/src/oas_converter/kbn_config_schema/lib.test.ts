@@ -125,6 +125,7 @@ describe('convert', () => {
             required: ['foo'],
           },
           type: 'array',
+          title: 'myArray',
         },
         myUnion: {
           anyOf: [
@@ -139,6 +140,7 @@ describe('convert', () => {
               type: 'number',
             },
           ],
+          title: 'myUnion',
         },
       },
     });
@@ -160,6 +162,7 @@ describe('convert', () => {
       },
       shared: {
         myId: {
+          title: 'myId',
           additionalProperties: false,
           properties: {
             a: {

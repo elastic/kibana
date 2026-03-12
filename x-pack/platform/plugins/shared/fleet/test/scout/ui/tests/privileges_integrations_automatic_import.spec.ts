@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import {
@@ -15,7 +16,14 @@ import {
   getAutomaticImportConnectorAllRole,
 } from '../fixtures/services/privileges';
 
-test.describe('Integrations automatic import privileges', { tag: ['@ess'] }, () => {
+test.describe('Integrations automatic import privileges', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(({ config }) => {
+    // TODO: Remove when custom roles in ECH are supported by Scout https://github.com/elastic/appex-qa-team/issues/665
+    // The following line will skip all tests in this suite when running on ECH
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(config.isCloud === true, 'Custom roles are not yet supported on ECH');
+  });
+
   const roleCombinations = [
     { fleetRole: 'read', integrationsRole: 'read' },
     { fleetRole: 'read', integrationsRole: 'all' },
@@ -102,6 +110,8 @@ test.describe('Integrations automatic import privileges', { tag: ['@ess'] }, () 
 
     await createIntegrationLanding.navigateToAssistant();
     await createIntegrationLanding.waitForPageToLoad();
+
+    // ECH displays: Anthropic Claude Sonnect 3.7, Anthropic Claude Sonnect 4.5, Google Gemini
 
     await expect(createIntegrationLanding.getConnectorBedrock()).toBeVisible();
     await expect(createIntegrationLanding.getConnectorOpenAI()).toBeVisible();

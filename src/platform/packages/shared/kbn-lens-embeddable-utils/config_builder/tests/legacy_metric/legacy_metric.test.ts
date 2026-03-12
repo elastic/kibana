@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { simpleLegacyMetricAttributes } from './lens_state_config.mock';
+import {
+  customColorByValueAttributes,
+  defaultColorByValueAttributes,
+  selectorColorByValueAttributes,
+  simpleLegacyMetricAttributes,
+} from './lens_state_config.mock';
 import {
   basicLegacyMetricWithAdHocDataView,
   basicLegacyMetricWithDataView,
@@ -24,6 +29,18 @@ describe('Legacy Metric', () => {
   describe('state transform validation', () => {
     it('should convert a simple legacy metric', () => {
       validator.legacyMetric.fromState(simpleLegacyMetricAttributes);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validator.legacyMetric.fromState(defaultColorByValueAttributes);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validator.legacyMetric.fromState(selectorColorByValueAttributes);
+    });
+
+    it('should convert a custom metric with a color by value palette', () => {
+      validator.legacyMetric.fromState(customColorByValueAttributes);
     });
   });
 

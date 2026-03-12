@@ -39,6 +39,7 @@ import {
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
+  SettingsSchemaV8,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -187,6 +188,7 @@ export const getSavedObjectTypes = (
           },
           integration_knowledge_enabled: { type: 'boolean' },
           ssl_secret_storage_requirements_met: { type: 'boolean' },
+          download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -275,6 +277,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: SettingsSchemaV7.extends({}, { unknowns: 'ignore' }),
             create: SettingsSchemaV7,
+          },
+        },
+        8: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                download_source_auth_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: SettingsSchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: SettingsSchemaV8,
           },
         },
       },
@@ -1219,6 +1235,10 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
+          pending_upgrade_review: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -1269,6 +1289,133 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                pending_upgrade_review: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: schema.object(
+              {
+                name: schema.string(),
+                version: schema.string(),
+                internal: schema.maybe(schema.boolean()),
+                keep_policies_up_to_date: schema.maybe(schema.boolean()),
+                es_index_patterns: schema.maybe(schema.any()),
+                verification_status: schema.string(),
+                verification_key_id: schema.maybe(schema.string()),
+                installed_es: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      id: schema.string(),
+                      type: schema.string(),
+                      version: schema.maybe(schema.string()),
+                      deferred: schema.maybe(schema.boolean()),
+                    }),
+                    { maxSize: 10000 }
+                  )
+                ),
+                latest_install_failed_attempts: schema.maybe(schema.any()),
+                latest_executed_state: schema.maybe(schema.any()),
+                installed_kibana: schema.maybe(schema.any()),
+                installed_kibana_space_id: schema.maybe(schema.string()),
+                package_assets: schema.maybe(schema.any()),
+                additional_spaces_installed_kibana: schema.maybe(schema.any()),
+                install_started_at: schema.string(),
+                install_version: schema.string(),
+                install_status: schema.string(),
+                install_source: schema.string(),
+                install_format_schema_version: schema.maybe(schema.string()),
+                experimental_data_stream_features: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      data_stream: schema.string(),
+                      features: schema.maybe(
+                        schema.arrayOf(
+                          schema.object(
+                            {
+                              synthetic_source: schema.maybe(schema.boolean()),
+                              tsdb: schema.maybe(schema.boolean()),
+                            },
+                            { unknowns: 'ignore' }
+                          ),
+                          { maxSize: 10 }
+                        )
+                      ),
+                    }),
+                    { maxSize: 1000 }
+                  )
+                ),
+                previous_version: schema.maybe(schema.string()),
+                pending_upgrade_review: schema.maybe(schema.any()),
+              },
+              { unknowns: 'ignore' }
+            ),
+            create: schema.object(
+              {
+                name: schema.string(),
+                version: schema.string(),
+                internal: schema.maybe(schema.boolean()),
+                keep_policies_up_to_date: schema.maybe(schema.boolean()),
+                es_index_patterns: schema.maybe(schema.any()),
+                verification_status: schema.string(),
+                verification_key_id: schema.maybe(schema.string()),
+                installed_es: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      id: schema.string(),
+                      type: schema.string(),
+                      version: schema.maybe(schema.string()),
+                      deferred: schema.maybe(schema.boolean()),
+                    }),
+                    { maxSize: 10000 }
+                  )
+                ),
+                latest_install_failed_attempts: schema.maybe(schema.any()),
+                latest_executed_state: schema.maybe(schema.any()),
+                installed_kibana: schema.maybe(schema.any()),
+                installed_kibana_space_id: schema.maybe(schema.string()),
+                package_assets: schema.maybe(schema.any()),
+                additional_spaces_installed_kibana: schema.maybe(schema.any()),
+                install_started_at: schema.string(),
+                install_version: schema.string(),
+                install_status: schema.string(),
+                install_source: schema.string(),
+                install_format_schema_version: schema.maybe(schema.string()),
+                experimental_data_stream_features: schema.maybe(
+                  schema.arrayOf(
+                    schema.object({
+                      data_stream: schema.string(),
+                      features: schema.maybe(
+                        schema.arrayOf(
+                          schema.object(
+                            {
+                              synthetic_source: schema.maybe(schema.boolean()),
+                              tsdb: schema.maybe(schema.boolean()),
+                            },
+                            { unknowns: 'ignore' }
+                          ),
+                          { maxSize: 10 }
+                        )
+                      ),
+                    }),
+                    { maxSize: 1000 }
+                  )
+                ),
+                previous_version: schema.maybe(schema.string()),
+                pending_upgrade_review: schema.maybe(schema.any()),
+              },
+              { unknowns: 'ignore' }
+            ),
+          },
         },
       },
       migrations: {
@@ -1597,6 +1744,8 @@ export const OUTPUT_ENCRYPTED_FIELDS = new Set([
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
 
+export const DOWNLOAD_SOURCE_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }, { key: 'auth' }]);
+
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
@@ -1624,7 +1773,7 @@ export function registerEncryptedSavedObjects(
   });
   encryptedSavedObjects.registerType({
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set([{ key: 'ssl' }]),
+    attributesToEncrypt: DOWNLOAD_SOURCE_ENCRYPTED_FIELDS,
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });

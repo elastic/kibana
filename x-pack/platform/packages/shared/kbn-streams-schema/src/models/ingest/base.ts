@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
+import { z } from '@kbn/zod/v4';
+import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
@@ -37,6 +37,8 @@ interface IngestStreamPrivileges {
   read_failure_store: boolean;
   // User can manage failure store information
   manage_failure_store: boolean;
+  // User can create snapshot repositories (needed for frozen phase searchable snapshots)
+  create_snapshot_repository: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -48,6 +50,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   text_structure: z.boolean(),
   read_failure_store: z.boolean(),
   manage_failure_store: z.boolean(),
+  create_snapshot_repository: z.boolean(),
 });
 
 export interface IngestBase {
@@ -103,15 +106,16 @@ type OmitIngestBaseStreamUpsertProps<
   };
 };
 
-type IngestBaseStreamDefaults = {
-  Source: z.input<IIngestBaseStreamSchema['Definition']>;
+interface IngestBaseStreamDefaults {
+  Definition: z.output<IIngestBaseStreamSchema['Definition']>;
+  Source: z.output<IIngestBaseStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IIngestBaseStreamSchema['Definition']>;
-  };
+    stream: z.output<IIngestBaseStreamSchema['Definition']>;
+  } & z.output<IIngestBaseStreamSchema['GetResponse']>;
   UpsertRequest: {
-    stream: OmitIngestBaseStreamUpsertProps<{} & z.input<IIngestBaseStreamSchema['Definition']>>;
+    stream: OmitIngestBaseStreamUpsertProps<{} & z.output<IIngestBaseStreamSchema['Definition']>>;
   };
-} & ModelOfSchema<IIngestBaseStreamSchema>;
+}
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';

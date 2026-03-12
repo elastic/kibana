@@ -22,9 +22,18 @@ import {
   persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { AttachmentType } from '../../../common/types/domain';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../common';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
+import type { ConfigType } from '../../config';
+
+const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =>
+  ({ attachments: { enabled: attachmentsEnabled } } as ConfigType);
+
+const owner = SECURITY_SOLUTION_OWNER;
 
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -38,6 +47,7 @@ describe('AttachmentService', () => {
       log: mockLogger,
       persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: createAttachmentServiceConfig(),
     });
   });
 
@@ -51,6 +61,7 @@ describe('AttachmentService', () => {
             attributes: createUserAttachment().attributes,
             references: [],
             id: '1',
+            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -62,6 +73,7 @@ describe('AttachmentService', () => {
           attributes: createUserAttachment().attributes,
           references: [],
           id: '1',
+          owner,
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -78,6 +90,7 @@ describe('AttachmentService', () => {
             attributes: createUserAttachment().attributes,
             references: [],
             id: '1',
+            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
@@ -95,9 +108,10 @@ describe('AttachmentService', () => {
             attributes: invalidAttachment.attributes,
             references: [],
             id: '1',
+            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
         );
       });
 
@@ -109,6 +123,7 @@ describe('AttachmentService', () => {
           attributes: { ...createUserAttachment().attributes, foo: 'bar' },
           references: [],
           id: '1',
+          owner,
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
@@ -129,6 +144,7 @@ describe('AttachmentService', () => {
             attachments: [
               { attributes: createUserAttachment().attributes, references: [], id: '1' },
             ],
+            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -148,6 +164,7 @@ describe('AttachmentService', () => {
             { attributes: createUserAttachment().attributes, references: [], id: '1' },
             { attributes: createUserAttachment().attributes, references: [], id: '1' },
           ],
+          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
@@ -160,6 +177,7 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkCreate({
           attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
+          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -178,6 +196,7 @@ describe('AttachmentService', () => {
             attachments: [
               { attributes: createUserAttachment().attributes, references: [], id: '1' },
             ],
+            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
@@ -195,9 +214,10 @@ describe('AttachmentService', () => {
         await expect(
           service.bulkCreate({
             attachments: [{ attributes: invalidAttachment.attributes, references: [], id: '1' }],
+            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
         );
       });
 
@@ -215,11 +235,126 @@ describe('AttachmentService', () => {
               id: '1',
             },
           ],
+          owner,
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0];
         expect(persistedAttributes.attributes).not.toHaveProperty('foo');
       });
+    });
+  });
+
+  describe('feature flag (config.attachments.enabled)', () => {
+    it('when enabled, create writes to CASE_ATTACHMENT_SAVED_OBJECT with unified attributes', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: '1',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        attributes: unifiedAttrs,
+        references: [],
+      });
+
+      await serviceWithFlagOn.create({
+        attributes: unifiedAttrs,
+        references: [],
+        id: '1',
+        owner,
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_ATTACHMENT_SAVED_OBJECT,
+        expect.objectContaining({ type: 'comment', data: { content: 'hello' } }),
+        expect.any(Object)
+      );
+    });
+
+    it('when disabled, create writes to CASE_COMMENT_SAVED_OBJECT with legacy attributes', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue(createUserAttachment());
+
+      await service.create({
+        attributes: createUserAttachment().attributes,
+        references: [],
+        id: '1',
+        owner,
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_COMMENT_SAVED_OBJECT,
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    it('when enabled, bulkCreate writes to CASE_ATTACHMENT_SAVED_OBJECT', async () => {
+      const serviceWithFlagOn = new AttachmentService({
+        log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        config: createAttachmentServiceConfig(true),
+      });
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hi' },
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          { id: '1', type: CASE_ATTACHMENT_SAVED_OBJECT, attributes: unifiedAttrs, references: [] },
+        ],
+      });
+
+      await serviceWithFlagOn.bulkCreate({
+        attachments: [{ attributes: unifiedAttrs, references: [], id: '1' }],
+        refresh: false,
+        owner,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: expect.objectContaining({ type: 'comment', data: { content: 'hi' } }),
+          }),
+        ]),
+        expect.any(Object)
+      );
+    });
+
+    it('when disabled, bulkCreate writes to CASE_COMMENT_SAVED_OBJECT', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [createUserAttachment()],
+      });
+
+      await service.bulkCreate({
+        attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
+        owner,
+        refresh: false,
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.objectContaining({ type: CASE_COMMENT_SAVED_OBJECT })]),
+        expect.any(Object)
+      );
     });
   });
 
@@ -232,6 +367,18 @@ describe('AttachmentService', () => {
       type: 'cases-comments',
     };
 
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.get.mockImplementation((type: string, id: string) => {
+        if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
+          return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
+        }
+        if (type === CASE_COMMENT_SAVED_OBJECT) {
+          return Promise.resolve(createUserAttachment());
+        }
+        return Promise.reject(new Error('Unknown type'));
+      });
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
@@ -239,6 +386,7 @@ describe('AttachmentService', () => {
         attachmentId: '1',
         updatedAttributes: persistableStateAttachment,
         options: { references: [] },
+        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: persistableStateAttachmentAttributes });
@@ -254,6 +402,7 @@ describe('AttachmentService', () => {
         attachmentId: '1',
         updatedAttributes: externalReferenceAttachmentSO,
         options: { references: [] },
+        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: externalReferenceAttachmentSOAttributes });
@@ -267,8 +416,9 @@ describe('AttachmentService', () => {
 
       const res = await service.update({
         attachmentId: '1',
-        updatedAttributes: externalReferenceAttachmentES,
+        updatedAttributes: externalReferenceAttachmentESAttributes,
         options: { references: [] },
+        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: externalReferenceAttachmentESAttributes });
@@ -280,8 +430,9 @@ describe('AttachmentService', () => {
 
         await expect(
           service.update({
-            updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
+            updatedAttributes: createUserAttachment().attributes,
             attachmentId: '1',
+            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -290,8 +441,9 @@ describe('AttachmentService', () => {
         unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment({ foo: 'bar' }));
 
         const res = await service.update({
-          updatedAttributes: { comment: 'yes', type: AttachmentType.user, owner: 'hi' },
+          updatedAttributes: createUserAttachment().attributes,
           attachmentId: '1',
+          owner,
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -309,7 +461,7 @@ describe('AttachmentService', () => {
             attachmentId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -325,7 +477,7 @@ describe('AttachmentService', () => {
             attachmentId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -386,6 +538,7 @@ describe('AttachmentService', () => {
             options: { references: [] },
           },
         ],
+        owner,
       });
 
       expect(res).toEqual({
@@ -406,7 +559,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createUserAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }], owner })
         ).resolves.not.toThrow();
       });
 
@@ -425,6 +578,7 @@ describe('AttachmentService', () => {
             { attachmentId: '1', updatedAttributes: userAttachment.attributes },
             { attachmentId: '1', updatedAttributes: userAttachment.attributes },
           ],
+          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
@@ -439,6 +593,7 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkUpdate({
           comments: [{ attachmentId: '1', updatedAttributes }],
+          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -455,9 +610,9 @@ describe('AttachmentService', () => {
         const updatedAttributes = createAlertAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
+          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }], owner })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -477,9 +632,11 @@ describe('AttachmentService', () => {
                 attachmentId: '1',
               },
             ],
+
+            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -503,6 +660,29 @@ describe('AttachmentService', () => {
 
         expect(persistedAttributes).not.toHaveProperty('foo');
       });
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('calls bulkDelete with both CASE_ATTACHMENT_SAVED_OBJECT and CASE_COMMENT_SAVED_OBJECT for each id', async () => {
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({ statuses: [] });
+
+      await service.bulkDelete({ attachmentIds: ['id-1', 'id-2'], refresh: false });
+
+      expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+      const [deleteRequests] = unsecuredSavedObjectsClient.bulkDelete.mock.calls[0];
+      expect(deleteRequests).toHaveLength(4);
+      const byId = (deleteRequests as Array<{ id: string; type: string }>).reduce((acc, r) => {
+        if (!acc[r.id]) acc[r.id] = [];
+        acc[r.id].push(r.type);
+        return acc;
+      }, {} as Record<string, string[]>);
+      expect(byId['id-1']).toEqual(
+        expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT])
+      );
+      expect(byId['id-2']).toEqual(
+        expect.arrayContaining([CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT])
+      );
     });
   });
 

@@ -24,7 +24,7 @@ import { test } from '../fixtures';
 
 // ...
 
-test.describe('My sample test suite', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('My sample test suite', { tag: tags.deploymentAgnostic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     // [1]
     // log in as an admin
@@ -60,7 +60,7 @@ You can log in with a custom role with the `loginWithCustomRole()` method. This 
 ```ts
 test.describe(
   'Discover app with a restricted read-only role',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     test.beforeAll(async () => {
       // load test data

@@ -30,6 +30,7 @@ export {
   getCredentialSchema,
   getAllVarKeys,
   getAllSupportedVarNames,
+  getCredentialKeyFromVarName,
 } from './schemas';
 
 // Accessor functions
@@ -43,3 +44,14 @@ export {
   getVarTarget,
   findFirstVarEntry,
 } from './var_accessor';
+
+// Var group helpers for cloud connector detection
+export type { VarGroupSelection, CloudConnectorOptionResult } from './var_group_helpers';
+export {
+  getSelectedOption,
+  getCloudConnectorOption,
+  getCloudConnectorVars,
+  getAllCloudConnectorVarNames,
+  getIacTemplateUrlFromVarGroupSelection,
+  detectTargetCsp,
+} from './var_group_helpers';

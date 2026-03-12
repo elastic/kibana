@@ -19,6 +19,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "cloudConnect",
       "console",
       "usageCollection",
       "serverless",

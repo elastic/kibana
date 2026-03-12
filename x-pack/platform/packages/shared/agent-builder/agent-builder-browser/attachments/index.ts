@@ -8,6 +8,9 @@
 export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
-  AttachmentContentProps,
-  AttachmentEditorProps,
+  AttachmentRenderProps,
+  CanvasRenderCallbacks,
+  GetActionButtonsParams,
+  ActionButton,
 } from './contract';
+export { ActionButtonType } from './contract';

@@ -4,21 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  systemSchema,
+  TaskStatus,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
-  type SignificantEventsGetResponse,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
+  getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
   type SignificantEventsQueriesGenerationTaskParams,
 } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 
@@ -26,9 +28,19 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 // Date, without breaking the OpenAPI generator
 const dateFromString = z.string().transform((input) => new Date(input));
 
-function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
-  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
-}
+/**
+ * Guards against stale task results from a previous Kibana version that stored
+ * queries with `kql`/`feature` but without the now-required `esql.query` field.
+ * Returns a failed status instead of letting the malformed payload reach the client.
+ */
+const sanitizeTaskResult = (
+  result: SignificantEventsQueriesGenerationTaskResult
+): SignificantEventsQueriesGenerationTaskResult => {
+  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+    return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
+  }
+  return result;
+};
 
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
@@ -52,19 +64,20 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
 
-    return taskClient.getStatus<
+    const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >(getSignificantEventsQueriesGenerationTaskId(name));
+
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -72,32 +85,16 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
     path: z.object({ name: z.string().describe('The name of the stream') }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new generation task'),
-        from: dateFromString.describe('Start of the time range'),
-        to: dateFromString.describe('End of the time range'),
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-        sampleDocsSize: z
-          .number()
-          .optional()
-          .describe(
-            'Number of sample documents to use for generation from the current data of stream'
-          ),
-        systems: z.array(systemSchema).optional().describe('Optional array of systems'),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-      }),
-      z.object({
-        action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-      }),
-    ]),
+    body: taskActionSchema({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+    }),
   }),
   options: {
     access: 'internal',
@@ -122,9 +119,9 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
+    await streamsClient.getStream(name);
     const { body } = params;
     const taskId = getSignificantEventsQueriesGenerationTaskId(name);
 
@@ -145,8 +142,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
-                  systems: body.systems,
-                  sampleDocsSize: body.sampleDocsSize,
                   streamName: name,
                 };
               })(),
@@ -155,7 +150,7 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<
+    const result = await handleTaskAction<
       SignificantEventsQueriesGenerationTaskParams,
       SignificantEventsQueriesGenerationResult
     >({
@@ -163,6 +158,8 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
       taskId,
       ...actionParams,
     });
+
+    return sanitizeTaskResult(result);
   },
 });
 
@@ -175,10 +172,8 @@ const readAllSignificantEventsRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .optional()
         .describe('Stream names to filter significant events'),
     }),
   }),

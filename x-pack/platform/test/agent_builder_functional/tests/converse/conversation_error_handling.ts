@@ -25,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const browser = getService('browser');
 
-  describe('Conversation Error Handling', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/248076
+  describe.skip('Conversation Error Handling', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {

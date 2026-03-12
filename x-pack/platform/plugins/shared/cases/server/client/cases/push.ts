@@ -274,6 +274,7 @@ export const push = async (
             version: comment.version,
           })),
         refresh: false,
+        owner: myCase.attributes.owner,
       }),
     ]);
 

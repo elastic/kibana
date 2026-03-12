@@ -6,14 +6,15 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
   intl="[object Object]"
 >
   <button
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
+    aria-expanded="false"
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
     type="button"
   >
     <span
       class="emotion-euiButtonDisplayContent"
     >
       <span
-        class="eui-textTruncate"
+        class="eui-textTruncate css-13ifi6d-m"
       >
         test
       </span>

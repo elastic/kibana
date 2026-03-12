@@ -575,36 +575,27 @@ describe('WorkflowsParamsFields', () => {
     });
   });
 
-  test('should sort workflows with alert trigger types to the top', async () => {
+  test('should sort workflows: enabled before disabled, alert-triggered before others', async () => {
     mockHttpPost.mockResolvedValue({
       results: [
         {
-          id: 'workflow-1',
-          name: 'Regular Workflow',
-          description: 'A regular workflow without alert triggers',
-          status: 'active',
+          id: 'workflow-disabled-alert',
+          name: 'Disabled Alert Workflow',
+          description: 'Disabled with alert trigger',
+          status: 'inactive',
+          enabled: false,
           definition: {
-            enabled: true,
-            triggers: [{ type: 'manual' }, { type: 'schedule' }],
+            enabled: false,
+            triggers: [{ type: 'alert' }],
             tags: [],
           },
         },
         {
-          id: 'workflow-2',
-          name: 'Alert Workflow A',
-          description: 'A workflow with alert trigger',
+          id: 'workflow-enabled-manual',
+          name: 'Enabled Manual Workflow',
+          description: 'Enabled with manual trigger',
           status: 'active',
-          definition: {
-            enabled: true,
-            triggers: [{ type: 'alert' }, { type: 'manual' }],
-            tags: [],
-          },
-        },
-        {
-          id: 'workflow-3',
-          name: 'Another Regular Workflow',
-          description: 'Another workflow without alert triggers',
-          status: 'active',
+          enabled: true,
           definition: {
             enabled: true,
             triggers: [{ type: 'manual' }],
@@ -612,13 +603,26 @@ describe('WorkflowsParamsFields', () => {
           },
         },
         {
-          id: 'workflow-4',
-          name: 'Alert Workflow B',
-          description: 'Another workflow with alert trigger',
+          id: 'workflow-disabled-manual',
+          name: 'Disabled Manual Workflow',
+          description: 'Disabled with manual trigger',
+          status: 'inactive',
+          enabled: false,
+          definition: {
+            enabled: false,
+            triggers: [{ type: 'manual' }],
+            tags: [],
+          },
+        },
+        {
+          id: 'workflow-enabled-alert',
+          name: 'Enabled Alert Workflow',
+          description: 'Enabled with alert trigger',
           status: 'active',
+          enabled: true,
           definition: {
             enabled: true,
-            triggers: [{ type: 'schedule' }, { type: 'alert' }],
+            triggers: [{ type: 'alert' }],
             tags: [],
           },
         },
@@ -629,43 +633,24 @@ describe('WorkflowsParamsFields', () => {
       renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
     });
 
-    // Wait for workflows to load
-    await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
-        body: JSON.stringify({
-          size: 1000,
-          page: 1,
-          query: '',
-        }),
-      });
-    });
-
     await waitFor(() => {
       expect(screen.getByTestId('workflowIdSelect')).toBeInTheDocument();
     });
 
-    // Click on the input to open the popover
     const input = screen.getByRole('searchbox');
     fireEvent.click(input);
 
-    // Wait for the options to appear
     await waitFor(() => {
-      expect(screen.getByText('Alert Workflow A')).toBeInTheDocument();
-      expect(screen.getByText('Alert Workflow B')).toBeInTheDocument();
-      expect(screen.getByText('Regular Workflow')).toBeInTheDocument();
-      expect(screen.getByText('Another Regular Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Enabled Alert Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Disabled Alert Workflow')).toBeInTheDocument();
     });
 
-    // Get all the workflow option elements
     const workflowOptions = screen.getAllByRole('option');
 
-    // The first two options should be the alert workflows (in original order among alert workflows)
-    expect(workflowOptions[0]).toHaveAttribute('name', 'Alert Workflow A');
-    expect(workflowOptions[1]).toHaveAttribute('name', 'Alert Workflow B');
-
-    // The next two should be regular workflows (in original order among regular workflows)
-    expect(workflowOptions[2]).toHaveAttribute('name', 'Regular Workflow');
-    expect(workflowOptions[3]).toHaveAttribute('name', 'Another Regular Workflow');
+    expect(workflowOptions[0]).toHaveAttribute('name', 'Enabled Alert Workflow');
+    expect(workflowOptions[1]).toHaveAttribute('name', 'Enabled Manual Workflow');
+    expect(workflowOptions[2]).toHaveAttribute('name', 'Disabled Alert Workflow');
+    expect(workflowOptions[3]).toHaveAttribute('name', 'Disabled Manual Workflow');
   });
 
   test('should handle workflows without definition or triggers gracefully', async () => {

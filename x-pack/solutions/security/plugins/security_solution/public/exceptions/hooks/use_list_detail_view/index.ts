@@ -115,7 +115,13 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = canReadRules ? await getListRules(result.list_id) : [];
+        const listRules = canReadRules
+          ? await getListRules({
+              id: result.id,
+              listId: result.list_id,
+              namespaceType: result.namespace_type,
+            })
+          : [];
         setLinkedRules(listRules);
       }
     },
@@ -245,12 +251,12 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #region DeleteList
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -267,17 +273,20 @@ export const useListDetailsView = (exceptionListId: string) => {
         id: list.id,
         namespaceType: list.namespace_type,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess,
+        onSuccess: () => {
+          handleDeleteSuccess(list.name)();
+          setReferenceModalState(exceptionReferenceModalInitialState);
+          setShowReferenceErrorModal(false);
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.exceptions,
+            path: '',
+          });
+        },
       });
     } catch (error) {
       handleErrorStatus(error);
-    } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
   }, [
     list,

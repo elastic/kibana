@@ -39,15 +39,21 @@ export function createDummySummaryDoc(
   sloId: string,
   instanceId: string,
   summaryUpdatedAt: string,
-  spaceId: string = TEST_SPACE_ID
+  spaceId: string = TEST_SPACE_ID,
+  overrides?: {
+    name?: string;
+    description?: string;
+    tags?: string[];
+    groupBy?: string | string[];
+  }
 ): EsSummaryDocument {
   return {
     slo: {
       id: sloId,
       instanceId,
       revision: 1,
-      name: `Test SLO ${sloId}`,
-      description: 'Test description',
+      name: overrides?.name ?? `Test SLO ${sloId}`,
+      description: overrides?.description ?? 'Test description',
       indicator: {
         type: 'sli.kql.custom',
         params: {
@@ -66,8 +72,8 @@ export function createDummySummaryDoc(
       objective: {
         target: 0.99,
       },
-      tags: ['test'],
-      groupBy: '*',
+      tags: overrides?.tags ?? ['test'],
+      groupBy: overrides?.groupBy ?? '*',
       groupings: {},
     },
     service: {

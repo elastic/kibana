@@ -20,6 +20,7 @@ import type { IntlShape } from '@kbn/i18n-react';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
+import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -49,8 +50,15 @@ const buildShareOptions = async ({
 }: BuildShareOptionsParams): Promise<Omit<ShowShareMenuOptions, 'anchorElement' | 'asExport'>> => {
   const { dataView, isEsqlMode } = discoverParams;
 
+  const searchSource = createSearchSource({
+    dataView,
+    appState: currentTab.appState,
+    globalState: currentTab.globalState,
+    services,
+  });
+
   const searchSourceSharingData = await getSharingData(
-    stateContainer.savedSearchState.getState().searchSource,
+    searchSource,
     currentTab.appState,
     services,
     isEsqlMode

@@ -18,11 +18,22 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
+import type {
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+  RegistryVarsEntry,
+} from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+
+export interface StreamAdvancedVarsConfig {
+  vars: RegistryVarsEntry[];
+  packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
+  validationResults: PackagePolicyConfigValidationResults;
+}
 
 export const PackagePolicyInputConfig: React.FunctionComponent<{
   hasInputStreams: boolean;
@@ -32,6 +43,8 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  showDescriptionColumn?: boolean;
+  streamAdvancedVars?: StreamAdvancedVarsConfig;
 }> = memo(
   ({
     hasInputStreams,
@@ -41,15 +54,20 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    showDescriptionColumn = true,
+    streamAdvancedVars,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-    // Split vars into required and advanced
+    // Split vars into required and advanced, filtering out deprecated vars on new installations
     const [requiredVars, advancedVars] = useMemo(() => {
       const _advancedVars: RegistryVarsEntry[] = [];
       const _requiredVars: RegistryVarsEntry[] = [];
       (packageInputVars || []).forEach((varDef) => {
+        if (!isEditPage && !!varDef.deprecated) {
+          return;
+        }
         if (isAdvancedVar(varDef)) {
           _advancedVars.push(varDef);
         } else {
@@ -57,85 +75,99 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         }
       });
       return [_requiredVars, _advancedVars];
-    }, [packageInputVars]);
+    }, [packageInputVars, isEditPage]);
+
+    const allAdvancedVars = useMemo(() => {
+      if (!streamAdvancedVars?.vars.length) {
+        return advancedVars;
+      }
+      return [...advancedVars, ...streamAdvancedVars.vars];
+    }, [advancedVars, streamAdvancedVars]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
     const hasRequiredVarGroupErrors = inputValidationResults.required_vars;
-    const advancedVarsWithErrorsCount: number = useMemo(
-      () =>
-        advancedVars.filter(({ name: varName }) => inputValidationResults.vars?.[varName]?.length)
-          .length,
-      [advancedVars, inputValidationResults.vars]
-    );
+    const advancedVarsWithErrorsCount: number = useMemo(() => {
+      let count = advancedVars.filter(
+        ({ name: varName }) => inputValidationResults.vars?.[varName]?.length
+      ).length;
+      if (streamAdvancedVars) {
+        count += streamAdvancedVars.vars.filter(
+          ({ name: varName }) => streamAdvancedVars.validationResults.vars?.[varName]?.length
+        ).length;
+      }
+      return count;
+    }, [advancedVars, inputValidationResults.vars, streamAdvancedVars]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
 
     return (
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart">
-            <EuiFlexItem grow={1} />
-            <EuiFlexItem grow={flexWidth}>
-              <EuiText>
-                <h4>
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
-                    defaultMessage="Settings"
-                  />
-                </h4>
-              </EuiText>
-              {hasInputStreams ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText color="subdued" size="s">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
-                        defaultMessage="The following settings are applicable to all inputs below."
-                      />
-                    </p>
-                  </EuiText>
-                </>
-              ) : null}
-              {hasRequiredVarGroupErrors && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiAccordion
-                    id={`${packagePolicyInput.type}-required-vars-group-error`}
-                    paddingSize="s"
-                    buttonContent={
-                      <EuiText color="danger" size="s">
+      <EuiFlexGrid columns={showDescriptionColumn ? 2 : 1} gutterSize="l">
+        {showDescriptionColumn ? (
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+              <EuiFlexItem grow={1} />
+              <EuiFlexItem grow={flexWidth}>
+                <EuiText>
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
+                      defaultMessage="Settings"
+                    />
+                  </h4>
+                </EuiText>
+                {hasInputStreams ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText color="subdued" size="s">
+                      <p>
                         <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
-                          defaultMessage="One of these settings groups is required"
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
+                          defaultMessage="The following settings are applicable to all inputs below."
                         />
-                      </EuiText>
-                    }
-                  >
-                    <EuiText size="xs" color="danger">
-                      {Object.entries(inputValidationResults.required_vars || {}).map(
-                        ([groupName, vars]) => {
-                          return (
-                            <>
-                              <strong>{groupName}</strong>
-                              <ul>
-                                {vars.map(({ name }) => (
-                                  <li key={`${groupName}-${name}`}>{name}</li>
-                                ))}
-                              </ul>
-                            </>
-                          );
-                        }
-                      )}
+                      </p>
                     </EuiText>
-                  </EuiAccordion>
-                </>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                  </>
+                ) : null}
+                {hasRequiredVarGroupErrors && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiAccordion
+                      id={`${packagePolicyInput.type}-required-vars-group-error`}
+                      paddingSize="s"
+                      buttonContent={
+                        <EuiText color="danger" size="s">
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
+                            defaultMessage="One of these settings groups is required"
+                          />
+                        </EuiText>
+                      }
+                    >
+                      <EuiText size="xs" color="danger">
+                        {Object.entries(inputValidationResults.required_vars || {}).map(
+                          ([groupName, vars]) => {
+                            return (
+                              <>
+                                <strong>{groupName}</strong>
+                                <ul>
+                                  {vars.map(({ name }) => (
+                                    <li key={`${groupName}-${name}`}>{name}</li>
+                                  ))}
+                                </ul>
+                              </>
+                            );
+                          }
+                        )}
+                      </EuiText>
+                    </EuiAccordion>
+                  </>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
@@ -168,7 +200,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {advancedVars.length ? (
+            {allAdvancedVars.length ? (
               <Fragment>
                 <EuiFlexItem>
                   {/* Wrapper div to prevent button from going full width */}
@@ -220,6 +252,35 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                               });
                             }}
                             errors={inputValidationResults.vars?.[varName]}
+                            forceShowErrors={forceShowErrors}
+                            isEditPage={isEditPage}
+                          />
+                        </EuiFlexItem>
+                      );
+                    })
+                  : null}
+                {isShowingAdvanced && streamAdvancedVars
+                  ? streamAdvancedVars.vars.map((varDef) => {
+                      const { name: varName, type: varType } = varDef;
+                      const value =
+                        streamAdvancedVars.packagePolicyInputStream.vars?.[varName]?.value;
+                      return (
+                        <EuiFlexItem key={`stream-${varName}`}>
+                          <PackagePolicyInputVarField
+                            varDef={varDef}
+                            value={value}
+                            onChange={(newValue: any) => {
+                              streamAdvancedVars.updatePackagePolicyInputStream({
+                                vars: {
+                                  ...streamAdvancedVars.packagePolicyInputStream.vars,
+                                  [varName]: {
+                                    type: varType,
+                                    value: newValue,
+                                  },
+                                },
+                              });
+                            }}
+                            errors={streamAdvancedVars.validationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                             isEditPage={isEditPage}
                           />

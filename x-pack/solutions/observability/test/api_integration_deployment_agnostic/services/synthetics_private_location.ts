@@ -34,15 +34,16 @@ export class PrivateLocationTestService {
       .set('kbn-xsrf', 'true')
       .send()
       .expect(200);
-    // attempt to delete any existing package so we can install specific version
-    await this.supertestWithAuth
-      .delete(`/api/fleet/epm/packages/synthetics`)
-      .set('kbn-xsrf', 'true');
-    await this.supertestWithAuth
-      .post(`/api/fleet/epm/packages/synthetics/${version}`)
-      .set('kbn-xsrf', 'true')
-      .send({ force: true })
-      .expect(200);
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .delete(`/api/fleet/epm/packages/synthetics`)
+        .set('kbn-xsrf', 'true');
+      await this.supertestWithAuth
+        .post(`/api/fleet/epm/packages/synthetics/${version}`)
+        .set('kbn-xsrf', 'true')
+        .send({ force: true })
+        .expect(200);
+    });
   }
 
   async addTestPrivateLocation(spaceId?: string) {

@@ -27,9 +27,13 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     // Use a default path that resolves to default configs (contains 'scout/' not 'scout_')
     // If configDir is provided, it will override the default path detection
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const configRootDir = getConfigRootDir(defaultPlaywrightPath, options.mode, options.configDir);
-    const config = await loadServersConfig(options.mode, log, configRootDir);
-    const pwGrepTag = getPlaywrightGrepTag(options.mode);
+    const configRootDir = getConfigRootDir(
+      defaultPlaywrightPath,
+      options.testTarget,
+      options.serverConfigSet
+    );
+    const config = await loadServersConfig(options.testTarget, log, configRootDir);
+    const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
     const shutdownEs = await runElasticsearch({
       config,

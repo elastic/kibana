@@ -15,11 +15,17 @@ import type {
   TextBasedLayerColumn,
   TextBasedPrivateState,
   TypedLensSerializedState,
-  DatasourceStates,
   ValueFormatConfig,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 
-import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
+import { operationDefinitionMap } from '../../../datasources/form_based/operations';
+import type {
+  ConvertibleLayer,
+  ConvertToEsqlParams,
+  EsqlConversionData,
+  LayerConversionData,
+} from './esql_conversion_types';
 
 // Map Lens DataType to DatatableColumnType
 // Some Lens types (counter, gauge, document) aren't valid DatatableColumnTypes
@@ -32,16 +38,6 @@ const getMetaTypeFromDataType = (dataType: DataType): DatatableColumnType => {
   }
   return dataType;
 };
-
-interface LayerConversionData {
-  layerId: string;
-  layer: FormBasedLayer;
-  conversionResult: {
-    esql: string;
-    partialRows: boolean;
-    esAggsIdMap: EsqlConversionData['esAggsIdMap'];
-  };
-}
 
 /**
  * Retrieves conversion data for a form-based layer.
@@ -109,29 +105,49 @@ function buildTextBasedState(
         const column: TextBasedLayerColumn = {
           columnId: sourceColumn.id,
           fieldName: esqlFieldName,
-          label: sourceColumn.label ?? esqlFieldName,
           meta: {
             type: metaType,
           },
         };
 
-        // Only include customLabel if it's explicitly set to true
-        if (sourceColumn.customLabel) {
-          column.customLabel = sourceColumn.customLabel;
+        const hasCustomLabel = Boolean(sourceColumn.customLabel);
+
+        column.customLabel = true; // set always to true so we can use the default label as a custom label
+        if (hasCustomLabel) {
+          column.label = sourceColumn.label;
+        } else {
+          // use the generated default label
+          column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
+            layer.columns[sourceColumn.id],
+            layer.columns,
+            indexPattern
+          );
         }
 
-        // Determine format: user-configured first, then data view field format as fallback
-        let format = sourceColumn.format;
-        if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
-          const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
-          if (fieldFormat?.id) {
-            format = fieldFormat as typeof sourceColumn.format;
+        // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
+        // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
+        const originalCol = layer.columns[sourceColumn.id] as
+          | { params?: { format?: ValueFormatConfig } }
+          | undefined;
+        const hadUserFormat = Boolean(
+          originalCol?.params &&
+            'format' in originalCol.params &&
+            originalCol.params.format !== undefined
+        );
+
+        // Only set format when the user had explicitly configured it on the form-based column.
+        // If it was default (no user override), leave column.params.format unset so it stays default.
+        if (hadUserFormat) {
+          let format = sourceColumn.format;
+          if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
+            const fieldFormat = indexPattern.fieldFormatMap[sourceColumn.sourceField];
+            if (fieldFormat?.id) {
+              format = fieldFormat as typeof sourceColumn.format;
+            }
           }
-        }
-
-        // Only include params if format has a valid id
-        if (format?.id !== undefined) {
-          column.params = { format: format as ValueFormatConfig };
+          if (format?.id !== undefined) {
+            column.params = { format: format as ValueFormatConfig };
+          }
         }
 
         return column;
@@ -156,18 +172,6 @@ function buildTextBasedState(
       name: ip.name,
     })),
   };
-}
-
-interface ConvertToEsqlParams {
-  /**
-   * The ConvertibleLayer objects selected for conversion.
-   * Contains the ES|QL query and column mappings from useEsqlConversionCheck.
-   */
-  layersToConvert: ConvertibleLayer[];
-  attributes: TypedLensSerializedState['attributes'];
-  visualizationState: unknown;
-  datasourceStates: DatasourceStates;
-  framePublicAPI: FramePublicAPI;
 }
 
 /**
@@ -214,11 +218,12 @@ export function convertFormBasedToTextBasedLayer({
     ...attributes,
     state: {
       ...attributes.state,
-      query: esqlQuery,
+      query: { esql: esql(esqlQuery.esql).print('wrapping') },
       datasourceStates: {
         textBased: newDatasourceState,
       },
       visualization: visualizationState,
+      needsRefresh: true,
     },
   };
 

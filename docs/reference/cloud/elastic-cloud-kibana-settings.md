@@ -108,6 +108,9 @@ stack: ga 9.2
 `xpack.actions.email.recipient_allowlist`
 :    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
 
+`xpack.securitySolution.disableEndpointRuleAutoInstall` {applies_to}`stack: ga 9.2.4+`
+:   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Default is `false`.
+
 ### Version 9.1+ [ec_version_9_1]
 ```{applies_to}
 stack: ga 9.1

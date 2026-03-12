@@ -131,7 +131,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Cancel changes
                 </span>
@@ -151,7 +151,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Clear form
                 </span>
@@ -298,7 +298,7 @@ exports[`Clear btns enabled when there are values 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Cancel changes
                 </span>
@@ -317,7 +317,7 @@ exports[`Clear btns enabled when there are values 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Clear form
                 </span>
@@ -464,7 +464,7 @@ exports[`Renders list control 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Cancel changes
                 </span>
@@ -484,7 +484,7 @@ exports[`Renders list control 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Clear form
                 </span>
@@ -686,7 +686,7 @@ exports[`Renders range control 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Cancel changes
                 </span>
@@ -706,7 +706,7 @@ exports[`Renders range control 1`] = `
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
                 >
                   Clear form
                 </span>

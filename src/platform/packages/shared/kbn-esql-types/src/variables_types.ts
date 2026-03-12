@@ -23,12 +23,12 @@ export enum ESQLVariableType {
   MULTI_VALUES = 'multi_values',
   FUNCTIONS = 'functions',
 }
-
 /**
  * Types of ES|QL controls
  * - STATIC_VALUES: Static values that are not dependent on any query
  * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
  */
+
 export enum EsqlControlType {
   STATIC_VALUES = 'STATIC_VALUES',
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
@@ -50,21 +50,6 @@ export interface PublishesESQLVariable {
   esqlVariable$: PublishingSubject<ESQLControlVariable>;
 }
 
-export type ControlWidthOptions = 'small' | 'medium' | 'large';
-
-export interface ESQLControlState {
-  singleSelect?: boolean;
-  title: string;
-  selectedOptions: string[];
-  variableName: string;
-  variableType: ESQLVariableType;
-  esqlQuery: string;
-  controlType: EsqlControlType;
-  // If the controlType is STATIC_VALUES, store the list of availableOptions in the control state
-  // VALUES_FROM_QUERY controls will instead fetch available options at runtime
-  availableOptions?: string[];
-}
-
 export const apiPublishesESQLVariable = (
   unknownApi: unknown
 ): unknownApi is PublishesESQLVariable => {
@@ -84,7 +69,7 @@ export const apiPublishesESQLVariables = (
 };
 
 interface HasVariableName {
-  variableName: string;
+  variable_name: string;
 }
 
 /**
@@ -95,7 +80,7 @@ interface HasVariableName {
 export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
   return Boolean(
     controlState &&
-      (controlState as HasVariableName)?.variableName !== undefined &&
-      typeof (controlState as HasVariableName).variableName === 'string'
+      (controlState as HasVariableName)?.variable_name !== undefined &&
+      typeof (controlState as HasVariableName).variable_name === 'string'
   );
 };

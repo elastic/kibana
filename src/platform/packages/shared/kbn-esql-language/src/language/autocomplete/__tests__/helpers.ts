@@ -46,6 +46,7 @@ import {
   timeseriesIndices,
   editorExtensions,
   inferenceEndpoints,
+  views,
 } from '../../../__tests__/language/helpers';
 import { IGNORED_FUNCTIONS_BY_LOCATION } from '../../../__tests__/commands/autocomplete';
 
@@ -384,6 +385,7 @@ export function createCustomCallbackMocks(
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
+    getViews: jest.fn(async () => ({ views })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       // from * is called in the empty state
       if (queryString.includes('logs*') || queryString === 'from *') {

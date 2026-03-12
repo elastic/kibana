@@ -6,21 +6,24 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import type { FilterCondition } from '@kbn/streamlang';
+import yaml from 'yaml';
+import type { Condition, FilterCondition } from '@kbn/streamlang';
 
 import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
     <textarea
       data-test-subj={dataTestSubj}
       value={value}
       onChange={(e) => onChange?.(e.target.value)}
+      onBlur={() => onBlur?.()}
     />
   ),
 }));
@@ -41,6 +44,14 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+// Mock the condition YAML service
+jest.mock('./condition_yaml_service', () => ({
+  conditionYamlService: {
+    register: jest.fn().mockResolvedValue(undefined),
+    release: jest.fn().mockResolvedValue(undefined),
+  },
+}));
+
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
 };
@@ -52,6 +63,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('ConditionEditor', () => {
   const mockOnConditionChange = jest.fn();
+  const mockOnValidityChange = jest.fn();
 
   const defaultFieldSuggestions: Suggestion[] = [
     { name: 'status', type: 'keyword' },
@@ -75,6 +87,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -88,6 +101,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -103,16 +117,141 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="disabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
       const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
       expect(switchButton).toBeDisabled();
     });
+
+    it('does not call onConditionChange on every keystroke; emits on debounce when YAML is valid', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'error' });
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'error' });
+
+      jest.useRealTimers();
+    });
+
+    it('flushes the last valid YAML immediately on blur', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'warn' });
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      fireEvent.blur(textarea);
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+
+      jest.useRealTimers();
+    });
+
+    it('does not flush on blur when the syntax editor value has not changed', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+
+      fireEvent.blur(textarea);
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('flushes pending debounced updates on unmount', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+      const { unmount } = renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+      const nextValue = yaml.stringify({ field: 'severity_text', eq: 'debug' });
+
+      fireEvent.change(textarea, { target: { value: nextValue } });
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+
+      unmount();
+      expect(mockOnConditionChange).toHaveBeenCalledTimes(1);
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'debug' });
+
+      jest.useRealTimers();
+    });
   });
 
   describe('Invalid condition handling', () => {
     it('should show error for invalid condition', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const invalidCondition = { invalid: 'condition' } as any;
 
       renderWithProviders(
@@ -120,12 +259,240 @@ describe('ConditionEditor', () => {
           condition={invalidCondition}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
       expect(
         screen.getByText(/The condition is invalid or in unrecognized format/i)
       ).toBeInTheDocument();
+    });
+
+    it('should NOT call onConditionChange when YAML parsing fails in syntax editor', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Clear the editor to simulate empty/invalid YAML
+      await user.clear(codeEditor);
+
+      // Verify onConditionChange was NOT called when YAML is invalid
+      // This prevents overriding user's partial input while typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call onConditionChange when syntax editor contains invalid YAML', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Set invalid YAML via fireEvent.change (userEvent.type has issues with special chars)
+      fireEvent.change(codeEditor, { target: { value: 'field: [unclosed' } });
+
+      // Verify onConditionChange was NOT called when YAML is invalid
+      // This prevents overriding user's partial input while typing
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should call onConditionChange when syntax editor contains valid YAML', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      // Toggle to syntax editor
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      // Clear any previous calls from initialization
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Set valid YAML via fireEvent.change (userEvent.type types character by character which is problematic)
+      const validYaml = yaml.stringify({ field: 'test', eq: 'value' });
+      fireEvent.change(codeEditor, { target: { value: validYaml } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      // Verify onConditionChange was called with the parsed YAML
+      expect(mockOnConditionChange).toHaveBeenCalled();
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'test', eq: 'value' });
+
+      jest.useRealTimers();
+    });
+
+    it('should show error message when condition becomes invalid via syntax editor', () => {
+      // Render with an invalid condition (simulating what happens after the fix)
+      const invalidCondition = {} as Condition;
+
+      renderWithProviders(
+        <ConditionEditor
+          condition={invalidCondition}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      expect(
+        screen.getByText(/The condition is invalid or in unrecognized format/i)
+      ).toBeInTheDocument();
+    });
+
+    it('should NOT call onConditionChange and should report invalid when syntax editor is cleared (empty string)', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+      mockOnValidityChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, { target: { value: '' } });
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenCalledWith(false);
+
+      jest.useRealTimers();
+    });
+
+    it('should NOT call onConditionChange and should report invalid when YAML has unrecognized keys', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+      mockOnValidityChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, {
+        target: { value: 'field: user.name\neq: user1\nsdfsd: sdf\n' },
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenCalledWith(false);
+
+      jest.useRealTimers();
+    });
+
+    it('should NOT flush on blur when YAML has unrecognized keys', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, {
+        target: { value: 'field: user.name\neq: user1\nsdfsd: sdf\n' },
+      });
+      fireEvent.blur(codeEditor);
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call onConditionChange on blur when syntax editor is empty', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      mockOnConditionChange.mockClear();
+
+      const codeEditor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      fireEvent.change(codeEditor, { target: { value: '' } });
+      fireEvent.blur(codeEditor);
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
     });
   });
 
@@ -141,6 +508,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -161,6 +529,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -180,6 +549,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -199,6 +569,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -218,6 +589,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -229,6 +601,93 @@ describe('ConditionEditor', () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math'
       );
       expect(link).toHaveAttribute('target', '_blank');
+    });
+  });
+
+  describe('Validity plumbing', () => {
+    it('should report invalid YAML without changing the condition', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('field: [unclosed');
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should not clobber local syntax text on rerender while YAML is invalid', async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('field: [unclosed');
+
+      rerender(
+        <I18nProvider>
+          <ConditionEditor
+            condition={{ field: 'severity_text', eq: 'info' }}
+            status="enabled"
+            onConditionChange={mockOnConditionChange}
+            onValidityChange={mockOnValidityChange}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streamsAppConditionEditorCodeEditor')).toHaveValue(
+        'field: [unclosed'
+      );
+    });
+
+    it('should report valid YAML and update condition on parse', async () => {
+      jest.useFakeTimers();
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+
+      // Use fireEvent.change to set valid YAML directly
+      const validYaml = 'field: severity_text\neq: warn\n';
+      fireEvent.change(editor, { target: { value: validYaml } });
+
+      // Wait for debounce to complete
+      act(() => {
+        jest.advanceTimersByTime(400);
+      });
+
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(true);
+
+      jest.useRealTimers();
     });
   });
 });

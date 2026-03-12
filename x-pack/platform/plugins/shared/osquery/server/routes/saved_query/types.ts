@@ -24,6 +24,23 @@ export interface SavedQueryResponse {
   version: number | string;
 }
 
+export interface CopySavedQueryResponseData {
+  saved_object_id: string;
+  id: string;
+  description: string | undefined;
+  query: string;
+  interval: number | string;
+  timeout?: number;
+  snapshot?: boolean;
+  removed?: boolean;
+  platform?: string;
+  ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
+  created_at: string;
+  created_by: string | undefined;
+  updated_at: string;
+  updated_by: string | undefined;
+}
+
 export interface UpdateSavedQueryResponse {
   saved_object_id: string;
   id: string;

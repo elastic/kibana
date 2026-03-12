@@ -11,8 +11,8 @@ import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
-import type { ESQLControlState } from '@kbn/esql-types';
 import useLatest from 'react-use/lib/useLatest';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -101,7 +101,7 @@ export const SingleTabView = ({
     }: {
       dataViewSpec?: DataViewSpec | undefined;
       defaultUrlState?: DiscoverAppState;
-      esqlControls?: ControlPanelsState<ESQLControlState>;
+      esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
     } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,

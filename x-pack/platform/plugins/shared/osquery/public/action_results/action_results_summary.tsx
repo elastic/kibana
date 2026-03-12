@@ -26,6 +26,8 @@ interface ActionResultsSummaryProps {
   expirationDate?: string;
   agentIds?: string[];
   error?: string;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 // Use Elasticsearch's native SearchHit type for result edges
@@ -92,6 +94,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   agentIds,
   error,
   startDate,
+  scheduleId,
+  executionCount,
 }) => {
   const { http, application } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -112,6 +116,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    scheduleId,
+    executionCount,
   });
 
   // Extract agent IDs from current page edges
@@ -333,6 +339,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         columns={columns}
         pagination={pagination}
         onChange={onTableChange}
+        tableCaption={i18n.translate(
+          'xpack.osquery.liveQueryActionResults.table.liveActionResultsCaption',
+          {
+            defaultMessage: 'Live action results',
+          }
+        )}
         tableLayout="auto"
       />
     </div>

@@ -9,9 +9,10 @@
 
 import type { Document, LineCounter, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
+import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { LineParseResult } from './parse_line_for_completion';
+import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
   StepPropInfo,
@@ -46,15 +47,13 @@ export interface AutocompleteContext {
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
+  isInWorkflowInputsContext: boolean;
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
-
-  // workflow definition (for JSON Schema autocompletion)
-  workflowDefinition: {
-    inputs?: unknown;
-    [key: string]: unknown;
-  } | null;
+  workflows: WorkflowsResponse;
+  currentWorkflowId: string | null;
+  workflowDefinition: WorkflowYaml | null;
 }
 
 // Extended context includes Monaco editor model and position for advanced autocompletion features

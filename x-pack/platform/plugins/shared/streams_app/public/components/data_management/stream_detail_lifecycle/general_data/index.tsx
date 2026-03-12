@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
-import { type IngestStreamLifecycle, type Streams } from '@kbn/streams-schema';
+import { type IngestStreamLifecycle, type Streams, type IlmPolicy } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -35,7 +35,8 @@ export const StreamDetailGeneralData = ({
   data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const {
-    core: { http, notifications },
+    core: { notifications, http, overlays, application },
+    appParams,
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -48,13 +49,43 @@ export const StreamDetailGeneralData = ({
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
+  const [isEditLifecycleFlyoutOpen, setIsEditLifecycleFlyoutOpen] = useState(false);
+  const [hasUnsavedEditLifecycleFlyoutChanges, setHasUnsavedEditLifecycleFlyoutChanges] =
+    useState(false);
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: hasUnsavedEditLifecycleFlyoutChanges,
+    history: appParams.history,
+    http,
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays.openConfirm,
+    shouldPromptOnReplace: false,
+    messageText: i18n.translate('xpack.streams.streamDetailLifecycle.unsavedChangesPrompt', {
+      defaultMessage:
+        'You have unsaved changes in the stream lifecycle. If you leave without saving, your changes will be lost.',
+    }),
+    titleText: i18n.translate('xpack.streams.streamDetailLifecycle.unsavedChangesPromptTitle', {
+      defaultMessage: 'Unsaved changes',
+    }),
+    confirmButtonText: i18n.translate(
+      'xpack.streams.streamDetailLifecycle.unsavedChangesPromptConfirmButton',
+      {
+        defaultMessage: 'Leave without saving',
+      }
+    ),
+    cancelButtonText: i18n.translate(
+      'xpack.streams.streamDetailLifecycle.unsavedChangesPromptCancelButton',
+      {
+        defaultMessage: 'Keep editing',
+      }
+    ),
+  });
 
   const { signal } = useAbortController();
 
-  const getIlmPolicies = () =>
-    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
-      signal,
-    });
+  const getIlmPolicies = async (): Promise<IlmPolicy[]> => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/lifecycle/_policies', { signal });
+  };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
@@ -113,7 +144,7 @@ export const StreamDetailGeneralData = ({
       <EuiTitle size="xs">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <h4>
@@ -128,7 +159,11 @@ export const StreamDetailGeneralData = ({
       {/* Retention Section */}
       <SectionPanel
         topCard={
-          <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
+          <RetentionCard
+            definition={definition}
+            openEditModal={() => setIsEditModalOpen(true)}
+            isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+          />
         }
         bottomCard={
           <StorageSizeCard
@@ -139,7 +174,14 @@ export const StreamDetailGeneralData = ({
         }
       >
         {definition.privileges.lifecycle ? (
-          <LifecycleSummary definition={definition} stats={data.stats?.ds.stats} />
+          <LifecycleSummary
+            definition={definition}
+            stats={data.stats?.ds.stats}
+            isMetricsStream={definition.index_mode === 'time_series'}
+            refreshDefinition={refreshDefinition}
+            onFlyoutOpenChange={setIsEditLifecycleFlyoutOpen}
+            onFlyoutUnsavedChangesChange={setHasUnsavedEditLifecycleFlyoutChanges}
+          />
         ) : null}
       </SectionPanel>
 

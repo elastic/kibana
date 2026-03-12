@@ -35,6 +35,7 @@ const mockCallbacks: SingleAgentMenuCallbacks = {
   onUnenrollClick: jest.fn(),
   onUninstallClick: jest.fn(),
   onRollbackClick: jest.fn(),
+  onViewAgentPolicyClick: jest.fn(),
 };
 
 function createMockAgent(overrides: Partial<Agent> = {}): Agent {
@@ -233,6 +234,61 @@ describe('useSingleAgentMenuItems', () => {
       const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
       expect(upgradeManagement).toBeDefined();
       expect(upgradeManagement?.children).toBeDefined();
+    });
+
+    it('should disable rollback when agent is upgrading', () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentPrivilegeLevelChange: true,
+        enableAgentRollback: true,
+      } as any);
+
+      const validUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            status: 'updating',
+            upgrade_started_at: new Date().toISOString(),
+            upgrade_details: {
+              state: 'UPG_DOWNLOADING',
+              target_version: '8.9.0',
+              action_id: 'action-1',
+            },
+            upgrade: { rollbacks: [{ valid_until: validUntil, version: '8.7.0' }] },
+            local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
+      const rollbackItem = upgradeManagement?.children?.find((item) => item.id === 'rollback');
+      expect(rollbackItem).toBeDefined();
+      expect(rollbackItem?.disabled).toBe(true);
+    });
+
+    it('should enable rollback when agent is not upgrading and has valid rollback', () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentPrivilegeLevelChange: true,
+        enableAgentRollback: true,
+      } as any);
+
+      const validUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({
+            upgrade: { rollbacks: [{ valid_until: validUntil, version: '8.7.0' }] },
+            local_metadata: { elastic: { agent: { version: '8.8.0', upgradeable: true } } },
+          }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const upgradeManagement = result.current.find((item) => item.id === 'upgrade-management');
+      const rollbackItem = upgradeManagement?.children?.find((item) => item.id === 'rollback');
+      expect(rollbackItem).toBeDefined();
+      expect(rollbackItem?.disabled).toBe(false);
     });
 
     it('should include Maintenance and diagnostics submenu', () => {
@@ -479,5 +535,17 @@ describe('useSingleAgentMenuItems', () => {
       const viewJsonItem = maintenance?.children?.find((item) => item.id === 'view-json');
       expect(viewJsonItem?.onClick).toBeDefined();
     });
+  });
+
+  it('should return only one menu item (view-json) for OPAMP agent', () => {
+    const { result } = renderer.renderHook(() =>
+      useSingleAgentMenuItems({
+        agent: createMockAgent({ type: 'OPAMP' }),
+        agentPolicy: createMockAgentPolicy(),
+        callbacks: mockCallbacks,
+      })
+    );
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0].id).toBe('view-json');
   });
 });

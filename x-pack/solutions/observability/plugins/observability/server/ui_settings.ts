@@ -30,6 +30,7 @@ import {
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
+  apmUseUnifiedTraceWaterfall,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   searchExcludedDataTiers,
@@ -417,6 +418,19 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     requiresPageReload: true,
     solutionViews: ['classic', 'oblt'],
   },
+  [apmUseUnifiedTraceWaterfall]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfall', {
+      defaultMessage: 'Use unified trace waterfall',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfallDescription', {
+      defaultMessage: 'Enable the new unified trace waterfall',
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+    solutionViews: ['classic', 'oblt'],
+  },
   [searchExcludedDataTiers]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.searchExcludedDataTiers', {
@@ -431,7 +445,8 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     value: [],
     schema: schema.arrayOf(
-      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')]),
+      { maxSize: 2 }
     ),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],

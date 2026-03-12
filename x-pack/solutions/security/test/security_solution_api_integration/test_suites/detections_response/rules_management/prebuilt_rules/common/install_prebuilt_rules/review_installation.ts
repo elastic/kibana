@@ -142,19 +142,26 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
 
-        const response = await reviewPrebuiltRulesToInstall(supertest, {
+        const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
         });
-        expect(response.rules.length).toEqual(2);
+        expect(page1Response.rules.length).toEqual(2);
+
+        const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
+          page: 2,
+          per_page: 2,
+        });
+
+        expect(page2Response.rules.length).toEqual(1);
       });
 
       it('returns correct rules for a page specified in the request', async () => {
         const ruleAssets = [
-          createRuleAssetSavedObject({ rule_id: 'rule-1' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-2' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-3' }),
-          createRuleAssetSavedObject({ rule_id: 'rule-4' }),
+          createRuleAssetSavedObject({ name: 'Rule 1', rule_id: 'rule-1' }),
+          createRuleAssetSavedObject({ name: 'Rule 2', rule_id: 'rule-2' }),
+          createRuleAssetSavedObject({ name: 'Rule 3', rule_id: 'rule-3' }),
+          createRuleAssetSavedObject({ name: 'Rule 4', rule_id: 'rule-4' }),
         ];
 
         await createPrebuiltRuleAssetSavedObjects(es, ruleAssets);
@@ -162,15 +169,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const page1Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 1,
           per_page: 2,
+          sort: [{ field: 'name', order: 'asc' }],
         });
 
         expect(page1Response.rules).toHaveLength(2);
-        expect(page1Response.rules).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ rule_id: 'rule-1' }),
-            expect.objectContaining({ rule_id: 'rule-2' }),
-          ])
-        );
+        expect(page1Response.rules).toEqual([
+          expect.objectContaining({ name: 'Rule 1' }),
+          expect.objectContaining({ name: 'Rule 2' }),
+        ]);
 
         const page2Response = await reviewPrebuiltRulesToInstall(supertest, {
           page: 2,
@@ -178,12 +184,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(page2Response.rules).toHaveLength(2);
-        expect(page2Response.rules).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ rule_id: 'rule-3' }),
-            expect.objectContaining({ rule_id: 'rule-4' }),
-          ])
-        );
+        expect(page2Response.rules).toEqual([
+          expect.objectContaining({ name: 'Rule 3' }),
+          expect.objectContaining({ name: 'Rule 4' }),
+        ]);
       });
 
       it('returns correct number of rules for the last page', async () => {
@@ -213,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Expected number, received string',
+            message: '[request body]: page: Invalid input: expected number, received string',
           });
 
           expect(
@@ -225,7 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Number must be greater than or equal to 1',
+            message: '[request body]: page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -237,7 +241,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: page: Number must be greater than or equal to 1',
+            message: '[request body]: page: Too small: expected number to be >=1',
           });
         });
 
@@ -251,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Expected number, received string',
+            message: '[request body]: per_page: Invalid input: expected number, received string',
           });
 
           expect(
@@ -263,7 +267,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be greater than or equal to 1',
+            message: '[request body]: per_page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -275,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be greater than or equal to 1',
+            message: '[request body]: per_page: Too small: expected number to be >=1',
           });
 
           expect(
@@ -287,7 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
               400
             )
           ).toMatchObject({
-            message: '[request body]: per_page: Number must be less than or equal to 10000',
+            message: '[request body]: per_page: Too big: expected number to be <=10000',
           });
         });
       });

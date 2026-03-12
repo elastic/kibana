@@ -31,3 +31,4 @@ export {
 } from './handler';
 export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './utils';
 export type { InternalToolDefinition, InternalToolAvailabilityHandler } from './internal';
+export type { ToolRegistry, ToolListParams, ToolCreateParams, ToolUpdateParams } from './registry';

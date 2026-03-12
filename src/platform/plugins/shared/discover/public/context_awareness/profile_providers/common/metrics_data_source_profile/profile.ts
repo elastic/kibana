@@ -9,7 +9,7 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';

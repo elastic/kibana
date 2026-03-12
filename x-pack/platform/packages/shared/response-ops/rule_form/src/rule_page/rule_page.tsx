@@ -146,7 +146,7 @@ export const RulePage = (props: RulePageProps) => {
         <ConfirmRuleClose onCancel={() => setIsCancelModalOpen(false)} onConfirm={onCancel} />
       )}
       {isConnectorsScreenVisible && <RuleActionsConnectorsModal />}
-      {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
+      {isShowRequestScreenVisible && <RulePageShowRequestModal />}
     </>
   );
 };

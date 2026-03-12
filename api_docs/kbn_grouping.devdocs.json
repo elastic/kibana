@@ -387,7 +387,9 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[], groupNumber: number) => JSX.Element | undefined) | undefined; renderChildComponent: ",
+          "[], groupNumber: number, groupBucket: ",
+          "GroupingBucket",
+          "<T>, closePopover: () => void) => JSX.Element | undefined) | undefined; renderChildComponent: ",
           "GroupChildComponentRenderer",
           "<T>; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; groupingLevel?: number | undefined; additionalToolbarControls?: JSX.Element[] | undefined; itemsPerPage: number; onGroupClose: () => void; }"
         ],
@@ -413,6 +415,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-grouping/src/components/types.ts",
         "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grouping",
+        "id": "def-common.GroupingSort",
+        "type": "Type",
+        "tags": [],
+        "label": "GroupingSort",
+        "description": [],
+        "signature": [
+          "{ [category: string]: { order: \"asc\" | \"desc\"; }; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-grouping/src/containers/query/types.ts",
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

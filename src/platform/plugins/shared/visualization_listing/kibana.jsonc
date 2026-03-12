@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/visualization-listing-plugin",
+  "owner": ["@elastic/kibana-visualizations"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "The listing page for visualizations.",
+  "plugin": {
+    "id": "visualizationListing",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": ["visualizations", "contentManagement", "embeddable"],
+    "optionalPlugins": ["savedObjectsTagging", "dashboard"],
+    "requiredBundles": [],
+    "extraPublicDirs": []
+  }
+}

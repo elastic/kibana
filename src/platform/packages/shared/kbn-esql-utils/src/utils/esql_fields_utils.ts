@@ -8,13 +8,8 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { LeafPrinter, Walker } from '@kbn/esql-language';
-import type {
-  ESQLColumn,
-  ESQLList,
-  ESQLLiteral,
-  ESQLProperNode,
-} from '@kbn/esql-language/src/types';
+import { isAssignment, isColumn, LeafPrinter, singleItems, Walker } from '@elastic/esql';
+import type { ESQLColumn, ESQLList, ESQLLiteral, ESQLProperNode } from '@elastic/esql/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const SPATIAL_FIELDS = ['geo_point', 'geo_shape', 'point', 'shape'];
@@ -81,12 +76,31 @@ export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
   return isGroupable(field.type, field.esTypes?.[0]);
 };
 
+/**
+ * Returns the expression that defines the value of the field.
+ *
+ * If the field is defined using an assignement expression, it returns the right side of the assignment.
+ * i.e. in `STATS foo = bar + 1`, it returns `bar + 1`.
+ *
+ * If the field is not defined using an assignment, it returns the field argument itself.
+ * i.e. in `STATS count()`, it returns `count()`.
+ */
+export const getFieldDefinitionFromArg = (fieldArgument: ESQLProperNode): ESQLProperNode => {
+  if (isAssignment(fieldArgument) && isColumn(fieldArgument.args[0])) {
+    const [_, definition] = singleItems(fieldArgument.args);
+    return definition;
+  }
+  return fieldArgument;
+};
+
 export type Terminal = ESQLColumn | ESQLLiteral | ESQLList;
 /**
  * Retrieves a list of terminal nodes that were found in the field definition.
  */
-export const getFieldTerminals = (definition: ESQLProperNode) => {
+export const getFieldTerminals = (fieldArgument: ESQLProperNode) => {
   const terminals: Array<Terminal> = [];
+
+  const definition = getFieldDefinitionFromArg(fieldArgument);
 
   Walker.walk(definition, {
     visitLiteral(node) {
@@ -112,8 +126,10 @@ export const getFieldTerminals = (definition: ESQLProperNode) => {
  * STATS foo = agg(x) BY y, bar = x
  * ```
  */
-export const getUsedFields = (definition: ESQLProperNode) => {
+export const getUsedFields = (fieldArgument: ESQLProperNode) => {
   const usedFields: Set<string> = new Set();
+
+  const definition = getFieldDefinitionFromArg(fieldArgument);
 
   Walker.walk(definition, {
     visitColumn(node) {

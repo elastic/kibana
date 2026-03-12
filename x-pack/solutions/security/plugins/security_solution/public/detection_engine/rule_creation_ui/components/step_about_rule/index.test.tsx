@@ -88,7 +88,8 @@ export const stepDefineStepMLRule: DefineStepRule = {
   shouldLoadQueryDynamically: false,
 };
 
-describe('StepAboutRuleComponent', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/235182
+describe.skip('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({

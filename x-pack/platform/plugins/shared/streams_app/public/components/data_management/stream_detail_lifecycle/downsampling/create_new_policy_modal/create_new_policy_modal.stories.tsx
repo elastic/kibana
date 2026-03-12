@@ -22,6 +22,7 @@ type Story = StoryObj<typeof CreatePolicyModal>;
 export const Default: Story = {
   args: {
     policyNames: ['logs-default', 'metrics-prod', 'my-policy'],
+    originalPolicyName: 'my-policy',
   },
   render: (args) => {
     const Story = ({ policyNames }: { policyNames: string[] }) => {
@@ -34,6 +35,31 @@ export const Default: Story = {
             policyNames={policyNames}
             onBack={action('onBack')}
             onSave={action('onSave')}
+            originalPolicyName={args.originalPolicyName}
+          />
+        </EuiOverlayMask>
+      );
+    };
+    return <Story policyNames={args.policyNames ?? []} />;
+  },
+};
+export const WithExistingPolicyName: Story = {
+  args: {
+    policyNames: ['logs-default', 'metrics-prod', 'my-policy-2', 'my-policy-3'],
+    originalPolicyName: 'my-policy',
+  },
+  render: (args) => {
+    const Story = ({ policyNames }: { policyNames: string[] }) => {
+      useEffect(() => {
+        action('policyNames')(policyNames);
+      }, [policyNames]);
+      return (
+        <EuiOverlayMask>
+          <CreatePolicyModal
+            policyNames={policyNames}
+            onBack={action('onBack')}
+            onSave={action('onSave')}
+            originalPolicyName={args.originalPolicyName}
           />
         </EuiOverlayMask>
       );

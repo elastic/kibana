@@ -55,6 +55,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const dashboardApi = useDashboardApi();
     const dashboardInternalApi = useDashboardInternalApi();
     const [
+      hidePanelBorders,
       highlightPanelId,
       scrollToPanelId,
       expandedPanelId,
@@ -64,6 +65,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardContainerRef,
       arePanelsRelated,
     ] = useBatchedPublishingSubjects(
+      dashboardApi.hideBorder$,
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
       dashboardApi.expandedPanelId$,
@@ -81,6 +83,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId !== undefined &&
       focusedPanelId !== id &&
       !arePanelsRelated(id, focusedPanelId);
+    const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -119,7 +122,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
         showBadges: true,
-        showBorder: useMargins,
+        showBorder,
         showNotifications: true,
         showShadow: false,
         setDragHandles,
@@ -135,7 +138,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           onApiAvailable={(api) => dashboardApi.registerChildApi(api)}
         />
       );
-    }, [id, dashboardApi, type, useMargins, setDragHandles]);
+    }, [id, dashboardApi, type, showBorder, setDragHandles]);
 
     const { euiTheme } = useEuiTheme();
     const hoverActionsHeight = euiTheme.base * 2;
@@ -231,6 +234,10 @@ const dashboardGridItemStyles = {
         },
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
+        },
+        // Call out focused panels with a simple border
+        '&.dshDashboardGrid__item--focused .embPanel': {
+          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
       getHighlightStyles(context),

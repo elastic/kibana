@@ -19,72 +19,46 @@ import {
   selectTabRuntimeState,
   selectTab,
 } from '..';
-import { createDataViewDataSource, DataSourceType } from '../../../../../../common/data_sources';
+import { createDataViewDataSource } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../../../__mocks__/services';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../../../__mocks__/saved_search';
 import {
   dataViewAdHoc,
   dataViewComplexMock,
   dataViewWithDefaultColumnMock,
 } from '../../../../../__mocks__/data_view_complex';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabStateActions from './tab_state';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
-  const { internalState, initializeTabs, initializeSingleTab, runtimeStateManager } =
-    getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [
-        dataViewMockWithTimeField,
-        dataViewMock,
-        dataViewComplexMock,
-        dataViewWithDefaultColumnMock,
-      ],
-    });
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [
+      dataViewMockWithTimeField,
+      dataViewMock,
+      dataViewComplexMock,
+      dataViewWithDefaultColumnMock,
+    ],
+  });
 
-  const dataView = dataViewMockWithTimeField;
-
-  // Create a persisted tab
-  const persistedTab = fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: 'test-tab',
-      initialInternalState: {
-        serializedSearchSource: {
-          index: dataView.id,
-        },
-      },
-      appState: {
-        query: { language: 'kuery', query: 'test' },
-        columns: ['field1', 'field2'],
-        dataSource: {
-          type: DataSourceType.DataView,
-          dataViewId: dataView.id!,
-        },
-        sort: [['@timestamp', 'desc']],
-        interval: 'auto',
-        hideChart: false,
-      },
-    }),
-    timeRestore: false,
+  const persistedTab = getPersistedTabMock({
+    dataView: dataViewMockWithTimeField,
     services,
   });
 
-  const persistedDiscoverSession = createDiscoverSessionMock({
-    id: 'test-session',
-    tabs: [persistedTab],
+  await toolkit.initializeTabs({
+    persistedDiscoverSession: createDiscoverSessionMock({
+      id: 'test-session',
+      tabs: [persistedTab],
+    }),
   });
-
-  await initializeTabs({ persistedDiscoverSession });
-  await initializeSingleTab({ tabId: persistedTab.id });
+  await toolkit.initializeSingleTab({ tabId: persistedTab.id });
 
   return {
-    internalState,
-    runtimeStateManager,
+    ...toolkit,
     tabId: persistedTab.id,
-    services,
   };
 };
 
@@ -245,6 +219,9 @@ describe('tab_state_data_view actions', () => {
 
     test('onDataViewCreated - ad-hoc data view', async () => {
       const { internalState, tabId, runtimeStateManager, services } = await setup();
+      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
+        dataViewMockWithTimeField
+      );
       jest
         .spyOn(services.dataViews, 'get')
         .mockImplementationOnce((id) =>
@@ -256,9 +233,10 @@ describe('tab_state_data_view actions', () => {
           nextDataView: dataViewAdHoc,
         })
       );
-      expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
-        dataViewAdHoc
-      );
+      // Verify the ad-hoc data view was added to the runtime state
+      const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
+      expect(adHocDataViews.map((dv) => dv.id)).toContain(dataViewAdHoc.id);
+      // Verify the app state was updated with the new data source
       expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
       );

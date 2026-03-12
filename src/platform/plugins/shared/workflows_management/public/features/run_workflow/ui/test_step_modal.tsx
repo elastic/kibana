@@ -17,12 +17,13 @@ import {
   euiFontSize,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,7 +43,6 @@ export function TestStepModal({
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
 }) {
-  const [overflowWidgetsDomNode, setOverflowWidgetsDomNode] = useState<HTMLDivElement | null>(null);
   const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
   const [inputsJson, setInputsJson] = React.useState<string>(
@@ -58,22 +58,7 @@ export function TestStepModal({
     });
   }, [initialcontextOverride.schema]);
 
-  const modelUri = useMemo(() => `inmemory://models/${id}.json`, [id]);
   const schemaUri = useMemo(() => `inmemory://schemas/${id}`, [id]);
-
-  useEffect(() => {
-    const overlayElement = document.createElement('div');
-    overlayElement.id = 'step-mock-data-overlay-root';
-    overlayElement.style.zIndex = '6001'; // should be above modal's z-index (6000)
-    overlayElement.style.position = 'fixed';
-    overlayElement.classList.add('monaco-editor');
-    document.body.appendChild(overlayElement);
-    setOverflowWidgetsDomNode(overlayElement);
-
-    return () => {
-      document.body.removeChild(overlayElement);
-    };
-  }, [setOverflowWidgetsDomNode]);
 
   // Hook Monaco on mount to register the schema for validation + suggestions
   const mountedOnce = useRef(false);
@@ -84,29 +69,19 @@ export function TestStepModal({
 
       try {
         // First, configure the JSON language service with schema validation
-        monaco.languages.json?.jsonDefaults?.setDiagnosticsOptions({
+        const currentModel = editor.getModel();
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           enableSchemaRequest: false,
           schemas: [
             {
               uri: schemaUri, // schema URI
-              fileMatch: [modelUri], // bind to this specific model URI
+              fileMatch: [currentModel?.uri.toString() ?? ''], // bind to this specific model URI
               schema: jsonSchema as any,
             },
           ],
         });
-
-        // Get current editor content
-        const text =
-          editor.getValue() || JSON.stringify(initialcontextOverride.stepContext, null, 2);
-
-        // Create model with the specific URI that matches our schema fileMatch
-        const uri = monaco.Uri.parse(modelUri);
-        const model = monaco.editor.createModel(text, 'json', uri);
-
-        // Set the model to the editor
-        editor.setModel(model);
       } catch (error) {
         // Monaco setup failed - fall back to basic JSON editing
       }
@@ -116,7 +91,7 @@ export function TestStepModal({
         editor.setValue(JSON.stringify(initialcontextOverride.stepContext, null, 2));
       }
     },
-    [initialcontextOverride.stepContext, jsonSchema, modelUri, schemaUri]
+    [initialcontextOverride.stepContext, jsonSchema, schemaUri]
   );
 
   useEffect(() => {
@@ -138,12 +113,13 @@ export function TestStepModal({
     }
   };
 
-  if (!overflowWidgetsDomNode) {
-    return null;
-  }
-
   return (
-    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      maxWidth={false}
+      onClose={onClose}
+      data-test-subj="workflowTestStepModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
@@ -159,51 +135,58 @@ export function TestStepModal({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <CodeEditor
-              languageId="json"
-              value={inputsJson}
-              width={1000}
-              height={500}
-              editorDidMount={handleMount}
-              onChange={handleInputChange}
-              dataTestSubj={'workflow-event-json-editor'}
-              options={{
-                language: 'json',
-                overflowWidgetsDomNode,
-                fixedOverflowWidgets: true,
-                theme: WORKFLOWS_MONACO_EDITOR_THEME,
-                automaticLayout: true,
-                fontSize: 12,
-                minimap: {
-                  enabled: false,
-                },
-                overviewRulerBorder: false,
-                scrollbar: {
-                  alwaysConsumeMouseWheel: false,
-                },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem css={{ alignSelf: 'flex-end' }} grow={false}>
-            <EuiButton
-              onClick={handleSubmit}
-              disabled={!isJsonValid}
-              color="success"
-              iconType="play"
-              size="s"
-              data-test-subj="submit-step-run"
-            >
-              <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiModalBody
+        css={({ euiTheme }) => ({
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
+          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        })}
+      >
+        <CodeEditor
+          languageId="json"
+          value={inputsJson}
+          width={1000}
+          height={500}
+          editorDidMount={handleMount}
+          onChange={handleInputChange}
+          dataTestSubj={'workflow-event-json-editor'}
+          // override the z-index of the hover widget to be above modal's z-index (6000)
+          overflowWidgetsContainerZIndexOverride={6001}
+          options={{
+            language: 'json',
+            fixedOverflowWidgets: true,
+            lineNumbersMinChars: 2,
+            theme: WORKFLOWS_MONACO_EDITOR_THEME,
+            automaticLayout: true,
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            overviewRulerBorder: false,
+            scrollbar: {
+              alwaysConsumeMouseWheel: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            hover: {
+              enabled: true,
+            },
+          }}
+        />
       </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton
+          onClick={handleSubmit}
+          disabled={!isJsonValid}
+          color="success"
+          iconType="play"
+          size="s"
+          data-test-subj="workflowSubmitStepRun"
+        >
+          <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+        </EuiButton>
+      </EuiModalFooter>
     </EuiModal>
   );
 }

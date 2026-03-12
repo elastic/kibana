@@ -7,17 +7,17 @@ mapped_pages:
 
 `Add Data` in the {{kib}} Home application contains tutorials for setting up data flows in the Elastic stack.
 
-Each tutorial contains three sets of instructions:
+Each tutorial provides three sets of instructions for setting up data flows based on your deployment:
 
-* `On Premise.` Set up a data flow when both {{kib}} and {{es}} are running on premise.
-* `On Premise Elastic Cloud.` Set up a data flow when {{kib}} is running on premise and {{es}} is running on Elastic Cloud.
-* `Elastic Cloud.` Set up a data flow when both {{kib}} and {{es}} are running on Elastic Cloud.
+* `On Premise:` Both {{kib}} and {{es}} running on premise.
+* `On Premise Elastic Cloud:` {{kib}} on premise, {{es}} on Elastic Cloud.
+* `Elastic Cloud:` Both {{kib}} and {{es}} running on Elastic Cloud.
 
 
 ## Creating a new tutorial [_creating_a_new_tutorial]
 
 1. Create a new directory in the [tutorials directory](https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/home/server/tutorials).
-2. In the new directory, create a file called `index.ts` that exports a function. The function must return a function object that conforms to the `TutorialSchema` interface [tutorial schema](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts).
+2. In the new directory, create a file called `index.ts` that exports a function. The function must return a function object that conforms to the [TutorialSchema interface](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/home/server/services/tutorials/lib/tutorial_schema.ts).
 3. Register the tutorial in [register.ts](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/home/server/tutorials/register.ts) by adding it to the `builtInTutorials`.
 4. Add image assets to the `tutorial_resources` directory.
 5. Run {{kib}} locally to preview the tutorial.

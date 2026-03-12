@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import {
   type ConnectedCustomizationService,
   getConnectedCustomizationService,
@@ -32,11 +32,16 @@ describe('getConnectedCustomizationService', () => {
       return promise;
     });
     const customizationCallbacks: CustomizationCallback[] = [callback];
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
     const servicePromise = getConnectedCustomizationService({
       stateContainer,
       customizationCallbacks,
-      services: createDiscoverServicesMock(),
+      services,
     });
     let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);

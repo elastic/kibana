@@ -50,7 +50,12 @@ export function FeatureIdentificationControl({
     getTask();
   }, [getTask]);
 
-  useTaskPolling(task, getFeaturesIdentificationStatus, getTask);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getFeaturesIdentificationStatus,
+    onRefresh: getTask,
+    onCancel: cancelFeaturesIdentificationTask,
+  });
 
   // Sync task status with parent component - only trigger on status changes
   useEffect(() => {
@@ -84,11 +89,8 @@ export function FeatureIdentificationControl({
   }, [aiFeatures, onTaskStart, scheduleFeaturesIdentificationTask, getTask]);
 
   const handleCancelIdentification = useCallback(() => {
-    cancelFeaturesIdentificationTask().then(() => {
-      getTask();
-      onTaskEnd();
-    });
-  }, [cancelFeaturesIdentificationTask, getTask, onTaskEnd]);
+    cancelTask().then(onTaskEnd);
+  }, [cancelTask, onTaskEnd]);
 
   if (error) {
     return <LoadingErrorCallout errorMessage={error.message} />;
@@ -124,7 +126,11 @@ export function FeatureIdentificationControl({
       );
 
     case TaskStatus.InProgress:
-      return <InProgressState onCancel={handleCancelIdentification} />;
+      return isCancellingTask ? (
+        <CancellingState aiFeatures={aiFeatures} />
+      ) : (
+        <InProgressState onCancel={handleCancelIdentification} />
+      );
 
     case TaskStatus.BeingCanceled:
       return <CancellingState aiFeatures={aiFeatures} />;

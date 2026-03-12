@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, type EsClient } from '@kbn/scout';
+import { type EsClient, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
@@ -106,8 +107,8 @@ async function cleanupTsdbResources(esClient: EsClient, templateName: string, st
 }
 
 test.describe(
-  'TSDB-aware Discover links - Streams list view',
-  { tag: ['@ess', '@svlOblt'] },
+  'TSDB-aware Discover links',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
       // Create TSDB stream
@@ -124,12 +125,6 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamMainPage();
-      await pageObjects.streams.expectStreamsTableVisible();
-    });
-
     test.afterAll(async ({ esClient, apiServices, logsSynthtraceEsClient }) => {
       // Cleanup TSDB resources
       await cleanupTsdbResources(esClient, TSDB_TEMPLATE_NAME, TSDB_STREAM_NAME);
@@ -143,7 +138,14 @@ test.describe(
       await logsSynthtraceEsClient.clean();
     });
 
-    test('should use TS source command for TSDB stream Discover link', async ({ pageObjects }) => {
+    test('list view: should use TS source command for TSDB stream Discover link', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.expectStreamsTableVisible();
+
       await expect
         .poll(
           async () => {
@@ -157,9 +159,14 @@ test.describe(
         .toBe('TS');
     });
 
-    test('should use FROM source command for regular stream Discover link', async ({
+    test('list view: should use FROM source command for regular stream Discover link', async ({
+      browserAuth,
       pageObjects,
     }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamMainPage();
+      await pageObjects.streams.expectStreamsTableVisible();
+
       await expect
         .poll(
           async () => {
@@ -168,6 +175,48 @@ test.describe(
           {
             message: 'Expected regular stream Discover link to use FROM source command',
             timeout: 10_000,
+          }
+        )
+        .toBe('FROM');
+    });
+
+    test('detail page header: should use TS source command for TSDB stream Discover link', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamManagementTab(TSDB_STREAM_NAME, 'overview');
+
+      await expect
+        .poll(
+          async () => {
+            return pageObjects.streams.getDiscoverButtonLinkSourceCommand(TSDB_STREAM_NAME);
+          },
+          {
+            message:
+              'Expected TSDB stream Discover link in detail page header to use TS source command',
+            timeout: 15_000,
+          }
+        )
+        .toBe('TS');
+    });
+
+    test('detail page header: should use FROM source command for regular stream Discover link', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.streams.gotoStreamManagementTab(REGULAR_STREAM_NAME, 'overview');
+
+      await expect
+        .poll(
+          async () => {
+            return pageObjects.streams.getDiscoverButtonLinkSourceCommand(REGULAR_STREAM_NAME);
+          },
+          {
+            message:
+              'Expected regular stream Discover link in detail page header to use FROM source command',
+            timeout: 15_000,
           }
         )
         .toBe('FROM');

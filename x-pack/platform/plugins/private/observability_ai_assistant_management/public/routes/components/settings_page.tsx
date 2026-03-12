@@ -27,7 +27,7 @@ import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
 import { useKibana } from '../../hooks/use_kibana';
-import { SearchConnectorTab } from './search_connector_tab';
+import { ContentConnectorTab } from './content_connector_tab';
 import { getSolutionSpecificLogos } from '../../helpers/get_solution_specific_logos';
 import { getSolutionSpecificLabels } from '../../helpers/get_solution_specific_labels';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
@@ -37,7 +37,7 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered, capabilities },
+      application: { navigateToApp, capabilities },
       serverless,
       spaces,
       cloud,
@@ -133,15 +133,15 @@ export function SettingsPage() {
       disabled: !knowledgeBase.status.value?.enabled,
     },
     {
-      id: 'search_connector',
+      id: 'content_connector',
       name: i18n.translate(
-        'xpack.observabilityAiAssistantManagement.settingsPage.searchConnector',
+        'xpack.observabilityAiAssistantManagement.settingsPage.contentConnector',
         {
-          defaultMessage: 'Search Connectors',
+          defaultMessage: 'Content Connectors',
         }
       ),
-      content: <SearchConnectorTab />,
-      disabled: !isAppRegistered('enterpriseSearch'),
+      content: <ContentConnectorTab />,
+      disabled: serverless && currentSolution === 'es',
     },
   ];
 

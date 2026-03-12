@@ -53,7 +53,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "repoRel",
-                "description": [],
+                "description": [
+                  "/**\n     * Repo relative path to the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -70,7 +72,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "path",
-                "description": [],
+                "description": [
+                  "/**\n     * Absolute path to the the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -87,7 +91,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "dir",
-                "description": [],
+                "description": [
+                  "/**\n     * Absolute directory all resolutions occur relative to\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -104,7 +110,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "/**\n     * Name/id of the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -335,7 +343,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "pkg",
-                "description": [],
+                "description": [
+                  "/**\n     * The RepoPackage object for this LintPackage, access should be mediated through the LintPackage object so direct references are \"deprecated\"\n     */"
+                ],
                 "signature": [
                   "Package"
                 ],
@@ -352,7 +362,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "tsProject",
-                "description": [],
+                "description": [
+                  "/**\n     * The TsProject object for this LintPackage\n     */"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/ts-projects",

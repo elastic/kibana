@@ -61,10 +61,11 @@ const ThroughputChartContent = ({
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
+    metadataFields,
   });
 
   if (!throughputChart) {

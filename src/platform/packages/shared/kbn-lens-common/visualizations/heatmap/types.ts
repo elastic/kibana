@@ -42,7 +42,9 @@ export interface HeatmapLegendConfigResult {
   type: typeof HEATMAP_LEGEND_NAME;
 }
 
-export interface HeatmapGridConfigResult {
+export type HeatmapSortPredicate = 'asc' | 'desc';
+
+export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;
   strokeColor?: string;
@@ -52,14 +54,18 @@ export interface HeatmapGridConfigResult {
   isYAxisLabelVisible: boolean;
   isYAxisTitleVisible: boolean;
   yTitle?: string;
+  ySortPredicate?: HeatmapSortPredicate;
   // X-axis
   isXAxisLabelVisible: boolean;
   xAxisLabelRotation?: number;
   isXAxisTitleVisible: boolean;
   xTitle?: string;
-  // type flag
-  type: typeof HEATMAP_GRID_NAME;
+  xSortPredicate?: HeatmapSortPredicate;
 }
+
+export type HeatmapGridConfigResult = HeatmapGridConfig & {
+  type: typeof HEATMAP_GRID_NAME;
+};
 
 export type HeatmapPalette = PaletteOutput<CustomPaletteParams> & { accessor: string };
 

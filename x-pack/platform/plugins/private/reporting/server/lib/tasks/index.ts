@@ -25,6 +25,7 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   jobtype: ReportSource['jobtype'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
+  useInternalUser?: boolean;
 }
 
 export interface ScheduledReportTaskParams {

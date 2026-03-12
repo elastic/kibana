@@ -72,8 +72,6 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
       css={css({
         maxWidth: maxWidth ? `${maxWidth}px` : undefined,
         minWidth: minWidth ? `${minWidth}px` : undefined,
-        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-        borderRadius: `${euiTheme.border.radius.medium}`,
       })}
     >
       {label && (
@@ -83,69 +81,69 @@ export const FormInfoField: React.FC<FormInfoFieldProps> = ({
           </EuiTitle>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          css={css({
-            color: euiTheme.colors.textParagraph,
-            borderRadius: euiTheme.border.radius.small,
-          })}
-          alignItems="center"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem css={{ minWidth: 0, maxWidth: `${euiTheme.base * 18.75}px` }} grow={false}>
-            <code
-              data-test-subj={dataTestSubj}
-              style={{
-                textOverflow: 'ellipsis',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                fontSize: euiTheme.size.m,
-                padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
-              }}
-            >
-              {value}
-            </code>
+      <EuiFlexGroup
+        css={css({
+          color: euiTheme.colors.textParagraph,
+          borderRadius: `${euiTheme.border.radius.medium}`,
+          backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
+          maxWidth: 'fit-content',
+        })}
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+      >
+        <EuiFlexItem css={{ minWidth: 0, maxWidth: `${euiTheme.base * 18.75}px` }} grow={false}>
+          <code
+            data-test-subj={dataTestSubj}
+            style={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              fontSize: euiTheme.size.m,
+              padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
+            }}
+          >
+            {value}
+          </code>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCopy
+            textToCopy={copyValue ?? value}
+            afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyAfterMessage', {
+              defaultMessage: 'Copied',
+            })}
+          >
+            {(copy) => (
+              <EuiButtonIcon
+                size="s"
+                display="empty"
+                onClick={() => handleCopy(copy)}
+                iconType={isCopied ? 'check' : 'copy'}
+                color={isCopied ? 'success' : 'text'}
+                data-test-subj={
+                  isCopied && copyValueDataTestSubj
+                    ? `${copyValueDataTestSubj}-copied`
+                    : copyValueDataTestSubj
+                }
+                aria-label={
+                  isCopied
+                    ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
+                        defaultMessage: 'Copied',
+                      })
+                    : i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
+                        defaultMessage: 'Copy to clipboard',
+                      })
+                }
+              />
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
+        {actions.map((action, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            {action}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy
-              textToCopy={copyValue ?? value}
-              afterMessage={i18n.translate('xpack.searchSharedUI.formInfoField.copyAfterMessage', {
-                defaultMessage: 'Copied',
-              })}
-            >
-              {(copy) => (
-                <EuiButtonIcon
-                  size="s"
-                  display="empty"
-                  onClick={() => handleCopy(copy)}
-                  iconType={isCopied ? 'check' : 'copy'}
-                  color={isCopied ? 'success' : 'text'}
-                  data-test-subj={
-                    isCopied && copyValueDataTestSubj
-                      ? `${copyValueDataTestSubj}-copied`
-                      : copyValueDataTestSubj
-                  }
-                  aria-label={
-                    isCopied
-                      ? i18n.translate('xpack.searchSharedUI.formInfoField.copiedAriaLabel', {
-                          defaultMessage: 'Copied',
-                        })
-                      : i18n.translate('xpack.searchSharedUI.formInfoField.copyAriaLabel', {
-                          defaultMessage: 'Copy to clipboard',
-                        })
-                  }
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-          {actions.map((action, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              {action}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };

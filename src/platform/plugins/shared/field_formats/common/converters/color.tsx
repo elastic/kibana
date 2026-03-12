@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom/server';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
@@ -62,7 +62,21 @@ export class ColorFormat extends FieldFormat {
     }
   }
 
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
+
+    return asPrettyString(val, options);
+  };
+
   htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
+    }
+
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
 
     const displayVal = escape(asPrettyString(val, options));

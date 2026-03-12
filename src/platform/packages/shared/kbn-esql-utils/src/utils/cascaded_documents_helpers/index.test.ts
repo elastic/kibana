@@ -185,6 +185,30 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([]);
     });
 
+    it('should return empty metadata when a group field is an inline cast wrapping an unsupported function', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY ts = BUCKET(@timestamp, 1 hour)::string`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
+    it('should return empty metadata when a group field among multiple is an inline cast wrapping an unsupported function', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY agent.keyword, ts = BUCKET(@timestamp, 1 hour)::string`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([]);
+      expect(result.appliedFunctions).toEqual([]);
+    });
+
+    it('should allow an inline cast of a simple column', () => {
+      const queryString = `FROM kibana_sample_data_logs | STATS count = COUNT(*) BY casted = clientip::keyword`;
+
+      const result = getESQLStatsQueryMeta(queryString);
+      expect(result.groupByFields).toEqual([{ field: 'casted', type: 'inlineCast' }]);
+      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
+    });
+
     it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
       const queryString = `
         FROM kibana_sample_data_logs | STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = PERCENTILE(bytes, 95), median = MEDIAN(bytes) BY response.keyword | KEEP Visits, Unique, p95, median, response.keyword | LIMIT 123

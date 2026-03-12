@@ -10,6 +10,7 @@
 export type {
   DashboardLink,
   ExternalLink,
+  ExternalLinkOptions,
   Link,
   LinkOptions,
   LinksState,

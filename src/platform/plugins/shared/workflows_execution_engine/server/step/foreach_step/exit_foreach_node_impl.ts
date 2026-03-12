@@ -28,17 +28,33 @@ export class ExitForeachNodeImpl implements NodeImplementation {
       throw new Error(`Foreach state for step ${this.node.stepId} not found`);
     }
 
-    if (foreachState.items[foreachState.index + 1]) {
+    const nextIndex = foreachState.index + 1;
+    const hasMoreItems = nextIndex < foreachState.total;
+    const maxReached =
+      this.node.maxIterations !== undefined && nextIndex >= this.node.maxIterations;
+
+    if (hasMoreItems && !maxReached) {
       this.wfExecutionRuntimeManager.navigateToNode(this.node.startNodeId);
       return;
     }
 
+    if (maxReached && hasMoreItems && this.node.onLimit === 'fail') {
+      throw new Error(
+        `Foreach step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
+          `Processed ${nextIndex} of ${foreachState.total} items.`
+      );
+    }
+
     this.stepExecutionRuntime.finishStep();
+
+    const reason =
+      maxReached && hasMoreItems
+        ? `reached max-iterations limit of ${this.node.maxIterations}`
+        : 'processing all items';
     this.workflowLogger.logDebug(
-      `Exiting foreach step ${this.node.stepId} after processing all items.`,
-      {
-        workflow: { step_id: this.node.stepId },
-      }
+      `Exiting foreach step "${this.node.stepId}" after ${reason}. ` +
+        `Processed ${nextIndex} of ${foreachState.total} items.`,
+      { workflow: { step_id: this.node.stepId } }
     );
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }

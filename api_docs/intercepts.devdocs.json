@@ -17,7 +17,7 @@
           "{}"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
-        "lineNumber": 53,
+        "lineNumber": 54,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
           "<{ lastInteractedInterceptId: number | null; } | { lastInteractedInterceptId: null; }>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/plugin.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

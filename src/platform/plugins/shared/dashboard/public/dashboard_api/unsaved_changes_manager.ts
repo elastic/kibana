@@ -9,7 +9,7 @@
 
 import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
 
-import type { HasLastSavedChildState } from '@kbn/presentation-containers';
+import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
   PublishesSavedObjectId,
   PublishingSubject,

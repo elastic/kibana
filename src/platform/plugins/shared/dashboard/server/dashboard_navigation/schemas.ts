@@ -11,28 +11,22 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../../common/page_bundle_constants';
 
 export const dashboardNavigationOptionsSchema = schema.object({
-  use_filters: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters,
-      meta: {
-        description: 'When enabled, filters are passed to the opening dashboard.',
-      },
-    })
-  ),
-  use_time_range: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range,
-      meta: {
-        description: 'When enabled, time range is passed to the opening dashboard.',
-      },
-    })
-  ),
-  open_in_new_tab: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab,
-      meta: {
-        description: 'When enabled, the dashboard opens in a new browser tab.',
-      },
-    })
-  ),
+  use_filters: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_filters,
+    meta: {
+      description: 'When enabled, filters are passed to the opening dashboard.',
+    },
+  }),
+  use_time_range: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.use_time_range,
+    meta: {
+      description: 'When enabled, time range is passed to the opening dashboard.',
+    },
+  }),
+  open_in_new_tab: schema.boolean({
+    defaultValue: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS.open_in_new_tab,
+    meta: {
+      description: 'When enabled, the dashboard opens in a new browser tab.',
+    },
+  }),
 });

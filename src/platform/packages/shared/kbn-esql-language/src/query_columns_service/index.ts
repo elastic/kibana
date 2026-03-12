@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLAstQueryExpression } from '../..';
-import { BasicPrettyPrinter, SOURCE_COMMANDS } from '../..';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
+import { BasicPrettyPrinter, SOURCE_COMMANDS } from '@elastic/esql';
 import { UnmappedFieldsStrategy } from '../commands/registry/types';
 import { type ESQLColumnData, type ESQLPolicy } from '../commands/registry/types';
 import { getCurrentQueryAvailableColumns, getFieldsFromES } from './helpers';
@@ -188,6 +188,7 @@ export class QueryColumns {
         fields,
         fetchFields,
         getPolicies,
+        this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
         this.originalQueryText,
         this.unmappedFieldsStrategy
       );
@@ -218,6 +219,7 @@ export class QueryColumns {
       fieldsAvailableAfterPreviousCommand,
       fetchFields,
       getPolicies,
+      this.resourceRetriever?.getTimeseriesIndices ?? (async () => ({ indices: [] })),
       this.originalQueryText,
       this.unmappedFieldsStrategy
     );

@@ -17,6 +17,8 @@ export type {
   RunInternalToolParams,
   RunContext,
   RunContextStackEntry,
+  RunAgentStackEntry,
+  RunToolStackEntry,
   RunToolParams,
   RunToolReturn,
 } from './runner';
@@ -45,6 +47,10 @@ export type {
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
 export type { AttachmentsService } from './attachments_service';
+export type { SkillsService } from './skills_service';
+export type { ToolManager } from './tool_manager';
+export { ToolManagerToolType } from './tool_manager';
+export type { SkillsStore, WritableSkillsStore } from './skills_store';
 export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
 export { FileEntryType } from './filestore';

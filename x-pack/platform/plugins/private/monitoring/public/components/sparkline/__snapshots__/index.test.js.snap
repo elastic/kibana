@@ -13,52 +13,14 @@ exports[`Sparkline component with EuiProvider shows tooltip on hover 1`] = `
   <div
     css="unknown styles"
   />
-  <div
-    className="monSparklineTooltip__container"
+  <EmotionCssPropInternal
+    __EMOTION_TYPE_PLEASE_DO_NOT_USE__="i"
+    className="fa fa-caret-right"
     style={
       Object {
-        "left": 210,
-        "top": 17,
+        "width": 6,
       }
     }
-  >
-    <i
-      className="fa fa-caret-left"
-      style={
-        Object {
-          "display": "block",
-          "width": 6,
-        }
-      }
-    />
-    <div
-      css="unknown styles"
-      style={
-        Object {
-          "height": 56,
-          "width": 220,
-        }
-      }
-    >
-      <div
-        css="unknown styles"
-      >
-        1513814914
-      </div>
-      <div
-        css="unknown styles"
-      >
-        25
-      </div>
-    </div>
-    <i
-      className="fa fa-caret-right"
-      style={
-        Object {
-          "width": 6,
-        }
-      }
-    />
-  </div>
+  />
 </div>
 `;

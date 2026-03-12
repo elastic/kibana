@@ -25,10 +25,19 @@ export const executeRegexRulesTask = ({
   records: Array<Record<string, string>>;
 }): DetectedMatch[] =>
   rules.flatMap((rule, ruleIndex) => {
-    const regex = new RegExp(rule.pattern, 'g');
+    let regex: RegExp;
+    try {
+      regex = new RegExp(rule.pattern, 'g');
+    } catch {
+      return [];
+    }
 
     return records.flatMap((record: Record<string, string>, recordIndex: number) =>
       Object.entries(record).flatMap(([key, value]) => {
+        if (typeof value !== 'string' || value.length === 0) {
+          return [];
+        }
+
         // Reset regex state for each field
         regex.lastIndex = 0;
 

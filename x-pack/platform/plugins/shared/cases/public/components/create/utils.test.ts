@@ -6,12 +6,12 @@
  */
 
 import {
-  getInitialCaseValue,
   trimUserFormData,
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
 } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
@@ -277,6 +277,35 @@ describe('utils', () => {
         description: untrimmedData.description.trim(),
         category: untrimmedData.category.trim(),
         tags: ['tag 1', 'tag 2'],
+      });
+    });
+
+    it('includes extended_fields in serialized output when present', () => {
+      const extendedFields = { customKey: 'customValue' };
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          extended_fields: extendedFields,
+        })
+      ).toEqual({ ...serializedFormData, extended_fields: extendedFields });
+    });
+
+    it('omits extended_fields from serialized output when not present', () => {
+      expect(createFormSerializer([], casesConfigurationsMock, dataToSerialize)).toEqual(
+        serializedFormData
+      );
+    });
+
+    it('serializes templateId and templateVersion into a template object', () => {
+      expect(
+        createFormSerializer([], casesConfigurationsMock, {
+          ...dataToSerialize,
+          templateId: 'tmpl-1',
+          templateVersion: 2,
+        })
+      ).toEqual({
+        ...serializedFormData,
+        template: { id: 'tmpl-1', version: 2 },
       });
     });
   });

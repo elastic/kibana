@@ -10,6 +10,7 @@ import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import type {
+  AxesSettingsConfig,
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
@@ -126,6 +127,53 @@ export function checkScaleOperation(
     return Boolean(
       operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
     );
+  };
+}
+
+/**
+ * Checks if an operation is a date histogram (date type with interval scale).
+ */
+export function isDateHistogramOperation(operation: OperationMetadata | null | undefined): boolean {
+  return Boolean(operation?.dataType === 'date' && operation?.scale === 'interval');
+}
+
+/**
+ * Returns recommended X-axis title visibility settings based on the operation type.
+ *
+ * - Date histogram: recommends "None" (redundant info - timestamp per bucket shown in chart)
+ * - Non-date histogram: recommends "Auto" (axis label is useful)
+ * - Respects user's manual choice (e.g., if user set Auto on date histogram, keeps it)
+ * - Preserves custom title settings (if xTitle is set, don't change visibility)
+ *
+ * @returns Updated settings if a change is recommended, undefined otherwise
+ */
+export function getRecommendedXAxisTitleVisibility(
+  currentSettings: AxesSettingsConfig | undefined,
+  operation: OperationMetadata | null | undefined,
+  xTitle: string | undefined
+): AxesSettingsConfig | undefined {
+  // Align with toolbar title modes:
+  // - none: hidden title
+  // - auto: visible title with generated text
+  // - custom: visible title with user-defined text
+  const currentTitleMode = xTitle ? 'custom' : currentSettings?.x === false ? 'none' : 'auto';
+
+  // Keep user custom title unchanged.
+  if (currentTitleMode === 'custom') {
+    return undefined;
+  }
+
+  const recommendedTitleMode = isDateHistogramOperation(operation) ? 'none' : 'auto';
+
+  if (currentTitleMode === recommendedTitleMode) {
+    return undefined;
+  }
+
+  return {
+    ...currentSettings,
+    x: recommendedTitleMode !== 'none',
+    yLeft: currentSettings?.yLeft ?? true,
+    yRight: currentSettings?.yRight ?? true,
   };
 }
 

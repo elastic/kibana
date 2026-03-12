@@ -13,6 +13,7 @@
       "_connector/_sync_job/{connector_sync_job_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-sync-job-delete",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-connector-sync-job-delete",
     "availability": {
       "stack": true,
       "serverless": true

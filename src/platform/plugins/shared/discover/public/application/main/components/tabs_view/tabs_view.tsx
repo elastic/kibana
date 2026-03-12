@@ -25,6 +25,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
+import { useSwitchModesTour } from './use_switch_modes_tour';
 
 const MAX_TABS_COUNT = 25;
 
@@ -49,6 +50,8 @@ export const TabsView = (props: SingleTabViewProps) => {
 
   const { shouldCollapseAppMenu, onResize, getAdditionalTabMenuItems, topNavMenuItems } =
     useAppMenuData({ currentDataView });
+
+  const switchModesTourStep = useSwitchModesTour();
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -78,34 +81,37 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   return (
-    /**
-     * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
-     * where this might not be good enough.
-     */
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <div ref={resizeRef}>
-          <UnifiedTabs
-            services={services}
-            items={items}
-            selectedItemId={currentTabId}
-            recentlyClosedItems={recentlyClosedItems}
-            unsavedItemIds={unsavedTabIds}
-            maxItemsCount={MAX_TABS_COUNT}
-            hideTabsBar={hideTabsBar}
-            createItem={createItem}
-            getPreviewData={getPreviewData}
-            renderContent={renderContent}
-            onChanged={onChanged}
-            onEBTEvent={onEvent}
-            onClearRecentlyClosed={onClearRecentlyClosed}
-            getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-            appendRight={
-              <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
-            }
-          />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      {switchModesTourStep}
+      {/**
+       * AppMenuComponent handles responsiveness on its own, however, there are some edge cases e.g opening push flyout
+       * where this might not be good enough.
+       */}
+      <EuiResizeObserver onResize={onResize}>
+        {(resizeRef) => (
+          <div ref={resizeRef}>
+            <UnifiedTabs
+              services={services}
+              items={items}
+              selectedItemId={currentTabId}
+              recentlyClosedItems={recentlyClosedItems}
+              unsavedItemIds={unsavedTabIds}
+              maxItemsCount={MAX_TABS_COUNT}
+              hideTabsBar={hideTabsBar}
+              createItem={createItem}
+              getPreviewData={getPreviewData}
+              renderContent={renderContent}
+              onChanged={onChanged}
+              onEBTEvent={onEvent}
+              onClearRecentlyClosed={onClearRecentlyClosed}
+              getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+              appendRight={
+                <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
+              }
+            />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };

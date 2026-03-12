@@ -8,6 +8,7 @@ The workflows management plugin provides the user interface and management capab
 
 ## Table of Contents
 
+- [Requirements](#requirements)
 - [Enable the Feature Flag](#enable-the-feature-flag)
 - [Overview](#overview)
 - [Features](#features)
@@ -16,6 +17,12 @@ The workflows management plugin provides the user interface and management capab
 - [API Endpoints](#api-endpoints)
 - [UI Application](#ui-application)
 - [Development](#development)
+
+---
+
+## Requirements
+
+To use workflows, you need an **active Enterprise license**. Workflows are not available on Basic or Standard licenses.
 
 ---
 

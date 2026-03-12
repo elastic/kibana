@@ -20,7 +20,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { Insight } from '@kbn/streams-schema';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
-import { useInsightsApi } from '../../../../hooks/use_insights_api';
+import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../util/errors';
@@ -39,17 +39,17 @@ export function Summary({ count }: { count: number }) {
     getInsightsDiscoveryTaskStatus,
     acknowledgeInsightsDiscoveryTask,
     cancelInsightsDiscoveryTask,
-  } = useInsightsApi();
+  } = useInsightsDiscoveryApi(aiFeatures?.genAiConnectors.selectedConnector);
 
   const [{ value: task }, getTaskStatus] = useAsyncFn(getInsightsDiscoveryTaskStatus);
-  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async (connectorId: string) => {
+  const [{ loading: isSchedulingTask }, scheduleTask] = useAsyncFn(async () => {
     /**
      * Combining scheduling and immediate status update to prevent
      * React updating the UI in between states causing flickering
      */
-    await scheduleInsightsDiscoveryTask(connectorId);
+    await scheduleInsightsDiscoveryTask();
     await getTaskStatus();
-  });
+  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
 
   useEffect(() => {
     getTaskStatus();
@@ -86,38 +86,28 @@ export function Summary({ count }: { count: number }) {
     }
   }, [task, notifications.toasts]);
 
-  useTaskPolling(task, getInsightsDiscoveryTaskStatus, getTaskStatus);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getInsightsDiscoveryTaskStatus,
+    onRefresh: getTaskStatus,
+    onCancel: cancelInsightsDiscoveryTask,
+  });
 
   const [insights, setInsights] = useState<Insight[] | null>(null);
 
   const onGenerateInsightsClick = async () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
-    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+    await scheduleTask();
   };
 
   const onRegenerateInsightsClick = async () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
     await acknowledgeInsightsDiscoveryTask();
-    await scheduleTask(aiFeatures?.genAiConnectors.selectedConnector);
+    await scheduleTask();
 
     setInsights(null);
   };
 
-  const onCancelClick = async () => {
-    await cancelInsightsDiscoveryTask();
-    getTaskStatus();
-  };
-
   const isGenerateButtonPending =
-    task?.status === TaskStatus.InProgress ||
-    task?.status === TaskStatus.BeingCanceled ||
-    isSchedulingTask;
+    task?.status === TaskStatus.InProgress || isCancellingTask || isSchedulingTask;
 
   if (insights && insights.length > 0) {
     return (
@@ -171,7 +161,7 @@ export function Summary({ count }: { count: number }) {
             style={{ minHeight: '30vh', minWidth: '40vh' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="createAdvancedJob" size="xxl" />
+              <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
@@ -222,14 +212,13 @@ export function Summary({ count }: { count: number }) {
                   }}
                 />
 
-                {(task?.status === TaskStatus.InProgress ||
-                  task?.status === TaskStatus.BeingCanceled) && (
+                {(task?.status === TaskStatus.InProgress || isCancellingTask) && (
                   <EuiButton
-                    onClick={onCancelClick}
-                    isDisabled={task?.status === TaskStatus.BeingCanceled}
+                    onClick={cancelTask}
+                    isDisabled={isCancellingTask}
                     data-test-subj="significant_events_cancel_insights_generation_button"
                   >
-                    {task?.status === TaskStatus.BeingCanceled
+                    {isCancellingTask
                       ? i18n.translate('xpack.streams.insights.cancellingTaskButtonLabel', {
                           defaultMessage: 'Cancelling',
                         })

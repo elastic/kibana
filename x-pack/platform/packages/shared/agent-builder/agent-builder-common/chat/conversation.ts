@@ -115,6 +115,10 @@ export interface ToolCallWithResult {
    * Result of the tool
    */
   results: ToolResult[];
+  /**
+   * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
+   */
+  tool_call_group_id?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -262,6 +266,13 @@ export interface Conversation {
  */
 export interface ConversationInternalState {
   prompt?: PromptStorageState;
+  /**
+   * Dynamic tool IDs that were added during conversation rounds.
+   * These tools are persisted across rounds so they remain available.
+   */
+  dynamic_tool_ids?: string[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+
+export type ConversationAction = 'regenerate';

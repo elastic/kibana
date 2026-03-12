@@ -73,6 +73,38 @@ describe('SecurityService', function () {
         });
       });
     });
+
+    describe('#uiam', () => {
+      it('should be set to `null` if UIAM is not configured ', () => {
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should be set to `null` if UIAM is not enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: { security: { uiam: { enabled: false, sharedSecret: 'some-secret' } } },
+              },
+            }),
+          })
+        );
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should return shared secret if UIAM is enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: { security: { uiam: { enabled: true, sharedSecret: 'some-secret' } } },
+              },
+            }),
+          })
+        );
+        expect(service.setup().uiam?.sharedSecret).toBe('some-secret');
+      });
+    });
   });
 
   describe('#start', () => {

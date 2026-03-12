@@ -46,14 +46,6 @@ jest.mock('../../../stream_detail_systems/stream_description/use_stream_descript
 }));
 
 // Mock hooks used by StreamDiscoveryConfiguration
-jest.mock('../../../stream_detail_systems/stream_systems/hooks/use_stream_systems', () => ({
-  useStreamSystems: () => ({
-    systems: [],
-    refreshSystems: jest.fn(),
-    systemsLoading: false,
-  }),
-}));
-
 jest.mock('../../../../hooks/use_stream_features', () => ({
   useStreamFeatures: () => ({
     features: [],
@@ -76,19 +68,6 @@ jest.mock('../../../../hooks/use_stream_features_api', () => ({
 jest.mock('../../../../hooks/use_ai_features', () => ({
   useAIFeatures: () => ({
     genAiConnectors: { selectedConnector: null },
-  }),
-}));
-
-jest.mock('../../../../hooks/use_stream_systems_api', () => ({
-  useStreamSystemsApi: () => ({
-    getSystemIdentificationStatus: jest.fn().mockResolvedValue({ status: 'idle' }),
-    scheduleSystemIdentificationTask: jest.fn(),
-    cancelSystemIdentificationTask: jest.fn(),
-    acknowledgeSystemIdentificationTask: jest.fn(),
-    addSystemsToStream: jest.fn(),
-    removeSystemsFromStream: jest.fn(),
-    upsertSystem: jest.fn(),
-    abort: jest.fn(),
   }),
 }));
 
@@ -117,6 +96,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       start: {
         licensing: {
           license$: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             subscribe: (observer: any) => {
               const license = { hasAtLeast: () => true };
               if (typeof observer === 'function') observer(license);
@@ -184,6 +164,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: true },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -206,6 +187,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -220,12 +202,13 @@ describe('WiredAdvancedView', () => {
   });
 
   describe('Significant Events Feature (Stream Description & Feature Configuration)', () => {
-    it('should render Stream description panel when significantEvents feature is enabled', () => {
+    it('should render Stream description panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -239,12 +222,13 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByText('Stream description')).toBeInTheDocument();
     });
 
-    it('should render Stream discovery panel when significantEvents feature is enabled', () => {
+    it('should render Stream discovery panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -258,12 +242,54 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
+    it('should NOT render Stream description or Stream discovery when significantEvents is disabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
-          significantEvents: { enabled: false },
+          significantEvents: { enabled: false, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Stream description or Stream discovery when significantEvents is enabled but not available (basic license)', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: true, available: false },
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      // These components require enterprise license and should NOT render with basic license
+      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Stream description or Stream discovery when significantEvents available is undefined', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: true, available: undefined },
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -285,6 +311,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -303,6 +330,7 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -323,11 +351,12 @@ describe('WiredAdvancedView', () => {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
         <WiredAdvancedView
-          definition={createMockDefinition('logs.child')}
+          definition={createMockDefinition('logs.otel.child')}
           refreshDefinition={mockRefreshDefinition}
         />
       );
@@ -335,12 +364,13 @@ describe('WiredAdvancedView', () => {
       expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
     });
 
-    it('should NOT render Delete stream panel for root streams', () => {
+    it('should render Delete stream panel for legacy logs root stream', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: false },
           significantEvents: { enabled: false },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
@@ -350,22 +380,61 @@ describe('WiredAdvancedView', () => {
         />
       );
 
+      expect(screen.getByRole('button', { name: /delete stream/i })).toBeInTheDocument();
+    });
+
+    it('should NOT render Delete stream panel for logs.otel root stream', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition('logs.otel')}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.queryByText('Delete stream')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Delete stream panel for logs.ecs root stream', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          contentPacks: { enabled: false },
+          significantEvents: { enabled: false },
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      renderWithProviders(
+        <WiredAdvancedView
+          definition={createMockDefinition('logs.ecs')}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
       expect(screen.queryByText('Delete stream')).not.toBeInTheDocument();
     });
   });
 
   describe('All Features Enabled', () => {
-    it('should render all panels when all features are enabled', () => {
+    it('should render all panels when all features are enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           contentPacks: { enabled: true },
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       renderWithProviders(
         <WiredAdvancedView
-          definition={createMockDefinition('logs.child')}
+          definition={createMockDefinition('logs.otel.child')}
           refreshDefinition={mockRefreshDefinition}
         />
       );
