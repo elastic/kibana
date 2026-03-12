@@ -11,6 +11,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
+import type { UsageApiSetup, UsageApiStart } from '@kbn/usage-api-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -37,6 +38,7 @@ import type { ModelProviderFactoryFn } from './services/runner/model_provider';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
+  usageApi?: UsageApiSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   inference: InferenceServerSetup;
@@ -52,6 +54,7 @@ export interface AgentBuilderStartDependencies {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
+  usageApi?: UsageApiStart;
   spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;

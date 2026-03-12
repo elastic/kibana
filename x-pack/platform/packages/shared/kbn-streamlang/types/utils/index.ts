@@ -11,7 +11,7 @@ export * from './grok_to_regex';
 export * from './painless_field_access';
 export * from './painless_encoding';
 
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 
 // Utility type to rename multiple fields in a type
 export type RenameFields<
@@ -38,7 +38,7 @@ export function zodRenameFields<T extends ZodObject<any>, Renames extends Record
     Object.keys(renames).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<string, true>)
   );
   // Add new fields with the same type as the old ones
-  const extensions: ZodRawShape = {};
+  const extensions: Record<string, z.ZodType> = {};
   for (const oldKey in renames) {
     if (Object.prototype.hasOwnProperty.call(renames, oldKey)) {
       const newKey = renames[oldKey];
