@@ -16,7 +16,7 @@ import {
 import {
   metricOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
 import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
@@ -345,11 +345,11 @@ export const metricStateSchemaNoESQL = schema.object({
   ),
 });
 
-const primaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema
+const primaryMetricESQL = esqlColumnWithFormatSchema
   .extends(metricStatePrimaryMetricOptionsSchema)
   .extends(metricStateBackgroundChartSchemaESQL);
 
-const secondaryMetricESQL = esqlColumnOperationWithLabelAndFormatSchema.extends(
+const secondaryMetricESQL = esqlColumnWithFormatSchema.extends(
   metricStateSecondaryMetricOptionsSchema
 );
 
