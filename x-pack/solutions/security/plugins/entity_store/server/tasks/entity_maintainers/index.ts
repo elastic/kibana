@@ -148,10 +148,10 @@ export function registerEntityMaintainerTask({
     .catch((err) => {
       logger.error(`Failed to register entity maintainer task: ${err?.message}`);
     });
-    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
-      id,
-      type: EntityMaintainerTelemetryEventType.REGISTER,
-    });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    type: EntityMaintainerTelemetryEventType.REGISTER,
+  });
 }
 
 async function runEntityMaintainerTask({
