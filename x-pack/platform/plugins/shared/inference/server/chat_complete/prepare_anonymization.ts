@@ -18,6 +18,7 @@ import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
+import { ReplacementsNamespaceMismatchError } from './anonymization/replacements/replacements_errors';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
 import { isConflictError, isRetryableShardRecoveryError, withShardRecoveryRetry } from './utils';
 
@@ -107,7 +108,22 @@ export const prepareAnonymization = async ({
     ? await withShardRecoveryRetry({
         logger,
         operation: 'get_replacements',
-        action: async () => repo?.get(namespace, carriedReplacementsId),
+        action: async () => {
+          try {
+            return await repo?.get(namespace, carriedReplacementsId);
+          } catch (error) {
+            if (error instanceof ReplacementsNamespaceMismatchError) {
+              logger.warn(
+                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.actualNamespace}`
+              );
+              throw createInferenceRequestError(
+                `Carried replacementsId "${carriedReplacementsId}" does not belong to namespace "${namespace}"`,
+                409
+              );
+            }
+            throw error;
+          }
+        },
       })
     : null;
 
@@ -205,11 +221,20 @@ export const prepareAnonymization = async ({
       if (!isConflictError(createErr)) {
         throw createErr;
       }
-      await withShardRecoveryRetry({
+      logger.warn(
+        `[inference.anonymization.create_conflict_fallback] replacements_id=${replacementsId} namespace=${namespace} triggered=true`
+      );
+      const updatedAfterConflict = await withShardRecoveryRetry({
         logger,
         operation: 'update_replacements_after_conflict',
         action: () => repo.update(namespace, replacementsId, { replacements }),
       });
+      if (!updatedAfterConflict) {
+        throw createInferenceRequestError(
+          `Unable to persist replacements after create conflict for replacementsId "${replacementsId}"`,
+          409
+        );
+      }
     }
   }
 

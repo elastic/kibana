@@ -19,6 +19,7 @@ import {
 } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
+import { ReplacementsNamespaceMismatchError } from './replacements_errors';
 import type { InferenceServerStart, InferenceStartDependencies } from '../../../types';
 
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
@@ -130,6 +131,9 @@ export const registerReplacementsRoutes = (
             },
           });
         } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            return response.notFound({ body: { message: 'Replacements set not found' } });
+          }
           logger.error(`Failed to resolve replacements: ${toErrorMessage(err)}`);
           return response.customError({
             body: { message: toErrorMessage(err) },
@@ -182,6 +186,9 @@ export const registerReplacementsRoutes = (
 
           return response.ok({ body: { text: deanonymizedText } });
         } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            return response.notFound({ body: { message: 'Replacements set not found' } });
+          }
           logger.error(`Failed to deanonymize text: ${toErrorMessage(err)}`);
           return response.customError({
             body: { message: toErrorMessage(err) },

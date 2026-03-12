@@ -35,6 +35,10 @@ export function registerConnectorsRoute({
       const actions = pluginsStart.actions;
       const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
       const connectors = await getConnectorList({ actions, request, esClient, logger });
+
+      // `anonymizationEnabled` is informational UI state for Agent Builder access checks.
+      // It must not be treated as a security boundary. Deanonymization is enforced
+      // server-side by replacements API privileges (`read_anonymization`).
       const body: GetConnectorsResponseBody = {
         connectors,
         anonymizationEnabled: pluginsStart.anonymization?.isEnabled() ?? false,

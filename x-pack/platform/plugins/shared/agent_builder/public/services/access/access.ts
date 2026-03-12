@@ -12,19 +12,12 @@ import { firstValueFrom } from 'rxjs';
 export interface AgentBuilderAccess {
   hasRequiredLicense: boolean;
   hasLlmConnector: boolean;
+  /**
+   * Informational UI gate only. Security boundaries for deanonymization are
+   * enforced server-side by anonymization replacements API privileges.
+   */
   hasAnonymizationEnabled: boolean;
 }
-
-type PromiseValues<T> = {
-  [Key in keyof T]: Promise<T[Key]>;
-};
-
-const resolveValues = async <T>(promiseObject: PromiseValues<T>): Promise<T> => {
-  const entries = await Promise.all(
-    Object.entries(promiseObject).map(async ([key, promise]) => [key, await promise])
-  );
-  return Object.fromEntries(entries);
-};
 
 export class AgentBuilderAccessChecker {
   private readonly licensing: LicensingPluginStart;
@@ -60,17 +53,17 @@ export class AgentBuilderAccessChecker {
       return;
     }
 
-    const inferenceAccessPromise = this.getInferenceAccess();
-    const accessPromise: PromiseValues<AgentBuilderAccess> = {
-      hasRequiredLicense: this.hasRequiredLicense(),
-      hasLlmConnector: inferenceAccessPromise.then((access) => access.hasLlmConnector),
-      hasAnonymizationEnabled: inferenceAccessPromise.then(
-        (access) => access.hasAnonymizationEnabled
-      ),
-    };
-
     try {
-      this.access = await resolveValues(accessPromise);
+      const [{ hasLlmConnector, hasAnonymizationEnabled }, hasRequiredLicense] = await Promise.all([
+        this.getInferenceAccess(),
+        this.hasRequiredLicense(),
+      ]);
+
+      this.access = {
+        hasRequiredLicense,
+        hasLlmConnector,
+        hasAnonymizationEnabled,
+      };
     } catch (error) {
       throw new Error('Unable to determine Agent Builder access', { cause: error });
     }

@@ -7,6 +7,8 @@
 
 import type { Logger } from '@kbn/logging';
 
+// This retry budget is intentionally short for interactive UX; it is not
+// intended to wait for full shard recovery after cluster restarts.
 const DEFAULT_SHARD_RECOVERY_MAX_RETRIES = 3;
 const DEFAULT_SHARD_RECOVERY_INITIAL_DELAY_MS = 200;
 
@@ -73,6 +75,11 @@ export const withShardRecoveryRetry = async <T>({
     } catch (error) {
       const shouldRetry = isRetryableShardRecoveryError(error) && attempt < maxRetries;
       if (!shouldRetry) {
+        if (isRetryableShardRecoveryError(error)) {
+          logger.warn(
+            `[inference.anonymization.retry_exhausted] operation=${operation} attempts=${attempt} reason=shard_recovering`
+          );
+        }
         throw error;
       }
       logger.debug(

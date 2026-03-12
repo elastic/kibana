@@ -36,6 +36,7 @@ import {
   handleCancellation,
   handleLifecycleCallbacks,
   streamToResponse,
+  isNotFoundError,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
@@ -392,7 +393,7 @@ function resolveAndCreatePipeline({
         anonymization,
       }).pipe(
         catchError((error) => {
-          if (error?.meta?.status === 404 || error?.statusCode === 404) {
+          if (isNotFoundError(error)) {
             if (isInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);

@@ -9,8 +9,9 @@ import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypt
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ReplacementsSet } from '@kbn/anonymization-common';
-import { isConflictError } from '../../utils';
+import { isConflictError, isNotFoundError } from '../../utils';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
+import { ReplacementsNamespaceMismatchError } from './replacements_errors';
 
 /** ES document shape for replacements. */
 interface EsReplacementsDocument {
@@ -131,6 +132,20 @@ export class ReplacementsRepository {
     return withStatus;
   }
 
+  private assertNamespaceMatch(
+    namespace: string,
+    replacementsId: string,
+    doc?: EsReplacementsDocument
+  ): asserts doc is EsReplacementsDocument {
+    if (!doc) {
+      throw this.setStatusCode(new Error('Replacements document missing'), 404);
+    }
+
+    if (doc.namespace !== namespace) {
+      throw new ReplacementsNamespaceMismatchError(replacementsId, namespace, doc.namespace);
+    }
+  }
+
   private dedupeAndValidate(
     replacements: Array<{ anonymized: string; original: string }>
   ): Array<{ anonymized: string; original: string }> {
@@ -203,13 +218,11 @@ export class ReplacementsRepository {
       });
 
       const doc = result._source;
-      if (!doc || doc.namespace !== namespace) {
-        return null;
-      }
+      this.assertNamespaceMatch(namespace, replacementsId, doc);
 
       return this.toReplacementsSet(doc);
     } catch (err) {
-      if (err?.meta?.statusCode === 404) {
+      if (isNotFoundError(err)) {
         return null;
       }
       throw err;
@@ -237,16 +250,14 @@ export class ReplacementsRepository {
           id: replacementsId,
         });
       } catch (err) {
-        if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode === 404) {
+        if (isNotFoundError(err)) {
           return null;
         }
         throw err;
       }
 
       const doc = docResult._source;
-      if (!doc || doc.namespace !== namespace) {
-        return null;
-      }
+      this.assertNamespaceMatch(namespace, replacementsId, doc);
 
       const existing = this.toReplacementsSet(doc);
       const now = new Date().toISOString();
