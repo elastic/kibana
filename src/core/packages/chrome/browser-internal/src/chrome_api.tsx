@@ -91,9 +91,9 @@ export function createChromeApi({
     getIsVisible$: () => state.visibility.isVisible$,
     setIsVisible: state.visibility.setIsVisible,
 
-    // Badge
-    getBadge$: () => state.badge.$,
-    setBadge: state.badge.set,
+    // Badge (delegates to breadcrumbs badge pipeline)
+    getBadge$: () => state.breadcrumbs.legacyBadge.$,
+    setBadge: state.breadcrumbs.legacyBadge.set,
 
     // Footer
     getGlobalFooter$: () => state.globalFooter.$,
