@@ -244,8 +244,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .attach(
                       'file',
                       buildImportBuffer(artifact.listId, [
-                        { tags: [CURRENT_SPACE_OWNER_TAG] },
                         {
+                          item_id: 'assigned-per-policy-artifact',
                           tags: [
                             CURRENT_SPACE_OWNER_TAG,
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
@@ -253,6 +253,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                             // even if assigned to policy in other space, the tag is kept
                             buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                           ],
+                        },
+                        {
+                          item_id: 'unassigned-per-policy-artifact',
+                          tags: [CURRENT_SPACE_OWNER_TAG],
                         },
                       ]),
                       'import_data.ndjson'
@@ -271,13 +275,23 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
 
                   expect(items.length).toEqual(2);
-                  expect(items[1].tags).toEqual([
-                    CURRENT_SPACE_OWNER_TAG,
-                    buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
-                    buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
-                    IMPORTED_ARTIFACT_TAG,
-                  ]);
-                  expect(items[0].tags).toEqual([CURRENT_SPACE_OWNER_TAG, IMPORTED_ARTIFACT_TAG]);
+                  expect(items[0]).toEqual(
+                    expect.objectContaining({
+                      item_id: 'assigned-per-policy-artifact',
+                      tags: [
+                        CURRENT_SPACE_OWNER_TAG,
+                        buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                        buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                        IMPORTED_ARTIFACT_TAG,
+                      ],
+                    })
+                  );
+                  expect(items[1]).toEqual(
+                    expect.objectContaining({
+                      item_id: 'unassigned-per-policy-artifact',
+                      tags: [CURRENT_SPACE_OWNER_TAG, IMPORTED_ARTIFACT_TAG],
+                    })
+                  );
                 });
 
                 it('should not import per-policy artifacts to other spaces when importing without global artifact privilege', async () => {
@@ -666,7 +680,6 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   expect(items[0].comments).toContainEqual(
                     expect.objectContaining({
                       comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`,
-                      created_by: `${artifact.listId}_allWithGlobal`,
                     })
                   );
                 });
@@ -798,9 +811,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     success_count_exception_list_items: 1,
                   } as ImportExceptionsResponseSchema);
 
-                const artifactsInCurrentSpace = (
-                  await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
-                ).map((item) => item.item_id);
+                const artifactsInCurrentSpace = (await fetchArtifacts(CURRENT_SPACE_ID)).map(
+                  (item) => item.item_id
+                );
 
                 expect(artifactsInCurrentSpace).toEqual([
                   'existing-global-artifact-in-current-space',
@@ -886,12 +899,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         success_count_exception_list_items: 1,
                       } as ImportExceptionsResponseSchema);
 
-                    const artifactsInCurrentSpace = (
-                      await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
-                    ).map((item) => item.item_id);
-                    const artifactsInOtherSpace = (
-                      await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
-                    ).map((item) => item.item_id);
+                    const artifactsInCurrentSpace = (await fetchArtifacts(CURRENT_SPACE_ID)).map(
+                      (item) => item.item_id
+                    );
+                    const artifactsInOtherSpace = (await fetchArtifacts(OTHER_SPACE_ID)).map(
+                      (item) => item.item_id
+                    );
 
                     expect(artifactsInCurrentSpace).toEqual([
                       'existing-global-artifact-in-current-space',
@@ -938,12 +951,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         success_count_exception_list_items: 1,
                       } as ImportExceptionsResponseSchema);
 
-                    const artifactsInCurrentSpace = (
-                      await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
-                    ).map((item) => item.item_id);
-                    const artifactsInOtherSpace = (
-                      await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
-                    ).map((item) => item.item_id);
+                    const artifactsInCurrentSpace = (await fetchArtifacts(CURRENT_SPACE_ID)).map(
+                      (item) => item.item_id
+                    );
+                    const artifactsInOtherSpace = (await fetchArtifacts(OTHER_SPACE_ID)).map(
+                      (item) => item.item_id
+                    );
 
                     expect(artifactsInCurrentSpace).toEqual([
                       // all visible artifacts are deleted, even if not owned by current space
@@ -1156,23 +1169,23 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 }))
               ).toEqual([
                 {
-                  item_id: 'imported-artifact-without-existing-comment',
-                  comments: [
-                    {
-                      comment: `Imported artifact.\nOriginally created by "original-creator-1" at "random-date-1".`,
-                      created_at: expect.any(String),
-                      created_by: `${artifact.listId}_allWithGlobal`,
-                      id: expect.any(String),
-                    },
-                  ],
-                },
-                {
                   item_id: 'imported-artifact-with-existing-comment',
                   comments: [
                     expect.objectContaining({ comment: 'I am a comment!' }),
                     expect.objectContaining({
                       comment: `Imported artifact.\nOriginally created by "original-creator-2" at "random-date-2".`,
                     }),
+                  ],
+                },
+                {
+                  item_id: 'imported-artifact-without-existing-comment',
+                  comments: [
+                    {
+                      comment: `Imported artifact.\nOriginally created by "original-creator-1" at "random-date-1".`,
+                      created_at: expect.any(String),
+                      created_by: expect.any(String), // we got different test usernames on ESS and Serverless
+                      id: expect.any(String),
+                    },
                   ],
                 },
               ]);
@@ -1260,7 +1273,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     )
                     .expect(200);
 
-                  const items = await fetchArtifacts(CURRENT_SPACE_ID, undefined, 'single');
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID, 'single');
                   expect(items.length).toEqual(1);
                   expect(items[0].tags).toEqual([]);
                 });
@@ -1470,7 +1483,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               )
               .expect(200);
 
-            const items = await fetchArtifacts(CURRENT_SPACE_ID, undefined, 'single');
+            const items = await fetchArtifacts(CURRENT_SPACE_ID, 'single');
             expect(items.length).toEqual(1);
             expect(items[0].tags).not.toContain(GLOBAL_ARTIFACT_TAG);
           });
@@ -1482,7 +1495,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
 const getFetchArtifacts =
   (supertest: TestAgent, log: ToolingLog, listId: string) =>
-  async (spaceId: string, sortField?: string, namespace: 'agnostic' | 'single' = 'agnostic') => {
+  async (spaceId: string, namespace: 'agnostic' | 'single' = 'agnostic') => {
     const { body }: { body: FindExceptionListItemsResponse } = await supertest
       .get(addSpaceIdToPath('/', spaceId, `${EXCEPTION_LIST_ITEM_URL}/_find`))
       .set('kbn-xsrf', 'true')
@@ -1490,8 +1503,8 @@ const getFetchArtifacts =
       .query({
         list_id: listId,
         namespace_type: namespace,
-        sort_field: sortField ?? undefined,
-        sort_order: sortField ? 'asc' : undefined,
+        sort_field: 'item_id',
+        sort_order: 'asc',
       } as FindExceptionListItemsRequestQueryInput)
       .send()
       .expect(200);
