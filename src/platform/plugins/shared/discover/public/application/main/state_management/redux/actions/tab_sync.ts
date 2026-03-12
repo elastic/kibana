@@ -194,6 +194,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId })).then(() => {
         startSyncingAppStateWithUrl();
         startSyncingGlobalStateWithUrl();
+        dispatch(internalStateActions.syncPreviousStateSnapshots({ tabId }));
       });
 
       return () => {
