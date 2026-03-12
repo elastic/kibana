@@ -75,7 +75,7 @@ export async function getMinikubeIp(): Promise<string> {
 /**
  * Waits for all pods in a namespace to be ready
  */
-export async function waitForPodsReady(namespace: string, timeoutSeconds = 300): Promise<void> {
+export async function waitForPodsReady(namespace: string, timeoutSeconds = 600): Promise<void> {
   const startTime = Date.now();
   const timeoutMs = timeoutSeconds * 1000;
 
@@ -112,6 +112,16 @@ export async function waitForPodsReady(namespace: string, timeoutSeconds = 300):
  */
 export async function deleteNamespace(namespace: string): Promise<void> {
   try {
+    await execa
+      .command(
+        `kubectl delete deployments --all -n ${namespace} --grace-period=0 --ignore-not-found`
+      )
+      .catch(() => {});
+    await execa
+      .command(
+        `kubectl delete pods --all -n ${namespace} --force --grace-period=0 --ignore-not-found`
+      )
+      .catch(() => {});
     await execa.command(`kubectl delete namespace ${namespace} --ignore-not-found`);
   } catch {
     // Ignore errors

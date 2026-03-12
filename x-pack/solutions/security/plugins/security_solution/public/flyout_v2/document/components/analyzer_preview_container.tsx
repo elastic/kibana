@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiSkeletonText } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -14,12 +14,18 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import {
+  ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID,
+  ANALYZER_PREVIEW_LOADING_TEST_ID,
+  ANALYZER_PREVIEW_TEST_ID,
+} from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { AnalyzerPreviewNoDataMessage } from './analyzer_no_data_message';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface AnalyzerPreviewContainerProps {
   /**
@@ -57,6 +63,12 @@ export const AnalyzerPreviewContainer = memo(
     showIcon,
     disableNavigation,
   }: AnalyzerPreviewContainerProps) => {
+    const { serverless, uiSettings } = useKibana().services;
+    const isServerless = !!serverless;
+    const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
+      EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER
+    );
+
     const isEnabled = useIsAnalyzerEnabled(hit);
 
     const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
@@ -77,6 +89,36 @@ export const AnalyzerPreviewContainer = memo(
     const dataViewLoading = status === 'loading' || status === 'pristine';
     const dataViewError =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
+
+    const coldAndFrozenTiersBadge = (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedTooltip"
+            defaultMessage="{state}, go to Advanced Settings or contact your administrator."
+            values={{
+              state: isColdAndFrozenTiersExcluded
+                ? 'Cold and frozen tiers are excluded to improve performance. To include them'
+                : 'This view loads more slowly because cold and frozen tiers are included. To change this',
+            }}
+          />
+        }
+      >
+        <EuiBadge
+          color="hollow"
+          iconSide="left"
+          iconType="snowflake"
+          tabIndex={0}
+          data-test-subj={ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.right.visualizations.analyzerPreview.coldAndFrozenTiers.excludedLabel"
+            defaultMessage="Cold/Frozen tiers {state}"
+            values={{ state: isColdAndFrozenTiersExcluded ? 'off' : 'on' }}
+          />
+        </EuiBadge>
+      </EuiToolTip>
+    );
 
     return (
       <ExpandablePanel
@@ -99,6 +141,7 @@ export const AnalyzerPreviewContainer = memo(
               ),
             },
           }),
+          headerContent: <>{!isServerless && coldAndFrozenTiersBadge}</>,
         }}
         data-test-subj={ANALYZER_PREVIEW_TEST_ID}
       >
