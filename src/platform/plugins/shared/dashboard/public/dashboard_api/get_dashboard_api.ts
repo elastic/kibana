@@ -189,7 +189,7 @@ export function getDashboardApi({
     getSerializedState: () => ({
       attributes: getState(),
     }),
-    runInteractiveSave: async () => {
+    runInteractiveSave: async (options?: { showOpenLink?: boolean }) => {
       trackOverlayApi.clearOverlays();
 
       const {
@@ -214,6 +214,7 @@ export function getDashboardApi({
         title,
         viewMode: viewModeManager.api.viewMode$.value,
         accessControl: accessControlManager.api.accessControl$.value,
+        showOpenLink: options?.showOpenLink,
       });
 
       if (!saveResult || saveResult.error) {
@@ -235,7 +236,7 @@ export function getDashboardApi({
 
       return saveResult;
     },
-    runQuickSave: async () => {
+    runQuickSave: async (options?: { showOpenLink?: boolean }) => {
       if (isManaged) return;
       const dashboardState = getState();
       const saveResult = await saveDashboard({
@@ -243,6 +244,7 @@ export function getDashboardApi({
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
         accessMode: accessControlManager.api.accessControl$.value?.accessMode,
+        showOpenLink: options?.showOpenLink,
       });
 
       if (saveResult?.error) return;

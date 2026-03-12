@@ -75,10 +75,10 @@ export const useRegisterActionButtons = ({
       type: ActionButtonType.PRIMARY,
       handler: async () => {
         if (linkedSavedDashboardExistsRef.current) {
-          await dashboardApi.runQuickSave();
+          await dashboardApi.runQuickSave({ showOpenLink: true });
           return;
         }
-        const result = await dashboardApi.runInteractiveSave();
+        const result = await dashboardApi.runInteractiveSave({ showOpenLink: true });
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
         if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectIdRef.current) {
           await updateOrigin({ savedObjectId: nextSavedObjectId });

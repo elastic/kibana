@@ -44,6 +44,7 @@ export async function openSaveModal({
   title,
   viewMode,
   accessControl,
+  showOpenLink,
 }: {
   description?: string;
   isManaged: boolean;
@@ -57,6 +58,7 @@ export async function openSaveModal({
   title: string;
   viewMode: ViewMode;
   accessControl?: Partial<SavedObjectAccessControl>;
+  showOpenLink?: boolean;
 }) {
   try {
     if (viewMode === 'edit' && isManaged) {
@@ -134,6 +136,7 @@ export async function openSaveModal({
               dashboardState: dashboardStateToSave,
               lastSavedId,
               accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
+              showOpenLink,
             });
 
             const addDuration = window.performance.now() - beforeAddTime;

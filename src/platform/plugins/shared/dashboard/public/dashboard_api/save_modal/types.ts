@@ -30,6 +30,7 @@ export interface SaveDashboardProps {
   saveOptions: SavedDashboardSaveOpts;
   lastSavedId?: string;
   accessMode?: SavedObjectAccessControl['accessMode'];
+  showOpenLink?: boolean;
 }
 
 export interface SaveDashboardReturn {

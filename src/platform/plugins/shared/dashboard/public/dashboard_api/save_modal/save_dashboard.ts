@@ -12,12 +12,14 @@ import { getDashboardBackupService } from '../../services/dashboard_backup_servi
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import type { SaveDashboardProps, SaveDashboardReturn } from './types';
+import { showSaveWithLinkToast } from './show_save_with_link_toast';
 
 export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
   accessMode,
+  showOpenLink,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
@@ -29,14 +31,18 @@ export const saveDashboard = async ({
     const newId = result.id;
 
     if (newId) {
-      coreServices.notifications.toasts.addSuccess({
-        title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-          defaultMessage: `Dashboard ''{title}'' was saved`,
-          values: { title: dashboardState.title },
-        }),
-        className: 'eui-textBreakWord',
-        'data-test-subj': 'saveDashboardSuccess',
-      });
+      if (showOpenLink) {
+        showSaveWithLinkToast(newId);
+      } else {
+        coreServices.notifications.toasts.addSuccess({
+          title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+            defaultMessage: `Dashboard ''{title}'' was saved`,
+            values: { title: dashboardState.title },
+          }),
+          className: 'eui-textBreakWord',
+          'data-test-subj': 'saveDashboardSuccess',
+        });
+      }
 
       /**
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
