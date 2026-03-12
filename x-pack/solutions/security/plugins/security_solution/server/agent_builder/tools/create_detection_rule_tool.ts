@@ -214,19 +214,8 @@ The tool stores the result as an attachment (creating new or updating existing).
 
         let resultAttachmentId: string | undefined;
         let version: number | undefined;
-        let isUpdate = false;
 
         try {
-          const existingAttachment = attachments
-            .getActive()
-            .find((a) => a.type === SecurityAgentBuilderAttachments.rule);
-
-          if (existingAttachment) {
-            logger.debug(`Deleting existing rule attachment ${existingAttachment.id}`);
-            await attachments.permanentDelete(existingAttachment.id);
-            isUpdate = true;
-          }
-
           const created = await attachments.add({
             id: SECURITY_RULE_ATTACHMENT_ID,
             type: SecurityAgentBuilderAttachments.rule,
@@ -253,7 +242,6 @@ The tool stores the result as an attachment (creating new or updating existing).
                 rule: result.rule,
                 ...(resultAttachmentId && { attachmentId: resultAttachmentId }),
                 ...(version !== undefined && { version }),
-                ...(isUpdate && { is_update: isUpdate }),
               },
             },
           ],
