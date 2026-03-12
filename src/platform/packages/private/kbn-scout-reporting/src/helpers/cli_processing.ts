@@ -48,20 +48,18 @@ export function getRunCommand(argv: string[] = process.argv): string {
   }
 }
 
-export function getRunTarget(argv: string[] = process.argv): string {
-  // First, try to get the target from the environment variable (set by the scout run-tests command)
-  if (process.env.SCOUT_TARGET_MODE) {
-    // Convert mode format (e.g. "serverless=oblt" to display format "serverless-oblt")
-    const mode = process.env.SCOUT_TARGET_MODE;
-    if (mode === 'stateful') {
-      return 'stateful';
-    }
-    if (mode.startsWith('serverless=')) {
-      return mode.replace('=', '-');
-    }
-    return mode;
-  }
-
+/**
+ * Tries to determine the Scout test target from process attributes.
+ *
+ * @param argv Process argument values
+ *
+ * @return ScoutTestTarget if necessary information was found in process arguments
+ *
+ * This won't return a target if '--grep' is not provided in the command line
+ */
+export function getTestTargetFromProcessArguments(
+  argv: string[] = process.argv
+): ScoutTestTarget | undefined {
   // Fallback to parsing command line arguments
   // Try to find --grep argument in different formats
   for (let i = 0; i < argv.length; i++) {
