@@ -68,10 +68,10 @@ test('should call onSave when "Save" clicked (url)', async () => {
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
-    altText: 'alt text',
-    backgroundColor: '',
+    alt_text: 'alt text',
+    background_color: '',
     sizing: {
-      objectFit: 'contain',
+      object_fit: 'contain',
     },
     src: {
       type: 'url',
@@ -105,10 +105,10 @@ test('should be able to edit', async () => {
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
   expect(onSave).toBeCalledWith({
-    altText: 'alt text changed',
-    backgroundColor: '',
+    alt_text: 'alt text changed',
+    background_color: '',
     sizing: {
-      objectFit: 'contain',
+      object_fit: 'contain',
     },
     src: {
       type: 'url',
