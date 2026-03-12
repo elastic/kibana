@@ -246,4 +246,27 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails handler)', () => {
     expect(result.output?.abort).toBe(true);
     expect(result.output?.abort_message).toBe('Policy violation.');
   });
+
+  it('fail closed: on LLM invoke error, logs warn and returns fallback rejection', async () => {
+    const llmError = new Error('Rate limit exceeded');
+    mockInvoke.mockRejectedValue(llmError);
+
+    const step = getAiGuardrailsStepDefinition(mockCoreSetup as any, mockGetInternalServices);
+    const context = createContext({ message: 'hello' });
+
+    const result = await step.handler(context);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Guardrail LLM evaluation failed',
+      llmError
+    );
+    expect(result.output?.pass).toBe(false);
+    expect(result.output?.abort).toBe(true);
+    expect(result.output?.reason).toBe(
+      'System error: unable to evaluate guardrails due to LLM failure.'
+    );
+    expect(result.output?.abort_message).toBe(
+      'System error: unable to evaluate guardrails due to LLM failure.'
+    );
+  });
 });

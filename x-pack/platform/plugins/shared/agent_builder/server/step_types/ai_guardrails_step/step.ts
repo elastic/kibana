@@ -171,22 +171,37 @@ export const getAiGuardrailsStepDefinition = (
         { name: 'guardrail_eval', includeRaw: true, method: 'jsonMode' as const }
       );
 
-      const result = await runnable.invoke(modelInput, { signal: context.abortSignal });
-      const parsed = result.parsed as { pass?: boolean; reason?: string };
-      const pass = parsed?.pass === true;
-      const reason = typeof parsed?.reason === 'string' ? parsed.reason : undefined;
+      try {
+        const result = await runnable.invoke(modelInput, { signal: context.abortSignal });
+        const parsed = result.parsed as { pass?: boolean; reason?: string };
+        const pass = parsed?.pass === true;
+        const reason = typeof parsed?.reason === 'string' ? parsed.reason : undefined;
 
-      if (pass) {
-        return { output: { pass: true } };
+        if (pass) {
+          return { output: { pass: true } };
+        }
+
+        return {
+          output: {
+            pass: false,
+            reason: reason ?? 'Guardrail evaluation failed.',
+            abort: true,
+            abort_message: reason ?? 'Guardrail evaluation failed.',
+          },
+        };
+      } catch (err) {
+        context.logger.warn(
+          'Guardrail LLM evaluation failed',
+          err instanceof Error ? err : new Error(String(err))
+        );
+        return {
+          output: {
+            pass: false,
+            reason: 'System error: unable to evaluate guardrails due to LLM failure.',
+            abort: true,
+            abort_message: 'System error: unable to evaluate guardrails due to LLM failure.',
+          },
+        };
       }
-
-      return {
-        output: {
-          pass: false,
-          reason: reason ?? 'Guardrail evaluation failed.',
-          abort: true,
-          abort_message: reason ?? 'Guardrail evaluation failed.',
-        },
-      };
     },
   });
