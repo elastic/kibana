@@ -15,6 +15,7 @@ export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
   getStreamNameFromViewName,
+  getWiredStreamViewQuery,
 } from './src/models/query/view_name';
 
 export {
@@ -29,7 +30,7 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
@@ -47,7 +48,15 @@ export {
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
-export { buildEsqlQuery } from './src/helpers/query';
+export {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getFromSources,
+  normalizeEsqlQuery,
+  replaceFromSources,
+  rewriteFromSources,
+} from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
 
@@ -57,7 +66,7 @@ export {
   flattenRecord,
   recursiveRecord,
 } from './src/shared/record_types';
-export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
+export { isSchema, createIsNarrowSchema, isRecord } from './src/shared/type_guards';
 
 export {
   isChildOf,
@@ -81,21 +90,27 @@ export {
   type FieldDefinition,
   type NamedFieldDefinitionConfig,
   type FieldDefinitionConfig,
+  type ClassicFieldDefinition,
+  type ClassicFieldDefinitionConfig,
   type InheritedFieldDefinitionConfig,
   type InheritedFieldDefinition,
   type FieldDefinitionConfigAdvancedParameters,
+  type FieldDefinitionType,
+  type AllFieldDefinitionType,
+  FIELD_DEFINITION_TYPES,
+  ALL_FIELD_DEFINITION_TYPES,
   fieldDefinitionConfigSchema,
   namedFieldDefinitionConfigSchema,
 } from './src/fields';
 
 export {
+  type EsqlQuery,
+  esqlQuerySchema,
   type StreamQuery,
-  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
-  streamQueryInputSchema,
 } from './src/queries';
 
 export {
@@ -161,6 +176,8 @@ export type {
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
   validateStreamName,
+  type StreamNameValidationError,
+  type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './src/helpers/stream_name_validation';
@@ -183,8 +200,6 @@ export {
   featureStatusSchema,
 } from './src/feature';
 
-export { type System, systemSchema, isSystem } from './src/system';
-
 export {
   type BaseSimulationError,
   type SimulationError,
@@ -204,6 +219,27 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult } from './src/api/features';
 
-export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';

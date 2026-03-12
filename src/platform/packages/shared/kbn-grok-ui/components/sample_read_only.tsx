@@ -157,7 +157,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     // Add text before the current highlight
     if (startIndex < currentHighlight.startIndex) {
       parts.push(
-        <span key={`${startIndex}-${currentHighlight.startIndex}`}>
+        <span key={`pre-${startIndex}-${currentHighlight.startIndex}`}>
           {text.slice(startIndex, currentHighlight.startIndex)}
         </span>
       );
@@ -165,7 +165,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
 
     const highlightedTextSpan = (
       <span
-        key={`${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
+        key={`hl-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
         className={currentHighlight.className}
       >
         {processText(
@@ -183,6 +183,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     parts.push(
       currentHighlight.fieldDefinition ? (
         <EuiToolTip
+          key={`tt-${currentHighlight.startIndex}-${currentHighlight.endIndex}`}
           position="top"
           content={
             <>
@@ -211,7 +212,7 @@ const applyHighlights = (sample: string, highlights: HighlightConfiguration[]): 
     // Add text after the current highlight
     if (currentHighlight.endIndex < endIndex) {
       parts.push(
-        <span key={`${currentHighlight.endIndex}-${endIndex}`}>
+        <span key={`post-${currentHighlight.endIndex}-${endIndex}`}>
           {processText(
             text,
             currentHighlight.endIndex,

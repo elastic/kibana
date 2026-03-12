@@ -9,6 +9,10 @@ paths:
       operationId: CreateAlertsIndex
       x-codegen-enabled: true
       summary: Create an alerts index
+      description: |
+        Creates an index for Elastic Security alerts. Calling this API is not
+        required for the detection engine to function properly. You can create
+        rules and alerts without calling this API.
       tags:
         - Alert index API
       responses:

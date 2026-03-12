@@ -34,10 +34,11 @@ import type {
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import type { YamlParseFn } from '../../../services';
-import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
+import { hasInvalidButRequiredVar, countValidationErrors, isAdvancedVar } from '../../../services';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 import { useYaml } from '../../../../../../../../services';
 
+import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 import { useDataStreamId } from './hooks';
@@ -112,16 +113,25 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     useEffect(() => {
       if (yaml) {
         setIsShowingStreams(
-          shouldShowStreamsByDefault(
-            yaml.parse,
-            packageInput,
-            packageInputStreams,
-            packagePolicyInput,
-            defaultDataStreamId
-          )
+          (isSingleInputAndStreams && packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
         );
       }
-    }, [yaml, packageInput, packageInputStreams, packagePolicyInput, defaultDataStreamId]);
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      isSingleInputAndStreams,
+      packageInfo.type,
+    ]);
 
     // Hide registry variables based on `hide_in_deployment_modes` value
     const hideRegistryVars = useCallback(
@@ -175,6 +185,55 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
     const showTopLevelDescription = inputStreams.length === 1;
+
+    // When isSingleInputAndStreams, check if all stream vars are advanced so we can
+    // consolidate them into the input-level advanced section.
+    const shouldConsolidateAdvancedSections = useMemo(() => {
+      if (!isSingleInputAndStreams || inputStreams.length !== 1) {
+        return false;
+      }
+      const stream = inputStreams[0].packageInputStream;
+      if (!stream.vars || stream.vars.length === 0) {
+        return false;
+      }
+      return stream.vars.every((varDef) => isAdvancedVar(varDef));
+    }, [isSingleInputAndStreams, inputStreams]);
+
+    const consolidatedStreamAdvancedVars: StreamAdvancedVarsConfig | undefined = useMemo(() => {
+      if (!shouldConsolidateAdvancedSections) {
+        return undefined;
+      }
+      const { packageInputStream, packagePolicyInputStream } = inputStreams[0];
+      return {
+        vars: packageInputStream.vars || [],
+        packagePolicyInputStream: packagePolicyInputStream!,
+        updatePackagePolicyInputStream: (updatedStream: Partial<PackagePolicyInputStream>) => {
+          const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
+            (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
+          );
+          const newStreams = [...packagePolicyInput.streams];
+          newStreams[indexOfUpdatedStream] = {
+            ...newStreams[indexOfUpdatedStream],
+            ...updatedStream,
+          };
+          const updatedInput: Partial<NewPackagePolicyInput> = { streams: newStreams };
+          if (!packagePolicyInput.enabled && updatedStream.enabled) {
+            updatedInput.enabled = true;
+          } else if (packagePolicyInput.enabled && !newStreams.find((s) => s.enabled)) {
+            updatedInput.enabled = false;
+          }
+          updatePackagePolicyInput(updatedInput);
+        },
+        validationResults:
+          inputValidationResults?.streams?.[packagePolicyInputStream!.data_stream!.dataset] ?? {},
+      };
+    }, [
+      shouldConsolidateAdvancedSections,
+      inputStreams,
+      packagePolicyInput,
+      updatePackagePolicyInput,
+      inputValidationResults,
+    ]);
 
     const topLevelDescription = showTopLevelDescription && (
       <EuiText size="s" color="subdued">
@@ -327,31 +386,33 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color={hasErrors ? 'danger' : 'primary'}
-                  onClick={() => setIsShowingStreams(!isShowingStreams)}
-                  iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
-                  iconSide="right"
-                  aria-expanded={isShowingStreams}
-                  aria-label={i18n.translate(
-                    'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color={hasErrors ? 'danger' : 'primary'}
+                    onClick={() => setIsShowingStreams(!isShowingStreams)}
+                    iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
+                    iconSide="right"
+                    aria-expanded={isShowingStreams}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+                      {
+                        defaultMessage: 'Change default settings for {title}',
+                        values: {
+                          title: packageInput.title || packageInput.type,
+                        },
+                      }
+                    )}
+                  >
                     {
-                      defaultMessage: 'Change default settings for {title}',
-                      values: {
-                        title: packageInput.title || packageInput.type,
-                      },
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
+                        defaultMessage="Change defaults"
+                      />
                     }
-                  )}
-                >
-                  {
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
-                      defaultMessage="Change defaults"
-                    />
-                  }
-                </EuiButtonEmpty>
-              </EuiFlexItem>
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -371,13 +432,18 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
               showDescriptionColumn={!isSingleInputAndStreams}
+              streamAdvancedVars={consolidatedStreamAdvancedVars}
             />
-            {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
+            {hasInputStreams && !shouldConsolidateAdvancedSections ? (
+              <ShortenedHorizontalRule margin="m" />
+            ) : (
+              <EuiSpacer size="l" />
+            )}
           </Fragment>
         ) : null}
 
         {/* Per-stream policy */}
-        {isShowingStreams ? (
+        {isShowingStreams && !shouldConsolidateAdvancedSections ? (
           <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>

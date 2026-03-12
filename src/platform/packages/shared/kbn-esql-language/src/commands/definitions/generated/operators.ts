@@ -182,6 +182,74 @@ const addDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'A numeric value, dense_vector or a date time value.',
@@ -228,6 +296,23 @@ const addDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -279,6 +364,23 @@ const addDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -473,6 +575,74 @@ const divDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'A numeric value.',
@@ -519,6 +689,23 @@ const divDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -570,6 +757,23 @@ const divDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -4716,6 +4920,74 @@ const mulDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'A numeric value or dense_vector',
@@ -4762,6 +5034,23 @@ const mulDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -4813,6 +5102,23 @@ const mulDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value or dense_vector',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -6123,6 +6429,74 @@ const subDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'A numeric value, dense_vector or a date time value.',
@@ -6169,6 +6543,23 @@ const subDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
@@ -6220,6 +6611,23 @@ const subDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'A numeric value, dense_vector or a date time value.',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [
