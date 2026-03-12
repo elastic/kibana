@@ -14,10 +14,8 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  HASHED_ID_FIELD,
-} from './logs_extraction_query_builder';
+import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
+import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
 import {
   LogExtractionConfig,
   type EngineDescriptorClient,

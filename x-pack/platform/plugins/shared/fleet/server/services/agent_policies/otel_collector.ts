@@ -50,6 +50,10 @@ export function generateOtelcolConfig(
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
         const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
+        // Extract signal types from pipeline IDs
+        const signalTypes = stream.service?.pipelines
+          ? extractSignalTypesFromPipelines(stream.service?.pipelines)
+          : [];
         const attributesTransform = generateOTelAttributesTransform(
           stream.data_stream.type ? stream.data_stream.type : 'logs',
           stream.data_stream.dataset,
@@ -58,11 +62,13 @@ export function generateOtelcolConfig(
             : 'default',
           suffix,
           packageInfo,
-          stream.service?.pipelines
+          signalTypes
         );
+        const hasTracesPipeline = signalTypes.includes('traces');
 
         const shouldAddAPMConfig =
-          stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true;
+          (stream.data_stream.type === dataTypes.Traces || hasTracesPipeline) &&
+          stream[USE_APM_VAR_NAME] === true;
 
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
@@ -89,7 +95,7 @@ export function generateOtelcolConfig(
 
         otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
 
-        if (stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true) {
+        if (shouldAddAPMConfig) {
           if (!otelConfig?.connectors) {
             otelConfig.connectors = {};
           }
@@ -208,17 +214,15 @@ function generateOTelAttributesTransform(
   namespace: string,
   suffix: string,
   packageInfo?: PackageInfo,
-  streamPipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
+  signalTypes?: string[]
 ): Record<OTelCollectorComponentID, any> {
   const dynamicSignalTypes = hasDynamicSignalTypes(packageInfo);
 
   let transformStatements: Record<string, any> = {};
 
-  if (dynamicSignalTypes && streamPipelines) {
-    // When dynamic_signal_types is true, extract signal types from pipeline IDs
-    // and generate transforms for each. This allows the collector to route data
+  if (dynamicSignalTypes && signalTypes) {
+    // When dynamic_signal_types is true, generate transforms for each signal type. This allows the collector to route data
     // to the appropriate datastreams based on the pipelines configured in the policy.
-    const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
     // Generate transforms for each signal type found in pipelines
     signalTypes.forEach((signalType) => {
       const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
@@ -281,24 +285,18 @@ function conditionallyAddApmToPipelines(
   if (!shouldAddAPMConfig) {
     return pipelines;
   }
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'exporters');
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'processors');
-  return pipelines;
-}
-
-function addCompomentToPipelines(
-  pipelines: any,
-  componentId: string,
-  type: string
-): Record<OTelCollectorPipelineID, any> {
-  for (const pipelineId in pipelines) {
-    if (pipelines[pipelineId][type]) {
-      pipelines[pipelineId][type] = pipelines[pipelineId][type].concat([componentId]);
-    } else {
-      pipelines[pipelineId][type] = [componentId];
+  const result: Record<OTelCollectorPipelineID, any> = {};
+  Object.entries(pipelines as Record<OTelCollectorPipelineID, Record<string, string[]>>).forEach(
+    ([pipelineID, pipeline]) => {
+      const signalType = getSignalType(pipelineID);
+      if (signalType === 'traces') {
+        pipeline.exporters = [...(pipeline.exporters || []), 'elasticapm'];
+        pipeline.processors = [...(pipeline.processors || []), 'elasticapm'];
+      }
+      result[pipelineID] = pipeline;
     }
-  }
-  return pipelines;
+  );
+  return result;
 }
 
 function addSuffixToOtelcolPipelinesComponents(
