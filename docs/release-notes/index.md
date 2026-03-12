@@ -402,6 +402,51 @@ For the Elastic Security 9.3.0 release information, refer to [Elastic Security S
 * Turns off custom suggestions on the embedded console [#241516]({{kib-pull}}241516).
 * Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings [#237509]({{kib-pull}}237509).
 
+## 9.2.7 [kibana-9.2.7-release-notes]
+
+### Features and enhancements [kibana-9.2.7-features-enhancements]
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+### Fixes [kibana-9.2.7-fixes]
+
+**Alerting**:
+* Fixes a blank page appearing at the end of PDF exports when using the **Print format** option with an even number of dashboard visualizations [#254957]({{kib-pull}}254957).
+* Improves handling of `204` responses [#251090]({{kib-pull}}251090).
+
+**Dashboards and Visualizations**:
+* Fixes an issue where embedded panels in Canvas workpads could lose their saved object references, causing panels to fail to load [#252191]({{kib-pull}}252191).
+* Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
+
+**Data ingestion and Fleet**:
+* Fixes the unenroll task and adds an FTR test [#255726]({{kib-pull}}255726).
+* Fixes incorrect installation of assets [#254923]({{kib-pull}}254923).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.2.7 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.2.7 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes the spaces list displaying **No spaces match** text on load [#255654]({{kib-pull}}255654).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys [#256233]({{kib-pull}}256233).
+
+**Kibana security**:
+* Adds `waitFor` for the privilege button [#255094]({{kib-pull}}255094).
+
+**Management**:
+* Improves name announcement in the index mode modal [#256392]({{kib-pull}}256392).
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters [#255649]({{kib-pull}}255649).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements [#255426]({{kib-pull}}255426).
+
+**Search**:
+* Fixes Search Playground routes to limit the maximum size of arrays [#255881]({{kib-pull}}255881).
+* Adds server-side API key generation [#256083]({{kib-pull}}256083).
+* Fixes glitchy rendering in the **Attributes** tab [#255173]({{kib-pull}}255173).
+* Fixes EQL sequence document merging to treat dot and nested notation the same [#254830]({{kib-pull}}254830).
+
 ## 9.2.6 [kibana-9.2.6-release-notes]
 
 :::{important}
