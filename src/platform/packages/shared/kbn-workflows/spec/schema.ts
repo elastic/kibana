@@ -258,6 +258,17 @@ export const WaitStepSchema = BaseStepSchema.extend({
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
+export const WaitForInputStepInputSchema = z
+  .object({
+    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+  })
+  .optional();
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
+  with: WaitForInputStepInputSchema,
+});
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
   .describe(
@@ -659,6 +670,7 @@ const StepSchema = z.lazy(() =>
     WhileStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    WaitForInputStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
