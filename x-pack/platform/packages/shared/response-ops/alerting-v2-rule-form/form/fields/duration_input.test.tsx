@@ -13,7 +13,7 @@ const defaultProps: DurationInputProps = {
   value: '5m',
   onChange: jest.fn(),
   numberLabel: 'Every',
-  unitLabel: 'Unit',
+  unitAriaLabel: 'Unit',
   dataTestSubj: 'testDuration',
   idPrefix: 'testDuration',
 };
