@@ -17,7 +17,7 @@ import { useRuleFormServices } from '../contexts';
 
 const PREFERRED_TIME_FIELD = '@timestamp';
 
-export const TimeFieldSelect: React.FC = () => {
+export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { control, setValue, getValues } = useFormContext<FormValues>();
   const query = useWatch({ name: 'evaluation.query.base', control });

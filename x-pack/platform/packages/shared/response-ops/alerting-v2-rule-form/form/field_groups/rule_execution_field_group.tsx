@@ -9,11 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldGroup } from './field_group';
 import { ScheduleField } from '../fields/schedule_field';
-import { TimeFieldSelect } from '../fields/time_field_select';
 import { LookbackWindowField } from '../fields/lookback_window_field';
-import { GroupFieldSelect } from '../fields/group_field_select';
 
-export const RuleExecutionFieldGroup: React.FC = () => {
+export const RuleExecutionFieldGroup = () => {
   return (
     <FieldGroup
       title={i18n.translate('xpack.alertingV2.ruleForm.ruleExecution', {
@@ -21,9 +19,7 @@ export const RuleExecutionFieldGroup: React.FC = () => {
       })}
     >
       <ScheduleField />
-      <TimeFieldSelect />
       <LookbackWindowField />
-      <GroupFieldSelect />
     </FieldGroup>
   );
 };

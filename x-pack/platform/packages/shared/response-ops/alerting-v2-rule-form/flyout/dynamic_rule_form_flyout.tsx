@@ -34,20 +34,19 @@ export interface DynamicRuleFormFlyoutProps {
  * the loading state of its footer buttons. The time field is automatically
  * derived from the query's available date fields.
  */
-const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
+const DynamicRuleFormFlyoutInner = ({
   push,
   onClose,
   query,
   services,
-}) => {
+}: DynamicRuleFormFlyoutProps) => {
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
     notifications: services.notifications,
-    onSuccess: onClose,
   });
 
   const handleSubmit = (values: FormValues) => {
-    createRule(values);
+    createRule(values, { onSuccess: onClose });
   };
 
   return (
@@ -57,12 +56,13 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
         isSubmitting={isLoading}
         query={query}
         services={services}
+        layout="flyout"
       />
     </RuleFormFlyout>
   );
 };
 
-export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => {
+export const DynamicRuleFormFlyout = (props: DynamicRuleFormFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

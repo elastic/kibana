@@ -34,21 +34,21 @@ const LazyStandaloneRuleFormFlyout = React.lazy(() =>
 export { LazyDynamicRuleFormFlyout, LazyStandaloneRuleFormFlyout, LazyRuleFormFlyout };
 
 /** Base flyout wrapper - use with DynamicRuleForm or StandaloneRuleForm as children */
-export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = (props) => (
+export const RuleFormFlyout = (props: RuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyRuleFormFlyout {...props} />
   </Suspense>
 );
 
 /** Pre-composed flyout for Discover integration - syncs with external query changes */
-export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => (
+export const DynamicRuleFormFlyout = (props: DynamicRuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyDynamicRuleFormFlyout {...props} />
   </Suspense>
 );
 
 /** Pre-composed flyout for classic experience - static initialization */
-export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => (
+export const StandaloneRuleFormFlyout = (props: StandaloneRuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyStandaloneRuleFormFlyout {...props} />
   </Suspense>

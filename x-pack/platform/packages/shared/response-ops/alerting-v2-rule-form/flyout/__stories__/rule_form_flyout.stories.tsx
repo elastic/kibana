@@ -13,7 +13,7 @@ import { StandaloneRuleFormFlyout } from '../standalone_rule_form_flyout';
 import { RuleFormFlyout } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
 import { StandaloneRuleForm } from '../../form/standalone_rule_form';
-import type { RuleFormServices } from '../../form/contexts/rule_form_services_context';
+import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 
 const mockServices = {
   http: {
