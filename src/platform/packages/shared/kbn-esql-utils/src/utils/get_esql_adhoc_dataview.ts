@@ -94,6 +94,10 @@ export async function getESQLAdHocDataview({
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
       timeFieldName: timeField || undefined,
+      fields:
+        skipFetchFields && timeField // TODO: receive type from server
+          ? { [timeField]: { name: timeField, type: 'date', searchable: true, aggregatable: true } }
+          : undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
