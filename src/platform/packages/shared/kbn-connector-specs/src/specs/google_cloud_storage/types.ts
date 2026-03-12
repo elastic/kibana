@@ -27,12 +27,7 @@ export const ListProjectsInputSchema = z.object({
 export type ListProjectsInput = z.infer<typeof ListProjectsInputSchema>;
 
 export const ListBucketsInputSchema = z.object({
-  project: z
-    .string()
-    .min(1)
-    .describe(
-      'Google Cloud project ID (e.g. "my-project-123")'
-    ),
+  project: z.string().min(1).describe('Google Cloud project ID (e.g. "my-project-123")'),
   maxResults: z
     .number()
     .optional()
