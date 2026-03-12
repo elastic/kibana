@@ -324,7 +324,11 @@ describe('ScanResultsPanel', () => {
       return {
         data: {
           results: hasSearchAfter
-            ? [buildScanResult({ slo: { id: 'slo-25', name: 'SLO 25', revision: 1, enabled: true } })]
+            ? [
+                buildScanResult({
+                  slo: { id: 'slo-25', name: 'SLO 25', revision: 1, enabled: true },
+                }),
+              ]
             : results,
           scan: completedScan({ status: 'completed', problematic: 30 }),
           total: 30,
