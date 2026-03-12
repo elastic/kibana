@@ -42,7 +42,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
-  EuiNotificationBadge,
+  EuiIcon,
   EuiIconTip,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
@@ -919,29 +919,44 @@ export const QueryBarTopRow = React.memo(
       }
 
       const filterCount = props.filters?.length ?? 0;
+      const isActive = Boolean(props.isFiltersVisible);
       const toggleButton = (
-        <EuiButtonIcon
-          iconType="filter"
+        <button
           aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
             defaultMessage: 'Toggle filters panel',
           })}
           onClick={handleFilterToggleClick}
-          size="s"
-          display="base"
-          color="text"
           data-test-subj="unifiedFilterPanelToggle"
-          css={
-            props.isFiltersVisible
-              ? css({
-                  backgroundColor: euiTheme.colors.darkShade,
-                  color: euiTheme.colors.ghost,
-                  '&:hover, &:focus': {
-                    backgroundColor: euiTheme.colors.darkShade,
-                  },
-                })
-              : undefined
-          }
-        />
+          css={css({
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: euiTheme.size.s,
+            padding: `0 ${euiTheme.size.s}`,
+            height: euiTheme.size.xl,
+            minWidth: 0,
+            border: 'none',
+            borderRadius: euiTheme.border.radius.medium,
+            backgroundColor: isActive ? euiTheme.colors.darkShade : euiTheme.colors.lightShade,
+            color: isActive ? euiTheme.colors.ghost : euiTheme.colors.text,
+            cursor: 'pointer',
+            fontFamily: euiTheme.font.family,
+            fontSize: euiTheme.size.m,
+            fontWeight: euiTheme.font.weight.medium,
+            lineHeight: 1,
+            '&:hover': {
+              backgroundColor: isActive
+                ? euiTheme.colors.darkShade
+                : euiTheme.colors.mediumShade,
+            },
+            '&:focus-visible': {
+              outline: `${euiTheme.focus.width} solid ${euiTheme.focus.color}`,
+              outlineOffset: 2,
+            },
+          })}
+        >
+          <EuiIcon type="filter" size="s" />
+          <span aria-hidden>{filterCount}</span>
+        </button>
       );
 
       return (
@@ -957,20 +972,6 @@ export const QueryBarTopRow = React.memo(
                 {toggleButton}
               </EuiToolTip>
             )}
-            <EuiNotificationBadge
-                aria-hidden
-                size="s"
-                color="subdued"
-                css={{
-                  position: 'absolute',
-                  top: -4,
-                  right: -4,
-                  zIndex: 1,
-                  pointerEvents: 'none',
-                }}
-              >
-                {filterCount}
-            </EuiNotificationBadge>
             {props.addFilterOpenFromToggle !== undefined && (
               <AddFilterPopover
                 indexPatterns={props.indexPatterns}
