@@ -17,6 +17,8 @@ import type { StartPlugins } from '../types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 
+const DEFAULT_EXPERIMENTAL_FEATURES: ExperimentalFeatures = allowedExperimentalValues;
+
 export interface ServicesWrapperProps {
   services: CoreStart & StartPlugins;
   children: React.ReactNode;
@@ -26,7 +28,7 @@ export interface ServicesWrapperProps {
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({
   services,
   children,
-  experimentalFeatures = { ...allowedExperimentalValues },
+  experimentalFeatures = DEFAULT_EXPERIMENTAL_FEATURES,
 }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
