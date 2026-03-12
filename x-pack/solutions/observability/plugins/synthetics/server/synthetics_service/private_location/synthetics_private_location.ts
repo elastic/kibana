@@ -10,6 +10,8 @@ import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -80,6 +82,13 @@ export class SyntheticsPrivateLocation {
       return `${config.id}-${locName}`;
     }
     return `${config.name}-${locName}`;
+  }
+
+  async getPolicyNamespace(configNamespace: string) {
+    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
+      return configNamespace;
+    }
+    return undefined;
   }
 
   /**
@@ -487,6 +496,49 @@ export class SyntheticsPrivateLocation {
     };
   }
 
+  async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
+    const policyIdsToDelete = new Set<string>();
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
+    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
+
+    for (const config of configs) {
+      const { locations } = config;
+      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+      for (const privateLocation of monitorPrivateLocations) {
+        policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToDelete.add(id)
+        );
+      }
+    }
+
+    if (policyIdsToDelete.size > 0) {
+      const result = await this.server.fleet.packagePolicyService.delete(
+        soClient,
+        esClient,
+        [...policyIdsToDelete],
+        {
+          force: true,
+          asyncDeploy: true,
+        }
+      );
+      const failedPolicies = result?.filter((policy) => {
+        return !policy.success && policy?.statusCode !== 404;
+      });
+      if (failedPolicies?.length > 0 && failedPolicies.length >= configs.length) {
+        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
+      }
+      return result;
+    }
+  }
+
+  async getAgentPolicies() {
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  }
+
   /**
    * Fetches existing package policies for the given configs and locations.
    * Looks for new (space-agnostic) format and legacy format for all spaces
@@ -527,4 +579,8 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
       name ? 'for monitor ' + name : ''
     } for private location: ${location}`
   );
+};
+
+const deletePolicyError = (name: string, location?: string) => {
+  return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };
