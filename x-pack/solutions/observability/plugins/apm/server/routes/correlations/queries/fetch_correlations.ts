@@ -9,13 +9,13 @@ import { chunk } from 'lodash';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import { CorrelationType } from '../../../../common/correlations/types';
 import type {
   CorrelationsResponse,
   UnifiedCorrelation,
   CommonCorrelationsQueryParams,
+  EntityType,
   FieldValuePair,
+  Metric,
 } from '../../../../common/correlations/types';
 import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
@@ -24,7 +24,7 @@ import { fetchDurationFieldCandidates } from './fetch_duration_field_candidates'
 import { fetchFieldValuePairs } from './fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './fetch_significant_correlations';
 import { fetchPValues } from './fetch_p_values';
-import { getEventType } from '../utils';
+import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const CHUNK_SIZE = 10;
@@ -34,7 +34,7 @@ export type CorrelationsScope = 'transactions' | 'exitSpans';
 
 interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
   apmEventClient: APMEventClient;
-  correlationType: CorrelationType;
+  metric: Metric;
   /** When 'exitSpans', analysis runs on raw exit span documents (span.destination.service.resource exists). Default 'transactions'. */
   scope?: CorrelationsScope;
   fieldCandidates?: string[];
@@ -49,9 +49,13 @@ interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
   };
 }
 
+function scopeToEntityType(scope: CorrelationsScope): EntityType {
+  return scope === 'exitSpans' ? 'exit_span' : 'transaction';
+}
+
 export async function fetchCorrelations({
   apmEventClient,
-  correlationType,
+  metric,
   scope = 'transactions',
   fieldCandidates: providedFieldCandidates,
   start,
@@ -65,22 +69,13 @@ export async function fetchCorrelations({
   includeHistogram = false,
   config,
 }: FetchCorrelationsParams): Promise<CorrelationsResponse> {
-  const chartType =
-    scope === 'exitSpans'
-      ? correlationType === CorrelationType.ERROR_RATE
-        ? LatencyDistributionChartType.exitSpanFailedTransactionsCorrelations
-        : LatencyDistributionChartType.exitSpanLatencyCorrelations
-      : correlationType === CorrelationType.ERROR_RATE
-      ? LatencyDistributionChartType.failedTransactionsCorrelations
-      : LatencyDistributionChartType.latencyCorrelations;
+  const isFailureRateMetric = metric === 'failure_rate';
+  const entityType = scopeToEntityType(scope);
+  const eventType = getEventTypeFromEntityType(entityType);
 
-  const searchAggregatedTransactions = false;
-  const eventType = getEventType(chartType, searchAggregatedTransactions);
-
-  // Determine if we should search metrics (only for transaction latency distribution)
   // Get overall distribution
   const overallDistribution = await getOverallLatencyDistribution({
-    chartType,
+    entityType,
     apmEventClient,
     start,
     end,
@@ -90,7 +85,6 @@ export async function fetchCorrelations({
     percentileThreshold,
     durationMinOverride: providedDurationMin,
     durationMaxOverride: providedDurationMax,
-    searchMetrics: searchAggregatedTransactions,
   });
 
   const durationMin = providedDurationMin ?? overallDistribution.durationMin ?? 0;
@@ -99,9 +93,9 @@ export async function fetchCorrelations({
 
   // For error_rate, also get error histogram
   let errorHistogram: CorrelationsResponse['errorHistogram'];
-  if (includeHistogram && correlationType === CorrelationType.ERROR_RATE) {
+  if (includeHistogram && isFailureRateMetric) {
     const errorDistribution = await getOverallLatencyDistribution({
-      chartType,
+      entityType,
       apmEventClient,
       start,
       end,
@@ -115,7 +109,6 @@ export async function fetchCorrelations({
       percentileThreshold,
       durationMinOverride: durationMin,
       durationMaxOverride: durationMax,
-      searchMetrics: searchAggregatedTransactions,
     });
     errorHistogram = errorDistribution.overallHistogram;
   }
@@ -137,7 +130,7 @@ export async function fetchCorrelations({
     fieldCandidates = candidatesResponse.fieldCandidates;
 
     // For error_rate, filter out EVENT_OUTCOME
-    if (correlationType === CorrelationType.ERROR_RATE) {
+    if (isFailureRateMetric) {
       fieldCandidates = fieldCandidates.filter((field) => field !== EVENT_OUTCOME);
     }
   }
@@ -151,7 +144,7 @@ export async function fetchCorrelations({
   let ccsWarning = false;
   let fallbackResult: UnifiedCorrelation | undefined;
 
-  if (correlationType === CorrelationType.ERROR_RATE) {
+  if (isFailureRateMetric) {
     // For error_rate, use p-values approach
     // Process field candidates directly (not field value pairs) to match legacy behavior
     const fieldCandidateChunks = chunk(fieldCandidates, CHUNK_SIZE);
@@ -170,7 +163,7 @@ export async function fetchCorrelations({
         durationMin,
         durationMax,
         fieldCandidates: fieldCandidatesChunk,
-        chartType,
+        entityType,
       });
 
       if (pValuesResponse.failedTransactionsCorrelations.length > 0) {
@@ -235,7 +228,7 @@ export async function fetchCorrelations({
         durationMinOverride: durationMin,
         durationMaxOverride: durationMax,
         fieldValuePairs: fieldValuePairChunk,
-        chartType,
+        entityType,
       });
 
       // Only include correlations that have histograms (already filtered by fetchSignificantCorrelations)
@@ -322,7 +315,7 @@ export async function fetchCorrelations({
     response.overallHistogram = overallDistribution.overallHistogram;
     response.percentileThresholdValue = overallDistribution.percentileThresholdValue;
 
-    if (correlationType === CorrelationType.ERROR_RATE) {
+    if (isFailureRateMetric) {
       response.errorHistogram = errorHistogram;
     }
   }
