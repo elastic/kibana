@@ -8,10 +8,8 @@
 import execa from 'execa';
 import {
   buildCandidateShaList,
-  getGcloudAccessToken,
   getPullRequestNumber,
   isCiEnvironment,
-  isGcloudAvailable,
   resolveCurrentCommitSha,
   resolveUpstreamRemote,
 } from './utils';
@@ -186,46 +184,6 @@ describe('utils', () => {
     it('returns undefined when git command fails', async () => {
       mockedExeca.mockRejectedValueOnce(new Error('git not found'));
       expect(await resolveUpstreamRemote()).toBeUndefined();
-    });
-  });
-
-  describe('getGcloudAccessToken', () => {
-    it('returns the access token when gcloud succeeds', async () => {
-      mockedExeca.mockResolvedValueOnce({
-        stdout: 'ya29.some-token\n',
-      } as any);
-
-      expect(await getGcloudAccessToken()).toBe('ya29.some-token');
-      expect(mockedExeca).toHaveBeenCalledWith(
-        'gcloud',
-        ['auth', 'print-access-token'],
-        expect.any(Object)
-      );
-    });
-
-    it('returns undefined when gcloud returns empty output', async () => {
-      mockedExeca.mockResolvedValueOnce({ stdout: '' } as any);
-      expect(await getGcloudAccessToken()).toBeUndefined();
-    });
-
-    it('returns undefined when gcloud is not installed', async () => {
-      mockedExeca.mockRejectedValueOnce(new Error('command not found: gcloud'));
-      expect(await getGcloudAccessToken()).toBeUndefined();
-    });
-  });
-
-  describe('isGcloudAvailable', () => {
-    it('returns true when getGcloudAccessToken returns a token', async () => {
-      mockedExeca.mockResolvedValueOnce({
-        stdout: 'ya29.some-token',
-      } as any);
-
-      expect(await isGcloudAvailable()).toBe(true);
-    });
-
-    it('returns false when getGcloudAccessToken fails', async () => {
-      mockedExeca.mockRejectedValueOnce(new Error('not authed'));
-      expect(await isGcloudAvailable()).toBe(false);
     });
   });
 });

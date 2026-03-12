@@ -15,7 +15,10 @@ export async function createTypeCheckConfigs(
   log: SomeDevLog,
   projects: TsProject[],
   allProjects: TsProject[],
-  { onlyCreateMissing = false }: { onlyCreateMissing?: boolean } = {}
+  {
+    onlyCreateMissing = false,
+    preserveTimestampOnWrite = false,
+  }: { onlyCreateMissing?: boolean; preserveTimestampOnWrite?: boolean } = {}
 ) {
   const writes: Array<[path: string, content: string]> = [];
 
@@ -55,10 +58,19 @@ export async function createTypeCheckConfigs(
 
   return new Set(
     await asyncMapWithLimit(writes, 50, async ([path, content]) => {
+      let preservedMtime: Date | undefined;
+
       try {
         const existing = await Fsp.readFile(path, 'utf8');
         if (existing === content || onlyCreateMissing) {
           return path;
+        }
+        // Capture the existing mtime before overwriting so we can restore it.
+        // This prevents tsc from seeing the updated config as newer than the
+        // archived .tsbuildinfo file after a GCS restore, which would otherwise
+        // trigger unnecessary full rebuilds on the first run.
+        if (preserveTimestampOnWrite) {
+          preservedMtime = (await Fsp.stat(path)).mtime;
         }
       } catch (err) {
         if (err.code !== 'ENOENT') {
@@ -69,6 +81,9 @@ export async function createTypeCheckConfigs(
       log.verbose('updating', path);
       // eslint-disable-next-line @kbn/eslint/require_kbn_fs
       await Fsp.writeFile(path, content, 'utf8');
+      if (preservedMtime) {
+        await Fsp.utimes(path, preservedMtime, preservedMtime);
+      }
       return path;
     })
   );
