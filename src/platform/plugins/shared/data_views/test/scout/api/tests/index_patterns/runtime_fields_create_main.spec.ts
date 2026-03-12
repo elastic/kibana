@@ -36,7 +36,7 @@ apiTest.describe(
     });
 
     apiTest('can create a new runtime field', async ({ apiClient }) => {
-      const title = `basic_index*`;
+      const title = `basic_index-${Date.now()}-${Math.random()}*`;
       const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
         headers: {
           ...COMMON_HEADERS,
@@ -74,6 +74,7 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body[SERVICE_KEY_LEGACY]).toBeDefined();
+      expect(response.body.field).toBeDefined();
 
       const field = response.body.field;
       expect(field.name).toBe('runtimeBar');
@@ -85,7 +86,7 @@ apiTest.describe(
     apiTest(
       'newly created runtime field is available in the index pattern object',
       async ({ apiClient }) => {
-        const title = `basic_index`;
+        const title = `basic_index-${Date.now()}-${Math.random()}`;
         const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
           headers: {
             ...COMMON_HEADERS,
@@ -104,7 +105,7 @@ apiTest.describe(
         const id = createResponse.body[SERVICE_KEY_LEGACY].id;
         createdIds.push(id);
 
-        await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
+        const rtResponse = await apiClient.post(`${DATA_VIEW_PATH_LEGACY}/${id}/runtime_field`, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
@@ -120,6 +121,8 @@ apiTest.describe(
             },
           },
         });
+
+        expect(rtResponse).toHaveStatusCode(200);
 
         const getResponse = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
           headers: {
@@ -163,7 +166,7 @@ apiTest.describe(
     );
 
     apiTest('prevents field name collisions', async ({ apiClient }) => {
-      const title = `basic*`;
+      const title = `basic-${Date.now()}-${Math.random()}*`;
       const createResponse = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
         headers: {
           ...COMMON_HEADERS,

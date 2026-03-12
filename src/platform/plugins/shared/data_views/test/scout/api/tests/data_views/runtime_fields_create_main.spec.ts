@@ -36,7 +36,7 @@ apiTest.describe(
     });
 
     apiTest('can create a new runtime field', async ({ apiClient }) => {
-      const title = `basic_index*`;
+      const title = `basic_index-${Date.now()}-${Math.random()}*`;
       const createResponse = await apiClient.post(DATA_VIEW_PATH, {
         headers: {
           ...COMMON_HEADERS,
@@ -74,6 +74,8 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body[SERVICE_KEY]).toBeDefined();
+      expect(response.body.fields).toBeDefined();
+      expect(response.body.fields.length).toBeGreaterThan(0);
 
       const field = response.body.fields[0];
       expect(field.name).toBe('runtimeBar');
@@ -85,7 +87,7 @@ apiTest.describe(
     apiTest(
       'newly created runtime field is available in the data view object',
       async ({ apiClient }) => {
-        const title = `basic_index`;
+        const title = `basic_index-${Date.now()}-${Math.random()}`;
         const createResponse = await apiClient.post(DATA_VIEW_PATH, {
           headers: {
             ...COMMON_HEADERS,
@@ -104,7 +106,7 @@ apiTest.describe(
         const id = createResponse.body[SERVICE_KEY].id;
         createdIds.push(id);
 
-        await apiClient.post(`${DATA_VIEW_PATH}/${id}/runtime_field`, {
+        const rtResponse = await apiClient.post(`${DATA_VIEW_PATH}/${id}/runtime_field`, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
@@ -120,6 +122,8 @@ apiTest.describe(
             },
           },
         });
+
+        expect(rtResponse).toHaveStatusCode(200);
 
         const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
           headers: {
@@ -160,7 +164,7 @@ apiTest.describe(
     );
 
     apiTest('prevents field name collisions', async ({ apiClient }) => {
-      const title = `basic*`;
+      const title = `basic-${Date.now()}-${Math.random()}*`;
       const createResponse = await apiClient.post(DATA_VIEW_PATH, {
         headers: {
           ...COMMON_HEADERS,
