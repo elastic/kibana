@@ -411,35 +411,24 @@ export class DiscoverApp {
 
     await this.waitUntilFieldListHasCountOfFields();
 
-    const fieldButton = this.page.testSubj.locator(`field-${field}-showDetails`);
-    if (await fieldButton.isVisible()) {
-      await fieldButton.click();
-    } else {
+    const breakdownButton = this.page.testSubj.locator(
+      `fieldPopoverHeader_addBreakdownField-${field}`
+    );
+
+    if (!(await breakdownButton.isVisible())) {
       const fieldLocator = this.page.testSubj.locator(`field-${field}`);
-      await fieldLocator.waitFor({ state: 'visible' });
+      await fieldLocator.hover();
       await fieldLocator.click();
+      await this.waitUntilFieldPopoverIsLoaded();
     }
 
-    const clickBreakdownButton = async () => {
-      const breakdownButton = this.page.testSubj.locator(
-        `fieldPopoverHeader_addBreakdownField-${field}`
-      );
-      await breakdownButton.waitFor({ state: 'visible' });
-      await breakdownButton.click();
-    };
-
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        await clickBreakdownButton();
-        break;
-      } catch (error) {
-        if (attempt === 2) {
-          throw error;
-        }
-      }
-    }
-
+    await breakdownButton.click();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  private async waitUntilFieldPopoverIsLoaded() {
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
   }
 
   /**
