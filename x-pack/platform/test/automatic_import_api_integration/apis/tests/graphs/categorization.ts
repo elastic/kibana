@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       if (response instanceof BadRequestError) {
         expect(response.message).to.be(
-          "No connector found for id 'preconfigured-dummy'\nSaved object [action/preconfigured-dummy] not found"
+          "No connector or inference endpoint found for ID 'preconfigured-dummy'"
         );
       } else {
         expect().fail('Expected BadRequestError');
