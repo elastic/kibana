@@ -93,6 +93,25 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
         http.fetch({ body: '/api/dashboards/' + id, method: 'POST' });
       `,
     },
+    {
+      code: dedent`
+        return await this.http.delete<void>(
+          \`${'${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}'}/${'${encodeURIComponent(jobId)}'}\`
+        );
+      `,
+    },
+    {
+      code: dedent`
+        return await this.http.delete<void>(
+          INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/' + encodeURIComponent(jobId)
+        );
+      `,
+    },
+    {
+      code: dedent`
+        http.get({ path: \`${'${MY_CONSTANT.path}'}/${'${encodeURIComponent(id)}'}\` });
+      `,
+    },
   ],
   invalid: [
     {
@@ -146,6 +165,30 @@ ruleTester.run('@kbn/eslint/no_unsafe_dynamic_http_path', rule, {
     {
       code: dedent`
         this.http.fetch({ path: \`/api/dashboards/${'${id}'}\`, method: 'POST', body });
+      `,
+      errors: [{ line: 1, message: WARN_MSG }],
+    },
+    {
+      code: dedent`
+        this.http.delete(\`${'${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}'}/${'${jobId}'}\`);
+      `,
+      errors: [{ line: 1, message: WARN_MSG }],
+    },
+    {
+      code: dedent`
+        this.http.delete(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + '/' + jobId);
+      `,
+      errors: [{ line: 1, message: WARN_MSG }],
+    },
+    {
+      code: dedent`
+        this.http.get(\`${'${prefix}'}/${'${encodeURIComponent(id)}'}\`);
+      `,
+      errors: [{ line: 1, message: WARN_MSG }],
+    },
+    {
+      code: dedent`
+        this.http.get(\`${'${MY_CONSTANT.path}'}/${'${MY_CONSTANT.path2}'}\`);
       `,
       errors: [{ line: 1, message: WARN_MSG }],
     },

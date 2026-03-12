@@ -28,6 +28,7 @@ const HTTP_REQUEST_METHOD_NAMES = new Set([
 ]);
 const WARN_MSG =
   'Dangerous use of dynamic http path. Use buildPath() from `@kbn/core-http-browser` or encodeURIComponent() so path params are encoded safely.';
+const ALL_CAPS_IDENTIFIER_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 
 /**
  * Limitations:
@@ -101,6 +102,61 @@ const isUsingEncodeURIComponent = (node) => {
  * @param {Node} node
  * @returns {boolean}
  */
+const isAllCapsIdentifier = (node) => {
+  return node.type === esTypes.Identifier && ALL_CAPS_IDENTIFIER_PATTERN.test(node.name);
+};
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+const isSafePathPrefixReference = (node) => {
+  if (isAllCapsIdentifier(node)) {
+    return true;
+  }
+
+  if (
+    node.type !== esTypes.MemberExpression ||
+    node.computed ||
+    node.property.type !== esTypes.Identifier
+  ) {
+    return false;
+  }
+
+  return isSafePathPrefixReference(node.object);
+};
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+const isPathExpressionStartingWithSlash = (node) => {
+  if (node.type === esTypes.Literal) {
+    return typeof node.value === 'string' && node.value.startsWith('/');
+  }
+
+  if (node.type === esTypes.TemplateLiteral) {
+    return node.quasis[0].value.cooked.startsWith('/');
+  }
+
+  if (node.type === esTypes.BinaryExpression && node.operator === '+') {
+    return isPathExpressionStartingWithSlash(node.left);
+  }
+
+  if (node.type === esTypes.ConditionalExpression) {
+    return (
+      isPathExpressionStartingWithSlash(node.consequent) &&
+      isPathExpressionStartingWithSlash(node.alternate)
+    );
+  }
+
+  return false;
+};
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
 const isSafePathSegmentExpression = (node) => {
   if (node.type === esTypes.Literal) {
     return true;
@@ -111,11 +167,16 @@ const isSafePathSegmentExpression = (node) => {
   }
 
   if (node.type === esTypes.TemplateLiteral) {
-    return node.expressions.every((expression) => isSafePathSegmentExpression(expression));
+    return isSafeTemplateLiteralPath(node);
   }
 
   if (node.type === esTypes.BinaryExpression && node.operator === '+') {
-    return isSafePathSegmentExpression(node.left) && isSafePathSegmentExpression(node.right);
+    return (
+      (isSafePathSegmentExpression(node.left) && isSafePathSegmentExpression(node.right)) ||
+      (isSafePathPrefixReference(node.left) &&
+        isPathExpressionStartingWithSlash(node.right) &&
+        isSafePathSegmentExpression(node.right))
+    );
   }
 
   if (node.type === esTypes.ConditionalExpression) {
@@ -126,6 +187,26 @@ const isSafePathSegmentExpression = (node) => {
 
   return false;
 };
+
+/**
+ * @param {import("@typescript-eslint/typescript-estree").TSESTree.TemplateLiteral} node
+ * @returns {boolean}
+ */
+function isSafeTemplateLiteralPath(node) {
+  return node.expressions.every((expression, index) => {
+    if (isSafePathSegmentExpression(expression)) {
+      return true;
+    }
+
+    return (
+      index === 0 &&
+      isSafePathPrefixReference(expression) &&
+      node.quasis[0].value.cooked === '' &&
+      node.quasis[1] != null &&
+      node.quasis[1].value.cooked.startsWith('/')
+    );
+  });
+}
 
 /**
  * @param {Expression} node
