@@ -11,30 +11,49 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
+import { PLUGIN_ID } from '../../../../common';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import type { ChildWorkflowExecutionInfo } from '../model/use_child_workflow_executions';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
+  childWorkflowExecution?: ChildWorkflowExecutionInfo;
+  ownerChildExecution?: ChildWorkflowExecutionInfo;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, workflowExecutionDuration, isLoadingStepData }) => {
+  ({
+    workflowExecutionId,
+    stepExecution,
+    workflowExecutionDuration,
+    isLoadingStepData,
+    childWorkflowExecution,
+    ownerChildExecution,
+  }) => {
+    const { application } = useKibana().services;
+    const { euiTheme } = useEuiTheme();
     const isFinished = useMemo(
       () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
       [stepExecution?.status]
@@ -42,6 +61,25 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
+    const isWorkflowExecuteStep =
+      stepExecution?.stepType === 'workflow.execute' ||
+      stepExecution?.stepType === 'workflow.executeAsync';
+
+    const navigateToChildExecution = useCallback(() => {
+      if (childWorkflowExecution) {
+        application.navigateToApp(PLUGIN_ID, {
+          path: `/${childWorkflowExecution.workflowId}?tab=executions&executionId=${childWorkflowExecution.executionId}`,
+        });
+      }
+    }, [application, childWorkflowExecution]);
+
+    const navigateToOwnerExecution = useCallback(() => {
+      if (ownerChildExecution) {
+        application.navigateToApp(PLUGIN_ID, {
+          path: `/${ownerChildExecution.workflowId}?tab=executions&executionId=${ownerChildExecution.executionId}`,
+        });
+      }
+    }, [application, ownerChildExecution]);
 
     // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
     const triggerType = isTriggerPseudoStep
@@ -115,6 +153,68 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {isWorkflowExecuteStep && childWorkflowExecution && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  {getExecutionStatusIcon(euiTheme, childWorkflowExecution.status)}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <EuiLink onClick={navigateToChildExecution}>
+                        {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
+                      </EuiLink>
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type="popout"
+                    size="s"
+                    color="primary"
+                    onClick={navigateToChildExecution}
+                    css={{ cursor: 'pointer' }}
+                    aria-label={i18n.translate(
+                      'workflowsManagement.stepExecutionDetails.openChildExecution',
+                      { defaultMessage: 'Open child workflow execution' }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {ownerChildExecution && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  {getExecutionStatusIcon(euiTheme, ownerChildExecution.status)}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <EuiLink onClick={navigateToOwnerExecution}>
+                        {`${ownerChildExecution.workflowName}: ${stepExecution?.stepId}`}
+                      </EuiLink>
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type="popout"
+                    size="s"
+                    color="primary"
+                    onClick={navigateToOwnerExecution}
+                    css={{ cursor: 'pointer' }}
+                    aria-label={i18n.translate(
+                      'workflowsManagement.stepExecutionDetails.openOwnerExecution',
+                      { defaultMessage: 'Open parent workflow execution' }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiTabs expand>
               {tabs.map((tab) => (
