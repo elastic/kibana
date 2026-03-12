@@ -9,6 +9,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { encode } from '@kbn/rison';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { KNOWLEDGE_BASE_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
 import { URL_PARAM_KEY } from '../../../../hooks/navigate_to_alerts_page_with_filters/constants';
 import { getDetectionEngineUrl } from './link_to/redirect_to_detection_engine';
@@ -90,6 +91,7 @@ const openAlertsPage = (
 ) =>
   openAlertsPageWithFilters(
     {
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       selected_options: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
       field_name: 'kibana.alert.workflow_status',
       persist: false,

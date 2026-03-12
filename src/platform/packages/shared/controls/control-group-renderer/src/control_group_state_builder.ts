@@ -104,6 +104,7 @@ export const controlGroupStateBuilder = {
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
+        grow: true,
       },
     };
   },

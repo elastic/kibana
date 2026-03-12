@@ -24,15 +24,4 @@ type ControlWidth =
 export const DEFAULT_PINNED_CONTROL_STATE = {
   width: CONTROL_WIDTH_MEDIUM as ControlWidth,
   grow: false,
-  use_global_filters: true,
-};
-
-export const DEFAULT_DATA_CONTROL_STATE = {
-  use_global_filters: true,
-  ignore_validations: false,
-};
-
-export const DEFAULT_PINNED_DATA_CONTROL_STATE = {
-  ...DEFAULT_PINNED_CONTROL_STATE,
-  ...DEFAULT_DATA_CONTROL_STATE,
 };

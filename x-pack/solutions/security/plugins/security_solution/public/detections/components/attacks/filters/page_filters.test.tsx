@@ -11,6 +11,7 @@ import { PageFilters } from './page_filters';
 import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
@@ -117,6 +118,7 @@ describe('PageFilters', () => {
   it('persists the filter control configuration to the url', async () => {
     const controlsConfig = [
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'Status',
         field_name: 'kibana.alert.workflow_status',
         selected_options: ['open'],

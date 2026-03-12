@@ -26,7 +26,7 @@ import type { OptionsListSuggestions } from '../../../../common/options_list';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
   DataControlApi & {
-    setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
+    setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
   };

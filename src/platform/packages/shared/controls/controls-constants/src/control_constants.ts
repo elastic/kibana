@@ -11,3 +11,8 @@ export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export const ESQL_CONTROL = 'esqlControl';
+
+export const DEFAULT_DATA_CONTROL_STATE = {
+  use_global_filters: true,
+  ignore_validations: false,
+};

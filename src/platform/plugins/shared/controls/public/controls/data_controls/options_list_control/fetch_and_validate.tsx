@@ -39,10 +39,10 @@ export function fetchAndValidate$({
       debouncedSearchString: Observable<string>;
     };
   requestSize$: PublishingSubject<number>;
-  runPastTimeout$: PublishingSubject<boolean | undefined>;
-  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
-  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
-  sort$: PublishingSubject<OptionsListSortingType | undefined>;
+  runPastTimeout$: PublishingSubject<boolean>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
+  sort$: PublishingSubject<OptionsListSortingType>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;

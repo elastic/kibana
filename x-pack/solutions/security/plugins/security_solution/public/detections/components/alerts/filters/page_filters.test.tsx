@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { render } from '@testing-library/react';
 import { PageFilters } from './page_filters';
 import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -117,6 +118,7 @@ describe('PageFilters', () => {
   it('persists the filter control configuration to the url', async () => {
     const controlsConfig = [
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         title: 'Status',
         field_name: 'kibana.alert.workflow_status',
         selected_options: ['open'],

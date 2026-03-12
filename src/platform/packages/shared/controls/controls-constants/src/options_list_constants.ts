@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_PINNED_DATA_CONTROL_STATE } from './controls_group_constants';
+import { DEFAULT_DATA_CONTROL_STATE } from './control_constants';
 
 export const DEFAULT_DSL_OPTIONS_LIST_STATE = {
+  ...DEFAULT_DATA_CONTROL_STATE,
   sort: {
     by: '_count',
     direction: 'desc',
@@ -22,12 +23,7 @@ export const DEFAULT_DSL_OPTIONS_LIST_STATE = {
   selected_options: [] as Array<string | number>,
 } as const;
 
-export const DEFAULT_PINNED_DSL_OPTIONS_LIST_STATE = {
-  ...DEFAULT_PINNED_DATA_CONTROL_STATE,
-  ...DEFAULT_DSL_OPTIONS_LIST_STATE,
-};
-
 export const DEFAULT_ESQL_OPTIONS_LIST_STATE = {
   single_select: true,
-  selected_options: [],
+  selected_options: [] as Array<string>,
 } as const;

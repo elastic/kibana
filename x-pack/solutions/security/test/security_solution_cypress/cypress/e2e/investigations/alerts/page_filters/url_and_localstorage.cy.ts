@@ -8,6 +8,7 @@
 import { encode } from '@kbn/rison';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -24,6 +25,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Status',
     field_name: 'kibana.alert.workflow_status',
     selected_options: ['open'],
@@ -34,6 +36,7 @@ const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     },
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Severity',
     field_name: 'kibana.alert.severity',
     selected_options: [],
@@ -43,10 +46,12 @@ const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
     },
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'User',
     field_name: 'user.name',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: 'Host',
     field_name: 'host.name',
   },
@@ -92,6 +97,7 @@ describe(
     it('should load page filters with custom filters and values', () => {
       const CUSTOM_URL_FILTER = [
         {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           title: 'Process',
           field_name: 'process.name',
           selected_options: ['testing123'],

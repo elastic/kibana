@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import type { StartDeps } from './plugin';
@@ -59,6 +60,7 @@ export const DashboardWithControlsExample = ({
             await controlGroupStateBuilder.addDataControlFromField(
               controlGroupState,
               {
+                ...DEFAULT_DATA_CONTROL_STATE,
                 data_view_id: dataView.id ?? '',
                 title: 'Destination country',
                 field_name: 'geo.dest',
@@ -70,6 +72,7 @@ export const DashboardWithControlsExample = ({
             await controlGroupStateBuilder.addDataControlFromField(
               controlGroupState,
               {
+                ...DEFAULT_DATA_CONTROL_STATE,
                 data_view_id: dataView.id ?? '',
                 field_name: 'bytes',
                 width: 'medium',

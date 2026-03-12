@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertsByStatusAgg } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
@@ -296,11 +297,13 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
 
   const filters = [
     {
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       title: OPEN_IN_ALERTS_TITLE_USERNAME,
       selected_options: [userName],
       field_name: 'user.name',
     },
     {
+      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
       title: OPEN_IN_ALERTS_TITLE_STATUS,
       selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
       field_name: 'kibana.alert.workflow_status',

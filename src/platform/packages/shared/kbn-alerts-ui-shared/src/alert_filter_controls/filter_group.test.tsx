@@ -11,7 +11,7 @@ import { FilterGroup } from './filter_group';
 import type { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
@@ -74,6 +74,7 @@ const TestComponent: FC<Partial<FilterGroupProps>> = (props) => {
       defaultControls={[
         ...DEFAULT_CONTROLS,
         {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           field_name: 'host.name',
           title: 'Host',
         },
@@ -537,6 +538,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               field_name: 'abc',
             },
           ]}
@@ -556,6 +558,7 @@ describe(' Filter Group Component ', () => {
         <TestComponent
           controlsUrlState={[
             {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               field_name: 'abc',
             },
           ]}

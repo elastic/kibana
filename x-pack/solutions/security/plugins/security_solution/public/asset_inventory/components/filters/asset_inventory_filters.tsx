@@ -19,6 +19,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataViewContext } from '../../hooks/data_view_context';
 import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
@@ -29,18 +30,21 @@ import { addEmptyDataFilter } from '../../utils/add_empty_data_filter';
 
 const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.type', {
       defaultMessage: 'Type',
     }),
     field_name: ASSET_FIELDS.ENTITY_TYPE,
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.name', {
       defaultMessage: 'Name',
     }),
     field_name: ASSET_FIELDS.ENTITY_NAME,
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.id', {
       defaultMessage: 'ID',
     }),

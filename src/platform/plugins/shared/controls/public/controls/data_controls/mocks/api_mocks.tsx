@@ -12,6 +12,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 import type { OptionsListDisplaySettings, OptionsListSortingType } from '@kbn/controls-schemas';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { initializeSelectionsManager } from '../options_list_control/selections_manager';
 import type { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
@@ -19,8 +20,8 @@ import { initializeEditorStateManager } from '../options_list_control/editor_sta
 import { initializeLabelManager } from '../../control_labels';
 
 export const getOptionsListContextMock = () => {
-  const editorStateManager = initializeEditorStateManager({});
-  const selectionsManager = initializeSelectionsManager({});
+  const editorStateManager = initializeEditorStateManager(DEFAULT_DSL_OPTIONS_LIST_STATE);
+  const selectionsManager = initializeSelectionsManager(DEFAULT_DSL_OPTIONS_LIST_STATE);
   const temporaryStateManager = initializeTemporayStateManager();
 
   const fieldName$ = new BehaviorSubject<string>('field');
