@@ -8,19 +8,23 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { ApmPage } from './apm';
 import type { TracesFlyout } from './flyout';
 import type { TracesGrid } from './grid';
 import type { TracesCharts } from './charts';
+import { createApmPage } from './apm';
 import { createTracesFlyout } from './flyout';
 import { createTracesGrid } from './grid';
 import { createTracesCharts } from './charts';
 
 export class TracesExperiencePage {
+  public readonly apm: ApmPage;
   public readonly flyout: TracesFlyout;
   public readonly grid: TracesGrid;
   public readonly charts: TracesCharts;
 
   constructor(page: ScoutPage) {
+    this.apm = createApmPage(page);
     this.flyout = createTracesFlyout(page);
     this.grid = createTracesGrid();
     this.charts = createTracesCharts(page);
