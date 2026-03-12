@@ -153,9 +153,7 @@ describe('findSavedQueryRoute', () => {
     await routeHandler({} as any, mockRequest, mockResponse);
 
     const findArgs = mockSavedObjectsClient.find.mock.calls[0][0];
-    expect(findArgs.filter).toContain(
-      'osquery-saved-query.attributes.created_by: "elastic"'
-    );
+    expect(findArgs.filter).toContain('osquery-saved-query.attributes.created_by: "elastic"');
   });
 
   it('builds createdBy filter with OR for multiple comma-separated users', async () => {
