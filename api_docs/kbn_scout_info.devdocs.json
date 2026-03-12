@@ -803,7 +803,7 @@
         "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "description": [],
         "signature": [
-          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
+          "\"{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "lineNumber": 35,
