@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { validateEsqlQuery } from './validation';
 import { durationSchema } from './common';
+import { MAX_CONSECUTIVE_BREACHES } from './constants';
 
 /** Primitives */
 
@@ -111,7 +112,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
-      .max(1000)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive breaches before active.'),
     pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
@@ -158,14 +159,6 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
-/** Notification policies (optional) */
-
-const notificationPolicyRefSchema = z
-  .object({
-    ref: z.string().min(1).describe('Reference to notification policy.'),
-  })
-  .strict();
-
 /** Create rule API schema */
 
 /**
@@ -188,7 +181,6 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
-    notification_policies: z.array(notificationPolicyRefSchema).optional(),
   })
   .strip();
 
@@ -248,7 +240,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
-    notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 

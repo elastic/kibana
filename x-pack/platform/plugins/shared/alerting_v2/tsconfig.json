@@ -59,6 +59,9 @@
     "@kbn/react-query",
     "@kbn/core-security-server",
     "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/workflows-management-plugin",
+    "@kbn/workflows",
+    "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
     "@kbn/react-query"
   ],

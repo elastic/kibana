@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 import type {
   NotificationPolicy,
   NotificationPolicyId,
@@ -13,8 +15,6 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 
 @injectable()
 export class FetchPoliciesStep implements DispatcherStep {
@@ -25,24 +25,15 @@ export class FetchPoliciesStep implements DispatcherStep {
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { rules } = state;
-    if (!rules || rules.size === 0) {
-      return { type: 'continue', data: { policies: new Map() } };
-    }
+  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+    const result = await this.notificationPolicySavedObjectService.findAllDecrypted();
 
-    const uniquePolicyIds = Array.from(
-      new Set(rules.values().flatMap((r) => r.notificationPolicyIds))
-    );
-    if (uniquePolicyIds.length === 0) {
-      return { type: 'continue', data: { policies: new Map() } };
-    }
-
-    const result = await this.notificationPolicySavedObjectService.bulkGetByIds(uniquePolicyIds);
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
     for (const doc of result) {
-      if ('error' in doc) continue;
+      if ('error' in doc) {
+        continue;
+      }
 
       policies.set(doc.id, {
         id: doc.id,
@@ -53,6 +44,8 @@ export class FetchPoliciesStep implements DispatcherStep {
         groupBy: doc.attributes.group_by ?? [],
         throttle: doc.attributes.throttle,
         snoozedUntil: doc.attributes.snoozedUntil,
+        ruleLabels: doc.attributes.rule_labels ?? [],
+        apiKey: doc.attributes.auth.apiKey,
       });
     }
 

@@ -17,15 +17,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SourcesTable } from './sources_table';
 import { useActiveSources } from '../../hooks/use_active_sources';
 import { useDeleteActiveSource } from '../../hooks/use_delete_active_source';
+import { useBulkDeleteActiveSources } from '../../hooks/use_bulk_delete_active_sources';
 import { useEditActiveSourceFlyout } from '../../hooks/use_edit_active_source_flyout';
 import type { ActiveSource } from '../../../types/connector';
 import { ConfirmDeleteActiveSourceModal } from '../../components/confirm_delete_active_source_modal';
+import { ConfirmBulkDeleteActiveSourcesModal } from '../../components/confirm_bulk_delete_active_sources_modal';
 
 export const SourcesList: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
   const [selectedSources, setSelectedSources] = useState<ActiveSource[]>([]);
   const [sourceToDelete, setSourceToDelete] = useState<ActiveSource | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
@@ -33,8 +36,20 @@ export const SourcesList: React.FC = () => {
     setShowDeleteModal(false);
   }, []);
 
+  const handleCancelBulkDelete = useCallback(() => {
+    setShowBulkDeleteModal(false);
+  }, []);
+
+  const handleBulkDeleteSuccess = useCallback(() => {
+    setShowBulkDeleteModal(false);
+    setSelectedSources([]);
+  }, []);
+
   const { mutate: deleteActiveSource, isLoading: isDeleting } =
     useDeleteActiveSource(handleCancelDelete);
+
+  const { mutate: bulkDeleteActiveSources, isLoading: isBulkDeleting } =
+    useBulkDeleteActiveSources(handleBulkDeleteSuccess);
 
   const handleCloseEditFlyout = useCallback(() => {
     setSourceToEdit(null);
@@ -63,6 +78,22 @@ export const SourcesList: React.FC = () => {
       deleteActiveSource(sourceToDelete.id);
     }
   }, [sourceToDelete, deleteActiveSource]);
+
+  const handleBulkDelete = useCallback(() => {
+    setShowBulkDeleteModal(true);
+  }, []);
+
+  const handleConfirmBulkDelete = useCallback(() => {
+    bulkDeleteActiveSources(selectedSources.map((source) => source.id));
+  }, [bulkDeleteActiveSources, selectedSources]);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedSources(activeSources);
+  }, [activeSources]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedSources([]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -107,6 +138,9 @@ export const SourcesList: React.FC = () => {
         onDelete={handleDelete}
         selectedItems={selectedSources}
         onSelectionChange={setSelectedSources}
+        onBulkDelete={handleBulkDelete}
+        onSelectAll={handleSelectAll}
+        onClearSelection={handleClearSelection}
       />
 
       {showDeleteModal && sourceToDelete && (
@@ -117,6 +151,16 @@ export const SourcesList: React.FC = () => {
           isDeleting={isDeleting}
         />
       )}
+
+      {showBulkDeleteModal && selectedSources.length > 0 && (
+        <ConfirmBulkDeleteActiveSourcesModal
+          activeSources={selectedSources}
+          onConfirm={handleConfirmBulkDelete}
+          onCancel={handleCancelBulkDelete}
+          isDeleting={isBulkDeleting}
+        />
+      )}
+
       {editFlyout}
     </>
   );

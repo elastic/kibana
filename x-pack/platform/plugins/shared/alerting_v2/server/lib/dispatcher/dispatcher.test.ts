@@ -8,9 +8,10 @@
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
-import { RULE_SAVED_OBJECT_TYPE, NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { createRuleSoAttributes } from '../test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -54,40 +55,43 @@ function mockRulesBulkGet(
     saved_objects: ruleIds.map((id) => ({
       id,
       type: RULE_SAVED_OBJECT_TYPE,
-      attributes: createRuleSoAttributes({
-        notification_policies: [{ ref: 'policy_456' }],
-        ...overrides,
-      }),
+      attributes: createRuleSoAttributes(overrides),
       references: [],
     })),
   });
 }
 
-function mockNpBulkGet(mockSoClient: jest.Mocked<SavedObjectsClientContract>, policyIds: string[]) {
-  mockSoClient.bulkGet.mockResolvedValue({
-    saved_objects: policyIds.map((id) => ({
+function mockNpFindAllDecrypted(spy: jest.SpyInstance, policyIds: string[]) {
+  spy.mockResolvedValue(
+    policyIds.map((id) => ({
       id,
-      type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       attributes: {
         name: `Policy ${id}`,
         description: `Description for ${id}`,
         enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
+        auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
         createdBy: null,
         updatedBy: null,
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',
       },
-      references: [],
-    })),
-  });
+    }))
+  );
 }
+
+const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
+  ({
+    getWorkflow: jest.fn().mockResolvedValue(null),
+    runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+  } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
   queryService: QueryServiceContract;
   storageService: StorageServiceContract;
   rulesSoService: RulesSavedObjectServiceContract;
   npSoService: NotificationPolicySavedObjectServiceContract;
+  workflowsManagement: WorkflowsServerPluginSetup['management'];
 }): DispatcherService {
   const { loggerService } = createLoggerService();
   const pipeline = new DispatcherPipeline(loggerService, [
@@ -99,7 +103,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
-    new DispatchStep(loggerService),
+    new DispatchStep(loggerService, deps.workflowsManagement),
     new StoreActionsStep(deps.storageService),
   ]);
   return new DispatcherService(pipeline);
@@ -114,7 +118,8 @@ describe('DispatcherService', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: NotificationPolicySavedObjectServiceContract;
   let rulesMockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let npMockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockFindAllDecrypted: jest.SpyInstance;
+  let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
@@ -127,14 +132,17 @@ describe('DispatcherService', () => {
 
     const npMock = createNotificationPolicySavedObjectService();
     npSoService = npMock.notificationPolicySavedObjectService;
-    npMockSoClient = npMock.mockSavedObjectsClient;
-    mockNpBulkGet(npMockSoClient, ['policy_456']);
+    mockFindAllDecrypted = npMock.mockFindAllDecrypted;
+    mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
+
+    mockWfm = createMockWorkflowsManagement();
 
     dispatcherService = buildDispatcherService({
       queryService,
       storageService,
       rulesSoService,
       npSoService,
+      workflowsManagement: mockWfm,
     });
   });
 
@@ -361,14 +369,17 @@ describe('DispatcherService', () => {
 
       const npMock = createNotificationPolicySavedObjectService();
       npSoService = npMock.notificationPolicySavedObjectService;
-      npMockSoClient = npMock.mockSavedObjectsClient;
-      mockNpBulkGet(npMockSoClient, ['policy_456']);
+      mockFindAllDecrypted = npMock.mockFindAllDecrypted;
+      mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
+
+      mockWfm = createMockWorkflowsManagement();
 
       dispatcherService = buildDispatcherService({
         queryService,
         storageService,
         rulesSoService,
         npSoService,
+        workflowsManagement: mockWfm,
       });
 
       // Dataset: 5 rules, 9 episodes total

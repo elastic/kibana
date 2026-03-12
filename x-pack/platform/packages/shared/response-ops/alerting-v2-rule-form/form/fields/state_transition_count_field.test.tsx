@@ -19,25 +19,6 @@ describe('StateTransitionCountField', () => {
     expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
   });
 
-  it('accepts a positive integer for count', () => {
-    render(<StateTransitionCountField />, {
-      wrapper: createFormWrapper({ kind: 'alert' }),
-    });
-
-    const input = screen.getByTestId('stateTransitionCountInput');
-    fireEvent.change(input, { target: { value: '3' } });
-    expect(input).toHaveValue(3);
-  });
-
-  it('applies max value of 1000', () => {
-    render(<StateTransitionCountField />, {
-      wrapper: createFormWrapper({ kind: 'alert' }),
-    });
-
-    const input = screen.getByTestId('stateTransitionCountInput');
-    expect(input).toHaveAttribute('max', '1000');
-  });
-
   it('renders with pre-filled state transition count from form state', () => {
     render(<StateTransitionCountField />, {
       wrapper: createFormWrapper({
@@ -49,5 +30,38 @@ describe('StateTransitionCountField', () => {
     });
 
     expect(screen.getByTestId('stateTransitionCountInput')).toHaveValue(5);
+  });
+
+  describe('variant="recovering"', () => {
+    it('renders with the recovering test subject', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionCountInput')).toBeInTheDocument();
+    });
+
+    it('accepts a positive integer for recovering count', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({ kind: 'alert' }),
+      });
+
+      const input = screen.getByTestId('recoveryTransitionCountInput');
+      fireEvent.change(input, { target: { value: '4' } });
+      expect(input).toHaveValue(4);
+    });
+
+    it('renders with pre-filled recovering count from form state', () => {
+      render(<StateTransitionCountField variant="recovering" />, {
+        wrapper: createFormWrapper({
+          kind: 'alert',
+          stateTransition: {
+            recoveringCount: 7,
+          },
+        }),
+      });
+
+      expect(screen.getByTestId('recoveryTransitionCountInput')).toHaveValue(7);
+    });
   });
 });

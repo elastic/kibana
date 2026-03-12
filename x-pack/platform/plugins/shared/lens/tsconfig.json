@@ -141,6 +141,7 @@
     "@kbn/react-kibana-context-env",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }

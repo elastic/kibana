@@ -6,17 +6,18 @@
  */
 
 import { PluginStart } from '@kbn/core-di';
-import type { ISavedObjectsClientFactory } from '@kbn/core-di-server';
-import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
+import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import { NotificationPolicySavedObjectsClientToken } from './tokens';
 
 export type NotificationPolicySavedObjectBulkGetItem =
   | {
@@ -57,6 +58,7 @@ export interface NotificationPolicySavedObjectServiceContract {
       attrs: Partial<NotificationPolicySavedObjectAttributes>;
     }>;
   }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
+  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
     saved_objects: Array<{
@@ -72,18 +74,14 @@ export interface NotificationPolicySavedObjectServiceContract {
 export class NotificationPolicySavedObjectService
   implements NotificationPolicySavedObjectServiceContract
 {
-  private readonly client: SavedObjectsClientContract;
-
   constructor(
-    @inject(SavedObjectsClientFactory)
-    private readonly savedObjectsClientFactory: ISavedObjectsClientFactory,
+    @inject(NotificationPolicySavedObjectsClientToken)
+    private readonly client: SavedObjectsClientContract,
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: SpacesPluginStart
-  ) {
-    this.client = this.savedObjectsClientFactory({
-      includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
-    });
-  }
+    private readonly spaces: SpacesPluginStart,
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient
+  ) {}
 
   public async create({
     attrs,
@@ -194,6 +192,29 @@ export class NotificationPolicySavedObjectService
         version: savedObject.version,
       };
     });
+  }
+
+  public async findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
+    const finder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE }
+      );
+
+    const results: NotificationPolicySavedObjectBulkGetItem[] = [];
+
+    for await (const response of finder.find()) {
+      for (const doc of response.saved_objects) {
+        if (doc.error) {
+          results.push({ id: doc.id, error: doc.error });
+        } else {
+          results.push({ id: doc.id, attributes: doc.attributes });
+        }
+      }
+    }
+
+    await finder.close();
+
+    return results;
   }
 
   public async delete({ id }: { id: string }): Promise<void> {

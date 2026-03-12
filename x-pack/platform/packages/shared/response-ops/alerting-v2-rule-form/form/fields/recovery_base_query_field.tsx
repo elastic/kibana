@@ -35,12 +35,12 @@ interface RecoveryBaseQueryFieldProps {
  * All validation logic (syntax, grouping, differs-from-evaluation) is provided
  * externally via the `rules` and `errors` props from the `useRecoveryValidation` hook.
  */
-export const RecoveryBaseQueryField: React.FC<RecoveryBaseQueryFieldProps> = ({
+export const RecoveryBaseQueryField = ({
   labelTooltip = DEFAULT_TOOLTIP,
   dataTestSubj = 'recoveryQueryField',
   rules,
   errors,
-}) => {
+}: RecoveryBaseQueryFieldProps) => {
   return (
     <EsqlEditorField
       name="recoveryPolicy.query.base"
