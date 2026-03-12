@@ -12,9 +12,7 @@ import { getHealthScanResults } from './get_health_scan_results';
 import { IllegalArgumentError } from '../../errors';
 import type { HealthDocument } from '../tasks/health_scan_task/types';
 
-function createMockHealthDoc(
-  overrides: Partial<HealthDocument> = {}
-): HealthDocument {
+function createMockHealthDoc(overrides: Partial<HealthDocument> = {}): HealthDocument {
   return {
     '@timestamp': '2026-01-15T10:00:00.000Z',
     scanId: 'scan-123',
@@ -41,11 +39,7 @@ function createMockHealthDoc(
   };
 }
 
-function createMockSearchHitsResponse(
-  docs: HealthDocument[],
-  total: number,
-  sortValue?: unknown
-) {
+function createMockSearchHitsResponse(docs: HealthDocument[], total: number, sortValue?: unknown) {
   const hits = docs.map((doc, i) => ({
     _index: '.slo-observability.health-v3.6',
     _id: `doc-${i}`,
@@ -160,7 +154,9 @@ describe('getHealthScanResults', () => {
 
     it('passes searchAfter to the query when provided', async () => {
       const searchAfter = ['2026-01-15T10:00:00.000Z', 'scan-123', 'default', true, 'slo-24'];
-      const docs = [createMockHealthDoc({ slo: { id: 'slo-25', name: 'SLO 25', revision: 1, enabled: true } })];
+      const docs = [
+        createMockHealthDoc({ slo: { id: 'slo-25', name: 'SLO 25', revision: 1, enabled: true } }),
+      ];
 
       scopedClusterClient.asInternalUser.search.mockImplementation(async (params: any) => {
         if (params?.size === 0) {
@@ -237,18 +233,12 @@ describe('getHealthScanResults', () => {
     });
 
     it('accepts size 1', async () => {
-      const result = await getHealthScanResults(
-        { scanId: TEST_SCAN_ID, size: 1 },
-        deps
-      );
+      const result = await getHealthScanResults({ scanId: TEST_SCAN_ID, size: 1 }, deps);
       expect(result).toBeDefined();
     });
 
     it('accepts size 100', async () => {
-      const result = await getHealthScanResults(
-        { scanId: TEST_SCAN_ID, size: 100 },
-        deps
-      );
+      const result = await getHealthScanResults({ scanId: TEST_SCAN_ID, size: 100 }, deps);
       expect(result).toBeDefined();
     });
   });

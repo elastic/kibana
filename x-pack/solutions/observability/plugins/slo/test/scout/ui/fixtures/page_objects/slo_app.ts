@@ -40,7 +40,9 @@ export class SLOApp {
 
   /** Opens the Actions popover and clicks Health scan, which opens the health scan flyout */
   async openHealthScanFlyout() {
-    await expect(this.page.getByTestId('headerControlActionsButton')).toBeVisible({ timeout: 15000 });
+    await expect(this.page.getByTestId('headerControlActionsButton')).toBeVisible({
+      timeout: 15000,
+    });
     await this.page.getByTestId('headerControlActionsButton').click();
     await this.page.getByTestId('healthScanItem').click();
     await expect(this.page.getByTestId('healthScanFlyout')).toBeVisible();
