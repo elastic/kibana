@@ -14,7 +14,8 @@ import {
 } from './api.test.mocks';
 
 import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
@@ -193,7 +194,7 @@ describe('createChatCompleteApi', () => {
       expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
     });
 
-    it('falls back to a new replacementsId when carried one is missing', async () => {
+    it('reuses carried replacementsId by creating document when carried one is missing', async () => {
       mockEsClient.get.mockRejectedValueOnce({ meta: { statusCode: 404 } });
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
@@ -211,8 +212,10 @@ describe('createChatCompleteApi', () => {
       expect(mockEsClient.get).toHaveBeenCalledTimes(1);
       expect(mockEsClient.update).toHaveBeenCalledTimes(0);
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
-      expect(response.metadata?.anonymization?.replacementsId).not.toBe('stale-replacements-id');
-      expect(response.metadata?.anonymization?.replacementsId).toEqual(expect.any(String));
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ id: 'stale-replacements-id' })
+      );
+      expect(response.metadata?.anonymization?.replacementsId).toBe('stale-replacements-id');
     });
 
     it('does not persist replacements when there is no anonymization and no carried id', async () => {
@@ -252,6 +255,37 @@ describe('createChatCompleteApi', () => {
         metadata: undefined,
         toolCalls: [],
       });
+    });
+
+    it('keeps masked output for Agent Builder requests while preserving replacements metadata', async () => {
+      mockEsClient.get.mockResolvedValueOnce({
+        _source: {
+          id: 'existing-replacements-id',
+          namespace: 'default',
+          replacements: [{ anonymized: 'EMAIL_token', original: 'alice@example.com' }],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: 'inference',
+        },
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('EMAIL_token')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'alice@example.com' }],
+        metadata: {
+          connectorTelemetry: { pluginId: 'agent_builder' },
+          anonymization: {
+            replacementsId: 'existing-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('EMAIL_token');
+      expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
+      expect(response.deanonymized_input).toBeUndefined();
+      expect(response.deanonymized_output).toBeUndefined();
     });
 
     it('implicitly retries errors when configured to', async () => {

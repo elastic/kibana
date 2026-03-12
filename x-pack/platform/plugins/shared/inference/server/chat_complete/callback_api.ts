@@ -137,16 +137,16 @@ export function createChatCompleteCallbackApi({
         stream,
         namespace,
         anonymization,
-      })
-    ).pipe(
-      retryWithExponentialBackoff({
-        maxRetry: maxRetries,
-        backoffMultiplier: retryConfiguration.backoffMultiplier,
-        initialDelay: retryConfiguration.initialDelay,
-        errorFilter: getRetryFilter(retryConfiguration.retryOn),
-      }),
-      callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
-      abortSignal ? handleCancellation(abortSignal) : identity
+      }).pipe(
+        retryWithExponentialBackoff({
+          maxRetry: maxRetries,
+          backoffMultiplier: retryConfiguration.backoffMultiplier,
+          initialDelay: retryConfiguration.initialDelay,
+          errorFilter: getRetryFilter(retryConfiguration.retryOn),
+        }),
+        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
+        abortSignal ? handleCancellation(abortSignal) : identity
+      )
     );
 
     if (stream) {
@@ -220,6 +220,20 @@ function createChatCompletePipeline({
         })
       ).pipe(
         switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+          // Temporary anonymization phase 3a hardening scope for Agent Builder:
+          // - RFC states the model should receive tokens while UI can render originals
+          //   to authorized analysts ("Reversible for UI"; "Before UI render: substitute
+          //   tokens with originals if authorized").
+          // - Agent Builder now relies on the replacements API permission boundary for reveal.
+          // - We keep this consumer-scoped for now to avoid broad behavior shifts in other
+          //   inference consumers.
+          // TODO(anonymization): Evaluate standardizing this behavior across consumers so
+          // tokenized output remains the default inference response shape and reveal stays
+          // consistently permission-gated in UI resolution paths.
+          // RFC reference: "Anonymization as a Platform Service RFC", sections 1 (Key
+          // principles: Reversible for UI) and 7.6 (Before UI render: substitute tokens
+          // with originals if authorized).
+          const isAgentBuilderRequest = metadata?.connectorTelemetry?.pluginId === 'agent_builder';
           const systemWithAnonymizationInstructions = preparedAnonymization.system
             ? addAnonymizationInstruction(
                 preparedAnonymization.system,
@@ -255,7 +269,17 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(
+            deanonymizeMessage(
+              isAgentBuilderRequest
+                ? {
+                    ...preparedAnonymization,
+                    anonymizations: [],
+                    replacementsId,
+                  }
+                : { ...preparedAnonymization, replacementsId }
+            )
+          );
         })
       );
     })
