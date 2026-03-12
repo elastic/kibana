@@ -15,7 +15,11 @@ import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
 
-import { getAffectedPackages, filterFilesByAffectedPackages } from '@kbn/moon/src/affected';
+import {
+  getAffectedPackages,
+  filterFilesByAffectedPackages,
+  // eslint-disable-next-line @kbn/imports/uniform_imports
+} from '../../../packages/kbn-moon/src/affected';
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
