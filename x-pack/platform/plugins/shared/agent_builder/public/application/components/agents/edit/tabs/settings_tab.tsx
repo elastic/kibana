@@ -30,11 +30,11 @@ import {
   AgentVisibility,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
-  type AgentVisibilityIcon,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -90,13 +90,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const formFlexColumnStyles = css`
     min-width: 0;
   `;
-  const renderVisibilityOption = ({
-    icon,
-    label,
-  }: {
-    icon: AgentVisibilityIcon;
-    label: string;
-  }) => (
+  const renderVisibilityOption = ({ icon, label }: { icon: EuiIconType; label: string }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={icon} aria-hidden={true} />

@@ -98,7 +98,6 @@ export {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentVisibility,
-  AgentVisibilityIcon,
   VISIBILITY_ICON,
   VISIBILITY_BADGE_COLOR,
   AgentExecutionErrorCode,
