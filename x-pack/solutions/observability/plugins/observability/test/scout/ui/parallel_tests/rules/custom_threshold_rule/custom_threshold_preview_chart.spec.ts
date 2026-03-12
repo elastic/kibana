@@ -8,8 +8,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
-// FLAKY: https://github.com/elastic/kibana/issues/247632
-test.describe.skip(
+test.describe(
   'Custom threshold preview chart',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -31,30 +30,39 @@ test.describe.skip(
     });
 
     test('should handle the error message correctly', async ({ page }) => {
-      await expect(async () => {
-        const customEquationField = page.testSubj.locator(
-          'thresholdRuleCustomEquationEditorFieldText'
-        );
+      const customEquation = page.testSubj.locator('customEquation');
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
+      const customEquationPopoverCloseButton = page.testSubj.locator(
+        'o11yClosablePopoverTitleButton'
+      );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
 
-        // Introduce an error in the equation
-        await page.testSubj.click('customEquation');
+      await test.step('introduce an error and verify failure panel appears', async () => {
+        await customEquation.click();
         await customEquationField.click();
         await customEquationField.fill('A +');
-        await page.testSubj.click('o11yClosablePopoverTitleButton');
+        await customEquationPopoverCloseButton.click();
 
-        const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-        await expect(lensFailure).toBeVisible();
-        await expect(lensFailure).toContainText('An error occurred while rendering the chart');
+        // The exact error message text varies by Lens version — only assert visibility.
+        await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+      });
 
-        // Fix the introduced error
-        await page.testSubj.click('customEquation');
-        await customEquationField.click();
-        await customEquationField.fill('A');
-        await page.testSubj.click('o11yClosablePopoverTitleButton');
+      await test.step('fix the error and verify failure panel disappears', async () => {
+        // Popover and embeddable updates can race in CI. Retry the full "fix" flow
+        // until Lens settles and the failure panel is gone.
+        await expect(async () => {
+          await customEquation.click();
+          await expect(customEquationField).toBeVisible({ timeout: 20_000 });
+          await customEquationField.fill('A');
+          await expect(customEquationField).toHaveValue('A');
+          await customEquationPopoverCloseButton.click();
 
-        // Wait for the chart to re-render after fixing the equation
-        await expect(lensFailure).toBeHidden();
-      }).toPass({ timeout: 15_000, intervals: [1000] });
+          await expect(customEquation).toContainText('A');
+          await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+        }).toPass({ timeout: 60_000, intervals: [500, 1000, 2000] });
+      });
     });
   }
 );
