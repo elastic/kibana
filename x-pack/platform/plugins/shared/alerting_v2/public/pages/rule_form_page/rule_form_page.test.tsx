@@ -315,7 +315,7 @@ describe('RuleFormPage', () => {
       expect(screen.getByText('Rule not found')).toBeInTheDocument();
     });
 
-    it('renders the "Clone rule" page title', () => {
+    it('renders the "Create rule" page title in clone mode', () => {
       mockUseFetchRule.mockReturnValue({
         data: {
           id: 'rule-1',
@@ -333,7 +333,7 @@ describe('RuleFormPage', () => {
 
       renderClonePage();
 
-      expect(screen.getByRole('heading', { name: 'Clone rule' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Create rule' })).toBeInTheDocument();
     });
 
     it('does not pass ruleId to StandaloneRuleForm (creates a new rule)', () => {
