@@ -95,7 +95,13 @@ export const createRenderAttachmentRenderer = ({
       versionToUse =
         typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
     } else {
-      const refVersion = attachmentRefs?.find((r) => r.attachment_id === attachmentId)?.version;
+      // if an attachment has multiple versions, we use the highest version I.e. the latest one
+      const refVersion = attachmentRefs
+        ?.filter((r) => r.attachment_id === attachmentId)
+        .reduce<number | undefined>(
+          (max, r) => (max === undefined || r.version > max ? r.version : max),
+          undefined
+        );
       versionToUse = refVersion ?? attachment.current_version;
     }
 
