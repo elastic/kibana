@@ -26,12 +26,17 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
     };
   });
 
-  const additionalKwargs = chunk.refusal ? { refusal: chunk.refusal } : {};
+  const additionalKwargs = {
+    ...(chunk.refusal ? { refusal: chunk.refusal } : {}),
+    ...(chunk.metadata?.anonymization
+      ? { anonymization: { replacementsId: chunk.metadata.anonymization.replacementsId } }
+      : {}),
+  };
 
   return new AIMessageChunk({
     content: chunk.content,
     tool_call_chunks: toolCallChunks,
-    additional_kwargs: additionalKwargs,
+    ...(Object.keys(additionalKwargs).length > 0 ? { additional_kwargs: additionalKwargs } : {}),
     response_metadata: {},
   });
 };
