@@ -21,7 +21,7 @@ jest.mock('./utils', () => ({
 }));
 
 describe('Lens API - Visualizations Search Route', () => {
-  it('correctly maps per_page from request to perPage internal variable and back to per_page in response', async () => {
+  it('maps API per_page to internal perPage/limit and vice versa', async () => {
     // Setup Router Mocks
     const mockRoute = { addVersion: jest.fn() };
     const mockRouter = {
