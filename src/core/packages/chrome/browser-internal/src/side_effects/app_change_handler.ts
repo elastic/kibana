@@ -31,7 +31,7 @@ export function setupAppChangeHandler({
 }: AppChangeHandlerDeps): void {
   currentAppId$.pipe(takeUntil(stop$)).subscribe(() => {
     // Reset UI elements
-    state.badge.set(undefined);
+    state.breadcrumbs.legacyBadge.set(undefined);
     state.appMenu.set(undefined);
 
     // Reset breadcrumbs
