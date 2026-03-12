@@ -10,15 +10,19 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import type { ScoutTestTarget } from '@kbn/scout-info';
-import type { Config } from '../config';
-import { readConfigFile } from '../loader';
+import { Config } from '../config';
+import { loadRawServerConfig } from '../loader';
 import { getConfigFilePath } from './get_config_file';
 import { saveScoutTestConfigOnDisk } from './save_scout_test_config';
+import { configureHTTP2 } from './configure_http2';
 
 /**
  * Loads server configuration based on the mode, creates "kbn-test" compatible Config
  * instance, that can be used to start local servers and saves its "Scout"-format copy
  * to the disk.
+ *
+ * HTTP/2 is enabled by default. To disable it, set `http2: false` in the server config.
+ *
  * @param testTarget The test target definition (based on location, architecture and domain)
  * @param log Logger instance to report errors or debug information.
  * @param configRootDir The root directory where the config file is located
@@ -38,15 +42,19 @@ export async function loadServersConfig(
 ): Promise<Config> {
   const configPath = getConfigFilePath(configRootDir, testTarget);
 
-  // Validate that the config file exists
   if (!fs.existsSync(configPath)) {
     throw new Error(`Config file not found: ${configPath}`);
   }
 
-  const clusterConfig = await readConfigFile(configPath);
-  // construct config for Playwright Test
+  const rawConfig = await loadRawServerConfig(configPath);
+
+  if (rawConfig.http2 !== false) {
+    log.info('scout: Enabling HTTP/2 with TLS for Kibana server');
+    configureHTTP2(rawConfig);
+  }
+
+  const clusterConfig = new Config(rawConfig);
   const scoutServerConfig = clusterConfig.getScoutTestConfig();
-  // save test config to the file
   saveScoutTestConfigOnDisk(scoutServerConfig, log);
   return clusterConfig;
 }

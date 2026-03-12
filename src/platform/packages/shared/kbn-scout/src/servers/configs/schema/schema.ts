@@ -64,6 +64,7 @@ const dockerServerSchema = () =>
 export const schema = Joi.object()
   .keys({
     serverless: Joi.boolean().default(false),
+    http2: Joi.boolean().default(true),
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
