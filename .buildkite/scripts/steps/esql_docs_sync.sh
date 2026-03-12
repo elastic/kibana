@@ -45,8 +45,7 @@ main () {
 
   if [ $ELAPSED_ES -ge $MAX_WAIT_ES ]; then
     echo "Elasticsearch failed to start within $MAX_WAIT_ES seconds"
-    echo "Skipping ES|QL docs sync as Elasticsearch is unavailable."
-    return 0
+    echo "Continuing ES|QL docs sync even though Elasticsearch may be unavailable."
   fi
 
   report_main_step "Starting Kibana"
@@ -88,8 +87,7 @@ main () {
 
   if [ $ELAPSED -ge $MAX_WAIT ]; then
     echo "Kibana failed to start within $MAX_WAIT seconds"
-    echo "Skipping ES|QL docs sync as Kibana is unavailable."
-    return 0
+    echo "Continuing ES|QL docs sync even though Kibana may be unavailable."
   fi
 
   # Cleanup function
