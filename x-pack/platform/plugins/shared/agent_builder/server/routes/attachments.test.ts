@@ -220,9 +220,12 @@ describe('Attachment Routes', () => {
   });
 
   const getHandler = (method: string, pathSuffix: string) => {
-    const key = Object.keys(routeHandlers).find(
-      (k) => k.startsWith(`${method}:`) && k.includes(pathSuffix)
-    );
+    const methodMatches = Object.keys(routeHandlers).filter((k) => k.startsWith(`${method}:`));
+    const exactSuffixMatch = methodMatches.find((k) => k.endsWith(pathSuffix));
+    const partialMatch = methodMatches
+      .filter((k) => k.includes(pathSuffix))
+      .sort((a, b) => b.length - a.length)[0];
+    const key = exactSuffixMatch ?? partialMatch;
     if (!key) {
       throw new Error(`Handler not found for ${method} ${pathSuffix}`);
     }
@@ -430,6 +433,169 @@ describe('Attachment Routes', () => {
       expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachment.hidden).toBe(true);
+    });
+  });
+
+  describe('GET /conversations/{conversation_id}/attachments/stale', () => {
+    const path = '/attachments/stale';
+
+    it('checks staleness only against latest version and returns resolved data when stale', async () => {
+      const latestData = { value: 'v2' };
+      const resolvedData = { value: 'v3' };
+      const attachment = createMockAttachment({
+        id: 'att-1',
+        type: 'viz',
+        current_version: 2,
+        origin: { savedObjectId: 'so-1' },
+        versions: [
+          {
+            version: 1,
+            data: { value: 'v1' },
+            created_at: '2024-01-01',
+            content_hash: hashContent({ value: 'v1' }),
+          },
+          {
+            version: 2,
+            data: latestData,
+            created_at: '2024-01-02',
+            content_hash: hashContent(latestData),
+          },
+        ],
+      });
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
+      mockGetInternalServices().attachments.getTypeDefinition.mockImplementation((type: string) => {
+        if (type === 'viz') {
+          return {
+            id: 'viz',
+            validate: (input: unknown) => ({ valid: true, data: input }),
+            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            resolve: jest.fn().mockResolvedValue(resolvedData),
+          };
+        }
+
+        return {
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        };
+      });
+
+      const handler = getHandler('GET', path);
+      const request = {
+        params: { conversation_id: 'conv-1' },
+      };
+
+      await handler(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const result = mockResponse.ok.mock.calls[0][0];
+      expect(result.body.attachments).toEqual([
+        expect.objectContaining({
+          attachment_id: 'att-1',
+          is_stale: true,
+          latest_version: 2,
+          resolved_data: resolvedData,
+        }),
+      ]);
+    });
+
+    it('returns not stale when attachment has no origin', async () => {
+      const attachment = createMockAttachment({
+        id: 'att-no-origin',
+        type: 'viz',
+        origin: undefined,
+      });
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
+
+      const handler = getHandler('GET', path);
+      const request = {
+        params: { conversation_id: 'conv-1' },
+      };
+
+      await handler(createMockContext(), request, mockResponse);
+
+      const result = mockResponse.ok.mock.calls[0][0];
+      expect(result.body.attachments).toEqual([
+        expect.objectContaining({
+          attachment_id: 'att-no-origin',
+          is_stale: false,
+        }),
+      ]);
+    });
+
+    it('returns not stale when resolve is not implemented', async () => {
+      const attachment = createMockAttachment({
+        id: 'att-no-resolve',
+        type: 'text',
+        origin: { id: 'source-1' },
+      });
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
+
+      const handler = getHandler('GET', path);
+      const request = {
+        params: { conversation_id: 'conv-1' },
+      };
+
+      await handler(createMockContext(), request, mockResponse);
+
+      const result = mockResponse.ok.mock.calls[0][0];
+      expect(result.body.attachments).toEqual([
+        expect.objectContaining({
+          attachment_id: 'att-no-resolve',
+          is_stale: false,
+        }),
+      ]);
+    });
+
+    it('uses custom isStale when provided', async () => {
+      const resolvedData = { value: 'fresh' };
+      const attachment = createMockAttachment({
+        id: 'att-custom',
+        type: 'custom',
+        origin: { id: 'source-1' },
+        versions: [
+          {
+            version: 1,
+            data: { value: 'old' },
+            created_at: '2024-01-01',
+            content_hash: hashContent({ value: 'old' }),
+          },
+        ],
+      });
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
+      mockGetInternalServices().attachments.getTypeDefinition.mockImplementation((type: string) => {
+        if (type === 'custom') {
+          return {
+            id: 'custom',
+            validate: (input: unknown) => ({ valid: true, data: input }),
+            format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+            resolve: jest.fn().mockResolvedValue(resolvedData),
+            isStale: jest.fn().mockResolvedValue(true),
+          };
+        }
+
+        return {
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        };
+      });
+
+      const handler = getHandler('GET', path);
+      const request = {
+        params: { conversation_id: 'conv-1' },
+      };
+
+      await handler(createMockContext(), request, mockResponse);
+
+      const result = mockResponse.ok.mock.calls[0][0];
+      expect(result.body.attachments).toEqual([
+        expect.objectContaining({
+          attachment_id: 'att-custom',
+          is_stale: true,
+          resolved_data: resolvedData,
+        }),
+      ]);
     });
   });
 

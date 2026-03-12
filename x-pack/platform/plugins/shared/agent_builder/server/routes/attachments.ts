@@ -10,8 +10,12 @@ import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import { isToolCallStep, attachmentTools } from '@kbn/agent-builder-common';
+import type {
+  AttachmentResolveContext,
+  AttachmentTypeDefinition,
+} from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR, hashContent } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -21,6 +25,8 @@ import type {
   DeleteAttachmentResponse,
   RestoreAttachmentResponse,
   RenameAttachmentResponse,
+  CheckStaleAttachmentsResponse,
+  AttachmentStaleCheckResult,
 } from '../../common/http_api/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
@@ -64,6 +70,109 @@ const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: u
     }
 
     return Boolean((version.data as { client_id?: string }).client_id);
+  });
+};
+
+interface ComputeStaleResultParams {
+  attachment: {
+    id: string;
+    type: string;
+    active?: boolean;
+    origin?: unknown;
+    current_version: number;
+    versions: Array<{ version: number; data: unknown; content_hash: string }>;
+  };
+  typeDefinition?: AttachmentTypeDefinition;
+  resolveContext: AttachmentResolveContext;
+}
+
+const createStaleResult = ({
+  attachmentId,
+  latestVersion,
+  isStale,
+  resolvedData,
+}: {
+  attachmentId: string;
+  latestVersion: number;
+  isStale: boolean;
+  resolvedData?: unknown;
+}): AttachmentStaleCheckResult => {
+  return {
+    attachment_id: attachmentId,
+    is_stale: isStale,
+    latest_version: latestVersion,
+    ...(resolvedData !== undefined ? { resolved_data: resolvedData } : {}),
+  };
+};
+
+interface RunStaleCheckParams {
+  latest: { data: unknown; content_hash: string };
+  origin: unknown;
+  resolveContext: AttachmentResolveContext;
+  resolve: NonNullable<AttachmentTypeDefinition['resolve']>;
+  customIsStale?: AttachmentTypeDefinition['isStale'];
+}
+
+const runStaleCheck = async ({
+  latest,
+  origin,
+  resolveContext,
+  resolve,
+  customIsStale,
+}: RunStaleCheckParams): Promise<{ isStale: boolean; resolvedData?: unknown }> => {
+  if (customIsStale) {
+    const isStale = await customIsStale(latest.data, origin, resolveContext);
+    if (!isStale) {
+      return { isStale: false };
+    }
+
+    const resolvedData = await resolve(origin, resolveContext);
+    return { isStale: true, resolvedData };
+  }
+
+  const resolvedData = await resolve(origin, resolveContext);
+  if (resolvedData === undefined) {
+    return { isStale: false };
+  }
+
+  return {
+    isStale: hashContent(resolvedData) !== latest.content_hash,
+    resolvedData,
+  };
+};
+
+const computeAttachmentStaleResult = async ({
+  attachment,
+  typeDefinition,
+  resolveContext,
+}: ComputeStaleResultParams): Promise<AttachmentStaleCheckResult> => {
+  const latest = attachment.versions.find(
+    (version) => version.version === attachment.current_version
+  );
+  const latestVersion = latest?.version ?? attachment.current_version;
+
+  if (
+    attachment.active === false ||
+    !latest ||
+    attachment.origin === undefined ||
+    !typeDefinition?.resolve
+  ) {
+    return createStaleResult({ attachmentId: attachment.id, latestVersion, isStale: false });
+  }
+
+  const { isStale, resolvedData } = await runStaleCheck({
+    latest,
+    origin: attachment.origin,
+    resolveContext,
+    resolve: typeDefinition.resolve,
+    customIsStale: typeDefinition.isStale,
+  });
+
+  return createStaleResult({
+    attachmentId: attachment.id,
+    latestVersion,
+    isStale,
+    resolvedData,
   });
 };
 
@@ -135,6 +244,80 @@ export function registerAttachmentRoutes({
           body: {
             results: attachments,
             total_token_estimate: stateManager.getTotalTokenEstimate(),
+          },
+        });
+      })
+    );
+
+  // Check stale status for all latest conversation attachments
+  router.versioned
+    .get({
+      path: `${publicApiPath}/conversations/{conversation_id}/attachments/stale`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Check attachment staleness',
+      description:
+        'Checks staleness for the latest version of all conversation attachments against their origin snapshot.',
+      options: {
+        tags: ['attachment', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService, attachments: attachmentsService } =
+          getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const conversation = await client.get(conversationId);
+        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
+          getTypeDefinition: attachmentsService.getTypeDefinition,
+        });
+
+        const [coreStart] = await coreSetup.getStartServices();
+        const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+        const resolveContext: AttachmentResolveContext = {
+          request,
+          spaceId,
+          savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+        };
+
+        const staleChecks = stateManager.getAll().map((attachment) => {
+          const typeDefinition = attachmentsService.getTypeDefinition(attachment.type);
+          return computeAttachmentStaleResult({
+            attachment,
+            typeDefinition,
+            resolveContext,
+          });
+        });
+
+        const staleResults = await Promise.all(staleChecks);
+        const staleCount = staleResults.filter((result) => result.is_stale).length;
+        logger.debug(
+          `Attachment staleness check completed for conversation "${conversationId}" (checked=${staleResults.length}, stale=${staleCount})`
+        );
+
+        return response.ok<CheckStaleAttachmentsResponse>({
+          body: {
+            attachments: staleResults,
           },
         });
       })

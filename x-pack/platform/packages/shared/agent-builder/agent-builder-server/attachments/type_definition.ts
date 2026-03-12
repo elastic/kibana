@@ -47,6 +47,18 @@ export interface AttachmentTypeDefinition<
     context: AttachmentResolveContext
   ) => MaybePromise<TContent | undefined>;
   /**
+   * Optional hook to determine if the current snapshot is stale compared to origin.
+   * Called only when both `origin` and `resolve` are available for the attachment type.
+   *
+   * If omitted, staleness falls back to resolving fresh content and comparing it to
+   * the current snapshot hash.
+   */
+  isStale?: (
+    currentData: TContent,
+    origin: TOrigin,
+    context: AttachmentResolveContext
+  ) => MaybePromise<boolean>;
+  /**
    * Optional validation for origin/reference data.
    * Called when an attachment is created with `origin` but no `data`.
    */

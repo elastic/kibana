@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
@@ -25,7 +25,7 @@ const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.remove
 });
 
 export interface AttachmentPillProps {
-  attachment: Attachment;
+  attachment: UnknownAttachment;
   onRemoveAttachment?: () => void;
 }
 
@@ -80,7 +80,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>

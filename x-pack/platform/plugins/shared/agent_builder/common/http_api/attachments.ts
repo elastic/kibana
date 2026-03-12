@@ -35,3 +35,14 @@ export interface RenameAttachmentResponse {
   success: boolean;
   attachment: VersionedAttachment;
 }
+
+export interface AttachmentStaleCheckResult {
+  attachment_id: string;
+  is_stale: boolean;
+  latest_version: number;
+  resolved_data?: unknown;
+}
+
+export interface CheckStaleAttachmentsResponse {
+  attachments: AttachmentStaleCheckResult[];
+}
