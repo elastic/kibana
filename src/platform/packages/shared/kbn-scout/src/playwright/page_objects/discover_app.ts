@@ -22,6 +22,8 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
+    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadingIndicatorHidden();
     await this.waitForDataViewSwitch();
   }
 
@@ -31,7 +33,7 @@ export class DiscoverApp {
 
     // There should be exactly one visible data view switch.
     // If both are visible (bug), fail explicitly instead of picking one
-    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible({ timeout: 30_000 });
 
     const discoverVisible = await discoverSwitch.isVisible();
     const fallbackVisible = await fallbackSwitch.isVisible();
@@ -367,13 +369,20 @@ export class DiscoverApp {
 
   async openRecommendedQueriesPanel() {
     const menuPopover = this.esqlMenuPopover;
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
     await menuPopover.waitFor({ state: 'visible' });
+
+    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
+    if (await panelTitleButton.isVisible()) {
+      return;
+    }
 
     const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
     await recommendedQueriesButton.waitFor({ state: 'visible' });
     await recommendedQueriesButton.click();
-
-    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
     await panelTitleButton.waitFor({ state: 'visible' });
   }
 
@@ -396,13 +405,21 @@ export class DiscoverApp {
 
   async addBreakdownFieldFromSidebar(field: string) {
     const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
-    await sidebarToggleButton.waitFor({ state: 'visible' });
-    await sidebarToggleButton.click();
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
 
     await this.waitUntilFieldListHasCountOfFields();
-    const fieldLocator = this.page.testSubj.locator(`field-${field}`);
-    await fieldLocator.waitFor({ state: 'visible' });
-    await fieldLocator.click();
+
+    const fieldButton = this.page.testSubj.locator(`field-${field}-showDetails`);
+    if (await fieldButton.isVisible()) {
+      await fieldButton.scrollIntoViewIfNeeded();
+      await fieldButton.click();
+    } else {
+      const fieldLocator = this.page.testSubj.locator(`field-${field}`);
+      await fieldLocator.waitFor({ state: 'visible' });
+      await fieldLocator.click();
+    }
 
     const breakdownButton = this.page.testSubj.locator(
       `fieldPopoverHeader_addBreakdownField-${field}`
