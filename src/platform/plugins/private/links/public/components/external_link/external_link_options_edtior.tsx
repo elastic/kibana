@@ -26,19 +26,19 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
         <EuiSwitch
           compressed
           id="openInNewTab"
-          name="openInNewTab"
+          name="open_in_new_tab"
           label={i18n.translate('links.externalUrl.openInNewTabLabel', {
             defaultMessage: 'Open URL in new tab',
           })}
-          checked={options.openInNewTab ?? DEFAULT_EXTERNAL_LINK_OPTIONS.openInNewTab}
-          onChange={() => onOptionChange({ openInNewTab: !options.openInNewTab })}
+          checked={options.open_in_new_tab ?? DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab}
+          onChange={() => onOptionChange({ open_in_new_tab: !options.open_in_new_tab })}
           data-test-subj="urlDrilldownOpenInNewTab"
         />
         <EuiSpacer size="s" />
         <EuiSwitch
           compressed
           id="encodeUrl"
-          name="encodeUrl"
+          name="encode_url"
           label={
             <>
               {i18n.translate('links.externalUrl.encodeUrl', {
@@ -52,8 +52,8 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
               </EuiTextColor>
             </>
           }
-          checked={options.encodeUrl ?? DEFAULT_EXTERNAL_LINK_OPTIONS.encodeUrl}
-          onChange={() => onOptionChange({ encodeUrl: !options.encodeUrl })}
+          checked={options.encode_url ?? DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url}
+          onChange={() => onOptionChange({ encode_url: !options.encode_url })}
           data-test-subj="urlDrilldownEncodeUrl"
         />
       </div>
