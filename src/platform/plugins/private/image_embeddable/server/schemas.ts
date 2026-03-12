@@ -15,10 +15,10 @@ import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
 const imageFileSrcSchema = schema.object({
   type: schema.literal('file'),
-  fileId: schema.string(),
-  fileImageMeta: schema.maybe(
+  file_id: schema.string(),
+  file_image_meta: schema.maybe(
     schema.object({
-      blurHash: schema.maybe(schema.string()),
+      blur_hash: schema.maybe(schema.string()),
       width: schema.number({
         meta: { description: 'Width of the image in pixels' },
       }),
@@ -40,9 +40,9 @@ const imageConfigSchema = schema.object({
   src: schema.oneOf([imageFileSrcSchema, imageUrlSrcSchema], {
     meta: { description: 'Image source (file or URL)' },
   }),
-  altText: schema.maybe(schema.string()),
+  alt_text: schema.maybe(schema.string()),
   sizing: schema.object({
-    objectFit: schema.oneOf(
+    object_fit: schema.oneOf(
       [
         schema.literal('fill'),
         schema.literal('contain'),
@@ -54,7 +54,7 @@ const imageConfigSchema = schema.object({
       }
     ),
   }),
-  backgroundColor: schema.maybe(schema.string()),
+  background_color: schema.maybe(schema.string()),
 });
 
 export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSchemaFnType) {
@@ -62,7 +62,7 @@ export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSche
     [
       getDrilldownsSchemas(IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS),
       schema.object({
-        imageConfig: imageConfigSchema,
+        image_config: imageConfigSchema,
       }),
       serializedTitlesSchema,
     ],
@@ -73,8 +73,6 @@ export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSche
     }
   );
 }
-
-// TODO - snake_caseify all of these schemas
 
 export type ImageConfig = TypeOf<typeof imageConfigSchema>;
 export type ImageConfigState = TypeOf<typeof imageConfigSchema>;
