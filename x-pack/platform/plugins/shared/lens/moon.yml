@@ -149,6 +149,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/controls-constants'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
