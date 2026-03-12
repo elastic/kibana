@@ -22,6 +22,7 @@ import type {
   StepWithIfCondition,
   StepWithOnFailure,
   TimeoutProp,
+  WaitForInputStep,
   WaitStep,
   WhileStep,
   WorkflowExecuteAsyncStep,
@@ -53,6 +54,7 @@ import type {
   ExitTryBlockNode,
   ExitWhileNode,
   GraphNodeUnion,
+  WaitForInputGraphNode,
   WorkflowGraphType,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -130,7 +132,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
   }
 
-  if ((currentStep as WhileStep).type === 'while') {
+  if (currentStep.type === 'while') {
     return createWhileGraph(getStepId(currentStep, context), currentStep as WhileStep, context);
   }
 
@@ -140,6 +142,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
+  }
+
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
   }
 
   if (currentStep.type === 'data.set') {
@@ -196,6 +202,26 @@ export function visitWaitStep(
   context: GraphBuildContext
 ): WorkflowGraphType {
   return createLeafStepGraph(currentStep, context, 'wait');
+}
+
+export function visitWaitForInputStep(
+  currentStep: WaitForInputStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const waitForInputNode: WaitForInputGraphNode = {
+    id: stepId,
+    type: 'waitForInput',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitForInputNode.id, waitForInputNode);
+
+  return graph;
 }
 
 export function visitDataSetStep(
