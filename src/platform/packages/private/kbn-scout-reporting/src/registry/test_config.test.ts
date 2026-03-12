@@ -154,7 +154,7 @@ describe('test_config module', () => {
             ...validManifestContent,
           },
           server: {
-            configSet: 'default',
+            configSet: expected.customScoutName || 'default',
           },
         });
       }
