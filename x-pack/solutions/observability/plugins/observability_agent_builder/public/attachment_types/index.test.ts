@@ -34,7 +34,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(mockAddAttachmentType).toHaveBeenCalledTimes(8);
   });
 
-  it('registers AI Insight attachment type with correct config', () => {
+  it('registers AI Insight attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const aiInsightCall = mockAddAttachmentType.mock.calls.find(
@@ -42,12 +42,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(aiInsightCall).toBeDefined();
 
-    const config = aiInsightCall![1];
+    const config = await aiInsightCall![1]();
     expect(config.getIcon()).toBe('sparkles');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Summary');
   });
 
-  it('registers alert attachment type with correct config', () => {
+  it('registers alert attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
@@ -55,12 +55,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(alertCall).toBeDefined();
 
-    const config = alertCall![1];
+    const config = await alertCall![1]();
     expect(config.getIcon()).toBe('warning');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Observability alert');
   });
 
-  it('registers error attachment type with correct config', () => {
+  it('registers error attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const errorCall = mockAddAttachmentType.mock.calls.find(
@@ -68,12 +68,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(errorCall).toBeDefined();
 
-    const config = errorCall![1];
+    const config = await errorCall![1]();
     expect(config.getIcon()).toBe('bug');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('APM error');
   });
 
-  it('registers log attachment type with correct config', () => {
+  it('registers log attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const logCall = mockAddAttachmentType.mock.calls.find(
@@ -81,18 +81,18 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(logCall).toBeDefined();
 
-    const config = logCall![1];
+    const config = await logCall![1]();
     expect(config.getIcon()).toBe('logPatternAnalysis');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log entry');
   });
 
-  it('returns attachmentLabel when provided in attachment data', () => {
+  it('returns attachmentLabel when provided in attachment data', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -102,13 +102,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Custom Label');
   });
 
-  it('returns default label when attachmentLabel is not provided', () => {
+  it('returns default label when attachmentLabel is not provided', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -118,13 +118,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Observability alert');
   });
 
-  it('returns default label when attachment data is undefined', () => {
+  it('returns default label when attachment data is undefined', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -134,7 +134,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Observability alert');
   });
 
-  it('registers SLO attachment type with correct config', () => {
+  it('registers SLO attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const sloCall = mockAddAttachmentType.mock.calls.find(
@@ -142,12 +142,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(sloCall).toBeDefined();
 
-    const config = sloCall![1];
+    const config = await sloCall![1]();
     expect(config.getIcon()).toBe('chartGauge');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('SLO');
   });
 
-  it('registers service attachment type with correct config', () => {
+  it('registers service attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const serviceCall = mockAddAttachmentType.mock.calls.find(
@@ -155,12 +155,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(serviceCall).toBeDefined();
 
-    const config = serviceCall![1];
+    const config = await serviceCall![1]();
     expect(config.getIcon()).toBe('gear');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Service');
   });
 
-  it('registers host attachment type with correct config', () => {
+  it('registers host attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const hostCall = mockAddAttachmentType.mock.calls.find(
@@ -168,12 +168,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(hostCall).toBeDefined();
 
-    const config = hostCall![1];
+    const config = await hostCall![1]();
     expect(config.getIcon()).toBe('storage');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Host');
   });
 
-  it('registers transaction attachment type with correct config', () => {
+  it('registers transaction attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const transactionCall = mockAddAttachmentType.mock.calls.find(
@@ -181,7 +181,7 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(transactionCall).toBeDefined();
 
-    const config = transactionCall![1];
+    const config = await transactionCall![1]();
     expect(config.getIcon()).toBe('merge');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Transaction');
   });
