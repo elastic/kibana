@@ -14,28 +14,28 @@ import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
+  type LensAttributes,
   LensConfigBuilder,
   type LensApiSchemaType,
-  type LensAttributes,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 
-export const buildLensPanelFromApi = (
+const lensConfigBuilder = new LensConfigBuilder();
+
+const buildLensPanelFromApi = (
   config: LensApiSchemaType,
   uid?: string
 ): Omit<DashboardPanel, 'grid'> => {
-  const lensAttributes: LensAttributes = new LensConfigBuilder().fromAPIFormat(config);
-
   const lensConfig: LensSerializedAPIConfig = {
     title:
-      lensAttributes.title ??
       config.title ??
       i18n.translate('xpack.dashboardAgent.attachments.dashboard.generatedPanelTitle', {
         defaultMessage: 'Generated panel',
       }),
-    attributes: lensAttributes,
+    attributes: config,
   };
 
   return {
@@ -45,21 +45,21 @@ export const buildLensPanelFromApi = (
   };
 };
 
-export const isLensEmbeddableType = (
+const isLensEmbeddableType = (
   embeddableType: string,
   rawConfig: unknown
 ): rawConfig is LensAttributes => {
   return embeddableType === LENS_EMBEDDABLE_TYPE && isLensLegacyAttributes(rawConfig);
 };
 
-export interface BuildPanelFromRawConfigOptions {
+interface BuildPanelFromRawConfigOptions {
   embeddableType: string;
   rawConfig: Record<string, unknown>;
   title: string | undefined;
   uid?: string;
 }
 
-export const buildPanelFromRawConfig = ({
+const buildPanelFromRawConfig = ({
   embeddableType,
   rawConfig,
   title,
@@ -70,14 +70,14 @@ export const buildPanelFromRawConfig = ({
     config: isLensEmbeddableType(embeddableType, rawConfig)
       ? {
           title: title ?? rawConfig.title ?? 'Panel',
-          attributes: rawConfig,
+          attributes: lensConfigBuilder.toAPIFormat(rawConfig),
         }
       : rawConfig,
     uid,
   };
 };
 
-export const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
+const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
   const panelList = panels ?? [];
 
   return panelList.reduce<DashboardPanel[]>((acc, panel) => {
@@ -113,7 +113,7 @@ const normalizeSections = (sections: AgentDashboardSection[]): DashboardSection[
   }));
 };
 
-export const normalizeDashboardWidgets = ({
+const normalizeDashboardWidgets = ({
   panels,
   sections,
 }: {
@@ -121,4 +121,22 @@ export const normalizeDashboardWidgets = ({
   sections?: AgentDashboardSection[];
 }): DashboardState['panels'] => {
   return [...normalizePanels(panels), ...normalizeSections(sections ?? [])];
+};
+
+export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
+
+export const getStateFromAttachment = (
+  attachment: DashboardAttachment
+): Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'> => {
+  const { title, description, panels = [], sections = [] } = attachment.data;
+
+  return {
+    title: title ?? '',
+    description: description ?? '',
+    panels: normalizeDashboardWidgets({
+      panels,
+      sections,
+    }),
+    time_range: DEFAULT_TIME_RANGE,
+  };
 };
