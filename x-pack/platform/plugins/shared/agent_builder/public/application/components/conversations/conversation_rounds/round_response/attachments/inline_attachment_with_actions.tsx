@@ -11,6 +11,7 @@ import type {
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
+import { useAttachmentUiDefinition } from '../../../../../hooks/use_attachment_ui_definition';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
@@ -50,7 +51,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     [attachmentsService, conversationId, attachment.id, conversationActions]
   );
 
-  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const uiDefinition = useAttachmentUiDefinition(attachment.type);
 
   const inlineActionButtons = useMemo(
     () =>

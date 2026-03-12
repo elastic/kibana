@@ -19,7 +19,7 @@ import { publicApiPath } from '../../../common/constants';
  * and provides methods for attachment API operations.
  */
 export class AttachmentsService {
-  private readonly registry: Map<string, AttachmentUIDefinition> = new Map();
+  private readonly registry: Map<string, () => Promise<AttachmentUIDefinition>> = new Map();
   private readonly http: HttpSetup;
 
   constructor({ http }: { http: HttpSetup }) {
@@ -35,12 +35,12 @@ export class AttachmentsService {
    */
   addAttachmentType<TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string,
-    definition: AttachmentUIDefinition<TAttachment>
+    getDefinition: () => Promise<AttachmentUIDefinition<TAttachment>>
   ): void {
     if (this.registry.has(attachmentType)) {
       throw new Error(`Attachment type "${attachmentType}" is already registered.`);
     }
-    this.registry.set(attachmentType, definition as AttachmentUIDefinition);
+    this.registry.set(attachmentType, getDefinition as () => Promise<AttachmentUIDefinition>);
   }
 
   /**
@@ -49,10 +49,10 @@ export class AttachmentsService {
    * @param attachmentType - The type identifier to look up
    * @returns The UI definition if registered, undefined otherwise
    */
-  getAttachmentUiDefinition<TAttachment extends UnknownAttachment = UnknownAttachment>(
+  async getAttachmentUiDefinition<TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
-  ): AttachmentUIDefinition<TAttachment> | undefined {
-    return this.registry.get(attachmentType) as AttachmentUIDefinition<TAttachment> | undefined;
+  ): Promise<AttachmentUIDefinition<TAttachment> | undefined> {
+    return this.registry.get(attachmentType)?.() as AttachmentUIDefinition<TAttachment> | undefined;
   }
 
   /**

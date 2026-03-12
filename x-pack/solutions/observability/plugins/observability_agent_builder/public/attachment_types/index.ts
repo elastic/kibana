@@ -105,7 +105,9 @@ export const registerAttachmentUiDefinitions = ({
   ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
     attachments.addAttachmentType<UnknownAttachmentWithLabel>(
       type,
-      createAttachmentTypeConfig(label, icon)
+      async () => {
+        return createAttachmentTypeConfig(label, icon);
+      }
     );
   });
 };

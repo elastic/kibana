@@ -14,8 +14,8 @@ export const createPublicAttachmentContract = ({
   attachmentsService: AttachmentsService;
 }): AttachmentServiceStartContract => {
   return {
-    addAttachmentType: (attachmentType, definition) => {
-      return attachmentsService.addAttachmentType(attachmentType, definition);
+    addAttachmentType: (attachmentType, getDefinition) => {
+      return attachmentsService.addAttachmentType(attachmentType, getDefinition);
     },
     getAttachmentUiDefinition: (attachmentType) => {
       return attachmentsService.getAttachmentUiDefinition(attachmentType);
