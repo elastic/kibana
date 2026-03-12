@@ -181,7 +181,7 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
       ...currentStep,
       type: 'workflow.output',
       status: 'failed',
-      with: (currentStep as WorkflowFailStep).with,
+      with: (currentStep as WorkflowFailStep).with ?? {},
     };
     return visitWorkflowOutputStep(transformedStep, context);
   }

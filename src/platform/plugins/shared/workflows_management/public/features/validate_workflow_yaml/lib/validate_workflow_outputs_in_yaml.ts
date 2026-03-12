@@ -168,7 +168,7 @@ function getOutputsFromYamlDocument(yamlDocument: Document): NormalizableFieldSc
     'properties' in plain &&
     typeof (plain as Record<string, unknown>).properties === 'object'
   ) {
-    return plain as NormalizableFieldSchema;
+    return plain;
   }
   return undefined;
 }

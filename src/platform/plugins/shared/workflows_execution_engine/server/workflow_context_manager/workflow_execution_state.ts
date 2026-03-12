@@ -164,22 +164,17 @@ export class WorkflowExecutionState {
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
     const existingStep = this.stepExecutions.get(step.id!);
-    // Filter out undefined only; null is intentional (e.g. output: null when a step fails) and must not be dropped
-    const definedChanges = Object.fromEntries(
-      Object.entries(step).filter(([, v]) => v !== undefined)
-    ) as Partial<EsWorkflowStepExecution>;
-    const mergedStep = {
+    const updatedStep = {
       ...existingStep,
-      ...definedChanges,
+      ...step,
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id!, mergedStep);
-
-    const existingChanges = this.stepDocumentsChanges.get(step.id as string) || {};
-    const mergedChanges = {
-      ...existingChanges,
-      ...definedChanges,
-    };
-    this.stepDocumentsChanges.set(step.id as string, mergedChanges);
+    this.stepExecutions.set(step.id!, updatedStep);
+    // Accumulate changes for the next flush — merge with any pending changes
+    // ES partial update (doc_as_upsert) preserves fields not included in the update
+    this.stepDocumentsChanges.set(step.id as string, {
+      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+      ...step,
+    });
   }
 
   private buildStepIdExecutionIdIndex(): void {

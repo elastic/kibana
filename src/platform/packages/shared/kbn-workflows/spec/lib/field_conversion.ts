@@ -18,41 +18,40 @@ export type NormalizableFieldSchema =
   | Array<LegacyWorkflowInput | WorkflowOutput>;
 
 /**
- * Converts a legacy workflow input definition to a JSON Schema property
- * @param input - The legacy input to convert
+ * Converts a legacy workflow field definition to a JSON Schema property
+ * @param field - The legacy field to convert (input or output)
  * @returns A JSON Schema property definition
  */
-function convertLegacyFieldToJsonSchemaProperty(input: LegacyWorkflowInput): JSONSchema7 {
+function convertLegacyFieldToJsonSchemaProperty(field: LegacyWorkflowInput): JSONSchema7 {
   const property: JSONSchema7 = {
-    type: input.type === 'choice' ? 'string' : input.type,
+    type: field.type === 'choice' ? 'string' : field.type,
   };
 
-  if (input.description) {
-    property.description = input.description;
+  if (field.description) {
+    property.description = field.description;
   }
 
-  if (input.default !== undefined) {
-    property.default = input.default;
+  if (field.default !== undefined) {
+    property.default = field.default;
   }
 
-  switch (input.type) {
+  switch (field.type) {
     case 'choice':
-      property.enum = input.options;
+      property.enum = field.options;
       break;
     case 'array': {
       property.items = {
         anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
       };
-      if (input.minItems !== undefined) {
-        property.minItems = input.minItems;
+      if (field.minItems !== undefined) {
+        property.minItems = field.minItems;
       }
-      if (input.maxItems !== undefined) {
-        property.maxItems = input.maxItems;
+      if (field.maxItems !== undefined) {
+        property.maxItems = field.maxItems;
       }
       break;
     }
     default:
-      // string, number, boolean - already handled
       break;
   }
 
@@ -60,25 +59,24 @@ function convertLegacyFieldToJsonSchemaProperty(input: LegacyWorkflowInput): JSO
 }
 
 /**
- * Converts legacy array-based inputs format to the new JSON Schema object format
- * @param legacyInputs - Array of legacy input definitions
- * @returns The inputs in the new JSON Schema object format
+ * Converts legacy array-based field format to the new JSON Schema object format
+ * @param legacyFields - Array of legacy field definitions (inputs or outputs)
+ * @returns The fields in the new JSON Schema object format
  */
 export function convertLegacyFieldsToJsonSchema(
-  legacyInputs: Array<z.infer<typeof WorkflowInputSchema>>
+  legacyFields: Array<z.infer<typeof WorkflowInputSchema>>
 ): JsonModelSchemaType {
   const properties: Record<string, JsonSchema> = {};
   const required: string[] = [];
 
-  for (const input of legacyInputs) {
-    // Skip null/undefined inputs (can happen during partial YAML parsing)
-    if (input && typeof input === 'object' && input.name) {
-      properties[input.name] = convertLegacyFieldToJsonSchemaProperty(
-        input
+  for (const field of legacyFields) {
+    if (field && typeof field === 'object' && field.name) {
+      properties[field.name] = convertLegacyFieldToJsonSchemaProperty(
+        field
       ) as unknown as JsonSchema;
 
-      if (input.required === true) {
-        required.push(input.name);
+      if (field.required === true) {
+        required.push(field.name);
       }
     }
   }
@@ -94,9 +92,10 @@ export function convertLegacyFieldsToJsonSchema(
  * Normalizes workflow fields (inputs or outputs) to the JSON Schema object format.
  * If fields are already in JSON Schema format, returns them as-is.
  * If fields are in the legacy array format, converts them.
+ * Accepts unknown to avoid explicit casts at call sites (runtime checks handle validation).
  */
 export function normalizeFieldsToJsonSchema(
-  fields?: NormalizableFieldSchema
+  fields?: NormalizableFieldSchema | unknown
 ): JsonModelSchemaType | undefined {
   if (!fields) {
     return undefined;

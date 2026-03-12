@@ -12,12 +12,8 @@ import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
-import {
-  type NormalizableFieldSchema,
-  normalizeFieldsToJsonSchema,
-  resolveRef,
-} from '@kbn/workflows/spec/lib/field_conversion';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
@@ -56,7 +52,7 @@ export function validateJsonSchemaDefaults(
   }
 
   // Normalize inputs to JSON Schema format
-  const normalizedInputs = normalizeFieldsToJsonSchema(inputs as NormalizableFieldSchema);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
   // Defensive check: ensure normalizedInputs has valid properties object
   if (
     !normalizedInputs ||

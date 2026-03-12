@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Re-export shared implementations from @kbn/workflows; used by execution engine and editor. */
+// @deprecated Import directly from '@kbn/workflows/spec/lib/build_fields_zod_validator' instead.
 export {
   buildFieldsZodValidator,
   convertJsonSchemaToZod,

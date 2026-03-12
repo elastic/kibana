@@ -73,6 +73,8 @@ export async function catchError(
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
+      // A step may already be COMPLETED if workflow.output/workflow.fail finished
+      // it successfully before setting the workflow-level error (e.g., status: 'failed')
       if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
         failedStepExecutionRuntime.failStep(
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

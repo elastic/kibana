@@ -13,14 +13,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
-  type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { z } from '@kbn/zod/v4';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { buildFieldsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 interface WorkflowExecuteManualFormProps {
@@ -33,9 +32,7 @@ interface WorkflowExecuteManualFormProps {
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeFieldsToJsonSchema(
-    definition.inputs as NormalizableFieldSchema
-  );
+  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
 
   if (!normalizedInputs?.properties) {
     return '{}';

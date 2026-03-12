@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
-import { buildFieldsZodValidator } from '../../../../../common/lib/json_schema_to_zod';
 
 // Generic interface for validation errors
 export interface WorkflowFieldValidationError {

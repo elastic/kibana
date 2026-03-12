@@ -11,11 +11,9 @@ import type { WorkflowOutputStep } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import {
-  type NormalizableFieldSchema,
-  normalizeFieldsToJsonSchema,
-} from '@kbn/workflows/spec/lib/field_conversion';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
@@ -34,28 +32,30 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     private node: WorkflowOutputGraphNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
   /**
-   * Completes all ancestor steps in the scope stack with the specified status.
-   * This is necessary when workflow.output terminates the workflow while inside
-   * nested scopes (e.g., foreach loops, if branches, etc.).
-   *
-   * Without this, parent scope steps would remain in "in progress" status even
-   * though the workflow has terminated.
-   *
-   * @param executionStatus - The status to set for ancestor steps (COMPLETED, CANCELLED, or FAILED)
+   * Completes all ancestor steps in the scope stack.
+   * Uses the step's own finishStep() logic so lifecycle behaviour
+   * (logging, timing, status) is applied consistently.
    */
-  private completeAncestorSteps(executionStatus: ExecutionStatus): void {
-    const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
-
-    // Delegate to the runtime manager to complete ancestor steps
-    this.workflowExecutionRuntime.completeAncestorSteps(
-      this.stepExecutionRuntime.scopeStack,
-      executionStatus,
-      workflowExecution.id
-    );
+  private completeAncestorSteps(): void {
+    let stack = this.stepExecutionRuntime.scopeStack;
+    while (!stack.isEmpty()) {
+      const currentScope = stack.getCurrentScope();
+      stack = stack.exitScope();
+      if (currentScope) {
+        const scopeStepRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentScope.nodeId,
+          stackFrames: stack.stackFrames,
+        });
+        if (scopeStepRuntime.stepExecutionExists()) {
+          scopeStepRuntime.finishStep();
+        }
+      }
+    }
   }
 
   async run(): Promise<void> {
@@ -63,19 +63,19 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     await this.stepExecutionRuntime.flushEventLogs();
 
     const step = this.node.configuration as WorkflowOutputStep;
-    // Render template variables in the output values
-    const outputValues = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      step.with
-    ) as Record<string, unknown>;
+    // Render template variables in the output values (with: may be omitted for workflow.fail)
+    const outputValues = step.with
+      ? (this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+          step.with
+        ) as Record<string, unknown>)
+      : {};
 
     try {
       // Get the workflow definition to check for declared outputs
       const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
       const declaredOutputs = workflowExecution.workflowDefinition?.outputs;
 
-      const normalizedOutputs = normalizeFieldsToJsonSchema(
-        declaredOutputs as NormalizableFieldSchema
-      );
+      const normalizedOutputs = normalizeFieldsToJsonSchema(declaredOutputs);
 
       if (normalizedOutputs?.properties && Object.keys(normalizedOutputs.properties).length > 0) {
         const validator = buildFieldsZodValidator(normalizedOutputs);
@@ -142,11 +142,10 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         case 'failed': {
           executionStatus = ExecutionStatus.FAILED;
           outcome = 'failure';
-          // For workflow.fail steps, use the message from the output if available
           const errorMessage =
-            typeof outputValues.message === 'string'
-              ? outputValues.message
-              : 'Workflow terminated with failed status';
+            (typeof outputValues.message === 'string' && outputValues.message) ||
+            (typeof outputValues.reason === 'string' && outputValues.reason) ||
+            'Workflow terminated with failed status';
 
           const failureError = new Error(errorMessage);
 
@@ -181,10 +180,7 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         tags: ['workflow-output', 'termination'],
       });
 
-      // Complete all ancestor steps in the scope stack (e.g., foreach, if, etc.)
-      // This ensures parent scopes are properly marked as completed/cancelled/failed
-      // when workflow.output terminates the workflow mid-execution
-      this.completeAncestorSteps(executionStatus);
+      this.completeAncestorSteps();
 
       // Update the workflow execution status to terminate the workflow (cancelled already set via setWorkflowCancelled)
       if (executionStatus !== ExecutionStatus.CANCELLED) {

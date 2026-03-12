@@ -12,7 +12,7 @@ import {
   buildFieldsZodValidator,
   convertJsonSchemaToZod,
   convertJsonSchemaToZodWithRefs,
-} from './json_schema_to_zod';
+} from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 
 describe('convertJsonSchemaToZod', () => {
   it('should convert a string schema to Zod', () => {

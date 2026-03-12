@@ -27,10 +27,7 @@ import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import {
-  type NormalizableFieldSchema,
-  normalizeFieldsToJsonSchema,
-} from '@kbn/workflows/spec/lib/field_conversion';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
@@ -122,7 +119,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return false;
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      const normalizedInputs = normalizeFieldsToJsonSchema(inputs as NormalizableFieldSchema);
+      const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (!hasAlertTrigger && !hasInputs) {
@@ -145,7 +142,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      const normalizedInputs = normalizeFieldsToJsonSchema(inputs as NormalizableFieldSchema);
+      const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (hasInputs) {

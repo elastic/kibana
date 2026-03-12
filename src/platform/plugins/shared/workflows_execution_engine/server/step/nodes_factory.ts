@@ -330,7 +330,8 @@ export class NodesFactory {
           node as WorkflowOutputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.stepExecutionRuntimeFactory
         );
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);

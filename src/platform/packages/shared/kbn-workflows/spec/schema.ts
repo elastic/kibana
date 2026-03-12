@@ -584,9 +584,12 @@ export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
 export const WorkflowFailStepSchema = BaseStepSchema.extend({
   type: z.literal('workflow.fail'),
-  with: z.object({
-    message: z.string(),
-  }),
+  with: z
+    .object({
+      message: z.string().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
