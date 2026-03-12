@@ -66,8 +66,7 @@ main () {
   node scripts/kibana "${KIBANA_ARGS[@]}" &
   KIBANA_PID=$!
 
-  KIBANA_URL="$(jq -r '.hosts.kibana' .scout/servers/local.json)"
-  KIBANA_URL="$(printf '%s' "$KIBANA_URL" | sed 's:/*$::')"
+  KIBANA_URL="http://localhost:5601"
 
 
   # Wait for Kibana to be ready (check both port and status endpoint)
