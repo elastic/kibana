@@ -210,6 +210,15 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   private queryBarMenuRef = createRef<EuiContextMenuClass>();
   private highlightTimer: ReturnType<typeof setTimeout> | null = null;
 
+  private handleAddFilterShortcut = (e: KeyboardEvent) => {
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const modifier = isMac ? e.metaKey : e.ctrlKey;
+    if (modifier && e.shiftKey && e.key.toLowerCase() === 'f') {
+      e.preventDefault();
+      this.handleDoubleClickFilterToggle();
+    }
+  };
+
   public static getDerivedStateFromProps(
     nextProps: SearchBarProps,
     prevState: SearchBarState<AggregateQuery | Query>
@@ -366,7 +375,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     }
   }
 
+  componentDidMount() {
+    document.addEventListener('keydown', this.handleAddFilterShortcut);
+  }
+
   componentWillUnmount() {
+    document.removeEventListener('keydown', this.handleAddFilterShortcut);
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.renderSavedQueryManagement.clear();
   }

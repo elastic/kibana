@@ -70,7 +70,7 @@ const BUTTON_MIN_WIDTH = 108;
 export const strings = {
   getFilterToggleTooltip: () =>
     i18n.translate('unifiedSearch.queryBar.filterPanelToggle.tooltip', {
-      defaultMessage: 'Tip: double click to add filter',
+      defaultMessage: 'Tip: double click or use Cmd+Shift+F (Ctrl+Shift+F on Windows) to add a filter',
     }),
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
