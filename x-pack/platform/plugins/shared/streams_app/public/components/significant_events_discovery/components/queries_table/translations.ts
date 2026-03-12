@@ -96,7 +96,7 @@ export const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
 export const getPromoteAllCalloutTitle = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutTitle', {
     defaultMessage:
-      '{count} {count, plural, one {query is} other {queries are}} ready for promotion',
+      '{count} {count, plural, one {query is} other {queries are}} ready for rule creation',
     values: { count },
   });
 
@@ -104,13 +104,13 @@ export const PROMOTE_ALL_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllCalloutDescription',
   {
     defaultMessage:
-      'Enable scheduled runs for these queries so their results are saved as Significant events, powering Insight generation.',
+      'Enable scheduled runs for these queries so their results are saved as events, powering Significant events generation.',
   }
 );
 
 export const PROMOTE_ALL_BUTTON = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteAllButton',
-  { defaultMessage: 'Promote all' }
+  { defaultMessage: 'Enable all' }
 );
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
@@ -134,13 +134,13 @@ export const CHART_SERIES_NAME = i18n.translate(
 
 export const getEventsCount = (count: number) =>
   i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.eventsCount', {
-    defaultMessage: '{count} Queries',
+    defaultMessage: '{count} Rules',
     values: { count },
   });
 
 export const TABLE_CAPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.tableCaption',
-  { defaultMessage: 'Queries table' }
+  { defaultMessage: 'Rules table' }
 );
 
 export const NO_ITEMS_MESSAGE = i18n.translate(
@@ -184,13 +184,13 @@ export const OPEN_IN_DISCOVER_ACTION_DESCRIPTION = i18n.translate(
 
 export const PROMOTE_QUERY_ACTION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionTitle',
-  { defaultMessage: 'Promote' }
+  { defaultMessage: 'Enable' }
 );
 
 export const PROMOTE_QUERY_ACTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionDescription',
   {
-    defaultMessage: 'Start scanning this query in the background for significant events',
+    defaultMessage: 'Start scanning this query in the background for events',
   }
 );
 

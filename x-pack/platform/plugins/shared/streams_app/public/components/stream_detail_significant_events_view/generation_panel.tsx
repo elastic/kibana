@@ -61,7 +61,7 @@ export function SignificantEventsGenerationPanel({
                   'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
                   {
                     defaultMessage:
-                      'Use AI to generate significant events from the data in this stream. Generation uses the last 24 hours of data.',
+                      'Use AI to generate queries and rules to detect events from the data in this stream. Generation uses the last 24 hours of data.',
                   }
                 )}
               </EuiText>
@@ -85,7 +85,7 @@ export function SignificantEventsGenerationPanel({
                 children: i18n.translate(
                   'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
                   {
-                    defaultMessage: 'Generate suggestions',
+                    defaultMessage: 'Generate queries',
                   }
                 ),
               }}
@@ -106,7 +106,7 @@ export function SignificantEventsGenerationPanel({
               {i18n.translate(
                 'xpack.streams.significantEvents.significantEventsGenerationPanel.orStartWithLabel',
                 {
-                  defaultMessage: 'or create significant events with',
+                  defaultMessage: 'or create queries with',
                 }
               )}
             </EuiText>

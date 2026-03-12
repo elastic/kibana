@@ -349,12 +349,12 @@ function LoadingErrorCallout({ errorMessage }: LoadingErrorCalloutProps) {
 
 const IDENTIFY_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationButtonLabel',
-  { defaultMessage: 'Identify features' }
+  { defaultMessage: 'Generate' }
 );
 
 const IN_PROGRESS_BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationButtonInProgressLabel',
-  { defaultMessage: 'Feature identification in progress' }
+  { defaultMessage: 'Knowledge indicator identification in progress' }
 );
 
 const CANCEL_BUTTON_LABEL = i18n.translate(
@@ -364,41 +364,41 @@ const CANCEL_BUTTON_LABEL = i18n.translate(
 
 const CANCELLING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationButtonCancellingLabel',
-  { defaultMessage: 'Canceling feature identification task' }
+  { defaultMessage: 'Canceling knowledge indicator identification task' }
 );
 
 const LOADING_TASK_FAILED_TITLE = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationLoadingTaskFailedLabel',
-  { defaultMessage: 'Failed to load feature identification task status' }
+  { defaultMessage: 'Failed to load knowledge indicator identification task status' }
 );
 
 const TASK_FAILED_TITLE = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationTaskFailedLabel',
-  { defaultMessage: 'Feature identification task failed' }
+  { defaultMessage: 'Knowledge indicator identification task failed' }
 );
 
 const TASK_STALE_TITLE = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationTaskStaledLabel',
-  { defaultMessage: 'Feature identification task did not complete' }
+  { defaultMessage: 'Knowledge indicator identification task did not complete' }
 );
 
 const TASK_STALE_DESCRIPTION = i18n.translate(
   'xpack.streams.streamDetailView.featureIdentificationTaskStaledDescription',
   {
     defaultMessage:
-      "The feature identification task didn't report its status for a prolonged period and is considered stale. Please start a new task.",
+      "The knowledge indicator identification task didn't report its status for a prolonged period and is considered stale. Please start a new task.",
   }
 );
 
 const NO_FEATURES_IDENTIFIED_TITLE = i18n.translate(
   'xpack.streams.streamDetailView.noFeaturesIdentifiedTitle',
-  { defaultMessage: 'No features identified' }
+  { defaultMessage: 'No knowledge indicators identified' }
 );
 
 const NO_FEATURES_IDENTIFIED_DESCRIPTION = i18n.translate(
   'xpack.streams.streamDetailView.noFeaturesIdentifiedDescription',
   {
     defaultMessage:
-      "The feature identification task didn't find any new features in your data. You can try again with different AI connector settings or try later with new data ingested.",
+      "The knowledge indicator identification task didn't find any new knowledge indicators in your data. You can try again with different AI connector settings or try later with new data ingested.",
   }
 );

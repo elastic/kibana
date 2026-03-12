@@ -73,7 +73,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       return {
         ...result,
         /**
-         * Significant events discovery for now only works with logs streams.
+         * Significant Events for now only works with logs streams.
          */
         streams: result.streams.filter((stream) => stream.stream.name.startsWith('logs')),
       };
@@ -290,14 +290,16 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
 
           <EuiButtonEmpty
             onClick={onBulkOnboardStreamsClick}
-            iconType="securitySignal"
+            iconType="play"
             disabled={selectedStreams.length === 0}
+            size="s"
           >
             {RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL}
           </EuiButtonEmpty>
 
           <EuiButtonEmpty
             iconType="crosshairs"
+            size="s"
             onClick={() => scheduleInsightsTask()}
             disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
             isLoading={isSchedulingInsights || isWaitingForInsightsTask}

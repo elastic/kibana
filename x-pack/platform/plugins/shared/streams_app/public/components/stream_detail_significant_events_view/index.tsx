@@ -143,11 +143,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
-                iconType="plus"
+                iconType="plusInCircle"
                 data-test-subj="significant_events_existing_queries_open_flyout_button"
               >
                 {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Significant events',
+                  defaultMessage: 'Add new',
                 })}
               </EuiButton>
             </EuiFlexItem>

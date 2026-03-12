@@ -14,7 +14,7 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
 export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnName',
   {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Events',
   }
 );
 
@@ -28,7 +28,7 @@ export const QUERIES_COLUMN_HEADER = i18n.translate(
 export const FEATURES_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.featuresColumnName',
   {
-    defaultMessage: 'Features',
+    defaultMessage: 'Knowledge indicators',
   }
 );
 
@@ -68,21 +68,21 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
 export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
   {
-    defaultMessage: 'Onboard Streams',
+    defaultMessage: 'Run a Discovery',
   }
 );
 
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
-    defaultMessage: 'Onboard stream',
+    defaultMessage: 'Run a Discovery',
   }
 );
 
 export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.stopStreamOnboardingButtonEmptyLabel',
   {
-    defaultMessage: 'Stop stream onboarding',
+    defaultMessage: 'Stop',
   }
 );
 
@@ -96,28 +96,28 @@ export const OCCURRENCES_CHART_TITLE = i18n.translate(
 export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.onboardingErrorTitle',
   {
-    defaultMessage: 'Could not onboard stream',
+    defaultMessage: 'Could not run the discovery',
   }
 );
 
 export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
   {
-    defaultMessage: 'Could not schedule a task to onboard stream',
+    defaultMessage: 'Could not schedule a task to run a discovery',
   }
 );
 
 export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
   {
-    defaultMessage: 'Discover Insights',
+    defaultMessage: 'Generate Significant Events',
   }
 );
 
 export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
   {
-    defaultMessage: 'Could not start insight generation',
+    defaultMessage: 'Could not start significant events generation',
   }
 );
 

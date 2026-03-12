@@ -23,24 +23,9 @@ export function EmptyState({
   return (
     <EuiEmptyPrompt
       titleSize="xs"
-      title={
-        <h2>
-          {i18n.translate('xpack.streams.significantEvents.emptyState.title', {
-            defaultMessage: 'Significant events',
-          })}
-        </h2>
-      }
+
       body={
         <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem>
-            <EuiText size="s" textAlign="center" color="subdued">
-              {i18n.translate('xpack.streams.significantEvents.emptyState.description', {
-                defaultMessage:
-                  "Single, 'interesting' log event identified by an automated rule as being important for understanding a system's behaviour.",
-              })}
-            </EuiText>
-          </EuiFlexItem>
-
           <EuiFlexItem>
             <SignificantEventsGenerationPanel
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}

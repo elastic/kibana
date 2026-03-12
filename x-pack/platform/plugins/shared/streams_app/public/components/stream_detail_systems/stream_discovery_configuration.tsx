@@ -51,21 +51,13 @@ export function StreamDiscoveryConfiguration({
         <EuiText size="s">
           <h3>
             {i18n.translate('xpack.streams.streamDetailView.streamDiscoveryTitle', {
-              defaultMessage: 'Stream discovery',
+              defaultMessage: 'Knowledge indicators',
             })}
           </h3>
         </EuiText>
       </EuiPanel>
 
       <EuiPanel hasShadow={false} hasBorder={false}>
-        <EuiText size="s">
-          <h4>
-            {i18n.translate('xpack.streams.streamDetailView.featuresTitle', {
-              defaultMessage: 'Features',
-            })}
-          </h4>
-        </EuiText>
-        <EuiSpacer size="s" />
         <EuiFlexGroup direction="column" gutterSize="s">
           <Row
             left={

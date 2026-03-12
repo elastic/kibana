@@ -77,10 +77,10 @@ export function useStreamFeaturesTable({
       await deleteFeature(selectedFeature.uuid);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamFeaturesTable.deleteSuccess.title', {
-          defaultMessage: 'Feature deleted',
+          defaultMessage: 'Knowledge indicator deleted',
         }),
         text: i18n.translate('xpack.streams.streamFeaturesTable.deleteSuccess.text', {
-          defaultMessage: 'The feature has been successfully deleted.',
+          defaultMessage: 'The knowledge indicator has been successfully deleted.',
         }),
       });
       onSelectFeature(null);
@@ -88,7 +88,7 @@ export function useStreamFeaturesTable({
     } catch (error) {
       notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
         title: i18n.translate('xpack.streams.streamFeaturesTable.deleteError.title', {
-          defaultMessage: 'Failed to delete feature',
+          defaultMessage: 'Failed to delete knowledge indicator',
         }),
       });
     }
@@ -101,12 +101,13 @@ export function useStreamFeaturesTable({
       await deleteFeaturesInBulk(selectedFeatures.map(({ uuid }) => uuid));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamFeaturesTable.bulkDeleteSuccess.title', {
-          defaultMessage: '{count, plural, one {Feature deleted} other {Features deleted}}',
+          defaultMessage:
+            '{count, plural, one {Knowledge indicator deleted} other {Knowledge indicators deleted}}',
           values: { count: selectedFeatures.length },
         }),
         text: i18n.translate('xpack.streams.streamFeaturesTable.bulkDeleteSuccess.text', {
           defaultMessage:
-            '{count, plural, one {The feature has} other {# features have}} been successfully deleted.',
+            '{count, plural, one {The knowledge indicator has} other {# knowledge indicators have}} been successfully deleted.',
           values: { count: selectedFeatures.length },
         }),
       });
@@ -116,7 +117,7 @@ export function useStreamFeaturesTable({
     } catch (error) {
       notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
         title: i18n.translate('xpack.streams.streamFeaturesTable.bulkDeleteError.title', {
-          defaultMessage: 'Failed to delete features',
+          defaultMessage: 'Failed to delete knowledge indicators',
         }),
       });
     }
@@ -224,7 +225,7 @@ export function useStreamFeaturesTable({
 const FEATURE_COLUMN_HEADER_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.columns.featureColumnHeader',
   {
-    defaultMessage: 'Feature',
+    defaultMessage: 'Knowledge indicator',
   }
 );
 
@@ -243,13 +244,13 @@ const CONFIDENCE_COLUMN_HEADER_LABEL = i18n.translate(
 );
 
 export const FEATURES_LABEL = i18n.translate('xpack.streams.streamFeaturesTable.tableTitle', {
-  defaultMessage: 'Features',
+  defaultMessage: 'Knowledge indicators',
 });
 
 export const TABLE_CAPTION_LABEL = i18n.translate(
   'xpack.streams.streamFeaturesTable.tableCaption',
   {
-    defaultMessage: 'List of features',
+    defaultMessage: 'List of knowledge indicators',
   }
 );
 
@@ -271,5 +272,5 @@ const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
 );
 
 const NO_FEATURES_MESSAGE = i18n.translate('xpack.streams.streamFeaturesTable.noFeaturesMessage', {
-  defaultMessage: 'No features found',
+  defaultMessage: 'No knowledge indicators found',
 });

@@ -43,7 +43,7 @@ export function useStreamsDetailManagementTabs({
           significantEvents: {
             content: <StreamDetailSignificantEventsView definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
-              defaultMessage: 'Significant events',
+              defaultMessage: 'Rules',
             }),
           },
         }

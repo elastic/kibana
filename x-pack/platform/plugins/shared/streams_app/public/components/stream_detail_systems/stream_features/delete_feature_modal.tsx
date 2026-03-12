@@ -70,7 +70,7 @@ export function DeleteFeatureModal({
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.streams.deleteFeatureModal.title', {
             defaultMessage:
-              'Are you sure you want to delete {count, plural, one {this feature} other {these features}}?',
+              'Are you sure you want to delete {count, plural, one {this knowledge indicator} other {these knowledge indicators}}?',
             values: { count: features.length },
           })}
         </EuiModalHeaderTitle>
@@ -79,7 +79,7 @@ export function DeleteFeatureModal({
         <EuiText>
           {i18n.translate('xpack.streams.deleteFeatureModal.consequenceMessage', {
             defaultMessage:
-              'This will permanently delete {count, plural, one {the feature} other {the selected features}}.',
+              'This will permanently delete {count, plural, one {the knowledge indicator} other {the selected knowledge indicators}}.',
             values: { count: features.length },
           })}
         </EuiText>
@@ -120,7 +120,8 @@ export function DeleteFeatureModal({
           data-test-subj="streamsAppDeleteFeatureModalConfirmButton"
         >
           {i18n.translate('xpack.streams.deleteFeatureModal.deleteButton', {
-            defaultMessage: 'Delete {count, plural, one {feature} other {features}}',
+            defaultMessage:
+              'Delete {count, plural, one {knowledge indicator} other {knowledge indicators}}',
             values: { count: features.length },
           })}
         </EuiButton>
@@ -132,7 +133,7 @@ export function DeleteFeatureModal({
 // i18n labels
 
 const FEATURE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.featureColumn', {
-  defaultMessage: 'Feature',
+  defaultMessage: 'Knowledge indicator',
 });
 
 const TYPE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.typeColumn', {
@@ -141,7 +142,7 @@ const TYPE_COLUMN_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.typeC
 
 const MODAL_ARIA_LABEL = i18n.translate(
   'xpack.streams.deleteFeatureModal.euiModal.deleteFeaturesModalLabel',
-  { defaultMessage: 'Delete features modal' }
+  { defaultMessage: 'Delete knowledge indicators modal' }
 );
 
 const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteFeatureModal.warningMessage', {
@@ -149,7 +150,7 @@ const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteFeatureModal.warning
 });
 
 const TABLE_CAPTION = i18n.translate('xpack.streams.deleteFeatureModal.tableCaption', {
-  defaultMessage: 'List of features to delete',
+  defaultMessage: 'List of knowledge indicators to delete',
 });
 
 const CANCEL_BUTTON_LABEL = i18n.translate('xpack.streams.deleteFeatureModal.cancelButton', {

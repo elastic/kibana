@@ -74,11 +74,11 @@ export function Summary({ count }: { count: number }) {
       if (previousStatus === TaskStatus.InProgress && task.insights.length === 0) {
         notifications.toasts.addInfo({
           title: i18n.translate('xpack.streams.insights.noInsightsTitle', {
-            defaultMessage: 'No insights found',
+            defaultMessage: 'No Significant Events detected',
           }),
           text: i18n.translate('xpack.streams.insights.noInsightsDescription', {
             defaultMessage:
-              'The AI could not generate any insights from the current significant events. Try again later when more events are available.',
+              'We could not generate any Significant events. You can try running this later.',
           }),
         });
       }
@@ -129,7 +129,7 @@ export function Summary({ count }: { count: number }) {
                     data-test-subj="significant_events_regenerate_insights_button"
                   >
                     {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
-                      defaultMessage: 'Re-generate insights',
+                      defaultMessage: 'Re-generate',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
@@ -170,7 +170,7 @@ export function Summary({ count }: { count: number }) {
                     'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
                     {
                       defaultMessage:
-                        '{count} significant {count, plural, one {event} other {events}} detected',
+                        '{count} {count, plural, one {event} other {events}} detected',
                       values: {
                         count,
                       },
@@ -200,10 +200,10 @@ export function Summary({ count }: { count: number }) {
                     children:
                       task?.status === TaskStatus.InProgress
                         ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                            defaultMessage: 'Generating insights',
+                            defaultMessage: 'Generating Significant Events',
                           })
                         : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                            defaultMessage: 'Generate insights',
+                            defaultMessage: 'Generate Significant Events',
                           }),
                     onClick: onGenerateInsightsClick,
                     isDisabled: isGenerateButtonPending,
