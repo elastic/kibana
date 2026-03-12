@@ -10,6 +10,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type { Filter as DataFilter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/types';
+import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import type { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';
@@ -29,11 +30,6 @@ export interface SavedLensInput {
   filters: DataFilter[];
   palette?: PaletteOutput;
 }
-
-const defaultTimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
 
 export function savedLens(): ExpressionFunctionDefinition<
   'savedLens',
@@ -77,7 +73,7 @@ export function savedLens(): ExpressionFunctionDefinition<
           id,
           savedObjectId: id,
           filters: getQueryFilters(filters),
-          timeRange: timerange || defaultTimeRange,
+          timeRange: timerange || DEFAULT_TIME_RANGE,
           title: title === null ? undefined : title,
           disableTriggers: true,
           palette,
