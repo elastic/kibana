@@ -10,7 +10,6 @@ import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -21,7 +20,6 @@ import {
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import type {
@@ -521,95 +519,6 @@ export class SyntheticsPrivateLocation {
 
     return { policies, allSpaces };
   }
-
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (esClient && newPolicies.length > 0) {
-      return await this.server.fleet.packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPolicies,
-        {
-          asyncDeploy: true,
-        }
-      );
-    }
-  }
-
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policiesToUpdate.length > 0) {
-      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-        soClient,
-        esClient,
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
-      return failedPolicies;
-    }
-  }
-
-    return this.packagePolicyService.getByIds({
-      spaceId,
-      packagePolicyIds,
-    });
-  }
-
-  async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
-    const policyIdsToDelete = [];
-    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    const allSpacesWithMonitors = await this.getAllSpacesWithMonitors();
-    const allSpaces = new Set([spaceId, ...allSpacesWithMonitors]);
-    const policyIdsToDelete = new Set<string>();
-
-    for (const config of configs) {
-      const { locations } = config;
-      const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
-
-      for (const privateLocation of monitorPrivateLocations) {
-        policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
-        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
-          (id) => policyIdsToDelete.add(id)
-        );
-      }
-    }
-
-    if (policyIdsToDelete.size > 0) {
-      const result = await this.server.fleet.packagePolicyService.delete(
-        soClient,
-        esClient,
-        [...policyIdsToDelete],
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
-      const failedPolicies = result?.filter((policy) => {
-        return !policy.success && policy?.statusCode !== 404;
-      });
-      if (failedPolicies?.length > 0 && failedPolicies.length >= configs.length) {
-        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
-      }
-      return result;
-    }
-  }
-
-  async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
-  }
-
-  async getPolicyNamespace(configNamespace: string) {
-    if (configNamespace && configNamespace !== DEFAULT_NAMESPACE_STRING) {
-      return configNamespace;
-    }
-    return undefined;
-  }
 }
 
 const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string) => {
@@ -618,8 +527,4 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
       name ? 'for monitor ' + name : ''
     } for private location: ${location}`
   );
-};
-
-const deletePolicyError = (name: string, location?: string) => {
-  return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };
