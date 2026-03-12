@@ -180,7 +180,7 @@ export const COMMON_HEADERS = {
 
 ### Test with minimal permissions [test-with-minimal-permissions-avoid-admin-when-possible]
 
-Avoid `admin` unless there’s no alternative. Minimal permissions catch real permission bugs and keep tests realistic.
+Avoid `admin` unless there’s no alternative. Minimal permissions catch real permission bugs and keep tests realistic. Also test the forbidden path: verify that an under-privileged role receives `403` for endpoints it shouldn’t access.
 
 See [browser authentication](./browser-auth.md) and [API authentication](./api-auth.md).
 
