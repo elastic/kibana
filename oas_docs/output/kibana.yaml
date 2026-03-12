@@ -66631,6 +66631,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66723,6 +66725,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66822,6 +66826,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66914,6 +66920,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -67013,6 +67021,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67953,6 +67963,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -68084,6 +68096,8 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
