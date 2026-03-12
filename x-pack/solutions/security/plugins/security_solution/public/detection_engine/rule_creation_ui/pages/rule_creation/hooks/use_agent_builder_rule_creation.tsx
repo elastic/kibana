@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useCallback, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -92,8 +93,14 @@ export const useAgentBuilderRuleCreation = ({
       actionsStepForm.updateFieldValues(stepsData.ruleActionsData);
 
       addSuccess({
-        title: 'Rule form updated',
-        text: 'The form has been updated with the AI-generated rule.',
+        title: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedTitle',
+          { defaultMessage: 'Rule form updated' }
+        ),
+        text: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedText',
+          { defaultMessage: 'The form has been updated with the AI-generated rule.' }
+        ),
       });
     },
     [defineStepForm, aboutStepForm, scheduleStepForm, actionsStepForm, addSuccess]
@@ -111,15 +118,6 @@ export const useAgentBuilderRuleCreation = ({
   }, [updateFormFromRule, addRuleAttachment]);
 
   useEffect(() => {
-    console.log(
-      'useEffect',
-      agentBuilder,
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
-      actionTypeRegistry
-    );
     if (
       !agentBuilder?.addAttachment ||
       !defineStepData ||
@@ -144,7 +142,6 @@ export const useAgentBuilderRuleCreation = ({
           actionsStepData,
           actionTypeRegistry
         );
-        console.log('formattedRule', formattedRule);
         addRuleAttachment(formattedRule, formattedRule.name ?? 'Rule');
       } catch {
         // Incomplete form data may cause formatting errors — ignore silently

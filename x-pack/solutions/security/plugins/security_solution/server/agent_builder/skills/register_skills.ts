@@ -48,10 +48,7 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
   );
-<<<<<<< HEAD
 
   agentBuilder.skills.register(getDetectionRuleEditSkill());
-=======
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
->>>>>>> main
 };
