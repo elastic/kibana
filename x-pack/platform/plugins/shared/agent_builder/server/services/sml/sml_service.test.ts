@@ -79,22 +79,23 @@ const createNotFoundError = () =>
 
 describe('createSmlService', () => {
   describe('lifecycle', () => {
-    it('setup() returns registerType', () => {
+    it('setup() returns registerType and getRegistry', () => {
       const service = createSmlService();
       const logger = createMockLogger();
       const setup = service.setup({ logger });
 
       expect(setup.registerType).toBeDefined();
       expect(typeof setup.registerType).toBe('function');
+      expect(setup.getRegistry).toBeDefined();
 
       const def = createMockSmlTypeDefinition({ id: 'dashboard' });
       setup.registerType(def);
 
-      expect(service.getRegistry().has('dashboard')).toBe(true);
+      expect(setup.getRegistry().has('dashboard')).toBe(true);
       expect(logger.info).toHaveBeenCalledWith('Registered SML type: dashboard');
     });
 
-    it('start() returns the SmlService', () => {
+    it('start() returns the SmlService with getCrawler', () => {
       const service = createSmlService();
       const logger = createMockLogger();
       service.setup({ logger });
@@ -106,36 +107,8 @@ describe('createSmlService', () => {
       expect(smlService.indexAttachment).toBeDefined();
       expect(smlService.getTypeDefinition).toBeDefined();
       expect(smlService.listTypeDefinitions).toBeDefined();
-    });
-
-    it('getIndexer() throws before start', () => {
-      const service = createSmlService();
-      const logger = createMockLogger();
-      service.setup({ logger });
-
-      expect(() => service.getIndexer()).toThrow(
-        'SML indexer not initialized — call start() first'
-      );
-    });
-
-    it('getCrawler() throws before start', () => {
-      const service = createSmlService();
-      const logger = createMockLogger();
-      service.setup({ logger });
-
-      expect(() => service.getCrawler()).toThrow(
-        'SML crawler not initialized — call start() first'
-      );
-    });
-
-    it('getIndexer() and getCrawler() return instances after start', () => {
-      const service = createSmlService();
-      const logger = createMockLogger();
-      service.setup({ logger });
-      service.start({ logger });
-
-      expect(service.getIndexer()).toBeDefined();
-      expect(service.getCrawler()).toBeDefined();
+      expect(smlService.getCrawler).toBeDefined();
+      expect(smlService.getCrawler()).toBeDefined();
     });
   });
 });

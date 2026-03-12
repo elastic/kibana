@@ -19,6 +19,7 @@ const getSmlService = jest.fn(() => ({
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
   listTypeDefinitions: jest.fn(),
+  getCrawler: jest.fn(),
 }));
 
 const mockContext = {
