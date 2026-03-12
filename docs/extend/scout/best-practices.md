@@ -75,6 +75,7 @@ test('returns 403 when missing read privilege', async ({ apiClient }) => {
 Prefer “one role + one flow per file” and keep spec files small (roughly 4–5 short tests or 2–3 longer ones). Put shared login/navigation in `beforeEach`.
 
 :::::{dropdown} Example
+
 ```ts
 // dashboard_viewer.spec.ts
 test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -86,6 +87,7 @@ test('can see dashboard', async ({ page }) => {
   // assertions...
 });
 ```
+
 :::::
 
 ### Use a global setup hook for one-time setup [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
@@ -93,12 +95,14 @@ test('can see dashboard', async ({ page }) => {
 If many files share the same “one-time” work (archives, API calls, settings), move it to a [global setup hook](./global-setup-hook.md).
 
 :::::{dropdown} Example
+
 ```ts
 globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log }) => {
   log.debug('[setup] loading archives (only if indexes do not exist)...');
   await esArchiver.loadIfNeeded(MY_ARCHIVE);
 });
 ```
+
 :::::
 
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
@@ -158,11 +162,39 @@ test.afterEach(async ({ esClient, log }) => {
 
 :::::
 
+### Don’t use `try/catch` in tests [dont-use-try-catch-in-tests]
+
+Tests should be clean and declarative. If a helper might return an expected error (for example, 404 during cleanup), the helper should handle it internally—for example, by accepting an `ignoreErrors` option (e.g., for treating a 404 during deletion as a success).
+
+:::::{dropdown} Examples
+❌ **Don’t:** catch errors in the test:
+
+```ts
+test.afterAll(async ({ apiServices }) => {
+  try {
+    await apiServices.cases.delete(caseId);
+  } catch {
+    // might already be deleted
+  }
+});
+```
+
+✔️ **Do:** let the helper handle expected errors:
+
+```ts
+test.afterAll(async ({ apiServices }) => {
+  await apiServices.cases.cleanup.deleteAllCases();
+});
+```
+
+:::::
+
 ### Use constants for shared test values [use-constants-for-shared-test-values]
 
 If a value is reused across suites (archive paths, fixed time ranges, endpoints, common headers), extract it into a shared `constants.ts` file. This reduces duplication and typos, and makes updates safer.
 
 :::::{dropdown} Example
+
 ```ts
 // test/scout/ui/constants.ts
 export const LENS_BASIC_TIME_RANGE = {
@@ -182,6 +214,7 @@ export const COMMON_HEADERS = {
   'Content-Type': 'application/json;charset=UTF-8',
 } as const;
 ```
+
 :::::
 
 ### Test with minimal permissions [test-with-minimal-permissions-avoid-admin-when-possible]
@@ -282,6 +315,7 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting).
 
 :::::{dropdown} Example
+
 ```ts
 test('navigates through pages', async ({ pageObjects }) => {
   await test.step('go to Dashboards', async () => {
@@ -293,6 +327,7 @@ test('navigates through pages', async ({ pageObjects }) => {
   });
 });
 ```
+
 :::::
 
 ### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
@@ -350,10 +385,12 @@ await expect(page.testSubj.locator('successToast')).toBeVisible();
 When an action triggers async UI work (navigation, saving, loading data), wait for the resulting state before your next step. This ensures the UI is ready and prevents flaky interactions with elements that haven’t rendered yet.
 
 :::::{dropdown} Example
+
 ```ts
 await page.gotoApp('sample/page/here');
 await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
 ```
+
 :::::
 
 ### Don't use manual retry loops [dont-use-manual-retry-loops]
@@ -395,6 +432,12 @@ await page.click('[data-test-subj="myButton"]');
 await page.getByText('Delete').click();
 ```
 
+❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices))—they break on non-clean environments where tests run without server restart and extra data may exist:
+
+```ts
+await page.testSubj.locator('tableRow').nth(0).click();
+```
+
 ✔️ **Do:** use `page.testSubj` or scoped `getByRole`:
 
 ```ts
@@ -412,12 +455,14 @@ Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana
 - If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale.
 
 :::::{dropdown} Example
+
 ```ts
 await expect(editor).toBeVisible(); // will use the default timeout
 
 // justified: report generation can be slow
 await expect(downloadBtn).toBeEnabled({ timeout: 30_000 });
 ```
+
 :::::
 
 ### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
@@ -450,12 +495,14 @@ For Kibana Maps, `data-render-complete="true"` is often the right “ready” si
 Prefer existing page objects (and their methods) over rebuilding EUI interactions in test files.
 
 :::::{dropdown} Example
+
 ```ts
 await pageObjects.datePicker.setAbsoluteRange({
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
 });
 ```
+
 :::::
 
 ### Abstract common operations in page object methods [abstract-common-operations-in-page-object-methods]
@@ -463,12 +510,14 @@ await pageObjects.datePicker.setAbsoluteRange({
 Create methods for repeated flows (and make them [wait for readiness](#wait-for-ui-updates-when-the-next-action-requires-it)).
 
 :::::{dropdown} Example
+
 ```ts
 async openNewDashboard() {
   await this.page.testSubj.click('newItemButton');
   await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
 }
 ```
+
 :::::
 
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
@@ -500,6 +549,7 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 If you must interact with EUI internals, use wrappers from Scout to keep that complexity out of tests.
 
 :::::{dropdown} Example
+
 ```ts
 import { EuiComboBoxWrapper, ScoutPage } from '@kbn/scout';
 
@@ -515,6 +565,7 @@ export class StreamsAppPage {
   }
 }
 ```
+
 :::::
 
 ### Add accessibility checks at key UI checkpoints [add-a11y-checks]
@@ -522,10 +573,12 @@ export class StreamsAppPage {
 Scout supports automated accessibility (a11y) scanning via `page.checkA11y`. Add checks at high-value points in your UI tests — landing pages, modals, flyouts, and wizard steps — rather than on every interaction.
 
 :::::{dropdown} Example
+
 ```ts
 const { violations } = await page.checkA11y({ include: ['[data-test-subj="myPanel"]'] });
 expect(violations).toHaveLength(0);
 ```
+
 :::::
 
 For the full guide (scoping, exclusions, handling pre-existing violations), see [Accessibility testing](./a11y-checks.md).
@@ -535,6 +588,7 @@ For the full guide (scoping, exclusions, handling pre-existing violations), see 
 If a page has onboarding/getting-started state, set `localStorage` before navigation.
 
 :::::{dropdown} Example
+
 ```ts
 test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
   await browserAuth.loginAsViewer();
@@ -544,6 +598,7 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
   await pageObjects.homepage.goto();
 });
 ```
+
 :::::
 
 ### Contribute to Scout when possible [contribute-to-scout-when-possible]
@@ -575,6 +630,7 @@ Use the right fixture for the right purpose:
 Prefer tests that read like “call endpoint X as role Y, assert outcome”.
 
 :::::{dropdown} Example
+
 ```ts
 import { expect } from '@kbn/scout/api';
 
@@ -592,6 +648,7 @@ apiTest('returns data for viewer', async ({ apiClient }) => {
   expect(response.body.items).toHaveLength(3);
 });
 ```
+
 :::::
 
 This pattern validates both endpoint behavior and the [permission model](#test-with-minimal-permissions-avoid-admin-when-possible).
