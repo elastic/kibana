@@ -3244,7 +3244,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /moon.yml @elastic/kibana-operations
 
 # Changes to bundled packages should not require approval
-fleet_packages.json
+/fleet_packages.json
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
