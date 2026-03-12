@@ -28,7 +28,6 @@ paths:
               type: object
               required:
                 - name
-                - description
                 - riskModifier
               properties:
                 name:
