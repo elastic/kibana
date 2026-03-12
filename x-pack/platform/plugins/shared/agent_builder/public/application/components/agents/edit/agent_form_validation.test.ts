@@ -44,6 +44,10 @@ describe('isValidAvatarSymbol', () => {
     expect(isValidAvatarSymbol('🇫🇷x')).toBe(false);
   });
 
+  it('rejects letter + emoji', () => {
+    expect(isValidAvatarSymbol('x🇫🇷')).toBe(false);
+  });
+
   it('accepts a ZWJ sequence (single grapheme cluster)', () => {
     const family = '👨‍👩‍👧‍👦';
     expect(isValidAvatarSymbol(family)).toBe(true);

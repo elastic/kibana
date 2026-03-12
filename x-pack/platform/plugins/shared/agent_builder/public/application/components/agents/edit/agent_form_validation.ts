@@ -34,7 +34,7 @@ export const isValidAvatarSymbol = (value: string): boolean => {
   const graphemes = getGraphemes(value);
   if (graphemes.length === 0) return true;
   if (graphemes.length === 1) return true;
-  if (graphemes.length === 2) return !isEmoji(graphemes[0]);
+  if (graphemes.length === 2) return !isEmoji(graphemes[0]) && !isEmoji(graphemes[1]);
   return false;
 };
 
