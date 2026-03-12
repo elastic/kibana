@@ -396,6 +396,7 @@ export class AuthenticationService {
       config: {
         authc: config.authc,
         accessAgreement: config.accessAgreement,
+        uiam: config.uiam,
       },
       getCurrentUser,
       featureUsageService,

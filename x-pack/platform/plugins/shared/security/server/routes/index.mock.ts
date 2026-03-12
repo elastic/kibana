@@ -28,9 +28,12 @@ import type { SecurityRequestHandlerContext } from '../types';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 
 export const routeDefinitionParamsMock = {
-  create: (rawConfig: Record<string, unknown> = {}) => {
+  create: (
+    rawConfig: Record<string, unknown> = {},
+    validationContext: Record<string, unknown> = {}
+  ) => {
     const config = createConfig(
-      ConfigSchema.validate(rawConfig),
+      ConfigSchema.validate(rawConfig, validationContext),
       loggingSystemMock.create().get(),
       { isTLSEnabled: false }
     );
