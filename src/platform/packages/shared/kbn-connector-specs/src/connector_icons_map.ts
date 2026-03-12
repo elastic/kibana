@@ -142,7 +142,7 @@ export const ConnectorIconsMap: Map<
     lazy(
       () =>
         import(
-          /* webpackChunkName: "connectorIcongooglecloudstorage" */ './specs/google_cloud_storage/icon'
+          /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
         )
     ),
   ],

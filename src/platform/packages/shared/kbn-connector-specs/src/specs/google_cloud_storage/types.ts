@@ -9,19 +9,19 @@
 
 import { z } from '@kbn/zod/v4';
 
-const DEFAULT_MAX_RESULTS = 100;
+const DEFAULT_PAGE_SIZE = 100;
 
 export const ListProjectsInputSchema = z.object({
   pageSize: z
     .number()
     .optional()
-    .describe(`Maximum number of projects to return (default: ${DEFAULT_MAX_RESULTS})`),
+    .describe(`Maximum number of projects to return (default: ${DEFAULT_PAGE_SIZE})`),
   pageToken: z.string().optional().describe('Token for pagination'),
   filter: z
     .string()
     .optional()
     .describe(
-      'Filter expression (e.g. "name:my-project" or "lifecycleState:ACTIVE"). See Google Cloud Resource Manager docs for syntax.'
+      'Optional filter expression. Supported operators: "name:" (project name contains), "id:" (exact project ID), "lifecycleState:" (ACTIVE, DELETE_REQUESTED, etc.). Examples: "name:production", "lifecycleState:ACTIVE".'
     ),
 });
 export type ListProjectsInput = z.infer<typeof ListProjectsInputSchema>;
@@ -31,12 +31,12 @@ export const ListBucketsInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      'Google Cloud project ID. Use list_projects to discover available project IDs.'
+      'Google Cloud project ID (e.g. "my-project-123")'
     ),
   maxResults: z
     .number()
     .optional()
-    .describe(`Maximum number of buckets to return (default: ${DEFAULT_MAX_RESULTS})`),
+    .describe(`Maximum number of buckets to return (default: ${DEFAULT_PAGE_SIZE})`),
   pageToken: z.string().optional().describe('Token for pagination'),
   prefix: z.string().optional().describe('Filter buckets whose names begin with this prefix'),
 });
@@ -59,7 +59,7 @@ export const ListObjectsInputSchema = z.object({
   maxResults: z
     .number()
     .optional()
-    .describe(`Maximum number of objects to return (default: ${DEFAULT_MAX_RESULTS})`),
+    .describe(`Maximum number of objects to return (default: ${DEFAULT_PAGE_SIZE})`),
   pageToken: z.string().optional().describe('Token for pagination'),
 });
 export type ListObjectsInput = z.infer<typeof ListObjectsInputSchema>;
@@ -73,11 +73,20 @@ export const GetObjectMetadataInputSchema = z.object({
 });
 export type GetObjectMetadataInput = z.infer<typeof GetObjectMetadataInputSchema>;
 
+const DEFAULT_MAX_DOWNLOAD_SIZE_BYTES = 768000; // ~750 KB (safe ceiling before base64 hits the 1 MB platform response limit)
+
 export const DownloadObjectInputSchema = z.object({
   bucket: z.string().min(1).describe('Name of the bucket'),
   object: z
     .string()
     .min(1)
     .describe('Full name/path of the object to download (e.g. "reports/2024/january.pdf")'),
+  maximumDownloadSizeBytes: z
+    .number()
+    .optional()
+    .default(DEFAULT_MAX_DOWNLOAD_SIZE_BYTES)
+    .describe(
+      `Maximum file size in bytes to download inline. Files exceeding this limit return metadata only. Default is ${DEFAULT_MAX_DOWNLOAD_SIZE_BYTES} (~750 KB).`
+    ),
 });
 export type DownloadObjectInput = z.infer<typeof DownloadObjectInputSchema>;

@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.google_cloud_storage.download'
-description: Download objects from Google Cloud Storage and extract their text content. Works with PDFs, Office docs, text files, and other supported formats. Optionally reranks results by relevance.
+description: Download objects from Google Cloud Storage and extract their text content. Works with PDFs, Office docs, text files, and other supported formats. Optionally reranks results by relevance. Files exceeding the size limit are skipped and returned with metadata only.
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -12,6 +12,11 @@ inputs:
   - name: objects
     type: array
     description: Array of object names/paths to download (e.g. ["reports/jan.pdf", "data/q1.csv"])
+  - name: maximumDownloadSizeBytes
+    type: number
+    required: false
+    default: 768000
+    description: "Maximum file size in bytes to download inline. Files exceeding this limit are skipped and returned with metadata only. Default is 768000 (~750 KB)."
   - name: rerank
     type: boolean
     required: false
@@ -41,34 +46,52 @@ steps:
         with:
           bucket: "${{inputs.bucket}}"
           object: "${{foreach.item}}"
-      - name: extract_content
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: /_ingest/pipeline/_simulate
-          body:
-            pipeline:
-              processors:
-                - attachment:
-                    field: data
-                    indexed_chars: -1
-                    remove_binary: true
-            docs:
-              - _id: "${{foreach.item}}"
-                _source:
-                  filename: "${{steps.download_object.output.name}}"
-                  data: "${{steps.download_object.output.content}}"
-      - name: normalize_result
-        type: data.set
-        with:
-          normalized:
-            bucket: "${{inputs.bucket}}"
-            object: "${{foreach.item}}"
-            filename: "${{steps.download_object.output.name}}"
-            contentType: "${{steps.download_object.output.contentType}}"
-            size: "${{steps.download_object.output.size}}"
-            content: "${{steps.extract_content.output.docs[0].doc._source.attachment.content}}"
-            content_type: "${{steps.extract_content.output.docs[0].doc._source.attachment.content_type}}"
+          maximumDownloadSizeBytes: ${{inputs.maximumDownloadSizeBytes}}
+      - name: check_has_content
+        type: if
+        condition: "${{steps.download_object.output.hasContent}}"
+        steps:
+          - name: extract_content
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /_ingest/pipeline/_simulate
+              body:
+                pipeline:
+                  processors:
+                    - attachment:
+                        field: data
+                        indexed_chars: -1
+                        remove_binary: true
+                docs:
+                  - _id: "${{foreach.item}}"
+                    _source:
+                      filename: "${{steps.download_object.output.name}}"
+                      data: "${{steps.download_object.output.content}}"
+          - name: normalize_with_content
+            type: data.set
+            with:
+              normalized:
+                bucket: "${{inputs.bucket}}"
+                object: "${{foreach.item}}"
+                filename: "${{steps.download_object.output.name}}"
+                contentType: "${{steps.download_object.output.contentType}}"
+                size: "${{steps.download_object.output.size}}"
+                content: "${{steps.extract_content.output.docs[0].doc._source.attachment.content}}"
+                content_type: "${{steps.extract_content.output.docs[0].doc._source.attachment.content_type}}"
+        else:
+          - name: normalize_skipped
+            type: data.set
+            with:
+              normalized:
+                bucket: "${{inputs.bucket}}"
+                object: "${{foreach.item}}"
+                filename: "${{steps.download_object.output.name}}"
+                contentType: "${{steps.download_object.output.contentType}}"
+                size: "${{steps.download_object.output.size}}"
+                content: null
+                skipped: true
+                reason: "${{steps.download_object.output.message}}"
       - name: accumulate_result
         type: data.set
         with:
