@@ -12,17 +12,17 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import type {
   CommonCorrelationsQueryParams,
+  EntityType,
   FieldValuePair,
 } from '../../../../common/correlations/types';
 
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { computeExpectationsAndRanges, splitAllSettledPromises } from '../utils';
 import { fetchDurationPercentiles } from './fetch_duration_percentiles';
 import { fetchDurationCorrelationWithHistogram } from './fetch_duration_correlation_with_histogram';
 import { fetchDurationFractions } from './fetch_duration_fractions';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchDurationRanges } from './fetch_duration_ranges';
-import { getEventType } from '../utils';
+import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface SignificantCorrelationsResponse {
@@ -42,29 +42,27 @@ export const fetchSignificantCorrelations = async ({
   durationMinOverride,
   durationMaxOverride,
   fieldValuePairs,
-  chartType = LatencyDistributionChartType.latencyCorrelations,
+  entityType,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   durationMinOverride?: number;
   durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
-  chartType?: LatencyDistributionChartType;
+  entityType: EntityType;
 }): Promise<SignificantCorrelationsResponse> => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
-  const searchMetrics = false; // latency correlations does not search metrics documents
-  const eventType = getEventType(chartType, searchMetrics);
+  const eventType = getEventTypeFromEntityType(entityType);
 
   const { percentiles: percentilesRecords } = await fetchDurationPercentiles({
     apmEventClient,
-    chartType,
+    entityType,
     start,
     end,
     environment,
     kuery,
     query,
     percents: percentileAggregationPercents,
-    searchMetrics,
   });
 
   // We need to round the percentiles values
@@ -87,13 +85,12 @@ export const fetchSignificantCorrelations = async ({
 
   const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     apmEventClient,
-    chartType,
+    entityType,
     start,
     end,
     environment,
     kuery,
     query,
-    searchMetrics,
     durationMinOverride,
     durationMaxOverride,
   });
@@ -103,7 +100,7 @@ export const fetchSignificantCorrelations = async ({
       fieldValuePairs.map((fieldValuePair) =>
         fetchDurationCorrelationWithHistogram({
           apmEventClient,
-          chartType,
+          entityType,
           start,
           end,
           environment,
@@ -149,7 +146,7 @@ export const fetchSignificantCorrelations = async ({
     const { fieldName, fieldValue } = fallbackResult;
     const { durationRanges: histogram } = await fetchDurationRanges({
       apmEventClient,
-      chartType,
+      entityType,
       start,
       end,
       environment,
@@ -160,7 +157,6 @@ export const fetchSignificantCorrelations = async ({
         },
       },
       rangeSteps,
-      searchMetrics,
     });
 
     if (fallbackResult) {

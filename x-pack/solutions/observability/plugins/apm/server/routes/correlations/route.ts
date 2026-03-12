@@ -31,8 +31,7 @@ import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/correlations/constants';
-import { CorrelationType } from '../../../common/correlations/types';
-import type { CorrelationsResponse } from '../../../common/correlations/types';
+import type { CorrelationsResponse, Metric } from '../../../common/correlations/types';
 import { fetchCorrelations } from './queries/fetch_correlations';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -279,6 +278,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
       durationMinOverride: durationMin,
       durationMaxOverride: durationMax,
       fieldValuePairs,
+      entityType: 'transaction',
     });
   },
 });
@@ -339,6 +339,7 @@ const pValuesTransactionsRoute = createApmServerRoute({
       durationMin,
       durationMax,
       fieldCandidates,
+      entityType: 'transaction',
     });
   },
 });
@@ -419,12 +420,9 @@ const unifiedCorrelationsRoute = createApmServerRoute({
 
     const includeHistogramWithDefault = includeHistogram ?? true;
 
-    const correlationType: CorrelationType = ((): CorrelationType => {
-      if (metric === 'latency') {
-        return CorrelationType.TRANSACTION_DURATION;
-      }
-      if (metric === 'failure_rate') {
-        return CorrelationType.ERROR_RATE;
+    const correlationTypeMetric: Metric = ((): Metric => {
+      if (metric === 'latency' || metric === 'failure_rate') {
+        return metric;
       }
       throw Boom.notImplemented(
         i18n.translate('xpack.apm.correlations.metric.notImplemented', {
@@ -449,7 +447,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
 
     return fetchCorrelations({
       apmEventClient,
-      correlationType,
+      metric: correlationTypeMetric,
       scope,
       start,
       end,

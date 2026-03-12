@@ -10,10 +10,12 @@ import pLimit from 'p-limit';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { splitAllSettledPromises, getEventType } from '../utils';
+import { getEventTypeFromEntityType, splitAllSettledPromises } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
@@ -36,26 +38,23 @@ export const fetchPValues = async ({
   durationMin,
   durationMax,
   fieldCandidates,
-  chartType = LatencyDistributionChartType.failedTransactionsCorrelations,
+  entityType,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   durationMin?: number;
   durationMax?: number;
   fieldCandidates: string[];
-  chartType?: LatencyDistributionChartType;
+  entityType: EntityType;
 }): Promise<PValuesResponse> => {
-  const searchMetrics = false; // failed transactions correlations does not search metrics documents
-  const eventType = getEventType(chartType, searchMetrics);
-
+  const eventType = getEventTypeFromEntityType(entityType);
   const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     apmEventClient,
-    chartType,
+    entityType,
     start,
     end,
     environment,
     kuery,
     query,
-    searchMetrics,
     durationMinOverride: durationMin,
     durationMaxOverride: durationMax,
   });
@@ -73,7 +72,7 @@ export const fetchPValues = async ({
             query,
             fieldName,
             rangeSteps,
-            chartType,
+            entityType,
           })
         )
       )

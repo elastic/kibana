@@ -10,6 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type {
   CommonCorrelationsQueryParams,
+  EntityType,
   FieldValuePair,
 } from '../../../../common/correlations/types';
 
@@ -18,15 +19,14 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
-import { getEventType } from '../utils';
+import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchDurationCorrelationWithHistogram({
   apmEventClient,
-  chartType,
+  entityType,
   start,
   end,
   environment,
@@ -40,7 +40,7 @@ export async function fetchDurationCorrelationWithHistogram({
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
-  chartType: LatencyDistributionChartType;
+  entityType: EntityType;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
   fractions: number[];
@@ -48,8 +48,7 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount: number;
   fieldValuePair: FieldValuePair;
 }) {
-  const searchMetrics = false; // latency correlations does not search metrics documents
-  const eventType = getEventType(chartType, searchMetrics);
+  const eventType = getEventTypeFromEntityType(entityType);
   const queryWithFieldValuePair = {
     bool: {
       filter: [query, ...termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)],
@@ -74,14 +73,13 @@ export async function fetchDurationCorrelationWithHistogram({
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
       const { durationRanges: histogram } = await fetchDurationRanges({
         apmEventClient,
-        chartType,
+        entityType,
         start,
         end,
         environment,
         kuery,
         query: queryWithFieldValuePair,
         rangeSteps: histogramRangeSteps,
-        searchMetrics,
       });
       return {
         ...fieldValuePair,
