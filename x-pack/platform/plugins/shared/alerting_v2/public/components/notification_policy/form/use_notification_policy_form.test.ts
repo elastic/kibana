@@ -178,6 +178,7 @@ describe('useNotificationPolicyForm', () => {
         matcher: 'data.severity : "critical"',
         group_by: ['host.name', 'service.name'],
         throttle: { interval: '5m' },
+        rule_labels: ['team-observability'],
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });
     });
