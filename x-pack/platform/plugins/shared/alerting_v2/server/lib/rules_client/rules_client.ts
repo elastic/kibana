@@ -128,7 +128,7 @@ export class RulesClient {
       );
     }
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;
@@ -149,7 +149,7 @@ export class RulesClient {
     }
 
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed.data, {
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     });
 
