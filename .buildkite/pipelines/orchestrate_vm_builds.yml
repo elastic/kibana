@@ -11,7 +11,8 @@ steps:
 
   - name: 'Upload trigger steps'
     command: |
-      export VM_IMAGES_BRANCH="${VM_IMAGES_BRANCH:-$(buildkite-agent meta-data get VM_IMAGES_BRANCH)}"
+      VM_IMAGES_BRANCH="$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
+
       buildkite-agent pipeline upload << PIPELINE
       steps:
         - name: 'Build base image'
