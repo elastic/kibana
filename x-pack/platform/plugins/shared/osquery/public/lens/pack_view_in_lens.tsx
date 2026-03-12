@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import moment from 'moment-timezone';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsInLensAction } from './view_results_in_lens';
+import { getPackViewDateWindow } from '../common/pack_view_date_window';
 
 interface PackViewInActionProps {
   item: {
@@ -37,20 +37,12 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
     skip: isScheduled,
   });
 
-  const startDate = isScheduled
-    ? timestamp
-      ? moment(timestamp).subtract(1, 'hour').toISOString()
-      : undefined
-    : lastResultsData?.lastResultTime
-    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
-    : `now-${interval}s`;
-  const endDate = isScheduled
-    ? timestamp
-      ? moment(timestamp).add(1, 'hour').toISOString()
-      : undefined
-    : lastResultsData?.lastResultTime
-    ? moment(lastResultsData.lastResultTime[0]).toISOString()
-    : 'now';
+  const { startDate, endDate, mode } = getPackViewDateWindow({
+    isScheduled,
+    timestamp,
+    lastResultTime: lastResultsData?.lastResultTime,
+    interval,
+  });
 
   return (
     <ViewResultsInLensAction
@@ -58,15 +50,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={
-        isScheduled
-          ? timestamp
-            ? 'absolute'
-            : undefined
-          : lastResultsData?.lastResultTime
-          ? 'absolute'
-          : 'relative'
-      }
+      mode={mode}
       scheduleId={scheduleId}
       executionCount={executionCount}
     />

@@ -13,7 +13,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
   ScheduledActionResultsRequestOptions,
   ScheduledActionResultsStrategyResponse,
@@ -66,7 +66,9 @@ export const getScheduledActionResultsRoute = (
               page: schema.maybe(schema.number()),
               pageSize: schema.maybe(schema.number()),
               sort: schema.maybe(schema.string()),
-              sortOrder: schema.maybe(schema.string()),
+              sortOrder: schema.maybe(
+                schema.oneOf([schema.literal('asc'), schema.literal('desc')])
+              ),
               kuery: schema.maybe(schema.string()),
             }),
           },
@@ -77,6 +79,17 @@ export const getScheduledActionResultsRoute = (
 
         try {
           const { scheduleId, executionCount } = request.params;
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 20;
+
+          if (page * pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+            return response.badRequest({
+              body: {
+                message: `Cannot paginate beyond ${DEFAULT_MAX_TABLE_QUERY_SIZE} results. Use Discover for full access.`,
+                attributes: { code: 'PAGINATION_LIMIT_EXCEEDED' },
+              },
+            });
+          }
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -93,10 +106,7 @@ export const getScheduledActionResultsRoute = (
                 executionCount,
                 spaceId,
                 factoryQueryType: OsqueryQueries.scheduledActionResults,
-                pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 20
-                ),
+                pagination: generateTablePaginationOptions(page, pageSize),
                 sort: {
                   direction: (request.query.sortOrder as Direction) ?? Direction.desc,
                   field: request.query.sort ?? '@timestamp',
@@ -121,8 +131,7 @@ export const getScheduledActionResultsRoute = (
               ? res.rawResponse.hits.total
               : res.rawResponse.hits.total?.value ?? 0;
 
-          const pageSize = request.query.pageSize ?? 20;
-          const currentPage = request.query.page ?? 0;
+          const currentPage = page;
 
           const topHitFields = res.rawResponse.hits.hits[0]?.fields as
             | ActionResponseHitFields

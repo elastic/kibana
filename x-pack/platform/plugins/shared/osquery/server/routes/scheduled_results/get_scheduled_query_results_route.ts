@@ -48,7 +48,9 @@ export const getScheduledQueryResultsRoute = (
               page: schema.maybe(schema.number()),
               pageSize: schema.maybe(schema.number()),
               sort: schema.maybe(schema.string()),
-              sortOrder: schema.maybe(schema.string()),
+              sortOrder: schema.maybe(
+                schema.oneOf([schema.literal('asc'), schema.literal('desc')])
+              ),
               kuery: schema.maybe(schema.string()),
               startDate: schema.maybe(schema.string()),
             }),

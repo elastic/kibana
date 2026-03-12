@@ -8,7 +8,22 @@ components:
     GetScheduledQueryResultsResponse:
       type: object
       description: 'The response for getting scheduled query results.'
-      properties: {}
+      properties:
+        data:
+          type: object
+          description: 'The query results data wrapper.'
+          properties:
+            edges:
+              description: 'The paginated list of query result rows.'
+              type: array
+              items:
+                type: object
+            total:
+              description: 'The total number of result rows.'
+              type: integer
+            inspect:
+              description: 'Debug/inspection data for the search query.'
+              type: object
       example:
         data:
           total: 2

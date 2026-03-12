@@ -10,7 +10,7 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { API_VERSIONS } from '../../../common/constants';
+import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
@@ -520,6 +520,36 @@ describe('getScheduledActionResultsRoute', () => {
       expect(responseBody.currentPage).toBe(2);
       expect(responseBody.pageSize).toBe(50);
       expect(responseBody.totalPages).toBe(2);
+    });
+  });
+
+  describe('pagination limit', () => {
+    it('should return bad request when pagination exceeds limit', async () => {
+      const mockOsqueryContext = {
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {
+          page: 1,
+          pageSize: DEFAULT_MAX_TABLE_QUERY_SIZE,
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler({} as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: expect.stringContaining('Cannot paginate beyond'),
+          attributes: { code: 'PAGINATION_LIMIT_EXCEEDED' },
+        }),
+      });
     });
   });
 

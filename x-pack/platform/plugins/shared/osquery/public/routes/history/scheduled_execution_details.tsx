@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSkeletonText,
   EuiLink,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
@@ -50,7 +51,7 @@ const ScheduledExecutionDetailsPageComponent = () => {
   const historyPath = pagePathGetters.history();
   const historyNavProps = useRouterNavigate(historyPath);
 
-  const { data, isLoading } = useScheduledExecutionDetails({
+  const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
     executionCount,
     skip: !isValid,
@@ -130,6 +131,39 @@ const ScheduledExecutionDetailsPageComponent = () => {
       <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
         <EuiSpacer size="l" />
         <EuiSkeletonText lines={5} />
+      </WithHeaderLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiSpacer size="l" />
+        <EuiEmptyPrompt
+          iconType="warning"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.osquery.scheduledExecutionDetails.errorTitle"
+                defaultMessage="Unable to load execution details"
+              />
+            </h2>
+          }
+          body={
+            <FormattedMessage
+              id="xpack.osquery.scheduledExecutionDetails.errorBody"
+              defaultMessage="There was an error loading the details for this scheduled execution. Please try again."
+            />
+          }
+          actions={
+            <EuiButtonEmpty {...historyNavProps} iconType="arrowLeft">
+              <FormattedMessage
+                id="xpack.osquery.scheduledExecutionDetails.backToHistory"
+                defaultMessage="Back to History"
+              />
+            </EuiButtonEmpty>
+          }
+        />
       </WithHeaderLayout>
     );
   }
