@@ -14,7 +14,6 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type {
-  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
@@ -60,8 +59,6 @@ interface NavControlsObservables {
 interface ClassicChromeObservables {
   /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  /** @todo Consolidate into {@link ChromeComponentsDeps.breadcrumbsAppendExtensions$} — see https://github.com/elastic/kibana/issues/256050 */
-  badge$: Observable<ChromeBadge | undefined>;
   recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
   customNavLink$: Observable<ChromeNavLink | undefined>;
 }
