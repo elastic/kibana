@@ -57,6 +57,7 @@ const { startES } = createTestServers({
       dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
       license: 'basic',
       esArgs: ['http.max_content_length=10Kb'],
+      esJavaOpts: '-da',
     },
   },
 });

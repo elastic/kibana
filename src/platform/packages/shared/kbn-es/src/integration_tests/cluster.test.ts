@@ -563,7 +563,7 @@ describe('#run()', () => {
     await cluster.run(installPath, esClusterExecOptions);
 
     expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(
-      `"-Xms1536m -Xmx1536m"`
+      `"-Xms1536m -Xmx1536m -ea"`
     );
   });
 
@@ -574,7 +574,21 @@ describe('#run()', () => {
     const cluster = new Cluster({ log });
     await cluster.run(installPath, esClusterExecOptions);
 
-    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms5g -Xmx5g"`);
+    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(
+      `"-Xms5g -Xmx5g -ea"`
+    );
+  });
+
+  test('allows JVM assertions to be overwritten', async () => {
+    mockEsBin({ start: true });
+    process.env.ES_JAVA_OPTS = '-da';
+
+    const cluster = new Cluster({ log });
+    await cluster.run(installPath, esClusterExecOptions);
+
+    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(
+      `"-da -Xms1536m -Xmx1536m"`
+    );
   });
 });
 
@@ -593,7 +607,7 @@ describe('#installPlugins()', () => {
         Object {
           "cwd": "foo",
           "env": Object {
-            "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m",
+            "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m -ea",
             "JAVA_HOME": "",
           },
         },
@@ -610,7 +624,7 @@ describe('#installPlugins()', () => {
             Object {
               "cwd": "foo",
               "env": Object {
-                "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m",
+                "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m -ea",
                 "JAVA_HOME": "",
               },
             },
@@ -624,7 +638,9 @@ describe('#installPlugins()', () => {
     const cluster = new Cluster({ log });
     await cluster.installPlugins('foo', 'esPlugin1', '-Xms2g -Xmx2g');
 
-    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms2g -Xmx2g"`);
+    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(
+      `"-Xms2g -Xmx2g -ea"`
+    );
   });
 });
 

@@ -12,6 +12,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      esJavaOpts: '-da',
+    },
     testFiles: [require.resolve('.')],
   };
 }
