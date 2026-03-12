@@ -162,16 +162,16 @@ function getWaterfallErrorsMarks({
 
 export function getColorByType(legends: IWaterfallLegend[]) {
   let serviceCount = 0;
-  let hasNonEmptyType = false;
+  let hasEmptyType = false;
 
   for (const legend of legends) {
     if (legend.type === WaterfallLegendType.ServiceName) serviceCount++;
-    if (legend.type === WaterfallLegendType.Type && legend.value) hasNonEmptyType = true;
+    if (legend.type === WaterfallLegendType.Type && !legend.value) hasEmptyType = true;
   }
 
   if (serviceCount > 1) return WaterfallLegendType.ServiceName;
-  if (hasNonEmptyType) return WaterfallLegendType.Type;
-  return WaterfallLegendType.ServiceName;
+  if (hasEmptyType) return WaterfallLegendType.ServiceName;
+  return WaterfallLegendType.Type;
 }
 
 export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {

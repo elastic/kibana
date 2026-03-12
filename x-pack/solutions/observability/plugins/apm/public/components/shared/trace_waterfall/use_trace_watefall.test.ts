@@ -620,10 +620,10 @@ describe('getColorByType', () => {
     expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
   });
 
-  it('defaults to color by service name if no legends provided', () => {
+  it('defaults to color by type if no legends provided', () => {
     const legends = getLegends([]);
 
-    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
   });
 });
 
