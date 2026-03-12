@@ -26,6 +26,7 @@
     "@kbn/control-group-renderer",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/as-code-filters-schema"
+    "@kbn/as-code-filters-schema",
+    "@kbn/controls-constants"
   ]
 }

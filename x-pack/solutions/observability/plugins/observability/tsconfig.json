@@ -150,6 +150,7 @@
     "@kbn/lens-common",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
+    "@kbn/controls-constants",
   ],
   "exclude": ["target/**/*"]
 }
