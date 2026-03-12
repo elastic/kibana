@@ -86,7 +86,7 @@ export const AssistantNavLink: FC = () => {
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
-    setTooltipVisible(true);
+    setTooltipVisible(false);
     showAssistantOverlay({ showOverlay: !isOverlayOpen });
   };
 

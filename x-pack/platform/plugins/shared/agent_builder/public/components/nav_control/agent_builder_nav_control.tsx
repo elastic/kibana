@@ -48,7 +48,7 @@ export function AgentBuilderNavControl() {
 
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();
-    setTooltipVisible(true);
+    setTooltipVisible(false);
     agentBuilder.toggleConversationFlyout(sidebarOptions());
     setIsSidebarOpen((prev) => !prev);
   }, [agentBuilder, sidebarOptions]);

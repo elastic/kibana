@@ -192,7 +192,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
-    setTooltipVisible(true);
+    setTooltipVisible(false);
     if (isOpen) {
       setFlyoutSettings((prev) => ({ ...prev, isOpen: false }));
       setIsOpen(false);

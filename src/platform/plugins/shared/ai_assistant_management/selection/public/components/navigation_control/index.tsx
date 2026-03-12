@@ -154,7 +154,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
 
   const handleButtonClick = () => {
     tooltipRef.current?.hideToolTip();
-    setTooltipVisible(true);
+    setTooltipVisible(false);
     setModalOpen(true);
   };
 
