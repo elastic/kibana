@@ -216,12 +216,25 @@ const fetchAlertSummariesForEntities = async (
 ): Promise<Map<string, AlertSummary>> => {
   const result = new Map<string, AlertSummary>();
 
-  const userNames = entities.filter((e) => e.type === 'user').map((e) => e.name);
+  const userEntities = entities.filter((e) => e.type === 'user');
   const hostNames = entities.filter((e) => e.type === 'host').map((e) => e.name);
-  const entityTerms: Array<Record<string, unknown>> = [
-    ...(userNames.length > 0 ? [{ terms: { 'user.name': userNames } }] : []),
-    ...(hostNames.length > 0 ? [{ terms: { 'host.name': hostNames } }] : []),
-  ];
+
+  const userEmails = userEntities
+    .map(extractUserEmail)
+    .filter((email): email is string => email != null);
+  const userNames = userEntities.map((e) => e.name);
+
+  const entityTerms: Array<Record<string, unknown>> = [];
+  if (userNames.length > 0) {
+    const userClauses: Array<Record<string, unknown>> = [{ terms: { 'user.name': userNames } }];
+    if (userEmails.length > 0) {
+      userClauses.push({ terms: { 'user.email': userEmails } });
+    }
+    entityTerms.push({ bool: { should: userClauses, minimum_should_match: 1 } });
+  }
+  if (hostNames.length > 0) {
+    entityTerms.push({ terms: { 'host.name': hostNames } });
+  }
   if (entityTerms.length === 0) return result;
 
   try {
@@ -290,6 +303,13 @@ const parseEntityBuckets = (
       topAlerts,
     });
   }
+};
+
+const extractUserEmail = (entity: LeadEntity): string | undefined => {
+  const record = entity.record as Record<string, unknown>;
+  const user = record.user as { email?: string | string[] } | undefined;
+  if (!user?.email) return undefined;
+  return Array.isArray(user.email) ? user.email[0] : user.email;
 };
 
 /** @deprecated Use createBehavioralAnalysisModule. */

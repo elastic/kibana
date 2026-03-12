@@ -18,8 +18,6 @@ const MODULE_NAME = 'Temporal State Analysis';
 const MODULE_PRIORITY = 9;
 const MODULE_WEIGHT = 0.25;
 
-const SUPPORTED_ENTITY_TYPES = ['user', 'host'] as const;
-
 /**
  * V2 history snapshots are stored in a single unified index per namespace
  * (not per entity type). Pattern matches all date-hour suffixed indices.
@@ -32,6 +30,11 @@ const getEntityStoreHistoryPattern = (namespace: string): string =>
 //
 // Detects shifts in entity state over time using Entity Store snapshots.
 // Currently: privilege_escalation (entity was non-privileged, is now privileged).
+//
+// Uses entity.id (EUID) for joins against snapshot indices since Entity Store
+// V2 snapshots carry entity.id as the definitive unique identifier. This
+// avoids issues with non-unique names and the entity.type field storing
+// unexpected values (e.g. "Identity" instead of "user").
 // ---------------------------------------------------------------------------
 
 interface TemporalStateModuleDeps {
@@ -55,11 +58,11 @@ export const createTemporalStateModule = ({
   isEnabled: () => true,
 
   async collect(entities: LeadEntity[]): Promise<Observation[]> {
-    const escalations = await fetchPrivilegeEscalations(esClient, spaceId, entities, logger);
+    const escalated = await fetchPrivilegeEscalations(esClient, spaceId, entities, logger);
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      if (escalations.has(`${entity.type}:${entity.name}`)) {
+      if (escalated.has(entity.id)) {
         observations.push(buildPrivilegeEscalationObservation(entity));
       }
     }
@@ -78,6 +81,9 @@ export const createTemporalStateModule = ({
 // snapshot via a top_hits aggregation (size:0 outer query, no raw docs fetched
 // beyond 1 per entity). If the oldest snapshot had privileged=false, it was
 // escalated.
+//
+// Filters and aggregates on entity.id (EUID) — the unique identifier in
+// Entity Store V2 snapshots — rather than entity.name or entity.type.
 // ---------------------------------------------------------------------------
 
 const fetchPrivilegeEscalations = async (
@@ -91,64 +97,55 @@ const fetchPrivilegeEscalations = async (
   if (privilegedEntities.length === 0) return escalated;
 
   const historyPattern = getEntityStoreHistoryPattern(spaceId);
+  const ids = privilegedEntities.map((e) => e.id);
 
-  for (const entityType of SUPPORTED_ENTITY_TYPES) {
-    const ofType = privilegedEntities.filter((e) => e.type === entityType);
-    if (ofType.length > 0) {
-      const names = ofType.map((e) => e.name);
-
-      try {
-        const response = await esClient.search({
-          index: historyPattern,
-          size: 0,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          query: {
-            bool: {
-              filter: [
-                { term: { 'entity.type': entityType } },
-                { terms: { 'entity.name': names } },
-              ],
-            },
-          },
+  try {
+    const response = await esClient.search({
+      index: historyPattern,
+      size: 0,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [{ terms: { 'entity.id': ids } }],
+        },
+      },
+      aggs: {
+        by_entity: {
+          terms: { field: 'entity.id', size: ids.length },
           aggs: {
-            by_entity: {
-              terms: { field: 'entity.name', size: names.length },
-              aggs: {
-                oldest_snapshot: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': { order: 'asc' } }],
-                    _source: ['entity.attributes.privileged'],
-                  },
-                },
+            oldest_snapshot: {
+              top_hits: {
+                size: 1,
+                sort: [{ '@timestamp': { order: 'asc' } }],
+                _source: ['entity.attributes.privileged'],
               },
             },
           },
-        });
+        },
+      },
+    });
 
-        const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-          []) as Array<{
-          key: string;
-          oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
-        }>;
+    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+      []) as Array<{
+      key: string;
+      oldest_snapshot: { hits: { hits: Array<{ _source: Record<string, unknown> }> } };
+    }>;
 
-        for (const bucket of buckets) {
-          const hit = bucket.oldest_snapshot.hits.hits[0];
-          if (hit) {
-            const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
-            const wasPrivileged = attrs?.privileged === true;
+    for (const bucket of buckets) {
+      const hit = bucket.oldest_snapshot.hits.hits[0];
+      if (hit) {
+        const entityField = hit._source?.entity as Record<string, unknown> | undefined;
+        const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
+        const wasPrivileged = attrs?.privileged === true;
 
-            if (!wasPrivileged) {
-              escalated.add(`${entityType}:${bucket.key}`);
-            }
-          }
+        if (!wasPrivileged) {
+          escalated.add(bucket.key);
         }
-      } catch (error) {
-        logger.warn(`[${MODULE_ID}] Failed to query privilege history for ${entityType}: ${error}`);
       }
     }
+  } catch (error) {
+    logger.warn(`[${MODULE_ID}] Failed to query privilege history: ${error}`);
   }
 
   return escalated;

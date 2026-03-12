@@ -18,55 +18,37 @@ const MODULE_NAME = 'Risk Analysis';
 const MODULE_PRIORITY = 10;
 const MODULE_WEIGHT = 0.35;
 
-const LOW_RISK_THRESHOLD = 20;
-const MODERATE_RISK_THRESHOLD = 40;
 const HIGH_RISK_THRESHOLD = 70;
-const CRITICAL_RISK_THRESHOLD = 90;
 const ESCALATION_DELTA_24H = 10;
 const ESCALATION_DELTA_7D_90D = 20;
 /** At or above this delta, the escalation severity bumps up one tier */
 const ESCALATION_CRITICAL_DELTA = 40;
 
 // ---------------------------------------------------------------------------
-// Data-driven tier configurations
+// Risk level → observation severity mapping
+//
+// Uses the risk engine's authoritative calculated_level directly instead of
+// re-deriving tiers from score thresholds. "Low" is intentionally omitted —
+// a low-risk entity on its own is not an actionable lead signal.
 // ---------------------------------------------------------------------------
 
-interface RiskLevelTier {
-  readonly threshold: number;
-  readonly type: string;
-  readonly severity: ObservationSeverity | ((score: number) => ObservationSeverity);
-  readonly confidence: number;
-  readonly descriptionSuffix: string;
-}
+const RISK_LEVEL_TO_SEVERITY: Readonly<Record<string, ObservationSeverity>> = {
+  Critical: 'critical',
+  High: 'high',
+  Moderate: 'medium',
+};
 
-/**
- * Ordered highest → lowest. The first matching tier wins.
- * Using a function for severity allows the high/critical boundary to be
- * computed at call time without a separate if/else in collect().
- */
-const RISK_LEVEL_TIERS: readonly RiskLevelTier[] = [
-  {
-    threshold: HIGH_RISK_THRESHOLD,
-    type: 'high_risk_score',
-    severity: (s) => (s >= CRITICAL_RISK_THRESHOLD ? 'critical' : 'high'),
-    confidence: 0.95,
-    descriptionSuffix: '',
-  },
-  {
-    threshold: MODERATE_RISK_THRESHOLD,
-    type: 'moderate_risk_score',
-    severity: 'medium',
-    confidence: 0.8,
-    descriptionSuffix: ', warranting monitoring',
-  },
-  {
-    threshold: LOW_RISK_THRESHOLD,
-    type: 'low_risk_score',
-    severity: 'low',
-    confidence: 0.6,
-    descriptionSuffix: '',
-  },
-] as const;
+const RISK_LEVEL_TO_TYPE: Readonly<Record<string, string>> = {
+  Critical: 'high_risk_score',
+  High: 'high_risk_score',
+  Moderate: 'moderate_risk_score',
+};
+
+const RISK_LEVEL_CONFIDENCE: Readonly<Record<string, number>> = {
+  Critical: 0.95,
+  High: 0.95,
+  Moderate: 0.8,
+};
 
 interface EscalationWindow {
   readonly daysBack: number;
@@ -139,20 +121,18 @@ export const createRiskScoreModule = ({
         const { scoreNorm, level, isPrivileged } = internals;
         const historicalScores = timeSeriesScores.get(`${entity.type}:${entity.name}`) ?? [];
 
-        // Observation 1: Current risk level — first matching tier wins
-        const tier = RISK_LEVEL_TIERS.find((t) => scoreNorm >= t.threshold);
-        if (tier) {
-          const severity =
-            typeof tier.severity === 'function' ? tier.severity(scoreNorm) : tier.severity;
+        // Observation 1: Current risk level — mapped from risk engine's calculated_level
+        const severity = RISK_LEVEL_TO_SEVERITY[level];
+        if (severity) {
           observations.push(
             makeObservation(entity, MODULE_ID, {
-              type: tier.type,
+              type: RISK_LEVEL_TO_TYPE[level],
               score: scoreNorm,
               severity,
-              confidence: tier.confidence,
+              confidence: RISK_LEVEL_CONFIDENCE[level] ?? 0.8,
               description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
                 1
-              )}${tier.descriptionSuffix}`,
+              )}`,
               metadata: {
                 calculated_score_norm: scoreNorm,
                 calculated_level: level,
@@ -166,13 +146,13 @@ export const createRiskScoreModule = ({
         for (const w of ESCALATION_WINDOWS) {
           const esc = detectEscalation(scoreNorm, historicalScores, w.daysBack, w.threshold);
           if (esc) {
-            const severity =
+            const escalationSeverity =
               esc.delta >= ESCALATION_CRITICAL_DELTA ? w.criticalSeverity : w.baseSeverity;
             observations.push(
               makeObservation(entity, MODULE_ID, {
                 type: w.type,
                 score: Math.min(100, esc.delta * 2),
-                severity,
+                severity: escalationSeverity,
                 confidence: 0.85,
                 description: `Entity ${entity.name} risk score escalated by ${esc.delta.toFixed(
                   1

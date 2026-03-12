@@ -32,7 +32,7 @@ import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
+import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity, Lead } from '../types';
 
@@ -222,7 +222,7 @@ export const fetchAllEntityStoreRecords = async (
         size: ENTITY_PAGE_SIZE,
         ignore_unavailable: true,
         _source: ENTITY_SOURCE_FIELDS,
-        sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
+        sort: [{ '@timestamp': { order: 'desc' } }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
         query: { match_all: {} },
       });
@@ -253,6 +253,7 @@ export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
     record,
     type: entityField?.type ?? 'unknown',
     name: entityField?.name ?? entityField?.id ?? 'unknown',
+    id: entityField?.id ?? entityField?.name ?? 'unknown',
   };
 };
 

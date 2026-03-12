@@ -14,9 +14,10 @@ jest.mock('./llm_synthesize', () => ({
 }));
 
 const createMockEntity = (type: string, name: string): LeadEntity => ({
-  record: { entity: { name, type } } as never,
+  record: { entity: { id: `euid-${name}`, name, type } } as never,
   type,
   name,
+  id: `euid-${name}`,
 });
 
 const createMockObservation = (
@@ -84,7 +85,7 @@ describe('LeadGenerationEngine', () => {
 
     it('produces a lead for an entity with observations', async () => {
       const entity = createMockEntity('user', 'alice');
-      const obs = createMockObservation('user:alice', { severity: 'high', score: 80 });
+      const obs = createMockObservation('user:euid-alice', { severity: 'high', score: 80 });
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -99,9 +100,13 @@ describe('LeadGenerationEngine', () => {
 
     it('skips disabled modules', async () => {
       const entity = createMockEntity('user', 'alice');
-      const disabledModule = createMockModule('disabled', [createMockObservation('user:alice')], {
-        isEnabled: () => false,
-      });
+      const disabledModule = createMockModule(
+        'disabled',
+        [createMockObservation('user:euid-alice')],
+        {
+          isEnabled: () => false,
+        }
+      );
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(disabledModule);
 
@@ -118,7 +123,7 @@ describe('LeadGenerationEngine', () => {
         isEnabled: () => true,
         collect: jest.fn().mockRejectedValue(new Error('boom')),
       };
-      const workingObs = createMockObservation('user:alice', { severity: 'high' });
+      const workingObs = createMockObservation('user:euid-alice', { severity: 'high' });
       const workingModule = createMockModule('working', [workingObs]);
 
       const engine = createLeadGenerationEngine({ logger });
@@ -134,7 +139,7 @@ describe('LeadGenerationEngine', () => {
     it('respects maxLeads config', async () => {
       const entities = Array.from({ length: 5 }, (_, i) => createMockEntity('user', `user-${i}`));
       const observations = entities.map((e) =>
-        createMockObservation(`user:${e.name}`, { severity: 'high' })
+        createMockObservation(`user:${e.id}`, { severity: 'high' })
       );
       const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 2 } });
       engine.registerModule(createMockModule('mod-a', observations));
@@ -146,7 +151,7 @@ describe('LeadGenerationEngine', () => {
 
     it('filters entities that do not meet minObservations threshold', async () => {
       const entity = createMockEntity('user', 'alice');
-      const obs = createMockObservation('user:alice');
+      const obs = createMockObservation('user:euid-alice');
       const engine = createLeadGenerationEngine({ logger, config: { minObservations: 3 } });
       engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -158,7 +163,7 @@ describe('LeadGenerationEngine', () => {
     describe('priority scoring', () => {
       it('assigns priority 1 for a single low severity observation', async () => {
         const entity = createMockEntity('user', 'alice');
-        const obs = createMockObservation('user:alice', { severity: 'low' });
+        const obs = createMockObservation('user:euid-alice', { severity: 'low' });
         const engine = createLeadGenerationEngine({ logger });
         engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -169,7 +174,7 @@ describe('LeadGenerationEngine', () => {
 
       it('assigns priority 5 for a single high severity observation', async () => {
         const entity = createMockEntity('user', 'alice');
-        const obs = createMockObservation('user:alice', { severity: 'high' });
+        const obs = createMockObservation('user:euid-alice', { severity: 'high' });
         const engine = createLeadGenerationEngine({ logger });
         engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -180,7 +185,7 @@ describe('LeadGenerationEngine', () => {
 
       it('assigns priority 7 for a single critical severity observation', async () => {
         const entity = createMockEntity('user', 'alice');
-        const obs = createMockObservation('user:alice', { severity: 'critical' });
+        const obs = createMockObservation('user:euid-alice', { severity: 'critical' });
         const engine = createLeadGenerationEngine({ logger });
         engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -192,7 +197,7 @@ describe('LeadGenerationEngine', () => {
       it('adds count bonus for multiple observations (capped at +4)', async () => {
         const entity = createMockEntity('user', 'alice');
         const observations = Array.from({ length: 6 }, () =>
-          createMockObservation('user:alice', { severity: 'high' })
+          createMockObservation('user:euid-alice', { severity: 'high' })
         );
         const engine = createLeadGenerationEngine({ logger });
         engine.registerModule(createMockModule('mod-a', observations));
@@ -206,7 +211,7 @@ describe('LeadGenerationEngine', () => {
       it('caps priority at 10', async () => {
         const entity = createMockEntity('user', 'alice');
         const observations = Array.from({ length: 10 }, () =>
-          createMockObservation('user:alice', { severity: 'critical' })
+          createMockObservation('user:euid-alice', { severity: 'critical' })
         );
         const engine = createLeadGenerationEngine({ logger });
         engine.registerModule(createMockModule('mod-a', observations));
@@ -220,8 +225,8 @@ describe('LeadGenerationEngine', () => {
     it('sorts leads by priority descending', async () => {
       const lowEntity = createMockEntity('user', 'low-user');
       const highEntity = createMockEntity('user', 'high-user');
-      const lowObs = createMockObservation('user:low-user', { severity: 'low' });
-      const highObs = createMockObservation('user:high-user', { severity: 'critical' });
+      const lowObs = createMockObservation('user:euid-low-user', { severity: 'low' });
+      const highObs = createMockObservation('user:euid-high-user', { severity: 'critical' });
 
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('mod-a', [lowObs, highObs]));
@@ -235,7 +240,7 @@ describe('LeadGenerationEngine', () => {
 
     it('sets staleness to fresh for newly generated leads', async () => {
       const entity = createMockEntity('user', 'alice');
-      const obs = createMockObservation('user:alice');
+      const obs = createMockObservation('user:euid-alice');
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('mod-a', [obs]));
 
@@ -246,7 +251,7 @@ describe('LeadGenerationEngine', () => {
 
     it('includes chatRecommendations in generated leads', async () => {
       const entity = createMockEntity('user', 'alice');
-      const obs = createMockObservation('user:alice', { moduleId: 'behavioral_analysis' });
+      const obs = createMockObservation('user:euid-alice', { moduleId: 'behavioral_analysis' });
       const engine = createLeadGenerationEngine({ logger });
       engine.registerModule(createMockModule('mod-a', [obs]));
 

@@ -7,8 +7,8 @@
 
 import type { LeadEntity, Observation } from '../types';
 
-/** Returns a stable string key for a LeadEntity: "type:name" */
-export const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.name}`;
+/** Returns a stable string key for a LeadEntity using the EUID: "type:id" */
+export const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.id}`;
 
 /**
  * Creates an Observation, automatically filling entityId and moduleId.

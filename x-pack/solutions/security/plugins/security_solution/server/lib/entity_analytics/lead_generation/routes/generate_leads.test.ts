@@ -223,29 +223,40 @@ describe('generate_leads helpers', () => {
   });
 
   describe('entityRecordToLeadEntity', () => {
-    it('extracts type and name from the entity field', () => {
+    it('extracts type, name, and id from the entity field', () => {
       const record = { entity: { id: 'euid-1', name: 'alice', type: 'user' } } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.type).toBe('user');
       expect(result.name).toBe('alice');
+      expect(result.id).toBe('euid-1');
       expect(result.record).toBe(record);
     });
 
-    it('falls back to entity.id when entity.name is missing', () => {
+    it('falls back to entity.id for name when entity.name is missing', () => {
       const record = { entity: { id: 'euid-host-1', type: 'host' } } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.name).toBe('euid-host-1');
+      expect(result.id).toBe('euid-host-1');
       expect(result.type).toBe('host');
     });
 
-    it('falls back to EUID for name and "unknown" for type when only entity.id is present', () => {
-      const record = { entity: { id: 'euid-only' } } as never;
+    it('falls back to entity.name for id when entity.id is missing', () => {
+      const record = { entity: { name: 'alice', type: 'user' } } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.name).toBe('alice');
+      expect(result.id).toBe('alice');
+    });
+
+    it('falls back to "unknown" for all fields when entity is minimal', () => {
+      const record = { entity: {} } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.type).toBe('unknown');
-      expect(result.name).toBe('euid-only');
+      expect(result.name).toBe('unknown');
+      expect(result.id).toBe('unknown');
     });
   });
 

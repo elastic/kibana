@@ -19,6 +19,7 @@ const createEntityWithRisk = (
 ): LeadEntity => ({
   record: {
     entity: {
+      id: `euid-${name}`,
       name,
       type,
       risk: { calculated_score_norm: scoreNorm, calculated_level: level },
@@ -27,6 +28,7 @@ const createEntityWithRisk = (
   } as never,
   type,
   name,
+  id: `euid-${name}`,
 });
 
 describe('RiskScoreModule', () => {
@@ -48,7 +50,7 @@ describe('RiskScoreModule', () => {
   });
 
   describe('current risk level observations', () => {
-    it('produces a critical observation for score >= 90', async () => {
+    it('produces a critical observation for Critical calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'alice', 95, 'Critical');
       const module = createRiskScoreModule({ esClient, logger, spaceId });
 
@@ -60,7 +62,7 @@ describe('RiskScoreModule', () => {
       expect(riskObs!.score).toBe(95);
     });
 
-    it('produces a high observation for score >= 70 and < 90', async () => {
+    it('produces a high observation for High calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'bob', 75, 'High');
       const module = createRiskScoreModule({ esClient, logger, spaceId });
 
@@ -71,7 +73,7 @@ describe('RiskScoreModule', () => {
       expect(riskObs!.severity).toBe('high');
     });
 
-    it('produces a medium observation for score >= 40 and < 70', async () => {
+    it('produces a medium observation for Moderate calculated_level', async () => {
       const entity = createEntityWithRisk('host', 'server-01', 55, 'Moderate');
       const module = createRiskScoreModule({ esClient, logger, spaceId });
 
@@ -82,19 +84,23 @@ describe('RiskScoreModule', () => {
       expect(riskObs!.severity).toBe('medium');
     });
 
-    it('produces a low observation for score >= 20 and < 40', async () => {
+    it('does not produce a risk level observation for Low calculated_level', async () => {
       const entity = createEntityWithRisk('user', 'charlie', 25, 'Low');
       const module = createRiskScoreModule({ esClient, logger, spaceId });
 
       const observations = await module.collect([entity]);
 
-      const riskObs = observations.find((o) => o.type === 'low_risk_score');
-      expect(riskObs).toBeDefined();
-      expect(riskObs!.severity).toBe('low');
+      const riskObs = observations.filter(
+        (o) =>
+          o.type === 'high_risk_score' ||
+          o.type === 'moderate_risk_score' ||
+          o.type === 'low_risk_score'
+      );
+      expect(riskObs).toHaveLength(0);
     });
 
-    it('produces no risk level observation for score < 20', async () => {
-      const entity = createEntityWithRisk('user', 'dave', 10, 'Low');
+    it('does not produce a risk level observation for Unknown calculated_level', async () => {
+      const entity = createEntityWithRisk('user', 'dave', 10, 'Unknown');
       const module = createRiskScoreModule({ esClient, logger, spaceId });
 
       const observations = await module.collect([entity]);
@@ -185,9 +191,10 @@ describe('RiskScoreModule', () => {
 
   it('skips entities without risk data', async () => {
     const entity: LeadEntity = {
-      record: { entity: { name: 'no-risk', type: 'user' } } as never,
+      record: { entity: { id: 'euid-no-risk', name: 'no-risk', type: 'user' } } as never,
       type: 'user',
       name: 'no-risk',
+      id: 'euid-no-risk',
     };
     const module = createRiskScoreModule({ esClient, logger, spaceId });
 

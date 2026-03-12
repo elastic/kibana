@@ -22,6 +22,8 @@ export interface LeadEntity {
   readonly type: string;
   /** Convenience: entity name derived from entity.name */
   readonly name: string;
+  /** EUID — the definitive unique identifier from entity.id */
+  readonly id: string;
 }
 
 // ---------------------------------------------------------------------------
