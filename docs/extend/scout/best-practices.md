@@ -479,6 +479,17 @@ export class StreamsAppPage {
 }
 ```
 
+### Add accessibility checks at key UI checkpoints [add-a11y-checks]
+
+Scout supports automated accessibility (a11y) scanning via `page.checkA11y`. Add checks at high-value points in your UI tests — landing pages, modals, flyouts, and wizard steps — rather than on every interaction.
+
+```ts
+const { violations } = await page.checkA11y({ include: ['[data-test-subj="myPanel"]'] });
+expect(violations).toHaveLength(0);
+```
+
+For the full guide (scoping, exclusions, handling pre-existing violations), see [Accessibility testing](./a11y-checks.md).
+
 ### Skip onboarding with `addInitScript` [skip-onboarding-flows-with-addinitscript]
 
 If a page has onboarding/getting-started state, set `localStorage` before navigation.
