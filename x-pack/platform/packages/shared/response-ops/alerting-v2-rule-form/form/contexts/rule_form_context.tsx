@@ -10,6 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export interface RuleFormServices {
   http: HttpStart;
@@ -17,6 +18,7 @@ export interface RuleFormServices {
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  lens: LensPublicStart;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

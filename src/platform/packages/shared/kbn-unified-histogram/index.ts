@@ -13,8 +13,17 @@ export type {
   UnifiedHistogramAdapters,
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
+  LensVisServiceState,
 } from './types';
-export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export {
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionType,
+  LensVisServiceStatus,
+} from './types';
+
+export { LensVisService } from './services/lens_vis_service';
+export type { QueryParams as LensVisQueryParams } from './utils/external_vis_context';
 
 export {
   UnifiedBreakdownFieldSelector,

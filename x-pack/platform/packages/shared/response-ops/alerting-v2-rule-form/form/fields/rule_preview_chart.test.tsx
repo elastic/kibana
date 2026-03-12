@@ -10,21 +10,15 @@ import { render, screen } from '@testing-library/react';
 import { PreviewChart } from './rule_preview_chart';
 import * as usePreviewChartModule from '../hooks/use_preview_chart';
 import type { UsePreviewChartResult } from '../hooks/use_preview_chart';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 jest.mock('../hooks/use_preview_chart');
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: ({ type, getParentApi, hidePanelChrome }: any) => (
-    <div data-test-subj="mockEmbeddableRenderer" data-type={type}>
-      Lens Chart Mock
-    </div>
-  ),
-}));
 
 const mockUsePreviewChart = jest.mocked(usePreviewChartModule.usePreviewChart);
 
 const mockLensAttributes = {
   visualizationType: 'lnsXY',
-  title: 'Rule results preview',
+  title: '',
   state: {
     datasourceStates: { textBased: { layers: {} } },
     filters: [],
@@ -43,23 +37,42 @@ const defaultProps = {
 const defaultChartResult: UsePreviewChartResult = {
   lensAttributes: undefined,
   timeRange: undefined,
-  chartQuery: null,
   isLoading: false,
   hasError: false,
 };
 
 describe('PreviewChart', () => {
+  let services: ReturnType<typeof createMockServices>;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUsePreviewChart.mockReturnValue(defaultChartResult);
+    services = createMockServices();
   });
 
-  it('renders nothing when no chart query is available', () => {
-    const { container } = render(<PreviewChart {...defaultProps} />);
+  const renderChart = (props = defaultProps) => {
+    const Wrapper = createFormWrapper(
+      {
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '5m' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+      },
+      services
+    );
+    return render(
+      <Wrapper>
+        <PreviewChart {...props} />
+      </Wrapper>
+    );
+  };
 
-    expect(container.innerHTML).toBe('');
-    expect(screen.queryByTestId('rulePreviewChart')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('rulePreviewChartLoading')).not.toBeInTheDocument();
+  it('renders nothing when no lens attributes or time range is available', () => {
+    const { container } = renderChart();
+
+    expect(container.querySelector('[data-test-subj="rulePreviewChart"]')).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="rulePreviewChartLoading"]')
+    ).not.toBeInTheDocument();
   });
 
   it('renders the loading spinner when isLoading is true and no attributes exist', () => {
@@ -68,26 +81,22 @@ describe('PreviewChart', () => {
       isLoading: true,
     });
 
-    render(<PreviewChart {...defaultProps} />);
+    renderChart();
 
     expect(screen.getByTestId('rulePreviewChartLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('rulePreviewChart')).not.toBeInTheDocument();
   });
 
-  it('renders the Lens chart when lensAttributes are available', () => {
+  it('renders the Lens chart when lensAttributes and timeRange are available', () => {
     mockUsePreviewChart.mockReturnValue({
       ...defaultChartResult,
       lensAttributes: mockLensAttributes as any,
       timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-01T00:05:00Z' },
-      chartQuery:
-        'FROM logs-*\n| STATS __count = COUNT(*) BY __bucket = BUCKET(@timestamp, 20, "...", "...")\n| SORT __bucket',
     });
 
-    render(<PreviewChart {...defaultProps} />);
+    renderChart();
 
     expect(screen.getByTestId('rulePreviewChart')).toBeInTheDocument();
-    expect(screen.getByTestId('mockEmbeddableRenderer')).toBeInTheDocument();
-    expect(screen.getByText('Lens Chart Mock')).toBeInTheDocument();
   });
 
   it('renders the error callout when hasError is true', () => {
@@ -96,7 +105,7 @@ describe('PreviewChart', () => {
       hasError: true,
     });
 
-    render(<PreviewChart {...defaultProps} />);
+    renderChart();
 
     expect(screen.getByText('Unable to load chart preview')).toBeInTheDocument();
     expect(screen.queryByTestId('rulePreviewChart')).not.toBeInTheDocument();
@@ -108,43 +117,42 @@ describe('PreviewChart', () => {
       ...defaultChartResult,
       lensAttributes: mockLensAttributes as any,
       timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-01T00:05:00Z' },
-      chartQuery: 'FROM logs-*\n| STATS __count = COUNT(*) ...',
       isLoading: true,
     });
 
-    render(<PreviewChart {...defaultProps} />);
+    renderChart();
 
     expect(screen.getByTestId('rulePreviewChart')).toBeInTheDocument();
     expect(screen.queryByTestId('rulePreviewChartLoading')).not.toBeInTheDocument();
   });
 
   it('passes props to usePreviewChart', () => {
-    render(
-      <PreviewChart
-        query="FROM logs-* | WHERE status >= 500"
-        timeField="event.created"
-        lookback="1h"
-      />
-    );
+    renderChart({
+      query: 'FROM logs-* | WHERE status >= 500',
+      timeField: 'event.created',
+      lookback: '1h',
+    });
 
     expect(mockUsePreviewChart).toHaveBeenCalledWith({
       query: 'FROM logs-* | WHERE status >= 500',
       timeField: 'event.created',
       lookback: '1h',
+      esqlColumns: undefined,
     });
   });
 
-  it('renders the EmbeddableRenderer with type "lens"', () => {
-    mockUsePreviewChart.mockReturnValue({
-      ...defaultChartResult,
-      lensAttributes: mockLensAttributes as any,
-      timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-01T00:05:00Z' },
-      chartQuery: 'FROM logs-*\n| STATS __count = COUNT(*) ...',
-    });
+  it('passes esqlColumns to usePreviewChart', () => {
+    const esqlColumns = [
+      { id: 'host.name', displayAsText: 'host.name', esType: 'keyword' },
+      { id: 'count', displayAsText: 'count', esType: 'long' },
+    ];
 
-    render(<PreviewChart {...defaultProps} />);
+    renderChart({ ...defaultProps, esqlColumns } as any);
 
-    const renderer = screen.getByTestId('mockEmbeddableRenderer');
-    expect(renderer).toHaveAttribute('data-type', 'lens');
+    expect(mockUsePreviewChart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlColumns,
+      })
+    );
   });
 });

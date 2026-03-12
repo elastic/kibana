@@ -37,8 +37,10 @@
     "@kbn/monaco",
     "@kbn/core-application-browser-mocks",
     "@kbn/react-hooks",
-    "@kbn/lens-embeddable-utils",
-    "@kbn/embeddable-plugin"
+    "@kbn/field-types",
+    "@kbn/lens-plugin",
+    "@kbn/unified-histogram",
+    "@kbn/expressions-plugin"
   ]
 }
 

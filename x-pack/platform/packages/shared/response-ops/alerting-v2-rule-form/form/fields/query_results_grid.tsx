@@ -195,7 +195,12 @@ export const QueryResultsGrid = ({
       {rows.length > 0 && query && timeField && lookback && (
         <>
           <EuiSpacer size="s" />
-          <PreviewChart query={query} timeField={timeField} lookback={lookback} />
+          <PreviewChart
+            query={query}
+            timeField={timeField}
+            lookback={lookback}
+            esqlColumns={columns}
+          />
         </>
       )}
 

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { usePreviewChart } from '../hooks/use_preview_chart';
+import type { PreviewColumn } from '../hooks/use_preview';
+import { useRuleFormServices } from '../contexts';
 
 const CHART_HEIGHT = 180;
 
@@ -21,22 +22,29 @@ export interface PreviewChartProps {
   timeField: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
+  /** ES|QL columns from the preview query result (used for STATS query suggestions) */
+  esqlColumns?: PreviewColumn[];
 }
 
 /**
- * Renders a Lens bar chart showing the count of matching rows over time.
+ * Renders a Lens chart for the rule preview.
  *
- * Accepts the ES|QL query, time field, and lookback as props so it can be
- * reused across both rule and recovery preview panels.
+ * For non-STATS ES|QL queries, this renders a time histogram (count over time).
+ * For STATS queries, it uses the Lens suggestions API to pick an appropriate
+ * chart type from the aggregated columns.
+ *
+ * Accepts the ES|QL query, time field, lookback, and optional columns as props
+ * so it can be reused across both rule and recovery preview panels.
  *
  * This component renders only the chart content (no panel wrapper) and is
  * intended to be placed inside a parent panel such as `QueryResultsGrid`.
  */
-export const PreviewChart = ({ query, timeField, lookback }: PreviewChartProps) => {
-  const { lensAttributes, chartQuery, isLoading, hasError } = usePreviewChart({
+export const PreviewChart = ({ query, timeField, lookback, esqlColumns }: PreviewChartProps) => {
+  const { lensAttributes, timeRange, isLoading, hasError } = usePreviewChart({
     query,
     timeField,
     lookback,
+    esqlColumns,
   });
 
   if (hasError) {
@@ -62,50 +70,43 @@ export const PreviewChart = ({ query, timeField, lookback }: PreviewChartProps) 
     );
   }
 
-  if (!lensAttributes) {
+  if (!lensAttributes || !timeRange) {
     return null;
   }
 
-  return (
-    <LensChart
-      key={chartQuery ?? undefined}
-      lensAttributes={lensAttributes}
-      height={CHART_HEIGHT}
-    />
-  );
+  return <LensChart lensAttributes={lensAttributes} timeRange={timeRange} height={CHART_HEIGHT} />;
 };
 
 /**
- * Renders the Lens embeddable chart using the EmbeddableRenderer pattern.
+ * Renders the Lens chart using the lens.EmbeddableComponent.
  *
- * Separated into its own component so the `getParentApi` callback can be
- * memoized on the Lens attributes without re-mounting the renderer on
- * every parent render.
+ * Separated into its own component so that the parent can conditionally
+ * render it based on the loading/error/empty states.
  */
 const LensChart = ({
   lensAttributes,
+  timeRange,
   height,
 }: {
-  lensAttributes: LensAttributes;
+  lensAttributes: TypedLensByValueInput['attributes'];
+  timeRange: { from: string; to: string };
   height: number;
 }) => {
-  const getParentApi = useCallback(
-    () => ({
-      getSerializedStateForChild: () => ({
-        attributes: lensAttributes,
-        viewMode: 'view' as const,
-        esqlVariables: [],
-      }),
-      noPadding: true,
-    }),
-    [lensAttributes]
-  );
+  const { lens } = useRuleFormServices();
+  const LensComponent = lens.EmbeddableComponent;
 
   const chartStyle = useMemo(() => ({ height: `${height}px`, width: '100%' }), [height]);
 
   return (
     <div style={chartStyle} data-test-subj="rulePreviewChart">
-      <EmbeddableRenderer type="lens" getParentApi={getParentApi} hidePanelChrome />
+      <LensComponent
+        id="rulePreviewLensChart"
+        viewMode="view"
+        timeRange={timeRange}
+        attributes={lensAttributes}
+        noPadding
+        disableTriggers
+      />
     </div>
   );
 };
