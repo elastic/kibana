@@ -11,7 +11,7 @@ steps:
 
   - name: 'Upload trigger steps'
     command: |
-      VM_IMAGES_BRANCH="$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
+      VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
 
       buildkite-agent pipeline upload << PIPELINE
       steps:
@@ -20,7 +20,7 @@ steps:
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '${VM_IMAGES_BRANCH}'
+            branch: '$${VM_IMAGES_BRANCH}'
             env:
               IMAGES_CONFIG: kibana/base_image.yml
         - name: 'Build packages layer'
@@ -29,7 +29,7 @@ steps:
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '${VM_IMAGES_BRANCH}'
+            branch: '$${VM_IMAGES_BRANCH}'
             env:
               IMAGES_CONFIG: kibana/packages_layer.yml
               BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
@@ -38,7 +38,7 @@ steps:
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '${VM_IMAGES_BRANCH}'
+            branch: '$${VM_IMAGES_BRANCH}'
             env:
               IMAGES_CONFIG: kibana/image_cache.tpl.yml
               BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
