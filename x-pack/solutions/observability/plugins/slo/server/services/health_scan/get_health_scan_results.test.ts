@@ -6,9 +6,12 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { getHealthScanResults } from './get_health_scan_results';
+
+type ScopedClusterClientMock = ReturnType<
+  typeof elasticsearchServiceMock.createScopedClusterClient
+>;
 import { IllegalArgumentError } from '../../errors';
 import type { HealthDocument } from '../tasks/health_scan_task/types';
 
