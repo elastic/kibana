@@ -374,7 +374,7 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('downloadObject action', () => {
-    it('should download an object and return base64 content', async () => {
+    it('should download an object and return base64 content when under size limit', async () => {
       const metaResponse = {
         data: {
           name: 'report.pdf',
@@ -392,6 +392,7 @@ describe('GoogleCloudStorageConnector', () => {
       const result = await GoogleCloudStorageConnector.actions.downloadObject.handler(mockContext, {
         bucket: 'my-bucket',
         object: 'report.pdf',
+        maximumDownloadSizeBytes: 768000,
       });
 
       expect(mockClient.get).toHaveBeenNthCalledWith(
@@ -410,8 +411,43 @@ describe('GoogleCloudStorageConnector', () => {
         size: '1024',
         timeCreated: '2024-01-01T00:00:00.000Z',
         updated: '2024-01-01T00:00:00.000Z',
+        hasContent: true,
         content: Buffer.from('pdf content').toString('base64'),
         encoding: 'base64',
+      });
+    });
+
+    it('should skip download and return metadata when file exceeds size limit', async () => {
+      const metaResponse = {
+        data: {
+          name: 'huge-video.mp4',
+          bucket: 'my-bucket',
+          contentType: 'video/mp4',
+          size: '1000000',
+          timeCreated: '2024-01-01T00:00:00.000Z',
+          updated: '2024-01-01T00:00:00.000Z',
+        },
+      };
+
+      mockClient.get.mockResolvedValueOnce(metaResponse);
+
+      const result = await GoogleCloudStorageConnector.actions.downloadObject.handler(mockContext, {
+        bucket: 'my-bucket',
+        object: 'huge-video.mp4',
+        maximumDownloadSizeBytes: 768000,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        name: 'huge-video.mp4',
+        bucket: 'my-bucket',
+        contentType: 'video/mp4',
+        size: '1000000',
+        timeCreated: '2024-01-01T00:00:00.000Z',
+        updated: '2024-01-01T00:00:00.000Z',
+        hasContent: false,
+        message:
+          'File size (1000000 bytes) exceeds maximum download size (768000 bytes). Use get_object_metadata to inspect this file without downloading.',
       });
     });
 
@@ -424,6 +460,7 @@ describe('GoogleCloudStorageConnector', () => {
         GoogleCloudStorageConnector.actions.downloadObject.handler(mockContext, {
           bucket: 'my-bucket',
           object: 'private.pdf',
+          maximumDownloadSizeBytes: 768000,
         })
       ).rejects.toThrow('Google Cloud Storage API error (403)');
     });

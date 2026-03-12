@@ -17,7 +17,7 @@ inputs:
   - name: filter
     type: string
     required: false
-    description: "Filter expression (e.g. 'name:my-project' or 'lifecycleState:ACTIVE')"
+    description: "Optional filter expression. Supported operators: 'name:' (project name contains), 'id:' (exact project ID), 'lifecycleState:' (ACTIVE, DELETE_REQUESTED). Examples: 'name:production', 'lifecycleState:ACTIVE'."
 steps:
   - name: list_projects
     type: google_cloud_storage.listProjects

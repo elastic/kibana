@@ -26,8 +26,8 @@ import type {
 
 const GCS_API_BASE = 'https://storage.googleapis.com/storage/v1';
 const RESOURCE_MANAGER_API_BASE = 'https://cloudresourcemanager.googleapis.com/v1';
-const DEFAULT_MAX_RESULTS = 100;
-const MAX_MAX_RESULTS = 1000;
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 1000;
 
 /**
  * Extracts and throws a meaningful error from GCS API responses.
@@ -68,7 +68,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       input: ListProjectsInputSchema,
       handler: async (ctx, input: ListProjectsInput) => {
         const params: Record<string, string | number> = {
-          pageSize: Math.min(input.pageSize ?? DEFAULT_MAX_RESULTS, MAX_MAX_RESULTS),
+          pageSize: Math.min(input.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
         };
         if (input.pageToken) params.pageToken = input.pageToken;
         if (input.filter) params.filter = input.filter;
@@ -106,7 +106,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       handler: async (ctx, input: ListBucketsInput) => {
         const params: Record<string, string | number> = {
           project: input.project,
-          maxResults: Math.min(input.maxResults ?? DEFAULT_MAX_RESULTS, MAX_MAX_RESULTS),
+          maxResults: Math.min(input.maxResults ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
         };
         if (input.pageToken) params.pageToken = input.pageToken;
         if (input.prefix) params.prefix = input.prefix;
@@ -145,7 +145,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       input: ListObjectsInputSchema,
       handler: async (ctx, input: ListObjectsInput) => {
         const params: Record<string, string | number> = {
-          maxResults: Math.min(input.maxResults ?? DEFAULT_MAX_RESULTS, MAX_MAX_RESULTS),
+          maxResults: Math.min(input.maxResults ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
         };
         if (input.prefix) params.prefix = input.prefix;
         if (input.delimiter) params.delimiter = input.delimiter;
@@ -221,15 +221,27 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       input: DownloadObjectInputSchema,
       handler: async (ctx, input: DownloadObjectInput) => {
         try {
-          // First fetch metadata to get content type and name
           const metaResponse = await ctx.client.get(
             `${GCS_API_BASE}/b/${encodeURIComponent(input.bucket)}/o/${encodeURIComponent(
               input.object
             )}`
           );
           const meta = metaResponse.data;
+          const fileSize = parseInt(meta.size, 10);
 
-          // Download the object content
+          if (fileSize > input.maximumDownloadSizeBytes) {
+            return {
+              name: meta.name,
+              bucket: meta.bucket,
+              contentType: meta.contentType,
+              size: meta.size,
+              timeCreated: meta.timeCreated,
+              updated: meta.updated,
+              hasContent: false,
+              message: `File size (${fileSize} bytes) exceeds maximum download size (${input.maximumDownloadSizeBytes} bytes). Use get_object_metadata to inspect this file without downloading.`,
+            };
+          }
+
           const contentResponse = await ctx.client.get(
             `${GCS_API_BASE}/b/${encodeURIComponent(input.bucket)}/o/${encodeURIComponent(
               input.object
@@ -249,6 +261,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
             size: meta.size,
             timeCreated: meta.timeCreated,
             updated: meta.updated,
+            hasContent: true,
             content: buffer.toString('base64'),
             encoding: 'base64',
           };
