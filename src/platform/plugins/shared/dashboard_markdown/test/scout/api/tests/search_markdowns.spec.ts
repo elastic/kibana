@@ -13,31 +13,20 @@ import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 
 const SEARCH_ENDPOINT = `${MARKDOWN_API_PATH}/search`;
-const TOTAL_MARKDOWNS = 25;
+const TOTAL_MARKDOWNS = 100;
+const MANY_MARKDOWNS_KBN_ARCHIVE_PATH =
+  'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-markdowns.json';
 
 apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    await kbnClient.savedObjects.cleanStandardList();
     viewerCredentials = await requestAuth.getApiKey('viewer');
-    const createPromises = Array.from({ length: TOTAL_MARKDOWNS }, (_, i) =>
-      kbnClient.savedObjects.create({
-        type: 'markdown',
-        id: `test-search-markdown-${String(i).padStart(2, '0')}`,
-        attributes: {
-          title: `Search Markdown ${String(i).padStart(2, '0')}`,
-          description: `Description for markdown ${i}`,
-          content: `# Content ${i}`,
-        },
-        overwrite: true,
-      })
-    );
-    await Promise.all(createPromises);
+    await kbnClient.importExport.load(MANY_MARKDOWNS_KBN_ARCHIVE_PATH);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.cleanStandardList();
+    await kbnClient.importExport.unload(MANY_MARKDOWNS_KBN_ARCHIVE_PATH);
   });
 
   apiTest('should retrieve a paginated list of markdown panels', async ({ apiClient }) => {
@@ -69,6 +58,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(1);
+    console.log(response.body.markdowns);
     expect(response.body.markdowns).toHaveLength(1);
   });
 
