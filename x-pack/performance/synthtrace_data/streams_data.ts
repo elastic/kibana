@@ -510,6 +510,8 @@ async function uploadContentPack(
       ...PUBLIC_API_HEADERS,
       'Content-Type': `multipart/form-data; boundary=${boundary}`,
     },
+    // `kibanaServer.request` expects a JSON body type, but content pack import is multipart/form-data.
+    // The underlying HTTP client supports Buffer payloads, so we intentionally cast here.
     body: body as unknown as Record<string, unknown>,
     ignoreErrors: [409, 422, 500],
     retries: 1,
@@ -938,6 +940,7 @@ export async function setupDataQualityAtScale(
   log.info(`Mapped ${FIELD_COUNT} keyword fields. Bulk-indexing ${DOC_COUNT} degraded docs...`);
 
   const BULK_BATCH_SIZE = 500;
+  const BULK_REQUEST_TIMEOUT_MS = 300_000;
   let indexed = 0;
   for (let i = 0; i < DOC_COUNT; i += BULK_BATCH_SIZE) {
     const batchSize = Math.min(BULK_BATCH_SIZE, DOC_COUNT - i);
@@ -953,7 +956,31 @@ export async function setupDataQualityAtScale(
       operations.push({ create: { _index: CHILD_STREAM } }, doc);
     }
 
-    const bulkResult = await es.bulk({ operations, refresh: false });
+    let bulkResult: Awaited<ReturnType<Client['bulk']>> | undefined;
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        bulkResult = await es.bulk(
+          { operations, refresh: false },
+          { requestTimeout: BULK_REQUEST_TIMEOUT_MS }
+        );
+        lastError = undefined;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (isEsTimeoutError(error) && attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          log.warning(
+            `  Bulk degraded doc batch offset ${i}: timed out on attempt ${attempt}/${MAX_RETRIES}, retrying in ${delay}ms`
+          );
+          await sleep(delay);
+          continue;
+        }
+        throw error;
+      }
+    }
+    if (!bulkResult) throw lastError ?? new Error(`Bulk degraded doc batch offset ${i} failed`);
+
     if (bulkResult.errors) {
       const firstFailure = bulkResult.items.find((item) => (item.create?.status ?? 201) !== 201);
       throw new Error(

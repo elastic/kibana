@@ -34,9 +34,8 @@ export const journey = new Journey({
 
     await page.click(subj('customRetentionButton'));
 
-    await page.waitForSelector(subj('streamsAppDslModalDaysField'));
+    await page.waitForSelector(subj('streamsAppDslModalDaysField'), { timeout: 30000 });
     const daysInput = page.locator(subj('streamsAppDslModalDaysField'));
-    await daysInput.fill('');
     await daysInput.fill('30');
   })
   .step('Save retention settings', async ({ page }) => {

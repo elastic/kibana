@@ -21,8 +21,26 @@ const WIRED_CHILD_FIRST = subj(`streamsNameLink-${WIRED_CHILD_FIRST_NAME}`);
 const WIRED_CHILD_MIDDLE = subj(`streamsNameLink-${WIRED_CHILD_MIDDLE_NAME}`);
 const WIRED_HIERARCHY_COUNT = 1000;
 const WIRED_HIERARCHY_STRATEGY = 'import' as const;
-const DELETE_BATCH_CONCURRENCY = 10;
+const DELETE_BATCH_SIZE = 10;
 const DELETE_COUNT = 200;
+
+type WiredFieldType = 'keyword' | 'text' | 'long' | 'double' | 'boolean' | 'date' | 'ip';
+
+interface WiredFieldDefinition {
+  type: WiredFieldType;
+}
+
+interface DownsampleEntry {
+  after: string;
+  fixed_interval: string;
+}
+
+interface StreamLifecycle {
+  dsl?: {
+    data_retention?: string;
+    downsample?: DownsampleEntry[];
+  };
+}
 
 interface PageEvaluateLike {
   evaluate<R, Arg>(pageFunction: (arg: Arg) => R | Promise<R>, arg: Arg): Promise<R>;
@@ -36,8 +54,8 @@ const updateIngestViaApi = async ({
 }: {
   page: PageEvaluateLike;
   streamName: string;
-  wiredFieldsToAdd?: Record<string, unknown>;
-  lifecycle?: unknown;
+  wiredFieldsToAdd?: Record<string, WiredFieldDefinition>;
+  lifecycle?: StreamLifecycle;
 }) => {
   await page.evaluate(
     async ({ targetStreamName, fieldsToAdd, newLifecycle }) => {
@@ -117,14 +135,14 @@ export const journey = new Journey({
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.type(WIRED_CHILD_MIDDLE_NAME, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(WIRED_CHILD_MIDDLE_NAME, { delay: inputDelays.TYPING });
     await page.waitForSelector(WIRED_CHILD_MIDDLE, { timeout: 60000 });
   })
   .step('Clear search', async ({ page }) => {
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await page.waitForSelector(subj('streamsTable'));
+    await page.waitForSelector(WIRED_CHILD_FIRST, { timeout: 60000 });
   })
   .step('Collapse all streams', async ({ page }) => {
     const collapseAllButton = page.locator(STREAMS_COLLAPSE_ALL_BUTTON).first();
@@ -137,7 +155,8 @@ export const journey = new Journey({
       await expandAllButton.waitFor({ state: 'visible', timeout: 60000 });
     }
 
-    await page.waitForSelector(subj('streamsTable'));
+    await expandAllButton.waitFor({ state: 'visible', timeout: 60000 });
+    await page.locator(WIRED_CHILD_FIRST).waitFor({ state: 'hidden', timeout: 60000 });
   })
   .step('Navigate to a wired child detail page', async ({ page }) => {
     const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
@@ -210,7 +229,7 @@ export const journey = new Journey({
     });
   })
   .step(
-    `Delete ${DELETE_COUNT} child streams via API (batches of ${DELETE_BATCH_CONCURRENCY})`,
+    `Delete ${DELETE_COUNT} child streams via API (batches of ${DELETE_BATCH_SIZE})`,
     async ({ page }) => {
       const deleteStart = WIRED_HIERARCHY_COUNT - DELETE_COUNT + 1;
       const streamsToDelete = Array.from({ length: DELETE_COUNT }, (_, index) => {
@@ -226,6 +245,93 @@ export const journey = new Journey({
             'elastic-api-version': '2023-10-31',
           };
 
+          const sleep = async (ms: number) =>
+            await new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+          const isRetryableLockConflict = (status: number, bodyText: string) =>
+            status === 409 && /Could not acquire lock for applying changes/i.test(bodyText);
+
+          const isRetryableTimeout = (status: number, bodyText: string) =>
+            status === 500 && /request timed out/i.test(bodyText);
+
+          const getStream = async (name: string) =>
+            await fetch(`/api/streams/${name}`, {
+              method: 'GET',
+              headers,
+            });
+
+          const deleteStream = async (name: string) =>
+            await fetch(`/api/streams/${name}`, {
+              method: 'DELETE',
+              headers,
+            });
+
+          // TODO(streams-program#958): once Streams supports bulk deletes or queues mutations
+          // server-side (single lock acquisition), remove this serial delete + retry/backoff
+          // workaround and reintroduce higher-concurrency deletion stress safely.
+          // Streams state changes are guarded by a global lock (`streams/apply_changes`).
+          // Deleting in parallel will reliably trigger 409 lock conflicts, so delete serially
+          // but with retries for lock/timeouts to keep the journey resilient under load.
+          const deleteWithRetries = async (name: string, batchLabel: string) => {
+            const maxAttempts = 10;
+            const baseDelayMs = 250;
+            const maxDelayMs = 5000;
+
+            const attemptDelays = Array.from({ length: maxAttempts }, (_, i) =>
+              Math.min(maxDelayMs, baseDelayMs * 2 ** i)
+            );
+
+            for (const [attemptIdx, delayMs] of attemptDelays.entries()) {
+              const attempt = attemptIdx + 1;
+              let res: Response;
+              try {
+                res = await deleteStream(name);
+              } catch (error) {
+                const probe = await getStream(name).catch(() => undefined);
+                if (probe?.status === 404) return;
+
+                if (attempt === maxAttempts) {
+                  throw new Error(
+                    `${batchLabel}: DELETE ${name} failed after ${maxAttempts} attempts (network): ${
+                      error instanceof Error ? error.message : String(error)
+                    }`
+                  );
+                }
+
+                await sleep(delayMs + Math.floor(Math.random() * 250));
+                continue;
+              }
+
+              if (res.ok || res.status === 404) return;
+
+              const text = await res.text();
+              if (isRetryableLockConflict(res.status, text)) {
+                if (attempt === maxAttempts) {
+                  throw new Error(
+                    `${batchLabel}: DELETE ${name}: still locked after ${maxAttempts} attempts`
+                  );
+                }
+                await sleep(delayMs + Math.floor(Math.random() * 250));
+                continue;
+              }
+
+              if (isRetryableTimeout(res.status, text)) {
+                const probe = await getStream(name).catch(() => undefined);
+                if (probe?.status === 404) return;
+
+                if (attempt === maxAttempts) {
+                  throw new Error(
+                    `${batchLabel}: DELETE ${name}: HTTP 500 timeout after ${maxAttempts} attempts`
+                  );
+                }
+                await sleep(delayMs + Math.floor(Math.random() * 250));
+                continue;
+              }
+
+              throw new Error(`${batchLabel}: DELETE ${name}: ${res.status} ${text}`);
+            }
+          };
+
           const batches = Array.from(
             { length: Math.ceil(streamNames.length / batchSize) },
             (_, batchIndex) =>
@@ -234,26 +340,8 @@ export const journey = new Journey({
 
           for (const [batchIndex, batch] of batches.entries()) {
             const batchLabel = `Batch ${batchIndex + 1}/${batches.length}`;
-            const results = await Promise.allSettled(
-              batch.map((name) =>
-                fetch(`/api/streams/${name}`, {
-                  method: 'DELETE',
-                  headers,
-                }).then(async (res) => {
-                  if (!res.ok && res.status !== 404) {
-                    const text = await res.text();
-                    throw new Error(`DELETE ${name}: ${res.status} ${text}`);
-                  }
-                })
-              )
-            );
-
-            const failures = results.filter(
-              (r): r is PromiseRejectedResult => r.status === 'rejected'
-            );
-            if (failures.length > 0) {
-              const msgs = failures.map((f) => f.reason?.message ?? f.reason).join('; ');
-              throw new Error(`${batchLabel} delete failed: ${msgs}`);
+            for (const name of batch) {
+              await deleteWithRetries(name, batchLabel);
             }
           }
 
@@ -263,10 +351,7 @@ export const journey = new Journey({
             streamNames[streamNames.length - 1],
           ];
           for (const name of spotChecks) {
-            const res = await fetch(`/api/streams/${name}`, {
-              method: 'GET',
-              headers,
-            });
+            const res = await getStream(name);
             if (res.status !== 404) {
               const text = await res.text();
               throw new Error(`Expected ${name} deleted (404), got ${res.status} ${text}`);
@@ -275,7 +360,7 @@ export const journey = new Journey({
         },
         {
           streamNames: streamsToDelete,
-          batchSize: DELETE_BATCH_CONCURRENCY,
+          batchSize: DELETE_BATCH_SIZE,
         }
       );
     }
@@ -286,7 +371,6 @@ export const journey = new Journey({
     const deletedChildName = `${WIRED_SCALE_PARENT_STREAM}.perf_child_${deletedIdx}`;
     const survivingChildName = `${WIRED_SCALE_PARENT_STREAM}.perf_child_${survivingIdx}`;
     const survivingChildSelector = subj(`streamsNameLink-${survivingChildName}`);
-    const deletedChildSelector = subj(`streamsNameLink-${deletedChildName}`);
 
     await page.goto(kbnUrl.get('/app/streams'));
     await page.waitForSelector(subj('streamsTable'), { timeout: 120000 });
@@ -296,23 +380,31 @@ export const journey = new Journey({
 
     // First prove the UI can still find a surviving child after the deletion batch.
     await searchBox.fill('');
-    await searchBox.type(survivingChildName, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(survivingChildName, { delay: inputDelays.TYPING });
     await page.waitForSelector(survivingChildSelector, { timeout: 60000 });
 
     // Then search for a deleted child and wait for the UI to apply the new filter.
     await searchBox.fill('');
-    await searchBox.type(deletedChildName, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(deletedChildName, { delay: inputDelays.TYPING });
     await page.waitForFunction(
-      ({ inputSelector, expectedInputValue, selectorsThatMustBeAbsent }) => {
+      ({ inputSelector, expectedInputValue, tableSelector, emptyMessage }) => {
         const input = document.querySelector<HTMLInputElement>(inputSelector);
         if (!input || input.value !== expectedInputValue) return false;
 
-        return selectorsThatMustBeAbsent.every((selector) => !document.querySelector(selector));
+        const table = document.querySelector<HTMLElement>(tableSelector);
+        if (!table) return false;
+
+        const hasEmptyMessage = table.textContent?.includes(emptyMessage) ?? false;
+        if (!hasEmptyMessage) return false;
+
+        const streamLinks = table.querySelectorAll('[data-test-subj^="streamsNameLink-"]');
+        return streamLinks.length === 0;
       },
       {
         inputSelector: STREAMS_SEARCH_SELECTOR,
         expectedInputValue: deletedChildName,
-        selectorsThatMustBeAbsent: [survivingChildSelector, deletedChildSelector],
+        tableSelector: subj('streamsTable'),
+        emptyMessage: 'No streams found.',
       },
       { timeout: 60000 }
     );

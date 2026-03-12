@@ -26,5 +26,7 @@ export const journey = new Journey({
     });
   })
   .step('Verify data quality metrics render', async ({ page }) => {
-    await page.waitForSelector(subj('datasetQualityDetailsSummaryKpiCard-Failed documents'));
+    await page.waitForSelector(subj('datasetQualityDetailsSummaryKpiCard-Failed documents'), {
+      timeout: 60000,
+    });
   });

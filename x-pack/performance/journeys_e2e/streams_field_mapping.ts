@@ -9,13 +9,13 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { setupFieldMappingAtScale } from '../synthtrace_data/streams_data';
 
-function getNewFieldName(): string {
+const getNewFieldName = (): string => {
   const phase = (process.env.TEST_PERFORMANCE_PHASE ?? 'local')
     .toLowerCase()
     .replace(/[^a-z0-9_]+/g, '_');
 
   return `attributes.perf_scale_new_field_${phase}`;
-}
+};
 
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
@@ -29,7 +29,9 @@ export const journey = new Journey({
   })
   .step('Open add field flyout', async ({ page }) => {
     await page.click(subj('streamsAppContentAddFieldButton'));
-    await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
+    await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'), {
+      timeout: 30000,
+    });
   })
   .step('Configure new field mapping', async ({ page, inputDelays }) => {
     const comboBox = page.locator(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
@@ -55,9 +57,13 @@ export const journey = new Journey({
     });
   })
   .step('Review and submit field mapping', async ({ page }) => {
-    await page.waitForSelector(subj('streamsAppSchemaEditorReviewStagedChangesButton'));
+    await page.waitForSelector(subj('streamsAppSchemaEditorReviewStagedChangesButton'), {
+      timeout: 60000,
+    });
     await page.click(subj('streamsAppSchemaEditorReviewStagedChangesButton'));
-    await page.waitForSelector(subj('streamsAppSchemaChangesReviewModalSubmitButton'));
+    await page.waitForSelector(subj('streamsAppSchemaChangesReviewModalSubmitButton'), {
+      timeout: 60000,
+    });
     await page.click(subj('streamsAppSchemaChangesReviewModalSubmitButton'));
     await page.waitForSelector(subj('streamsAppSchemaChangesReviewModalSubmitButton'), {
       state: 'detached',

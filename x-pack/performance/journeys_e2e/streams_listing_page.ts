@@ -12,6 +12,7 @@ import { setupListingPageData } from '../synthtrace_data/streams_data';
 const STREAMS_SEARCH_SELECTOR = 'input[aria-label="Search streams by name"]';
 const STREAMS_EXPAND_ALL_BUTTON = subj('streamsExpandAllButton');
 const STREAMS_COLLAPSE_ALL_BUTTON = subj('streamsCollapseAllButton');
+const CLASSIC_STREAM_TO_SEARCH = 'logs-perf-classic-00001';
 
 export const journey = new Journey({
   ftrConfigPath: 'x-pack/performance/configs/streams_heavy_config.ts',
@@ -27,17 +28,18 @@ export const journey = new Journey({
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.type('logs-perf-classic-00001', {
+    await searchBox.pressSequentially(CLASSIC_STREAM_TO_SEARCH, {
       delay: inputDelays.TYPING,
+    });
+    await page.waitForSelector(subj(`streamsNameLink-${CLASSIC_STREAM_TO_SEARCH}`), {
       timeout: 120000,
     });
-    await page.waitForSelector(subj('streamsTable'), { timeout: 60000 });
   })
   .step('Clear search and expand all streams', async ({ page }) => {
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await page.waitForSelector(subj('streamsTable'));
+
     const expandAllButton = page.locator(STREAMS_EXPAND_ALL_BUTTON).first();
     const collapseAllButton = page.locator(STREAMS_COLLAPSE_ALL_BUTTON).first();
 
@@ -50,22 +52,23 @@ export const journey = new Journey({
       await expandAllButton.click();
     }
 
-    await page.waitForSelector(subj('streamsTable'));
+    // Wait for the expand-all action to settle (button state swap).
+    await collapseAllButton.waitFor({ state: 'visible', timeout: 60000 });
   })
   .step('Collapse all streams', async ({ page }) => {
     const collapseAllButton = page.locator(STREAMS_COLLAPSE_ALL_BUTTON).first();
     await collapseAllButton.waitFor({ state: 'visible', timeout: 60000 });
     await collapseAllButton.click();
-    await page.waitForSelector(subj('streamsTable'));
+    const expandAllButton = page.locator(STREAMS_EXPAND_ALL_BUTTON).first();
+    await expandAllButton.waitFor({ state: 'visible', timeout: 60000 });
   })
   .step('Navigate to a stream detail page', async ({ page, inputDelays }) => {
     // logs.otel can be paginated away. Filter to bring it into view.
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.type('logs.otel', {
+    await searchBox.pressSequentially('logs.otel', {
       delay: inputDelays.TYPING,
-      timeout: 60000,
     });
 
     const logsOtelExpand = page.locator(subj('expandButton-logs.otel'));

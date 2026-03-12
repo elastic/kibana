@@ -35,9 +35,17 @@ export const journey = new Journey({
 
     const option = page.locator(subj('autocomplete-suggestion-body.text'));
     try {
+      await option.waitFor({ state: 'visible', timeout: 10000 });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        await page.keyboard.press('Enter');
+      } else {
+        throw error;
+      }
+    }
+
+    if (await option.isVisible().catch(() => false)) {
       await option.click({ timeout: 10000 });
-    } catch {
-      await page.keyboard.press('Enter');
     }
 
     const patternTextbox = page
