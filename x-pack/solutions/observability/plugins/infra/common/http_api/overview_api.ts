@@ -44,7 +44,7 @@ export const TopNodesRequestRT = rt.intersection([
       to: rt.number,
     }),
   }),
-  rt.partial({ sort: rt.string, sortDirection: rt.string }),
+  rt.partial({ sort: rt.string, sortDirection: rt.string, schema: rt.string }),
 ]);
 
 export type TopNodesRequest = rt.TypeOf<typeof TopNodesRequestRT>;

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import type { TopNodesRequest } from '../../../../common/http_api/overview_api';
 import type { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
@@ -14,11 +15,12 @@ import type { ESResponseForTopNodes } from './types';
 export const queryTopNodes = async (
   options: TopNodesRequest,
   client: ESSearchClient,
-  source: MetricsSourceConfiguration
+  source: MetricsSourceConfiguration,
+  schema?: DataSchemaFormat | null
 ) => {
   const params = {
     index: source.configuration.metricAlias,
-    body: createTopNodesQuery(options, source),
+    body: createTopNodesQuery(options, source, schema),
   };
 
   const response = await client<{}, ESResponseForTopNodes>(params);
