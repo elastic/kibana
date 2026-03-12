@@ -19,7 +19,7 @@ import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { useDiscoverFieldForBreakdown } from './hooks';
+import { useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -57,6 +57,10 @@ export const MetricsExperienceGrid = ({
 
   // TODO: simplify the dimensions to a string array
   const dimensions = allDimensions.map((name) => ({ name }));
+  const { filteredMetricItems } = useMetricFieldsFilter({
+    metricItems,
+    searchTerm,
+  });
 
   useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
 
@@ -138,7 +142,7 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        metricItems={metricItems}
+        metricItems={filteredMetricItems}
         services={services}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}

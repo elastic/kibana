@@ -104,7 +104,10 @@ export function useFetchMetricsData({
   return {
     loading,
     error: error ?? null,
-    metricItems: value?.metricItems.sort((a, b) => a.metricName.localeCompare(b.metricName)) ?? [],
-    allDimensions: value?.allDimensions.sort((a, b) => a.localeCompare(b)) ?? [],
+    metricItems:
+      value?.metricItems.sort((a: ParsedMetricItem, b: ParsedMetricItem) =>
+        a.metricName.localeCompare(b.metricName)
+      ) ?? [],
+    allDimensions: value?.allDimensions.sort((a: string, b: string) => a.localeCompare(b)) ?? [],
   };
 }

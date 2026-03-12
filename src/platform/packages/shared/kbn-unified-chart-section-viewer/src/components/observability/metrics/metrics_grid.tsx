@@ -13,7 +13,12 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import type { MetricField, Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type {
+  MetricField,
+  Dimension,
+  UnifiedMetricsGridProps,
+  ParsedMetricItem,
+} from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
 import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
