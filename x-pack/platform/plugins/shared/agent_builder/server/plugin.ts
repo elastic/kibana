@@ -172,7 +172,6 @@ export class AgentBuilderPlugin
 
     registerSkillToolsLoaderHook(serviceSetups);
 
-    // Register SML built-in tools (lazy resolution of SML service at handler time)
     const smlTools = createSmlTools({
       getSmlService: () => {
         const services = this.serviceManager.internalStart;
