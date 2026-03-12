@@ -57,6 +57,18 @@ export const SharepointOnline: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_client_certificate',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 

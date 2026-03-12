@@ -13,6 +13,7 @@ export * from './auth_types/bearer';
 export * from './auth_types/basic';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
+export { OAuthClientCertificate } from './auth_types/oauth_client_certificate';
 
 // Skipping PFX and CRT exports for now as they will require updates to
 // the formbuilder to support file upload fields.

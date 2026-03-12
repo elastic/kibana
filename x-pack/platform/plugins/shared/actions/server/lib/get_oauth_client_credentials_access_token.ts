@@ -15,7 +15,7 @@ export interface GetOAuthClientCredentialsConfig {
 }
 
 export interface GetOAuthClientCredentialsSecrets {
-  clientSecret: string;
+  clientSecret?: string;
 }
 
 interface GetOAuthClientCredentialsAccessTokenOpts {
@@ -43,7 +43,8 @@ export const getOAuthClientCredentialsAccessToken = async ({
   const { clientId, additionalFields } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
-  if (!clientId || !clientSecret) {
+  const hasClientAssertion = Boolean(additionalFields?.client_assertion);
+  if (!clientId || (!clientSecret && !hasClientAssertion)) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }

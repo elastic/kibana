@@ -9,5 +9,6 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
+export { CLIENT_ASSERTION_TYPE } from './src/auth_types/oauth_client_certificate';
 
 export * as authTypeSpecs from './src/all_auth_types';
