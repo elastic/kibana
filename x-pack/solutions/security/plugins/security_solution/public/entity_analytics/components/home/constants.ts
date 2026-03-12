@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+export { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+
 export const ENTITY_ANALYTICS_TABLE_ID = 'entity-analytics-home-table';
 
 const LOCAL_STORAGE_PREFIX = 'entityAnalytics';
 export const ENTITY_ANALYTICS_LOCAL_STORAGE_COLUMNS_KEY = `${LOCAL_STORAGE_PREFIX}:columns`;
 export const ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY = `${LOCAL_STORAGE_PREFIX}:dataTable:pageSize`;
-
-export const getEntityStoreV2IndexPattern = (spaceId: string) =>
-  `.entities.v2.latest.security_${spaceId}`;

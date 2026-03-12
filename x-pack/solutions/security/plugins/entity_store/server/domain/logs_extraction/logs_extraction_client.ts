@@ -25,7 +25,7 @@ import {
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
-import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
+import { getLatestEntitiesIndexName } from '../constants';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
