@@ -99,5 +99,8 @@ describe('withShardRecoveryRetry', () => {
 
     expect(action).toHaveBeenCalledTimes(2);
     expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[inference.anonymization.retry_exhausted] operation=test-operation attempts=2 reason=shard_recovering'
+    );
   });
 });
