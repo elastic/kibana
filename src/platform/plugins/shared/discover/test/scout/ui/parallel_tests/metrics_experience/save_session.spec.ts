@@ -39,34 +39,31 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest(
-      'should save and restore a metrics session',
-      async ({ pageObjects, page }) => {
-        const { metricsExperience, discover } = pageObjects;
+    spaceTest('should save and restore a metrics session', async ({ pageObjects, page }) => {
+      const { metricsExperience, discover } = pageObjects;
 
-        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      await expect(metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+
+      await spaceTest.step('save the current metrics session', async () => {
+        await discover.saveSearch(SAVED_SEARCH_NAME);
+      });
+
+      await spaceTest.step('start a new Discover session', async () => {
+        const newButton = page.testSubj.locator('discoverNewButton');
+        await newButton.click();
+        await expect(metricsExperience.grid).toBeHidden({ timeout: 30000 });
+      });
+
+      await spaceTest.step('load the saved search', async () => {
+        await discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      });
+
+      await spaceTest.step('metrics grid should be restored', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-
-        await spaceTest.step('save the current metrics session', async () => {
-          await discover.saveSearch(SAVED_SEARCH_NAME);
-        });
-
-        await spaceTest.step('start a new Discover session', async () => {
-          const newButton = page.testSubj.locator('discoverNewButton');
-          await newButton.click();
-          await expect(metricsExperience.grid).toBeHidden({ timeout: 30000 });
-        });
-
-        await spaceTest.step('load the saved search', async () => {
-          await discover.loadSavedSearch(SAVED_SEARCH_NAME);
-        });
-
-        await spaceTest.step('metrics grid should be restored', async () => {
-          await expect(metricsExperience.grid).toBeVisible();
-          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-        });
-      }
-    );
+      });
+    });
   }
 );
