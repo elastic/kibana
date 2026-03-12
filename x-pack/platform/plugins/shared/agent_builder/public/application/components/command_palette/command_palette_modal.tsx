@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiModal,
-  EuiModalBody,
   EuiModalHeader,
-  EuiFieldSearch,
+  EuiModalBody,
+  EuiSelectable,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-
-const modalStyles = css`
-  width: 500px;
-`;
-
-const searchInputStyles = css`
-  width: 100%;
-`;
+import { useCommandPaletteActions } from './use_command_palette_actions';
 
 interface CommandPaletteModalProps {
   onClose: () => void;
@@ -30,6 +25,57 @@ interface CommandPaletteModalProps {
 
 export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId({ prefix: 'commandPaletteModal' });
+  const { euiTheme } = useEuiTheme();
+  const selectableOptions = useCommandPaletteActions({ onClose });
+
+  const handleChange = useCallback(
+    (options: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
+      const action = changedOption?.data?.action;
+      if (action?.onSelect) {
+        action.onSelect();
+      }
+    },
+    []
+  );
+
+  const modalStyles = css`
+    width: 650px;
+  `;
+
+  const modalHeaderStyles = css`
+    padding: ${euiTheme.size.m};
+    padding-inline-end: ${euiTheme.size.xl};
+  `;
+
+  const modalBodyStyles = css`
+    padding: 0;
+
+    .euiModalBody__overflow {
+      padding: ${euiTheme.size.m};
+      padding-block-start: 0;
+      max-height: 500px;
+    }
+  `;
+
+  const listStylesOverride = css`
+    .euiSelectableListItem:not(:last-of-type) {
+      border-block-end: 0;
+    }
+    .euiSelectableList__groupLabel {
+      border-block-end: 0;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: ${euiTheme.colors.textSubdued};
+      :not(:first-of-type) {
+        padding-block-start: ${euiTheme.size.m};
+      }
+    }
+    .euiSelectableList__list {
+      mask-image: none;
+    }
+  `;
 
   return (
     <EuiModal
@@ -37,28 +83,46 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClos
       aria-labelledby={modalTitleId}
       css={modalStyles}
       data-test-subj="agentBuilderCommandPaletteModal"
+      outsideClickCloses
     >
-      <EuiModalHeader>
-        <EuiFieldSearch
-          placeholder={i18n.translate('xpack.agentBuilder.commandPalette.searchPlaceholder', {
+      <EuiSelectable
+        searchable
+        searchProps={{
+          placeholder: i18n.translate('xpack.agentBuilder.commandPalette.searchPlaceholder', {
             defaultMessage: 'Search...',
-          })}
-          fullWidth
-          autoFocus
-          css={searchInputStyles}
-          data-test-subj="agentBuilderCommandPaletteSearch"
-          aria-label={i18n.translate('xpack.agentBuilder.commandPalette.searchAriaLabel', {
-            defaultMessage: 'Search commands and actions',
-          })}
-        />
-      </EuiModalHeader>
-      <EuiModalBody>
-        <p>
-          {i18n.translate('xpack.agentBuilder.commandPalette.placeholder', {
-            defaultMessage: 'Command palette content will go here',
-          })}
-        </p>
-      </EuiModalBody>
+          }),
+          autoFocus: true,
+          'data-test-subj': 'agentBuilderCommandPaletteSearch',
+        }}
+        options={selectableOptions}
+        onChange={handleChange}
+        singleSelection
+        listProps={{
+          bordered: false,
+          showIcons: false,
+          onFocusBadge: false,
+          isVirtualized: false,
+        }}
+        css={listStylesOverride}
+        aria-label={i18n.translate('xpack.agentBuilder.commandPalette.searchAriaLabel', {
+          defaultMessage: 'Search commands and actions',
+        })}
+        data-test-subj="agentBuilderCommandPaletteList"
+      >
+        {(list, search) => (
+          <>
+            <EuiModalHeader css={modalHeaderStyles}>
+              <span id={modalTitleId} className="euiScreenReaderOnly">
+                {i18n.translate('xpack.agentBuilder.commandPalette.title', {
+                  defaultMessage: 'Command palette',
+                })}
+              </span>
+              {search}
+            </EuiModalHeader>
+            <EuiModalBody css={modalBodyStyles}>{list}</EuiModalBody>
+          </>
+        )}
+      </EuiSelectable>
     </EuiModal>
   );
 };
