@@ -5,23 +5,23 @@ viewer:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
-        - ".alerts*"
-        - ".preview.alerts*"
-        - ".adhoc.alerts*"
+        - '.alerts*'
+        - '.preview.alerts*'
+        - '.adhoc.alerts*'
       privileges:
-        - "read"
-        - "view_index_metadata"
+        - 'read'
+        - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -34,19 +34,19 @@ viewer:
         - winlogbeat-*
         - metrics-endpoint.metadata_current_*
         - logstash-*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
-        - "risk-score.risk-score-*"
-        - ".asset-criticality.asset-criticality-*"
-        - ".entities.v1.latest.security_*"
-        - ".entities.v1.updates.security_*"
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.fleet-agents*'
+        - '.fleet-actions*'
+        - 'risk-score.risk-score-*'
+        - '.asset-criticality.asset-criticality-*'
+        - '.entities.v1.latest.security_*'
+        - '.entities.v1.updates.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.read
@@ -69,7 +69,7 @@ viewer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.read
         - feature_workflowsManagement.read
-      resources: "*"
+      resources: '*'
   run_as: []
 
 # modeled after t3_analyst
@@ -78,17 +78,17 @@ editor:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
-        - ".siem-signals*"
-        - ".lists-*"
-        - ".items-*"
+        - '.siem-signals*'
+        - '.lists-*'
+        - '.items-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
       allow_restricted_indices: false
     - names:
         - apm-*-transaction*
@@ -105,34 +105,34 @@ editor:
         - read
         - write
     - names:
-        - ".internal.alerts*"
-        - ".alerts*"
-        - ".internal.preview.alerts*"
-        - ".preview.alerts*"
-        - ".internal.adhoc.alerts*"
-        - ".adhoc.alerts*"
-        - "risk-score.risk-score-*"
+        - '.internal.alerts*'
+        - '.alerts*'
+        - '.internal.preview.alerts*'
+        - '.preview.alerts*'
+        - '.internal.adhoc.alerts*'
+        - '.adhoc.alerts*'
+        - 'risk-score.risk-score-*'
       privileges:
-        - "read"
-        - "view_index_metadata"
-        - "write"
-        - "maintenance"
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'maintenance'
     - names:
-        - ".asset-criticality.asset-criticality-*"
-        - ".entities.v1.latest.security_*"
-        - ".entities.v1.updates.security_*"
-        - ".entities.v1.history.*.security_*"
-        - ".entities.v1.reset*"
+        - '.asset-criticality.asset-criticality-*'
+        - '.entities.v1.latest.security_*'
+        - '.entities.v1.updates.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
       privileges:
-        - "read"
-        - "write"
+        - 'read'
+        - 'write'
       allow_restricted_indices: false
     - names:
-        - ".ml-anomalies-*"
+        - '.ml-anomalies-*'
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -166,7 +166,7 @@ editor:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
   run_as: []
 
 t1_analyst:
@@ -174,11 +174,11 @@ t1_analyst:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
-        - ".alerts-security*"
-        - ".siem-signals-*"
+        - '.alerts-security*'
+        - '.siem-signals-*'
       privileges:
         - read
         - write
@@ -196,21 +196,21 @@ t1_analyst:
         - winlogbeat-*
         - logstash-*
         - metrics-endpoint.metadata_current_*
-        - ".fleet-agents*"
-        - ".fleet-actions*"
+        - '.fleet-agents*'
+        - '.fleet-actions*'
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.latest.security_*"
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.latest.security_*'
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.read
@@ -233,14 +233,14 @@ t1_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 t2_analyst:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - .alerts-security*
@@ -267,8 +267,8 @@ t2_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
         - .entity_analytics.monitoring*
       privileges:
@@ -279,7 +279,7 @@ t2_analyst:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.read
@@ -302,14 +302,14 @@ t2_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 t3_analyst:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -347,13 +347,13 @@ t3_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -390,14 +390,14 @@ t3_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 threat_intelligence_analyst:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -438,12 +438,12 @@ threat_intelligence_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -467,14 +467,14 @@ threat_intelligence_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 rule_author:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -517,13 +517,13 @@ rule_author:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -554,14 +554,14 @@ rule_author:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 soc_manager:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -576,7 +576,7 @@ soc_manager:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
+        - '.entities.v1.history.*.security_*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -604,12 +604,12 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - ".ml-anomalies-*"
+        - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -649,13 +649,13 @@ soc_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 detections_admin:
   metadata:
     _public: true
     _reserved: true
-  cluster: ["manage_index_templates", "manage_transform", "read_project_routing"]
+  cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
         - apm-*-transaction*
@@ -684,7 +684,7 @@ detections_admin:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
-        - ".ml-anomalies-*"
+        - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
@@ -696,12 +696,12 @@ detections_admin:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
+        - '.entities.v1.history.*.security_*'
       privileges:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siemV5.all
@@ -723,7 +723,7 @@ detections_admin:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 platform_engineer:
   metadata:
@@ -758,18 +758,18 @@ platform_engineer:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".entities.v1.reset*"
+        - '.entities.v1.history.*.security_*'
+        - '.entities.v1.reset*'
       privileges:
         - read
         - write
     - names:
-        - ".ml-anomalies-*"
+        - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
       privileges:
         - read
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siemV5.all
@@ -804,14 +804,14 @@ platform_engineer:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 endpoint_operations_analyst:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -834,8 +834,8 @@ endpoint_operations_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -856,7 +856,7 @@ endpoint_operations_analyst:
         - read
         - write
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
         - feature_siemV5.all
@@ -897,14 +897,14 @@ endpoint_operations_analyst:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
+      resources: '*'
 
 endpoint_policy_manager:
   metadata:
     _public: true
     _reserved: true
   cluster:
-    - "read_project_routing"
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -925,8 +925,8 @@ endpoint_policy_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
-        - ".entities.v1.history.*.security_*"
-        - ".ml-anomalies-*"
+        - '.entities.v1.history.*.security_*'
+        - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -954,7 +954,7 @@ endpoint_policy_manager:
         - write
         - manage
   applications:
-    - application: "kibana-.kibana"
+    - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
         - feature_siemV5.all
@@ -986,8 +986,7 @@ endpoint_policy_manager:
         - feature_savedQueryManagement.all
         - feature_agentBuilder.all
         - feature_workflowsManagement.all
-      resources: "*"
-
+      resources: '*'
 
 # admin role defined in elasticsearch controller
 admin:
