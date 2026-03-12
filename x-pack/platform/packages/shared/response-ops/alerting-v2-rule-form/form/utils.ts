@@ -111,12 +111,3 @@ export const formatDuration = (duration: number, short: boolean = false): string
   const seconds = duration / 1000;
   return short ? `${seconds}s` : `${seconds} second${seconds > 1 ? 's' : ''}`;
 };
-
-export const parsePositiveIntegerInput = (rawValue: string): number | undefined => {
-  const trimmedValue = rawValue.trim();
-  if (!POSITIVE_INTEGER_REGEX.test(trimmedValue)) {
-    return undefined;
-  }
-
-  return parseInt(trimmedValue, 10);
-};
