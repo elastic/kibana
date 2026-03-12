@@ -140,32 +140,12 @@ Object {
             "must_not": Array [
               Object {
                 "exists": Object {
-                  "field": "user.entity.id",
-                },
-              },
-              Object {
-                "exists": Object {
-                  "field": "host.entity.id",
-                },
-              },
-              Object {
-                "exists": Object {
-                  "field": "host.id",
-                },
-              },
-              Object {
-                "exists": Object {
-                  "field": "host.name",
+                  "field": "user.email",
                 },
               },
               Object {
                 "exists": Object {
                   "field": "user.id",
-                },
-              },
-              Object {
-                "exists": Object {
-                  "field": "user.email",
                 },
               },
               Object {

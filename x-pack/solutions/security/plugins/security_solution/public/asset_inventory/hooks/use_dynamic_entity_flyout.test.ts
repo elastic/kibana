@@ -128,7 +128,6 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
-    // Entity store euid.getEntityIdentifiersFromDocument returns first matching set only
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,

@@ -8,10 +8,19 @@
 /**
  * Public API for the entity_store plugin.
  * Exports only constants and types needed on every load (including browser).
- * For EUID translation helpers (DSL/ESQL/Painless, entity types), use common/euid_helpers.
+ * Does NOT import domain/euid barrel so ESQL is excluded from browser bundle.
+ * For full euid including ESQL helpers, use common/euid_helpers (server-only).
  */
 
 import { z } from '@kbn/zod/v4';
+
+import { getEuidFromObject } from './domain/euid/memory';
+import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './domain/euid/painless';
+import {
+  getEuidDslFilterBasedOnDocument,
+  getEuidDslDocumentsContainsIdFilter,
+} from './domain/euid/dsl';
+import { getEuidSourceFields } from './domain/euid/identity_fields';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
@@ -19,33 +28,28 @@ export const PLUGIN_NAME = 'Entity Store';
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
 /**
- * Library API: euid helpers for use by other plugins.
+ * Library API: euid helpers for use by other plugins (browser-safe: DSL + Painless only, no ESQL).
  * Import the `euid` object instead of using the plugin start contract.
+ * For ESQL helpers (getEuidEsql*), use common/euid_helpers (server-only).
  *
  * @example
- * import { euid, type EntityType } from '@kbn/entity-store-plugin';
+ * import { euid, type EntityType } from '@kbn/entity-store/public';
  * euid.getEuidFromObject('host', doc);
- * euid.getEuidPainlessEvaluation('user');
+ * euid.getEuidDslFilterBasedOnDocument('host', identifiers);
  */
-import * as euidModule from './domain/euid';
-
 export const euid = {
-  getEuidFromObject: euidModule.getEuidFromObject,
-  getEuidPainlessEvaluation: euidModule.getEuidPainlessEvaluation,
-  getEuidPainlessRuntimeMapping: euidModule.getEuidPainlessRuntimeMapping,
-  getEuidDslFilterBasedOnDocument: euidModule.getEuidDslFilterBasedOnDocument,
-  getEuidDslDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
-  getEuidEsqlDocumentsContainsIdFilter: euidModule.getEuidEsqlDocumentsContainsIdFilter,
-  getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
-  getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
-  getEuidSourceFields: euidModule.getEuidSourceFields,
-  getEntityIdentifiersFromDocument: euidModule.getEntityIdentifiersFromDocument,
+  getEuidFromObject,
+  getEuidPainlessEvaluation,
+  getEuidPainlessRuntimeMapping,
+  getEuidDslFilterBasedOnDocument,
+  getEuidDslDocumentsContainsIdFilter,
+  getEuidSourceFields,
 };
 
 export {
   buildEntityFiltersFromEntityIdentifiers,
   buildGenericEntityFlyoutPreviewQuery,
-} from './domain/euid';
+} from './domain/euid/entity_filters';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
@@ -95,11 +99,5 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export interface IdentitySourceFields {
-  /** Fields that participate in identity (EUID composition). */
-  requiresOneOf: string[];
-  /** All field names used in EUID composition, deduplicated. */
-  identitySourceFields: string[];
-}
-
+export type { IdentitySourceFields } from './domain/euid/identity_fields';
 export type { Entity } from './domain/definitions/entity.gen';
