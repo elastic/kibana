@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -42,6 +42,9 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   error,
 }) => {
   const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
+  useEffect(() => {
+    setMetadataField(criteria?.metadata ?? '');
+  }, [criteria]);
 
   return (
     <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
@@ -117,6 +120,12 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
                     {
                       defaultMessage: 'Match type',
+                    }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
+                    {
+                      defaultMessage: 'Select matching type',
                     }
                   )}
                 >
