@@ -46,7 +46,6 @@ For the Elastic Security 9.3.2 release information, refer to [Elastic Security S
 * Fixes the **Add from library** action adding incorrect embeddable state [#257261]({{kib-pull}}257261).
 * Fixes Lens transforms [#257224]({{kib-pull}}257224).
 * Fixes an issue where dashboard panels could get stuck in an infinite loading state after an error instead of showing error messages [#257188]({{kib-pull}}257188).
-* Throws on RPC route validation errors in dev mode [#255181]({{kib-pull}}255181).
 * Fixes Maps failing to load when the stored time filter contained a `quick` mode value [#255178]({{kib-pull}}255178).
 
 **Data ingestion and Fleet**:
