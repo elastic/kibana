@@ -20,18 +20,6 @@ If the user is not available and the information cannot be found in any source, 
 
 ---
 
-## Common mistakes — never do these
-
-These are the most frequent ways this skill produces low-quality output. Check against this list before saving any draft.
-
-- **Hallucinating scenarios** — writing test scenarios for features or behaviours not explicitly described in the issue, sub-issues, linked PRs, or Figma designs. If it is not in a source, it does not belong in the test plan.
-- **Duplicating sub-issue coverage** — writing scenarios that are already covered in a sub-issue test plan. Always cross-check existing test plans found in Step 1 before writing scenarios.
-- **Speculative optional sections** — including RBAC, upgrade, CCS, multi-space, or multi-tenant sections when the issue does not explicitly warrant them. Each optional section has a clear inclusion criterion in the table in Step 3 — if the criterion is not met, omit the section entirely.
-- **UI-step Gherkin** — writing scenarios that describe clicks and UI interactions instead of user intent and expected behaviour. See `references/optional-scenarios.md` for the correct approach and a valid example.
-- **Ignoring the Core rule** — proceeding past a point of uncertainty instead of stopping and asking the user.
-
----
-
 ## Execution constraints — read before doing anything else
 
 **Sequential only — no parallel calls.** Execute every MCP tool call one at a time. Wait for each call to complete before making the next one. This applies throughout the entire skill — GitHub, Figma, Google Drive, filesystem reads, everything. Do not batch or parallelize any calls for efficiency.
@@ -74,7 +62,7 @@ If the user selects **A**, proceed as follows:
 1. Read the published test plan in full — this is the baseline.
 2. Run Steps 1 and 2 normally to gather and analyze all current context, including any PRs linked since the test plan was published.
 3. Compare the gathered context against the baseline: identify acceptance criteria, scenarios, or sections that are missing or outdated.
-4. If gaps are found: add only the missing scenarios and update only the outdated sections. Do not rewrite sections that are still accurate. Save the result to `.agents/tmp/test-plan-#<issue_number>.md` and tell the user exactly what was added or changed.
+4. If gaps are found: add only the missing scenarios and update only the outdated sections. Do not rewrite sections that are still accurate. Before saving, review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save the result to `.agents/tmp/test-plan-#<issue_number>.md` and tell the user exactly what was added or changed.
 5. After saving the draft, output the Sources Summary as defined in `references/output-formats.md`.
 6. If no gaps are found: tell the user "The existing test plan appears to be up to date. No changes are needed." Do not save a draft file.
 
@@ -115,7 +103,7 @@ If the user selects **B**, proceed normally through Steps 1, 2, and 3.
 
 6. Apply only the identified changes to the published comment content. Do not rewrite sections that are still accurate.
 
-7. Save the result to `.agents/tmp/test-plan-#<issue_number>.md`.
+7. Before saving, review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save the result to `.agents/tmp/test-plan-#<issue_number>.md`.
 
 8. Tell the user exactly what changed and what was left unchanged, so they can review the diff before publishing.
 
@@ -308,7 +296,7 @@ Write the test plan following the Document structure and Writing scenarios secti
 - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, optional section templates, and formatting rules
 - `references/output-formats.md` — scenario structure, automation coverage format, and Gherkin self-review checklist
 
-When all scenarios are written, run the Gherkin self-review from `references/output-formats.md` and fix any issues before saving.
+When all scenarios are written, run the Gherkin self-review from `references/output-formats.md` and review [`references/common-mistakes.md`](references/common-mistakes.md) — fix any issues found before saving.
 
 Before saving, append the following footer at the very end of the file — replacing `[model-identifier]` with your exact model string (e.g. `claude-sonnet-4-6`, `gpt-4o`) and `[YYYY-MM-DD]` with today's date:
 
