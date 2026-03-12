@@ -10,7 +10,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
