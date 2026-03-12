@@ -76,11 +76,6 @@ export {
   severityOrder,
 } from './src';
 
-export {
-  cloneDataViewAndUseEsqlColumnsAsFields,
-  type CloneDataViewAndUseEsqlColumnsAsFieldsDeps,
-} from './src/utils/clone_data_view_and_use_esql_columns_as_fields';
-
 export type { LogsContextService, ApmContextService, SortOrder, SortInput, SortPair } from './src';
 
 export * from './src/types';

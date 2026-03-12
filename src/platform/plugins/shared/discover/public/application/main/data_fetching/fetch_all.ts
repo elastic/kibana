@@ -14,7 +14,6 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -191,9 +190,7 @@ export function fetchAll(
         // Create enriched DataView with ES|QL column fields if available
         let esqlDataView;
         if (esqlQueryColumns && esqlQueryColumns.length > 0) {
-          esqlDataView = cloneDataViewAndUseEsqlColumnsAsFields(dataView, esqlQueryColumns, {
-            fieldFormats: services.fieldFormats,
-          });
+          esqlDataView = dataView.cloneAndUseEsqlColumnsAsFields(esqlQueryColumns);
         }
 
         dataSubjects.documents$.next({

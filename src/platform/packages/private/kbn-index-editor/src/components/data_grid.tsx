@@ -26,7 +26,6 @@ import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import type { EditLookupIndexContentContext } from '../types';
 import { type KibanaContextExtra } from '../types';
@@ -163,10 +162,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       return props.dataView;
     }
 
-    return cloneDataViewAndUseEsqlColumnsAsFields(props.dataView, props.columns, {
-      fieldFormats,
-    });
-  }, [props.dataView, props.columns, fieldFormats]);
+    return props.dataView.cloneAndUseEsqlColumnsAsFields(props.columns);
+  }, [props.dataView, props.columns]);
 
   // We render an editable header for columns that are not saved in the index.
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {

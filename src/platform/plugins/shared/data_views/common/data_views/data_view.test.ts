@@ -8,6 +8,7 @@
  */
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 import type { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
@@ -810,6 +811,155 @@ describe('IndexPattern', () => {
       expect(
         create('test', spec).toMinimalSpec({ keepFieldAttrs: [] }).fieldAttrs
       ).toMatchInlineSnapshot(`undefined`);
+    });
+  });
+
+  describe('cloneAndUseEsqlColumnsAsFields', () => {
+    test('should create a new DataView with fields from ES|QL columns', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'field1',
+          name: 'field1',
+          meta: { type: 'string', esType: 'keyword' },
+        },
+        {
+          id: 'field2',
+          name: 'field2',
+          meta: { type: 'number', esType: 'long' },
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      expect(clonedDataView).toBeInstanceOf(DataView);
+      expect(clonedDataView.id).toEqual(indexPattern.id);
+      expect(clonedDataView.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
+      expect(clonedDataView.fields.length).toEqual(2);
+      expect(clonedDataView.fields.getByName('field1')).toBeDefined();
+      expect(clonedDataView.fields.getByName('field2')).toBeDefined();
+      expect(clonedDataView.fields.getByName('field1')?.type).toEqual('string');
+      expect(clonedDataView.fields.getByName('field2')?.type).toEqual('number');
+    });
+
+    test('should mark computed columns correctly', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'regular_field',
+          name: 'regular_field',
+          meta: { type: 'string', esType: 'keyword' },
+          isComputedColumn: false,
+        },
+        {
+          id: 'computed_field',
+          name: 'computed_field',
+          meta: { type: 'number' },
+          isComputedColumn: true,
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      expect(clonedDataView.fields.getByName('regular_field')?.isComputedColumn).toBe(false);
+      expect(clonedDataView.fields.getByName('computed_field')?.isComputedColumn).toBe(true);
+    });
+
+    test('should handle counter types correctly', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'counter_field',
+          name: 'counter_field',
+          meta: { type: 'number', esType: 'counter_long' },
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      const field = clonedDataView.fields.getByName('counter_field');
+      expect(field).toBeDefined();
+      expect(field?.esTypes).toContain('long');
+      expect(field?.timeSeriesMetric).toEqual('counter');
+    });
+
+    test('should handle isNull flag', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'null_field',
+          name: 'null_field',
+          meta: { type: 'string' },
+          isNull: true,
+        },
+        {
+          id: 'non_null_field',
+          name: 'non_null_field',
+          meta: { type: 'string' },
+          isNull: false,
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      expect(clonedDataView.fields.getByName('null_field')?.isNull).toBe(true);
+      expect(clonedDataView.fields.getByName('non_null_field')?.isNull).toBe(false);
+    });
+
+    test('should preserve metaFields and shortDotsEnable from original DataView', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          fields: {},
+        },
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: true,
+        metaFields: ['_source', '_id', '_index'],
+      });
+
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'field1',
+          name: 'field1',
+          meta: { type: 'string' },
+        },
+      ];
+
+      const clonedDataView = dataView.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      expect(clonedDataView.metaFields).toEqual(['_source', '_id', '_index']);
+      expect(clonedDataView.shortDotsEnable).toBe(true);
+    });
+
+    test('should handle columns without esType', () => {
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'field_no_esType',
+          name: 'field_no_esType',
+          meta: { type: 'string' },
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      const field = clonedDataView.fields.getByName('field_no_esType');
+      expect(field).toBeDefined();
+      expect(field?.type).toEqual('string');
+      expect(field?.esTypes).toBeUndefined();
+    });
+
+    test('should not mutate the original DataView', () => {
+      const originalFieldsLength = indexPattern.fields.length;
+      const esqlColumns: DatatableColumn[] = [
+        {
+          id: 'new_field',
+          name: 'new_field',
+          meta: { type: 'string' },
+        },
+      ];
+
+      const clonedDataView = indexPattern.cloneAndUseEsqlColumnsAsFields(esqlColumns);
+
+      expect(indexPattern.fields.length).toEqual(originalFieldsLength);
+      expect(clonedDataView.fields.length).toEqual(1);
+      expect(indexPattern.fields.getByName('new_field')).toBeUndefined();
     });
   });
 });

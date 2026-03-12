@@ -36,7 +36,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -227,13 +226,7 @@ export function initializeFetch({
             // Create enriched DataView with ES|QL column fields if available
             let esqlDataView;
             if (result.esqlQueryColumns && result.esqlQueryColumns.length > 0) {
-              esqlDataView = cloneDataViewAndUseEsqlColumnsAsFields(
-                dataView,
-                result.esqlQueryColumns,
-                {
-                  fieldFormats: discoverServices.fieldFormats,
-                }
-              );
+              esqlDataView = dataView.cloneAndUseEsqlColumnsAsFields(result.esqlQueryColumns);
             }
 
             return {

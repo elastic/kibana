@@ -25,11 +25,10 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { cloneDataViewAndUseEsqlColumnsAsFields } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDataGridProps {
@@ -69,10 +68,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       return props.dataView;
     }
 
-    return cloneDataViewAndUseEsqlColumnsAsFields(props.dataView, props.columns, {
-      fieldFormats: props.fieldFormats,
-    });
-  }, [props.dataView, props.columns, props.fieldFormats]);
+    return props.dataView.cloneAndUseEsqlColumnsAsFields(props.columns);
+  }, [props.dataView, props.columns]);
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
