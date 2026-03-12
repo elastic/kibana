@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { Subscription } from 'rxjs';
 import type {
   DashboardAgentPluginPublicSetup,
@@ -26,7 +25,6 @@ export class DashboardAgentPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
-  private dashboardApi?: DashboardApi;
   private dashboardAppApiSubscription: Subscription | undefined;
 
   constructor(_initContext: PluginInitializerContext) {}
@@ -46,23 +44,12 @@ export class DashboardAgentPlugin
     // Please avoid this practice as it hides plugin size but impacts kibana load performance
     // Please remove async import.
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
-      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
-      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         attachments: plugins.agentBuilder.attachments,
-        dashboardLocator,
+        dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
         unifiedSearch: plugins.unifiedSearch,
-        getAttachedDashboardApi: () => this.dashboardApi,
-        doesSavedDashboardExist: async (dashboardId: string) => {
-          const findDashboardsService = await findDashboardsServicePromise;
-          const result = await findDashboardsService.findById(dashboardId);
-          return result.status === 'success';
-        },
+        dashboardPlugin: plugins.dashboard,
       });
-    });
-
-    this.dashboardAppApiSubscription = plugins.dashboard.dashboardAppClientApi$.subscribe((api) => {
-      this.dashboardApi = api;
     });
 
     return {};
@@ -71,6 +58,5 @@ export class DashboardAgentPlugin
   public stop() {
     this.cleanupAttachmentUi?.();
     this.dashboardAppApiSubscription?.unsubscribe();
-    this.dashboardApi = undefined;
   }
 }

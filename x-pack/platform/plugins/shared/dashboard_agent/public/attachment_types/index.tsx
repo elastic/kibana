@@ -11,7 +11,11 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { getStateFromAttachment } from './attachment_to_dashboard_state';
@@ -20,15 +24,24 @@ export const registerDashboardAttachmentUiDefinition = ({
   attachments,
   dashboardLocator,
   unifiedSearch,
-  getAttachedDashboardApi,
-  doesSavedDashboardExist,
+  dashboardPlugin,
 }: {
   attachments: AttachmentServiceStartContract;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  getAttachedDashboardApi: () => DashboardApi | undefined;
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  dashboardPlugin: DashboardStart;
 }): (() => void) => {
+  let dashboardApi: DashboardApi | undefined;
+  const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+    dashboardApi = api;
+  });
+
+  const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
+  const doesSavedDashboardExist = async (dashboardId: string) => {
+    const findDashboardsService = await findDashboardsServicePromise;
+    const result = await findDashboardsService.findById(dashboardId);
+    return result.status === 'success';
+  };
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -61,7 +74,6 @@ export const registerDashboardAttachmentUiDefinition = ({
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: () => {
-            const dashboardApi = getAttachedDashboardApi();
             if (!dashboardApi) {
               openCanvas?.();
               return;
@@ -75,5 +87,8 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
   });
 
-  return () => {};
+  return () => {
+    dashboardAppApiSubscription.unsubscribe();
+    dashboardApi = undefined;
+  };
 };
