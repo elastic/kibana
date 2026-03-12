@@ -19,7 +19,7 @@ import React, { useCallback, useMemo } from 'react';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { contentManagementService, coreServices } from '../../services/kibana_services';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
