@@ -21,8 +21,11 @@ export { RULE_FORM_ID } from './form/constants';
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';
 
+// Preview component (lazy loaded) - for displaying rule query results preview
+export { RuleResultsPreview } from './form';
+
 // Context - for consumers who need custom integrations
-export { RuleFormServicesProvider, useRuleFormServices } from './form';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
 // Mappers
 export {
@@ -38,6 +41,8 @@ export type {
   DynamicRuleFormProps,
   StandaloneRuleFormProps,
   RuleFormServices,
+  RuleFormMeta,
+  RuleFormLayout,
   RuleRequestCommon,
 } from './form';
 

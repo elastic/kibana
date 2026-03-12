@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { PrebuiltRulesFilter } from './prebuilt_rules_filter';
 
 export enum RuleCustomizationStatus {

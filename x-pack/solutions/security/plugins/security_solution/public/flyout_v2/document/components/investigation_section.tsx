@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { useKibana } from '../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../../../flyout/document_details/shared/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';

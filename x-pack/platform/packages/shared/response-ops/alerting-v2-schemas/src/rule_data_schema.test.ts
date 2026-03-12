@@ -542,6 +542,21 @@ describe('updateRuleDataSchema', () => {
     expect(result).toEqual({ metadata: { name: 'updated name' } });
   });
 
+  it('accepts an enabled field set to true', () => {
+    const result = updateRuleDataSchema.parse({ enabled: true });
+    expect(result).toEqual({ enabled: true });
+  });
+
+  it('accepts an enabled field set to false', () => {
+    const result = updateRuleDataSchema.parse({ enabled: false });
+    expect(result).toEqual({ enabled: false });
+  });
+
+  it('omits enabled when not provided', () => {
+    const result = updateRuleDataSchema.parse({});
+    expect(result).not.toHaveProperty('enabled');
+  });
+
   it('accepts a state_transition object', () => {
     const result = updateRuleDataSchema.parse({
       state_transition: { pending_count: 3, recovering_count: 5 },

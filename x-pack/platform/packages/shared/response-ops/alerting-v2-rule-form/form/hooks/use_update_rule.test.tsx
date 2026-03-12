@@ -25,7 +25,6 @@ describe('useUpdateRule', () => {
           http,
           notifications,
           ruleId,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
@@ -258,7 +257,7 @@ describe('useUpdateRule', () => {
     http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'My Updated Rule' } });
 
     await act(async () => {
-      result.current.updateRule(validFormData);
+      result.current.updateRule(validFormData, { onSuccess });
     });
 
     await waitFor(() => {
@@ -278,7 +277,7 @@ describe('useUpdateRule', () => {
     });
 
     await act(async () => {
-      result.current.updateRule(validFormData);
+      result.current.updateRule(validFormData, { onSuccess });
     });
 
     await waitFor(() => {

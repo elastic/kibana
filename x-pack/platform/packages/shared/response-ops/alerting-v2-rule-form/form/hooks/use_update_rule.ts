@@ -15,10 +15,9 @@ interface UseUpdateRuleProps {
   http: HttpStart;
   notifications: NotificationsStart;
   ruleId: string;
-  onSuccess?: () => void;
 }
 
-export const useUpdateRule = ({ http, notifications, ruleId, onSuccess }: UseUpdateRuleProps) => {
+export const useUpdateRule = ({ http, notifications, ruleId }: UseUpdateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
       return http.patch<RuleResponse>(`/internal/alerting/v2/rule/${encodeURIComponent(ruleId)}`, {
@@ -28,7 +27,6 @@ export const useUpdateRule = ({ http, notifications, ruleId, onSuccess }: UseUpd
     {
       onSuccess: (data: RuleResponse) => {
         notifications.toasts.addSuccess(`Rule '${data.metadata.name}' was updated successfully`);
-        onSuccess?.();
       },
       onError: (error: Error) => {
         notifications.toasts.addDanger(`Error updating rule: ${error.message}`);
