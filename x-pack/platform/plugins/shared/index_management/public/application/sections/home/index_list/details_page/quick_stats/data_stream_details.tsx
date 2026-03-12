@@ -139,7 +139,7 @@ export const DataStreamDetails: FunctionComponent<{ dataStreamName: string }> = 
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="calendar" />
+              <EuiIcon type="calendar" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.dataStream.lastUpdateLabel', {

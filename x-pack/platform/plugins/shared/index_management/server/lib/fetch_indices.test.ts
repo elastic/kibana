@@ -21,6 +21,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
   const getIndices = router.getMockESApiFn('indices.get');
   const getIndicesStats = router.getMockESApiFn('indices.stats');
   const getMeteringStats = router.getMockESApiFnAsSecondaryAuthUser('transport.request');
+  const getEsqlQuery = router.getMockESApiFn('esql.query');
   const mockRequest: RequestMock = {
     method: 'get',
     path: addBasePath('/indices'),
@@ -48,6 +49,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           regular_index: createTestIndexStats({ uuid: 'regular_index' }),
         },
       });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[1, 'regular_index']],
+      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [createTestIndexResponse({ name: 'regular_index', uuid: 'regular_index' })],
@@ -63,6 +71,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         indices: {
           index_with_aliases: createTestIndexStats({ uuid: 'index_with_aliases' }),
         },
+      });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[1, 'index_with_aliases']],
       });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -86,6 +101,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           frozen_index: createTestIndexStats({ uuid: 'frozen_index' }),
         },
       });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[1, 'frozen_index']],
+      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -107,6 +129,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         indices: {
           hidden_index: createTestIndexStats({ uuid: 'hidden_index' }),
         },
+      });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[1, 'hidden_index']],
       });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -130,6 +159,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
           data_stream_index: createTestIndexStats({ uuid: 'data_stream_index' }),
         },
       });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[1, 'data_stream_index']],
+      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -151,6 +187,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         indices: {
           some_other_index: createTestIndexStats({ uuid: 'some_other_index' }),
         },
+      });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [],
       });
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -188,6 +231,13 @@ describe('[Index management API Routes] fetch indices lib function', () => {
       getMeteringStats.mockResolvedValue({
         indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
       });
+      getEsqlQuery.mockResolvedValue({
+        columns: [
+          { name: 'count()', type: 'long' },
+          { name: '_index', type: 'keyword' },
+        ],
+        values: [[42, 'regular_index']],
+      });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: [
@@ -197,7 +247,7 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             aliases: 'none',
             hidden: false,
             data_stream: undefined,
-            documents: 100,
+            documents: 42,
             size: 1000,
           },
         ],

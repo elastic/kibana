@@ -100,7 +100,7 @@ export const StatusDetails: FunctionComponent<{
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documents" color="subdued" />
+              <EuiIcon type="documents" color="subdued" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="subdued">
