@@ -86,6 +86,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         const {
           created_at: createdAt,
           created_by: createdBy,
+          created_by_profile_uid: createdByProfileUid,
           description,
           id,
           interval,
@@ -98,12 +99,14 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           ecs_mapping: ecsMapping,
           updated_at: updatedAt,
           updated_by: updatedBy,
+          updated_by_profile_uid: updatedByProfileUid,
           prebuilt,
         } = savedQuery.attributes;
 
         const data: SavedQueryResponse = {
           created_at: createdAt,
           created_by: createdBy,
+          created_by_profile_uid: createdByProfileUid,
           description,
           id,
           removed,
@@ -116,6 +119,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           query,
           updated_at: updatedAt,
           updated_by: updatedBy,
+          updated_by_profile_uid: updatedByProfileUid,
           prebuilt,
           saved_object_id: savedQuery.id,
         };

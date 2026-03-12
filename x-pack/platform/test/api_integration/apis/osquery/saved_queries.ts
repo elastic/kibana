@@ -52,6 +52,12 @@ export default function ({ getService }: FtrProviderContext) {
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', osqueryPublicApiVersion);
 
+  const findSavedQueriesWithParams = (params: string) =>
+    supertest
+      .get(`/api/osquery/saved_queries?${params}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', osqueryPublicApiVersion);
+
   describe('Saved queries', () => {
     it('creates, reads, and deletes a saved query', async () => {
       const savedQueryId = `saved-query-${Date.now()}`;
@@ -79,6 +85,95 @@ export default function ({ getService }: FtrProviderContext) {
 
       const deleteResponse = await deleteSavedQuery(savedObjectId);
       expect(deleteResponse.status).to.be(200);
+    });
+
+    describe('profile_uid fields', () => {
+      let savedObjectId: string;
+      const queryId = `profile-uid-query-${Date.now()}`;
+
+      before(async () => {
+        const response = await createSavedQuery(queryId).expect(200);
+        savedObjectId = response.body.data.saved_object_id;
+      });
+
+      after(async () => {
+        if (savedObjectId) {
+          await deleteSavedQuery(savedObjectId);
+        }
+      });
+
+      it('includes profile_uid fields on create response', async () => {
+        const response = await createSavedQuery(`profile-uid-query-2-${Date.now()}`).expect(200);
+        const { data } = response.body;
+        expect(data).to.have.property('created_by_profile_uid');
+        expect(data).to.have.property('updated_by_profile_uid');
+        await deleteSavedQuery(data.saved_object_id);
+      });
+
+      it('includes profile_uid fields on read response', async () => {
+        const response = await getSavedQuery(savedObjectId).expect(200);
+        expect(response.body.data).to.have.property('created_by_profile_uid');
+        expect(response.body.data).to.have.property('updated_by_profile_uid');
+      });
+
+      it('includes profile_uid fields in find response', async () => {
+        const response = await findSavedQueries().expect(200);
+        const match = response.body.data.find((q: { id: string }) => q.id === queryId);
+        expect(match).to.be.ok();
+        expect(match).to.have.property('created_by_profile_uid');
+        expect(match).to.have.property('updated_by_profile_uid');
+      });
+    });
+
+    describe('find with search and createdBy params', () => {
+      const uniquePrefix = `findtest-${Date.now()}`;
+      const queryIds: string[] = [];
+      const savedObjectIds: string[] = [];
+
+      before(async () => {
+        for (const suffix of ['alpha', 'beta', 'gamma']) {
+          const id = `${uniquePrefix}-${suffix}`;
+          const response = await createSavedQuery(id).expect(200);
+          queryIds.push(id);
+          savedObjectIds.push(response.body.data.saved_object_id);
+        }
+      });
+
+      after(async () => {
+        for (const soId of savedObjectIds) {
+          await deleteSavedQuery(soId);
+        }
+      });
+
+      it('filters by search term matching query id', async () => {
+        const response = await findSavedQueriesWithParams(`search=${uniquePrefix}-alpha`).expect(
+          200
+        );
+        expect(response.body.total).to.be.greaterThan(0);
+        expect(
+          response.body.data.some((q: { id: string }) => q.id === `${uniquePrefix}-alpha`)
+        ).to.be(true);
+      });
+
+      it('returns empty results for non-matching search', async () => {
+        const response = await findSavedQueriesWithParams('search=zzzznonexistent999').expect(200);
+        expect(response.body.total).to.be(0);
+      });
+
+      it('filters by createdBy', async () => {
+        const response = await findSavedQueriesWithParams(`createdBy=elastic&pageSize=100`).expect(
+          200
+        );
+        expect(response.body.total).to.be.greaterThan(0);
+        const creators = response.body.data.map((q: { created_by: string }) => q.created_by);
+        const uniqueCreators = [...new Set(creators)];
+        expect(uniqueCreators).to.eql(['elastic']);
+      });
+
+      it('returns empty results for non-matching createdBy', async () => {
+        const response = await findSavedQueriesWithParams('createdBy=nonexistentuser').expect(200);
+        expect(response.body.total).to.be(0);
+      });
     });
   });
 }

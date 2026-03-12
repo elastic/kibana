@@ -18,6 +18,18 @@ export const savedQueryModelVersion1: SavedObjectsModelVersion = {
   ],
 };
 
+export const savedQueryModelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        created_by_profile_uid: { type: 'keyword' },
+        updated_by_profile_uid: { type: 'keyword' },
+      },
+    },
+  ],
+};
+
 export const packSavedObjectModelVersion1: SavedObjectsModelVersion = {
   changes: [
     {
@@ -28,6 +40,18 @@ export const packSavedObjectModelVersion1: SavedObjectsModelVersion = {
             timeout: { type: 'short' },
           },
         },
+      },
+    },
+  ],
+};
+
+export const packSavedObjectModelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        created_by_profile_uid: { type: 'keyword' },
+        updated_by_profile_uid: { type: 'keyword' },
       },
     },
   ],
