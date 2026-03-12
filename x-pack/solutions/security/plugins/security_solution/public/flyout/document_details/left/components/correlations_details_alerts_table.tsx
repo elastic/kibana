@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, useMemo, useCallback, type ReactElement, type ReactNode } from 'react';
-import { type Criteria, EuiBasicTable, EuiCallOut, formatDate } from '@elastic/eui';
+import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import { isRight } from 'fp-ts/Either';
@@ -24,6 +24,7 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/component
 import { getDataProvider } from '../../../../common/components/event_details/use_action_cell_data_provider';
 import { AlertPreviewButton } from '../../../shared/components/alert_preview_button';
 import { PreviewLink } from '../../../shared/components/preview_link';
+import { FlyoutMissingAlertsPrivilegeCallout } from '../../../shared/components/flyout_missing_alerts_privilege_callout';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -220,22 +221,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   );
 
   const panelContent = !hasAlertsRead ? (
-    <EuiCallOut
-      iconType="lock"
-      color="warning"
-      title={i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.correlations.missingAlertsPrivilegeTitle',
-        { defaultMessage: 'Privileges required' }
-      )}
-      data-test-subj={`${dataTestSubj}MissingAlertsPrivilege`}
-    >
-      <p>
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.missingAlertsPrivilegeDescription"
-          defaultMessage="To view related alerts, you need the Alerts feature read privilege. Contact your Kibana administrator to request access."
-        />
-      </p>
-    </EuiCallOut>
+    <FlyoutMissingAlertsPrivilegeCallout data-test-subj={`${dataTestSubj}MissingAlertsPrivilege`} />
   ) : (
     <EuiBasicTable<Record<string, unknown>>
       data-test-subj={`${dataTestSubj}Table`}
