@@ -52,6 +52,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const fieldsMetadataClient = await startPlugins.fieldsMetadata.getClient(request);
 
     return {
       core: coreContext,
@@ -80,6 +81,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       inference: startPlugins.inference,
       savedObjectsClient,
       esClient,
+      fieldsMetadataClient,
     };
   }
 }
