@@ -60,6 +60,7 @@ import {
 import type { IntegrationTile } from './ingest_hub_data';
 import { IntegrationCard, CompactIntegrationCard, CardLogoIcon } from './ingest_hub_components';
 import { KubernetesFlyout } from './kubernetes_flyout';
+import { AwsFlyout } from './aws_flyout';
 import rocketImg from './assets/rocket.png';
 import integrationsHeaderImg from './assets/integrations-header.png';
 import apiEndpointHeaderImg from './assets/api-endpoint-header.png';
@@ -1340,7 +1341,7 @@ export const IngestHubPage: React.FC = () => {
       <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         {renderSectionPageHeader(
           rocketImg,
-          'Welcome to Elastic Observability',
+          'Get started with Elastic Observability',
           'Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack'
         )}
       </div>
@@ -1370,7 +1371,7 @@ export const IngestHubPage: React.FC = () => {
                     <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
                       <EuiIcon type="plusInCircle" size="m" />
                     </span>
-                    Get started adding your data
+                    Add your data
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
@@ -2042,20 +2043,7 @@ export const IngestHubPage: React.FC = () => {
               paddingBottom: 40,
             }}
           >
-            <div
-              style={{
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                borderRadius: 12,
-                padding: 4,
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src={rocketImg}
-                alt="Welcome"
-                style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
-              />
-            </div>
+            <EuiIcon type="logoObservability" size="xxl" />
             <div>
               <EuiTitle size="l">
                 <h2>Welcome to Elastic Observability</h2>
@@ -2071,7 +2059,7 @@ export const IngestHubPage: React.FC = () => {
           <div style={{ height: 32 }} />
           <div css={css`margin-bottom: 32px;`}>
             <EuiTitle size="s">
-              <h3>Get started adding your data</h3>
+              <h3>Add your data</h3>
             </EuiTitle>
             <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
               <p>Connect your data sources to start monitoring your infrastructure.</p>
@@ -2114,7 +2102,14 @@ export const IngestHubPage: React.FC = () => {
         />
       )}
 
-      {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && (
+      {welcomeChildTile && welcomeChildTile.id === 'aws' && (
+        <AwsFlyout
+          logoUrl={welcomeChildTile.logoUrl ?? ''}
+          onClose={() => setWelcomeChildTile(null)}
+        />
+      )}
+
+      {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && welcomeChildTile.id !== 'aws' && (
         <EuiFlyout
           ownFocus
           onClose={() => setWelcomeChildTile(null)}
@@ -2204,7 +2199,14 @@ export const IngestHubPage: React.FC = () => {
         />
       )}
 
-      {flyoutTile && flyoutTile.id !== 'kubernetes' && (
+      {flyoutTile && flyoutTile.id === 'aws' && (
+        <AwsFlyout
+          logoUrl={flyoutTile.logoUrl ?? ''}
+          onClose={() => setFlyoutTile(null)}
+        />
+      )}
+
+      {flyoutTile && flyoutTile.id !== 'kubernetes' && flyoutTile.id !== 'aws' && (
         <EuiFlyout
           ownFocus
           onClose={() => setFlyoutTile(null)}
@@ -2296,20 +2298,7 @@ export const IngestHubPage: React.FC = () => {
                 gap: 16,
               }}
             >
-              <div
-                style={{
-                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                  borderRadius: 12,
-                  padding: 4,
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={rocketImg}
-                  alt="Welcome"
-                  style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
-                />
-              </div>
+              <EuiIcon type="logoObservability" size="xxl" />
               <div>
                 <EuiTitle size="l">
                   <h2 id="getStartedFlyoutTitle">Welcome to Elastic Observability</h2>
@@ -2379,14 +2368,23 @@ export const IngestHubPage: React.FC = () => {
             />
           )}
 
-          {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && (
+          {welcomeChildTile && welcomeChildTile.id === 'aws' && (
+            <AwsFlyout
+              logoUrl={welcomeChildTile.logoUrl ?? ''}
+              onClose={() => setWelcomeChildTile(null)}
+              isChild
+              hideCloseButton={isStopFillVersion}
+            />
+          )}
+
+          {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && welcomeChildTile.id !== 'aws' && (
             <EuiFlyout
               onClose={() => setWelcomeChildTile(null)}
               aria-labelledby="welcomeChildFlyoutTitle"
               session="start"
               flyoutMenuProps={{ title: welcomeChildTile.name }}
               css={css`
-                inline-size: 77vw !important;
+                inline-size: 65vw !important;
                 animation-duration: 0s !important;
                 transition-duration: 0s !important;
                 [class*="euiFlyoutMenu__container"] {

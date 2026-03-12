@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
-  EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckableCard,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,8 +19,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiSteps,
   EuiSwitch,
@@ -70,11 +70,25 @@ const COLLECTOR_OPTIONS = [
   },
 ];
 
+const K8S_DASHBOARDS = [
+  '[Kubernetes] Cluster Overview',
+  '[Kubernetes] Node Metrics',
+  '[Kubernetes] Pod Metrics',
+  '[Kubernetes] Deployments',
+  '[Kubernetes] DaemonSets',
+  '[Kubernetes] StatefulSets',
+  '[Kubernetes] Container Logs',
+  '[Kubernetes] API Server',
+  '[Kubernetes] Controller Manager',
+  '[Kubernetes] Scheduler',
+  '[Kubernetes] Proxy',
+  '[Kubernetes] Volumes',
+];
+
 export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onClose, isChild, hideCloseButton, ownFocus: ownFocusProp }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedCollector, setSelectedCollector] = useState('new-collector');
   const [instrumentApp, setInstrumentApp] = useState(false);
-  const [assetsExpanded, setAssetsExpanded] = useState(false);
 
   const steps = [
     {
@@ -88,7 +102,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
               configuration.
             </p>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
           <fieldset>
             <EuiFlexGroup gutterSize="m" responsive={false} css={css`
               .euiCheckableCard {
@@ -151,7 +165,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
           <EuiText size="s" color="subdued">
             <p>Run this command to add the OpenTelemetry Helm chart repository.</p>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
           <EuiCodeBlock language="bash" isCopyable paddingSize="m" fontSize="s">
             {HELM_REPO_COMMAND}
           </EuiCodeBlock>
@@ -171,7 +185,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
               in our documentation.
             </p>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
           <EuiCodeBlock language="bash" isCopyable paddingSize="m" fontSize="s">
             {INSTALL_COMMANDS}
           </EuiCodeBlock>
@@ -189,7 +203,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
               annotated pods for some languages.
             </p>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="l" />
           <EuiSwitch
             label="Instrument application (Optional)"
             checked={instrumentApp}
@@ -207,43 +221,49 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
           <EuiText size="s" color="subdued">
             <p>When finished come back and test your connection to see incoming data.</p>
           </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>
-                    Establishing connection/Validating data flow/Preparing your assets...
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiCallOut
+            color="primary"
+            css={css`
+              border-radius: ${euiTheme.border.radius.small};
+            `}
+            title={
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>Waiting for connection...</EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="k8sDashboardsAccordion"
+            buttonContent={`Dashboards available once installed (${K8S_DASHBOARDS.length})`}
+            paddingSize="s"
+          >
             <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              0/24 Kubernetes assets installed.
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiButtonEmpty
-              data-test-subj="kubernetesFlyoutViewAssetsButton"
-              size="xs"
-              flush="left"
-              iconType={assetsExpanded ? 'arrowDown' : 'arrowRight'}
-              onClick={() => setAssetsExpanded(!assetsExpanded)}
-            >
-              View assets
-            </EuiButtonEmpty>
-            {assetsExpanded && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiText size="xs" color="subdued">
-                  <p>Assets will appear here as they are installed.</p>
-                </EuiText>
-              </>
-            )}
-          </EuiPanel>
+            <EuiPanel color="plain" hasBorder paddingSize="m">
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                {K8S_DASHBOARDS.map((name, idx) => (
+                  <EuiFlexItem key={`${name}-${idx}`}>
+                    <EuiFlexGroup
+                      gutterSize="s"
+                      alignItems="center"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="dashedCircle" size="s" color="subdued" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="xs">{name}</EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiAccordion>
         </>
       ),
     },
@@ -262,7 +282,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
           }
         : {})}
       css={css`
-        inline-size: ${isChild ? '77vw' : '50vw'} !important;
+        inline-size: ${isChild ? '65vw' : '50vw'} !important;
         ${isChild ? `
           animation-duration: 0s !important;
           transition-duration: 0s !important;
@@ -304,7 +324,8 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
           titleSize="xs"
           css={css`
             .euiStep__content {
-              margin-block-start: ${euiTheme.size.xs};
+              margin-block-start: 0 !important;
+              padding-block-start: ${euiTheme.size.s} !important;
               padding-block-end: ${euiTheme.size.l};
             }
             .euiStep__title {
@@ -320,6 +341,7 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
             <EuiButton
               data-test-subj="kubernetesFlyoutSeeMyDataButton"
               fill
+              disabled
               onClick={onClose}
             >
               See my data
