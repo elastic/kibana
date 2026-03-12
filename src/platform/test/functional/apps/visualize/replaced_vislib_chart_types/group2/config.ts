@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TracesExperiencePage } from './traces_experience';
-export type { ApmPage } from './apm';
-export type { TracesFlyout } from './flyout';
-export type { TracesGrid } from './grid';
-export type { TracesCharts } from './charts';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const baseConfig = await readConfigFile(require.resolve('../group1/config.ts'));
+
+  return {
+    ...baseConfig.getAll(),
+    testFiles: [require.resolve('.')],
+  };
+}
