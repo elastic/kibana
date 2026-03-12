@@ -34,12 +34,6 @@ export function WaterfallSizeWarning({
   discoverHref,
   'data-test-subj': dataTestSubj,
 }: WaterfallSizeWarningProps) {
-  const sharedValues = {
-    traceDocsTotal,
-    maxTraceItems,
-    configKey: <code>{'xpack.apm.ui.maxTraceItems'}</code>,
-  };
-
   return (
     <EuiCallOut
       announceOnMount
@@ -51,9 +45,10 @@ export function WaterfallSizeWarning({
         discoverHref ? (
           <FormattedMessage
             id="xpack.apm.waterfall.exceedsMax.withDiscoverLink"
-            defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via {configKey} to see the full trace, or {discoverLink}."
+            defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via xpack.apm.ui.maxTraceItems to see the full trace, or {discoverLink}."
             values={{
-              ...sharedValues,
+              traceDocsTotal,
+              maxTraceItems,
               discoverLink: (
                 <EuiLink data-test-subj={`${dataTestSubj}DiscoverLink`} href={discoverHref}>
                   <FormattedMessage
@@ -67,8 +62,8 @@ export function WaterfallSizeWarning({
         ) : (
           <FormattedMessage
             id="xpack.apm.waterfall.exceedsMax"
-            defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via {configKey} to see the full trace."
-            values={sharedValues}
+            defaultMessage="The number of items in this trace is {traceDocsTotal} which is higher than the current limit of {maxTraceItems}. Please increase the limit via xpack.apm.ui.maxTraceItems to see the full trace."
+            values={{ traceDocsTotal, maxTraceItems }}
           />
         )
       }
