@@ -20,6 +20,30 @@ import {
 } from './demos/online_boutique/config';
 import { onlineBoutiqueManifests } from './demos/online_boutique/manifests';
 import { ONLINE_BOUTIQUE_SCENARIOS } from './demos/online_boutique/scenarios';
+import {
+  bankOfAnthosConfig,
+  SERVICE_DEFAULTS as BANK_OF_ANTHOS_SERVICE_DEFAULTS,
+} from './demos/bank_of_anthos/config';
+import { bankOfAnthosManifests } from './demos/bank_of_anthos/manifests';
+import { BANK_OF_ANTHOS_SCENARIOS } from './demos/bank_of_anthos/scenarios';
+import {
+  quarkusSuperHeroesConfig,
+  SERVICE_DEFAULTS as QUARKUS_SUPER_HEROES_SERVICE_DEFAULTS,
+} from './demos/quarkus_super_heroes/config';
+import { quarkusSuperHeroesManifests } from './demos/quarkus_super_heroes/manifests';
+import { QUARKUS_SUPER_HEROES_SCENARIOS } from './demos/quarkus_super_heroes/scenarios';
+import {
+  awsRetailStoreConfig,
+  SERVICE_DEFAULTS as AWS_RETAIL_STORE_SERVICE_DEFAULTS,
+} from './demos/aws_retail_store/config';
+import { awsRetailStoreManifests } from './demos/aws_retail_store/manifests';
+import { AWS_RETAIL_STORE_SCENARIOS } from './demos/aws_retail_store/scenarios';
+import {
+  rustK8sDemoConfig,
+  SERVICE_DEFAULTS as RUST_K8S_DEMO_SERVICE_DEFAULTS,
+} from './demos/rust_k8s_demo/config';
+import { rustK8sDemoManifests } from './demos/rust_k8s_demo/manifests';
+import { RUST_K8S_DEMO_SCENARIOS } from './demos/rust_k8s_demo/scenarios';
 
 /**
  * Registry of all available demo configurations
@@ -27,6 +51,10 @@ import { ONLINE_BOUTIQUE_SCENARIOS } from './demos/online_boutique/scenarios';
 export const DEMO_CONFIGS: Record<DemoType, DemoConfig> = {
   'otel-demo': otelDemoConfig,
   'online-boutique': onlineBoutiqueConfig,
+  'bank-of-anthos': bankOfAnthosConfig,
+  'quarkus-super-heroes': quarkusSuperHeroesConfig,
+  'aws-retail-store': awsRetailStoreConfig,
+  'rust-k8s-demo': rustK8sDemoConfig,
 };
 
 /**
@@ -35,6 +63,10 @@ export const DEMO_CONFIGS: Record<DemoType, DemoConfig> = {
 export const DEMO_MANIFESTS: Record<DemoType, DemoManifestGenerator> = {
   'otel-demo': otelDemoManifests,
   'online-boutique': onlineBoutiqueManifests,
+  'bank-of-anthos': bankOfAnthosManifests,
+  'quarkus-super-heroes': quarkusSuperHeroesManifests,
+  'aws-retail-store': awsRetailStoreManifests,
+  'rust-k8s-demo': rustK8sDemoManifests,
 };
 
 /**
@@ -43,6 +75,10 @@ export const DEMO_MANIFESTS: Record<DemoType, DemoManifestGenerator> = {
 export const DEMO_SCENARIOS: Record<DemoType, FailureScenario[]> = {
   'otel-demo': OTEL_DEMO_SCENARIOS,
   'online-boutique': ONLINE_BOUTIQUE_SCENARIOS,
+  'bank-of-anthos': BANK_OF_ANTHOS_SCENARIOS,
+  'quarkus-super-heroes': QUARKUS_SUPER_HEROES_SCENARIOS,
+  'aws-retail-store': AWS_RETAIL_STORE_SCENARIOS,
+  'rust-k8s-demo': RUST_K8S_DEMO_SCENARIOS,
 };
 
 /**
@@ -51,6 +87,10 @@ export const DEMO_SCENARIOS: Record<DemoType, FailureScenario[]> = {
 export const DEMO_SERVICE_DEFAULTS: Record<DemoType, Record<string, Record<string, string>>> = {
   'otel-demo': OTEL_SERVICE_DEFAULTS,
   'online-boutique': BOUTIQUE_SERVICE_DEFAULTS,
+  'bank-of-anthos': BANK_OF_ANTHOS_SERVICE_DEFAULTS,
+  'quarkus-super-heroes': QUARKUS_SUPER_HEROES_SERVICE_DEFAULTS,
+  'aws-retail-store': AWS_RETAIL_STORE_SERVICE_DEFAULTS,
+  'rust-k8s-demo': RUST_K8S_DEMO_SERVICE_DEFAULTS,
 };
 
 /**
@@ -113,6 +153,22 @@ export function getScenariosByCategory(
  */
 export function listAvailableDemos(): DemoType[] {
   return Object.keys(DEMO_CONFIGS) as DemoType[];
+}
+
+/**
+ * List demos that are ready to use (don't require custom images)
+ */
+export function listReadyDemos(): DemoType[] {
+  return (Object.keys(DEMO_CONFIGS) as DemoType[]).filter(
+    (type) => !DEMO_CONFIGS[type].requiresCustomImages
+  );
+}
+
+/**
+ * Check if a demo requires custom-built images
+ */
+export function requiresCustomImages(type: DemoType): boolean {
+  return DEMO_CONFIGS[type]?.requiresCustomImages ?? false;
 }
 
 /**

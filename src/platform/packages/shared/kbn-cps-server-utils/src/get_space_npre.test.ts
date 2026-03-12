@@ -13,28 +13,28 @@ const mockRequest = (pathname: string) => ({ url: new URL(`http://localhost:5601
 
 describe('getSpaceNPRE', () => {
   describe('when called with a spaceId string', () => {
-    it('returns the NPRE for the given space', () => {
-      expect(getSpaceNPRE('my-space')).toBe('kibana_space_my-space_default');
+    it('returns the NPRE reference for the given space', () => {
+      expect(getSpaceNPRE('my-space')).toBe('@kibana_space_my-space_default');
     });
 
     it('uses "default" when spaceId is an empty string', () => {
-      expect(getSpaceNPRE('')).toBe('kibana_space_default_default');
+      expect(getSpaceNPRE('')).toBe('@kibana_space_default_default');
     });
 
-    it('returns the NPRE for the default space when spaceId is "default"', () => {
-      expect(getSpaceNPRE('default')).toBe('kibana_space_default_default');
+    it('returns the NPRE reference for the default space when spaceId is "default"', () => {
+      expect(getSpaceNPRE('default')).toBe('@kibana_space_default_default');
     });
   });
 
   describe('when called with a request object', () => {
-    it('extracts the space from the request URL and returns the NPRE', () => {
+    it('extracts the space from the request URL and returns the NPRE reference', () => {
       expect(getSpaceNPRE(mockRequest('/s/my-space/api/foo'))).toBe(
-        'kibana_space_my-space_default'
+        '@kibana_space_my-space_default'
       );
     });
 
-    it('returns the default space NPRE when the request URL has no space segment', () => {
-      expect(getSpaceNPRE(mockRequest('/api/foo'))).toBe('kibana_space_default_default');
+    it('returns the default space NPRE reference when the request URL has no space segment', () => {
+      expect(getSpaceNPRE(mockRequest('/api/foo'))).toBe('@kibana_space_default_default');
     });
 
     it('throws when the request has no url (e.g. a FakeRequest passed at runtime)', () => {

@@ -39,6 +39,13 @@ export interface UseContentListSearchReturn {
  * used for data fetching. When search is disabled via `features.search: false`,
  * `setSearch` becomes a no-op and `isSupported` returns `false`.
  *
+ * When tag services are available, the toolbar parses tag filter syntax
+ * (e.g., `tag:production`) from the query text and passes the full
+ * {@link ActiveFilters} object to `setSearch`. To toggle a tag without
+ * going through the search bar (e.g., a tag badge click), use
+ * {@link useTagFilterToggle} — it rebuilds the query text via EUI's `Query`
+ * API so the toolbar stays in sync.
+ *
  * @throws Error if used outside `ContentListProvider`.
  * @returns Object containing `search` text, `setSearch` function, and `isSupported` flag.
  *

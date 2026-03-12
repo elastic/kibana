@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { SetAlertsStatusByIds } from '../../signals/set_signal_status/set_signals_status_route.gen';
 

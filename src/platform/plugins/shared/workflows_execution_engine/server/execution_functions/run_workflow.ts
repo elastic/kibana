@@ -59,10 +59,24 @@ export async function runWorkflow({
     workflowsExecutionEngine
   );
   setupSpan?.end();
-  // Span for runtime initialization
+
+  // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
-  await workflowRuntime.start();
-  startSpan?.end();
+  try {
+    await workflowRuntime.start();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(
+      `Workflow execution ${workflowRunId} failed during runtime start: ${errorMessage}`
+    );
+    if (errorStack) {
+      logger.error(`Workflow execution ${workflowRunId} runtime start error stack: ${errorStack}`);
+    }
+    throw error;
+  } finally {
+    startSpan?.end();
+  }
 
   // Span for the main execution loop
   const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');

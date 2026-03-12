@@ -9,8 +9,11 @@
  * Referenced content for a skill.
  */
 export interface SkillReferencedContent {
+  /** Display name for the referenced content. */
   name: string;
+  /** Path relative to the skill (e.g. ./.cursor/skills/foo/SKILL.md). */
   relativePath: string;
+  /** Raw content of the referenced file. */
   content: string;
 }
 
@@ -48,7 +51,19 @@ export interface PublicSkillDefinition {
    * Whether this skill is built-in (readonly) or user-created.
    */
   readonly: boolean;
+  /**
+   * If this skill was installed from a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }
+
+/**
+ * Lightweight version of {@link PublicSkillDefinition} used for listing.
+ * Omits heavy `content` and `referenced_content` fields; carries only the count.
+ */
+export type PublicSkillSummary = Omit<PublicSkillDefinition, 'content' | 'referenced_content'> & {
+  referenced_content_count: number;
+};
 
 /**
  * Shape for creating a persisted (user-created) skill.
@@ -78,6 +93,10 @@ export interface PersistedSkillCreateRequest {
    * Tool IDs from the tool registry.
    */
   tool_ids: string[];
+  /**
+   * If this skill is managed by a plugin, the plugin name.
+   */
+  plugin_id?: string;
 }
 
 /**

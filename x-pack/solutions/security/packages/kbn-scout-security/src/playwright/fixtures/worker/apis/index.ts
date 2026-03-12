@@ -15,3 +15,6 @@ export { getEntityAnalyticsApiService } from './entity_analytics';
 export type { EntityAnalyticsApiService } from './entity_analytics';
 export { getCloudConnectorApiService } from './cloud_connector';
 export type { CloudConnectorApiService } from './cloud_connector';
+
+export { getTimelineApiService } from './timeline';
+export type { TimelineApiService } from './timeline';

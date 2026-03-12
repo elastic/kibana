@@ -94,7 +94,7 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
     Default: `false`
 
 `xpack.actions.customHostSettings[n].smtp.requireTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
-: A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+:   A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
     Data type: `bool`
     Default: `false`
@@ -891,7 +891,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 
     :::{note}
     :applies_to: serverless:
-    In Serverless, the maximum number of rules to run per minute is set to `400` and can't be configured.
+    In Serverless, the maximum number of rules to run per minute is set to `800` for Elastic Security project while `400` for other projects. This setting can't be configured.
     :::
 
 `xpack.alerting.rules.minimumScheduleInterval.value` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
@@ -915,7 +915,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   Specifies the maximum number of alerts that a rule can generate each time detection checks run.
 
     ::::{warning}
-    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload, however setting a value higher than the default (`1000`) is not recommended or supported. Doing so could strain system resources and lead to performance issues, delays in alert processing, and potential disruptions during high alert activity periods.
+    The exact number of alerts your cluster can safely handle depends on your cluster configuration and workload. While it is technically possible to increase this value above 1000, doing so is not recommended and not supported. Increasing this limit can significantly affect {{kib}} and {{es}} performance and memory usage. Carefully evaluate the impact on your deployment before making this change.
     ::::
 
     Data type: `int`
