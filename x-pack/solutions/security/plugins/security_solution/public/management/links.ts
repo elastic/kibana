@@ -62,6 +62,7 @@ import { HostIsolationExceptionsApiClient } from './pages/host_isolation_excepti
 import { IconAssetCriticality } from '../common/icons/asset_criticality';
 import { IconTrustedDevices } from '../common/icons/trusted_devices';
 import { IconEndpointExceptions } from '../common/icons/endpoint_exceptions';
+import { IconScriptLibrary } from '../common/icons/script_library';
 
 const categories = [
   {
@@ -260,8 +261,7 @@ export const links: LinkItem = {
       description: i18n.translate('xpack.securitySolution.appLinks.scriptsLibraryDescription', {
         defaultMessage: 'View and manage your scripts library.',
       }),
-      // TODO: Replace with a custom icon same as other links when available
-      landingIcon: 'broom',
+      landingIcon: IconScriptLibrary,
       path: SCRIPTS_LIBRARY_PATH,
       skipUrlState: true,
       hideTimeline: true,

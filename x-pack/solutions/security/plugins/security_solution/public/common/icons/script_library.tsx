@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-export const ScriptIcon = memo((props: React.SVGProps<SVGSVGElement>) => {
+export const IconScriptLibrary: React.FC<React.SVGProps<SVGSVGElement>> = (props) => {
   const isDarkMode = useKibanaIsDarkMode();
+  const { height, ...rest } = props;
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       width="100%"
-      height={24}
+      height={height ?? 32}
       viewBox="0 0 24 24"
+      {...rest}
     >
       <path
         fill="currentColor"
@@ -38,6 +40,4 @@ export const ScriptIcon = memo((props: React.SVGProps<SVGSVGElement>) => {
       />
     </svg>
   );
-});
-
-ScriptIcon.displayName = 'ScriptIcon';
+};

@@ -18,13 +18,16 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IconScriptLibrary } from '../../../../../../common/icons/script_library';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { ScriptIcon } from './script_icon';
 
 interface NewPageBannerProps {
   onDismiss: () => void;
   'data-test-subj'?: string;
 }
+const Icon = () => {
+  return <IconScriptLibrary height={24} />;
+};
 
 export const NewPageBanner: React.FC<NewPageBannerProps> = ({
   onDismiss,
@@ -51,7 +54,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
       >
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={false} data-test-subj={getTestId('banner-icon')}>
-            <EuiIcon type={ScriptIcon} aria-hidden={true} />
+            <EuiIcon type={Icon} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
