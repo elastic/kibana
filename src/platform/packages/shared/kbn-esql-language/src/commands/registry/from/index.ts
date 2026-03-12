@@ -26,7 +26,7 @@ export const fromCommand = {
   methods: fromCommandMethods,
   metadata: {
     type: 'source' as const,
-    subquerySupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
+    subquerySupport: true,
     viewsSupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     description: i18n.translate('kbn-esql-language.esql.definitions.fromDoc', {
       defaultMessage:
