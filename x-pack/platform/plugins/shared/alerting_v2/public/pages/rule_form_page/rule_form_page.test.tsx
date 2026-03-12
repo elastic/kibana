@@ -315,7 +315,7 @@ describe('RuleFormPage', () => {
       expect(screen.getByText('Rule not found')).toBeInTheDocument();
     });
 
-    it('renders the "Create rule" page title in clone mode', () => {
+    it('renders the "Create rule" page title', () => {
       mockUseFetchRule.mockReturnValue({
         data: {
           id: 'rule-1',
