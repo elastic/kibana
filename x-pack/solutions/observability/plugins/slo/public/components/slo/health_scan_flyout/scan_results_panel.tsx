@@ -9,6 +9,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   type EuiBasicTableColumn,
+  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -91,16 +92,26 @@ function getHealthStatus(result: HealthScanResultResponse): string {
       });
 }
 
+const PAGE_SIZE = 5;
+
 export function ScanResultsPanel({ scanId }: Props) {
   const { uiSettings, http } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
   const [isPending, setIsPending] = useState<boolean>(true);
+  const [searchAfter, setSearchAfter] = useState<string | undefined>(undefined);
+  const [searchAfterHistory, setSearchAfterHistory] = useState<Array<string | undefined>>([]);
+
+  useEffect(() => {
+    setSearchAfter(undefined);
+    setSearchAfterHistory([]);
+  }, [scanId]);
 
   const { data, isLoading, isError } = useGetHealthScanResults({
     scanId,
     problematic: true,
     allSpaces: true,
-    size: 100,
+    size: PAGE_SIZE,
+    searchAfter,
     refetchInterval: isPending ? 5000 : false,
   });
 
@@ -109,6 +120,21 @@ export function ScanResultsPanel({ scanId }: Props) {
       setIsPending(data.scan.status !== 'completed');
     }
   }, [isLoading, data]);
+
+  const handleNextPage = () => {
+    if (data?.searchAfter) {
+      setSearchAfterHistory((prev) => [...prev, searchAfter]);
+      setSearchAfter(JSON.stringify(data.searchAfter));
+    }
+  };
+  const handlePreviousPage = () => {
+    const newHistory = [...searchAfterHistory];
+    const previousCursor = newHistory.pop();
+    setSearchAfterHistory(newHistory);
+    setSearchAfter(previousCursor);
+  };
+
+  const pageIndex = searchAfterHistory.length;
 
   const columns: Array<EuiBasicTableColumn<HealthScanResultResponse>> = [
     {
@@ -151,7 +177,7 @@ export function ScanResultsPanel({ scanId }: Props) {
     },
   ];
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" style={{ minHeight: 200 }}>
         <EuiFlexItem grow={false}>
@@ -295,11 +321,56 @@ export function ScanResultsPanel({ scanId }: Props) {
               tableCaption="Problematic health scan results"
               items={data?.results ?? []}
               columns={columns}
+              loading={isLoading}
               rowProps={(result) => ({
                 'data-test-subj': `healthScanResult-${result.slo.id}`,
               })}
               data-test-subj="healthScanResultsTable"
             />
+
+            {data && data.total > PAGE_SIZE && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      {i18n.translate('xpack.slo.healthScanFlyout.scanResults.paginationLabel', {
+                        defaultMessage: 'Showing {start}-{end} of {total}',
+                        values: {
+                          start: pageIndex * PAGE_SIZE + 1,
+                          end: Math.min((pageIndex + 1) * PAGE_SIZE, data.total),
+                          total: data.total,
+                        },
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s">
+                      <EuiButton
+                        size="s"
+                        onClick={handlePreviousPage}
+                        disabled={searchAfterHistory.length === 0 || isLoading}
+                        data-test-subj="healthScanResultsPreviousPage"
+                      >
+                        {i18n.translate('xpack.slo.healthScanFlyout.scanResults.previousPage', {
+                          defaultMessage: 'Previous',
+                        })}
+                      </EuiButton>
+                      <EuiButton
+                        size="s"
+                        onClick={handleNextPage}
+                        disabled={!data?.searchAfter || isLoading}
+                        data-test-subj="healthScanResultsNextPage"
+                      >
+                        {i18n.translate('xpack.slo.healthScanFlyout.scanResults.nextPage', {
+                          defaultMessage: 'Next',
+                        })}
+                      </EuiButton>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </>
         )}
       </EuiFlexGroup>

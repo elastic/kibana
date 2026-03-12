@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { GetHealthScanResultsResponse, HealthScanResultResponse } from '@kbn/slo-schema';
 import { ScanResultsPanel } from './scan_results_panel';
@@ -264,5 +264,87 @@ describe('ScanResultsPanel', () => {
     expect(
       screen.getByText('Missing rollup transform, Unhealthy summary transform')
     ).toBeInTheDocument();
+  });
+
+  it('shows pagination controls when total problematic SLOs exceed page size', () => {
+    const results = Array.from({ length: 25 }, (_, i) =>
+      buildScanResult({
+        slo: { id: `slo-${i}`, name: `SLO ${i}`, revision: 1, enabled: true },
+        health: {
+          isProblematic: true,
+          rollup: {
+            isProblematic: true,
+            missing: true,
+            status: 'unavailable',
+            state: 'unavailable',
+          },
+          summary: { ...healthyTransform },
+        },
+      })
+    );
+
+    mockUseGetHealthScanResults.mockReturnValue({
+      data: {
+        results,
+        scan: completedScan({ status: 'completed', problematic: 30 }),
+        total: 30,
+        searchAfter: ['2026-02-27T10:00:00.000Z', 'scan-123', 'default', false, 'slo-24'],
+      },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ScanResultsPanel scanId="scan-123" />);
+
+    expect(screen.getByText('Showing 1-25 of 30')).toBeInTheDocument();
+    expect(screen.getByTestId('healthScanResultsPreviousPage')).toBeDisabled();
+    expect(screen.getByTestId('healthScanResultsNextPage')).toBeEnabled();
+  });
+
+  it('calls useGetHealthScanResults with searchAfter when Next is clicked', () => {
+    const searchAfterCursor = ['2026-02-27T10:00:00.000Z', 'scan-123', 'default', false, 'slo-24'];
+    const results = Array.from({ length: 25 }, (_, i) =>
+      buildScanResult({
+        slo: { id: `slo-${i}`, name: `SLO ${i}`, revision: 1, enabled: true },
+        health: {
+          isProblematic: true,
+          rollup: {
+            isProblematic: true,
+            missing: true,
+            status: 'unavailable',
+            state: 'unavailable',
+          },
+          summary: { ...healthyTransform },
+        },
+      })
+    );
+
+    mockUseGetHealthScanResults.mockImplementation((params) => {
+      const hasSearchAfter = params.searchAfter !== undefined;
+      return {
+        data: {
+          results: hasSearchAfter
+            ? [buildScanResult({ slo: { id: 'slo-25', name: 'SLO 25', revision: 1, enabled: true } })]
+            : results,
+          scan: completedScan({ status: 'completed', problematic: 30 }),
+          total: 30,
+          searchAfter: hasSearchAfter ? undefined : searchAfterCursor,
+        },
+        isLoading: false,
+        isError: false,
+      };
+    });
+
+    render(<ScanResultsPanel scanId="scan-123" />);
+
+    fireEvent.click(screen.getByTestId('healthScanResultsNextPage'));
+
+    expect(mockUseGetHealthScanResults).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        scanId: 'scan-123',
+        searchAfter: JSON.stringify(searchAfterCursor),
+        size: 25,
+      })
+    );
   });
 });
