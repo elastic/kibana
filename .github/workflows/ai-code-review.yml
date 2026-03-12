@@ -19,7 +19,7 @@ jobs:
     if: >-
       github.event.pull_request.user.type != 'Bot' &&
       contains(fromJSON('["MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) &&
-      !contains(github.event.pull_request.labels.*.name, 'ai:skip-review')
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai')
     outputs:
       run_claude: ${{ steps.labels.outputs.run_claude }}
     steps:
@@ -29,8 +29,7 @@ jobs:
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);
-            const all = labels.includes('ai:review-all');
-            core.setOutput('run_claude', all || labels.includes('ai:review-claude'));
+            core.setOutput('run_claude', labels.includes('reviewer:claude'));
 
   review-claude:
     needs: gate
