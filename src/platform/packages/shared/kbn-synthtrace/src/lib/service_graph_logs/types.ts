@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApmFields, InfraDocument, LogDocument } from '@kbn/synthtrace-client';
 import type {
   InfraCache,
   InfraDatabase,
@@ -257,4 +258,43 @@ export interface LogsGeneratorConfig<TServiceGraph extends ServiceGraph = Servic
   cycleMs?: number;
   /** Absolute timestamp that corresponds to offset 0 of the cycle. */
   cycleOriginMs?: number;
+  /** Fraction of requests that produce trace spans (0-1). Default 0.1. */
+  traceSampleRate?: number;
+  /** Metrics aggregation interval in ms. Default: tickIntervalMs. */
+  metricsIntervalMs?: number;
+}
+
+/** Per-service request statistics accumulated during a tick (traced + untraced). */
+export interface ServiceStats {
+  requests: number;
+  errors: number;
+  totalLatencyUs: number;
+}
+
+/** Signal-agnostic record of a single span in the DFS traversal. */
+export interface SpanRecord {
+  service: string;
+  operation: string;
+  durationMs: number;
+  isError: boolean;
+  httpStatus: number;
+  protocol: Protocols;
+  infraDeps: Array<{ dep: InfraDependency; durationMs: number; isError: boolean }>;
+  children: SpanRecord[];
+}
+
+/** Signal-agnostic result of a full DFS request simulation. */
+export interface RequestResult {
+  docs: Array<Partial<LogDocument>>;
+  rootSpan: SpanRecord;
+  serviceStats: Record<string, ServiceStats>;
+}
+
+/** Tick envelope containing all signal types from a single generator tick. */
+export interface TickOutput {
+  logs: Array<Partial<LogDocument>>;
+  /** Transaction/span/breakdown-metric docs + app-metric docs. */
+  apm: ApmFields[];
+  /** Host/pod metrics derived from service health state. */
+  infra: InfraDocument[];
 }

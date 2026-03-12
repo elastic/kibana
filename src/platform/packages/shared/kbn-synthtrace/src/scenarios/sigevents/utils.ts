@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogDocument } from '@kbn/synthtrace-client';
+import type { ApmFields, InfraDocument, LogDocument } from '@kbn/synthtrace-client';
 import { parseInterval } from '@kbn/synthtrace-client';
 import moment from 'moment';
 import type { Scenario } from '../../cli/scenario';
@@ -279,7 +279,7 @@ export const defineMockApp = <TServiceGraph extends ServiceGraph>(
  */
 export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
   mockApps: Record<string, MockAppDefinition<TServiceGraph>>
-): Scenario<LogDocument> {
+): Scenario<LogDocument | ApmFields | InfraDocument> {
   return async (runOptions) => {
     const {
       seed,
@@ -306,7 +306,7 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
     }
 
     return {
-      generate: ({ range, clients: { logsEsClient } }) => {
+      generate: ({ range, clients: { logsEsClient, apmEsClient, infraEsClient } }) => {
         const { logger, from } = runOptions;
         const baseRate = parsedBaseRate;
         const baselineWindowMs = duration('1m') * baselineMinutes;
@@ -352,7 +352,7 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
 
         const serviceGraph = scenarioGraph ?? mockApp.serviceGraph;
 
-        const { generator: tick } = sigEvents.buildLogsGenerator({
+        const { logsGenerator, apmGenerator, infraGenerator } = sigEvents.buildLogsGenerator({
           tickIntervalMs: duration('1m'),
           seed,
           serviceGraph,
@@ -364,12 +364,24 @@ export function createSigEventsScenario<TServiceGraph extends ServiceGraph>(
           noise,
         });
 
-        return withClient(
-          logsEsClient,
-          logger.perf('generating_sigevents', () =>
-            range.interval('1m').rate(baseRate).generator(tick)
-          )
-        );
+        const logsGen = range.interval('1m').rate(baseRate).generator(logsGenerator);
+        const apmGen = range.interval('1m').rate(baseRate).generator(apmGenerator);
+        const infraGen = range.interval('1m').rate(baseRate).generator(infraGenerator);
+
+        return [
+          withClient(
+            logsEsClient,
+            logger.perf('generating_sigevents_logs', () => logsGen)
+          ),
+          withClient(
+            apmEsClient,
+            logger.perf('generating_sigevents_apm', () => apmGen)
+          ),
+          withClient(
+            infraEsClient,
+            logger.perf('generating_sigevents_infra', () => infraGen)
+          ),
+        ];
       },
     };
   };

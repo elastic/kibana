@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogDocument } from '@kbn/synthtrace-client';
 import type { ServiceGraph, ServiceNode } from '../types';
 import { HEALTH_PROBS, LEVEL_RNG_SEED_OFFSET } from '../constants';
 import { mulberry32 } from '../placeholders';
@@ -20,10 +19,10 @@ export interface ServicePhaseOptions {
   timestamp: number;
 }
 
-export interface ServiceGraphOptions {
+export interface ServiceGraphOptions<TServiceGraph extends ServiceGraph = ServiceGraph> {
   seed: number;
   timestamp: number;
-  serviceGraph: ServiceGraph;
+  serviceGraph: TServiceGraph;
   metadataCache?: MetadataCache;
 }
 
@@ -51,23 +50,3 @@ export const resolveLogLevel = (
 
 export const resolveLogLevelFromSeed = (isFailing: boolean, seed: number) =>
   resolveLogLevel(isFailing, mulberry32(seed + LEVEL_RNG_SEED_OFFSET));
-
-export const buildLogDoc = ({
-  service,
-  level,
-  message,
-  metadata,
-}: {
-  service: ServiceNode;
-  level: 'info' | 'warn' | 'error';
-  message: string;
-  metadata: Record<string, string | undefined>;
-}): Partial<LogDocument> => {
-  return {
-    'service.name': service.displayName ?? service.name,
-    'service.version': service.version,
-    'log.level': level,
-    message,
-    ...metadata,
-  } as Partial<LogDocument>;
-};
