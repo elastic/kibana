@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-common'
+  title: '@kbn/inference-common'
   description: Moon project for @kbn/inference-common
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ai-infra/inference-common
+  sourceRoot: x-pack/platform/packages/shared/ai-infra/inference-common
 dependsOn:
   - '@kbn/sse-utils'
   - '@kbn/zod'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
