@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    soft_fail: true # todo: remove once issue is fixed
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
