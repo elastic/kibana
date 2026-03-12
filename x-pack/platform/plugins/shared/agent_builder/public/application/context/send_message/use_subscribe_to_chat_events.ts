@@ -51,12 +51,16 @@ export const useSubscribeToChatEvents = ({
   const nextChatEvent = (event: ChatEvent) => {
     // chunk received, we append it to the chunk buffer
     if (isMessageChunkEvent(event)) {
-      conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
+      conversationActions.addAssistantMessageChunk({
+        messageChunk: event.data.text_chunk,
+        replacementsId: event.data.replacements_id,
+      });
     }
     // full message received, override chunk buffer
     else if (isMessageCompleteEvent(event)) {
       conversationActions.setAssistantMessage({
         assistantMessage: event.data.message_content,
+        replacementsId: event.data.replacements_id,
       });
     } else if (isToolProgressEvent(event)) {
       conversationActions.setToolCallProgress({

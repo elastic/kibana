@@ -42,6 +42,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
             isCurrentRound={isCurrentRound}
             rawRound={round}
             conversationId={conversation?.id}
+            conversationReplacementsId={conversation?.replacementsId}
             conversationAttachments={conversation?.attachments}
           />
         );

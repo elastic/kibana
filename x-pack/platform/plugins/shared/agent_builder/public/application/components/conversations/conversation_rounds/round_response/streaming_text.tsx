@@ -17,6 +17,7 @@ const TOKEN_DELAY = 17;
 interface StreamingTextProps {
   content: string;
   steps: ConversationRoundStep[];
+  replacementsId?: string;
   tokenDelay?: number; // ms between tokens. Defaults to 17ms to ensure 60fps.
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
@@ -26,6 +27,7 @@ interface StreamingTextProps {
 export const StreamingText = ({
   content,
   steps,
+  replacementsId,
   tokenDelay = TOKEN_DELAY,
   conversationAttachments,
   attachmentRefs,
@@ -74,6 +76,8 @@ export const StreamingText = ({
     <ChatMessageText
       content={displayedText}
       steps={steps}
+      replacementsId={replacementsId}
+      holdContentWhileResolvingReplacements
       conversationAttachments={conversationAttachments}
       attachmentRefs={attachmentRefs}
       conversationId={conversationId}
