@@ -67,7 +67,7 @@ describe(
     it('renders anomalies placeholder panel', () => {
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
       cy.get(ANOMALIES_PLACEHOLDER_PANEL, { timeout: 30000 }).should('be.visible');
-      cy.get(ANOMALIES_PLACEHOLDER_PANEL).contains('Anomaly explorer');
+      cy.get(ANOMALIES_PLACEHOLDER_PANEL).contains('Recent anomalies');
     });
 
     it('renders entities table', () => {
