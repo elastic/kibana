@@ -58,7 +58,7 @@ function useMetricsInfoFetch(
       filters: fetchParams.filters ?? [],
       variables: fetchParams.esqlVariables,
       uiSettings: services.uiSettings,
-    });
+    }).catch(() => {});
   }, [
     shouldFetch,
     esql,
