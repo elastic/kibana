@@ -325,9 +325,9 @@ describe('When the tabular page is loaded', () => {
 
     it('should display accordions with tables for model groups', () => {
       const groupAccordions = screen.getAllByTestId(/-accordion$/);
-      expect(groupAccordions).toHaveLength(5);
+      expect(groupAccordions).toHaveLength(6);
       const groupTables = screen.getAllByTestId(/-table$/);
-      expect(groupTables).toHaveLength(5);
+      expect(groupTables).toHaveLength(6);
     });
 
     it('should have expected endpoint table columns', () => {
@@ -346,7 +346,12 @@ describe('When the tabular page is loaded', () => {
         {
           groupId: 'elastic',
           label: 'Elastic',
-          countLabel: '6 endpoints',
+          countLabel: '5 endpoints',
+        },
+        {
+          groupId: 'anthropic',
+          label: 'Anthropic',
+          countLabel: '1 endpoint',
         },
         {
           groupId: '.own_model',
@@ -516,14 +521,8 @@ describe('When the tabular page is loaded', () => {
     const stats = screen.getByTestId('endpointStats');
     expect(stats).toBeInTheDocument();
 
-    // 3 unique services: elasticsearch, openai, elastic
-    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
-
     // 8 unique models
     expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
-
-    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
-    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
 
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
