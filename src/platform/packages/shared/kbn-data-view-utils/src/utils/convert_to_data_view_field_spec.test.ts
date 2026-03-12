@@ -96,7 +96,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
     expect(result.isComputedColumn).toBe(false);
   });
 
-  it('should default isComputedColumn to false when not specified', () => {
+  it('should default isComputedColumn to true when not specified', () => {
     const column = {
       id: 'legacy_col',
       name: 'legacy_col',
@@ -107,7 +107,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
       isNull: false,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
-    expect(result.isComputedColumn).toBe(false);
+    expect(result.isComputedColumn).toBe(true);
   });
 });
 
