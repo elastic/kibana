@@ -91,17 +91,6 @@ export const useDetectionRulesByIntegration = (integrationPackages?: string | st
     return enabledPackageNames;
   }, [integrationPackages, integrationItems]);
 
-  const installedPackages = useMemo(() => {
-    if (integrationPackages !== undefined) {
-      return Array.isArray(integrationPackages) ? integrationPackages : [integrationPackages];
-    }
-    return (
-      getIntegrations?.data?.items
-        ?.filter((pkg) => pkg.status === 'installed')
-        .map((pkg) => pkg.name) || []
-    );
-  }, [integrationPackages, getIntegrations?.data?.items]);
-
   const ruleIntegrationCoverage = useMemo(() => {
     if (!enabledRulesQuery.data?.data) {
       return null;
