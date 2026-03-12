@@ -56,7 +56,7 @@ xpack.features.overrides:
   ### Inference Endpoints feature is moved from Analytics category to the Management one.
   searchInferenceEndpoints:
     category: "management"
-    order: 1100
+    order: 4000
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
