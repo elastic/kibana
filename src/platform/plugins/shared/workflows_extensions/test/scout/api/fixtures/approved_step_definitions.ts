@@ -109,7 +109,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
   },
   {
-    id: 'cases.addCategory',
+    id: 'cases.setCategory',
     handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
   },
   {
@@ -121,7 +121,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
   },
   {
-    id: 'cases.addTag',
+    id: 'cases.addTags',
     handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
   },
   {
