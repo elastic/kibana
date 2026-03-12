@@ -21,25 +21,20 @@ describe('buildEsqlQuery', () => {
   });
 
   describe('skipEntityFields=false (default)', () => {
-    it('includes entity.id references in the query', () => {
+    it('computes entity.namespace via field evaluations', () => {
       const query = buildEsqlQuery('default', false);
-      expect(query).toContain('.entity.');
+      expect(query).toContain('entity.namespace');
     });
   });
 
   describe('skipEntityFields=true', () => {
-    it('does not contain any .entity. references', () => {
-      const query = buildEsqlQuery('default', true);
-      expect(query).not.toContain('.entity.');
-    });
-
-    it('still contains non-entity user identity fields', () => {
+    it('still contains user identity fields', () => {
       const query = buildEsqlQuery('default', true);
       expect(query).toContain('user.id');
       expect(query).toContain('user.name');
     });
 
-    it('still contains non-entity host identity fields', () => {
+    it('still contains host identity fields', () => {
       const query = buildEsqlQuery('default', true);
       expect(query).toContain('host.id');
       expect(query).toContain('host.name');

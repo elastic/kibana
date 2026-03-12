@@ -20,6 +20,8 @@ import {
 
 const ES_ARCHIVE_PATH =
   'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/elastic_defend_events';
+const IDP_ARCHIVE_PATH =
+  'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/idp_events';
 
 /** Normalise a field that may be a single string or an array into a string[]. */
 function toArray(value: unknown): string[] {
@@ -195,6 +197,10 @@ for (const integration of INTEGRATION_CONFIGS) {
       // Load the data stream template, mappings, and 6 seed documents.
       await esArchiver.loadIfNeeded(ES_ARCHIVE_PATH);
 
+      // Load IDP-like events (event.category: iam, event.type: user) so that
+      // entities pass the user postAggFilter during extraction.
+      await esArchiver.loadIfNeeded(IDP_ARCHIVE_PATH);
+
       // Refresh timestamps so events fall within the maintainer's lookback
       // window (now-4w). esArchiver data has static timestamps that would
       // eventually age out.
@@ -274,7 +280,7 @@ for (const integration of INTEGRATION_CONFIGS) {
         index: LATEST_INDEX,
         query: {
           bool: {
-            filter: { term: { 'entity.id': 'user:test-user-a@test-host-a' } },
+            filter: { term: { 'entity.id': 'user:test-user-a@endpoint' } },
           },
         },
         size: 1,
@@ -283,7 +289,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       expect(entities.hits.hits).toHaveLength(1);
 
       const source = entities.hits.hits[0]._source as Record<string, unknown>;
-      expect(getField(source, 'entity.id')).toBe('user:test-user-a@test-host-a');
+      expect(getField(source, 'entity.id')).toBe('user:test-user-a@endpoint');
       expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual([
         'test-host-a',
       ]);
@@ -297,7 +303,7 @@ for (const integration of INTEGRATION_CONFIGS) {
         index: LATEST_INDEX,
         query: {
           bool: {
-            filter: { term: { 'entity.id': 'user:test-user-b@test-host-b' } },
+            filter: { term: { 'entity.id': 'user:test-user-b@endpoint' } },
           },
         },
         size: 1,
@@ -306,7 +312,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       expect(entities.hits.hits).toHaveLength(1);
 
       const source = entities.hits.hits[0]._source as Record<string, unknown>;
-      expect(getField(source, 'entity.id')).toBe('user:test-user-b@test-host-b');
+      expect(getField(source, 'entity.id')).toBe('user:test-user-b@endpoint');
       expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual(
         []
       );

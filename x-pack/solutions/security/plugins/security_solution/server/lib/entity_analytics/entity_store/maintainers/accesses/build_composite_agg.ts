@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 import type { CompositeAfterKey, CompositeBucket } from './types';

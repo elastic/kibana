@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 import { getIndexPattern, COMPOSITE_PAGE_SIZE } from './constants';
 
@@ -47,7 +47,10 @@ function getEuidFragments(skipEntityFields: boolean) {
     ? { eval: skipEntityIdFieldsInEval, filter: skipEntityIdFieldsInFilter }
     : { eval: (s: string) => s, filter: (s: string) => s };
 
+  const userFieldEvals = euid.getFieldEvaluationsEsql('user');
+
   return {
+    userFieldEvalsLine: userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '',
     userIdEval: skipEntity.eval(euid.getEuidEsqlEvaluation('user', { withTypeId: false })),
     userIdFilter: skipEntity.filter(euid.getEuidEsqlDocumentsContainsIdFilter('user')),
     hostIdFilter: skipEntity.filter(euid.getEuidEsqlDocumentsContainsIdFilter('host')),
@@ -56,7 +59,8 @@ function getEuidFragments(skipEntityFields: boolean) {
 }
 
 export function buildEsqlQuery(namespace: string, skipEntityFields: boolean = false): string {
-  const { userIdEval, userIdFilter, hostIdFilter, hostIdEval } = getEuidFragments(skipEntityFields);
+  const { userFieldEvalsLine, userIdEval, userIdFilter, hostIdFilter, hostIdEval } =
+    getEuidFragments(skipEntityFields);
 
   return `FROM ${getIndexPattern(namespace)}
 | WHERE event.action == "log_on"
@@ -64,20 +68,22 @@ export function buildEsqlQuery(namespace: string, skipEntityFields: boolean = fa
     AND event.outcome == "success"
     AND (${userIdFilter})
     AND (${hostIdFilter})
-| EVAL actorUserId = ${userIdEval}
+${userFieldEvalsLine}| EVAL actorUserId = ${userIdEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
 | EVAL targetEntityId = COALESCE(${hostIdEval}, TO_STRING(host.ip), TO_STRING(host.mac))
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""
-| STATS access_count = COUNT(*) BY actorUserId, targetEntityId
+| STATS access_count = COUNT(*), _userId = MIN(user.id), _ns = MIN(entity.namespace) BY actorUserId, targetEntityId
 | EVAL access_type = CASE(
     access_count > 4, "accesses_frequently",
     "accesses_infrequently"
   )
-| STATS targets = VALUES(targetEntityId) BY access_type, actorUserId
+| STATS targets = VALUES(targetEntityId), _userId = MIN(_userId), _ns = MIN(_ns) BY access_type, actorUserId
 | STATS
     accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
-    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
+    accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently",
+    _userId = MIN(_userId),
+    _ns = MIN(_ns)
   BY actorUserId
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }

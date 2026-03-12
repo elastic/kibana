@@ -30,6 +30,8 @@ export function postprocessEsqlResults(
 
     return {
       entityId: record.actorUserId as string,
+      userId: (record._userId as string) ?? null,
+      entityNamespace: (record._ns as string) ?? null,
       accesses_frequently: toStringArray(record.accesses_frequently),
       accesses_infrequently: toStringArray(record.accesses_infrequently),
     };

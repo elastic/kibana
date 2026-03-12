@@ -296,10 +296,22 @@ describe('runMaintainer', () => {
         .mockResolvedValueOnce(createAggResponse(page2Buckets));
 
       const page1Records: ProcessedEntityRecord[] = [
-        { entityId: 'user-0', accesses_frequently: ['host-a'], accesses_infrequently: [] },
+        {
+          entityId: 'user-0',
+          userId: null,
+          entityNamespace: null,
+          accesses_frequently: ['host-a'],
+          accesses_infrequently: [],
+        },
       ];
       const page2Records: ProcessedEntityRecord[] = [
-        { entityId: 'user-last', accesses_frequently: [], accesses_infrequently: ['host-b'] },
+        {
+          entityId: 'user-last',
+          userId: null,
+          entityNamespace: null,
+          accesses_frequently: [],
+          accesses_infrequently: ['host-b'],
+        },
       ];
 
       const esqlColumns: EsqlColumn[] = [
@@ -370,10 +382,22 @@ describe('runMaintainer', () => {
         .mockResolvedValueOnce(createEsqlResponse() as never);
 
       const records1: ProcessedEntityRecord[] = [
-        { entityId: 'user-a', accesses_frequently: ['host-1'], accesses_infrequently: [] },
+        {
+          entityId: 'user-a',
+          userId: null,
+          entityNamespace: null,
+          accesses_frequently: ['host-1'],
+          accesses_infrequently: [],
+        },
       ];
       const records2: ProcessedEntityRecord[] = [
-        { entityId: 'user-b', accesses_frequently: [], accesses_infrequently: ['host-2'] },
+        {
+          entityId: 'user-b',
+          userId: null,
+          entityNamespace: null,
+          accesses_frequently: [],
+          accesses_infrequently: ['host-2'],
+        },
       ];
 
       mockPostprocessEsqlResults.mockReturnValueOnce(records1).mockReturnValueOnce(records2);
@@ -445,7 +469,13 @@ describe('runMaintainer', () => {
       esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
 
       const records: ProcessedEntityRecord[] = [
-        { entityId: 'user-1', accesses_frequently: [], accesses_infrequently: ['host-a'] },
+        {
+          entityId: 'user-1',
+          userId: null,
+          entityNamespace: null,
+          accesses_frequently: [],
+          accesses_infrequently: ['host-a'],
+        },
       ];
       esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
       mockPostprocessEsqlResults.mockReturnValueOnce(records);

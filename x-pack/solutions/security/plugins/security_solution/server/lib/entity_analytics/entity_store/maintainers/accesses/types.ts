@@ -16,6 +16,8 @@ export interface CompositeBucket {
 
 export interface ProcessedEntityRecord {
   entityId: string;
+  userId: string | null;
+  entityNamespace: string | null;
   accesses_frequently: string[];
   accesses_infrequently: string[];
 }

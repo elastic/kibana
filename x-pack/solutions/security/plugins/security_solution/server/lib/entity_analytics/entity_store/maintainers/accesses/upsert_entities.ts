@@ -23,6 +23,8 @@ function buildEntityDoc(record: ProcessedEntityRecord): Entity {
           record.accesses_infrequently.length > 0 ? record.accesses_infrequently : undefined,
       },
     },
+    ...(record.userId ? { user: { id: record.userId } } : {}),
+    ...(record.entityNamespace ? { event: { module: record.entityNamespace } } : {}),
   } as Entity;
 }
 
