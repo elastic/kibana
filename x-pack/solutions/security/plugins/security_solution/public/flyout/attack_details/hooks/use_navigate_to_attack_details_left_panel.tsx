@@ -19,7 +19,7 @@ export interface UseNavigateToAttackDetailsLeftPanelParams {
    * Optional tab to open in the left panel. Defaults to the Insights tab.
    * Use 'notes' to open the Notes tab.
    */
-  tab?: 'insights' | 'notes' | string;
+  tab?: 'insights' | 'notes';
   /**
    * Optional sub-tab (e.g. 'entity' for Entities). When opening Insights, defaults to Entities.
    * Ignored when tab is 'notes'.
