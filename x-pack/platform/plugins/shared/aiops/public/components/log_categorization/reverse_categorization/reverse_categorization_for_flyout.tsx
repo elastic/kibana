@@ -14,7 +14,6 @@ import {
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  // useEuiTheme,
   EuiSpacer,
   EuiBasicTable,
   EuiText,
@@ -22,6 +21,7 @@ import {
   EuiButtonEmpty,
   EuiSkeletonRectangle,
   EuiSkeletonText,
+  EuiCallOut,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 
@@ -30,11 +30,9 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
-// import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-// import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -51,12 +49,10 @@ import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { useCategorizeRequest } from '../use_categorize_request';
 import type { EventRate } from '../use_categorize_request';
 import { SamplingMenu, useRandomSamplerStorage } from '../sampling_menu';
-// import { useValidateFieldRequest } from '../use_validate_category_field';
 import { useActions } from '../category_table/use_actions';
 import { MiniHistogram } from '../../mini_histogram';
 import { useDocsForCategory } from './use_docs_for_category';
 import { useCreateFormattedExample } from '../format_category';
-// import { DocumentCountChart } from '../document_count_chart';
 import { PatternCellRenderer } from './pattern_cell_renderer';
 
 type SparkLinesPerCategory = Record<string, Record<number, number>>;
@@ -88,13 +84,10 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       query: { getState, filterManager },
     },
     uiSettings,
-    // embeddingOrigin,
   } = useAiopsAppContext();
 
-  // const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
-  //   useValidateFieldRequest();
-  // const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
+  const [matchNotFound, setMatchNotFound] = useState(false);
 
   const mounted = useRef(false);
   const randomSamplerStorage = useRandomSamplerStorage();
@@ -115,7 +108,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     })
   );
   const createFormattedExample = useCreateFormattedExample();
-  // const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventRate, setEventRate] = useState<EventRate>([]);
 
@@ -127,16 +119,11 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     docCount: number;
   } | null>(null);
 
-  // const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
-  //   null
-  // );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  // const tableState = useTableState<Category>([], 'key');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
   const cancelRequest = useCallback(() => {
-    // cancelValidationRequest();
     cancelCategorizationRequest();
   }, [cancelCategorizationRequest]);
 
@@ -191,7 +178,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     onClose
   );
-  // console.log(dataView.isPersisted());
 
   const loadCategories = useCallback(async () => {
     const { getIndexPattern, timeFieldName: timeField } = dataView;
@@ -210,7 +196,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
     setLoading(true);
     setData(null);
-    // setFieldValidationResult(null);
 
     const timeRange = {
       from: earliest,
@@ -233,8 +218,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       );
 
       if (mounted.current === true) {
-        // setFieldValidationResult(validationResult);
-
         let docs: { timestamp: string; message: string }[] = [];
 
         if (fieldValue) {
@@ -242,6 +225,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
             new RegExp(c.regex).test(fieldValue)
           );
           if (!category) {
+            setMatchNotFound(true);
             return;
           }
 
@@ -324,9 +308,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     randomSampler,
   ]);
 
-  // const actions = getActions(true);
-  // const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
-
   const docsTableColumns = useMemo(() => {
     const dateFormat = uiSettings.get('dateFormat');
 
@@ -399,7 +380,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
     const newTerm = term > docCount ? docCount : term;
     const adjustedDocCount = docCount - newTerm;
-    // console.log(selectedCategory);
 
     return {
       doc_count_overall: adjustedDocCount,
@@ -409,37 +389,13 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     };
   });
 
-  // const histogram2 = eventRate.map(({ key: catKey, docCount }) => {
-  //   const term =
-  //     (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
-
-  //   return {
-  //     docCount: term,
-  //     key: catKey,
-  //   };
-  // });
-
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
-                <FormattedMessage
-                  id="xpack.aiops.categorizeFlyout.title"
-                  defaultMessage="Similar values of {name}"
-                  values={{ name: selectedField.name }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <SamplingMenu randomSampler={randomSampler} reload={() => forceRefresh()} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+      <Header
+        fieldName={selectedField.name}
+        randomSampler={randomSampler}
+        reload={() => forceRefresh()}
+      />
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
         <EuiText css={{ fontWeight: 'bold' }}>{selectedField.displayName}</EuiText>
         <EuiSpacer size="s" />
@@ -455,91 +411,92 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
         <EuiSpacer size="l" />
 
-        <EuiText css={{ fontWeight: 'bold' }}>Pattern</EuiText>
-        <EuiSpacer size="s" />
-        <EuiText>
-          {data?.selectedCategory?.regex !== undefined ? (
-            <PatternCellRenderer pattern={data.selectedCategory?.regex} isDetails={false} />
-          ) : (
-            <EuiSkeletonText lines={2} />
-          )}
-        </EuiText>
-
-        <EuiSpacer size="l" />
-
-        <EuiText css={{ fontWeight: 'bold' }}>
-          {data?.docs.length ? (
+        {matchNotFound === true ? (
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.aiops.logCategorization.reverseCategorization.matchNotFoundTitle',
+              { defaultMessage: 'No pattern matches found' }
+            )}
+            color="primary"
+            iconType="warning"
+            announceOnMount
+          >
             <FormattedMessage
-              id="xpack.aiops.logCategorization.reverseCategorization.matchingDocumentsTitle"
-              defaultMessage="{count} documents which match the same pattern"
-              values={{ count: data?.docCount ?? 0 }}
+              id="xpack.aiops.logCategorization.reverseCategorization.matchNotFoundBody"
+              defaultMessage="Try adjusting the time range or changing the sampling settings to improve results."
             />
-          ) : (
-            <FormattedMessage
-              id="xpack.aiops.logCategorization.reverseCategorization.noMatchingDocumentsTitle"
-              defaultMessage="Documents which match the same pattern"
-            />
-          )}
-        </EuiText>
-
-        <EuiSpacer size="s" />
-
-        {loading === false && data !== null && data.categories.length > 0 ? (
+          </EuiCallOut>
+        ) : (
           <>
-            <MiniHistogram
-              chartData={histogram}
-              isLoading={false}
-              label={''}
-              width={'100%'}
-              height={'100px'}
-            />
-
-            {/* <DocumentCountChart
-              eventRate={histogram2}
-              totalCount={data.docs.length}
-              pinnedCategory={null}
-              selectedCategory={null}
-              documentCountStats={documentStats.documentCountStats}
-            /> */}
+            <EuiText css={{ fontWeight: 'bold' }}>Pattern</EuiText>
+            <EuiSpacer size="s" />
+            <EuiText>
+              {data?.selectedCategory?.regex !== undefined ? (
+                <PatternCellRenderer pattern={data.selectedCategory?.regex} isDetails={false} />
+              ) : (
+                <EuiSkeletonText lines={2} />
+              )}
+            </EuiText>
 
             <EuiSpacer size="l" />
 
-            {data.docs && data.docs.length > 0 && (
-              <EuiBasicTable
-                tableCaption={i18n.translate(
-                  'xpack.aiops.logCategorization.reverseCategorization.docsTableCaption',
-                  {
-                    defaultMessage: 'Documents matching the selected category',
-                  }
-                )}
-                data-test-subj="aiopsReverseCategorizationDocsTable"
-                compressed
-                items={docsPagination.pageOfItems}
-                columns={docsTableColumns}
-                pagination={
-                  docsPagination.pagination.totalItemCount > docsPagination.pagination.pageSize
-                    ? docsPagination.pagination
-                    : undefined
-                }
-                onChange={onTableChange}
-              />
-            )}
+            <EuiText css={{ fontWeight: 'bold' }}>
+              {data?.docs.length ? (
+                <FormattedMessage
+                  id="xpack.aiops.logCategorization.reverseCategorization.matchingDocumentsTitle"
+                  defaultMessage="{count} documents which match the same pattern"
+                  values={{ count: data?.docCount ?? 0 }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.aiops.logCategorization.reverseCategorization.noMatchingDocumentsTitle"
+                  defaultMessage="Documents which match the same pattern"
+                />
+              )}
+            </EuiText>
 
-            {/* <CategoryTable
-              categories={data.categories}
-              eventRate={eventRate}
-              enableRowActions={false}
-              displayExamples={data.displayExamples}
-              setSelectedCategories={setSelectedCategories}
-              tableState={tableState}
-              actions={actions}
-            /> */}
-          </>
-        ) : (
-          <>
-            <EuiSkeletonRectangle width="100%" height="120px" />
-            <EuiSpacer size="m" />
-            <EuiSkeletonText lines={10} />
+            <EuiSpacer size="s" />
+
+            {loading === false && data !== null && data.categories.length > 0 ? (
+              <>
+                <MiniHistogram
+                  chartData={histogram}
+                  isLoading={false}
+                  label={''}
+                  width={'100%'}
+                  height={'100px'}
+                />
+
+                <EuiSpacer size="l" />
+
+                {data.docs && data.docs.length > 0 && (
+                  <EuiBasicTable
+                    tableCaption={i18n.translate(
+                      'xpack.aiops.logCategorization.reverseCategorization.docsTableCaption',
+                      {
+                        defaultMessage: 'Documents matching the selected category',
+                      }
+                    )}
+                    data-test-subj="aiopsReverseCategorizationDocsTable"
+                    compressed
+                    items={docsPagination.pageOfItems}
+                    columns={docsTableColumns}
+                    pagination={
+                      docsPagination.pagination.totalItemCount > docsPagination.pagination.pageSize
+                        ? docsPagination.pagination
+                        : undefined
+                    }
+                    onChange={onTableChange}
+                  />
+                )}
+              </>
+            ) : (
+              <>
+                <EuiSkeletonRectangle width="100%" height="120px" />
+                <EuiSpacer size="m" />
+                <EuiSkeletonText lines={10} />
+              </>
+            )}
           </>
         )}
       </EuiFlyoutBody>
@@ -575,3 +532,31 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     </>
   );
 };
+
+interface HeaderProps {
+  fieldName: string;
+  randomSampler: ReturnType<typeof useCategorizeRequest>['randomSampler'];
+  reload: () => void;
+}
+
+const Header: FC<HeaderProps> = ({ fieldName, randomSampler, reload }) => (
+  <EuiFlyoutHeader hasBorder>
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
+            <FormattedMessage
+              id="xpack.aiops.categorizeFlyout.title"
+              defaultMessage="Similar values of {name}"
+              values={{ name: fieldName }}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem />
+      <EuiFlexItem grow={false}>
+        <SamplingMenu randomSampler={randomSampler} reload={reload} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+);
