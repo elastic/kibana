@@ -24,10 +24,12 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { setAiCreatedRule } from '../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH } from '../../../common/constants';
+import { hasCapabilities } from '../../common/lib/capabilities';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -289,7 +291,8 @@ export const createRuleAttachmentDefinition = ({
   renderInlineContent: (props) => <RuleInlineContent {...props} />,
   getActionButtons: ({ attachment }) => {
     const rule = parseRuleFromAttachment(attachment);
-    if (!rule) {
+    const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
+    if (!rule || !canEditRules) {
       return [];
     }
 

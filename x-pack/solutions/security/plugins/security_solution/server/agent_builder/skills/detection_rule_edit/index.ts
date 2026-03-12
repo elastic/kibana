@@ -30,7 +30,7 @@ const SKILL_CONTENT = `# Detection Rule Creation and Editing
 ## When to Use This Skill
 
 Use this skill when the user asks to:
-- Create a detection rule (e.g., "create a rule that detects ...", "build a SIEM rule for ...", "create a security detection rule to find ...")
+- Create a detection rule (e.g., "create a rule that detects ...", "build a SIEM rule for ...", "create a security detection rule to find ...", "create a security detection rule that ...")
 - Edit an existing rule's fields (e.g., "change the severity to high", "update the query", "set the interval to 10m", "add tags to the rule")
 - Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "change the index patterns", "update the description", "add new terms to the query")
 
@@ -65,6 +65,7 @@ This is especially important when:
 If you are creating a new rule, use the following:
 - **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
 - after calling the \`security.create_detection_rule\` tool, move to step 4.
+- render the latest version of the attachment inline.
 
 
 When asked to edit or update the rule or any field of the rule, use the following:
@@ -82,11 +83,12 @@ Follow these steps exactly. Every step is MANDATORY:
 \`\`\`
 attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringified rule JSON>" } })
 \`\`\`
-
-
-### Step 4: ALWAYS Render the Attachment After EVERY Change
-
 - Render the latest version of the attachment inline.
+
+
+Checklist before finishing the answer:
+- [ ] Did I call the tool read attachment first?
+- [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS, always render the latest version of the attachment inline.
 
 ---
 
