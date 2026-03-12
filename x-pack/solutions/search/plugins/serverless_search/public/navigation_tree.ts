@@ -270,6 +270,11 @@ export function createNavigationTree({
                 link: 'management:inference_endpoints',
                 breadcrumbStatus: 'hidden',
               },
+              {
+                id: 'searchInferenceEndpointsModelSettings',
+                link: 'management:model_settings',
+                breadcrumbStatus: 'hidden',
+              },
               { link: 'management:anomaly_detection' },
               { link: 'management:analytics' },
             ],
