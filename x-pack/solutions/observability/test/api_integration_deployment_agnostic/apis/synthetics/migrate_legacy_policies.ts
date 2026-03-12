@@ -136,7 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       privateLocation = locations[0];
 
       const pkgResponse = await supertestAdmin.get('/api/fleet/epm/packages/synthetics');
-      syntheticsPackageVersion = pkgResponse.body?.item?.version || '1.4.2';
+      syntheticsPackageVersion = pkgResponse.body?.item?.version || '1.5.0';
     });
 
     beforeEach(() => {
