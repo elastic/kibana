@@ -56,38 +56,17 @@ describe('StorageSizeCard', () => {
       );
     });
 
-    it('renders a loading indicator for time series count when in time_series mode', () => {
+    it('renders only document count when time series count is missing', () => {
       const stats = createMockStats(500, 2048576);
 
       renderWithI18n(
-        <StorageSizeCard
-          hasMonitorPrivileges={true}
-          stats={stats}
-          isTimeSeriesMode={true}
-          timeSeriesCountLoading={true}
-        />
+        <StorageSizeCard hasMonitorPrivileges={true} stats={stats} isTimeSeriesMode={true} />
       );
 
-      expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent(
-        '500 documents · Loading time series'
-      );
-    });
-
-    it('renders an unavailable message for time series count when request fails', () => {
-      const stats = createMockStats(500, 2048576);
-
-      renderWithI18n(
-        <StorageSizeCard
-          hasMonitorPrivileges={true}
-          stats={stats}
-          isTimeSeriesMode={true}
-          timeSeriesCountError={new Error('boom')}
-        />
-      );
-
-      expect(screen.getByTestId('storageSize-metric-subtitle')).toHaveTextContent(
-        '500 documents · Failed to fetch time series count'
-      );
+      const subtitle = screen.getByTestId('storageSize-metric-subtitle');
+      expect(subtitle).toHaveTextContent('500 documents');
+      expect(subtitle).not.toHaveTextContent('time series');
+      expect(subtitle).not.toHaveTextContent('·');
     });
 
     it('falls back to dash when there is a stats error', () => {

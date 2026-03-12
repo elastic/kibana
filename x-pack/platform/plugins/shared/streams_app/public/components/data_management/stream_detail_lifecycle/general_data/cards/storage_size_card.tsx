@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIconTip, EuiLoadingSpinner, EuiText, formatNumber } from '@elastic/eui';
+import { EuiIconTip, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -19,15 +19,11 @@ export const StorageSizeCard = ({
   stats,
   statsError,
   isTimeSeriesMode = false,
-  timeSeriesCountLoading = false,
-  timeSeriesCountError,
 }: {
   hasMonitorPrivileges: boolean;
   stats?: DataStreamStats;
   statsError?: Error;
   isTimeSeriesMode?: boolean;
-  timeSeriesCountLoading?: boolean;
-  timeSeriesCountError?: Error;
 }) => {
   const totalDocs =
     statsError || !stats || stats.totalDocs === undefined
@@ -46,9 +42,7 @@ export const StorageSizeCard = ({
   let subtitle: React.ReactNode | null = null;
 
   if (hasMonitorPrivileges) {
-    if (!isTimeSeriesMode) {
-      subtitle = docsText;
-    } else if (typeof stats?.timeSeriesCount === 'number') {
+    if (isTimeSeriesMode && !statsError && typeof stats?.timeSeriesCount === 'number') {
       subtitle = i18n.translate(
         'xpack.streams.streamDetailLifecycle.storageSize.docsAndTimeSeries',
         {
@@ -59,30 +53,8 @@ export const StorageSizeCard = ({
           },
         }
       );
-    } else if (timeSeriesCountLoading) {
-      subtitle = (
-        <span>
-          {docsText} · <EuiLoadingSpinner size="s" />{' '}
-          {i18n.translate(
-            'xpack.streams.streamDetailLifecycle.storageSize.timeSeriesCountLoading',
-            {
-              defaultMessage: 'Loading time series count',
-            }
-          )}
-        </span>
-      );
-    } else if (timeSeriesCountError) {
-      subtitle = (
-        <span>
-          {docsText} ·{' '}
-          <EuiText color="warning" size="s" style={{ display: 'inline' }}>
-            {i18n.translate(
-              'xpack.streams.streamDetailLifecycle.storageSize.timeSeriesCountUnavailable',
-              { defaultMessage: 'Failed to fetch time series count' }
-            )}
-          </EuiText>
-        </span>
-      );
+    } else {
+      subtitle = docsText;
     }
   }
 
