@@ -125,7 +125,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         : i18n.translate('discover.panelsToggle.hideTableButton', {
             defaultMessage: 'Hide table',
           }),
-      iconType: isTableHidden ? TableHiddenIcon : TableShownIcon,
+      iconType: isTableHidden || !isActualChartAvailable ? TableHiddenIcon : TableShownIcon,
       'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
       'aria-expanded': !isTableHidden,
       'aria-controls': 'discoverDocTable',
