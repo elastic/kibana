@@ -222,7 +222,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   const panelContent = !hasAlertsRead ? (
     <EuiCallOut
       iconType="lock"
-      color="subdued"
+      color="warning"
       title={i18n.translate(
         'xpack.securitySolution.flyout.left.insights.correlations.missingAlertsPrivilegeTitle',
         { defaultMessage: 'Privileges required' }
