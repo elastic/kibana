@@ -109,10 +109,7 @@ export function getCompletionItemProvider(
       // Inside workflow.output's with: block, show only declared output field names so the user
       // doesn't get generic YAML/JSON Schema keys; skip the YAML provider in that case.
       const shouldUseExclusiveSuggestions = isInWorkflowOutputWithBlock(
-        autocompleteContext.path,
-        autocompleteContext.focusedStepInfo,
-        autocompleteContext.yamlDocument,
-        autocompleteContext.absoluteOffset
+        autocompleteContext.focusedStepInfo
       );
 
       let isIncomplete = false;

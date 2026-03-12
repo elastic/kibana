@@ -150,5 +150,73 @@ steps:
       expect(results.length).toBeGreaterThanOrEqual(1);
       expect(results.some((r) => r.severity === 'error')).toBe(true);
     });
+
+    it('should use fallback with legacy array outputs when workflowOutputs is undefined', () => {
+      const yamlString = `name: test
+outputs:
+  - name: result
+    type: string
+    required: true
+steps:
+  - name: return
+    type: workflow.output
+    with:
+      wrong: value`;
+
+      const { yamlDocument, model } = buildTestContext(yamlString);
+      const results = validateWorkflowOutputsInYaml(yamlDocument, model, undefined);
+
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      expect(results.some((r) => r.severity === 'error')).toBe(true);
+    });
+
+    it('should collect and validate workflow.output inside while, on-failure.fallback, and else', () => {
+      const yamlString = `name: test
+outputs:
+  required: [x]
+  properties:
+    x: { type: number }
+steps:
+  - name: branch
+    type: if
+    condition: "true"
+    steps:
+      - name: inner
+        type: while
+        max-iterations: 5
+        condition: "false"
+        steps:
+          - name: out_while
+            type: workflow.output
+            with:
+              x: wrong
+    else:
+      - name: out_else
+        type: workflow.output
+        with: {}
+  - name: with_fallback
+    type: console
+    with:
+      message: hi
+    on-failure:
+      fallback:
+        - name: out_fallback
+          type: workflow.output
+          with:
+            x: 1`;
+
+      const { yamlDocument, model } = buildTestContext(yamlString);
+      const parseResult = parseWorkflowYamlForAutocomplete(yamlString);
+      const workflowOutputs = parseResult.success
+        ? (parseResult.data.outputs as JsonModelSchemaType)
+        : undefined;
+
+      const results = validateWorkflowOutputsInYaml(yamlDocument, model, workflowOutputs);
+
+      const messages = results.map((r) => r.message);
+      expect(messages.some((m) => m?.includes('out_while') || m?.includes('"x"')));
+      expect(messages.some((m) => m?.includes('out_else') || m?.includes('"x"')));
+      expect(results.filter((r) => r.severity === 'error').length).toBeGreaterThanOrEqual(1);
+    });
   });
 });

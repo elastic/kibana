@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap, isPair, isScalar, isSeq } from 'yaml';
-import type { Document, Node, YAMLMap, YAMLSeq } from 'yaml';
+import { isMap, isPair, isScalar } from 'yaml';
+import type { Document, Node, YAMLMap } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import { getStepNodesWithType } from '../../../../common/lib/yaml/get_step_nodes_with_type';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateWorkflowFields } from '../../../widgets/workflow_yaml_editor/lib/validation/validate_workflow_fields';
 import type { YamlValidationResult } from '../model/types';
@@ -28,24 +29,12 @@ interface WorkflowOutputStepItem {
   model: monaco.editor.ITextModel;
 }
 
-function getStepType(stepNode: unknown): string | null {
-  if (!isMap(stepNode)) return null;
+function getStepType(stepNode: YAMLMap): string | null {
   const typePair = stepNode.items.find(
     (item) => isPair(item) && isScalar(item.key) && item.key.value === 'type'
   );
   if (typePair && isPair(typePair) && isScalar(typePair.value)) {
     return String(typePair.value.value);
-  }
-  return null;
-}
-
-function findNestedStepsSequence(stepNode: unknown, key: 'steps' | 'else'): YAMLSeq | null {
-  if (!isMap(stepNode)) return null;
-  const pair = stepNode.items.find(
-    (item) => isPair(item) && isScalar(item.key) && item.key.value === key
-  );
-  if (pair && isPair(pair) && isSeq(pair.value)) {
-    return pair.value as YAMLSeq;
   }
   return null;
 }
@@ -105,54 +94,33 @@ function collectWorkflowOutputStepFromNode(
 }
 
 /**
- * Recursively collects workflow.output steps from a steps sequence (including nested if/foreach).
- */
-function collectFromStepsSequence(
-  stepsSeq: YAMLSeq,
-  model: monaco.editor.ITextModel,
-  items: WorkflowOutputStepItem[] = []
-): WorkflowOutputStepItem[] {
-  for (const stepNode of stepsSeq.items) {
-    if (isMap(stepNode)) {
-      const stepType = getStepType(stepNode);
-      if (stepType === 'workflow.output') {
-        collectWorkflowOutputStepFromNode(stepNode, items, model);
-      } else if (stepType === 'foreach' || stepType === 'if') {
-        const nestedSteps = findNestedStepsSequence(stepNode, 'steps');
-        if (nestedSteps) {
-          collectFromStepsSequence(nestedSteps, model, items);
-        }
-        if (stepType === 'if') {
-          const elseSteps = findNestedStepsSequence(stepNode, 'else');
-          if (elseSteps) {
-            collectFromStepsSequence(elseSteps, model, items);
-          }
-        }
-      }
-    }
-  }
-  return items;
-}
-
-/**
- * Collects all workflow.output steps from the YAML document (top-level and nested in if/foreach).
+ * Collects all workflow.output steps from the YAML document using the shared AST visitor.
+ * Covers steps at any nesting depth (if, foreach, while, on-failure, etc.).
  */
 function collectWorkflowOutputSteps(
   yamlDocument: Document,
   model: monaco.editor.ITextModel
 ): WorkflowOutputStepItem[] {
-  const stepsNode = yamlDocument.get('steps', true);
-
-  if (!stepsNode || !isSeq(stepsNode)) {
-    return [];
+  const allStepNodes = getStepNodesWithType(yamlDocument);
+  const outputStepNodes = allStepNodes.filter((node) => getStepType(node) === 'workflow.output');
+  const items: WorkflowOutputStepItem[] = [];
+  for (const node of outputStepNodes) {
+    collectWorkflowOutputStepFromNode(node, items, model);
   }
-
-  return collectFromStepsSequence(stepsNode as YAMLSeq, model, []);
+  return items;
 }
 
 /**
- * Reads the outputs section from the raw YAML document as a plain object.
- * Used when workflowDefinition.outputs is missing (e.g. schema parse stripped it).
+ * Reads the outputs section from the raw YAML document as a plain object or array.
+ * Used when workflowDefinition.outputs is missing so we can still validate workflow.output
+ * steps. That happens when:
+ * - The workflow YAML fails schema parse (e.g. structural error) and the parsed
+ *   workflow definition is undefined or stripped.
+ * - Validations run before the full workflow graph/definition is available.
+ * In those cases the editor still has the raw yamlDocument; we read `outputs` from it
+ * so workflow.output `with:` validation can run.
+ * Supports both JSON Schema format (object with properties) and legacy array format
+ * ([{ name, type, required?, ... }]) so that either declaration style is validated.
  */
 function getOutputsFromYamlDocument(yamlDocument: Document): NormalizableFieldSchema | undefined {
   const outputsNode = yamlDocument.get('outputs', true);
@@ -161,15 +129,28 @@ function getOutputsFromYamlDocument(yamlDocument: Document): NormalizableFieldSc
     typeof (outputsNode as Node).toJSON === 'function'
       ? (outputsNode as Node).toJSON()
       : outputsNode;
+  if (!plain || typeof plain !== 'object') return undefined;
+
+  // JSON Schema format: { properties: { ... } }
   if (
-    plain &&
-    typeof plain === 'object' &&
     !Array.isArray(plain) &&
     'properties' in plain &&
     typeof (plain as Record<string, unknown>).properties === 'object'
   ) {
-    return plain;
+    return plain as NormalizableFieldSchema;
   }
+
+  // Legacy array format: [{ name, type, required?, ... }]
+  if (
+    Array.isArray(plain) &&
+    plain.length > 0 &&
+    plain.every(
+      (item) => item != null && typeof item === 'object' && 'name' in item && 'type' in item
+    )
+  ) {
+    return plain as NormalizableFieldSchema;
+  }
+
   return undefined;
 }
 

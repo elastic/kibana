@@ -85,6 +85,7 @@ export {
   isKibana,
   isWait,
   isWaitForInput,
+  isWorkflowOutput,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,

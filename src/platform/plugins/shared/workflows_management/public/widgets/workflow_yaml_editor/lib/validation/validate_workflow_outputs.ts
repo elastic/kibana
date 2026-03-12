@@ -8,15 +8,7 @@
  */
 
 import type { NormalizableFieldSchema } from '@kbn/workflows/spec/lib/field_conversion';
-import { makeWorkflowFieldsValidator, validateWorkflowFields } from './validate_workflow_fields';
-
-/**
- * Creates a Zod validator for workflow outputs
- * Delegates to shared field validator
- */
-export function makeWorkflowOutputsValidator(outputs: NormalizableFieldSchema) {
-  return makeWorkflowFieldsValidator(outputs);
-}
+import { validateWorkflowFields } from './validate_workflow_fields';
 
 export interface WorkflowOutputValidationError {
   outputName: string;

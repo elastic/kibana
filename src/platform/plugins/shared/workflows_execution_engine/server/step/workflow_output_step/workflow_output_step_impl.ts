@@ -110,8 +110,8 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
         tags: ['workflow-output', 'success'],
       });
 
-      // Determine the execution status based on the step's status parameter
-      const stepStatus = step.status || 'completed';
+      // Execution status from step (default 'completed' is applied by WorkflowOutputStepSchema)
+      const stepStatus = step.status;
       let executionStatus: ExecutionStatus;
       let outcome: 'success' | 'failure' | 'unknown';
 
