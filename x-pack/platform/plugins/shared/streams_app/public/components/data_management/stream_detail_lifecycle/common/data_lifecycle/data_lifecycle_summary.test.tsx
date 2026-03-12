@@ -11,10 +11,16 @@ import { DataLifecycleSummary } from './data_lifecycle_summary';
 import { type LifecyclePhase } from './lifecycle_types';
 
 describe('DataLifecycleSummary', () => {
+  const defaultProps = {
+    model: {
+      phases: [],
+    },
+    capabilities: { canManageLifecycle: true },
+    showDownsampling: true,
+  };
   describe('Loading State', () => {
     it('should show skeleton when data is being fetched', () => {
-      const phases: LifecyclePhase[] = [];
-      render(<DataLifecycleSummary phases={phases} loading={true} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ loading: true, phases: [] }} />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
@@ -23,8 +29,7 @@ describe('DataLifecycleSummary', () => {
 
   describe('Empty State', () => {
     it('should render title with no phases when phases array is empty', () => {
-      const phases: LifecyclePhase[] = [];
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
@@ -62,7 +67,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByText('0d')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-hot-name')).toBeInTheDocument();
@@ -93,7 +98,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByText('0s')).toBeInTheDocument();
     });
@@ -119,7 +124,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByTestId('lifecyclePhase-Main phase-name')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-Main phase-size')).toHaveTextContent('2.0 GB');
@@ -139,7 +144,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByTestId('lifecyclePhase-Main phase-name')).toBeInTheDocument();
       expect(screen.queryByTestId('dataLifecycle-delete-icon')).not.toBeInTheDocument();
@@ -156,7 +161,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByText('∞')).toBeInTheDocument();
     });
@@ -179,7 +184,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
@@ -208,11 +213,41 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1h-interval')).toHaveTextContent('1h');
       expect(screen.queryByTestId('downsamplingPhase-delete-label')).not.toBeInTheDocument();
+    });
+
+    it('should not render downsampling bar when show downsampling is false', () => {
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          name: 'hot',
+          label: 'hot',
+          size: '1.0 MB',
+          grow: true,
+        },
+      ];
+
+      const downsampleSteps = [
+        { fixed_interval: '1d', after: '20d' },
+        { fixed_interval: '5d', after: '40d' },
+      ];
+
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ phases, downsampleSteps }}
+          showDownsampling={false}
+        />
+      );
+
+      expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('downsamplingPhase-1d-label')).not.toBeInTheDocument();
+      expect(screen.queryByText('20d')).not.toBeInTheDocument();
+      expect(screen.queryByText('40d')).not.toBeInTheDocument();
     });
   });
 
@@ -233,13 +268,7 @@ describe('DataLifecycleSummary', () => {
         { fixed_interval: '5d', after: '40d' },
       ];
 
-      render(
-        <DataLifecycleSummary
-          phases={phases}
-          downsampleSteps={downsampleSteps}
-          canManageLifecycle
-        />
-      );
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases, downsampleSteps }} />);
 
       expect(screen.getByTestId('downsamplingPhase-1d-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingPhase-1d-interval')).toHaveTextContent('1d');
@@ -261,7 +290,7 @@ describe('DataLifecycleSummary', () => {
         },
       ];
 
-      render(<DataLifecycleSummary phases={phases} canManageLifecycle />);
+      render(<DataLifecycleSummary {...defaultProps} model={{ phases }} />);
 
       expect(screen.queryByTestId('downsamplingPhase-1d-label')).not.toBeInTheDocument();
     });
@@ -290,11 +319,10 @@ describe('DataLifecycleSummary', () => {
 
       render(
         <DataLifecycleSummary
-          phases={phases}
-          isIlm
-          onRemovePhase={jest.fn()}
-          onRemoveDownsampleStep={jest.fn()}
-          canManageLifecycle
+          {...defaultProps}
+          model={{ phases }}
+          phaseActions={{ onRemovePhase: jest.fn() }}
+          downsamplingActions={{ onRemoveDownsampleStep: jest.fn() }}
         />
       );
 
@@ -306,6 +334,57 @@ describe('DataLifecycleSummary', () => {
         .closest('[role="button"]');
       fireEvent.click(warmPhaseButton!);
       expect(screen.getByTestId('lifecyclePhase-warm-removeButton')).toBeInTheDocument();
+    });
+  });
+
+  describe('Edit flyout open behavior', () => {
+    it('should navigate to phase when edit flyout is open (no popover)', () => {
+      const onEditPhase = jest.fn();
+      const phases: LifecyclePhase[] = [
+        { grow: 5, name: 'hot', label: 'hot', color: '#FF0000', min_age: '0d' },
+        { grow: 3, name: 'warm', label: 'warm', color: '#FFA500', min_age: '30d' },
+      ];
+
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ phases }}
+          phaseActions={{ onEditPhase }}
+          uiState={{ isEditLifecycleFlyoutOpen: true }}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+
+      expect(onEditPhase).toHaveBeenCalledWith(phases[1].label);
+      expect(screen.queryByTestId('lifecyclePhase-warm-popoverTitle')).not.toBeInTheDocument();
+    });
+
+    it('should navigate to downsampling step when edit flyout is open (no popover)', () => {
+      const onEditDownsampleStep = jest.fn();
+      const phases: LifecyclePhase[] = [
+        {
+          color: '#FF0000',
+          name: 'hot',
+          label: 'hot',
+          grow: 5,
+          downsample: { after: '0d', fixed_interval: '1h' },
+        },
+      ];
+
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ phases }}
+          downsamplingActions={{ onEditDownsampleStep }}
+          uiState={{ isEditLifecycleFlyoutOpen: true }}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+
+      expect(onEditDownsampleStep).toHaveBeenCalledWith(1, 'hot');
+      expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
     });
   });
 });

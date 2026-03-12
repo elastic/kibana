@@ -146,21 +146,10 @@ export const extractEsqlVariables = (
       const isSingleSelect = panel.single_select ?? true;
       const selectedValues = panel.selected_options || [];
 
-      let value: string | number | (string | number)[];
-
-      if (isSingleSelect) {
-        // Single select: return the first selected value, converting to number if possible
-        const singleValue = selectedValues[0];
-        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
-      } else {
-        // Multi select: return array with numbers converted from strings when possible
-        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
-      }
-
       acc.push({
         key: panel.variable_name,
         type: panel.variable_type as ESQLVariableType,
-        value,
+        value: isSingleSelect ? selectedValues[0] ?? '' : selectedValues,
       });
     }
     return acc;

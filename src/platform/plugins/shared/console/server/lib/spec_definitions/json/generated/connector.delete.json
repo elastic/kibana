@@ -15,6 +15,7 @@
       "_connector/{connector_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-delete",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-connector-delete",
     "availability": {
       "stack": true,
       "serverless": true

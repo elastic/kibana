@@ -13,15 +13,24 @@ import type {
 import {
   createWorkflowAbortedError,
   createWorkflowExecutionError,
-  AGENT_WORKFLOWS_FEATURE_FLAG,
 } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { executeWorkflow } from '../../services/workflow/execute_workflow';
 import type { BeforeAgentWorkflowOutput } from './types';
+import type { AgentsServiceStart } from '../../services/agents';
+import {
+  mergePreExecutionWorkflowIds,
+  toStringArray,
+} from '../../../common/pre_execution_workflows';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
@@ -65,28 +74,17 @@ export async function runBeforeAgentWorkflows({
   getInternalServices,
   logger,
 }: RunBeforeAgentWorkflowsParams): Promise<void | HookHandlerResult<HookLifecycle.beforeAgent>> {
-  if (!context.agentId) {
-    return;
-  }
-
-  const { agents, spaces, featureFlags, uiSettings, savedObjects } = getInternalServices();
-  const agentWorkflowsEnabled = await featureFlags.getBooleanValue(
-    AGENT_WORKFLOWS_FEATURE_FLAG,
-    false
-  );
+  const { agents, spaces, uiSettings, savedObjects } = getInternalServices();
   const soClient = savedObjects.getScopedClient(context.request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-  const workflowsUiEnabled =
-    (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? false;
-  if (!agentWorkflowsEnabled || !workflowsUiEnabled) {
+  const isEnabled = await isPreExecutionWorkflowEnabled(uiSettingsClient);
+
+  if (!isEnabled) {
     return;
   }
 
-  const registry = await agents.getRegistry({ request: context.request });
-  const agent = await registry.get(context.agentId);
-  const workflowIds = agent?.configuration?.workflow_ids;
-
-  if (!workflowIds?.length) {
+  const workflowIds = await getWorkflowIds(uiSettingsClient, context, agents);
+  if (!workflowIds.length) {
     return;
   }
 
@@ -142,4 +140,31 @@ export async function runBeforeAgentWorkflows({
   if (currentNextInput !== context.nextInput) {
     return { nextInput: currentNextInput };
   }
+}
+
+async function isPreExecutionWorkflowEnabled(uiSettingsClient: IUiSettingsClient) {
+  const experimentalFeaturesEnabled =
+    (await uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)) ?? false;
+  const workflowsUiEnabled =
+    (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? false;
+  return workflowsUiEnabled && experimentalFeaturesEnabled;
+}
+
+async function getWorkflowIds(
+  uiSettingsClient: IUiSettingsClient,
+  context: BeforeAgentHookContext,
+  agents: AgentsServiceStart
+) {
+  const globalWorkflowIds = toStringArray(
+    await uiSettingsClient.get(AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS)
+  );
+
+  let agentWorkflowIds: string[] = [];
+  if (context.agentId) {
+    const registry = await agents.getRegistry({ request: context.request });
+    const agent = await registry.get(context.agentId);
+    agentWorkflowIds = agent?.configuration?.workflow_ids ?? [];
+  }
+
+  return mergePreExecutionWorkflowIds(globalWorkflowIds, agentWorkflowIds);
 }

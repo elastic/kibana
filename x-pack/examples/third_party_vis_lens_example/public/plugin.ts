@@ -101,7 +101,7 @@ export class EmbeddedLensExamplePlugin
             const defaultDataView = await dataViews.getDefault();
             lensStart.navigateToPrefilledEditor({
               id: '',
-              timeRange: {
+              time_range: {
                 from: 'now-5d',
                 to: 'now',
               },

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/transform-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/transform-plugin'
+  title: '@kbn/transform-plugin'
   description: Moon project for @kbn/transform-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/transform
+  sourceRoot: x-pack/platform/plugins/private/transform
 dependsOn:
   - '@kbn/core'
   - '@kbn/features-plugin'
@@ -94,6 +93,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -110,14 +110,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

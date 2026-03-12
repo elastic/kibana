@@ -2478,25 +2478,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-common.checkFTRCodeOwnersCLI",
-        "type": "Function",
-        "tags": [],
-        "label": "checkFTRCodeOwnersCLI",
-        "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/code_owners.ts",
-        "lineNumber": 26,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-common.cleanupElasticsearch",
         "type": "Function",
         "tags": [],
@@ -2923,7 +2904,7 @@
           "<Options>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-        "lineNumber": 175,
+        "lineNumber": 189,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2939,7 +2920,7 @@
               "Options"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
-            "lineNumber": 177,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3181,7 +3162,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 742,
+        "lineNumber": 754,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3197,7 +3178,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 747,
+            "lineNumber": 759,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -4550,7 +4531,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"tag\" | \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"dataPath\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/es/test_es_cluster.ts",
             "lineNumber": 77,

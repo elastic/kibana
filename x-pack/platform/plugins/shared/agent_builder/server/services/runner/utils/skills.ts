@@ -20,7 +20,7 @@ import { isDisabledDefinition } from '../../tools/tool_types/definitions';
 import { ToolAvailabilityCache } from '../../tools/builtin/availability_cache';
 import type { ToolsServiceStart } from '../../tools';
 
-export const createSkillsService = ({
+export const createSkillsService = async ({
   skillServiceStart,
   toolsServiceStart,
   runner,
@@ -32,7 +32,8 @@ export const createSkillsService = ({
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
-}): SkillsService => {
+}): Promise<SkillsService> => {
+  const skillRegistry = await skillServiceStart.getRegistry({ request });
   const toolConverterFn = createSkillToolConverter({
     request,
     spaceId,
@@ -41,11 +42,13 @@ export const createSkillsService = ({
   });
 
   return {
-    list: () => {
-      return skillServiceStart.listSkills();
-    },
-    getSkillDefinition: (skillId) => {
-      return skillServiceStart.getSkillDefinition(skillId);
+    list: () => skillRegistry.list(),
+    get: async (skillId) => {
+      try {
+        return await skillRegistry.get(skillId);
+      } catch {
+        return undefined;
+      }
     },
     convertSkillTool: toolConverterFn,
   };

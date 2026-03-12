@@ -51,7 +51,6 @@ export const OptionsListPopoverSuggestions = ({
     totalCardinality,
     loading,
     fieldFormatter,
-    allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     componentApi.sort$,
     componentApi.searchString$,
@@ -63,19 +62,18 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.availableOptions$,
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
-    componentApi.fieldFormatter,
-    componentApi.allowExpensiveQueries$
+    componentApi.fieldFormatter
   );
 
   const listRef = useRef<HTMLDivElement>(null);
 
   const canLoadMoreSuggestions = useMemo<boolean>(
     () =>
-      allowExpensiveQueries && totalCardinality && !showOnlySelected // && searchString.valid
+      totalCardinality && !showOnlySelected
         ? (availableOptions ?? []).length <
           Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE)
         : false,
-    [availableOptions, totalCardinality, showOnlySelected, allowExpensiveQueries]
+    [availableOptions, totalCardinality, showOnlySelected]
   );
 
   const suggestions = useMemo<OptionsListSuggestions | OptionsListSelection[]>(() => {
@@ -163,7 +161,7 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+      if (searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -171,7 +169,7 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    [searchTechnique, allowExpensiveQueries]
+    [searchTechnique]
   );
 
   useEffect(() => {

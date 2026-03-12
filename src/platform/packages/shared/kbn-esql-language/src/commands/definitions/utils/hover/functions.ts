@@ -8,13 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteral } from '../../../../ast/is';
-import { getExpressionType } from '..';
+import type { ESQLFunction } from '@elastic/esql/types';
+import { resolveArgumentTypes } from '../expressions';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';
-import type { ESQLFunction } from '../../../../types';
 import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
-import { getMatchingSignatures } from '../expressions';
+import { getMatchingSignatures } from '../signatures';
 
 /**
  * Formats a list of types with optional limiting and overflow indicator.
@@ -152,31 +151,30 @@ function getFilteredSignatures(
   let signatures = functionDef.signatures;
 
   if (fnNode && columns && fnNode.args.length > 0) {
-    const argTypes = fnNode.args.map((arg) =>
-      getExpressionType(arg, columns, unmappedFieldsStrategy)
-    );
-    const literalMask = fnNode.args.map((arg) => isLiteral(arg));
+    const { argTypes, literalMask } = resolveArgumentTypes(fnNode.args, {
+      columns,
+      unmappedFieldsStrategy,
+    });
 
     const matchingSignatures = getMatchingSignatures(
       functionDef.signatures,
       argTypes,
       literalMask,
-      false, // Accepts unknown
-      true // Accepts partial matches
+      false,
+      true
     );
+
     if (matchingSignatures.length > 0) {
       signatures = matchingSignatures;
     } else {
-      // Try again without the last argument (in case user is typing it and it's incomplete)
-      const argTypesWithoutLast = argTypes.slice(0, -1);
-      const literalMaskWithoutLast = literalMask.slice(0, -1);
       const partialMatchingSignatures = getMatchingSignatures(
         functionDef.signatures,
-        argTypesWithoutLast,
-        literalMaskWithoutLast,
+        argTypes.slice(0, -1),
+        literalMask.slice(0, -1),
         false,
         true
       );
+
       if (partialMatchingSignatures.length > 0) {
         signatures = partialMatchingSignatures;
       }

@@ -21,10 +21,10 @@ import {
   EuiTextColor,
   EuiButtonGroup,
   EuiPanel,
-  EuiButtonEmpty,
   EuiCopy,
   EuiButton,
   EuiText,
+  EuiFormAppend,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -418,18 +418,17 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                       textToCopy={`${inferenceUri}${config.inferenceId}`}
                     >
                       {(copy) => (
-                        <EuiButtonEmpty
-                          iconType="copy"
-                          size="xs"
-                          iconSide="right"
+                        <EuiFormAppend
+                          element="button"
+                          label={
+                            <FormattedMessage
+                              id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
+                              defaultMessage="Copy"
+                            />
+                          }
+                          iconRight="copy"
                           onClick={copy}
-                          data-test-subj="copyInferenceUriToClipboard"
-                        >
-                          <FormattedMessage
-                            id="xpack.inferenceEndpointUICommon.components.additionalInfo.copyLabel"
-                            defaultMessage="Copy"
-                          />
-                        </EuiButtonEmpty>
+                        />
                       )}
                     </EuiCopy>
                   }

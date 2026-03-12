@@ -9,12 +9,10 @@ import type { Readable } from 'stream';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  DeserializerOrUndefined,
   ListIdOrUndefined,
   ListSchema,
   MetaOrUndefined,
   RefreshWithWaitFor,
-  SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
@@ -30,8 +28,6 @@ export interface ImportListItemsToStreamOptions {
   listId: ListIdOrUndefined;
   config: ConfigType;
   listIndex: string;
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
   stream: Readable;
   esClient: ElasticsearchClient;
   listItemIndex: string;
@@ -44,8 +40,6 @@ export interface ImportListItemsToStreamOptions {
 
 export const importListItemsToStream = ({
   config,
-  deserializer,
-  serializer,
   listId,
   stream,
   esClient,
@@ -71,14 +65,12 @@ export const importListItemsToStream = ({
               defaultMessage: 'File uploaded from file system of {fileName}',
               values: { fileName },
             }),
-            deserializer,
             esClient,
             id: fileName,
             immutable: false,
             listIndex,
             meta,
             name: fileName,
-            serializer,
             type,
             user,
             version,
@@ -95,26 +87,22 @@ export const importListItemsToStream = ({
         if (listId != null) {
           await writeBufferToItems({
             buffer: lines,
-            deserializer,
             esClient,
             listId,
             listItemIndex,
             meta,
             refresh,
-            serializer,
             type,
             user,
           });
         } else if (fileName != null) {
           await writeBufferToItems({
             buffer: lines,
-            deserializer,
             esClient,
             listId: fileName,
             listItemIndex,
             meta,
             refresh,
-            serializer,
             type,
             user,
           });
@@ -132,8 +120,6 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  deserializer: DeserializerOrUndefined;
-  serializer: SerializerOrUndefined;
   esClient: ElasticsearchClient;
   listItemIndex: string;
   buffer: string[];
@@ -150,8 +136,6 @@ export interface LinesResult {
 export const writeBufferToItems = async ({
   listId,
   esClient,
-  deserializer,
-  serializer,
   listItemIndex,
   buffer,
   type,
@@ -160,13 +144,11 @@ export const writeBufferToItems = async ({
   refresh,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   await createListItemsBulk({
-    deserializer,
     esClient,
     listId,
     listItemIndex,
     meta,
     refresh,
-    serializer,
     type,
     user,
     value: buffer,

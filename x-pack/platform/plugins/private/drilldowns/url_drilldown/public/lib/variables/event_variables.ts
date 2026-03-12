@@ -23,12 +23,9 @@ import {
   isRowClickTriggerContext,
 } from '@kbn/embeddable-plugin/public';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import {
-  ROW_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_ROW } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Primitive } from './util';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';
 
@@ -285,11 +282,11 @@ const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
 
 export const getEventVariableList = (trigger?: string): UrlTemplateEditorVariable[] => {
   switch (trigger) {
-    case VALUE_CLICK_TRIGGER:
+    case ON_CLICK_VALUE:
       return [...valueClickVariables];
-    case ROW_CLICK_TRIGGER:
+    case ON_CLICK_ROW:
       return [...rowClickVariables];
-    case SELECT_RANGE_TRIGGER:
+    case ON_SELECT_RANGE:
       return [...selectRangeVariables];
   }
 

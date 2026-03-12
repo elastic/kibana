@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+
 describe('ResolveAllConflicts', () => {
   const summarizedCopyResult = {
     objects: [
-      // these objects have minimal attributes to exercise test scenarios; these are not fully realistic results
-      { type: 'type-1', id: 'id-1', conflict: undefined }, // not a conflict
-      { type: 'type-2', id: 'id-2', conflict: { error: { type: 'conflict' } } }, // conflict without a destinationId
+      { type: 'type-1', id: 'id-1', conflict: undefined },
+      { type: 'type-2', id: 'id-2', conflict: { error: { type: 'conflict' } } },
       {
-        // conflict with a destinationId
         type: 'type-3',
         id: 'id-3',
         conflict: { error: { type: 'conflict', destinationId: 'dest-3' } },
       },
       {
-        // ambiguous conflict with two destinations
         type: 'type-4',
         id: 'id-4',
         conflict: {
@@ -40,7 +39,6 @@ describe('ResolveAllConflicts', () => {
         },
       },
       {
-        // ambiguous conflict with two destinations (a retry already exists for dest-5b)
         type: 'type-5',
         id: 'id-5',
         conflict: {
@@ -59,11 +57,6 @@ describe('ResolveAllConflicts', () => {
   const onRetriesChange = jest.fn();
   const onDestinationMapChange = jest.fn();
 
-  const getOverwriteOption = (wrapper: ReactWrapper) =>
-    findTestSubject(wrapper, 'cts-resolve-all-conflicts-overwrite');
-  const getSkipOption = (wrapper: ReactWrapper) =>
-    findTestSubject(wrapper, 'cts-resolve-all-conflicts-skip');
-
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -74,81 +67,57 @@ describe('ResolveAllConflicts', () => {
     onRetriesChange,
     onDestinationMapChange,
   };
-  const openPopover = async (wrapper: ReactWrapper) => {
-    await act(async () => {
-      wrapper.setState({ isPopoverOpen: true });
-      await nextTick();
-      wrapper.update();
+
+  const openPopover = async () => {
+    await userEvent.click(screen.getByText('(resolve all)'));
+    await waitFor(() => {
+      expect(screen.getByTestId('cts-resolve-all-conflicts-overwrite')).toBeInTheDocument();
     });
   };
 
   it('should render as expected', async () => {
-    const wrapper = shallowWithIntl(<ResolveAllConflicts {...props} />);
-
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiPopover
-        anchorPosition="downLeft"
-        button={
-          <ResolveAllButton
-            onButtonClick={[Function]}
-          />
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={false}
+    const { container } = renderWithIntl(<ResolveAllConflicts {...props} />);
+    expect(screen.getByText('(resolve all)')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
         id="resolveAllConflictsVisibilityPopover"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanelClass
-          items={
-            Array [
-              <EuiContextMenuItem
-                data-test-subj="cts-resolve-all-conflicts-overwrite"
-                onClick={[Function]}
-              >
-                Overwrite all
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                data-test-subj="cts-resolve-all-conflicts-skip"
-                onClick={[Function]}
-              >
-                Skip all
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
+        <button
+          class="euiLink emotion-euiLink-primary-ResolveAllButton"
+          type="button"
+        >
+          (resolve all)
+        </button>
+      </div>
     `);
   });
 
   it('should add overwrite retries when "Overwrite all" is selected', async () => {
-    const wrapper = mountWithIntl(<ResolveAllConflicts {...props} />);
-    await openPopover(wrapper);
+    renderWithIntl(<ResolveAllConflicts {...props} />);
+    await openPopover();
     expect(onRetriesChange).not.toHaveBeenCalled();
 
-    getOverwriteOption(wrapper).simulate('click');
+    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
     expect(onRetriesChange).toHaveBeenCalledWith([
-      { type: 'type-1', id: 'id-1', overwrite: false }, // unchanged
-      { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' }, // unchanged
-      { type: 'type-2', id: 'id-2', overwrite: true }, // added without a destinationId
-      { type: 'type-3', id: 'id-3', overwrite: true, destinationId: 'dest-3' }, // added with the destinationId
-      { type: 'type-4', id: 'id-4', overwrite: true, destinationId: 'dest-4a' }, // added with the first destinationId
+      { type: 'type-1', id: 'id-1', overwrite: false },
+      { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
+      { type: 'type-2', id: 'id-2', overwrite: true },
+      { type: 'type-3', id: 'id-3', overwrite: true, destinationId: 'dest-3' },
+      { type: 'type-4', id: 'id-4', overwrite: true, destinationId: 'dest-4a' },
     ]);
     expect(onDestinationMapChange).not.toHaveBeenCalled();
   });
 
   it('should remove overwrite retries when "Skip all" is selected', async () => {
-    const wrapper = mountWithIntl(<ResolveAllConflicts {...props} />);
-    await openPopover(wrapper);
+    renderWithIntl(<ResolveAllConflicts {...props} />);
+    await openPopover();
     expect(onRetriesChange).not.toHaveBeenCalled();
     expect(onDestinationMapChange).not.toHaveBeenCalled();
 
-    getSkipOption(wrapper).simulate('click');
+    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
     expect(onRetriesChange).toHaveBeenCalledWith([
-      { type: 'type-1', id: 'id-1', overwrite: false }, // unchanged
+      { type: 'type-1', id: 'id-1', overwrite: false },
     ]);
     expect(onDestinationMapChange).toHaveBeenCalledWith(undefined);
   });

@@ -16,15 +16,19 @@ import {
   isInheritLifecycle,
   getInheritedFieldsFromAncestors,
   validateStreamName,
+  getEsqlViewName,
+  getWiredStreamViewQuery,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
+  getRoot,
   isChildOf,
   isDescendantOf,
   isRootStreamDefinition,
   isIlmLifecycle,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -540,6 +544,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     validateAncestorFields({
       ancestors,
       fields: this._definition.ingest.wired.fields,
+      streamName: this._definition.name,
     });
 
     validateDescendantFields({
@@ -571,9 +576,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         .map(([name]) => name);
 
       // Validate the Streamlang DSL
+      const rootStream = getRoot(this._definition.name);
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields,
         streamType: 'wired',
+        skipNamespaceValidation: rootStream === LOGS_ECS_STREAM_NAME,
       });
 
       if (!validationResult.isValid) {
@@ -622,13 +629,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     await Promise.all([
       shouldValidateSettingsWithDryRun
         ? validateSettingsWithDryRun({
-            scopedClusterClient: this.dependencies.scopedClusterClient,
+            esClient: this.dependencies.esClient,
             streamName: this._definition.name,
             settings: inheritedSettings,
             isServerless: this.dependencies.isServerless,
           })
         : Promise.resolve(),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     return { isValid: true, errors: [] };
@@ -636,10 +643,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   private async getMatchingDataStream() {
     try {
-      const response =
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+      const response = await this.dependencies.esClient.indices.getDataStream({
+        name: this._definition.name,
+      });
 
       if (response.data_streams.length === 0) {
         // the request didn't throw an error, but the data stream doesn't exist
@@ -697,7 +703,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     try {
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+      await this.dependencies.esClient.indices.get({
         index: name,
       });
 
@@ -723,7 +729,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const settings = getInheritedSettings(ancestors);
     const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
         request: generateLayer(
@@ -750,13 +756,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       existsAsManagedDataStream
         ? {
-            type: 'rollover',
+            type: 'rollover' as const,
             request: {
               name: this._definition.name,
             },
           }
         : {
-            type: 'upsert_datastream',
+            type: 'upsert_datastream' as const,
             request: {
               name: this._definition.name,
             },
@@ -788,6 +794,21 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         request: this._definition,
       },
     ];
+
+    if (this.dependencies.isWiredStreamViewsEnabled) {
+      actions.push({
+        type: 'upsert_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+          query: getWiredStreamViewQuery(
+            this._definition.name,
+            this._definition.ingest.wired.routing.map((r) => r.destination)
+          ),
+        },
+      });
+    }
+
+    return actions;
   }
 
   public hasChangedFields(): boolean {
@@ -871,6 +892,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           definition: this._definition,
         }),
       });
+      if (this.dependencies.isWiredStreamViewsEnabled) {
+        actions.push({
+          type: 'upsert_esql_view',
+          request: {
+            name: getEsqlViewName(this._definition.name),
+            query: getWiredStreamViewQuery(
+              this._definition.name,
+              this._definition.ingest.wired.routing.map((r) => r.destination)
+            ),
+          },
+        });
+      }
     }
     if (this._changes.processing) {
       actions.push({
@@ -981,7 +1014,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'delete_index_template',
         request: {
@@ -1043,5 +1076,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
     ];
+
+    if (this.dependencies.isWiredStreamViewsEnabled) {
+      actions.push({
+        type: 'delete_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+        },
+      });
+    }
+
+    return actions;
   }
 }
