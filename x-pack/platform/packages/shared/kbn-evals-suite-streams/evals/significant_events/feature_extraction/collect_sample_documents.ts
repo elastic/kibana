@@ -18,7 +18,9 @@ const REQUIRED_APP_SAMPLE_SIZE = 10;
 const getAppNameFromLogDoc = (doc: Record<string, unknown>): string | undefined => {
   const resource = doc.resource as Record<string, unknown> | undefined;
   const attributes = resource?.attributes as Record<string, unknown> | undefined;
-  const app = attributes?.app;
+  // Check both OTel Demo convention (resource.attributes.app) and standard OTEL
+  // (resource.attributes.service.name stored as a dotted key in the attributes object).
+  const app = attributes?.app ?? attributes?.['service.name'];
   return typeof app === 'string' && app.length > 0 ? app : undefined;
 };
 
@@ -142,7 +144,17 @@ export const collectSampleDocuments = async ({
     const result = await esClient.search<Record<string, unknown>>({
       index: MANAGED_STREAM_SEARCH_PATTERN,
       size,
-      query: { term: { 'resource.attributes.app': app } },
+      query: {
+        bool: {
+          should: [
+            // OTel Demo convention
+            { term: { 'resource.attributes.app': app } },
+            // Standard OTEL convention (service.name is a dotted key in the attributes map)
+            { term: { 'resource.attributes.service.name.keyword': app } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
       sort: [{ '@timestamp': { order: 'desc' } }, { _shard_doc: { order: 'desc' } }],
     });
 
