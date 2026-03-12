@@ -64,7 +64,8 @@
     "@kbn/core-http-server-utils",
     "@kbn/es-query",
     "@kbn/eval-kql",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/lens-plugin"
   ],
   "exclude": ["target/**/*"]
 }
