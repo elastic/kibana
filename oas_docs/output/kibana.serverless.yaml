@@ -24101,6 +24101,9 @@ paths:
                         is_protected:
                           description: Indicates whether the agent policy has tamper protection enabled. Default false.
                           type: boolean
+                        is_verifier:
+                          description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                          type: boolean
                         keep_monitoring_alive:
                           default: false
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -24921,6 +24924,9 @@ paths:
                   type: boolean
                 is_protected:
                   type: boolean
+                is_verifier:
+                  description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                  type: boolean
                 keep_monitoring_alive:
                   default: false
                   description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -25176,6 +25182,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -26035,6 +26044,9 @@ paths:
                         is_protected:
                           description: Indicates whether the agent policy has tamper protection enabled. Default false.
                           type: boolean
+                        is_verifier:
+                          description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                          type: boolean
                         keep_monitoring_alive:
                           default: false
                           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -26872,6 +26884,9 @@ paths:
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
                         type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                        type: boolean
                       keep_monitoring_alive:
                         default: false
                         description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -27691,6 +27706,9 @@ paths:
                   type: boolean
                 is_protected:
                   type: boolean
+                is_verifier:
+                  description: Indicates this is a short-lived verifier policy used for OTel permission verification.
+                  type: boolean
                 keep_monitoring_alive:
                   default: false
                   description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
@@ -27946,6 +27964,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -28896,6 +28917,9 @@ paths:
                         type: boolean
                       is_protected:
                         description: Indicates whether the agent policy has tamper protection enabled. Default false.
+                        type: boolean
+                      is_verifier:
+                        description: Indicates this is a short-lived verifier policy used for OTel permission verification.
                         type: boolean
                       keep_monitoring_alive:
                         default: false
@@ -35837,6 +35861,19 @@ paths:
                         vars:
                           additionalProperties: {}
                           type: object
+                        verification_failed_at:
+                          type: string
+                        verification_id:
+                          type: string
+                        verification_permissions:
+                          additionalProperties: {}
+                          type: object
+                        verification_started_at:
+                          type: string
+                        verification_status:
+                          type: string
+                        verification_timestamp:
+                          type: string
                       required:
                         - id
                         - name
@@ -35990,6 +36027,19 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_id:
+                        type: string
+                      verification_permissions:
+                        additionalProperties: {}
+                        type: object
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
+                      verification_timestamp:
+                        type: string
                     required:
                       - id
                       - name
@@ -36149,6 +36199,19 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_id:
+                        type: string
+                      verification_permissions:
+                        additionalProperties: {}
+                        type: object
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
+                      verification_timestamp:
+                        type: string
                     required:
                       - id
                       - name
@@ -36295,6 +36358,19 @@ paths:
                       vars:
                         additionalProperties: {}
                         type: object
+                      verification_failed_at:
+                        type: string
+                      verification_id:
+                        type: string
+                      verification_permissions:
+                        additionalProperties: {}
+                        type: object
+                      verification_started_at:
+                        type: string
+                      verification_status:
+                        type: string
+                      verification_timestamp:
+                        type: string
                     required:
                       - id
                       - name
