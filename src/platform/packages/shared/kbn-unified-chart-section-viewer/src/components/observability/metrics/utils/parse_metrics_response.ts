@@ -13,6 +13,9 @@ import type {
   ParsedMetricsResult,
 } from '../../../../types';
 import { toArray } from './to_array';
+import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
+
+const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 
 export const parseMetricsResponse = (
   response: MetricsESQLResponseObject[]
@@ -21,9 +24,18 @@ export const parseMetricsResponse = (
   const allDimensionsSet = new Set<string>();
 
   for (const metric of response) {
+    const metricTypes = toArray(metric.metric_type);
+
+    const isSupportedMetricType = metricTypes.every((metricType) =>
+      ALLOWED_METRIC_TYPES_SET.has(metricType)
+    );
+
+    if (!isSupportedMetricType) {
+      continue;
+    }
+
     const dataStreams = toArray(metric.data_stream);
     const units = toArray(metric.unit);
-    const metricTypes = toArray(metric.metric_type);
     const fieldTypes = toArray(metric.field_type);
     const dimensionFields = toArray(metric.dimension_fields);
 
