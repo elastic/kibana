@@ -82,7 +82,6 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     eprCategoryLoadingError,
     filteredCards,
     onCategoryChange,
-    availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
