@@ -12,8 +12,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
-import type { EuiSelectHTMLAttributes } from '@elastic/eui';
+import { EuiButtonGroupTestHarness, EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import type {
   FramePublicAPI,
   DatasourcePublicAPI,
@@ -34,10 +33,15 @@ describe('data table dimension editor', () => {
   let user: UserEvent;
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
-  let btnGroups: { alignment: EuiButtonGroupTestHarness };
+  let btnGroups: { alignment: EuiButtonGroupTestHarness; colorMode: EuiComboBoxTestHarness };
   let mockOperationForFirstColumn: (overrides?: Partial<OperationDescriptor>) => void;
 
   let props: TableDimensionEditorProps;
+
+  const getDynamicColoringLabel = (colorMode: ColumnState['colorMode']) => {
+    const normalizedColorMode = colorMode ?? 'none';
+    return normalizedColorMode.charAt(0).toUpperCase() + normalizedColorMode.slice(1);
+  };
 
   function testState(): DatatableVisualizationState {
     return {
@@ -62,6 +66,7 @@ describe('data table dimension editor', () => {
   beforeEach(() => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     btnGroups = {
+      colorMode: new EuiComboBoxTestHarness('lnsDatatable_dynamicColoring_groups'),
       alignment: new EuiButtonGroupTestHarness('lnsDatatable_alignment_groups'),
     };
     state = testState();
@@ -126,10 +131,6 @@ describe('data table dimension editor', () => {
     });
   };
 
-  const getColorModeSelect = () =>
-    screen.getByTestId('lnsDatatable_dynamicColoring_groups') as HTMLSelectElement &
-      EuiSelectHTMLAttributes<HTMLSelectElement>;
-
   it('should render default alignment', () => {
     renderTableDimensionEditor();
     expect(btnGroups.alignment.getSelected()).toHaveTextContent('Left');
@@ -182,7 +183,7 @@ describe('data table dimension editor', () => {
   it('should set the dynamic coloring default to "none"', () => {
     state.columns[0].colorMode = undefined;
     renderTableDimensionEditor();
-    expect(getColorModeSelect()).toHaveValue('none');
+    expect(btnGroups.colorMode.getSelected()).toEqual(['None']);
     expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
   });
 
@@ -202,7 +203,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(getColorModeSelect()).toHaveValue(colorMode);
+      expect(btnGroups.colorMode.getSelected()).toEqual([getDynamicColoringLabel(colorMode)]);
       expect(screen.getByTestId('lns_dynamicColoring_edit')).toBeInTheDocument();
     }
   );
@@ -212,7 +213,7 @@ describe('data table dimension editor', () => {
     (colorMode) => {
       state.columns[0].colorMode = colorMode;
       renderTableDimensionEditor();
-      expect(getColorModeSelect()).toHaveValue('none');
+      expect(btnGroups.colorMode.getSelected()).toEqual(['None']);
       expect(screen.queryByTestId('lns_dynamicColoring_edit')).not.toBeInTheDocument();
     }
   );
@@ -220,7 +221,7 @@ describe('data table dimension editor', () => {
   it('should set the coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    await user.selectOptions(getColorModeSelect(), 'cell');
+    await btnGroups.colorMode.select('Cell');
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -241,7 +242,7 @@ describe('data table dimension editor', () => {
   it('should set the badge coloring mode to the right column', async () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
-    await user.selectOptions(getColorModeSelect(), 'badge');
+    await btnGroups.colorMode.select('Badge');
     jest.advanceTimersByTime(256);
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -276,7 +277,7 @@ describe('data table dimension editor', () => {
       },
     ];
     renderTableDimensionEditor();
-    await user.selectOptions(getColorModeSelect(), 'text');
+    await btnGroups.colorMode.select('Text');
     jest.advanceTimersByTime(256);
 
     expect(props.setState).toHaveBeenCalledWith({
@@ -329,9 +330,7 @@ describe('data table dimension editor', () => {
 
     renderTableDimensionEditor();
 
-    await act(async () => {
-      await user.selectOptions(getColorModeSelect(), 'none');
-    });
+    await btnGroups.colorMode.select('None');
 
     jest.advanceTimersByTime(256);
     expect(props.setState).toBeCalledWith({
