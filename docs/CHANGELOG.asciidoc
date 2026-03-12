@@ -140,7 +140,7 @@ Elastic Observability solution::
 * Fixes an error on the SLO burn rate alert details page for suppressed alerts ({kibana-pull}256435[#256435]).
 * Fixes a 500 error and infinite loading on the APM **Error group details** page when the related transaction document is missing the `transaction.sampled` field ({kibana-pull}255788[#255788]).
 Elastic Security solution::
-For the Elastic Security 8.19.13 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.13 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Management::
 * Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters ({kibana-pull}255649[#255649]).
 * Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements ({kibana-pull}255426[#255426]).
