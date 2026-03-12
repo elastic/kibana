@@ -101,89 +101,86 @@ export class GridLayout implements LayoutService {
       customBranding$: customBranding.customBranding$,
     };
 
-    return React.memo(() => {
-      const chromeVisible = useIsChromeVisible();
-      const hasHeaderBanner = useHasHeaderBanner();
-      const chromeStyle = useChromeStyle();
-      const hasAppMenu = useHasAppMenu();
-      const footer = useGlobalFooter();
-      const sidebarWidth = useSidebarWidth();
+    const GridLayoutContent = React.memo(
+      ({ debug: showDebug }: { debug: boolean }) => {
+        const chromeVisible = useIsChromeVisible();
+        const hasHeaderBanner = useHasHeaderBanner();
+        const chromeStyle = useChromeStyle();
+        const hasAppMenu = useHasAppMenu();
+        const footer = useGlobalFooter();
+        const sidebarWidth = useSidebarWidth();
 
-      const layoutConfig = {
-        ...layoutConfigs[chromeStyle],
-        sidebarWidth,
-      };
+        const layoutConfig = {
+          ...layoutConfigs[chromeStyle],
+          sidebarWidth,
+        };
 
-      // Assign main layout parts first
-      let header: ReactNode;
-      let navigation: ReactNode;
-      let banner: ReactNode;
-      let applicationTopBar: ReactNode;
+        // Assign main layout parts first
+        let header: ReactNode;
+        let navigation: ReactNode;
+        let banner: ReactNode;
+        let applicationTopBar: ReactNode;
 
-      if (chromeVisible) {
-        if (chromeStyle === 'classic') {
-          // If classic style, we use the classic header and no navigation, since it is part of the header
-          header = <ClassicHeader />;
-        } else {
-          // If project style, we use the project header and navigation
-          header = <ProjectHeader />;
-          if (hasAppMenu) {
-            // If project app menu is present, we use it as the application top bar
-            applicationTopBar = <AppMenuBar />;
-          }
-
-          navigation = <GridLayoutProjectSideNav />;
-        }
-      }
-
-      if (hasHeaderBanner) {
-        // If header banner is present, we use it, even if chrome is not visible
-        banner = <HeaderTopBanner position="static" />;
-      }
-
-      // If debug, override/add debug overlays
-      if (debug) {
         if (chromeVisible) {
-          if (!navigation) {
-            navigation = <SimpleDebugOverlay label="Debug Navigation" />;
+          if (chromeStyle === 'classic') {
+            header = <ClassicHeader />;
+          } else {
+            header = <ProjectHeader />;
+            if (hasAppMenu) {
+              applicationTopBar = <AppMenuBar />;
+            }
+
+            navigation = <GridLayoutProjectSideNav />;
           }
         }
-        // banner is visible even when chrome is not visible
-        if (!banner) {
-          banner = <SimpleDebugOverlay label="Debug Banner" />;
+
+        if (hasHeaderBanner) {
+          banner = <HeaderTopBanner position="static" />;
         }
+
+        if (showDebug) {
+          if (chromeVisible) {
+            if (!navigation) {
+              navigation = <SimpleDebugOverlay label="Debug Navigation" />;
+            }
+          }
+          if (!banner) {
+            banner = <SimpleDebugOverlay label="Debug Banner" />;
+          }
+        }
+
+        return (
+          <>
+            <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
+            <ChromeLayoutConfigProvider value={layoutConfig}>
+              <ChromeLayout
+                header={header}
+                sidebar={<Sidebar />}
+                footer={footer}
+                navigation={navigation}
+                banner={banner}
+                applicationTopBar={applicationTopBar}
+              >
+                <>
+                  {!chromeVisible && <ChromelessHeader />}
+
+                  <div id="globalBannerList">{appBannerComponent}</div>
+                  <AppWrapper chromeVisible={chromeVisible}>
+                    <div id={APP_FIXED_VIEWPORT_ID} />
+                    {appComponent}
+                  </AppWrapper>
+                </>
+              </ChromeLayout>
+            </ChromeLayoutConfigProvider>
+          </>
+        );
       }
+    );
 
-      return (
-        <ChromeComponentsProvider value={componentDeps}>
-          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
-          <ChromeLayoutConfigProvider value={layoutConfig}>
-            <ChromeLayout
-              header={header}
-              sidebar={<Sidebar />}
-              footer={footer}
-              navigation={navigation}
-              banner={banner}
-              applicationTopBar={applicationTopBar}
-            >
-              <>
-                {/* If chrome is not visible, we use the chromeless header to display the*/}
-                {/* data-test-subj and fixed loading bar*/}
-                {!chromeVisible && <ChromelessHeader />}
-
-                <div id="globalBannerList">{appBannerComponent}</div>
-                <AppWrapper chromeVisible={chromeVisible}>
-                  {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-                  <div id={APP_FIXED_VIEWPORT_ID} />
-
-                  {/* The actual plugin/app */}
-                  {appComponent}
-                </AppWrapper>
-              </>
-            </ChromeLayout>
-          </ChromeLayoutConfigProvider>
-        </ChromeComponentsProvider>
-      );
-    });
+    return () => (
+      <ChromeComponentsProvider value={componentDeps}>
+        <GridLayoutContent debug={debug} />
+      </ChromeComponentsProvider>
+    );
   }
 }
