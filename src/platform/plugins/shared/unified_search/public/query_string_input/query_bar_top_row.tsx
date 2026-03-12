@@ -42,8 +42,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
-  EuiFilterButton,
-  EuiIcon,
+  EuiNotificationBadge,
   EuiIconTip,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
@@ -927,30 +926,45 @@ export const QueryBarTopRow = React.memo(
               content={strings.getFilterToggleTooltip()}
               delay="long"
             >
-              <EuiFilterButton
+              <EuiButtonIcon
+                iconType="filter"
                 aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
                   defaultMessage: 'Toggle filters panel',
                 })}
                 onClick={handleFilterToggleClick}
                 size="s"
+                display="base"
                 color="text"
-                isSelected={props.isFiltersVisible}
-                hasActiveFilters={hasFilters}
-                numFilters={filterCount}
-                numActiveFilters={filterCount > 0 ? filterCount : undefined}
                 data-test-subj="unifiedFilterPanelToggle"
-                css={css({
-                  padding: 0,
-                  minWidth: 0,
-                  '&, & .euiFilterButton__text': {
-                    minWidth: 0,
-                    lineHeight: 1,
-                  },
-                })}
-              >
-                <EuiIcon type="filter" />
-              </EuiFilterButton>
+                css={
+                  props.isFiltersVisible
+                    ? css({
+                        backgroundColor: euiTheme.colors.darkShade,
+                        color: euiTheme.colors.ghost,
+                        '&:hover, &:focus': {
+                          backgroundColor: euiTheme.colors.darkShade,
+                        },
+                      })
+                    : undefined
+                }
+              />
             </EuiToolTip>
+            {filterCount > 0 && (
+              <EuiNotificationBadge
+                aria-hidden
+                size="s"
+                color="subdued"
+                css={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -4,
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                }}
+              >
+                {filterCount}
+              </EuiNotificationBadge>
+            )}
             {props.addFilterOpenFromToggle !== undefined && (
               <AddFilterPopover
                 indexPatterns={props.indexPatterns}
