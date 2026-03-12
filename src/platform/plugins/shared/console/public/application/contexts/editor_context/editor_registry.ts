@@ -16,8 +16,20 @@ export class EditorRegistry {
     this.inputEditor = inputEditor;
   }
 
+  getInputEditorOrUndefined() {
+    return this.inputEditor;
+  }
+
+  getInputModel() {
+    return this.inputEditor?.getModel() ?? null;
+  }
+
   getInputEditor() {
     return this.inputEditor!;
+  }
+
+  getEditor() {
+    return this.inputEditor?.getEditor();
   }
 }
 

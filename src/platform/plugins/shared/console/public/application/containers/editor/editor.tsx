@@ -20,6 +20,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+
 import type { TextObject } from '../../../../common/text_object';
 
 import { NetworkRequestStatusBar } from '../../components';
@@ -73,6 +75,20 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   // localStorage related
   const editorDispatch = useEditorActionContext();
 
+  // const [selectedTabId, setSelectedTabId] = useState<EditorTabId>('request');
+  const [{ managedItems, managedSelectedItemId }, setState] = useState<{
+    managedItems: UnifiedTabsProps['items'];
+    managedSelectedItemId: UnifiedTabsProps['selectedItemId'];
+  }>({
+    managedItems: [{ label: 'Untitled', id: '1' }],
+    managedSelectedItemId: '1',
+  });
+
+  const [editorValueByTab, setEditorValueByTab] = useState<
+    Record<string, { inputValue: string; outputValue: string }>
+  >({});
+  const [internalInputEditorValue, setInternalInputEditorValue] = useState<string>('');
+
   // used for showing a loading state when fetching autocomplete entities
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
@@ -105,6 +121,37 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     debouncedUpdateLocalStorageValue(inputEditorValue);
   }, [debouncedUpdateLocalStorageValue, inputEditorValue]);
 
+  const updateInputEditorValue = useCallback(
+    (nextValue: string) => {
+      setEditorValueByTab((prev) => ({
+        ...prev,
+        [managedSelectedItemId!]: {
+          inputValue: nextValue,
+          outputValue: prev[managedSelectedItemId!]?.outputValue || '',
+        },
+      }));
+      setInternalInputEditorValue(nextValue);
+    },
+    [managedSelectedItemId, setEditorValueByTab, setInternalInputEditorValue]
+  );
+
+  const updateOutputEditorValue = useCallback(
+    (nextValue: string) => {
+      if (!managedSelectedItemId) {
+        return;
+      }
+
+      setEditorValueByTab((prev) => ({
+        ...prev,
+        [managedSelectedItemId]: {
+          inputValue: prev[managedSelectedItemId]?.inputValue || '',
+          outputValue: nextValue,
+        },
+      }));
+    },
+    [managedSelectedItemId]
+  );
+
   if (!currentTextObject) return null;
 
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
@@ -112,6 +159,29 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   return (
     <>
+      <UnifiedTabs
+        items={managedItems}
+        selectedItemId={managedSelectedItemId}
+        recentlyClosedItems={[]}
+        services={{ core: {} }}
+        createItem={() => ({
+          id: `${Date.now()}`,
+          label: editorI18n.newTabLabel,
+        })}
+        onClearRecentlyClosed={() => {}}
+        onEBTEvent={() => {}}
+        onChanged={(nextState) => {
+          setState({
+            managedItems: nextState.items,
+            managedSelectedItemId: nextState.selectedItem?.id,
+          });
+          // updateInputEditorValue(editorValueByTab[nextState.selectedItem?.id!] || '');
+          setInternalInputEditorValue(
+            editorValueByTab[nextState.selectedItem?.id!]?.inputValue || ''
+          );
+        }}
+        data-test-subj="consoleEditorTabs"
+      />
       {fetchingAutocompleteEntities ? (
         <div css={styles.requestProgressBarContainer}>
           <EuiProgress size="xs" color="accent" position="absolute" />
@@ -147,8 +217,8 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                 >
                   <InputPanel
                     loading={loading}
-                    inputEditorValue={inputEditorValue}
-                    setInputEditorValue={setInputEditorValue}
+                    inputEditorValue={internalInputEditorValue}
+                    setInputEditorValue={updateInputEditorValue}
                     setFetchingAutocompleteEntities={setFetchingAutocompleteEntities}
                   />
                 </EuiSplitPanel.Inner>
@@ -200,7 +270,11 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   paddingSize="none"
                   css={[styles.consoleEditorPanel, styles.outputPanelCentered]}
                 >
-                  <OutputPanel loading={isLoading} />
+                  <OutputPanel
+                    loading={isLoading}
+                    setVal={updateOutputEditorValue}
+                    val={editorValueByTab[managedSelectedItemId!]?.outputValue || ''}
+                  />
                 </EuiSplitPanel.Inner>
 
                 {(data || isLoading) && (

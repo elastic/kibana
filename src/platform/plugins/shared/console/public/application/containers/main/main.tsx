@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { getConsoleTourStepProps } from './get_console_tour_step_props';
 import { useServicesContext } from '../../contexts';
+import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 import { MAIN_PANEL_LABELS } from './i18n';
 import { NavIconButton } from './nav_icon_button';
 import { Editor } from '../editor';
@@ -151,6 +152,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const { currentTextObject } = useEditorReadContext();
   const [inputEditorValue, setInputEditorValue] = useState<string>(currentTextObject?.text ?? '');
+  const exportContent = editorRegistry.getInputModel()?.getValue() ?? inputEditorValue;
 
   const updateTab = (tab: string) => {
     if (routeHistory) {
@@ -270,10 +272,10 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
                       iconType="exportAction"
-                      disabled={inputEditorValue === ''}
+                      disabled={exportContent === ''}
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
-                          content: inputEditorValue,
+                          content: exportContent,
                           type: 'text/plain',
                         })
                       }
@@ -360,7 +362,11 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
             <Editor
               loading={!done}
               inputEditorValue={inputEditorValue}
-              setInputEditorValue={setInputEditorValue}
+              setInputEditorValue={(val) => {
+                console.log(editorRegistry.getEditor()?.getScrollTop());
+                editorRegistry.getEditor()?.setScrollTop(62);
+                setInputEditorValue(val);
+              }}
             />
           )}
           {currentTab === HISTORY_TAB_ID && <History />}

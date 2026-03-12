@@ -14,7 +14,15 @@ import { MonacoEditorOutput } from './monaco_editor_output';
 import { useRequestReadContext } from '../../contexts';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
-export const OutputPanel = ({ loading }: { loading: boolean }) => {
+export const OutputPanel = ({
+  loading,
+  setVal,
+  val,
+}: {
+  loading: boolean;
+  setVal: (value: string) => void;
+  val: string;
+}) => {
   const {
     requestInFlight,
     lastResult: { data: requestData, error: requestError },
@@ -26,7 +34,12 @@ export const OutputPanel = ({ loading }: { loading: boolean }) => {
   return (
     <>
       {data ? (
-        <MonacoEditorOutput />
+        <MonacoEditorOutput
+          // setVal={updateOutputEditorValue}
+          // val={editorValueByTab[managedSelectedItemId!]?.outputValue || ''}
+          setVal={setVal}
+          val={val}
+        />
       ) : isLoading ? (
         <EditorContentSpinner />
       ) : (
