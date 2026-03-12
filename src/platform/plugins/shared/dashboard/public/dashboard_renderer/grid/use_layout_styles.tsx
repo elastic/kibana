@@ -121,8 +121,15 @@ export const useLayoutStyles = () => {
         }
       }
 
-      // show accent background on hover of the section header
-      .kbnGridSectionHeader:hover {
+      // show accent background on hover of the section header (edit mode only)
+      .dshLayout--editing & .kbnGridSectionHeader:hover {
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
+        border-radius: ${euiTheme.border.radius.medium};
+      }
+
+      // highlight the section panel area when hovering the section header (edit mode only)
+      .kbnGridSection--headerHovered {
+        z-index: -1;
         background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
         border-radius: ${euiTheme.border.radius.medium};
       }

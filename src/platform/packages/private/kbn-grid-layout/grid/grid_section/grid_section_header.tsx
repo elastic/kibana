@@ -65,6 +65,11 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       .pipe(distinctUntilChanged())
       .subscribe((accessMode) => {
         setReadOnly(accessMode === 'VIEW');
+        if (accessMode === 'VIEW') {
+          gridLayoutStateManager.sectionRefs.current[sectionId]?.classList.remove(
+            'kbnGridSection--headerHovered'
+          );
+        }
       });
 
     /**
@@ -201,6 +206,19 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     [readOnly, startDrag]
   );
 
+  const handleMouseEnter = useCallback(() => {
+    if (readOnly) return;
+    gridLayoutStateManager.sectionRefs.current[sectionId]?.classList.add(
+      'kbnGridSection--headerHovered'
+    );
+  }, [readOnly, gridLayoutStateManager, sectionId]);
+
+  const handleMouseLeave = useCallback(() => {
+    gridLayoutStateManager.sectionRefs.current[sectionId]?.classList.remove(
+      'kbnGridSection--headerHovered'
+    );
+  }, [gridLayoutStateManager, sectionId]);
+
   return (
     <>
       <EuiFlexGroup
@@ -223,6 +241,8 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         }}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <GridSectionTitle
           sectionId={sectionId}
