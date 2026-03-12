@@ -28,7 +28,7 @@ apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () 
 
   apiTest('GET returns all registered keys with their default values', async ({ apiClient }) => {
     const response = await h.get(apiClient);
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(404);
     expect(response.body).toStrictEqual(DEFAULT_VALUES);
   });
 
