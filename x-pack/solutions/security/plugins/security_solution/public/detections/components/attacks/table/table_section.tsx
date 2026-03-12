@@ -40,6 +40,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
@@ -326,6 +327,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
+          unitsCountFilter={dsl.isNotAttack()}
         />
       </div>
     );
