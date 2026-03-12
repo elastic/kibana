@@ -6,15 +6,6 @@
  */
 
 import { tags } from '@kbn/scout';
-import { isDuplicateFeature } from '@kbn/streams-schema';
-import { identifyFeatures, type DeletedFeatureSummary } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
-import { sampleSize as lodashSampleSize } from 'lodash';
-import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
@@ -28,14 +19,11 @@ import {
   getActiveDatasets,
   resolveScenarioSnapshotSource,
   snapshotCatalogKey,
-  MANAGED_STREAM_NAME,
   MANAGED_STREAM_SEARCH_PATTERN,
   type FeatureSoftDeleteScenario,
 } from '../datasets';
-import {
-  createSoftDeleteSemanticEvaluator,
-  type SoftDeleteTaskOutput,
-} from '../../../src/evaluators/soft_delete/soft_delete_evaluators';
+import { createSoftDeleteSemanticEvaluator } from '../../../src/evaluators/soft_delete';
+import { runSoftDeleteExperiment } from './run_soft_delete_experiment';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
@@ -65,128 +53,6 @@ evaluate.describe(
         availableSnapshotsBySource.set(catalogSourceKey, new Set(availableSnapshots));
       }
     });
-
-    async function fetchSampleDocuments({
-      esClient,
-      sampleSize,
-      log,
-    }: {
-      esClient: Client;
-      sampleSize: number;
-      log: ToolingLog;
-    }): Promise<Array<SearchHit<Record<string, unknown>>>> {
-      const result = await esClient.search<Record<string, unknown>>({
-        index: MANAGED_STREAM_SEARCH_PATTERN,
-        size: sampleSize,
-        query: { match_all: {} },
-        sort: [{ '@timestamp': { order: 'desc' } }],
-      });
-
-      const sampleDocuments = result.hits.hits;
-      log.info(
-        `Fetched ${sampleDocuments.length} sample documents from ${MANAGED_STREAM_SEARCH_PATTERN}`
-      );
-
-      if (sampleDocuments.length === 0) {
-        throw new Error(
-          `No sample documents found in ${MANAGED_STREAM_SEARCH_PATTERN}. Ensure the snapshot has been replayed.`
-        );
-      }
-
-      return sampleDocuments;
-    }
-
-    async function runSoftDeleteExperiment({
-      esClient,
-      deleteCount,
-      followUpRuns,
-      inferenceClient,
-      logger,
-      sampleSize,
-      log,
-    }: {
-      esClient: Client;
-      deleteCount: number;
-      followUpRuns: number;
-      inferenceClient: BoundInferenceClient;
-      logger: Logger;
-      sampleSize: number;
-      log: ToolingLog;
-    }): Promise<SoftDeleteTaskOutput> {
-      const abortController = new AbortController();
-
-      const initialSampleDocuments = await fetchSampleDocuments({
-        esClient,
-        sampleSize,
-        log,
-      });
-
-      const { features: initialFeatures } = await identifyFeatures({
-        streamName: MANAGED_STREAM_NAME,
-        sampleDocuments: initialSampleDocuments,
-        systemPrompt: featuresPrompt,
-        inferenceClient,
-        logger,
-        signal: abortController.signal,
-      });
-
-      log.info(`Initial identification returned ${initialFeatures.length} features`);
-
-      if (initialFeatures.length < deleteCount) {
-        log.info(
-          `Not enough features identified (${initialFeatures.length}) to delete ${deleteCount}, skipping follow-up runs`
-        );
-        return {
-          initialFeatures,
-          deletedFeatures: [],
-          followUpRuns: [],
-        };
-      }
-
-      const featuresToDelete = lodashSampleSize(initialFeatures, deleteCount);
-      const deletedFeatures: DeletedFeatureSummary[] = featuresToDelete.map(
-        ({ id, type, subtype, title, description, properties }) => ({
-          id,
-          type,
-          subtype,
-          title,
-          description,
-          properties,
-        })
-      );
-
-      const outputs: SoftDeleteTaskOutput['followUpRuns'] = [];
-
-      for (let i = 0; i < followUpRuns; i++) {
-        const sampleDocuments = await fetchSampleDocuments({
-          esClient,
-          sampleSize,
-          log,
-        });
-
-        const { features: rawFeatures, ignoredFeatures } = await identifyFeatures({
-          streamName: MANAGED_STREAM_NAME,
-          sampleDocuments,
-          deletedFeatures,
-          systemPrompt: featuresPrompt,
-          inferenceClient,
-          logger,
-          signal: abortController.signal,
-        });
-
-        const features = rawFeatures.filter(
-          (feature) => !deletedFeatures.some((deleted) => isDuplicateFeature(feature, deleted))
-        );
-
-        outputs.push({ features, rawFeatures, ignoredFeatures });
-      }
-
-      return {
-        initialFeatures,
-        deletedFeatures,
-        followUpRuns: outputs,
-      };
-    }
 
     for (const { dataset, scenario } of softDeleteRuns) {
       const scenarioLabel = `${dataset.id} / ${scenario.input.scenario_id} (delete ${scenario.input.delete_count})`;

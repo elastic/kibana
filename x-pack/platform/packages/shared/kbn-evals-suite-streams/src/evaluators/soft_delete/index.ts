@@ -6,9 +6,10 @@
  */
 
 import type { BaseFeature } from '@kbn/streams-schema';
-import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { DeletedFeatureSummary, IgnoredFeature } from '@kbn/streams-ai';
-import { SoftDeleteCompliancePrompt } from './soft_delete_evaluator_prompt';
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
+import { SoftDeleteCompliancePrompt } from './prompt';
 
 export interface SoftDeleteTaskOutput {
   initialFeatures: BaseFeature[];
@@ -77,15 +78,22 @@ export const createSoftDeleteSemanticEvaluator = ({
       })),
     }));
 
-    const response = await inferenceClient.prompt({
+    const response = await executeUntilValid({
       prompt: SoftDeleteCompliancePrompt,
+      inferenceClient,
       input: {
         deleted_features: JSON.stringify(deletedFeatures),
         follow_up_runs: JSON.stringify(followUpRunsGrouped),
       },
-      toolChoice: {
+      finalToolChoice: {
         function: 'analyze',
-      } as ToolChoice,
+      },
+      maxRetries: 3,
+      toolCallbacks: {
+        analyze: async (toolCall) => ({
+          response: toolCall.function.arguments,
+        }),
+      },
     });
 
     const toolCall = response.toolCalls[0];
