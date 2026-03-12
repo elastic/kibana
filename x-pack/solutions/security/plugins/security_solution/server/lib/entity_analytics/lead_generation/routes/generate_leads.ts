@@ -46,6 +46,7 @@ export const ENTITY_SOURCE_FIELDS = [
   '@timestamp',
   'entity.name',
   'entity.type',
+  'entity.EngineMetadata.Type',
   'entity.id',
   'entity.risk',
   'entity.attributes',
@@ -249,9 +250,10 @@ export const fetchAllEntityStoreRecords = async (
 
 export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
   const { entity: entityField } = record;
+  const engineMeta = entityField?.EngineMetadata as { Type?: string } | undefined;
   return {
     record,
-    type: entityField?.type ?? 'unknown',
+    type: engineMeta?.Type ?? entityField?.type ?? 'unknown',
     name: entityField?.name ?? entityField?.id ?? 'unknown',
     id: entityField?.id ?? entityField?.name ?? 'unknown',
   };

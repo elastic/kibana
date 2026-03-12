@@ -223,8 +223,15 @@ describe('generate_leads helpers', () => {
   });
 
   describe('entityRecordToLeadEntity', () => {
-    it('extracts type, name, and id from the entity field', () => {
-      const record = { entity: { id: 'euid-1', name: 'alice', type: 'user' } } as never;
+    it('prefers EngineMetadata.Type over entity.type for the type field', () => {
+      const record = {
+        entity: {
+          id: 'euid-1',
+          name: 'alice',
+          type: 'Identity',
+          EngineMetadata: { Type: 'user' },
+        },
+      } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.type).toBe('user');
@@ -233,8 +240,17 @@ describe('generate_leads helpers', () => {
       expect(result.record).toBe(record);
     });
 
+    it('falls back to entity.type when EngineMetadata.Type is missing', () => {
+      const record = { entity: { id: 'euid-1', name: 'alice', type: 'user' } } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.type).toBe('user');
+    });
+
     it('falls back to entity.id for name when entity.name is missing', () => {
-      const record = { entity: { id: 'euid-host-1', type: 'host' } } as never;
+      const record = {
+        entity: { id: 'euid-host-1', type: 'Host', EngineMetadata: { Type: 'host' } },
+      } as never;
       const result = entityRecordToLeadEntity(record);
 
       expect(result.name).toBe('euid-host-1');
