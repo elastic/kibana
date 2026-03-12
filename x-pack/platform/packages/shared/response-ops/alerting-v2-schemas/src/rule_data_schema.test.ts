@@ -548,10 +548,12 @@ describe('updateRuleDataSchema', () => {
     const withArtifacts = updateRuleDataSchema.parse({
       artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
     });
-    expect(withArtifacts.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    expect(withArtifacts).toMatchObject({
+      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+    });
 
     const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
-    expect(nullArtifacts.artifacts).toBeNull();
+    expect(nullArtifacts).toMatchObject({ artifacts: null });
   });
 
   it('accepts a state_transition object', () => {
