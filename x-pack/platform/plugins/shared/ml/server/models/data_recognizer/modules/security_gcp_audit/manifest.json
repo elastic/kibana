@@ -21,8 +21,8 @@
       "file": "gcp_audit_rare_method_for_a_country_ea.json"
     },
     {
-      "id": "gcp_audit_rare_method_for_a_client_user_email_ea",
-      "file": "gcp_audit_rare_method_for_a_client_user_email_ea.json"
+      "id": "gcp_audit_rare_method_for_a_user_email_ea",
+      "file": "gcp_audit_rare_method_for_a_user_email_ea.json"
     },
     {
       "id": "gcp_audit_high_distinct_count_error_message_ea",
@@ -45,9 +45,9 @@
       "job_id": "gcp_audit_rare_method_for_a_country_ea"
     },
     {
-      "id": "datafeed-gcp_audit_rare_method_for_a_client_user_email_ea",
-      "file": "datafeed_gcp_audit_rare_method_for_a_client_user_email_ea.json",
-      "job_id": "gcp_audit_rare_method_for_a_client_user_email_ea"
+      "id": "datafeed-gcp_audit_rare_method_for_a_user_email_ea",
+      "file": "datafeed_gcp_audit_rare_method_for_a_user_email_ea.json",
+      "job_id": "gcp_audit_rare_method_for_a_user_email_ea"
     },
     {
       "id": "datafeed-gcp_audit_high_distinct_count_error_message_ea",
