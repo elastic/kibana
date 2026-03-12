@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getRunCommand, stripRunCommand } from './cli_processing';
+import {
+  getRunCommand,
+  getTestTargetFromProcessArguments,
+  stripRunCommand,
+} from './cli_processing';
 
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {
@@ -69,12 +73,7 @@ describe('cli_processing', () => {
     });
   });
 
-  describe('getTestTargetFromProcessArguments', () => {
-    const originalScoutTargetEnv: Record<string, string | undefined> = {
-      SCOUT_TARGET_LOCATION: process.env.SCOUT_TARGET_LOCATION,
-      SCOUT_TARGET_ARCH: process.env.SCOUT_TARGET_ARCH,
-      SCOUT_TARGET_DOMAIN: process.env.SCOUT_TARGET_DOMAIN,
-    };
+  describe('getRunCommand', () => {
     const originalEnv = process.env.SCOUT_RUN_COMMAND;
 
     afterEach(() => {
@@ -87,7 +86,7 @@ describe('cli_processing', () => {
 
     it(`should prefer SCOUT_RUN_COMMAND when provided`, () => {
       process.env.SCOUT_RUN_COMMAND =
-        'node scripts/scout.js run-tests --serverless=oblt --config path/to/config';
+        'node scripts/scout.js run-tests --arch serverless --domain observability_complete --config path/to/config';
 
       const argv = [
         'npx',
@@ -111,14 +110,18 @@ describe('cli_processing', () => {
         'path/to/config',
         '--project',
         'local',
-        '--grep=@svlSearch',
+        '--grep=@local-serverless-search',
       ];
       expect(getRunCommand(argv)).toBe(stripRunCommand(argv));
     });
   });
 
-  describe('getRunTarget', () => {
-    const originalEnv = process.env.SCOUT_TARGET_MODE;
+  describe('getTestTargetFromProcessArguments', () => {
+    const originalScoutTargetEnv: Record<string, string | undefined> = {
+      SCOUT_TARGET_LOCATION: process.env.SCOUT_TARGET_LOCATION,
+      SCOUT_TARGET_ARCH: process.env.SCOUT_TARGET_ARCH,
+      SCOUT_TARGET_DOMAIN: process.env.SCOUT_TARGET_DOMAIN,
+    };
 
     const clearScoutTargetEnv = () => {
       Object.keys(originalScoutTargetEnv).forEach((k: string) => delete process.env[k]);
