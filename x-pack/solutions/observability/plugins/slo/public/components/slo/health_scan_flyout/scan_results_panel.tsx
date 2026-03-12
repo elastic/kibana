@@ -92,7 +92,7 @@ function getHealthStatus(result: HealthScanResultResponse): string {
       });
 }
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 25;
 
 export function ScanResultsPanel({ scanId }: Props) {
   const { uiSettings, http } = useKibana().services;
