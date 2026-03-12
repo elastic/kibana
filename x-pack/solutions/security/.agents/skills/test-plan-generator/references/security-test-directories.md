@@ -4,13 +4,41 @@ This file maps Security Solution feature areas to their test directories, file n
 
 ---
 
+## Contents
+
+- [Repo-level skill locations](#repo-level-skill-locations)
+- [Test type overview](#test-type-overview)
+- [Feature area → test directory mapping](#feature-area--test-directory-mapping)
+  - [Detection Engine & Rules Management](#detection-engine--rules-management)
+  - [Alerts](#alerts)
+  - [Timelines & Timeline Templates](#timelines--timeline-templates)
+  - [Cases](#cases)
+  - [Entity Analytics](#entity-analytics-risk-engine-entity-store-entity-details)
+  - [Explore](#explore-hosts-network-users-overview)
+  - [Exceptions & Value Lists](#exceptions--value-lists)
+  - [AI Assistant / GenAI](#ai-assistant--genai-attack-discovery-conversations-knowledge-base)
+  - [AI4DSOC / Security AI Features](#ai4dsoc--security-ai-features)
+  - [SIEM Migrations](#siem-migrations)
+  - [Flyout / Expandable Flyout](#flyout--expandable-flyout)
+  - [Asset Inventory](#asset-inventory)
+  - [Cloud Security Posture](#cloud-security-posture-cspm--kspm--cdr)
+  - [Endpoint Security / EDR Workflows](#endpoint-security--edr-workflows)
+  - [Telemetry](#telemetry)
+  - [Investigations](#investigations-cross-feature-dashboards-data-view-threat-intelligence)
+  - [Notes](#notes)
+  - [Onboarding / Sourcerer / Common](#onboarding--sourcerer--common)
+- [File naming conventions](#file-naming-conventions)
+- [Notes for test coverage catalog](#notes-for-test-coverage-catalog)
+
+---
+
 ## Repo-level skill locations
 
 | Skill | Path |
 |---|---|
-| Scout UI testing | `/.agents/skills/scout-ui-testing/SKILL.md` |
-| Scout API testing | `/.agents/skills/scout-api-testing/SKILL.md` |
-| FTR testing | `/.agents/skills/ftr-testing/SKILL.md` |
+| Scout UI testing | `.agents/skills/scout-ui-testing/SKILL.md` |
+| Scout API testing | `.agents/skills/scout-api-testing/SKILL.md` |
+| FTR testing | `.agents/skills/ftr-testing/SKILL.md` |
 
 These skills describe test file conventions, runner commands, authentication patterns, and fixture extension rules. Read the relevant skill when generating or reviewing test scenarios that involve those test types.
 

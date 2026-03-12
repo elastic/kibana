@@ -4,6 +4,15 @@ This file defines the format of summaries and structured outputs that the agent 
 
 ---
 
+## Contents
+
+- [Scenario format](#scenario-format)
+- [Gherkin self-review](#gherkin-self-review--run-before-saving-any-draft)
+- [Footer format](#footer-format)
+- [Sources Summary](#sources-summary)
+
+---
+
 ## Scenario format
 
 Every scenario in the test plan must follow this structure exactly:
