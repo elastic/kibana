@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { savedQuerySchemaV2, packSchemaV2 } from './schemas';
 
 export const savedQueryModelVersion1: SavedObjectsModelVersion = {
   changes: [
@@ -28,6 +29,10 @@ export const savedQueryModelVersion2: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: savedQuerySchemaV2.extends({}, { unknowns: 'ignore' }),
+    create: savedQuerySchemaV2,
+  },
 };
 
 export const packSavedObjectModelVersion1: SavedObjectsModelVersion = {
@@ -55,6 +60,10 @@ export const packSavedObjectModelVersion2: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: packSchemaV2.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV2,
+  },
 };
 
 export const packAssetSavedObjectModelVersion1: SavedObjectsModelVersion = {
