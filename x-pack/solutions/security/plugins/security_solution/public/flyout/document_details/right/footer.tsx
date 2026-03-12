@@ -23,7 +23,10 @@ import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_ag
 import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../../assistant/helpers';
-import { stringifyEssentialAlertData } from '../../../agent_builder/helpers';
+import {
+  ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
+  stringifyEssentialAlertData,
+} from '../../../agent_builder/helpers';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
@@ -63,6 +66,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
         alert: stringifyEssentialAlertData(rawData),
         attachmentLabel: isAlert ? rawData['kibana.alert.rule.name']?.[0] : EVENT,
       },
+      anonymizationTarget: ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
       attachmentPrompt: isAlert ? ALERT_ATTACHMENT_PROMPT : EVENT_ATTACHMENT_PROMPT,
     };
   }, [dataFormattedForFieldBrowser, isAlert]);

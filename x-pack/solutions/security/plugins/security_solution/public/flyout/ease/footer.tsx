@@ -18,7 +18,10 @@ import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../assistant/helpers';
-import { stringifyEssentialAlertData } from '../../agent_builder/helpers';
+import {
+  ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
+  stringifyEssentialAlertData,
+} from '../../agent_builder/helpers';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
 
@@ -52,6 +55,7 @@ export const PanelFooter = memo(() => {
         alert: stringifyEssentialAlertData(rawData),
         attachmentLabel: rawData[ALERT_RULE_NAME]?.[0],
       },
+      anonymizationTarget: ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
       attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
     };
   }, [dataFormattedForFieldBrowser]);

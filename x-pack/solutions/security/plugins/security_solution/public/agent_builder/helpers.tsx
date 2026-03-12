@@ -8,6 +8,12 @@
 import { pick } from 'lodash';
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../common/constants';
+
+export const ALERT_DATA_VIEW_ANONYMIZATION_TARGET = {
+  targetType: 'data_view',
+  targetId: DEFAULT_ALERT_DATA_VIEW_ID,
+} as const;
 
 /**
  * Filters raw alert data to only include essential fields and stringifies the result.

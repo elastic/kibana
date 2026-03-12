@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
 
@@ -19,6 +20,8 @@ export interface UseAgentBuilderAttachmentParams {
    * Data for the attachment
    */
   attachmentData: Record<string, unknown>;
+  replacementsId?: string;
+  anonymizationTarget?: ChatCompleteAnonymizationTarget;
   /**
    * Prompt/input text for the agent builder conversation
    */
@@ -39,6 +42,8 @@ export interface UseAgentBuilderAttachmentResult {
 export const useAgentBuilderAttachment = ({
   attachmentType,
   attachmentData,
+  replacementsId,
+  anonymizationTarget,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
@@ -55,7 +60,11 @@ export const useAgentBuilderAttachment = ({
     const attachment: AttachmentInput = {
       id: attachmentId,
       type: attachmentType,
-      data: attachmentData,
+      data: {
+        ...attachmentData,
+        ...(replacementsId ? { replacementsId } : {}),
+        ...(anonymizationTarget ? { anonymizationTarget } : {}),
+      },
     };
 
     // Open the chat with attachment and prefilled message
@@ -67,7 +76,14 @@ export const useAgentBuilderAttachment = ({
       sessionTag: 'security',
       agentId: THREAT_HUNTING_AGENT_ID,
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [
+    agentBuilder,
+    anonymizationTarget,
+    attachmentData,
+    attachmentPrompt,
+    attachmentType,
+    replacementsId,
+  ]);
 
   return {
     openAgentBuilderFlyout,
