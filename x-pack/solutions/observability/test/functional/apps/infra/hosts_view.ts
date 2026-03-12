@@ -238,7 +238,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts View', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/257428
+  describe.skip('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let synthEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
