@@ -8,7 +8,11 @@
 import dedent from 'dedent';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  ToolResultType,
+  type OtherResult,
+  type ErrorResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
@@ -20,10 +24,7 @@ import type { GetLogsResult } from './handler';
 import { getDefaultBucketSize, getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
 
-export interface GetLogsToolResult {
-  type: ToolResultType.other;
-  data: GetLogsResult;
-}
+export type GetLogsToolResult = OtherResult<GetLogsResult> | ErrorResult;
 
 const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
@@ -76,8 +77,8 @@ export function createGetLogsTool({
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-}): StaticToolRegistration<typeof getLogsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
+}): StaticToolRegistration<typeof getLogsSchema, GetLogsToolResult> {
+  const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema, GetLogsToolResult> = {
     id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
     description: dedent(
