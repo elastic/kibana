@@ -169,8 +169,8 @@ export function getColorByType(legends: IWaterfallLegend[]) {
     if (legend.type === WaterfallLegendType.Type && !legend.value) hasEmptyType = true;
   }
 
-  if (serviceCount > 1) return WaterfallLegendType.ServiceName;
-  if (hasEmptyType) return WaterfallLegendType.ServiceName;
+  if (serviceCount > 1 || hasEmptyType) return WaterfallLegendType.ServiceName;
+
   return WaterfallLegendType.Type;
 }
 

@@ -32,7 +32,7 @@ export function WaterfallLegends({ serviceName, legends, type }: Props) {
   const displayedLegends = legends.filter((legend) => legend.type === type);
 
   const legendsWithFallbackLabel = displayedLegends.map((legend) => {
-    return { ...legend, value: legend.value || serviceName };
+    return { ...legend, value: legend?.value || serviceName };
   });
 
   return (
