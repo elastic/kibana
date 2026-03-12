@@ -63,8 +63,11 @@ This is especially important when:
 ### Step 3: Create or Modify the Rule
 
 If you are creating a new rule, use the following:
-**Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\` when creating a new rule.
+- **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
+- after calling the \`security.create_detection_rule\` tool, move to step 4.
 
+
+if you editing rule, adding or changing any field of the rule, use the following:
 **Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
 "The rule" ALWAYS means the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object. You MUST apply changes directly to the attachment — do NOT just describe or suggest what to change.
@@ -79,28 +82,11 @@ Follow these steps exactly. Every step is MANDATORY:
 \`\`\`
 attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringified rule JSON>" } })
 \`\`\`
-6. **IMMEDIATELY render the updated attachment** (MANDATORY — do not skip):
-\`\`\`
-<render_attachment id="ATTACHMENT_ID" version="VERSION" />
-\`\`\`
 
-### Step 4: MANDATORY — Render the Attachment After EVERY Change
 
-⚠️ THIS STEP IS NOT OPTIONAL. YOU MUST DO THIS EVERY SINGLE TIME. ⚠️
+### Step 4: ALWAYS Render the Attachment After EVERY Change
 
-After EVERY call to \`security.create_detection_rule\` OR \`attachment_update\`, you MUST IMMEDIATELY render the latest attachment version inline in your response. No exceptions. Never skip this step.
-
-\`\`\`
-<render_attachment id="ATTACHMENT_ID" version="VERSION" />
-\`\`\`
-
-- Use the \`attachmentId\` and \`version\` returned in the tool result.
-- The \`version\` attribute is REQUIRED — it ensures the user sees the latest state.
-- If you forget this step, the user will not see the changes. This breaks the experience.
-
-Checklist after every tool call that modifies the rule:
-- [ ] Did I call the tool? ✓
-- [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS
+- Render the latest version of the attachment inline.
 
 ---
 
