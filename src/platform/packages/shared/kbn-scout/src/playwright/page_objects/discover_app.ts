@@ -367,19 +367,13 @@ export class DiscoverApp {
 
   async openRecommendedQueriesPanel() {
     const menuPopover = this.esqlMenuPopover;
-    if (!(await menuPopover.isVisible())) {
-      await this.page.testSubj.click('esql-help-popover-button');
-    }
     await menuPopover.waitFor({ state: 'visible' });
-
-    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
-    if (await panelTitleButton.isVisible()) {
-      return;
-    }
 
     const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
     await recommendedQueriesButton.waitFor({ state: 'visible' });
     await recommendedQueriesButton.click();
+
+    const panelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
     await panelTitleButton.waitFor({ state: 'visible' });
   }
 
@@ -402,9 +396,8 @@ export class DiscoverApp {
 
   async addBreakdownFieldFromSidebar(field: string) {
     const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
-    if (await sidebarToggleButton.isVisible()) {
-      await sidebarToggleButton.click();
-    }
+    await sidebarToggleButton.waitFor({ state: 'visible' });
+    await sidebarToggleButton.click();
 
     await this.waitUntilFieldListHasCountOfFields();
     const fieldLocator = this.page.testSubj.locator(`field-${field}`);
