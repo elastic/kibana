@@ -49,6 +49,22 @@ export function generateBuiltInStepSnippet(
         steps: [{ name: 'then-step', type: '# Add step type here' }],
       };
       break;
+    case 'switch':
+      parameters = {
+        expression: '{{ steps.step_1.output.value }}',
+        cases: [
+          {
+            value: 'value_1',
+            steps: [{ name: 'case-1-step', type: '# Add step type here' }],
+          },
+          {
+            value: 'value_2',
+            steps: [{ name: 'case-2-step', type: '# Add step type here' }],
+          },
+        ],
+        default: [{ name: 'default-step', type: '# Add step type here' }],
+      };
+      break;
     case 'while':
       parameters = {
         condition: 'steps.inner_step.output: "value"',

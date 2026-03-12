@@ -16,6 +16,7 @@ import {
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  SwitchStepSchema,
   WaitStepSchema,
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -227,6 +228,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
     {
       schema: IfStepSchema,
       description: 'Execute steps conditionally based on a condition',
+      icon: monaco.languages.CompletionItemKind.Keyword,
+    },
+    {
+      schema: SwitchStepSchema,
+      description:
+        'Multi-way branching. Evaluates expression and runs the steps of the first matching case value',
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {

@@ -9,14 +9,19 @@
 
 import type {
   AtomicGraphNode,
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTryBlockNode,
   EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
@@ -57,6 +62,14 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback-step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import {
+  EnterCaseBranchNodeImpl,
+  EnterDefaultBranchNodeImpl,
+  EnterSwitchNodeImpl,
+  ExitCaseBranchNodeImpl,
+  ExitDefaultBranchNodeImpl,
+  ExitSwitchNodeImpl,
+} from './switch_step';
 import {
   EnterStepTimeoutZoneNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
@@ -273,6 +286,32 @@ export class NodesFactory {
         );
       case 'exit-if':
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
+      case 'enter-switch':
+        return new EnterSwitchNodeImpl(
+          node as EnterSwitchNode,
+          this.workflowRuntime,
+          this.workflowGraph,
+          stepExecutionRuntime,
+          stepLogger
+        );
+      case 'enter-case-branch':
+        return new EnterCaseBranchNodeImpl(node as EnterCaseBranchNode, this.workflowRuntime);
+      case 'enter-default-branch':
+        return new EnterDefaultBranchNodeImpl(node as EnterDefaultBranchNode, this.workflowRuntime);
+      case 'exit-case-branch':
+        return new ExitCaseBranchNodeImpl(
+          node as ExitCaseBranchNode,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
+      case 'exit-default-branch':
+        return new ExitDefaultBranchNodeImpl(
+          node as ExitDefaultBranchNode,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
+      case 'exit-switch':
+        return new ExitSwitchNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

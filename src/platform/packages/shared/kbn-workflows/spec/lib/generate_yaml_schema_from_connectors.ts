@@ -19,6 +19,7 @@ import {
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getSwitchStepSchema,
   getTriggerSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
@@ -104,6 +105,7 @@ function createRecursiveStepSchema(
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
@@ -121,6 +123,7 @@ function createRecursiveStepSchema(
       forEachSchema,
       whileSchema,
       ifSchema,
+      switchSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,

@@ -73,6 +73,23 @@ export type {
   ExitTimeoutZoneNode,
 } from './nodes/on_failure_nodes';
 
+export type {
+  EnterSwitchNode,
+  EnterSwitchNodeSchema,
+  EnterSwitchNodeConfiguration,
+  EnterSwitchNodeConfigurationSchema,
+  EnterCaseBranchNode,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNode,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNode,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNode,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNode,
+  ExitSwitchNodeSchema,
+} from './nodes/switch_nodes';
+
 export type { GraphNodeUnion } from './nodes/union';
 export type { WorkflowGraphType } from './graph';
 
@@ -101,5 +118,11 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isEnterSwitch,
+  isExitSwitch,
+  isEnterCaseBranch,
+  isExitCaseBranch,
+  isEnterDefaultBranch,
+  isExitDefaultBranch,
   shouldSuggestInnerSteps,
 } from './guards';
