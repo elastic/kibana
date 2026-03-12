@@ -23,20 +23,40 @@ const LazyStandaloneRuleForm = React.lazy(() =>
   }))
 );
 
-export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = (props) => (
+export const DynamicRuleForm = (props: DynamicRuleFormProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyDynamicRuleForm {...props} />
   </Suspense>
 );
 
-export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = (props) => (
+export const StandaloneRuleForm = (props: StandaloneRuleFormProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyStandaloneRuleForm {...props} />
+  </Suspense>
+);
+
+// Lazy load preview component
+const LazyRuleResultsPreview = React.lazy(() =>
+  import('./fields/rule_results_preview').then((module) => ({
+    default: module.RuleResultsPreview,
+  }))
+);
+
+export const RuleResultsPreview = () => (
+  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+    <LazyRuleResultsPreview />
   </Suspense>
 );
 
 export type { FormValues } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
-export type { RuleFormServices } from './contexts';
-export { RuleFormServicesProvider, useRuleFormServices } from './contexts';
+export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
+  mapFormValuesToRuleRequest,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+  mapRuleResponseToFormValues,
+} from './utils/rule_request_mappers';
+export type { RuleRequestCommon } from './utils/rule_request_mappers';

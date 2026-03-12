@@ -34,7 +34,7 @@ const RECOVERY_TYPE_OPTIONS: Array<{ value: RecoveryPolicyType; text: string }> 
  * - `no_breach`: Alert recovers when the evaluation condition is no longer breached
  * - `query`: Alert recovers when a custom ES|QL recovery query matches
  */
-export const RecoveryTypeField: React.FC = () => {
+export const RecoveryTypeField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (

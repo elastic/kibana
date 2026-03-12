@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { validateEsqlQuery } from './validation';
 import { durationSchema } from './common';
+import { MAX_CONSECUTIVE_BREACHES } from './constants';
 
 /** Primitives */
 
@@ -111,7 +112,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
-      .max(1000)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive breaches before active.'),
     pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
@@ -249,6 +250,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 

@@ -34,20 +34,19 @@ export interface StandaloneRuleFormFlyoutProps {
  * the loading state of its footer buttons. Time field is auto-selected by
  * TimeFieldSelect based on available date fields.
  */
-const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = ({
+const StandaloneRuleFormFlyoutInner = ({
   push,
   onClose,
   query,
   services,
-}) => {
+}: StandaloneRuleFormFlyoutProps) => {
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
     notifications: services.notifications,
-    onSuccess: onClose ?? (() => {}),
   });
 
   const handleSubmit = (values: FormValues) => {
-    createRule(values);
+    createRule(values, { onSuccess: onClose });
   };
 
   return (
@@ -57,12 +56,13 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
         isSubmitting={isLoading}
         query={query}
         services={services}
+        layout="flyout"
       />
     </RuleFormFlyout>
   );
 };
 
-export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => {
+export const StandaloneRuleFormFlyout = (props: StandaloneRuleFormFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

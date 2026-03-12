@@ -14,7 +14,7 @@ import { RuleSchedule } from './rule_schedule';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 
-export const ScheduleField: React.FC = () => {
+export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
