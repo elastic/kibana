@@ -42,8 +42,7 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/244001
-describe.skip('<Findings />', () => {
+describe('<Findings />', () => {
   startMockServer(server);
 
   (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({

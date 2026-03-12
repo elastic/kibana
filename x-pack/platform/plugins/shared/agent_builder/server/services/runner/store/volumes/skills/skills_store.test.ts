@@ -20,6 +20,7 @@ describe('SkillsStore', () => {
     content: 'Skill body content',
     readonly: true,
     getRegistryTools: () => [],
+    referencedContentCount: 0,
     ...overrides,
   });
 
@@ -291,6 +292,7 @@ describe('SkillsStore', () => {
       content: 'Custom skill content',
       readonly: false,
       getRegistryTools: () => ['tool-1'],
+      referencedContentCount: 0,
       ...overrides,
     });
 
