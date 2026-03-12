@@ -18,8 +18,11 @@ export interface ClientDetails {
  * Options for the MCP client.
  * These map to reconnection options for the StreamableHTTPClientTransport.
  */
+export type FetchLike = (url: string | URL, init?: RequestInit) => Promise<Response>;
+
 export interface McpClientOptions {
   headers?: Record<string, string>;
+  fetch?: FetchLike;
   maxRetries?: number;
   reconnectionDelayGrowFactor?: number;
   initialReconnectionDelay?: number;

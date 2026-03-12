@@ -138,15 +138,31 @@ describe('upsertMarkdownPanel', () => {
     expect(result.panels[0]).toMatchObject({
       type: 'DASHBOARD_MARKDOWN',
       rawConfig: { content: '# Summary' },
+      grid: { w: 48, h: 4, x: 0, y: 0 },
     });
   });
 
-  it('updates existing markdown panel content in place', () => {
+  it('sets grid height based on markdown content length, capped at 9', () => {
+    const shortContent = '# Title';
+    const shortResult = upsertMarkdownPanel([], shortContent);
+    expect(shortResult.panels[0].grid).toMatchObject({ w: 48, h: 4 });
+
+    const mediumContent = '# Dashboard\n\nLine 1\nLine 2\nLine 3\nLine 4';
+    const mediumResult = upsertMarkdownPanel([], mediumContent);
+    expect(mediumResult.panels[0].grid).toMatchObject({ w: 48, h: 7 });
+
+    const longContent = Array.from({ length: 20 }, (_, i) => `Line ${i + 1}`).join('\n');
+    const longResult = upsertMarkdownPanel([], longContent);
+    expect(longResult.panels[0].grid).toMatchObject({ w: 48, h: 9 });
+  });
+
+  it('updates existing markdown panel content and recalculates grid height', () => {
     const existingPanels: AttachmentPanel[] = [
       {
         type: 'DASHBOARD_MARKDOWN',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old summary' },
+        grid: { w: 48, h: 4, x: 0, y: 0 },
       },
       {
         type: 'lens',
@@ -155,17 +171,13 @@ describe('upsertMarkdownPanel', () => {
       },
     ];
 
-    const result = upsertMarkdownPanel(existingPanels, '# New summary');
+    const result = upsertMarkdownPanel(existingPanels, '# New summary\n\nLine 1\nLine 2\nLine 3');
 
     expect(result.changedPanel).toMatchObject({
       type: 'DASHBOARD_MARKDOWN',
       panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
-    });
-    expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
-      panelId: 'markdown-1',
-      rawConfig: { content: '# New summary' },
+      rawConfig: { content: '# New summary\n\nLine 1\nLine 2\nLine 3' },
+      grid: { w: 48, h: 6, x: 0, y: 0 },
     });
     expect(result.panels[1]).toEqual(existingPanels[1]);
   });
@@ -176,6 +188,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'DASHBOARD_MARKDOWN',
         panelId: 'markdown-1',
         rawConfig: { content: '# Summary' },
+        grid: { w: 48, h: 4, x: 0, y: 0 },
       },
     ];
 
@@ -183,6 +196,21 @@ describe('upsertMarkdownPanel', () => {
 
     expect(result.changedPanel).toBeUndefined();
     expect(result.panels).toEqual(existingPanels);
+  });
+
+  it('preserves existing x and y position when updating markdown content', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        panelId: 'markdown-1',
+        rawConfig: { content: '# Old' },
+        grid: { w: 48, h: 4, x: 0, y: 10 },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# Updated');
+
+    expect(result.changedPanel?.grid).toMatchObject({ w: 48, x: 0, y: 10 });
   });
 
   it('does not change panels when markdown content is not provided', () => {

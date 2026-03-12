@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
 const strings = {
@@ -30,8 +29,3 @@ export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
     {strings.getUnknownArgumentTypeErrorMessage(argType)}
   </div>
 );
-
-FunctionUnknown.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  argType: PropTypes.string,
-};
