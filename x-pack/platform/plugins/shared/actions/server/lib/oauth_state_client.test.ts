@@ -91,8 +91,8 @@ describe('OAuthStateClient', () => {
       expect(mockUnsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         OAUTH_STATE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          state: expect.any(String),
-          codeVerifier: expect.any(String),
+          state: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/),
+          codeVerifier: expect.stringMatching(/^[A-Za-z0-9_-]{43,128}$/),
           connectorId: 'connector-1',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
@@ -101,21 +101,6 @@ describe('OAuthStateClient', () => {
         }),
         { id: 'generated-id' }
       );
-    });
-
-    it('generates a codeVerifier within PKCE spec length (43-128 chars)', async () => {
-      const client = createClient();
-      mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
-        id: 'generated-id',
-        attributes: {},
-      });
-
-      await client.create({ connectorId: 'connector-1', spaceId: 'default' });
-
-      const { codeVerifier } = mockUnsecuredSavedObjectsClient.create.mock.calls[0][1];
-      expect(typeof codeVerifier).toBe('string');
-      expect(codeVerifier.length).toBeGreaterThanOrEqual(43);
-      expect(codeVerifier.length).toBeLessThanOrEqual(128);
     });
 
     it('includes createdBy when provided', async () => {
