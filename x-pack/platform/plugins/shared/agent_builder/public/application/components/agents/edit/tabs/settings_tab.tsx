@@ -45,6 +45,7 @@ import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import { VISIBILITY_LABELS } from '../../../../utils/visibility_i18n';
 import type { AgentFormData } from '../agent_form';
+import { truncateAvatarSymbol } from '../agent_form_validation';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -639,8 +640,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiFieldText
                       {...rest}
                       onChange={(event) => {
-                        const value = event.target.value;
-                        rest.onChange(value.slice(0, 2));
+                        rest.onChange(truncateAvatarSymbol(event.target.value));
                       }}
                       inputRef={ref}
                       disabled={isFormDisabled}
