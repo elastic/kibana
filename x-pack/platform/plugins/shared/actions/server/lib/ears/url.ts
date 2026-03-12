@@ -18,6 +18,7 @@ export function resolveEarsUrl(urlPath: string, earsBaseUrl: string | undefined)
 }
 
 export interface EarsEndpoints {
+  authorizeEndpoint: string;
   tokenEndpoint: string;
   refreshEndpoint: string;
 }
@@ -31,6 +32,7 @@ export function getEarsEndpointsForProvider(provider: string | undefined): EarsE
   }
 
   return {
+    authorizeEndpoint: `${provider}/oauth/authorize`,
     tokenEndpoint: `${provider}/oauth/token`,
     refreshEndpoint: `${provider}/oauth/refresh`,
   };

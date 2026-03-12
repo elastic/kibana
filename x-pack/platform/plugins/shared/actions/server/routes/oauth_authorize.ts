@@ -158,9 +158,12 @@ export const oauthAuthorizeRoute = (
 
           let authorizationUrl: string;
           if (oauthConfig.authTypeId === 'ears') {
-            const { tokenEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
+            const { authorizeEndpoint } = getEarsEndpointsForProvider(oauthConfig.provider);
             authorizationUrl = oauthService.buildEarsAuthorizationUrl({
-              baseAuthorizationUrl: resolveEarsUrl(tokenEndpoint, actionsConfigUtils.getEarsUrl()),
+              baseAuthorizationUrl: resolveEarsUrl(
+                authorizeEndpoint,
+                actionsConfigUtils.getEarsUrl()
+              ),
               scope: oauthConfig.scope,
               callbackUri: redirectUri,
               state: state.state,
