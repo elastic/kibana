@@ -144,7 +144,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         componentStaticState
       );
 
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: Omit<OptionsListComponentApi, 'availableOptions$'> = {
         ...api,
         ...selections.internalApi,
         ...labelManager.api,
@@ -154,7 +154,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         isPinnable: true,
         uuid,
         setDataLoading,
-        // ...componentStaticStateManager.api,
+        ...componentStaticStateManager.api,
 
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;

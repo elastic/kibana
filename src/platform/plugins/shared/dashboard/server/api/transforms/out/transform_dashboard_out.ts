@@ -63,7 +63,7 @@ export function transformDashboardOut(
       panels: transformPanelsOut(panelsJSON, sections, references, isDashboardAppRequest),
     }),
 
-    ...(pinnedPanelsOut && { pinned_panels: pinnedPanelsOut }),
+    pinned_panels: pinnedPanelsOut,
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
