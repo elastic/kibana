@@ -433,7 +433,7 @@ await page.testSubj.click('submitButton');
 Prefer stable `data-test-subj` attributes accessed using `page.testSubj`. If `data-test-subj` is missing, prefer adding one to source code. If that’s not possible, use `getByRole` **inside a scoped container**.
 
 :::::{dropdown} Examples
-❌ **Don’t:** use raw CSS selectors or fragile text matchers:
+❌ **Don’t:** use raw CSS selectors or unscoped text matchers (searching the entire page for text is unreliable when duplicates exist):
 
 ```ts
 await page.click('[data-test-subj="myButton"]');
