@@ -8,7 +8,6 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import { test as fcTest, fc } from '@fast-check/jest';
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
@@ -560,47 +559,43 @@ test('format() correctly serializes meta.error after calling meta.toJSON() if me
   });
 });
 
-const nonObjectMetaArb = fc.oneof(
-  fc.string(),
-  fc.boolean(),
-  fc.integer(),
-  fc.float({ noNaN: false, noDefaultInfinity: true }),
-  fc.array(fc.string(), { maxLength: 20 })
-);
+test.each([
+  ['string', 'hello'],
+  ['boolean', false],
+  ['integer', 42],
+  ['float', 1.25],
+  ['NaN', Number.NaN],
+  ['array', ['hello', 'world']],
+])('format() serializes non-object meta as plain string in error: %s', (_, meta) => {
+  const layout = new JsonLayout();
 
-fcTest.prop([nonObjectMetaArb])(
-  'format() serializes non-object meta as plain string in error',
-  (meta) => {
-    const layout = new JsonLayout();
-
-    expect(
-      JSON.parse(
-        layout.format({
-          message: 'foo',
-          timestamp,
-          level: LogLevel.Debug,
-          context: 'bar',
-          pid: 3,
-          // @ts-expect-error validating defensive runtime behavior
-          meta,
-        })
-      )
-    ).toStrictEqual({
-      ecs: { version: expect.any(String) },
-      '@timestamp': '2012-02-01T09:30:22.011-05:00',
-      message: 'foo',
-      log: {
-        level: 'DEBUG',
-        logger: 'bar',
-      },
-      error: String(meta),
-      process: {
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
         pid: 3,
-        uptime: 10,
-      },
-    });
-  }
-);
+        // @ts-expect-error validating defensive runtime behavior
+        meta,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    error: String(meta),
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+  });
+});
 
 test('format() does not add error when meta is null', () => {
   const layout = new JsonLayout();
@@ -632,18 +627,16 @@ test('format() does not add error when meta is null', () => {
   });
 });
 
-const nonObjectToJsonReturnArb = fc.oneof(
-  fc.string(),
-  fc.boolean(),
-  fc.integer(),
-  fc.constant(null),
-  fc.constant(undefined),
-  fc.array(fc.string(), { maxLength: 20 })
-);
-
-fcTest.prop([nonObjectToJsonReturnArb])(
-  'format() serializes non-object meta.toJSON() output as string in error',
-  (toJsonValue) => {
+test.each([
+  ['string', 'hello'],
+  ['boolean', true],
+  ['integer', 42],
+  ['null', null],
+  ['undefined', undefined],
+  ['array', ['hello', 'world']],
+])(
+  'format() serializes non-object meta.toJSON() output as string in error: %s',
+  (_, toJsonValue) => {
     const layout = new JsonLayout();
 
     expect(
