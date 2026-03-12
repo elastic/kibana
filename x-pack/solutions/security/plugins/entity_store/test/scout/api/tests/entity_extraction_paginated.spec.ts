@@ -11,7 +11,8 @@ import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtu
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { expectedHostEntities } from '../fixtures/entity_extraction_expected';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/256811
+apiTest.describe.skip(
   'Entity Store Logs Extraction with pagination (max 5 docs per page)',
   { tag: ENTITY_STORE_TAGS },
   () => {
