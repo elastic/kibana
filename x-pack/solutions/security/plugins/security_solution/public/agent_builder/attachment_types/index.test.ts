@@ -25,7 +25,7 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(mockAddAttachmentType).toHaveBeenCalledTimes(3);
   });
 
-  it('registers alert attachment type with correct config', () => {
+  it('registers alert attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
@@ -33,12 +33,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(alertCall).toBeDefined();
 
-    const config = alertCall![1];
+    const config = await alertCall![1]();
     expect(config.getIcon()).toBe('bell');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Alert');
   });
 
-  it('registers entity attachment type with correct config', () => {
+  it('registers entity attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
@@ -46,12 +46,12 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(entityCall).toBeDefined();
 
-    const config = entityCall![1];
+    const config = await entityCall![1]();
     expect(config.getIcon()).toBe('user');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Risk Entity');
   });
 
-  it('registers rule attachment type with correct config', () => {
+  it('registers rule attachment type with correct config', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -59,18 +59,18 @@ describe('registerAttachmentUiDefinitions', () => {
     );
     expect(ruleCall).toBeDefined();
 
-    const config = ruleCall![1];
+    const config = await ruleCall![1]();
     expect(config.getIcon()).toBe('document');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Security Rule');
   });
 
-  it('returns attachmentLabel when provided in attachment data', () => {
+  it('returns attachmentLabel when provided in attachment data', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -80,13 +80,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Custom Label');
   });
 
-  it('returns default label when attachmentLabel is not provided', () => {
+  it('returns default label when attachmentLabel is not provided', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
@@ -96,13 +96,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(config.getLabel(attachment)).toBe('Security Alert');
   });
 
-  it('returns default label when attachment data is undefined', () => {
+  it('returns default label when attachment data is undefined', async () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === SecurityAgentBuilderAttachments.alert
     );
-    const config = alertCall![1];
+    const config = await alertCall![1]();
 
     const attachment = {
       id: 'test',
