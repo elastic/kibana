@@ -14,7 +14,7 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 export class DashboardAgentPlugin
   implements
