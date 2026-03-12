@@ -63,10 +63,8 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClos
     }
     .euiSelectableList__groupLabel {
       border-block-end: 0;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: ${euiTheme.size.m};
+      font-weight: 400;
       color: ${euiTheme.colors.textSubdued};
       :not(:first-of-type) {
         padding-block-start: ${euiTheme.size.m};

@@ -14,6 +14,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../hooks/use_experimental_features';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
+import { useConversationList } from '../../hooks/use_conversation_list';
 import { appPaths } from '../../utils/app_paths';
 
 const getShortcutSymbols = () => ({
@@ -22,7 +23,9 @@ const getShortcutSymbols = () => ({
   enter: '↵',
 });
 
-type CommandPaletteSection = 'quick' | 'navigation' | 'shortcuts';
+const MAX_RECENT_CONVERSATIONS = 5;
+
+type CommandPaletteSection = 'quick' | 'conversations' | 'navigation' | 'shortcuts';
 
 interface CommandPaletteAction {
   id: string;
@@ -35,13 +38,16 @@ interface CommandPaletteAction {
 
 const sectionLabels: Record<CommandPaletteSection, string> = {
   quick: i18n.translate('xpack.agentBuilder.commandPalette.section.quickActions', {
-    defaultMessage: 'Quick Actions',
+    defaultMessage: 'Quick actions',
+  }),
+  conversations: i18n.translate('xpack.agentBuilder.commandPalette.section.recentConversations', {
+    defaultMessage: 'Recents',
   }),
   navigation: i18n.translate('xpack.agentBuilder.commandPalette.section.navigation', {
-    defaultMessage: 'Navigation',
+    defaultMessage: 'Actions',
   }),
   shortcuts: i18n.translate('xpack.agentBuilder.commandPalette.section.keyboardShortcuts', {
-    defaultMessage: 'Keyboard Shortcuts',
+    defaultMessage: 'Keyboard shortcuts',
   }),
 };
 
@@ -56,6 +62,11 @@ export const useCommandPaletteActions = ({
   } = useKibana();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const { conversations = [] } = useConversationList();
+
+  const recentConversations = useMemo(() => {
+    return conversations.slice(0, MAX_RECENT_CONVERSATIONS);
+  }, [conversations]);
 
   const actions = useMemo<CommandPaletteAction[]>(() => {
     const shortcutSymbols = getShortcutSymbols();
@@ -73,6 +84,24 @@ export const useCommandPaletteActions = ({
           onClose();
         },
       },
+
+      // Recent Conversations
+      ...recentConversations.map((conversation) => ({
+        id: `conversation-${conversation.id}`,
+        label:
+          conversation.title ||
+          i18n.translate('xpack.agentBuilder.commandPalette.action.untitledConversation', {
+            defaultMessage: 'Untitled conversation',
+          }),
+        icon: 'discuss',
+        section: 'conversations' as const,
+        onSelect: () => {
+          navigateToAgentBuilderUrl(
+            appPaths.chat.conversation({ conversationId: conversation.id })
+          );
+          onClose();
+        },
+      })),
 
       // Navigation
       {
@@ -113,18 +142,6 @@ export const useCommandPaletteActions = ({
                 onClose();
               },
             },
-            // {
-            //   id: 'nav-plugins',
-            //   label: i18n.translate('xpack.agentBuilder.commandPalette.action.plugins', {
-            //     defaultMessage: 'Plugins',
-            //   }),
-            //   icon: 'package',
-            //   section: 'navigation' as const,
-            //   onSelect: () => {
-            //     navigateToAgentBuilderUrl(appPaths.plugins.list);
-            //     onClose();
-            //   },
-            // },
           ]
         : []),
       ...(hasAccessToGenAiSettings
@@ -164,7 +181,7 @@ export const useCommandPaletteActions = ({
         }),
         icon: 'menuLeft',
         section: 'shortcuts',
-        shortcutDisplay: `${shortcutSymbols.meta} ;`,
+        shortcutDisplay: `${shortcutSymbols.meta} .`,
         onSelect: () => {
           // TODO: Implement sidebar toggle
           onClose();
@@ -203,12 +220,13 @@ export const useCommandPaletteActions = ({
     application,
     isExperimentalFeaturesEnabled,
     hasAccessToGenAiSettings,
+    recentConversations,
     onClose,
   ]);
 
   const selectableOptions = useMemo<EuiSelectableOption[]>(() => {
     const options: EuiSelectableOption[] = [];
-    const sections: CommandPaletteSection[] = ['quick', 'navigation', 'shortcuts'];
+    const sections: CommandPaletteSection[] = ['quick', 'conversations', 'navigation', 'shortcuts'];
 
     sections.forEach((section) => {
       const sectionActions = actions.filter((action) => action.section === section);
