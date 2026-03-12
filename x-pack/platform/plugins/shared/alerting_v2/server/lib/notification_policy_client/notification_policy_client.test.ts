@@ -13,45 +13,17 @@ import {
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
 import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
+import {
+  createMockEncryptedSavedObjects,
+  createNotificationPolicySavedObjectService,
+} from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
-
-function createMockRequest(): { url: { pathname: string } } {
-  return { url: { pathname: '/s/default' } };
-}
-
-function createMockEncryptedSavedObjects(
-  getDecryptedAttrs?: (id: string) => { apiKey: string; createdByUser: boolean } | null
-) {
-  const getDecryptedAsInternalUser = jest.fn().mockImplementation((_type: string, id: string) => {
-    const attrs = getDecryptedAttrs?.(id);
-    if (!attrs) return Promise.reject(new Error('not found'));
-    return Promise.resolve({
-      id,
-      type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-      attributes: {
-        auth: { apiKey: attrs.apiKey, createdByUser: attrs.createdByUser, owner: 'test-user' },
-      },
-      references: [],
-    });
-  });
-  return {
-    getClient: jest.fn().mockReturnValue({ getDecryptedAsInternalUser }),
-  };
-}
-
-function createMockSpaces() {
-  return {
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-      spaceIdToNamespace: jest.fn().mockImplementation((id: string) => id),
-    },
-  };
-}
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 describe('NotificationPolicyClient', () => {
   let client: NotificationPolicyClient;
@@ -60,9 +32,7 @@ describe('NotificationPolicyClient', () => {
   let userService: UserService;
   let userProfile: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
-  let mockRequest: ReturnType<typeof createMockRequest>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
-  let mockSpaces: ReturnType<typeof createMockSpaces>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -75,21 +45,19 @@ describe('NotificationPolicyClient', () => {
       createNotificationPolicySavedObjectService());
     ({ userService, userProfile } = createUserService());
     apiKeyService = createMockApiKeyService();
-    mockRequest = createMockRequest();
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
       if (id === 'policy-id-del-1') return { apiKey: 'some-key', createdByUser: false };
       return null;
     });
-    mockSpaces = createMockSpaces();
 
     client = new NotificationPolicyClient(
       notificationPolicySavedObjectService,
       userService,
       apiKeyService,
-      mockRequest as any,
+      httpServerMock.createKibanaRequest(),
       mockEncryptedSavedObjects as any,
-      mockSpaces as any
+      spacesMock.createStart()
     );
 
     userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
