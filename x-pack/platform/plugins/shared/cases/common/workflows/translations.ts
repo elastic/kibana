@@ -228,6 +228,28 @@ export const CLOSE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const DELETE_CASES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.deleteCases.label',
+  {
+    defaultMessage: 'Delete cases',
+  }
+);
+
+export const DELETE_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.deleteCases.description',
+  {
+    defaultMessage: 'Deletes one or more cases',
+  }
+);
+
+export const DELETE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.deleteCases.documentation.details',
+  {
+    defaultMessage:
+      'This step deletes the provided cases, including their comments and user action history.',
+  }
+);
+
 export const ASSIGN_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.assignCase.label', {
   defaultMessage: 'Assign case',
 });

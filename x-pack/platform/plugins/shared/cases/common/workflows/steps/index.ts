@@ -17,6 +17,7 @@ import { findCasesStepCommonDefinition } from './find_cases';
 import { setSeverityStepCommonDefinition } from './set_severity';
 import { setStatusStepCommonDefinition } from './set_status';
 import { closeCaseStepCommonDefinition } from './close_case';
+import { deleteCasesStepCommonDefinition } from './delete_cases';
 import { assignCaseStepCommonDefinition } from './assign_case';
 import { unassignCaseStepCommonDefinition } from './unassign_case';
 import { addAlertsStepCommonDefinition } from './add_alerts';
@@ -42,6 +43,7 @@ export { FindCasesStepTypeId, findCasesStepCommonDefinition } from './find_cases
 export { SetSeverityStepTypeId, setSeverityStepCommonDefinition } from './set_severity';
 export { SetStatusStepTypeId, setStatusStepCommonDefinition } from './set_status';
 export { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
+export { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
 export { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
 export { UnassignCaseStepTypeId, unassignCaseStepCommonDefinition } from './unassign_case';
 export { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts';
@@ -68,6 +70,7 @@ export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.fr
   setSeverityStepCommonDefinition,
   setStatusStepCommonDefinition,
   closeCaseStepCommonDefinition,
+  deleteCasesStepCommonDefinition,
   assignCaseStepCommonDefinition,
   unassignCaseStepCommonDefinition,
   addAlertsStepCommonDefinition,

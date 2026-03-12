@@ -56,6 +56,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./delete_cases').then((m) => m.deleteCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./assign_case').then((m) => m.assignCaseStepDefinition)
   );
 

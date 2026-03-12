@@ -151,6 +151,14 @@ export const closeCaseInputFixture = {
   case_id: caseIdFixture,
 };
 
+export const deleteCasesInputFixture = {
+  case_ids: [caseIdFixture, 'case-2'],
+};
+
+export const deleteCasesOutputFixture = {
+  case_ids: [caseIdFixture, 'case-2'],
+};
+
 export const assignCaseInputFixture = {
   case_id: caseIdFixture,
   assignees: caseAssigneesFixture,

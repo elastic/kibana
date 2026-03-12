@@ -20,6 +20,7 @@ import { findCasesStepDefinition } from './steps/find_cases';
 import { setSeverityStepDefinition } from './steps/set_severity';
 import { setStatusStepDefinition } from './steps/set_status';
 import { closeCaseStepDefinition } from './steps/close_case';
+import { deleteCasesStepDefinition } from './steps/delete_cases';
 import { assignCaseStepDefinition } from './steps/assign_case';
 import { unassignCaseStepDefinition } from './steps/unassign_case';
 import { addAlertsStepDefinition } from './steps/add_alerts';
@@ -51,6 +52,7 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(setSeverityStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setStatusStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(closeCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(deleteCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(assignCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(unassignCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addAlertsStepDefinition(getCasesClient));

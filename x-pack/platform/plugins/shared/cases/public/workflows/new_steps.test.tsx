@@ -8,6 +8,7 @@
 import { setSeverityStepDefinition } from './set_severity';
 import { setStatusStepDefinition } from './set_status';
 import { closeCaseStepDefinition } from './close_case';
+import { deleteCasesStepDefinition } from './delete_cases';
 import { assignCaseStepDefinition } from './assign_case';
 import { unassignCaseStepDefinition } from './unassign_case';
 import { addAlertsStepDefinition } from './add_alerts';
@@ -24,6 +25,7 @@ describe('new cases public step definitions', () => {
     setSeverityStepDefinition,
     setStatusStepDefinition,
     closeCaseStepDefinition,
+    deleteCasesStepDefinition,
     assignCaseStepDefinition,
     unassignCaseStepDefinition,
     addAlertsStepDefinition,

@@ -19,6 +19,12 @@ export const UPDATE_CASES_FAILED_MESSAGE = (caseId: string, errorMessage: string
     values: { caseId, errorMessage },
   });
 
+export const DELETE_CASES_FAILED_MESSAGE = (caseIds: string[], errorMessage: string) =>
+  i18n.translate('xpack.cases.workflowSteps.deleteCases.error.casesCouldNotBeDeleted', {
+    defaultMessage: 'Cases could not be deleted: {caseIds}. Reason: {errorMessage}',
+    values: { caseIds: caseIds.join(', '), errorMessage },
+  });
+
 export const SET_CUSTOM_FIELD_FAILED_MESSAGE = (caseId: string, fieldName: string) =>
   i18n.translate(
     'xpack.cases.workflowSteps.setCustomField.error.caseCustomFieldCouldNotBeUpdated',
