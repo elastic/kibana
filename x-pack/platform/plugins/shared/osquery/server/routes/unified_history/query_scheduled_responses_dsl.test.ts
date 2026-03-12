@@ -93,17 +93,6 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(subAggs.max_timestamp).toEqual({ max: { field: '@timestamp' } });
     });
-
-    test('includes pack_id_hit top_hits sub-aggregation', () => {
-      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
-      const aggs = result.body.aggs as Record<string, unknown>;
-      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
-      const subAggs = scheduledExec.aggs as Record<string, unknown>;
-
-      expect(subAggs.pack_id_hit).toEqual({
-        top_hits: { size: 1, _source: { includes: ['pack_id'] } },
-      });
-    });
   });
 
   describe('base filters', () => {
@@ -230,6 +219,51 @@ describe('buildScheduledResponsesQuery', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('scheduleIds filter', () => {
+    test('adds terms filter when only scheduleIds is provided', () => {
+      const scheduleIds = ['sched-1', 'sched-2'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ terms: { schedule_id: scheduleIds } });
+    });
+
+    test('adds bool should with pack_id and schedule_id when both packIds and scheduleIds provided', () => {
+      const packIds = ['pack-1'];
+      const scheduleIds = ['sched-1'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        bool: {
+          should: [{ terms: { pack_id: packIds } }, { terms: { schedule_id: scheduleIds } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    test('adds match_none when both packIds and scheduleIds are empty', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds: [],
+        scheduleIds: [],
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ match_none: {} });
     });
   });
 
