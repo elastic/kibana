@@ -15,6 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import { ALERT_DATA_VIEW_ANONYMIZATION_TARGET } from '../../../../agent_builder/helpers';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
 
 const DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL = i18n.translate(
@@ -40,6 +41,7 @@ export const useAttackDiscoveryAttachment = (
           : '',
         attachmentLabel: attackDiscovery?.title ?? DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL,
       },
+      anonymizationTarget: ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
       attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
     }),
     [attackDiscovery, replacements]
