@@ -159,6 +159,8 @@ export interface MessageChunkEventData {
   message_id: string;
   /** chunk (text delta) */
   text_chunk: string;
+  /** replacements id returned by inference anonymization metadata */
+  replacements_id?: string;
 }
 
 export type MessageChunkEvent = ChatEventBase<ChatEventType.messageChunk, MessageChunkEventData>;
@@ -178,6 +180,8 @@ export interface MessageCompleteEventData {
   message_content: string;
   /** optional structured data */
   structured_output?: object;
+  /** replacements id returned by inference anonymization metadata */
+  replacements_id?: string;
 }
 
 export type MessageCompleteEvent = ChatEventBase<
@@ -222,6 +226,8 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /** replacements id returned by inference anonymization metadata */
+  replacements_id?: string;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
