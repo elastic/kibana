@@ -120,6 +120,10 @@ export class MonacoEditorActionsProvider {
     });
   }
 
+  public getModel(): monaco.editor.ITextModel | null {
+    return this.editor.getModel();
+  }
+
   private clearEditorDecorations() {
     // remove the highlighted lines
     this.highlightedLines.clear();
@@ -692,6 +696,10 @@ export class MonacoEditorActionsProvider {
     }
     // If no range is provided, return all text in the editor
     return model.getValue();
+  }
+
+  public getEditor() {
+    return this.editor;
   }
 
   /**
