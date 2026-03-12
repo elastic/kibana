@@ -54,7 +54,6 @@ export interface RuleResponse {
     behavior?: 'no_data' | 'last_status' | 'recover';
     timeframe?: string;
   };
-  notification_policies?: Array<{ ref: string }>;
   enabled: boolean;
   createdBy: string | null;
   createdAt: string;
