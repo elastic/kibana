@@ -116,15 +116,17 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 
-It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Audit your archive imports periodically and remove any that aren’t exercised by assertions.
+It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Check if your tests ingest the data they actually need.
+
+Use `esArchiver.loadIfNeeded()`, which skips ingestion if the index and documents already exist (useful when multiple suites share the same data).
 
 :::::{dropdown} Examples
 ❌ **Don’t:** load archives that no test in the suite relies on:
 
 ```ts
 test.beforeAll(async ({ esArchiver }) => {
-  await esArchiver.load('large_metrics_archive');
-  await esArchiver.load('user_actions_archive');
+  await esArchiver.loadIfNeeded('large_metrics_archive');
+  await esArchiver.loadIfNeeded('user_actions_archive');
 });
 
 test('shows metrics dashboard', async ({ page }) => {
@@ -136,7 +138,7 @@ test('shows metrics dashboard', async ({ page }) => {
 
 ```ts
 test.beforeAll(async ({ esArchiver }) => {
-  await esArchiver.load('large_metrics_archive');
+  await esArchiver.loadIfNeeded('large_metrics_archive');
 });
 ```
 
