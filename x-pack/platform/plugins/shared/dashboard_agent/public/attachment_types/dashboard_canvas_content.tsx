@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type {
   DashboardAttachmentData,
@@ -19,15 +18,15 @@ import type {
   DashboardCreationOptions,
   DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { normalizeDashboardWidgets } from './panel_grid_layout';
+import { useRegisterActionButtons } from './use_register_action_buttons';
 
-interface DashboardCanvasInitialInput {
+export interface DashboardCanvasInitialInput {
   timeRange: {
     from: string;
     to: string;
@@ -38,10 +37,12 @@ interface DashboardCanvasInitialInput {
   description?: string;
 }
 
+const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
+
 const createDashboardRendererInitialInput = (
   data: DashboardAttachmentData
 ): DashboardCanvasInitialInput => ({
-  timeRange: { from: 'now-24h', to: 'now' },
+  timeRange: DEFAULT_TIME_RANGE,
   viewMode: 'view',
   panels: normalizeDashboardWidgets({
     panels: data.panels ?? [],
@@ -160,6 +161,10 @@ export const DashboardCanvasContent = ({
   // );
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
 
+  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
+    initialDashboardInput.timeRange
+  );
+
   const getCreationOptions = useCallback(
     () =>
       getDashboardRendererCreationOptions({
@@ -169,66 +174,15 @@ export const DashboardCanvasContent = ({
     [data.savedObjectId, initialDashboardInput]
   );
 
-  useEffect(
-    function registerActionButtonsEffect() {
-      if (!dashboardApi) {
-        return;
-      }
-      const buttons: ActionButton[] = [];
-      if (dashboardApi.locator) {
-        const { locator } = dashboardApi;
-        buttons.push({
-          label: i18n.translate(
-            'xpack.dashboardAgent.attachments.dashboard.canvasEditActionLabel',
-            {
-              defaultMessage: 'Edit',
-            }
-          ),
-          icon: 'pencil',
-          type: ActionButtonType.PRIMARY,
-          handler: async () => {
-            await locator.navigate({
-              dashboardId: data.savedObjectId,
-              title: initialDashboardInput.title,
-              description: initialDashboardInput.description,
-              panels: initialDashboardInput.panels,
-              time_range: initialDashboardInput.timeRange,
-              viewMode: 'edit',
-            });
-          },
-        });
-      }
-
-      buttons.push({
-        label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.canvasSaveActionLabel', {
-          defaultMessage: 'Save',
-        }),
-        icon: 'save',
-        type: ActionButtonType.SECONDARY,
-        handler: async () => {
-          const result = await dashboardApi.runInteractiveSave();
-          const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
-
-          if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectId) {
-            await updateOrigin({ savedObjectId: nextSavedObjectId });
-          }
-        },
-      });
-
-      registerActionButtons(buttons);
-    },
-    [
-      dashboardApi,
-      initialDashboardInput.description,
-      initialDashboardInput.panels,
-      initialDashboardInput.timeRange,
-      initialDashboardInput.title,
-      registerActionButtons,
-      data.savedObjectId,
-      linkedSavedObjectId,
-      updateOrigin,
-    ]
-  );
+  useRegisterActionButtons({
+    dashboardApi,
+    registerActionButtons,
+    updateOrigin,
+    timeRange,
+    initialDashboardInput,
+    linkedSavedObjectId,
+    doesSavedDashboardExist,
+  });
 
   return (
     <div css={styles.root}>
@@ -244,8 +198,11 @@ export const DashboardCanvasContent = ({
           displayStyle="inPage"
           disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
+          dateRangeFrom={timeRange.from}
+          dateRangeTo={timeRange.to}
           onQuerySubmit={({ dateRange }) => {
-            dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });
+            setTimeRange(dateRange);
+            dashboardApi?.setTimeRange(dateRange);
           }}
           onRefresh={() => {
             dashboardApi?.forceRefresh();
