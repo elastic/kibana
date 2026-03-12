@@ -44,46 +44,43 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest(
-      'should apply breakdown dimension and re-render charts',
-      async ({ pageObjects }) => {
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-        const { metricsExperience } = pageObjects;
-        await expect(metricsExperience.grid).toBeVisible();
+    spaceTest('should apply breakdown dimension and re-render charts', async ({ pageObjects }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+      await expect(metricsExperience.grid).toBeVisible();
+      await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+
+      await spaceTest.step('select a breakdown dimension', async () => {
+        await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+        if (await metricsExperience.breakdownSelector.selectable.isVisible()) {
+          await metricsExperience.breakdownSelector.toggleButton.click();
+        }
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+      });
+
+      await spaceTest.step('charts should re-render with breakdown', async () => {
+        await expect
+          .poll(
+            async () => {
+              const card = metricsExperience.getCardByIndex(0);
+              const loading = card.locator('[role="progressbar"]');
+              return (await loading.count()) === 0;
+            },
+            { timeout: 30000 }
+          )
+          .toBe(true);
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+      });
 
-        await spaceTest.step('select a breakdown dimension', async () => {
-          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
-          if (await metricsExperience.breakdownSelector.selectable.isVisible()) {
-            await metricsExperience.breakdownSelector.toggleButton.click();
-          }
-          await expect(
-            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
-          ).toBeVisible();
-          await pageObjects.discover.waitUntilSearchingHasFinished();
-        });
-
-        await spaceTest.step('charts should re-render with breakdown', async () => {
-          await expect
-            .poll(
-              async () => {
-                const card = metricsExperience.getCardByIndex(0);
-                const loading = card.locator('[role="progressbar"]');
-                return (await loading.count()) === 0;
-              },
-              { timeout: 30000 }
-            )
-            .toBe(true);
-          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-        });
-
-        await spaceTest.step('grid should remain visible with breakdown', async () => {
-          await expect(metricsExperience.grid).toBeVisible();
-          await expect(
-            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
-          ).toBeVisible();
-        });
-      }
-    );
+      await spaceTest.step('grid should remain visible with breakdown', async () => {
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+      });
+    });
   }
 );
