@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-date-picker'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ml-date-picker'
+  title: '@kbn/ml-date-picker'
   description: Moon project for @kbn/ml-date-picker
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/ml/date_picker
+  sourceRoot: x-pack/platform/packages/private/ml/date_picker
 dependsOn:
   - '@kbn/es-query'
   - '@kbn/i18n'
@@ -44,14 +43,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

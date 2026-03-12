@@ -77,6 +77,7 @@ describe('VisualizationsSection', () => {
   const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
   const openSystemFlyout = jest.fn();
+  const renderCellActions = jest.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -85,7 +86,7 @@ describe('VisualizationsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <VisualizationsSection hit={mockHit} />
+            <VisualizationsSection hit={mockHit} renderCellActions={renderCellActions} />
           </Router>
         </Provider>
       </IntlProvider>

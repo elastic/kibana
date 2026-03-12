@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kibana-cors-test-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kibana-cors-test-plugin'
+  title: '@kbn/kibana-cors-test-plugin'
   description: Moon project for @kbn/kibana-cors-test-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/test/functional_cors/plugins/kibana_cors_test
+  sourceRoot: x-pack/platform/test/functional_cors/plugins/kibana_cors_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/test'
