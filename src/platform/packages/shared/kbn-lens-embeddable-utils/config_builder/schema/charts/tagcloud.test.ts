@@ -12,7 +12,7 @@ import { tagcloudStateSchema } from './tagcloud';
 
 describe('Tagcloud Schema', () => {
   const baseTagcloudConfig = {
-    type: 'tagcloud',
+    type: 'tag_cloud',
     dataset: {
       type: 'dataView',
       id: 'test-data-view',
@@ -321,7 +321,7 @@ describe('Tagcloud Schema', () => {
 
       it('throw when missing DSL and esql operation in a configuration', () => {
         const input = {
-          type: 'tagcloud',
+          type: 'tag_cloud',
           dataset: {
             type: 'esql',
             query: 'FROM my-index | LIMIT 100',
@@ -403,7 +403,7 @@ describe('Tagcloud Schema', () => {
 
       it('validates esql configuration', () => {
         const input = {
-          type: 'tagcloud',
+          type: 'tag_cloud',
           dataset: {
             type: 'esql',
             query: 'FROM my-index | STATS count() BY category | LIMIT 100',

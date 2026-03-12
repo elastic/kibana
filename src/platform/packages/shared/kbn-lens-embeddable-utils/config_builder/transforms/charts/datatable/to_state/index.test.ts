@@ -14,7 +14,7 @@ describe('Datatable ES|QL column ordering', () => {
   describe('buildVisualizationState', () => {
     it('should order visualization columns as rows, split_metrics_by, then metrics', () => {
       const config: DatatableState = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM test | LIMIT 10',
@@ -46,7 +46,7 @@ describe('Datatable ES|QL column ordering', () => {
 
     it('should mark row columns as isMetric: false and metric columns as isMetric: true', () => {
       const config: DatatableState = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM test | LIMIT 10',
@@ -70,7 +70,7 @@ describe('Datatable ES|QL column ordering', () => {
   describe('getValueColumns', () => {
     test('returns value columns for rows, split_metrics_by, and metrics', () => {
       const config = {
-        type: 'datatable',
+        type: 'data_table',
         metrics: [
           { operation: 'value', column: 'bytes' },
           { operation: 'value', column: 'requests' },
