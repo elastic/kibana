@@ -42,7 +42,7 @@ export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColum
     searchable: true,
     aggregatable: false,
     isNull: Boolean(column?.isNull),
-    isComputedColumn: Boolean(column?.isComputedColumn),
+    isComputedColumn: column?.isComputedColumn ?? true,
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
   };
 }

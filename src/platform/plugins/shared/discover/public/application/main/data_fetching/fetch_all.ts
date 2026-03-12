@@ -137,7 +137,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(async ({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
         fetchAllRequestOnlyTracker.reportEvent(
           {
             queryRangeSeconds,

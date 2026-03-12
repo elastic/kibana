@@ -95,13 +95,13 @@ export abstract class AbstractDataView {
    */
   public namespaces: string[];
   /**
-   * Returns true if short dot notation is enabled
-   */
-  public shortDotsEnable: boolean = false;
-  /**
    * Original saved object body. Used to check for saved object changes.
    */
   protected originalSavedObjectBody: SavedObjectBody = {};
+  /**
+   * Returns true if short dot notation is enabled
+   */
+  protected shortDotsEnable: boolean = false;
   /**
    * FieldFormats service interface
    */
