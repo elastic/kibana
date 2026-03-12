@@ -39,7 +39,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/pages',
-        undefined
+        { params: { limit: 25 } }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -79,10 +79,9 @@ describe('ConfluenceCloudConnector', () => {
 
       await ConfluenceCloudConnector.actions.listPages.handler(contextWithSubdomain, {});
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://acme.atlassian.net/wiki/api/v2/pages',
-        undefined
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://acme.atlassian.net/wiki/api/v2/pages', {
+        params: { limit: 25 },
+      });
     });
   });
 
@@ -139,7 +138,7 @@ describe('ConfluenceCloudConnector', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/wiki/api/v2/spaces',
-        undefined
+        { params: { limit: 25 } }
       );
       expect(result).toEqual(mockResponse.data);
     });

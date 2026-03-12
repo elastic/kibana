@@ -28,6 +28,9 @@ const buildBaseUrl = (ctx: ActionContext) =>
 
 const CONFLUENCE_V2_PREFIX = '/wiki/api/v2';
 
+/** Default page size when listing spaces or pages and no limit is provided. */
+const DEFAULT_LIST_LIMIT = 25;
+
 export const ConfluenceCloudConnector: ConnectorSpec = {
   metadata: {
     id: '.confluence-cloud',
@@ -88,8 +91,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       input: ListPagesInputSchema,
       handler: async (ctx, input: ListPagesInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        const params: Record<string, unknown> = {};
-        if (input.limit != null) params.limit = input.limit;
+        const params: Record<string, unknown> = {
+          limit: input.limit ?? DEFAULT_LIST_LIMIT,
+        };
         if (input.cursor != null) params.cursor = input.cursor;
         if (input.spaceId != null) {
           params['space-id'] = Array.isArray(input.spaceId) ? input.spaceId : [input.spaceId];
@@ -125,8 +129,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       input: ListSpacesInputSchema,
       handler: async (ctx, input: ListSpacesInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        const params: Record<string, unknown> = {};
-        if (input.limit != null) params.limit = input.limit;
+        const params: Record<string, unknown> = {
+          limit: input.limit ?? DEFAULT_LIST_LIMIT,
+        };
         if (input.cursor != null) params.cursor = input.cursor;
         if (input.ids != null) {
           params.ids = Array.isArray(input.ids) ? input.ids : [input.ids];
