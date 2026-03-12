@@ -173,6 +173,7 @@ The files live at:
 x-pack/solutions/security/.agents/skills/test-plan-generator/
 ├── SKILL.md                              # Agent instructions
 └── references/
+    ├── common-mistakes.md                # Quality checklist reviewed before every save
     ├── document-structure.md             # Test plan template and structure
     ├── optional-scenarios.md             # Gherkin templates and formatting rules
     ├── output-formats.md                 # Sources Summary template and chat output formats
