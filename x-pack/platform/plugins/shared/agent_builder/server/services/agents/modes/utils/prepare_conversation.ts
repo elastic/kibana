@@ -12,7 +12,11 @@ import type {
   RoundInput,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   getLatestVersion,
@@ -116,6 +120,18 @@ const deriveAnonymizationTarget = ({
   }
 
   return distinctTargets.values().next().value?.target;
+};
+
+const toAttachmentInput = (attachment: VersionedAttachment): AttachmentInput | undefined => {
+  const latest = getLatestVersion(attachment);
+  if (!latest) {
+    return undefined;
+  }
+  return {
+    id: attachment.id,
+    type: attachment.type,
+    data: latest.data as Record<string, unknown>,
+  };
 };
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -244,8 +260,17 @@ export const prepareConversation = async ({
     (round) => round.input.attachments ?? []
   ) as AttachmentInput[];
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
+  const activeConversationAttachments = attachmentStateManager
+    .getActive()
+    .map((attachment) => toAttachmentInput(attachment))
+    .filter((attachment): attachment is AttachmentInput => attachment !== undefined);
+
   const anonymizationTarget = deriveAnonymizationTarget({
-    attachments: nextInputAttachments,
+    attachments: [
+      ...activeConversationAttachments,
+      ...previousAttachments,
+      ...nextInputAttachments,
+    ],
     logger: context.logger,
   });
 
