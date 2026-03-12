@@ -21,11 +21,22 @@ export default ({ getService }: FtrProviderContext) => {
     id: SUPPORTED_TRAINED_MODELS.TINY_NER.name,
   };
 
+  const anotherTestModel = {
+    ...SUPPORTED_TRAINED_MODELS.TINY_PASS_THROUGH,
+    id: SUPPORTED_TRAINED_MODELS.TINY_PASS_THROUGH.name,
+  };
+
   const customDeploymentId = 'my_deployment_id';
 
   describe('Start and stop deployment tests', () => {
     before(async () => {
       await ml.api.importTrainedModel(testModel.id, testModel.name);
+      await ml.api.importTrainedModel(anotherTestModel.id, anotherTestModel.name, {
+        ...ml.api.getTrainedModelConfig(anotherTestModel.id),
+        inference_config: {
+          text_similarity: {},
+        },
+      });
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
@@ -58,6 +69,14 @@ export default ({ getService }: FtrProviderContext) => {
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === testModel.id);
 
       expect(deploymentStats).to.be(undefined);
+    });
+
+    it('does not allow to start trained model deployment if the model is a rerank model', async () => {
+      const { body: startResponseBody, status: startResponseStatus } = await supertest
+        .post(`/internal/ml/trained_models/${anotherTestModel.id}/deployment/_start`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(getCommonRequestHeader('1'));
+      ml.api.assertResponseStatusCode(400, startResponseStatus, startResponseBody);
     });
 
     it('starts trained model deployment with the default ID', async () => {
