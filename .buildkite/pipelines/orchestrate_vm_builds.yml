@@ -9,31 +9,36 @@ steps:
         hint: 'Branch in elastic/ci-agent-images to run'
         required: true
 
-  - name: 'Build base image'
-    key: build-base-image
-    trigger: kibana-vm-images
-    async: false
-    build:
-      branch: '${VM_IMAGES_BRANCH}'
-      env:
-        IMAGES_CONFIG: kibana/base_image.yml
-  - name: 'Build packages layer'
-    key: build-packages-layer
-    depends_on: build-base-image
-    trigger: kibana-vm-images
-    async: false
-    build:
-      branch: '${VM_IMAGES_BRANCH}'
-      env:
-        IMAGES_CONFIG: kibana/packages_layer.yml
-        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-
-  - name: 'Build image cache'
-    depends_on: build-packages-layer
-    trigger: kibana-vm-images
-    async: false
-    build:
-      branch: '${VM_IMAGES_BRANCH}'
-      env:
-        IMAGES_CONFIG: kibana/image_cache.tpl.yml
-        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+  - name: 'Upload trigger steps'
+    command: |
+      export VM_IMAGES_BRANCH="${VM_IMAGES_BRANCH:-$(buildkite-agent meta-data get VM_IMAGES_BRANCH)}"
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Build base image'
+          key: build-base-image
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/base_image.yml
+        - name: 'Build packages layer'
+          key: build-packages-layer
+          depends_on: build-base-image
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/packages_layer.yml
+              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+        - name: 'Build image cache'
+          depends_on: build-packages-layer
+          trigger: kibana-vm-images
+          async: false
+          build:
+            branch: '${VM_IMAGES_BRANCH}'
+            env:
+              IMAGES_CONFIG: kibana/image_cache.tpl.yml
+              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+      PIPELINE
