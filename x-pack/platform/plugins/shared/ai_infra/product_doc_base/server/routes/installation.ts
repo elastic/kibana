@@ -226,7 +226,7 @@ export const registerInstallationRoutes = ({
       validate: {
         body: schema.object({
           forceUpdate: schema.boolean({ defaultValue: false }),
-          inferenceIds: schema.maybe(schema.arrayOf(schema.string())),
+          inferenceIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
         }),
       },
       options: {
