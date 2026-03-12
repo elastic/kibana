@@ -11,11 +11,13 @@ The planner must produce a Markdown file following this structure exactly. Every
 ````markdown
 # FTR to Scout Migration Plan
 
-> **Source**: `<FTR directory path>`
-> **Target module root**: `<Scout module root>`
-> **Generated**: `<date>`
-> **Deployment targets**: `<stateful | serverless | both>`
-> **FTR config chain**: `<config.ts> > <base.config.ts> > ...`
+| Field | Value |
+|-------|-------|
+| Source | `<FTR directory path>` |
+| Target module root | `<Scout module root>` |
+| Generated | `<date>` |
+| Deployment targets | `<stateful / serverless / both>` |
+| FTR config chain | `<config.ts>` > `<base.config.ts>` > ... |
 
 ---
 
@@ -267,9 +269,9 @@ Simple tests, all dependencies exist, no new abstractions needed.
 | 1 | `feature_controls_viewer.spec.ts` | `feature_controls.ts` | simple | Built-in viewer role, existing page objects |
 | 2 | `preserve_url.spec.ts` | `preserve_url.ts` | simple | Pure navigation test |
 
-**Human involvement**: `autopilot` (executor can handle end-to-end)
-**Dependencies**: none
-**Blockers**: none
+- **Human involvement**: `autopilot` (executor can handle end-to-end)
+- **Dependencies**: none
+- **Blockers**: none
 
 ### Batch 2: Needs new abstractions
 
@@ -278,9 +280,9 @@ Simple tests, all dependencies exist, no new abstractions needed.
 | 3 | `panel_actions.spec.ts` | `panel_actions.ts` | medium | Needs new panel page object |
 | 4 | `filter_bar.spec.ts` | `filter_bar.ts` | medium | Needs `data-test-subj` added to filter pills in source |
 
-**Human involvement**: `guided` (source code changes needed for `filter_bar`)
-**Dependencies**: panel page object (created in this batch)
-**Blockers**: `data-test-subj` additions to source
+- **Human involvement**: `guided` (source code changes needed for `filter_bar`)
+- **Dependencies**: panel page object (created in this batch)
+- **Blockers**: `data-test-subj` additions to source
 
 ### Batch N: Complex / blocked
 
@@ -288,9 +290,9 @@ Simple tests, all dependencies exist, no new abstractions needed.
 |---|--------------|--------------|------------|-------|
 | N | `snapshot_restore.spec.ts` | `snapshot_restore.ts` | complex | Needs custom server config for `path.repo` |
 
-**Human involvement**: `hands-on` (new server config set, infrastructure decisions)
-**Dependencies**: custom server config set
-**Blockers**: `path.repo` not supported in any existing Scout config set
+- **Human involvement**: `hands-on` (new server config set, infrastructure decisions)
+- **Dependencies**: custom server config set
+- **Blockers**: `path.repo` not supported in any existing Scout config set
 
 ---
 
