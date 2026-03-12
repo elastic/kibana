@@ -6,22 +6,31 @@
  */
 
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { Request } from '@kbn/core-di-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
+import { PluginStart } from '@kbn/core-di';
+import {
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  type NotificationPolicySavedObjectAttributes,
+} from '../../saved_objects';
+import type { ApiKeyInvalidationServiceContract } from '../invalidate_pending_api_keys/api_key_invalidation_service';
+import { ApiKeyInvalidationServiceToken } from '../invalidate_pending_api_keys/tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import type { AlertingServerStartDependencies } from '../../types';
 import type {
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
@@ -42,7 +51,16 @@ export class NotificationPolicyClient {
     @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
+    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
+    @inject(ApiKeyInvalidationServiceToken)
+    private readonly invalidationService: ApiKeyInvalidationServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(
+      PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>('encryptedSavedObjects')
+    )
+    private readonly encryptedSavedObjects: AlertingServerStartDependencies['encryptedSavedObjects'],
+    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
+    private readonly spaces: AlertingServerStartDependencies['spaces']
   ) {}
 
   public async createNotificationPolicy(
@@ -77,6 +95,9 @@ export class NotificationPolicyClient {
 
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
+      if (attributes.auth?.apiKey) {
+        await this.invalidationService.markApiKeysForInvalidation([attributes.auth.apiKey]);
+      }
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(`Notification policy with id "${conflictId}" already exists`);
@@ -146,6 +167,8 @@ export class NotificationPolicyClient {
       id: params.options.id,
     });
 
+    const oldAuth = await this.getDecryptedAuth(params.options.id);
+
     const policyName = parsed.data.name ?? existingPolicy.name;
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
@@ -164,6 +187,10 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
 
+      if (oldAuth?.apiKey && oldAuth.createdByUser === false) {
+        this.invalidationService.markApiKeysForInvalidation([oldAuth.apiKey]).catch(() => {});
+      }
+
       return {
         id: params.options.id,
         version: updated.version,
@@ -171,6 +198,9 @@ export class NotificationPolicyClient {
         auth: toAuthResponse(nextAttrs.auth),
       };
     } catch (e) {
+      if (nextAttrs.auth?.apiKey) {
+        await this.invalidationService.markApiKeysForInvalidation([nextAttrs.auth.apiKey]);
+      }
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -202,7 +232,41 @@ export class NotificationPolicyClient {
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
+    const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
+    if (auth?.apiKey && auth.createdByUser === false) {
+      this.invalidationService.markApiKeysForInvalidation([auth.apiKey]).catch(() => {});
+    }
+  }
+
+  /**
+   * Returns decrypted auth (apiKey, createdByUser) for the policy in the current request space.
+   * Returns null if the policy is not found or decryption fails.
+   */
+  private async getDecryptedAuth(
+    id: string
+  ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
+    try {
+      const spaceId = this.spaces.spacesService.getSpaceId(this.request);
+      const namespace = this.spaces.spacesService.spaceIdToNamespace(spaceId);
+      const esoClient = this.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+      });
+      const doc =
+        await esoClient.getDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id,
+          { namespace }
+        );
+      const auth = doc.attributes?.auth;
+      if (!auth?.apiKey) return null;
+      return {
+        apiKey: auth.apiKey,
+        createdByUser: auth.createdByUser ?? true,
+      };
+    } catch {
+      return null;
+    }
   }
 
   private async getUserProfileUid(): Promise<string | null> {

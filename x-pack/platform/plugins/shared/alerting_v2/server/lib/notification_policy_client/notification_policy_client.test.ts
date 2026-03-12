@@ -12,6 +12,7 @@ import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
+import type { ApiKeyInvalidationServiceContract } from '../invalidate_pending_api_keys/api_key_invalidation_service';
 import type { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { createNotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
@@ -20,6 +21,45 @@ import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
 
+function createMockInvalidationService(): jest.Mocked<ApiKeyInvalidationServiceContract> {
+  return {
+    markApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
+  };
+}
+
+function createMockRequest(): { url: { pathname: string } } {
+  return { url: { pathname: '/s/default' } };
+}
+
+function createMockEncryptedSavedObjects(
+  getDecryptedAttrs?: (id: string) => { apiKey: string; createdByUser: boolean } | null
+) {
+  const getDecryptedAsInternalUser = jest.fn().mockImplementation((_type: string, id: string) => {
+    const attrs = getDecryptedAttrs?.(id);
+    if (!attrs) return Promise.reject(new Error('not found'));
+    return Promise.resolve({
+      id,
+      type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+      attributes: {
+        auth: { apiKey: attrs.apiKey, createdByUser: attrs.createdByUser, owner: 'test-user' },
+      },
+      references: [],
+    });
+  });
+  return {
+    getClient: jest.fn().mockReturnValue({ getDecryptedAsInternalUser }),
+  };
+}
+
+function createMockSpaces() {
+  return {
+    spacesService: {
+      getSpaceId: jest.fn().mockReturnValue('default'),
+      spaceIdToNamespace: jest.fn().mockImplementation((id: string) => id),
+    },
+  };
+}
+
 describe('NotificationPolicyClient', () => {
   let client: NotificationPolicyClient;
   let notificationPolicySavedObjectService: NotificationPolicySavedObjectService;
@@ -27,6 +67,10 @@ describe('NotificationPolicyClient', () => {
   let userService: UserService;
   let userProfile: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
+  let invalidationService: jest.Mocked<ApiKeyInvalidationServiceContract>;
+  let mockRequest: ReturnType<typeof createMockRequest>;
+  let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
+  let mockSpaces: ReturnType<typeof createMockSpaces>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -39,11 +83,23 @@ describe('NotificationPolicyClient', () => {
       createNotificationPolicySavedObjectService());
     ({ userService, userProfile } = createUserService());
     apiKeyService = createMockApiKeyService();
+    invalidationService = createMockInvalidationService();
+    mockRequest = createMockRequest();
+    mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
+      if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
+      if (id === 'policy-id-del-1') return { apiKey: 'some-key', createdByUser: false };
+      return null;
+    });
+    mockSpaces = createMockSpaces();
 
     client = new NotificationPolicyClient(
       notificationPolicySavedObjectService,
       userService,
-      apiKeyService
+      apiKeyService,
+      invalidationService,
+      mockRequest as any,
+      mockEncryptedSavedObjects as any,
+      mockSpaces as any
     );
 
     userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));
@@ -210,6 +266,29 @@ describe('NotificationPolicyClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
       });
+
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+        'encoded-es-api-key',
+      ]);
+    });
+
+    it('marks new API key for invalidation when create fails after key was created', async () => {
+      mockSavedObjectsClient.create.mockRejectedValueOnce(new Error('storage error'));
+
+      await expect(
+        client.createNotificationPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          },
+          options: { id: 'policy-id-1' },
+        })
+      ).rejects.toThrow('storage error');
+
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+        'encoded-es-api-key',
+      ]);
     });
   });
 
@@ -526,6 +605,155 @@ describe('NotificationPolicyClient', () => {
       );
 
       expect(res.auth).not.toHaveProperty('apiKey');
+
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+    });
+
+    it('does not call invalidation for old key when decrypted policy has createdByUser: true', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: true,
+        },
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          auth: { apiKey: 'old-api-key', createdByUser: true, owner: 'test-user' },
+        },
+        references: [],
+      });
+
+      await client.updateNotificationPolicy({
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    it('when update throws, calls invalidation with the new (unused) key', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-throw',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockRejectedValueOnce(new Error('storage error'));
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+        id: 'policy-id-update-throw',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          auth: { apiKey: 'old-api-key', createdByUser: false, owner: 'test-user' },
+        },
+        references: [],
+      });
+
+      await expect(
+        client.updateNotificationPolicy({
+          data: {
+            name: 'updated-policy',
+            destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+          },
+          options: { id: 'policy-id-update-throw', version: 'WzEsMV0=' },
+        })
+      ).rejects.toThrow('storage error');
+
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+        'encoded-es-api-key',
+      ]);
+    });
+
+    it('does not call invalidation on success when decrypted policy has no apiKey', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        auth: {
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-no-key',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-no-key',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+        id: 'policy-id-update-no-key',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          auth: { createdByUser: false, owner: 'test-user' },
+        },
+        references: [],
+      });
+
+      await client.updateNotificationPolicy({
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
+        options: { id: 'policy-id-update-no-key', version: 'WzEsMV0=' },
+      });
+
+      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -598,6 +826,10 @@ describe('NotificationPolicyClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
       });
+
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+        'encoded-es-api-key',
+      ]);
     });
   });
 
@@ -631,6 +863,7 @@ describe('NotificationPolicyClient', () => {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-del-1'
       );
+      expect(invalidationService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
     });
 
     it('throws 404 when notification policy is not found', async () => {
@@ -648,6 +881,78 @@ describe('NotificationPolicyClient', () => {
       });
 
       expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('does not mark API key for invalidation when policy auth was createdByUser', async () => {
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+        id: 'policy-id-del-user',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          auth: { apiKey: 'user-created-key', createdByUser: true, owner: 'test-user' },
+        },
+        references: [],
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-user',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'user-policy',
+          description: '',
+          destinations: [],
+          auth: { apiKey: 'user-created-key', owner: 'test-user', createdByUser: true },
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+
+      await client.deleteNotificationPolicy({ id: 'policy-id-del-user' });
+
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-del-user'
+      );
+      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    it('does not call invalidation when decrypted policy has no apiKey', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-del-no-key',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'policy-no-key',
+          description: '',
+          destinations: [],
+          auth: { owner: 'test-user', createdByUser: false },
+          createdBy: 'elastic_profile_uid',
+          createdAt: '2025-01-01T00:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+      });
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce({
+        id: 'policy-id-del-no-key',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {
+          auth: { createdByUser: false, owner: 'test-user' },
+        },
+        references: [],
+      });
+
+      await client.deleteNotificationPolicy({ id: 'policy-id-del-no-key' });
+
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-del-no-key'
+      );
+      expect(invalidationService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
 });

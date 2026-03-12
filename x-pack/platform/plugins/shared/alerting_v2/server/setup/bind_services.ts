@@ -49,7 +49,16 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  ApiKeyInvalidationSavedObjectsClientToken,
+  ApiKeyInvalidationServiceToken,
+} from '../lib/invalidate_pending_api_keys/tokens';
+import { ApiKeyInvalidationService } from '../lib/invalidate_pending_api_keys/api_key_invalidation_service';
+import {
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
 import type { AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -111,6 +120,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return new NotificationPolicySavedObjectService(() => internalClient, spaces);
     })
     .inSingletonScope();
+
+  bind(ApiKeyInvalidationSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]);
+    })
+    .inSingletonScope();
+
+  bind(ApiKeyInvalidationService).toSelf().inRequestScope();
+  bind(ApiKeyInvalidationServiceToken).toService(ApiKeyInvalidationService);
 
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
