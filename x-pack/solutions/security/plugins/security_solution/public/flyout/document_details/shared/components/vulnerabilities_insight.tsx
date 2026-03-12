@@ -24,7 +24,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
@@ -70,10 +70,16 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
+  const euidApi = useEntityStoreEuidApi();
+  const buildPreviewQuery =
+    euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
+      ? euidApi.buildGenericEntityFlyoutPreviewQuery
+      : null;
+  const query = buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } };
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
+    query: query as Parameters<typeof useVulnerabilitiesPreview>[0]['query'],
     sort: [],
-    enabled: true,
+    enabled: !!buildPreviewQuery,
     pageSize: 1,
   });
 

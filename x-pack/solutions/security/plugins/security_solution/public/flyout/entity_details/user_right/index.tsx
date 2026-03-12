@@ -10,7 +10,7 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
@@ -44,6 +44,7 @@ import {
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -74,6 +75,7 @@ export const UserPanel = ({
   entityIdentifiers,
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
+  const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
@@ -96,13 +98,14 @@ export const UserPanel = ({
   }, [safeEntityIdentifiers, hasValidIdentifiers]);
 
   const userFilterQuery = useMemo((): ESQuery | undefined => {
-    if (entityStoreV2Enabled) {
-      return euid.getEuidDslFilterBasedOnDocument('user', safeEntityIdentifiers) as unknown as
-        | ESQuery
-        | undefined;
+    if (entityStoreV2Enabled && euidApi?.euid) {
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(
+        'user',
+        safeEntityIdentifiers
+      ) as unknown as ESQuery | undefined;
     }
     return effectiveUserName ? (buildUserNamesFilter([effectiveUserName]) as ESQuery) : undefined;
-  }, [entityStoreV2Enabled, safeEntityIdentifiers, effectiveUserName]);
+  }, [entityStoreV2Enabled, euidApi?.euid, safeEntityIdentifiers, effectiveUserName]);
 
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
   const entityFromStoreResult = useEntityFromStore({
@@ -139,7 +142,7 @@ export const UserPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(safeEntityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(safeEntityIdentifiers, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
@@ -235,7 +238,7 @@ export const UserPanel = ({
       />
       {noEntityInStore && (
         <EuiCallOut
-          title="No corresponding entity exists."
+          title={NO_CORRESPONDING_ENTITY_EXISTS}
           color="warning"
           iconType="warning"
           data-test-subj="entity-flyout-no-entity-warning"

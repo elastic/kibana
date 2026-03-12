@@ -11,7 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';
@@ -58,13 +58,14 @@ const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
 
 /**
  * Builds Filter[] from entityIdentifiers for timeline navigation following entity store EUID priority logic.
- * Priority order for hosts: host.entity.id > host.id > (host.name/hostname + host.domain) > (host.name/hostname + host.mac) > host.name > host.hostname
- * Priority order for users: user.entity.id > user.id > user.email > user.name (with related fields)
+ * Pass api from useEntityStoreEuidApi(); when null, returns [].
  */
 const buildTimelineFiltersFromEntityIdentifiers = (
-  entityIdentifiers: EntityIdentifiers
+  entityIdentifiers: EntityIdentifiers,
+  api: { buildEntityFiltersFromEntityIdentifiers: (ids: Record<string, string>) => unknown[] } | null
 ): Filter[] => {
-  const esFilters = buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
+  if (!api) return [];
+  const esFilters = api.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
   // Convert ES query filters to timeline Filter format
   return esFilters
     .filter(
@@ -142,6 +143,7 @@ export const AlertCountByRuleByStatus = React.memo(
       () => resolveEntityIdentifiers(entityIdentifiers, entityFilter),
       [entityIdentifiers, entityFilter]
     );
+    const euidApi = useEntityStoreEuidApi();
     const entityKey = getEntityKey(entityIdentifiersResolved);
     const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityKey}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
@@ -159,8 +161,8 @@ export const AlertCountByRuleByStatus = React.memo(
     });
 
     const entityTimelineFilters = useMemo(
-      () => buildTimelineFiltersFromEntityIdentifiers(entityIdentifiersResolved),
-      [entityIdentifiersResolved]
+      () => buildTimelineFiltersFromEntityIdentifiers(entityIdentifiersResolved, euidApi),
+      [entityIdentifiersResolved, euidApi]
     );
 
     const columns = useMemo(() => {

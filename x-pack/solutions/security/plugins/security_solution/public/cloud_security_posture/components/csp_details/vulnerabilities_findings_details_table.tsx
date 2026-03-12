@@ -13,7 +13,7 @@ import {
   buildEntityFlyoutPreviewQueryWithStatus,
   VULNERABILITY_QUERY_FIELD,
 } from '@kbn/cloud-security-posture-common';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -70,6 +70,7 @@ const EMPTY_VALUE = '-';
 export const VulnerabilitiesFindingsDetailsTable = memo(
   ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
+    const euidApi = useEntityStoreEuidApi();
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -99,16 +100,18 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
     const { data } = useVulnerabilitiesFindings({
       query: buildEntityFlyoutPreviewQueryWithStatus(
-        buildEntityFiltersFromEntityIdentifiers(entityIdentifiers),
+        euidApi?.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) ?? [],
         currentFilter || undefined,
         VULNERABILITY_QUERY_FIELD
       ),
       sort: [sortFieldDirection],
-      enabled: true,
+      enabled: !!euidApi,
       pageSize: 1,
     });
 
-    const { counts } = useHasVulnerabilities(buildEntityFlyoutPreviewCspOptions(entityIdentifiers));
+    const { counts } = useHasVulnerabilities(
+      buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    );
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 

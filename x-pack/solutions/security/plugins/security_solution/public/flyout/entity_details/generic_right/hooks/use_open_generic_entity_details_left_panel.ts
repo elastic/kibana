@@ -8,6 +8,7 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
@@ -26,11 +27,12 @@ export const useOpenGenericEntityDetailsLeftPanel = (
 ) => {
   const { entityIdentifiers, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
+  const euidApi = useEntityStoreEuidApi();
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({

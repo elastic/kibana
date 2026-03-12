@@ -19,7 +19,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
@@ -74,10 +74,17 @@ export const VulnerabilitiesPreview = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
   }, []);
 
+  const euidApi = useEntityStoreEuidApi();
+  const buildPreviewQuery =
+    euidApi && typeof euidApi?.buildGenericEntityFlyoutPreviewQuery === 'function'
+      ? euidApi.buildGenericEntityFlyoutPreviewQuery
+      : null;
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
+    query: buildPreviewQuery
+      ? buildPreviewQuery(entityIdentifiers)
+      : { bool: { filter: [] } },
     sort: [],
-    enabled: true,
+    enabled: !!buildPreviewQuery,
     pageSize: 1,
   });
 

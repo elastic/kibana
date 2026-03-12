@@ -13,6 +13,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -38,6 +39,7 @@ interface InventoryFlyoutProps {
 export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () => void }) => {
   const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { notifications } = useKibana().services;
+  const euidApi = useEntityStoreEuidApi();
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
@@ -47,7 +49,11 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     scopeId,
     contextId,
   }: InventoryFlyoutProps) => {
-    const entityIdentifiers = getEntityIdentifiersFromSource(rawSource, entityType);
+    const entityIdentifiers = getEntityIdentifiersFromSource(
+      rawSource,
+      entityType,
+      euidApi?.euid ?? null
+    );
 
     // User, Host, and Service entity flyouts require entityIdentifiers (EUID-derived)
     if (entityType && ['user', 'host', 'service'].includes(entityType)) {

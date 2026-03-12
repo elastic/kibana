@@ -18,7 +18,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useInstallEntityStoreV2 } from '@kbn/entity-store/public';
+import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
 import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -56,6 +56,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
+          <EntityStoreEuidApiProvider>
           <EuiThemeProvider darkMode={darkMode}>
             <MlCapabilitiesProvider>
               <UserPrivilegesProvider kibanaCapabilities={capabilities}>
@@ -80,6 +81,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
               </UserPrivilegesProvider>
             </MlCapabilitiesProvider>
           </EuiThemeProvider>
+          </EntityStoreEuidApiProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
         </ReduxStoreProvider>

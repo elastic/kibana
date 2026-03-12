@@ -9,6 +9,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCallback, useMemo } from 'react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
@@ -35,6 +36,7 @@ export const useNavigateEntityInsight = ({
 }) => {
   const isHostNameField = 'host.name' in entityIdentifiers;
   const { to, from } = useGlobalTime();
+  const euidApi = useEntityStoreEuidApi();
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,
@@ -44,7 +46,7 @@ export const useNavigateEntityInsight = ({
   });
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const primaryField = useMemo(() => {
@@ -79,7 +81,7 @@ export const useNavigateEntityInsight = ({
 
   const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const { openLeftPanel } = useExpandableFlyoutApi();
 

@@ -7,7 +7,7 @@
 
 import { useMemo, useEffect } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { GetFieldsData } from '../../document_details/shared/hooks/use_get_fields_data';
 import {
@@ -109,18 +109,18 @@ export interface UseAttackEntitiesListsResult {
  */
 export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
   const originalAlertIds = useOriginalAlertIds();
+  const euidApi = useEntityStoreEuidApi();
 
-  const query = useMemo(
-    () => ({
-      query: {
-        ids: {
-          values: originalAlertIds,
-        },
-      },
+  const query = useMemo(() => {
+    if (!euidApi?.euid) {
+      return { query: { ids: { values: originalAlertIds } }, size: 0, aggs: {} };
+    }
+    return {
+      query: { ids: { values: originalAlertIds } },
       size: 0,
       runtime_mappings: {
-        [USER_EUID_RUNTIME_FIELD]: euid.getEuidPainlessRuntimeMapping('user'),
-        [HOST_EUID_RUNTIME_FIELD]: euid.getEuidPainlessRuntimeMapping('host'),
+        [USER_EUID_RUNTIME_FIELD]: euidApi.euid.getEuidPainlessRuntimeMapping('user'),
+        [HOST_EUID_RUNTIME_FIELD]: euidApi.euid.getEuidPainlessRuntimeMapping('host'),
       },
       aggs: {
         unique_users_by_euid: {
@@ -130,12 +130,7 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
             min_doc_count: 1,
           },
           aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: true,
-              },
-            },
+            sample: { top_hits: { size: 1, _source: true } },
           },
         },
         unique_hosts_by_euid: {
@@ -145,23 +140,17 @@ export const useAttackEntitiesLists = (): UseAttackEntitiesListsResult => {
             min_doc_count: 1,
           },
           aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: true,
-              },
-            },
+            sample: { top_hits: { size: 1, _source: true } },
           },
         },
       },
-    }),
-    [originalAlertIds]
-  );
+    };
+  }, [originalAlertIds, euidApi?.euid]);
 
   const { loading, data, setQuery } = useQueryAlerts<unknown, AttackEntitiesListsAggregations>({
     fetchMethod: fetchQueryAlerts,
     query,
-    skip: originalAlertIds.length === 0,
+    skip: originalAlertIds.length === 0 || !euidApi?.euid,
     queryName: ALERTS_QUERY_NAMES.ATTACK_ENTITIES_LISTS,
   });
 

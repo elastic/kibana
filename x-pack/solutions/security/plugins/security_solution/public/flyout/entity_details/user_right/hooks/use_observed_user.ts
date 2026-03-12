@@ -85,22 +85,13 @@ export const useObservedUser = (
     loading: useEntityStoreData ? entityFromStore.isLoading : loadingObservedUser,
   });
 
-  const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
+  const [loading, { firstSeen, lastSeen }] = useFirstLastSeen({
     field: 'user.name',
     value: userName,
     defaultIndex: securityDefaultPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: useEntityStoreData ? false : true,
-  });
-
-  const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
-    field: 'user.name',
-    value: userName,
-    defaultIndex: securityDefaultPatterns,
-    order: Direction.desc,
-    filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
-    skip: useEntityStoreData ? false : true,
+    skip: !!useEntityStoreData,
   });
 
   return useMemo((): ObservedUserResult => {
@@ -137,12 +128,12 @@ export const useObservedUser = (
     }
     return {
       details: observedUserDetails,
-      isLoading: loadingObservedUser || loadingLastSeen || loadingFirstSeen,
+      isLoading: loadingObservedUser || loading,
       firstSeen: {
         date: firstSeen,
-        isLoading: loadingFirstSeen,
+        isLoading: loading,
       },
-      lastSeen: { date: lastSeen, isLoading: loadingLastSeen },
+      lastSeen: { date: lastSeen, isLoading: loading },
       entityRecord: null,
       refetchEntityStore: entityStoreV2Enabled ? entityFromStore.refetch : undefined,
     };
@@ -150,16 +141,15 @@ export const useObservedUser = (
     useEntityStoreData,
     observedUserDetails,
     loadingObservedUser,
-    loadingLastSeen,
-    loadingFirstSeen,
+    loading,
     firstSeen,
     lastSeen,
+    entityStoreV2Enabled,
+    entityFromStore.refetch,
     entityFromStore.entity,
     entityFromStore.isLoading,
     entityFromStore.firstSeen,
     entityFromStore.lastSeen,
     entityFromStore.entityRecord,
-    entityFromStore.refetch,
-    entityStoreV2Enabled,
   ]);
 };

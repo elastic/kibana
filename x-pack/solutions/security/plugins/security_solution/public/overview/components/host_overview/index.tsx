@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -21,7 +21,7 @@ import { buildHostNamesFilter, type HostItem } from '../../../../common/search_s
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { hostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
+import { HostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
 import {
   DefaultFieldRenderer,
   toFieldRendererItems,
@@ -106,6 +106,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
+    const euidApi = useEntityStoreEuidApi();
     const effectiveHostName = useMemo(
       () =>
         entityIdentifiers['host.name'] ||
@@ -114,14 +115,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [entityIdentifiers]
     );
     const filterQuery = useMemo(() => {
-      const euidFilter = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
+      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
       if (euidFilter) {
         return JSON.stringify(euidFilter);
       }
       return effectiveHostName
         ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
         : undefined;
-    }, [entityIdentifiers, effectiveHostName]);
+    }, [euidApi?.euid, entityIdentifiers, effectiveHostName]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
@@ -213,12 +214,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({
-                  host: data.host,
-                  noLink: true,
-                  scopeId,
-                  isFlyoutOpen,
-                })
+              ? (
+                  <HostIdRenderer
+                    host={data.host}
+                    noLink={true}
+                    scopeId={scopeId}
+                    isFlyoutOpen={isFlyoutOpen}
+                  />
+                )
               : getEmptyTagValue(),
         },
         {

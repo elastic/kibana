@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { euid, type EntityType } from '@kbn/entity-store/public';
+import type { EntityType } from '@kbn/entity-store/public';
 import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
 import type { GenericEntityRecord } from '../types/generic_entity_record';
 
@@ -56,17 +56,30 @@ const getEntityIdentifiersFromDslFilter = (
   return Object.keys(identifiers).length === 0 ? null : identifiers;
 };
 
+/** Euid API shape needed for getEntityIdentifiersFromSource (from useEntityStoreEuidApi().euid). */
+export interface EuidApiForIdentifiers {
+  getEuidDslFilterBasedOnDocument: (
+    entityType: string,
+    doc: unknown
+  ) => QueryDslQueryContainer | undefined;
+}
+
 /**
  * Extract entityIdentifiers from asset inventory document _source using entity store EUID logic.
  * Uses euid.getEuidDslFilterBasedOnDocument and derives identifiers from the resulting DSL.
  * Prefers entity.id from source when present (user.entity.id, host.entity.id, service.entity.id).
  *
  * For generic/container types, maps entity.id to 'related.entity' for flyout param convention.
+ * Pass euidApi from useEntityStoreEuidApi()?.euid; when null, returns null.
  */
 export const getEntityIdentifiersFromSource = (
   source: GenericEntityRecord | Record<string, unknown>,
-  entityType?: string
+  entityType?: string,
+  euidApi?: EuidApiForIdentifiers | null
 ): EntityIdentifiers | null => {
+  if (!euidApi) {
+    return null;
+  }
   const raw = source as Record<string, unknown>;
   const entity = raw.entity as { EngineMetadata?: { Type?: string }; type?: string } | undefined;
   const assetType = (entityType ?? entity?.EngineMetadata?.Type ?? entity?.type) as
@@ -86,7 +99,7 @@ export const getEntityIdentifiersFromSource = (
     }
   }
 
-  const dsl = euid.getEuidDslFilterBasedOnDocument(storeType, raw);
+  const dsl = euidApi.getEuidDslFilterBasedOnDocument(storeType, raw);
   const identifiers = getEntityIdentifiersFromDslFilter(dsl);
   if (!identifiers || Object.keys(identifiers).length === 0) {
     return null;

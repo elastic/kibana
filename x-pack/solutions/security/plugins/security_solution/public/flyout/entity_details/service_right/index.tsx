@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter } from '../../../../common/search_strategy';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
@@ -52,6 +52,7 @@ const getServiceNameFromEntityIdentifiers = (entityIdentifiers: EntityIdentifier
   entityIdentifiers['service.name'] || Object.values(entityIdentifiers)[0] || '';
 
 export const ServicePanel = ({ contextID, scopeId, entityIdentifiers }: ServicePanelProps) => {
+  const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const serviceName = useMemo(
     () => getServiceNameFromEntityIdentifiers(entityIdentifiers ?? {}),
@@ -59,11 +60,18 @@ export const ServicePanel = ({ contextID, scopeId, entityIdentifiers }: ServiceP
   );
 
   const serviceFilterQuery = useMemo(() => {
-    if (entityStoreV2Enabled && Object.keys(entityIdentifiers ?? {}).length > 0) {
-      return euid.getEuidDslFilterBasedOnDocument('service', entityIdentifiers ?? {}) ?? undefined;
+    if (
+      entityStoreV2Enabled &&
+      Object.keys(entityIdentifiers ?? {}).length > 0 &&
+      euidApi?.euid
+    ) {
+      return euidApi.euid.getEuidDslFilterBasedOnDocument(
+        'service',
+        entityIdentifiers ?? {}
+      ) as ESQuery | undefined;
     }
     return serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined;
-  }, [entityStoreV2Enabled, entityIdentifiers, serviceName]);
+  }, [entityStoreV2Enabled, entityIdentifiers, serviceName, euidApi?.euid]);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.service,

@@ -19,6 +19,7 @@ import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -114,8 +115,9 @@ export const MisconfigurationsPreview = ({
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
+  const euidApi = useEntityStoreEuidApi();
   const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 

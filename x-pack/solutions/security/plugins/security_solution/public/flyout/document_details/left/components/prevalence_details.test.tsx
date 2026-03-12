@@ -33,6 +33,8 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/components/user_privileges');
@@ -80,6 +82,9 @@ const panelContextValue = {
   browserFields: {},
   dataFormattedForFieldBrowser: [],
   scopeId: 'scopeId',
+  getFieldsData: mockGetFieldsData,
+  dataAsNestedObject: mockDataAsNestedObject,
+  investigationFields: [],
 } as unknown as DocumentDetailsContext;
 
 const UPSELL_MESSAGE = 'Host and user prevalence are only available with a';

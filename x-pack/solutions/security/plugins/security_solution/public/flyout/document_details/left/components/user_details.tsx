@@ -28,6 +28,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -188,6 +189,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
   const entityFromStoreResult = useEntityFromStore({
     entityIdentifiers,
     entityType: 'user',
@@ -244,7 +246,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       : !!userRiskData?.user?.risk;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers,

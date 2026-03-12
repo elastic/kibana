@@ -6,52 +6,16 @@
  */
 
 /**
- * Public API for the entity_store plugin.
- * Exports only constants and types needed on every load (including browser).
- * Does NOT import domain/euid barrel so ESQL is excluded from browser bundle.
- * For full euid including ESQL helpers, use common/euid_helpers (server-only).
+ * Constants and types for the entity_store plugin with zero dependency on domain/euid.
+ * Use this from the plugin's public entry so the page-load bundle stays under limit.
  */
 
 import { z } from '@kbn/zod/v4';
-
-import { getEuidFromObject } from './domain/euid/memory';
-import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './domain/euid/painless';
-import {
-  getEuidDslFilterBasedOnDocument,
-  getEuidDslDocumentsContainsIdFilter,
-  getEntityIdentifiersFromDocument,
-} from './domain/euid/dsl';
-import { getEuidSourceFields } from './domain/euid/identity_fields';
 
 export const PLUGIN_ID = 'entityStore';
 export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
-
-/**
- * Library API: euid helpers for use by other plugins (browser-safe: DSL + Painless only, no ESQL).
- * Import the `euid` object instead of using the plugin start contract.
- * For ESQL helpers (getEuidEsql*), use common/euid_helpers (server-only).
- *
- * @example
- * import { euid, type EntityType } from '@kbn/entity-store/public';
- * euid.getEuidFromObject('host', doc);
- * euid.getEuidDslFilterBasedOnDocument('host', identifiers);
- */
-export const euid = {
-  getEuidFromObject,
-  getEuidPainlessEvaluation,
-  getEuidPainlessRuntimeMapping,
-  getEuidDslFilterBasedOnDocument,
-  getEuidDslDocumentsContainsIdFilter,
-  getEuidSourceFields,
-  getEntityIdentifiersFromDocument,
-};
-
-export {
-  buildEntityFiltersFromEntityIdentifiers,
-  buildGenericEntityFlyoutPreviewQuery,
-} from './domain/euid/entity_filters';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
@@ -95,11 +59,15 @@ export const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-// Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export type { IdentitySourceFields } from './domain/euid/identity_fields';
+/** Minimal shape for identity source fields (avoids importing domain/euid in page-load bundle). */
+export interface IdentitySourceFields {
+  requiresOneOf: string[];
+  identitySourceFields: string[];
+}
+
 export type { Entity } from './domain/definitions/entity.gen';

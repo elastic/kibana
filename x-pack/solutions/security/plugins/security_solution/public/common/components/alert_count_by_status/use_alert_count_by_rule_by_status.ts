@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -72,6 +72,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
 }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
+  const euidApi = useEntityStoreEuidApi();
 
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
@@ -90,6 +91,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       entityIdentifiers,
       statuses,
       isExploreContext,
+      buildEntityFiltersFromEntityIdentifiers: euidApi?.buildEntityFiltersFromEntityIdentifiers,
     }),
     skip,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
@@ -116,6 +118,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
         entityIdentifiers: entityIdentifiersRef.current,
         statuses: statusesRef.current,
         isExploreContext,
+        buildEntityFiltersFromEntityIdentifiers: euidApi?.buildEntityFiltersFromEntityIdentifiers,
       })
     );
   }, [
@@ -126,6 +129,7 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
     statusesKey,
     additionalFiltersKey,
     isExploreContext,
+    euidApi,
   ]);
 
   useEffect(() => {
@@ -167,6 +171,7 @@ export const buildRuleAlertsByEntityQuery = ({
   entityIdentifiers,
   statuses,
   isExploreContext = false,
+  buildEntityFiltersFromEntityIdentifiers: buildEntityFilters,
 }: {
   additionalFilters?: ESBoolQuery[];
   from: string;
@@ -174,10 +179,13 @@ export const buildRuleAlertsByEntityQuery = ({
   statuses: string[];
   entityIdentifiers: EntityIdentifiers;
   isExploreContext?: boolean;
+  buildEntityFiltersFromEntityIdentifiers?: (ids: Record<string, string>) => QueryDslQueryContainer[];
 }) => {
   const entityFilters = isExploreContext
     ? getExploreEntityNameFilter(entityIdentifiers)
-    : buildEntityFiltersFromEntityIdentifiers(entityIdentifiers);
+    : buildEntityFilters
+      ? buildEntityFilters(entityIdentifiers)
+      : getExploreEntityNameFilter(entityIdentifiers);
   return {
     size: 0,
     _source: false,

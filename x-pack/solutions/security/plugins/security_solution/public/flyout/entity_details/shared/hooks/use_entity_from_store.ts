@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
   UserEntity,
@@ -81,10 +81,13 @@ export function useEntityFromStore(
   params: UseEntityFromStoreParams
 ): EntityFromStoreResult<HostItem | UserItem> {
   const { entityIdentifiers, entityType, skip } = params;
+  const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesList } = useEntityAnalyticsRoutes();
 
   const hasValidIdentifiers = Object.keys(entityIdentifiers).length > 0;
-  const filter = euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers);
+  const filter = euidApi?.euid
+    ? euidApi.euid.getEuidDslFilterBasedOnDocument(entityType, entityIdentifiers)
+    : undefined;
 
   const stableIdentifiersKey = getStableEntityIdentifiersKey(entityIdentifiers);
   const queryResult = useQuery({

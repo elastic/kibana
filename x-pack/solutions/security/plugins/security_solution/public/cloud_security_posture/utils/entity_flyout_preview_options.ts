@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
+
+/** API shape needed (from useEntityStoreEuidApi()). */
+export type EntityFlyoutPreviewApi = {
+  buildGenericEntityFlyoutPreviewQuery: (
+    entityIdentifiers: Record<string, string>,
+    status?: string,
+    queryField?: string
+  ) => { bool: { filter: unknown[] } };
+};
 
 /**
  * Builds CSP preview options for useHasMisconfigurations and useHasVulnerabilities
  * by applying entity-store EUID logic to entity identifiers.
- * Call this in security solution and pass the result to the hooks.
+ * Pass api from useEntityStoreEuidApi(); when null, returns options with enabled: false.
  */
 export const buildEntityFlyoutPreviewCspOptions = (
-  entityIdentifiers: Record<string, string>
-): UseCspOptions => ({
-  query: buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
-  sort: [],
-  enabled: true,
-  pageSize: 1,
-});
+  entityIdentifiers: Record<string, string>,
+  api?: EntityFlyoutPreviewApi | null
+): UseCspOptions =>
+  api
+    ? {
+        query: api.buildGenericEntityFlyoutPreviewQuery(entityIdentifiers),
+        sort: [],
+        enabled: true,
+        pageSize: 1,
+      }
+    : { query: { bool: { filter: [] } }, sort: [], enabled: false, pageSize: 1 };

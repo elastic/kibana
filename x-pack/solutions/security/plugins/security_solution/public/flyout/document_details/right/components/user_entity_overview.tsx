@@ -20,6 +20,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -118,6 +119,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
@@ -228,7 +230,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(stableEntityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(stableEntityIdentifiers, euidApi)
   );
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityIdentifiers: stableEntityIdentifiers,

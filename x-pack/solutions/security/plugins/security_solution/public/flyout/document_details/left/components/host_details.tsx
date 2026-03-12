@@ -32,6 +32,7 @@ import {
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -201,6 +202,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
   const entityFromStoreResult = useEntityFromStore({
     entityIdentifiers,
     entityType: 'host',
@@ -285,10 +287,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     queryId: 'HostEntityOverview',
   });
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const openDetailsPanel = useNavigateToHostDetails({

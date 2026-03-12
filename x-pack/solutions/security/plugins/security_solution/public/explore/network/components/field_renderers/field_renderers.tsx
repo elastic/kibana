@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityIdentifiers } from '../../../../flyout/document_details/shared/utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
@@ -86,7 +86,7 @@ interface HostIdRendererTypes {
   isFlyoutOpen: boolean;
 }
 
-export const hostIdRenderer = ({
+export const HostIdRenderer = ({
   contextID,
   host,
   ipFilter,
@@ -94,7 +94,16 @@ export const hostIdRenderer = ({
   scopeId,
   isFlyoutOpen,
 }: HostIdRendererTypes): React.ReactElement => {
+  const euidApi = useEntityStoreEuidApi();
   const hostName = host.name && host.name[0];
+  const entityIdentifiers = euidApi?.euid
+    ? euidApi.euid.getEuidSourceFields('host').identitySourceFields.reduce((acc, field) => {
+        acc[field] = host[field as keyof HostEcs] as string;
+        return acc;
+      }, {} as EntityIdentifiers)
+    : hostName != null
+    ? { 'host.name': hostName }
+    : {};
   return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {hostName != null ? (
@@ -110,12 +119,7 @@ export const hostIdRenderer = ({
               <FlyoutLink
                 field={'host.name'}
                 value={hostName}
-                entityIdentifiers={euid
-                  .getEuidSourceFields('host')
-                  .identitySourceFields.reduce((acc, field) => {
-                    acc[field] = host[field as keyof HostEcs] as string;
-                    return acc;
-                  }, {} as EntityIdentifiers)}
+                entityIdentifiers={entityIdentifiers}
                 scopeId={scopeId}
                 isFlyoutOpen={isFlyoutOpen}
               >
@@ -139,23 +143,30 @@ interface HostNameRendererTypes {
   ipFilter?: string;
   isFlyoutOpen: boolean;
 }
-export const hostNameRenderer = ({
+export const HostNameRenderer = ({
   scopeId,
   host,
   ipFilter,
   isFlyoutOpen,
-}: HostNameRendererTypes): React.ReactElement =>
-  host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
+}: HostNameRendererTypes): React.ReactElement => {
+  const euidApi = useEntityStoreEuidApi();
+  const entityIdentifiers = euidApi?.euid
+    ? euidApi.euid.getEuidSourceFields('host').identitySourceFields.reduce((acc, field) => {
+        acc[field] = host[field as keyof HostEcs] as string;
+        return acc;
+      }, {} as EntityIdentifiers)
+    : host.name?.[0] != null
+    ? { 'host.name': host.name[0] }
+    : {};
+  return host.name &&
+    host.name[0] &&
+    host.ip &&
+    (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
       <FlyoutLink
         field={'host.name'}
         value={host.name[0]}
-        entityIdentifiers={euid
-          .getEuidSourceFields('host')
-          .identitySourceFields.reduce((acc, field) => {
-            acc[field] = host[field as keyof HostEcs] as string;
-            return acc;
-          }, {} as EntityIdentifiers)}
+        entityIdentifiers={entityIdentifiers}
         scopeId={scopeId}
         isFlyoutOpen={isFlyoutOpen}
       />
@@ -163,6 +174,7 @@ export const hostNameRenderer = ({
   ) : (
     getEmptyTagValue()
   );
+};
 
 export const whoisRenderer = (ip: string) => <WhoIsLink domain={ip}>{i18n.VIEW_WHOIS}</WhoIsLink>;
 

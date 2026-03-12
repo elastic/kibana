@@ -162,16 +162,13 @@ export const getPreviewPanelParams = ({
         },
       };
     case USER_NAME_FIELD_NAME:
-    case 'user.entity.id':
-    case 'user.id':
-    case 'user.email':
       return {
         id: UserPreviewPanelKey,
         params: {
           userName: value,
           scopeId,
           banner: USER_PREVIEW_BANNER,
-          contextID: scopeId || 'highlighted-fields-host-preview',
+          contextID: scopeId || 'highlighted-fields-user-preview',
           entityIdentifiers,
         },
       };

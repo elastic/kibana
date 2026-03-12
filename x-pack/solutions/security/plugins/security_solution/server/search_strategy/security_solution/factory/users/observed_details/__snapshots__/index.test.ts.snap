@@ -144,32 +144,12 @@ Object {
             \\"must_not\\": [
               {
                 \\"exists\\": {
-                  \\"field\\": \\"user.entity.id\\"
-                }
-              },
-              {
-                \\"exists\\": {
-                  \\"field\\": \\"host.entity.id\\"
-                }
-              },
-              {
-                \\"exists\\": {
-                  \\"field\\": \\"host.id\\"
-                }
-              },
-              {
-                \\"exists\\": {
-                  \\"field\\": \\"host.name\\"
+                  \\"field\\": \\"user.email\\"
                 }
               },
               {
                 \\"exists\\": {
                   \\"field\\": \\"user.id\\"
-                }
-              },
-              {
-                \\"exists\\": {
-                  \\"field\\": \\"user.email\\"
                 }
               },
               {

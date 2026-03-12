@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
@@ -41,14 +42,15 @@ export const EntityInsight = <T,>({
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const euidApi = useEntityStoreEuidApi();
   const insightContent: React.ReactElement[] = [];
 
   const { hasMisconfigurationFindings: showMisconfigurationsPreview } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const showVulnerabilitiesPreview = hasVulnerabilitiesFindings && entityIdentifiers !== undefined;

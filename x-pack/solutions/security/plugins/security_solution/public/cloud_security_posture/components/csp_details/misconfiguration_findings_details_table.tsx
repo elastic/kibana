@@ -20,7 +20,7 @@ import {
   buildEntityFlyoutPreviewQueryWithStatus,
   MISCONFIGURATION_QUERY_FIELD,
 } from '@kbn/cloud-security-posture-common';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
@@ -121,6 +121,8 @@ const useGetFindingsStats = () => {
  */
 export const MisconfigurationFindingsDetailsTable = memo(
   ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
+    const euidApi = useEntityStoreEuidApi();
+
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -140,17 +142,17 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const { data, isLoading } = useMisconfigurationFindings({
       query: buildEntityFlyoutPreviewQueryWithStatus(
-        buildEntityFiltersFromEntityIdentifiers(entityIdentifiers),
+        euidApi?.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) ?? [],
         currentFilter || undefined,
         MISCONFIGURATION_QUERY_FIELD
       ),
       sort: [sortFieldDirection],
-      enabled: true,
+      enabled: !!euidApi,
       pageSize: 1,
     });
 
     const { passedFindings, failedFindings } = useHasMisconfigurations(
-      buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+      buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
     );
 
     const [pageIndex, setPageIndex] = useState(0);

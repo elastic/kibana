@@ -5,7 +5,42 @@
  * 2.0.
  */
 
+import type { EuidApiForIdentifiers } from './entity_identifiers_from_source';
 import { getEntityIdentifiersFromSource } from './entity_identifiers_from_source';
+
+type DocWithEntityFields = Record<
+  string,
+  Record<string, unknown> & { entity?: { id?: unknown }; name?: unknown }
+>;
+
+/** Mock euid API that returns DSL with term filters so getEntityIdentifiersFromDslFilter can parse. */
+const mockEuidApi = {
+  getEuidDslFilterBasedOnDocument: (entityType: string, doc: unknown) => {
+    const d = doc as DocWithEntityFields;
+    if (entityType === 'user') {
+      if (d.user?.entity?.id)
+        return { bool: { filter: [{ term: { 'user.entity.id': d.user.entity.id } }] } };
+      if (d.user?.name) return { bool: { filter: [{ term: { 'user.name': d.user.name } }] } };
+    }
+    if (entityType === 'host') {
+      if (d.host?.entity?.id)
+        return { bool: { filter: [{ term: { 'host.entity.id': d.host.entity.id } }] } };
+      if (d.host?.name) return { bool: { filter: [{ term: { 'host.name': d.host.name } }] } };
+    }
+    if (entityType === 'service') {
+      if (d.service?.entity?.id)
+        return { bool: { filter: [{ term: { 'service.entity.id': d.service.entity.id } }] } };
+      if (d.service?.name)
+        return { bool: { filter: [{ term: { 'service.name': d.service.name } }] } };
+    }
+    if (entityType === 'generic' && d.entity?.id) {
+      return {
+        bool: { filter: [{ term: { 'entity.id': d.entity.id } }] },
+      };
+    }
+    return undefined;
+  },
+} as EuidApiForIdentifiers;
 
 describe('getEntityIdentifiersFromSource', () => {
   it('extracts user entityIdentifiers via entity store euid (user.entity.id priority)', () => {
@@ -13,7 +48,7 @@ describe('getEntityIdentifiersFromSource', () => {
       user: { entity: { id: 'user-euid-1' }, name: 'alice', id: 'user-1' },
       entity: { EngineMetadata: { Type: 'user' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'user');
+    const result = getEntityIdentifiersFromSource(source, 'user', mockEuidApi);
     expect(result).toEqual({ 'user.entity.id': 'user-euid-1' });
   });
 
@@ -22,7 +57,7 @@ describe('getEntityIdentifiersFromSource', () => {
       user: { name: 'bob' },
       entity: { EngineMetadata: { Type: 'user' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'user');
+    const result = getEntityIdentifiersFromSource(source, 'user', mockEuidApi);
     expect(result).toEqual({ 'user.name': 'bob' });
   });
 
@@ -31,7 +66,7 @@ describe('getEntityIdentifiersFromSource', () => {
       host: { entity: { id: 'host-euid-1' }, name: 'server1', id: 'host-1' },
       entity: { EngineMetadata: { Type: 'host' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'host');
+    const result = getEntityIdentifiersFromSource(source, 'host', mockEuidApi);
     expect(result).toEqual({ 'host.entity.id': 'host-euid-1' });
   });
 
@@ -40,7 +75,7 @@ describe('getEntityIdentifiersFromSource', () => {
       host: { name: 'my-server' },
       entity: { EngineMetadata: { Type: 'host' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'host');
+    const result = getEntityIdentifiersFromSource(source, 'host', mockEuidApi);
     expect(result).toEqual({ 'host.name': 'my-server' });
   });
 
@@ -49,7 +84,7 @@ describe('getEntityIdentifiersFromSource', () => {
       service: { entity: { id: 'svc-euid-1' }, name: 'nginx' },
       entity: { EngineMetadata: { Type: 'service' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'service');
+    const result = getEntityIdentifiersFromSource(source, 'service', mockEuidApi);
     expect(result).toEqual({ 'service.entity.id': 'svc-euid-1' });
   });
 
@@ -58,7 +93,7 @@ describe('getEntityIdentifiersFromSource', () => {
       service: { name: 'api-gateway' },
       entity: { EngineMetadata: { Type: 'service' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'service');
+    const result = getEntityIdentifiersFromSource(source, 'service', mockEuidApi);
     expect(result).toEqual({ 'service.name': 'api-gateway' });
   });
 
@@ -66,7 +101,7 @@ describe('getEntityIdentifiersFromSource', () => {
     const source = {
       entity: { id: 'generic-entity-123', EngineMetadata: { Type: 'generic' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'generic');
+    const result = getEntityIdentifiersFromSource(source, 'generic', mockEuidApi);
     expect(result).toEqual({ 'related.entity': 'generic-entity-123' });
   });
 
@@ -74,7 +109,7 @@ describe('getEntityIdentifiersFromSource', () => {
     const source = {
       entity: { id: 'container-123', EngineMetadata: { Type: 'container' } },
     };
-    const result = getEntityIdentifiersFromSource(source, 'container');
+    const result = getEntityIdentifiersFromSource(source, 'container', mockEuidApi);
     expect(result).toEqual({ 'related.entity': 'container-123' });
   });
 
@@ -83,7 +118,7 @@ describe('getEntityIdentifiersFromSource', () => {
       host: { name: 'derived-host' },
       entity: { EngineMetadata: { Type: 'host' } },
     };
-    const result = getEntityIdentifiersFromSource(source);
+    const result = getEntityIdentifiersFromSource(source, undefined, mockEuidApi);
     expect(result).toEqual({ 'host.name': 'derived-host' });
   });
 });

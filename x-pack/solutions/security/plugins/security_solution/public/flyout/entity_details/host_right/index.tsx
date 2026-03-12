@@ -11,7 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { euid } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityFlyoutPreviewCspOptions } from '../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -43,6 +43,7 @@ import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../shared/translations';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -75,6 +76,7 @@ export const HostPanel = ({
   entityIdentifiers,
 }: HostPanelProps) => {
   const { uiSettings } = useKibana().services;
+  const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
@@ -98,9 +100,11 @@ export const HostPanel = ({
   });
   const hostFilterQuery = useMemo(
     () =>
-      euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers) ??
+      (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers) as
+        | ESQuery
+        | undefined) ??
       (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [entityIdentifiers, effectiveHostName]
+    [euidApi?.euid, entityIdentifiers, effectiveHostName]
   );
 
   // Risk score index is keyed by host.name; use host name filter so the API finds the host
@@ -136,11 +140,11 @@ export const HostPanel = ({
   );
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEntityFlyoutPreviewCspOptions(entityIdentifiers)
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
   );
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
@@ -247,7 +251,7 @@ export const HostPanel = ({
       />
       {noEntityInStore && (
         <EuiCallOut
-          title="No corresponding entity exists."
+          title={NO_CORRESPONDING_ENTITY_EXISTS}
           color="warning"
           iconType="warning"
           data-test-subj="entity-flyout-no-entity-warning"

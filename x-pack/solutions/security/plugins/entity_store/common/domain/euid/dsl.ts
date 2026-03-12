@@ -138,3 +138,53 @@ export function getEuidDslFilterBasedOnDocument(
 
   return dsl;
 }
+
+/**
+ * Extracts entity identifier field-value pairs from a document.
+ * Same logic as {@link getEuidDslFilterBasedOnDocument} but returns the raw identifiers
+ * instead of a DSL filter. Excludes evaluated-only fields (not stored in the index).
+ *
+ * @param entityType - The entity type (e.g. 'host', 'user', 'generic')
+ * @param doc - The document (flattened or nested; may have _source)
+ * @returns Record of field names to string values, or undefined if the document has insufficient identity data
+ */
+export function getEntityIdentifiersFromDocument(
+  entityType: EntityType,
+  doc: unknown
+): Record<string, string> | undefined {
+  if (!doc) {
+    return undefined;
+  }
+
+  const unwrapped = getDocument(doc);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(unwrapped, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return { [identityField.singleField]: value };
+  }
+
+  let docWithEval = unwrapped;
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(unwrapped, identityField.fieldEvaluations);
+    docWithEval = { ...unwrapped, ...evaluated };
+  }
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(docWithEval, identityField.euidFields);
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+
+  const evaluatedDestinations = new Set(
+    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
+  );
+  const entries = Object.entries(fieldsToBeFilteredOn.values).filter(
+    ([field]) => !evaluatedDestinations.has(field)
+  );
+  if (entries.length === 0) {
+    return undefined;
+  }
+  return Object.fromEntries(entries) as Record<string, string>;
+}
