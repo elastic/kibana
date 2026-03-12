@@ -103,6 +103,21 @@ describe('OAuthStateClient', () => {
       );
     });
 
+    it('generates a codeVerifier within PKCE spec length (43-128 chars)', async () => {
+      const client = createClient();
+      mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
+        id: 'generated-id',
+        attributes: {},
+      });
+
+      await client.create({ connectorId: 'connector-1', spaceId: 'default' });
+
+      const { codeVerifier } = mockUnsecuredSavedObjectsClient.create.mock.calls[0][1];
+      expect(typeof codeVerifier).toBe('string');
+      expect(codeVerifier.length).toBeGreaterThanOrEqual(43);
+      expect(codeVerifier.length).toBeLessThanOrEqual(128);
+    });
+
     it('includes createdBy when provided', async () => {
       const client = createClient();
       mockUnsecuredSavedObjectsClient.create.mockResolvedValue({
