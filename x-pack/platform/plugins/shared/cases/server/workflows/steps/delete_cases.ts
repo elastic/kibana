@@ -10,14 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteCasesStepCommonDefinition } from '../../../common/workflows/steps/delete_cases';
 import type { CasesClient } from '../../client';
 import { DELETE_CASES_FAILED_MESSAGE } from './translations';
-
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error && error.message.length > 0) {
-    return error.message;
-  }
-
-  return String(error);
-};
+import { getCasesClientFromStepsContext, getErrorMessage } from './utils';
 
 export const deleteCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -28,8 +21,7 @@ export const deleteCasesStepDefinition = (
       const input = deleteCasesStepCommonDefinition.inputSchema.parse(context.input);
 
       try {
-        const request = context.contextManager.getFakeRequest();
-        const casesClient = await getCasesClient(request);
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
         await casesClient.cases.delete(input.case_ids);
 
         const output = deleteCasesStepCommonDefinition.outputSchema.parse({

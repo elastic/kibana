@@ -10,6 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { findSimilarCasesStepCommonDefinition } from '../../../common/workflows/steps/find_similar_cases';
 import type { CasesClient } from '../../client';
 import { FIND_SIMILAR_CASES_FAILED_MESSAGE } from './translations';
+import { getCasesClientFromStepsContext } from './utils';
 
 export const findSimilarCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -20,8 +21,7 @@ export const findSimilarCasesStepDefinition = (
       const input = findSimilarCasesStepCommonDefinition.inputSchema.parse(context.input);
 
       try {
-        const request = context.contextManager.getFakeRequest();
-        const casesClient = await getCasesClient(request);
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
         const similarCases = await casesClient.cases.similar(input.case_id, {
           page: input.page,
           perPage: input.perPage,

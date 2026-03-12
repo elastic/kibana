@@ -8,20 +8,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateCasesStepCommonDefinition } from '../../../common/workflows/steps/update_cases';
-import { CasePatchRequestRt } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../../client';
-import { normalizeCaseStepUpdatesForBulkPatch, pushCase } from './utils';
+import { getCasesClientFromStepsContext, getErrorMessage, pushCase } from './utils';
 import { UPDATE_CASES_FAILED_MESSAGE } from './translations';
-import { resolveCaseVersion } from './update_case_helpers';
-
-const getErrorMessage = (error: unknown): string => {
-  if (error instanceof Error && error.message.length > 0) {
-    return error.message;
-  }
-
-  return String(error);
-};
+import { prepareCasePatch } from './update_case_helpers';
 
 const resolveFailedCaseId = (error: unknown, caseIds: string[]): string => {
   if (error instanceof Error) {
@@ -44,22 +34,15 @@ export const updateCasesStepDefinition = (
       const caseIds = input.cases.map(({ case_id: caseId }) => caseId);
 
       try {
-        const request = context.contextManager.getFakeRequest();
-        const casesClient = await getCasesClient(request);
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
 
         const normalizedCasePatches = await Promise.all(
           input.cases.map(async (caseInput) => {
             try {
-              const version = await resolveCaseVersion(
-                casesClient,
-                caseInput.case_id,
-                caseInput.version
-              );
-
-              return decodeWithExcessOrThrow(CasePatchRequestRt)({
-                id: caseInput.case_id,
-                version,
-                ...normalizeCaseStepUpdatesForBulkPatch(caseInput.updates),
+              return await prepareCasePatch(casesClient, {
+                caseId: caseInput.case_id,
+                version: caseInput.version,
+                updates: caseInput.updates,
               });
             } catch (error) {
               throw new Error(

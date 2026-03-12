@@ -26,6 +26,12 @@ interface UpdateSingleCaseParams {
   onNotFoundError: Error;
 }
 
+interface PrepareCasePatchParams {
+  caseId: string;
+  version?: string;
+  updates: WorkflowUpdatePayload;
+}
+
 interface CaseIdVersionInput {
   case_id: string;
   version?: string;
@@ -40,17 +46,24 @@ export const resolveCaseVersion = async (client: CasesClient, caseId: string, ve
     })
   ).version;
 
-export const updateSingleCase = async (
+export const prepareCasePatch = async (
   client: CasesClient,
-  { caseId, version, updates, onNotFoundError }: UpdateSingleCaseParams
+  { caseId, version, updates }: PrepareCasePatchParams
 ) => {
   const resolvedVersion = await resolveCaseVersion(client, caseId, version);
 
-  const normalizedCasePatch = decodeWithExcessOrThrow(CasePatchRequestRt)({
+  return decodeWithExcessOrThrow(CasePatchRequestRt)({
     id: caseId,
     version: resolvedVersion,
     ...normalizeCaseStepUpdatesForBulkPatch(updates),
   });
+};
+
+export const updateSingleCase = async (
+  client: CasesClient,
+  { caseId, version, updates, onNotFoundError }: UpdateSingleCaseParams
+) => {
+  const normalizedCasePatch = await prepareCasePatch(client, { caseId, version, updates });
 
   const updatedCases = await client.cases.bulkUpdate({
     cases: [normalizedCasePatch],

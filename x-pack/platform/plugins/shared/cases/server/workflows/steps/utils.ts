@@ -30,7 +30,7 @@ export const normalizeCaseStepUpdatesForBulkPatch = (updates: WorkflowUpdatePayl
   };
 };
 
-async function getCasesClientFromStepsContext(
+export async function getCasesClientFromStepsContext(
   context: StepHandlerContext,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ): Promise<CasesClient> {
@@ -65,6 +65,14 @@ export const pushCase = async (casesClient: CasesClient, theCase: PushableCase) 
     connectorId: theCase.connector.id,
     pushType: 'automatic',
   });
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error && error.message.length > 0) {
+    return error.message;
+  }
+
+  return String(error);
+};
 
 /**
  * Creates a standardized handler for cases workflow steps.

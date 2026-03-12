@@ -10,6 +10,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { findCasesStepCommonDefinition } from '../../../common/workflows/steps/find_cases';
 import type { CasesFindRequestWithCustomFields } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
+import { getCasesClientFromStepsContext } from './utils';
 
 export const findCasesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -18,8 +19,7 @@ export const findCasesStepDefinition = (
     ...findCasesStepCommonDefinition,
     handler: async (context) => {
       try {
-        const request = context.contextManager.getFakeRequest();
-        const casesClient = await getCasesClient(request);
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
         const input = findCasesStepCommonDefinition.inputSchema.parse(context.input);
 
         const findRequest: CasesFindRequestWithCustomFields = {

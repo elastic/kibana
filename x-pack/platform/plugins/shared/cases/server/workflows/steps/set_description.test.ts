@@ -6,9 +6,8 @@
  */
 
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
-import type { CasesClient } from '../../client';
 import { setDescriptionStepDefinition } from './set_description';
-import { createStepHandlerContext } from './test_utils';
+import { createBulkUpdateCasesClientMock, createStepHandlerContext } from './test_utils';
 
 const createContext = (input: unknown) =>
   createStepHandlerContext({ input, stepType: 'cases.setDescription' });
@@ -16,11 +15,10 @@ const createContext = (input: unknown) =>
 describe('setDescriptionStepDefinition', () => {
   it('updates case description', async () => {
     const description = 'Updated description';
-    const get = jest.fn();
-    const bulkUpdate = jest.fn().mockResolvedValue([{ ...createCaseResponseFixture, description }]);
-    const getCasesClient = jest.fn().mockResolvedValue({
-      cases: { get, bulkUpdate },
-    } as unknown as CasesClient);
+    const { get, bulkUpdate, getCasesClient } = createBulkUpdateCasesClientMock({
+      ...createCaseResponseFixture,
+      description,
+    });
     const definition = setDescriptionStepDefinition(getCasesClient);
 
     const result = await definition.handler(
