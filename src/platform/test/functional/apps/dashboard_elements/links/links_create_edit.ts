@@ -161,8 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorSaveButton();
 
         await header.waitUntilLoadingHasFinished();
-        const listGroup = await testSubjects.find('links--component--listGroup');
-        const link = await listGroup.findByCssSelector(`li:nth-child(5)`);
+        const link = await testSubjects.find('dashboardLink--to be deleted');
         expect(await link.getVisibleText()).to.equal('to be deleted');
       });
 
