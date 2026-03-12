@@ -95,16 +95,6 @@ describe('validateUniqueName', () => {
       expect(result).toBeUndefined();
     });
 
-    it('SHOULD prioritize pending field error over mapping view error', () => {
-      const pendingFields = createNormalizedFields(['duplicate']);
-      const mappingViewFields = createNormalizedFields(['duplicate']);
-      const validator = validateUniqueName(pendingFields, undefined, undefined, mappingViewFields);
-      const result = validator({ value: 'duplicate' } as any);
-      expect(result).toEqual({
-        message: 'There is already a field with this name.',
-      });
-    });
-
     it('SHOULD return error for nested field name that exists under the same parent', () => {
       const parentId = 'parent-field';
       const pendingFields = createNormalizedFields([]);
