@@ -8,75 +8,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
-import type {
-  DashboardAttachmentData,
-  DashboardAttachmentOrigin,
-} from '@kbn/dashboard-agent-common';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
-import type {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRendererProps,
-} from '@kbn/dashboard-plugin/public';
+import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { normalizeDashboardWidgets } from './panel_grid_layout';
+import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
 import { useRegisterActionButtons } from './use_register_action_buttons';
-
-export interface DashboardCanvasInitialInput {
-  timeRange: {
-    from: string;
-    to: string;
-  };
-  viewMode: 'view';
-  panels: DashboardState['panels'];
-  title?: string;
-  description?: string;
-}
-
-const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
-
-const createDashboardRendererInitialInput = (
-  data: DashboardAttachmentData
-): DashboardCanvasInitialInput => ({
-  timeRange: DEFAULT_TIME_RANGE,
-  viewMode: 'view',
-  panels: normalizeDashboardWidgets({
-    panels: data.panels ?? [],
-    sections: data.sections,
-  }),
-  title: data.title,
-  description: data.description,
-});
-
-const getDashboardRendererCreationOptions = async ({
-  savedObjectId,
-  initialDashboardInput,
-}: {
-  savedObjectId?: string;
-  initialDashboardInput: DashboardCanvasInitialInput;
-}): Promise<DashboardCreationOptions> => {
-  if (savedObjectId) {
-    return {
-      getInitialInput: () => ({
-        viewMode: 'view',
-      }),
-    };
-  }
-
-  return {
-    getInitialInput: () => {
-      const { timeRange, ...restInitialDashboardInput } = initialDashboardInput;
-      return {
-        ...restInitialDashboardInput,
-        time_range: timeRange,
-      };
-    },
-  };
-};
 
 const dashboardCanvasContentStyles = {
   root: css({
@@ -126,7 +66,6 @@ export const DashboardCanvasContent = ({
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
-  const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
@@ -159,19 +98,18 @@ export const DashboardCanvasContent = ({
   //   },
   //   [linkedSavedObjectId, doesSavedDashboardExist]
   // );
-  const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
+  const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
-    initialDashboardInput.timeRange
+    dashboardState.time_range ?? DEFAULT_TIME_RANGE
   );
 
   const getCreationOptions = useCallback(
     () =>
-      getDashboardRendererCreationOptions({
-        savedObjectId: data.savedObjectId,
-        initialDashboardInput,
+      Promise.resolve({
+        getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
       }),
-    [data.savedObjectId, initialDashboardInput]
+    [dashboardState]
   );
 
   useRegisterActionButtons({
@@ -179,7 +117,7 @@ export const DashboardCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     timeRange,
-    initialDashboardInput,
+    dashboardState,
     linkedSavedObjectId,
     doesSavedDashboardExist,
   });
