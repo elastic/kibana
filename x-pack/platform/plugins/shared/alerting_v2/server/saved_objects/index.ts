@@ -21,7 +21,7 @@ import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attr
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
 export const NOTIFICATION_POLICY_SAVED_OBJECT_TYPE = 'alerting_notification_policy';
-export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_v2_api_key_pending_invalidation';
+export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
 
 export const NotificationPolicyAttributesToEncrypt = ['auth.apiKey'];
 

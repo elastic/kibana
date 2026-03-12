@@ -182,7 +182,7 @@ export class NotificationPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      // If update fails we mark the new API key for invalidation
+      // If update fails we explicitly mark the new API key for invalidation
       this._markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
@@ -192,7 +192,7 @@ export class NotificationPolicyClient {
       throw e;
     }
 
-    this._markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser ?? true);
+    this._markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
 
     return {
       id: params.options.id,
@@ -226,10 +226,10 @@ export class NotificationPolicyClient {
     await this.getNotificationPolicy({ id });
     const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
-    this._markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser ?? true);
+    this._markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
   }
 
-  private _markApiKeysForInvalidation(apiKey: string | undefined, createdByUser: boolean): void {
+  private _markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
     if (!apiKey || createdByUser) {
       return;
     }
@@ -257,7 +257,7 @@ export class NotificationPolicyClient {
       if (!auth?.apiKey) return null;
       return {
         apiKey: auth.apiKey,
-        createdByUser: auth.createdByUser ?? true,
+        createdByUser: auth.createdByUser,
       };
     } catch {
       return null;
