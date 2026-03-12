@@ -222,4 +222,8 @@ export class LensApp {
   getCancelFlyoutButton() {
     return this.page.getByTestId('cancelFlyoutButton');
   }
+
+  getEditInLensButton() {
+    return this.page.getByTestId('navigateToLensEditorLink');
+  }
 }

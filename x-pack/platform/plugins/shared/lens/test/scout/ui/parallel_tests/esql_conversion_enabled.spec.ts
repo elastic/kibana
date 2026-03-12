@@ -9,6 +9,7 @@ import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
+
 spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await apiServices.core.settings({
@@ -55,6 +56,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       await lens.getConvertToEsqModalConfirmButton().click();
 
       await expect(modal).toBeHidden();
+      await expect(lens.getEditInLensButton()).toBeHidden();
 
       await lens.getApplyFlyoutButton().click();
 
