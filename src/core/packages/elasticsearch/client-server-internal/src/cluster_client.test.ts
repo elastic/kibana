@@ -320,7 +320,7 @@ describe('ClusterClient', () => {
     });
 
     describe('CPS routing', () => {
-      it("injects the space NPRE when projectRouting is 'space'", () => {
+      it("injects the space NPRE when projectRouting is 'space-npre'", () => {
         // asScoped().asCurrentUser goes through createTransport, so capture onRequest from there.
         const onRequest = captureTransportOnRequest();
 
@@ -335,7 +335,7 @@ describe('ClusterClient', () => {
         });
 
         const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
+        client = clusterClient.asScoped(request, { projectRouting: 'space-npre' }).asCurrentUser;
 
         const params = makeSearchParams();
         onRequest.get()({} as never, params, {}, logger);
@@ -1434,10 +1434,12 @@ describe('ClusterClient', () => {
           onRequestHandlerFactory: mockOnRequestHandlerFactory,
         });
 
-        // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
+        // Even when the scoped client is created with 'space-npre' routing, asSecondaryAuthUser
         // is always a child of asInternalUser, which uses origin-only routing.
         const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asSecondaryAuthUser;
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'space-npre',
+        }).asSecondaryAuthUser;
 
         // No Transport override means the child inherits asInternalUser's origin-only Transport.
         expect(internalClient.child).toHaveBeenCalledWith(

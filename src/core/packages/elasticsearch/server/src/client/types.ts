@@ -19,7 +19,7 @@ export interface FakeRequest {
 }
 
 /**
- * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
+ * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space-npre'`) in
  * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
  * {@link KibanaRequest} is available. The space is derived from the URL pathname
  * (e.g. `/s/<spaceId>/...`).
@@ -43,7 +43,7 @@ export interface UrlRequest extends FakeRequest {
 export type ScopeableRequest = KibanaRequest | FakeRequest;
 
 /**
- * A request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.
+ * A request that carries a URL, accepted by `asScoped` when `projectRouting: 'space-npre'` is used.
  *
  * Covers both {@link KibanaRequest} (the typical caller from route handlers, whose URL is set by
  * the HTTP layer) and {@link UrlRequest} (a lightweight synthetic alternative for programmatic

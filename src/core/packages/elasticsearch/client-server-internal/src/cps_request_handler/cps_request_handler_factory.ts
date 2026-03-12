@@ -29,7 +29,7 @@ export function getRequestHandlerFactory(cpsEnabled: boolean): OnRequestHandlerF
         return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, opts.logger);
       case 'all':
         return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ALL, opts.logger);
-      case 'space':
+      case 'space-npre':
         return getCpsRequestHandler(cpsEnabled, getSpaceNPRE(opts.request), opts.logger);
       case 'request-header': {
         const raw = opts.request.headers[KBN_PROJECT_ROUTING_HEADER];

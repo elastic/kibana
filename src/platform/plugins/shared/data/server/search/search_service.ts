@@ -14,7 +14,6 @@ import moment from 'moment';
 import type {
   CoreSetup,
   CoreStart,
-  IClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -292,11 +291,7 @@ export class SearchService {
       asScoped: this.asScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest, opts?: AsScopedOptions) => {
-          const esClient = this.createScopedEsClient({
-            client: elasticsearch.client,
-            request,
-            opts,
-          });
+          const esClient = elasticsearch.client.asScoped(request, opts);
 
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
@@ -546,7 +541,7 @@ export class SearchService {
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
+        esClient: elasticsearch.client.asScoped(request, opts),
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
@@ -575,23 +570,5 @@ export class SearchService {
         getSessionStatus: searchSessionsClient.status,
       };
     };
-  };
-
-  private createScopedEsClient = ({
-    client,
-    request,
-    opts,
-  }: {
-    client: IClusterClient;
-    request: KibanaRequest;
-    opts?: AsScopedOptions;
-  }) => {
-    return opts?.projectRouting === 'space'
-      ? client.asScoped(request, { projectRouting: 'space' })
-      : opts?.projectRouting === 'all'
-      ? client.asScoped(request, { projectRouting: 'all' })
-      : opts?.projectRouting === 'origin-only'
-      ? client.asScoped(request, { projectRouting: 'origin-only' })
-      : client.asScoped(request);
   };
 }

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from './client';
 import type { ScopeableRequest, ScopeableUrlRequest } from './types';
 import type { IScopedClusterClient } from './scoped_cluster_client';
@@ -30,7 +31,7 @@ export interface AsScopedOptions {
    * - `'origin-only'`: Requests are routed exclusively to the "origin" Elasticsearch instance
    *   (i.e., the project that Kibana is directly connected to). Use this for administrative or
    *   internal operations that must not fan out across other projects.
-   * - `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured for
+   * - `'space-npre'`: Requests are routed to the Named Project Routing Expression (NPRE) configured for
    *   the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`
    *   so that the space can be extracted from the URL pathname. Use this when the scope of the
    *   query should match the data boundaries of the active space.
@@ -47,7 +48,7 @@ export interface AsScopedOptions {
    * stripped from requests to avoid Elasticsearch rejections and to preserve traditional
    * single-cluster routing behavior.
    */
-  projectRouting: 'origin-only' | 'space' | 'all' | 'request-header';
+  projectRouting: 'origin-only' | 'space-npre' | 'all' | 'request-header';
 }
 
 /**
@@ -66,7 +67,7 @@ export interface OriginOnlyRouting extends AsScopedOptions {
  * @public
  */
 export interface SpaceNPRERouting extends AsScopedOptions {
-  projectRouting: 'space';
+  projectRouting: 'space-npre';
 }
 
 /**
@@ -118,7 +119,7 @@ export interface IClusterClient {
    * @param request - A {@link ScopeableUrlRequest} whose URL is used to extract the active space
    *   for space-level CPS routing. Accepts both a real {@link KibanaRequest} (the typical caller
    *   from route handlers) and a synthetic {@link UrlRequest}.
-   * @param opts - {@link SpaceNPRERouting} options with `projectRouting` set to `'space'`.
+   * @param opts - {@link SpaceNPRERouting} options with `projectRouting` set to `'space-npre'`.
    */
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
   /**
@@ -151,6 +152,19 @@ export interface IClusterClient {
     request: ScopeableRequest,
     opts?: OriginOnlyRouting | AllProjectsRouting
   ): IScopedClusterClient;
+  /**
+   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
+   * forwarding the request's authentication headers to Elasticsearch.
+   *
+   * In CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`
+   * is injected into outgoing requests. See {@link AsScopedOptions} for details.
+   *
+   * @param request - The incoming {@link KibanaRequest | request} whose credentials are used
+   *   to authenticate Elasticsearch calls.
+   * @param opts - Optional {@link AsScopedOptions | options} to configure CPS routing behavior.
+   *   Defaults to `'origin-only'` when not specified.
+   */
+  asScoped(request: KibanaRequest, opts?: AsScopedOptions): IScopedClusterClient;
 }
 
 /**

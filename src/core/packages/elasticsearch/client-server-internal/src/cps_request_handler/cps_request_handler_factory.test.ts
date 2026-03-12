@@ -79,11 +79,11 @@ describe('getRequestHandlerFactory', () => {
     });
   });
 
-  describe("projectRouting: 'space'", () => {
+  describe("projectRouting: 'space-npre'", () => {
     it('injects the space NPRE derived from a KibanaRequest', () => {
       const factory = getRequestHandlerFactory(true);
       const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-      const handler = factory({ projectRouting: 'space', request, logger: mockLogger });
+      const handler = factory({ projectRouting: 'space-npre', request, logger: mockLogger });
       const params = makeSearchParams();
 
       handler({ scoped: true }, params, {}, mockLogger);

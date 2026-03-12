@@ -53,17 +53,18 @@ const noop = () => undefined;
  * Each variant carries exactly the data needed for that routing mode.
  * @internal
  */
-export type FactoryRoutingOpts =
+export type FactoryRoutingOpts = { logger: Logger } & (
   | { projectRouting: 'origin-only' }
   | { projectRouting: 'all' }
-  | { projectRouting: 'space'; request: ScopeableUrlRequest }
-  | { projectRouting: 'request-header'; request: ScopeableRequest };
+  | { projectRouting: 'space-npre'; request: ScopeableUrlRequest }
+  | { projectRouting: 'request-header'; request: ScopeableRequest }
+);
 
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts & { logger: Logger }) => OnRequestHandler;
+export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -146,21 +147,24 @@ export class ClusterClient implements ICustomClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
       const { projectRouting } = opts;
-
       let factoryOpts: FactoryRoutingOpts;
-      if (projectRouting === 'space') {
-        factoryOpts = { projectRouting: 'space', request: request as ScopeableUrlRequest };
+      if (projectRouting === 'space-npre') {
+        factoryOpts = {
+          projectRouting: 'space-npre',
+          request: request as ScopeableUrlRequest,
+          logger: this.logger,
+        };
       } else if (projectRouting === 'request-header') {
-        factoryOpts = { projectRouting: 'request-header', request };
+        factoryOpts = { projectRouting: 'request-header', request, logger: this.logger };
       } else {
-        factoryOpts = { projectRouting };
+        factoryOpts = { projectRouting, logger: this.logger };
       }
 
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory({ ...factoryOpts, logger: this.logger }),
+        onRequest: this.onRequestHandlerFactory(factoryOpts),
         logger: this.logger,
       });
 
