@@ -7,8 +7,9 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { ModelFamily, ModelProvider, type Model } from '@kbn/inference-common';
+import type { Model } from '@kbn/inference-common';
 import { buildRunFilterQuery, buildStatsAggregation, SCORES_SORT_ORDER } from '@kbn/evals-common';
+import { getEvalDoc } from '../evaluations_export/eval_doc';
 
 interface BulkDroppedDocument<TDocument> {
   status?: number;
@@ -189,69 +190,33 @@ const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
-  private getLatestBackingIndexNameFromMappings(
-    mappingsByIndex: Record<string, any>
-  ): string | null {
-    const indexNames = Object.keys(mappingsByIndex ?? {});
-    if (indexNames.length === 0) return null;
+  private getErrorStatusCode(error: unknown): number | undefined {
+    if (typeof error !== 'object' || error === null) {
+      return undefined;
+    }
 
-    // Data stream backing indices are typically `.ds-<ds>-YYYY.MM.DD-000001`.
-    // Lexicographic order reliably places the latest generation last.
-    indexNames.sort();
-    return indexNames[indexNames.length - 1];
+    const asRecord = error as Record<string, unknown>;
+    const direct = asRecord.statusCode;
+    if (typeof direct === 'number') {
+      return direct;
+    }
+
+    const meta = asRecord.meta;
+    if (typeof meta !== 'object' || meta === null) {
+      return undefined;
+    }
+
+    const metaRecord = meta as Record<string, unknown>;
+    const metaStatusCode = metaRecord.statusCode;
+    if (typeof metaStatusCode === 'number') {
+      return metaStatusCode;
+    }
+
+    return undefined;
   }
 
   private isExportingToExternalCluster(): boolean {
     return Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
-  }
-
-  private async assertLatestBackingIndexCompatible(): Promise<void> {
-    let mappingResponse: any;
-    try {
-      // Use the backing index mapping (not index template APIs) so a writer-only key can validate
-      // compatibility with only `view_index_metadata` on `kibana-evaluations*`.
-      mappingResponse = await this.esClient.indices.getMapping({
-        index: EVALUATIONS_DATA_STREAM_ALIAS,
-      });
-    } catch (error: any) {
-      if (error?.statusCode === 404) {
-        throw new Error(
-          `Elasticsearch data stream ${EVALUATIONS_DATA_STREAM_ALIAS} does not exist. ` +
-            `Ensure the data stream and index template (${EVALUATIONS_DATA_STREAM_TEMPLATE}) exist before exporting results.`
-        );
-      }
-      throw error;
-    }
-
-    const latestIndex = this.getLatestBackingIndexNameFromMappings(mappingResponse);
-    if (!latestIndex) {
-      throw new Error(
-        `Unable to determine backing index mapping for data stream ${EVALUATIONS_DATA_STREAM_ALIAS}.`
-      );
-    }
-
-    const mappings = mappingResponse?.[latestIndex]?.mappings;
-    const properties = mappings?.properties;
-
-    const exampleInputEnabled = properties?.example?.properties?.input?.enabled;
-    const taskOutputEnabled = properties?.task?.properties?.output?.enabled;
-    const evaluatorMetadataType = properties?.evaluator?.properties?.metadata?.type;
-
-    const ok =
-      exampleInputEnabled === false &&
-      taskOutputEnabled === false &&
-      evaluatorMetadataType === 'flattened';
-
-    if (!ok) {
-      throw new Error(
-        `Latest backing index ${latestIndex} for ${EVALUATIONS_DATA_STREAM_ALIAS} is incompatible with @kbn/evals. ` +
-          `Expected example.input.enabled=false, task.output.enabled=false, evaluator.metadata.type=flattened. ` +
-          `Got example.input.enabled=${String(exampleInputEnabled)}, task.output.enabled=${String(
-            taskOutputEnabled
-          )}, evaluator.metadata.type=${String(evaluatorMetadataType)}. ` +
-          `This usually means the golden cluster template is stale or the data stream was not rolled over after a schema change.`
-      );
-    }
   }
 
   private async ensureIndexTemplate(): Promise<void> {
@@ -371,12 +336,15 @@ export class EvaluationScoreRepository {
         .catch(() => false);
 
       if (!templateExists) {
-        await this.esClient.indices.putIndexTemplate({
+        const request: Parameters<EsClient['indices']['putIndexTemplate']>[0] = {
           name: EVALUATIONS_DATA_STREAM_TEMPLATE,
           index_patterns: templateBody.index_patterns,
           data_stream: templateBody.data_stream,
-          template: templateBody.template as any,
-        });
+          template: templateBody.template as unknown as Parameters<
+            EsClient['indices']['putIndexTemplate']
+          >[0]['template'],
+        };
+        await this.esClient.indices.putIndexTemplate(request);
 
         this.log.debug('Created Elasticsearch index template for evaluation scores');
       }
@@ -395,8 +363,8 @@ export class EvaluationScoreRepository {
       await this.esClient.indices.getDataStream({
         name: EVALUATIONS_DATA_STREAM_ALIAS,
       });
-    } catch (error: any) {
-      if (error?.statusCode === 404) {
+    } catch (error: unknown) {
+      if (this.getErrorStatusCode(error) === 404) {
         await this.esClient.indices.createDataStream({
           name: EVALUATIONS_DATA_STREAM_ALIAS,
         });
@@ -417,16 +385,13 @@ export class EvaluationScoreRepository {
    * Validates that exporting to the evaluations datastream is possible *before* the evaluation
    * suite spends time on inference.
    *
-   * For external (golden) clusters, this check is deliberately non-invasive:
-   * - Validates the data stream exists and has compatible mappings
-   * - Performs a small sentinel write (and best-effort cleanup) to validate write compatibility
+   * This is intentionally behavioral (a real write) rather than mapping-based. Mapping checks tend
+   * to become brittle as the schema evolves; a representative write will fail for the reasons we
+   * actually care about (missing data stream/template, auth/privilege issues, mapper errors, etc).
    */
   async preflightExport(_runId: string): Promise<void> {
     // For local (Scout) clusters, keep bootstrapping behavior unchanged.
     await this.prepareLocalExportTarget();
-
-    // For external clusters, do not attempt to create/update templates or create the data stream.
-    await this.assertLatestBackingIndexCompatible();
 
     const suiteId = process.env.EVAL_SUITE_ID ?? 'unknown-suite';
     const buildId = process.env.BUILDKITE_BUILD_ID ?? 'local';
@@ -439,69 +404,23 @@ export class EvaluationScoreRepository {
     // Create conflicts (409) are treated as success.
     const sentinelId = ['preflight', buildId, jobId, suiteId].join('-');
 
-    const sentinelDoc: EvaluationScoreDocument = {
-      '@timestamp': new Date().toISOString(),
-      run_id: preflightRunId,
-      experiment_id: 'preflight',
-      suite: { id: suiteId },
-      ci: {
-        buildkite: {
-          build_id: process.env.BUILDKITE_BUILD_ID,
-          job_id: process.env.BUILDKITE_JOB_ID,
-          build_url: process.env.BUILDKITE_BUILD_URL,
-          pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
-          pull_request:
-            process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
-              ? process.env.BUILDKITE_PULL_REQUEST
-              : undefined,
-          branch: process.env.BUILDKITE_BRANCH,
-          commit: process.env.BUILDKITE_COMMIT,
-        },
-      },
-      example: {
-        id: 'preflight',
-        index: 0,
-        input: {
-          // Keep small + stable; when mappings are correct, this is ignored by ES (enabled:false).
-          kind: 'preflight',
-        },
-        dataset: {
-          id: 'preflight',
-          name: 'preflight',
-        },
-      },
-      task: {
-        trace_id: null,
-        repetition_index: 0,
-        output: {
-          kind: 'preflight',
-        },
-        model: {
-          id: 'kbn-evals-preflight',
-          family: ModelFamily.GPT,
-          provider: ModelProvider.OpenAI,
-        },
-      },
-      evaluator: {
-        name: 'preflight',
-        score: 0,
-        label: 'ok',
-        explanation: null,
-        metadata: { preflight: true },
-        trace_id: null,
-        model: {
-          id: 'kbn-evals-preflight',
-          family: ModelFamily.GPT,
-          provider: ModelProvider.OpenAI,
-        },
-      },
-      run_metadata: {
-        git_branch: null,
-        git_commit_sha: null,
-        total_repetitions: 1,
-      },
-      environment: {
-        hostname: 'preflight',
+    const sentinelDoc = getEvalDoc();
+    sentinelDoc['@timestamp'] = new Date().toISOString();
+    sentinelDoc.run_id = preflightRunId;
+    sentinelDoc.experiment_id = 'preflight';
+    sentinelDoc.suite = { id: suiteId };
+    sentinelDoc.ci = {
+      buildkite: {
+        build_id: process.env.BUILDKITE_BUILD_ID,
+        job_id: process.env.BUILDKITE_JOB_ID,
+        build_url: process.env.BUILDKITE_BUILD_URL,
+        pipeline_slug: process.env.BUILDKITE_PIPELINE_SLUG,
+        pull_request:
+          process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
+            ? process.env.BUILDKITE_PULL_REQUEST
+            : undefined,
+        branch: process.env.BUILDKITE_BRANCH,
+        commit: process.env.BUILDKITE_COMMIT,
       },
     };
 
@@ -514,9 +433,9 @@ export class EvaluationScoreRepository {
         refresh: 'wait_for',
       });
       created = true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If the document already exists, preflight still succeeded.
-      if (error?.statusCode !== 409) {
+      if (this.getErrorStatusCode(error) !== 409) {
         throw error;
       }
     } finally {
@@ -528,12 +447,13 @@ export class EvaluationScoreRepository {
             id: sentinelId,
             refresh: 'wait_for',
           });
-        } catch (error: any) {
-          if (error?.statusCode === 403 || error?.statusCode === 404) {
+        } catch (error: unknown) {
+          const statusCode = this.getErrorStatusCode(error);
+          if (statusCode === 403 || statusCode === 404) {
             // Ignore: writer keys may not have delete privilege; 404 is also fine.
           } else {
             this.log.warning(`Failed to delete export preflight document: ${sentinelId}`);
-            this.log.debug(error);
+            this.log.debug(String(error));
           }
         }
       }

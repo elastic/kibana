@@ -121,18 +121,6 @@ describe('EvaluationScoreRepository', () => {
           ],
         }),
         createDataStream: jest.fn().mockResolvedValue({}),
-        getMapping: jest.fn().mockResolvedValue({
-          '.ds-kibana-evaluations-000001': {
-            mappings: {
-              _meta: { kbn_evals: { schema_version: 1 } },
-              properties: {
-                example: { properties: { input: { enabled: false } } },
-                task: { properties: { output: { enabled: false } } },
-                evaluator: { properties: { metadata: { type: 'flattened' } } },
-              },
-            },
-          },
-        }),
       },
       security: {
         hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }),
@@ -320,14 +308,13 @@ describe('EvaluationScoreRepository', () => {
   });
 
   describe('preflightExport', () => {
-    it('validates schema compatibility, backing index mapping, and privileges for external clusters', async () => {
+    it('performs a sentinel write (and best-effort cleanup) for external clusters', async () => {
       const prev = process.env.EVALUATIONS_ES_URL;
       process.env.EVALUATIONS_ES_URL = 'https://example.test';
       try {
         await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
 
         expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
-        expect(mockEsClient.indices.getMapping).toHaveBeenCalled();
         expect(mockEsClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
             index: 'kibana-evaluations',
