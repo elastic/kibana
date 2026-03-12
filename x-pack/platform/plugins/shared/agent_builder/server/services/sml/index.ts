@@ -17,6 +17,7 @@ export type {
   SmlSearchResult,
   SmlDocument,
   SmlCrawlerStateDocument,
+  SmlCrawler,
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from './types';
@@ -28,7 +29,6 @@ export {
 } from './sml_service';
 export { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 export { createSmlIndexer, type SmlIndexer } from './sml_indexer';
-export { createSmlCrawler, type SmlCrawler } from './sml_crawler';
 export {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,

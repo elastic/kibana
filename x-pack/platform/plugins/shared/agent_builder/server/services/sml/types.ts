@@ -6,7 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
@@ -169,9 +172,24 @@ export interface SmlIndexAttachmentParams {
 }
 
 /**
+ * The SML crawler enumerates registered SML types, compares the current state
+ * with what has been previously indexed, and queues create/update/delete actions
+ * to be processed by the indexer.
+ */
+export interface SmlCrawler {
+  crawl: (params: {
+    definition: SmlTypeDefinition;
+    esClient: ElasticsearchClient;
+    savedObjectsClient: ISavedObjectsRepository;
+  }) => Promise<void>;
+}
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
+  /** Get the crawler instance (for task manager integration) */
+  getCrawler: () => SmlCrawler;
   /** Search the SML index, filtering results by space and permissions */
   search: (params: {
     keywords: string[];

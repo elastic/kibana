@@ -13,7 +13,8 @@ import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-serve
 import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
-import { createSmlCrawler, type SmlCrawler } from './sml_crawler';
+import { SmlCrawlerImpl } from './sml_crawler';
+import type { SmlCrawler } from './types';
 import { smlIndexName } from './sml_storage';
 
 export interface SmlServiceSetup {
@@ -22,6 +23,8 @@ export interface SmlServiceSetup {
    * Should be called during plugin setup.
    */
   registerType: (definition: SmlTypeDefinition) => void;
+  /** Access the type registry (e.g. for task scheduling). */
+  getRegistry: () => SmlTypeRegistry;
 }
 
 export interface SmlServiceStartDeps {
@@ -32,9 +35,6 @@ export interface SmlServiceStartDeps {
 export interface SmlServiceInstance {
   setup: (deps: { logger: Logger }) => SmlServiceSetup;
   start: (deps: SmlServiceStartDeps) => SmlService;
-  getRegistry: () => SmlTypeRegistry;
-  getIndexer: () => SmlIndexer;
-  getCrawler: () => SmlCrawler;
 }
 
 export const createSmlService = (): SmlServiceInstance => {
@@ -57,6 +57,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         this.registry.register(definition);
         logger.info(`Registered SML type: ${definition.id}`);
       },
+      getRegistry: () => this.registry,
     };
   }
 
@@ -68,12 +69,15 @@ class SmlServiceImpl implements SmlServiceInstance {
       );
     }
     this.indexer = createSmlIndexer({ registry: this.registry, logger: logger.get('indexer') });
-    this.crawler = createSmlCrawler({
+    this.crawler = new SmlCrawlerImpl({
       indexer: this.indexer,
       logger: logger.get('crawler'),
     });
 
+    const crawler = this.crawler;
+
     return {
+      getCrawler: () => crawler,
       search: async ({ keywords, size = 10, spaceId, esClient, request }) => {
         const rawResults = await searchSml({ keywords, size, spaceId, esClient, logger });
         return filterResultsByPermissions({
@@ -108,22 +112,11 @@ class SmlServiceImpl implements SmlServiceInstance {
     };
   }
 
-  getRegistry(): SmlTypeRegistry {
-    return this.registry;
-  }
-
-  getIndexer(): SmlIndexer {
+  private getIndexer(): SmlIndexer {
     if (!this.indexer) {
       throw new Error('SML indexer not initialized — call start() first');
     }
     return this.indexer;
-  }
-
-  getCrawler(): SmlCrawler {
-    if (!this.crawler) {
-      throw new Error('SML crawler not initialized — call start() first');
-    }
-    return this.crawler;
   }
 }
 
@@ -229,7 +222,6 @@ const checkItemsAccess = async ({
   const accessMap = new Map<string, boolean>();
 
   // When the security plugin is absent, grant access to all items.
-  // This follows the standard Kibana convention for open-access mode.
   if (!securityAuthz) {
     for (const item of items) {
       accessMap.set(item.id, true);

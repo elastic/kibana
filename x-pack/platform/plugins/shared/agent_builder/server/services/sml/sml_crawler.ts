@@ -9,7 +9,7 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition, SmlContext, SmlCrawlerStateDocument } from './types';
+import type { SmlTypeDefinition, SmlContext, SmlCrawlerStateDocument, SmlCrawler } from './types';
 import type { SmlIndexer } from './sml_indexer';
 import {
   createSmlCrawlerStateStorage,
@@ -17,34 +17,14 @@ import {
 } from './sml_crawler_state_storage';
 import { smlIndexName } from './sml_storage';
 
+export type { SmlCrawler };
+
 export interface SmlCrawlerDeps {
   indexer: SmlIndexer;
   logger: Logger;
 }
 
-/**
- * The SML crawler enumerates registered SML types, compares the current state
- * with what has been previously indexed, and queues create/update/delete actions
- * to be processed by the indexer.
- */
-export interface SmlCrawler {
-  /**
-   * Run the crawler for a specific attachment type.
-   * Fetches all items across all spaces in a single pass.
-   * This is called by the task manager scheduled task.
-   */
-  crawl: (params: {
-    definition: SmlTypeDefinition;
-    esClient: ElasticsearchClient;
-    savedObjectsClient: ISavedObjectsRepository;
-  }) => Promise<void>;
-}
-
-export const createSmlCrawler = ({ indexer, logger }: SmlCrawlerDeps): SmlCrawler => {
-  return new SmlCrawlerImpl({ indexer, logger });
-};
-
-class SmlCrawlerImpl implements SmlCrawler {
+export class SmlCrawlerImpl implements SmlCrawler {
   private readonly indexer: SmlIndexer;
   private readonly logger: Logger;
 

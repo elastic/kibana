@@ -102,14 +102,18 @@ export class AgentBuilderPlugin
     });
 
     // Register SML crawler task definition
+    const smlSetup = this.serviceManager.internalSetup!.sml;
     registerSmlCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
       getCrawlerDeps: async () => {
         const [coreStart] = await coreSetup.getStartServices();
-        const smlServiceInstance = this.serviceManager.getSmlServiceInstance();
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getCrawlerDeps called before service init');
+        }
         return {
-          crawler: smlServiceInstance.getCrawler(),
-          registry: smlServiceInstance.getRegistry(),
+          crawler: services.sml.getCrawler(),
+          registry: smlSetup.getRegistry(),
           elasticsearch: coreStart.elasticsearch,
           savedObjects: coreStart.savedObjects,
           logger: this.logger.get('services').get('sml'),
@@ -234,10 +238,9 @@ export class AgentBuilderPlugin
     });
 
     // Schedule SML crawler tasks for all registered types
-    const smlServiceInstance = this.serviceManager.getSmlServiceInstance();
     scheduleSmlCrawlerTasks({
       taskManager,
-      registry: smlServiceInstance.getRegistry(),
+      registry: this.serviceManager.internalSetup!.sml.getRegistry(),
       logger: this.logger.get('services').get('sml'),
     }).catch((error) => {
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);

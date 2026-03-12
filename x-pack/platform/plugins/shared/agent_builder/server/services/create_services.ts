@@ -47,17 +47,6 @@ export class ServiceManager {
     this.config = config;
   }
 
-  /**
-   * Provides access to the SML service instance for task registration
-   * and crawler scheduling.
-   */
-  getSmlServiceInstance(): SmlServiceInstance {
-    if (!this.services?.sml) {
-      throw new Error('SML service not available — call setupServices first');
-    }
-    return this.services.sml;
-  }
-
   setupServices({
     logger,
     workflowsManagement,
