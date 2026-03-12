@@ -30,12 +30,15 @@ const getSmlService = jest.fn(() => ({
   getCrawler: jest.fn(),
 }));
 
+const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
+
 const mockContext = {
   spaceId: 'default',
   esClient: { asCurrentUser: {} },
   request: {},
   savedObjectsClient: {},
   attachments: { add: mockAttachmentsAdd },
+  logger: mockLogger,
 };
 
 const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
