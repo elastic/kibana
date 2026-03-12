@@ -7,11 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import {
-  findSimilarCasesStepCommonDefinition,
-  type FindSimilarCasesStepInput,
-  type FindSimilarCasesStepOutput,
-} from '../../../common/workflows/steps/find_similar_cases';
+import { findSimilarCasesStepCommonDefinition } from '../../../common/workflows/steps/find_similar_cases';
 import type { CasesClient } from '../../client';
 import { FIND_SIMILAR_CASES_FAILED_MESSAGE } from './translations';
 
@@ -21,7 +17,7 @@ export const findSimilarCasesStepDefinition = (
   createServerStepDefinition({
     ...findSimilarCasesStepCommonDefinition,
     handler: async (context) => {
-      const input = context.input as FindSimilarCasesStepInput;
+      const input = findSimilarCasesStepCommonDefinition.inputSchema.parse(context.input);
 
       try {
         const request = context.contextManager.getFakeRequest();
@@ -31,8 +27,7 @@ export const findSimilarCasesStepDefinition = (
           perPage: input.perPage,
         });
 
-        const output: FindSimilarCasesStepOutput =
-          findSimilarCasesStepCommonDefinition.outputSchema.parse(similarCases);
+        const output = findSimilarCasesStepCommonDefinition.outputSchema.parse(similarCases);
 
         return { output };
       } catch (_error) {

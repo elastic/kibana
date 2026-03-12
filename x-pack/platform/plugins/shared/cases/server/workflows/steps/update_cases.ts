@@ -7,10 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import {
-  updateCasesStepCommonDefinition,
-  type UpdateCasesStepInput,
-} from '../../../common/workflows/steps/update_cases';
+import { updateCasesStepCommonDefinition } from '../../../common/workflows/steps/update_cases';
 import { CasePatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../../client';
@@ -43,7 +40,7 @@ export const updateCasesStepDefinition = (
   createServerStepDefinition({
     ...updateCasesStepCommonDefinition,
     handler: async (context) => {
-      const input = context.input as UpdateCasesStepInput;
+      const input = updateCasesStepCommonDefinition.inputSchema.parse(context.input);
       const caseIds = input.cases.map(({ case_id: caseId }) => caseId);
 
       try {

@@ -10,7 +10,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   addAlertsStepCommonDefinition,
   type AddAlertsStepInput,
-  type AddAlertsStepOutput,
 } from '../../../common/workflows/steps/add_alerts';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
@@ -40,7 +39,7 @@ export const addAlertsStepDefinition = (
             })),
           });
 
-          return updatedCase as AddAlertsStepOutput['case'];
+          return addAlertsStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
         });
       },
       {

@@ -10,7 +10,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   addEventsStepCommonDefinition,
   type AddEventsStepInput,
-  type AddEventsStepOutput,
 } from '../../../common/workflows/steps/add_events';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
@@ -36,7 +35,7 @@ export const addEventsStepDefinition = (
             })),
           });
 
-          return updatedCase as AddEventsStepOutput['case'];
+          return addEventsStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
         });
       },
       {

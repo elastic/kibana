@@ -59,7 +59,7 @@ export const createCaseFromTemplateStepDefinition = (
       const mergedCreatePayload = getInitialCaseValue({
         owner: WORKFLOW_CASE_OWNER,
         ...(template.caseFields ?? {}),
-        ...(normalizedOverwrites as Partial<GetInitialCaseValueArgs>),
+        ...normalizedOverwrites,
       } as GetInitialCaseValueArgs);
 
       const createdCase = await casesClient.cases.create(mergedCreatePayload);

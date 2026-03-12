@@ -10,7 +10,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   getCaseStepCommonDefinition,
   type GetCaseStepInput,
-  type GetCaseStepOutput,
 } from '../../../common/workflows/steps/get_case';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler } from './utils';
@@ -26,6 +25,6 @@ export const getCaseStepDefinition = (
         includeComments: input.include_comments,
       });
 
-      return theCase as GetCaseStepOutput['case'];
+      return getCaseStepCommonDefinition.outputSchema.shape.case.parse(theCase);
     }),
   });

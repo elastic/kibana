@@ -10,7 +10,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   addCommentStepCommonDefinition,
   type AddCommentStepInput,
-  type AddCommentStepOutput,
 } from '../../../common/workflows/steps/add_comment';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
@@ -32,7 +31,7 @@ export const addCommentStepDefinition = (
           },
         });
 
-        return updatedCase as AddCommentStepOutput['case'];
+        return addCommentStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
       });
     }),
   });
