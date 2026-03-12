@@ -16,11 +16,13 @@ const STREAMS_COLLAPSE_ALL_BUTTON = subj('streamsCollapseAllButton');
 // mutate a scale parent directly under `logs.otel`.
 const WIRED_SCALE_PARENT_STREAM = 'logs.otel.perf_parent';
 const WIRED_CHILD_FIRST_NAME = `${WIRED_SCALE_PARENT_STREAM}.perf_child_0001`;
-const WIRED_CHILD_MIDDLE_NAME = `${WIRED_SCALE_PARENT_STREAM}.perf_child_0050`;
+const WIRED_CHILD_MIDDLE_NAME = `${WIRED_SCALE_PARENT_STREAM}.perf_child_0500`;
 const WIRED_CHILD_FIRST = subj(`streamsNameLink-${WIRED_CHILD_FIRST_NAME}`);
 const WIRED_CHILD_MIDDLE = subj(`streamsNameLink-${WIRED_CHILD_MIDDLE_NAME}`);
 const WIRED_HIERARCHY_COUNT = 1000;
 const WIRED_HIERARCHY_STRATEGY = 'import' as const;
+const DELETE_BATCH_CONCURRENCY = 10;
+const DELETE_COUNT = 200;
 
 interface PageEvaluateLike {
   evaluate<R, Arg>(pageFunction: (arg: Arg) => R | Promise<R>, arg: Arg): Promise<R>;
@@ -207,87 +209,111 @@ export const journey = new Journey({
       timeout: 120000,
     });
   })
-  .step('Delete 50 child streams via API', async ({ page }) => {
-    const deleteStart = 951;
-    const deleteEnd = 1000;
-    const streamsToDelete = Array.from({ length: deleteEnd - deleteStart + 1 }, (_, index) => {
-      const i = deleteStart + index;
-      return `${WIRED_SCALE_PARENT_STREAM}.perf_child_${String(i).padStart(4, '0')}`;
-    });
-    const verifyDeleted = streamsToDelete[streamsToDelete.length - 1];
+  .step(
+    `Delete ${DELETE_COUNT} child streams via API (batches of ${DELETE_BATCH_CONCURRENCY})`,
+    async ({ page }) => {
+      const deleteStart = WIRED_HIERARCHY_COUNT - DELETE_COUNT + 1;
+      const streamsToDelete = Array.from({ length: DELETE_COUNT }, (_, index) => {
+        const i = deleteStart + index;
+        return `${WIRED_SCALE_PARENT_STREAM}.perf_child_${String(i).padStart(4, '0')}`;
+      });
 
-    await page.evaluate(
-      async ({ streamNames, streamNameToVerify }) => {
-        const headers = {
-          'kbn-xsrf': 'streams-perf-test',
-          'x-elastic-internal-origin': 'kibana',
-          'elastic-api-version': '2023-10-31',
-        };
+      await page.evaluate(
+        async ({ streamNames, batchSize }) => {
+          const headers = {
+            'kbn-xsrf': 'streams-perf-test',
+            'x-elastic-internal-origin': 'kibana',
+            'elastic-api-version': '2023-10-31',
+          };
 
-        for (const name of streamNames) {
-          const res = await fetch(`/api/streams/${name}`, { method: 'DELETE', headers });
-          if (!res.ok && res.status !== 404) {
-            const text = await res.text();
-            throw new Error(`DELETE ${name} failed: ${res.status} ${text}`);
-          }
-        }
-
-        const verifyRes = await fetch(`/api/streams/${streamNameToVerify}`, {
-          method: 'GET',
-          headers,
-        });
-        if (verifyRes.status !== 404) {
-          const text = await verifyRes.text();
-          throw new Error(
-            `Expected ${streamNameToVerify} to be deleted (404), got ${verifyRes.status} ${text}`
+          const batches = Array.from(
+            { length: Math.ceil(streamNames.length / batchSize) },
+            (_, batchIndex) =>
+              streamNames.slice(batchIndex * batchSize, (batchIndex + 1) * batchSize)
           );
+
+          for (const [batchIndex, batch] of batches.entries()) {
+            const batchLabel = `Batch ${batchIndex + 1}/${batches.length}`;
+            const results = await Promise.allSettled(
+              batch.map((name) =>
+                fetch(`/api/streams/${name}`, {
+                  method: 'DELETE',
+                  headers,
+                }).then(async (res) => {
+                  if (!res.ok && res.status !== 404) {
+                    const text = await res.text();
+                    throw new Error(`DELETE ${name}: ${res.status} ${text}`);
+                  }
+                })
+              )
+            );
+
+            const failures = results.filter(
+              (r): r is PromiseRejectedResult => r.status === 'rejected'
+            );
+            if (failures.length > 0) {
+              const msgs = failures.map((f) => f.reason?.message ?? f.reason).join('; ');
+              throw new Error(`${batchLabel} delete failed: ${msgs}`);
+            }
+          }
+
+          const spotChecks = [
+            streamNames[0],
+            streamNames[Math.floor(streamNames.length / 2)],
+            streamNames[streamNames.length - 1],
+          ];
+          for (const name of spotChecks) {
+            const res = await fetch(`/api/streams/${name}`, {
+              method: 'GET',
+              headers,
+            });
+            if (res.status !== 404) {
+              const text = await res.text();
+              throw new Error(`Expected ${name} deleted (404), got ${res.status} ${text}`);
+            }
+          }
+        },
+        {
+          streamNames: streamsToDelete,
+          batchSize: DELETE_BATCH_CONCURRENCY,
         }
-      },
-      {
-        streamNames: streamsToDelete,
-        streamNameToVerify: verifyDeleted,
-      }
-    );
-  })
+      );
+    }
+  )
   .step('Verify deletion on listing page', async ({ page, kbnUrl, inputDelays }) => {
-    const deletedChildName = `${WIRED_SCALE_PARENT_STREAM}.perf_child_1000`;
+    const deletedIdx = String(WIRED_HIERARCHY_COUNT).padStart(4, '0');
+    const survivingIdx = String(WIRED_HIERARCHY_COUNT - DELETE_COUNT).padStart(4, '0');
+    const deletedChildName = `${WIRED_SCALE_PARENT_STREAM}.perf_child_${deletedIdx}`;
+    const survivingChildName = `${WIRED_SCALE_PARENT_STREAM}.perf_child_${survivingIdx}`;
+    const survivingChildSelector = subj(`streamsNameLink-${survivingChildName}`);
+    const deletedChildSelector = subj(`streamsNameLink-${deletedChildName}`);
+
     await page.goto(kbnUrl.get('/app/streams'));
     await page.waitForSelector(subj('streamsTable'), { timeout: 120000 });
 
-    const expandAllButton = page.locator(STREAMS_EXPAND_ALL_BUTTON).first();
-    const collapseAllButton = page.locator(STREAMS_COLLAPSE_ALL_BUTTON).first();
-
-    if (await expandAllButton.isVisible().catch(() => false)) {
-      await expandAllButton.click();
-    } else if (await collapseAllButton.isVisible().catch(() => false)) {
-      // Already expanded (or partially expanded). Re-expand to make the step deterministic.
-      await collapseAllButton.click();
-      await expandAllButton.waitFor({ state: 'visible', timeout: 60000 });
-      await expandAllButton.click();
-    } else {
-      // Fallback: expand only the relevant branch.
-      const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
-      if (await logsExpandButton.isVisible().catch(() => false)) {
-        await logsExpandButton.click();
-      }
-      const parentExpandButton = page.locator(subj(`expandButton-${WIRED_SCALE_PARENT_STREAM}`));
-      if (await parentExpandButton.isVisible().catch(() => false)) {
-        await parentExpandButton.click();
-      }
-    }
-
-    await page.waitForSelector(WIRED_CHILD_FIRST, { timeout: 60000 });
-
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
+
+    // First prove the UI can still find a surviving child after the deletion batch.
+    await searchBox.fill('');
+    await searchBox.type(survivingChildName, { delay: inputDelays.TYPING });
+    await page.waitForSelector(survivingChildSelector, { timeout: 60000 });
+
+    // Then search for a deleted child and wait for the UI to apply the new filter.
     await searchBox.fill('');
     await searchBox.type(deletedChildName, { delay: inputDelays.TYPING });
-    await page.waitForSelector(subj(`streamsNameLink-${deletedChildName}`), {
-      state: 'detached',
-      timeout: 60000,
-    });
+    await page.waitForFunction(
+      ({ inputSelector, expectedInputValue, selectorsThatMustBeAbsent }) => {
+        const input = document.querySelector<HTMLInputElement>(inputSelector);
+        if (!input || input.value !== expectedInputValue) return false;
 
-    await searchBox.fill('');
-    await searchBox.type(WIRED_CHILD_FIRST_NAME, { delay: inputDelays.TYPING });
-    await page.waitForSelector(WIRED_CHILD_FIRST, { timeout: 60000 });
+        return selectorsThatMustBeAbsent.every((selector) => !document.querySelector(selector));
+      },
+      {
+        inputSelector: STREAMS_SEARCH_SELECTOR,
+        expectedInputValue: deletedChildName,
+        selectorsThatMustBeAbsent: [survivingChildSelector, deletedChildSelector],
+      },
+      { timeout: 60000 }
+    );
   });
