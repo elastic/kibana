@@ -14,6 +14,8 @@ import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builde
 import { registerLensVisualizationsSearchAPIRoute } from './search';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 
+// We mock getLensResponseItem to avoid setting up a complex LensConfigBuilder
+// just to test the pagination logic for now, which doesn't rely on the actual data formatting.
 jest.mock('./utils', () => ({
   getLensResponseItem: jest.fn().mockImplementation((builder, item) => item),
 }));
@@ -96,6 +98,7 @@ describe('Lens API - Visualizations Search Route', () => {
       },
     });
 
+    // 3. The response meta contains the correct `per_page` value
     expect(responsePayload.body.meta.per_page).toBe(50);
   });
 });
