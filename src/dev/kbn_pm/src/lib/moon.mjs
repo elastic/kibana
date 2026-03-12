@@ -36,7 +36,7 @@ export async function moonRun(commandOrCommands, opts = {}) {
 
   const moonArgs = [];
   if (opts.noCache) {
-    moonArgs.push('-u');
+    moonArgs.push('--force');
   }
   if (opts.noActions) {
     moonArgs.push('--no-actions');
@@ -55,6 +55,13 @@ export async function moonRun(commandOrCommands, opts = {}) {
   opts.filter = combinePredicates(
     ...[opts.filter, excludeShallowCloneWarnings, excludeRemoteWarnings].filter(Boolean)
   );
+
+  if (opts.noCache) {
+    opts.env = {
+      ...opts.env,
+      MOON_CACHE: 'off',
+    };
+  }
 
   return run(moonExec, args, opts);
 }
