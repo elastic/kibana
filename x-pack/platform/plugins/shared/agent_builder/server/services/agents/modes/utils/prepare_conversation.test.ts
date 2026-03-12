@@ -464,4 +464,143 @@ describe('prepareConversation', () => {
       expect(result.nextInput.message).toBe('Original message');
     });
   });
+
+  describe('anonymization target derivation', () => {
+    it('returns a single valid target from next input attachments', async () => {
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [
+            {
+              id: 'screen-context',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index',
+                  targetId: 'logs-*',
+                },
+              },
+            },
+          ],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toEqual({
+        targetType: 'index',
+        targetId: 'logs-*',
+      });
+      expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('dedupes duplicate targets and keeps a single target', async () => {
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [
+            {
+              id: 'a-1',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'data_view',
+                  targetId: 'security_data_view',
+                },
+              },
+            },
+            {
+              id: 'a-2',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'data_view',
+                  targetId: 'security_data_view',
+                },
+              },
+            },
+          ],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toEqual({
+        targetType: 'data_view',
+        targetId: 'security_data_view',
+      });
+      expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('falls back to global-only when multiple distinct targets are provided', async () => {
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [
+            {
+              id: 'a-1',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index',
+                  targetId: 'logs-*',
+                },
+              },
+            },
+            {
+              id: 'a-2',
+              type: 'screen_context',
+              data: {
+                anonymizationTarget: {
+                  targetType: 'index_pattern',
+                  targetId: 'alerts-*',
+                },
+              },
+            },
+          ],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toBeUndefined();
+      expect(mockContext.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('multiple_distinct_targets_detected=true')
+      );
+    });
+
+    it('ignores malformed targets and still returns one valid target', async () => {
+      const result = await prepareConversation({
+        previousRounds: [],
+        nextInput: {
+          message: 'Hello',
+          attachments: [
+            {
+              id: 'a-1',
+              type: 'screen_context',
+              data: {
+                targetType: 'not_a_valid_type',
+                targetId: 'ignored',
+              },
+            },
+            {
+              id: 'a-2',
+              type: 'screen_context',
+              data: {
+                targetType: 'index',
+                targetId: 'metrics-*',
+              },
+            },
+          ],
+        },
+        context: mockContext,
+      });
+
+      expect(result.anonymizationTarget).toEqual({
+        targetType: 'index',
+        targetId: 'metrics-*',
+      });
+      expect(mockContext.logger.warn).not.toHaveBeenCalled();
+    });
+  });
 });

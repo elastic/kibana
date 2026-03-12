@@ -23,12 +23,14 @@ export const createConversation$ = ({
   agentId,
   conversationClient,
   conversationId,
+  replacementsId,
   title$,
   roundCompletedEvents$,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
   conversationId?: string;
+  replacementsId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -41,6 +43,7 @@ export const createConversation$ = ({
         id: conversationId,
         title,
         agent_id: agentId,
+        replacementsId: roundCompletedEvent.data.replacements_id ?? replacementsId,
         state: roundCompletedEvent.data.conversation_state,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
@@ -85,6 +88,7 @@ export const updateConversation$ = ({
       return conversationClient.update({
         id: conversation.id,
         title,
+        replacementsId: roundCompletedEvent.data.replacements_id ?? conversation.replacementsId,
         rounds: updatedRound,
         state: conversation_state,
         ...(roundCompletedEvent.data.attachments !== undefined
@@ -141,8 +145,10 @@ export const getConversation = async ({
 
   // Case 2: Conversation ID specified and autoCreate is false - update existing
   if (!autoCreateConversationWithId) {
+    const conversation = await conversationClient.get(conversationId);
     return {
-      ...(await conversationClient.get(conversationId)),
+      ...conversation,
+      replacementsId: conversation.replacementsId ?? uuidv4(),
       operation: 'UPDATE',
     };
   }
@@ -150,8 +156,10 @@ export const getConversation = async ({
   // Case 3: Conversation ID specified and autoCreate is true - check if exists
   const exists = await conversationExists({ conversationId, conversationClient });
   if (exists) {
+    const conversation = await conversationClient.get(conversationId);
     return {
-      ...(await conversationClient.get(conversationId)),
+      ...conversation,
+      replacementsId: conversation.replacementsId ?? uuidv4(),
       operation: 'UPDATE',
     };
   } else {
@@ -175,6 +183,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     rounds: [],
     updated_at: new Date().toISOString(),
+    replacementsId: uuidv4(),
     created_at: new Date().toISOString(),
     user: {
       id: 'unknown',

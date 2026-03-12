@@ -46,6 +46,7 @@ import {
 } from './actions';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
+import { extractReplacementsId } from './replacements_id';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
@@ -86,6 +87,7 @@ export const convertGraphEvents = ({
         if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
+          const replacementsId = extractReplacementsId(chunk.additional_kwargs);
           if (textContent) {
             const events: ConvertedEvents[] = [];
             if (!isThinkingComplete) {
@@ -93,7 +95,7 @@ export const convertGraphEvents = ({
               events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
               isThinkingComplete = true;
             }
-            events.push(createTextChunkEvent(textContent, { messageId }));
+            events.push(createTextChunkEvent(textContent, { messageId, replacementsId }));
             return of(...events);
           }
         }
@@ -163,11 +165,13 @@ export const convertGraphEvents = ({
           if (isStructuredAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.data, {
               messageId,
+              replacementsId: lastAction.replacements_id,
             });
             events.push(messageEvent);
           } else if (isAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.message, {
               messageId,
+              replacementsId: lastAction.replacements_id,
             });
             events.push(messageEvent);
           }
