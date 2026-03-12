@@ -24,13 +24,14 @@ import {
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
   getRunCommand,
+  getTestTargetFromProcessArguments,
   parseStdout,
   stripFilePath,
 } from '../../../helpers';
@@ -62,6 +63,8 @@ export class ScoutFailedTestReporter implements Reporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
     this.command = getRunCommand();
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
