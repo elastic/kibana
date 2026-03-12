@@ -22,6 +22,7 @@ export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
 interface StreamQueryBase {
   id: string;
   title: string;
+  description?: string;
 }
 
 export interface StreamQuery extends StreamQueryBase {
@@ -29,18 +30,17 @@ export interface StreamQuery extends StreamQueryBase {
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
-  description?: string;
 }
 
 const streamQueryBaseSchema = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
+  description: z.string().optional(),
 }) satisfies z.Schema<StreamQueryBase>;
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
-  description: z.string().optional(),
   esql: esqlQuerySchema,
 });
 
