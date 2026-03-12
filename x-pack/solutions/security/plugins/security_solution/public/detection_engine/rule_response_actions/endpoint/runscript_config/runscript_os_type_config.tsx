@@ -186,7 +186,7 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
         gutterSize="m"
         alignItems="flexStart"
         justifyContent="spaceBetween"
-        data-test-subj={dataTestSubj}
+        data-test-subj={getTestId()}
       >
         {/* OS Column */}
         <EuiFlexItem grow={false}>
@@ -211,7 +211,6 @@ export const RunScriptOsTypeConfig = memo<RunScriptOsTypeConfigProps>(
             gutterSize="m"
             alignItems="flexStart"
             justifyContent="spaceBetween"
-            data-test-subj={dataTestSubj}
           >
             {/* Script Selector Column */}
             <EuiFlexItem grow={2} className="eui-textTruncate">
