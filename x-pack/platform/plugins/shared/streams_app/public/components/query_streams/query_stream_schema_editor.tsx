@@ -245,7 +245,7 @@ export const QueryStreamFieldDescriptionFlyout = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
-              <FieldType type={field.type ?? 'unknown'} />
+              <FieldType type={field.type ?? 'unmapped'} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="flexStart">

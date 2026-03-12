@@ -43,7 +43,7 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
     expect(screen.getByText('keyword')).toBeInTheDocument();
   });
 
-  it('shows edit button when not editing', () => {
+  it('shows text area with existing description', () => {
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
@@ -55,14 +55,23 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       </Wrapper>
     );
 
-    expect(screen.getByText('Edit description')).toBeInTheDocument();
+    const textarea = screen.getByTestId('streamsAppQueryStreamFieldDescriptionTextArea');
+    expect(textarea).toBeInTheDocument();
+    expect(textarea).toHaveValue('Initial description');
   });
 
-  it('shows text area when edit button is clicked', async () => {
+  it('shows empty text area when field has no description', () => {
+    const fieldWithoutDescription: SchemaEditorField = {
+      name: 'empty_field',
+      type: 'keyword',
+      parent: 'test-query-stream',
+      status: 'mapped',
+    };
+
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
-          field={mockField}
+          field={fieldWithoutDescription}
           onClose={jest.fn()}
           onSave={jest.fn()}
           isSaving={false}
@@ -70,9 +79,9 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       </Wrapper>
     );
 
-    await user.click(screen.getByText('Edit description'));
-
-    expect(screen.getByTestId('streamsAppQueryStreamFieldDescriptionTextArea')).toBeInTheDocument();
+    const textarea = screen.getByTestId('streamsAppQueryStreamFieldDescriptionTextArea');
+    expect(textarea).toBeInTheDocument();
+    expect(textarea).toHaveValue('');
   });
 
   it('calls onSave with updated description', async () => {
@@ -89,8 +98,6 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       </Wrapper>
     );
 
-    await user.click(screen.getByText('Edit description'));
-
     const textarea = screen.getByTestId('streamsAppQueryStreamFieldDescriptionTextArea');
     await user.clear(textarea);
     await user.type(textarea, 'New description');
@@ -105,7 +112,7 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
     );
   });
 
-  it('disables save button when no changes', async () => {
+  it('disables save button when no changes', () => {
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
@@ -117,14 +124,12 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
       </Wrapper>
     );
 
-    await user.click(screen.getByText('Edit description'));
-
     const saveButton = screen.getByTestId('streamsAppQueryStreamFieldSaveButton');
     expect(saveButton).toBeDisabled();
   });
 
-  it('displays field with undefined description', () => {
-    const fieldWithoutDescription: SchemaEditorField = {
+  it('displays field type correctly', () => {
+    const fieldWithLongType: SchemaEditorField = {
       name: 'no_desc_field',
       type: 'long',
       parent: 'test-query-stream',
@@ -134,7 +139,7 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
     render(
       <Wrapper>
         <QueryStreamFieldDescriptionFlyout
-          field={fieldWithoutDescription}
+          field={fieldWithLongType}
           onClose={jest.fn()}
           onSave={jest.fn()}
           isSaving={false}
@@ -143,7 +148,7 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
     );
 
     expect(screen.getByText('no_desc_field')).toBeInTheDocument();
-    expect(screen.getByText('-----')).toBeInTheDocument();
+    expect(screen.getByText('Number (long)')).toBeInTheDocument();
   });
 
   it('allows clearing description by saving empty string', async () => {
@@ -159,8 +164,6 @@ describe('QueryStreamFieldDescriptionFlyout', () => {
         />
       </Wrapper>
     );
-
-    await user.click(screen.getByText('Edit description'));
 
     const textarea = screen.getByTestId('streamsAppQueryStreamFieldDescriptionTextArea');
     await user.clear(textarea);
