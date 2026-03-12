@@ -19,7 +19,6 @@ import { anonymizeMessages } from './anonymization/anonymize_messages';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
-import { shouldLogAnonymizationDebug, stringifyForLogs } from './anonymization/debug_logging';
 import { isConflictError, isRetryableShardRecoveryError, withShardRecoveryRetry } from './utils';
 
 interface PrepareAnonymizationOptions {
@@ -57,21 +56,8 @@ export const prepareAnonymization = async ({
   system,
   messages,
 }: PrepareAnonymizationOptions) => {
-  const isAnonymizationDebugLoggingEnabled = shouldLogAnonymizationDebug();
   const salt = await saltPromise;
   const effectivePolicy = await resolveEffectivePolicy?.(metadata?.anonymization?.target);
-  if (isAnonymizationDebugLoggingEnabled) {
-    logger.debug(
-      `[inference.anonymization.prepare] metadata=${stringifyForLogs(
-        metadata?.anonymization,
-        4000
-      )} total_rules=${anonymizationRules.length} enabled_rules=${
-        anonymizationRules.filter((rule) => rule.enabled).length
-      } effective_policy_entries=${
-        Object.keys(effectivePolicy ?? {}).length
-      } carried_replacements_id=${metadata?.anonymization?.replacementsId ?? 'none'}`
-    );
-  }
   if (!usePersistentReplacements) {
     const anonymization = await anonymizeMessages({
       system,
@@ -143,13 +129,6 @@ export const prepareAnonymization = async ({
     anonymized: entity.mask,
     original: entity.value,
   }));
-  if (isAnonymizationDebugLoggingEnabled) {
-    logger.debug(
-      `[inference.anonymization.result] anonymizations=${
-        anonymization.anonymizations.length
-      } replacements=${replacements.length} generated_replacements_id=${replacementsId ?? 'none'}`
-    );
-  }
   const shouldPersistReplacements = Boolean(carriedReplacementsId || replacements.length);
 
   if (!shouldPersistReplacements) {
