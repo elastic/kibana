@@ -3832,6 +3832,49 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasTimeseriesInfoCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasTimeseriesInfoCommand",
+        "description": [
+          "\nDetermines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.\n"
+        ],
+        "signature": [
+          "(esql?: string | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "lineNumber": 622,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasTimeseriesInfoCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The ES|QL query string to analyze"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "lineNumber": 622,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.hasTransformationalCommand",
         "type": "Function",
         "tags": [],
