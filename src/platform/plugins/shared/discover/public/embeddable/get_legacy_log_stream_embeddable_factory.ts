@@ -11,6 +11,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { toStoredSort, toStoredColumns } from '../../common/embeddable/transform_utils';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import { LEGACY_LOG_STREAM_EMBEDDABLE } from './constants';
 
@@ -39,8 +40,8 @@ export const getLegacyLogStreamEmbeddableFactory = (
         title: initialState.title,
         description: initialState.description,
         timeRange: initialState.time_range,
-        sort: initialState.sort ?? [],
-        columns: initialState.columns ?? [],
+        sort: toStoredSort(initialState.sort),
+        columns: toStoredColumns(initialState.columns),
         searchSource,
         managed: false,
       };

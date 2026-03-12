@@ -280,6 +280,7 @@ export function toStoredSearchEmbeddableState(
     density,
   } = apiState;
   const grid = toStoredGrid(columns);
+  const hasGrid = grid && Object.keys(grid).length > 0;
   return {
     ...(sort && { sort: toStoredSort(sort) }),
     ...(columns && { columns: toStoredColumns(columns) }),
@@ -288,7 +289,7 @@ export function toStoredSearchEmbeddableState(
     ...(rowsPerPage && { rowsPerPage }),
     ...(headerRowHeight && { headerRowHeight: toStoredHeight(headerRowHeight) }),
     ...(density && { density }),
-    ...(grid && { grid }),
+    ...(hasGrid && { grid }),
   };
 }
 

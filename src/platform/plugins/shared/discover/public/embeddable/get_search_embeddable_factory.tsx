@@ -156,35 +156,22 @@ export const getSearchEmbeddableFactory = ({
         getComparators: () => {
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
           const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
+          const skipComparator = 'skip' as const;
 
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...searchEmbeddable.comparators,
+            // Panel override comparators use API-format keys (snake_case).
             // While the selected tab is missing or inline editing is in progress,
-            // skip tab-dependent comparators so unsaved-changes badges don't appear
-            // until the user explicitly applies a tab change.
-            ...(shouldSkipTabComparators
-              ? Object.fromEntries(
-                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
-                )
-              : {}),
-            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-            attributes: 'skip',
-            breakdownField: 'skip',
-            hideAggregatedPreview: 'skip',
-            hideChart: 'skip',
-            isTextBasedQuery: 'skip',
-            kibanaSavedObjectMeta: 'skip',
-            nonPersistedDisplayOptions: 'skip',
-            refreshInterval: 'skip',
-            savedObjectId: 'skip',
-            timeRestore: 'skip',
-            usesAdHocDataView: 'skip',
-            controlGroupJson: 'skip',
-            visContext: 'skip',
-            tabs: 'skip',
+            // skip these so unsaved-changes badges don't appear prematurely.
+            columns: shouldSkipTabComparators ? skipComparator : 'deepEquality',
+            sort: shouldSkipTabComparators ? skipComparator : 'deepEquality',
+            density: shouldSkipTabComparators ? skipComparator : 'referenceEquality',
+            header_row_height: shouldSkipTabComparators ? skipComparator : 'referenceEquality',
+            row_height: shouldSkipTabComparators ? skipComparator : 'referenceEquality',
+            rows_per_page: shouldSkipTabComparators ? skipComparator : 'referenceEquality',
+            sample_size: shouldSkipTabComparators ? skipComparator : 'referenceEquality',
           };
         },
         onReset: async (lastSaved) => {

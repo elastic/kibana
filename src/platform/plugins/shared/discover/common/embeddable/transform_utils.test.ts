@@ -367,7 +367,6 @@ describe('search embeddable transform utils', () => {
         title: 'My Search',
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
-        grid: {},
       });
     });
   });
@@ -658,8 +657,8 @@ describe('search embeddable transform utils', () => {
       expect(result).toEqual({
         sort: [['@timestamp', 'desc']],
         columns: ['message'],
-        grid: {},
       });
+      expect(result.grid).toBeUndefined();
       expect(result.rowHeight).toBeUndefined();
       expect(result.sampleSize).toBeUndefined();
       expect(result.rowsPerPage).toBeUndefined();
@@ -1184,6 +1183,502 @@ describe('search embeddable transform utils', () => {
         title: 'my-*',
         timeFieldName: '@timestamp',
       });
+    });
+  });
+
+  describe('full round-trip: stored → API → stored (by-value)', () => {
+    it('round-trips a by-value state with filters, query, columns, sort', () => {
+      const storedState: StoredSearchEmbeddableByValueState = {
+        title: 'My Panel',
+        description: 'Some description',
+        attributes: {
+          title: 'Session Title',
+          description: 'Session Description',
+          columns: ['message', '@timestamp', 'host'],
+          sort: [
+            ['@timestamp', 'desc'],
+            ['host', 'asc'],
+          ],
+          grid: { columns: { '@timestamp': { width: 200 }, host: { width: 120 } } },
+          hideChart: false,
+          isTextBasedQuery: false,
+          sampleSize: 1000,
+          rowsPerPage: 50,
+          rowHeight: -1,
+          headerRowHeight: 3,
+          density: DataGridDensity.NORMAL,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              index: 'data-view-1',
+              query: { language: 'kuery', query: 'host: "elastic.co"' },
+              filter: [
+                {
+                  meta: {
+                    disabled: false,
+                    negate: false,
+                    alias: null,
+                    key: 'status',
+                    field: 'status',
+                    type: 'phrase',
+                    params: { query: '200' },
+                    index: 'data-view-1',
+                  },
+                  query: { match_phrase: { status: '200' } },
+                  $state: { store: 'appState' },
+                },
+              ],
+            }),
+          },
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Main',
+              attributes: {
+                columns: ['message', '@timestamp', 'host'],
+                sort: [
+                  ['@timestamp', 'desc'],
+                  ['host', 'asc'],
+                ],
+                grid: { columns: { '@timestamp': { width: 200 }, host: { width: 120 } } },
+                hideChart: false,
+                isTextBasedQuery: false,
+                sampleSize: 1000,
+                rowsPerPage: 50,
+                rowHeight: -1,
+                headerRowHeight: 3,
+                density: DataGridDensity.NORMAL,
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    index: 'data-view-1',
+                    query: { language: 'kuery', query: 'host: "elastic.co"' },
+                    filter: [
+                      {
+                        meta: {
+                          disabled: false,
+                          negate: false,
+                          alias: null,
+                          key: 'status',
+                          field: 'status',
+                          type: 'phrase',
+                          params: { query: '200' },
+                          index: 'data-view-1',
+                        },
+                        query: { match_phrase: { status: '200' } },
+                        $state: { store: 'appState' },
+                      },
+                    ],
+                  }),
+                },
+              },
+            },
+          ],
+        },
+      };
+      const references: SavedObjectReference[] = [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'data-view-1',
+        },
+      ];
+
+      const apiState = byValueSavedSearchToDiscoverSessionEmbeddableState(storedState, references);
+
+      expect(apiState.title).toBe('My Panel');
+      expect(apiState.description).toBe('Some description');
+      expect(apiState.tabs).toHaveLength(1);
+      expect(apiState.tabs[0].columns).toEqual([
+        { name: 'message' },
+        { name: '@timestamp', width: 200 },
+        { name: 'host', width: 120 },
+      ]);
+      expect(apiState.tabs[0].sort).toEqual([
+        { name: '@timestamp', direction: 'desc' },
+        { name: 'host', direction: 'asc' },
+      ]);
+      expect('filters' in apiState.tabs[0] && apiState.tabs[0].filters).toHaveLength(1);
+      expect('filters' in apiState.tabs[0] && apiState.tabs[0].filters[0]).toMatchObject({
+        [ASCODE_FILTER_TYPE.CONDITION]: expect.objectContaining({
+          field: 'status',
+          operator: ASCODE_FILTER_OPERATOR.IS,
+          value: '200',
+        }),
+      });
+
+      const { state: backToStored, references: backRefs } =
+        byValueDiscoverSessionToSavedSearchEmbeddableState(apiState);
+
+      expect(backToStored.title).toBe('My Panel');
+      expect(backToStored.description).toBe('Some description');
+      expect(backToStored.attributes.tabs).toHaveLength(1);
+
+      const backTab = backToStored.attributes.tabs[0].attributes;
+      expect(backTab.columns).toEqual(['message', '@timestamp', 'host']);
+      expect(backTab.sort).toEqual([
+        ['@timestamp', 'desc'],
+        ['host', 'asc'],
+      ]);
+      expect(backTab.grid).toEqual({
+        columns: { '@timestamp': { width: 200 }, host: { width: 120 } },
+      });
+      expect(backTab.density).toBe(DataGridDensity.NORMAL);
+      expect(backTab.rowHeight).toBe(-1);
+      expect(backTab.headerRowHeight).toBe(3);
+
+      const backSearchSource = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON);
+      expect(backSearchSource.query).toEqual({
+        language: 'kuery',
+        query: 'host: "elastic.co"',
+      });
+      expect(backSearchSource.filter).toHaveLength(1);
+      expect(backSearchSource.filter[0].meta.type).toBe('phrase');
+      expect(backSearchSource.filter[0].meta.key).toBe('status');
+
+      expect(backRefs).toContainEqual({
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: 'data-view-1',
+      });
+    });
+  });
+
+  describe('full round-trip: stored → API → stored (by-reference with overrides)', () => {
+    it('round-trips by-reference state with panel overrides', () => {
+      const storedState: StoredSearchEmbeddableByReferenceState = {
+        title: 'Panel Override Title',
+        description: 'Override desc',
+        sort: [['message', 'asc']],
+        columns: ['message', 'host'],
+        grid: { columns: { message: { width: 300 } } },
+        rowHeight: 5,
+        sampleSize: 2000,
+        rowsPerPage: 25,
+        headerRowHeight: -1,
+        density: DataGridDensity.EXPANDED,
+      };
+      const references: SavedObjectReference[] = [
+        { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-abc' },
+      ];
+
+      const apiState = byReferenceSavedSearchToDiscoverSessionEmbeddableState(
+        storedState,
+        references
+      );
+
+      expect(apiState.discover_session_id).toBe('session-abc');
+      expect(apiState.title).toBe('Panel Override Title');
+      expect(apiState.sort).toEqual([{ name: 'message', direction: 'asc' }]);
+      expect(apiState.columns).toEqual([{ name: 'message', width: 300 }, { name: 'host' }]);
+      expect(apiState.row_height).toBe(5);
+      expect(apiState.sample_size).toBe(2000);
+      expect(apiState.rows_per_page).toBe(25);
+      expect(apiState.header_row_height).toBe('auto');
+      expect(apiState.density).toBe(DataGridDensity.EXPANDED);
+
+      const { state: backToStored, references: backRefs } =
+        byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState);
+
+      expect(backToStored.title).toBe('Panel Override Title');
+      expect(backToStored.description).toBe('Override desc');
+      expect(backToStored.sort).toEqual([['message', 'asc']]);
+      expect(backToStored.columns).toEqual(['message', 'host']);
+      expect(backToStored.grid).toEqual({ columns: { message: { width: 300 } } });
+      expect(backToStored.rowHeight).toBe(5);
+      expect(backToStored.sampleSize).toBe(2000);
+      expect(backToStored.rowsPerPage).toBe(25);
+      expect(backToStored.headerRowHeight).toBe(-1);
+      expect(backToStored.density).toBe(DataGridDensity.EXPANDED);
+
+      expect(backRefs).toContainEqual({
+        name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
+        type: SavedSearchType,
+        id: 'session-abc',
+      });
+    });
+  });
+
+  describe('filter round-trip integration: fromStoredTab / toStoredTab', () => {
+    const buildStoredTabWithFilter = (filter: Record<string, unknown>) => ({
+      sort: [['@timestamp', 'desc']],
+      columns: ['message'],
+      grid: {},
+      rowHeight: 3,
+      headerRowHeight: 3,
+      density: DataGridDensity.COMPACT,
+      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      hideChart: false,
+      isTextBasedQuery: false,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: JSON.stringify({
+          index: 'dv-1',
+          query: { language: 'kuery', query: '' },
+          filter: [filter],
+        }),
+      },
+    });
+
+    const refs: SavedObjectReference[] = [
+      { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
+    ];
+
+    it('round-trips a phrase (is) filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'status',
+          field: 'status',
+          type: 'phrase',
+          params: { query: '200' },
+          index: 'dv-1',
+        },
+        query: { match_phrase: { status: '200' } },
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toMatchObject({
+        [ASCODE_FILTER_TYPE.CONDITION]: expect.objectContaining({
+          field: 'status',
+          operator: ASCODE_FILTER_OPERATOR.IS,
+          value: '200',
+        }),
+      });
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('phrase');
+      expect(backFilter[0].meta.key).toBe('status');
+    });
+
+    it('round-trips a negated phrases (is_not_one_of) filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          disabled: false,
+          negate: true,
+          alias: null,
+          key: 'os',
+          field: 'os',
+          type: 'phrases',
+          params: ['ios', 'osx'],
+          index: 'dv-1',
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ match_phrase: { os: 'ios' } }, { match_phrase: { os: 'osx' } }],
+          },
+        },
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toMatchObject({
+        negate: true,
+        [ASCODE_FILTER_TYPE.CONDITION]: expect.objectContaining({
+          field: 'os',
+          operator: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
+          value: ['ios', 'osx'],
+        }),
+      });
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('phrases');
+      expect(backFilter[0].meta.negate).toBe(true);
+    });
+
+    it('round-trips an exists filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'url',
+          field: 'url',
+          type: 'exists',
+          index: 'dv-1',
+        },
+        query: { exists: { field: 'url' } },
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toMatchObject({
+        [ASCODE_FILTER_TYPE.CONDITION]: expect.objectContaining({
+          field: 'url',
+          operator: ASCODE_FILTER_OPERATOR.EXISTS,
+        }),
+      });
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('exists');
+    });
+
+    it('round-trips a range filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'bytes',
+          field: 'bytes',
+          type: 'range',
+          params: { gte: '500', lte: '1000' },
+          index: 'dv-1',
+        },
+        query: { range: { bytes: { gte: '500', lte: '1000' } } },
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toMatchObject({
+        [ASCODE_FILTER_TYPE.CONDITION]: expect.objectContaining({
+          field: 'bytes',
+          operator: ASCODE_FILTER_OPERATOR.RANGE,
+          value: expect.objectContaining({ gte: '500', lte: '1000' }),
+        }),
+      });
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('range');
+    });
+
+    it('round-trips a custom DSL filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+          type: 'custom',
+          index: 'dv-1',
+        },
+        query: { match: { agent: { query: 'Mozilla', fuzziness: 'AUTO' } } },
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toHaveProperty(ASCODE_FILTER_TYPE.DSL);
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('custom');
+    });
+
+    it('round-trips a combined (group) filter', () => {
+      const stored = buildStoredTabWithFilter({
+        meta: {
+          type: 'combined',
+          relation: 'AND',
+          disabled: false,
+          negate: false,
+          alias: null,
+          index: 'dv-1',
+          params: [
+            {
+              query: { match_phrase: { host: 'elastic.co' } },
+              meta: {
+                negate: false,
+                key: 'host',
+                field: 'host',
+                type: 'phrase',
+                params: { query: 'elastic.co' },
+                index: 'dv-1',
+                disabled: false,
+              },
+            },
+            {
+              meta: {
+                negate: false,
+                key: 'bytes',
+                field: 'bytes',
+                type: 'range',
+                params: { gte: '100' },
+                index: 'dv-1',
+                disabled: false,
+              },
+              query: { range: { bytes: { gte: '100' } } },
+            },
+          ],
+        },
+        query: {},
+        $state: { store: 'appState' },
+      });
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(1);
+      expect('filters' in apiTab && apiTab.filters[0]).toHaveProperty(ASCODE_FILTER_TYPE.GROUP);
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilter = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilter).toHaveLength(1);
+      expect(backFilter[0].meta.type).toBe('combined');
+      expect(backFilter[0].meta.relation).toBe('AND');
+      expect(backFilter[0].meta.params).toHaveLength(2);
+    });
+
+    it('round-trips multiple filters of different types', () => {
+      const stored = {
+        sort: [['@timestamp', 'desc']],
+        columns: ['message'],
+        grid: {},
+        rowHeight: 3,
+        headerRowHeight: 3,
+        density: DataGridDensity.COMPACT,
+        viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+        hideChart: false,
+        isTextBasedQuery: false,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            index: 'dv-1',
+            query: { language: 'kuery', query: '' },
+            filter: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  key: 'status',
+                  field: 'status',
+                  type: 'phrase',
+                  params: { query: '200' },
+                  index: 'dv-1',
+                },
+                query: { match_phrase: { status: '200' } },
+                $state: { store: 'appState' },
+              },
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  key: 'url',
+                  field: 'url',
+                  type: 'exists',
+                  index: 'dv-1',
+                },
+                query: { exists: { field: 'url' } },
+                $state: { store: 'appState' },
+              },
+            ],
+          }),
+        },
+      };
+
+      const apiTab = fromStoredTab(stored as unknown as Parameters<typeof fromStoredTab>[0], refs);
+      expect('filters' in apiTab && apiTab.filters).toHaveLength(2);
+
+      const { state: backTab } = toStoredTab(apiTab);
+      const backFilters = JSON.parse(backTab.kibanaSavedObjectMeta.searchSourceJSON).filter;
+      expect(backFilters).toHaveLength(2);
+      expect(backFilters[0].meta.type).toBe('phrase');
+      expect(backFilters[1].meta.type).toBe('exists');
     });
   });
 });

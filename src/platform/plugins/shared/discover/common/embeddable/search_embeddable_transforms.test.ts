@@ -130,11 +130,13 @@ describe('searchEmbeddableTransforms', () => {
         type: 'dataView',
         id: 'data-view-1',
       });
-      expect(result.columns).toEqual(result.tabs[0].columns);
-      expect(result.sort).toEqual(result.tabs[0].sort);
-      expect(result.density).toBe(DataGridDensity.COMPACT);
-      expect(result.header_row_height).toBe('auto');
-      expect(result.row_height).toBe('auto');
+      // Panel-level overrides are not set because the stored state
+      // has no top-level columns/sort/etc. — they live inside attributes only
+      expect(result.columns).toBeUndefined();
+      expect(result.sort).toBeUndefined();
+      expect(result.density).toBeUndefined();
+      expect(result.header_row_height).toBeUndefined();
+      expect(result.row_height).toBeUndefined();
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
 
@@ -253,51 +255,33 @@ describe('searchEmbeddableTransforms', () => {
         expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(apiState);
       });
 
-      it('includes attributes.references so data view ref is stored on dashboard (by-value Classic mode)', () => {
-        const dataViewRef = {
-          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          id: 'data-view-id-123',
-          type: 'index-pattern',
-        };
-        const serializedState: SearchEmbeddableByValueState = {
-          attributes: {
-            title: 'Test Search',
-            description: '',
-            columns: ['_source'],
-            sort: [],
-            grid: {},
-            hideChart: false,
-            isTextBasedQuery: false,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-            },
-            tabs: [
-              {
-                id: 'tab-1',
-                label: 'Tab 1',
-                attributes: {
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON:
-                      '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-                  },
-                  sort: [],
-                  columns: ['_source'],
-                  grid: {},
-                  hideChart: false,
-                  sampleSize: 100,
-                  isTextBasedQuery: false,
-                },
-              },
-            ],
-            references: [dataViewRef],
-          },
+      it('extracts data view reference from by-value API state into references array', () => {
+        const apiState: DiscoverSessionEmbeddableByValueState = {
           title: 'Panel Title',
+          tabs: [
+            {
+              columns: [{ name: '_source' }],
+              sort: [],
+              view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+              density: DataGridDensity.COMPACT,
+              header_row_height: 'auto',
+              row_height: 'auto',
+              query: { language: 'kuery', query: '' },
+              filters: [],
+              sample_size: 100,
+              dataset: { type: 'dataView', id: 'data-view-id-123' },
+            },
+          ],
         };
 
         const result =
-          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
-        expect(result.references).toContainEqual(dataViewRef);
+        expect(result.references).toContainEqual({
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          id: 'data-view-id-123',
+          type: 'index-pattern',
+        });
         expect((result.state as StoredSearchEmbeddableByValueState).attributes).not.toHaveProperty(
           'references'
         );
