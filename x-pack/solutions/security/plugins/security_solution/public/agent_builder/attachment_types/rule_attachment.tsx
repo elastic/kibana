@@ -40,7 +40,6 @@ const isOnRuleFormPage = (): boolean => {
 };
 
 const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
-  console.log('attachment', attachment);
   try {
     const parsed = JSON.parse(attachment.data.text);
     if (!parsed || !parsed.name) {
@@ -144,13 +143,6 @@ const RULE_TYPE_LABELS: Record<string, string> = {
   new_terms: 'New Terms',
 };
 
-const getCodeBlockLanguage = (rule: RuleResponse): string => {
-  const language = 'language' in rule ? (rule.language as string) : undefined;
-  if (language === 'esql') return 'esql';
-  if (language === 'eql') return 'eql';
-  return 'sql';
-};
-
 const getQueryHeading = (rule: RuleResponse): string => {
   const language = 'language' in rule ? (rule.language as string) : undefined;
   const languageLabel = language ? QUERY_LANGUAGE_LABELS[language] : undefined;
@@ -227,12 +219,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         <>
           <SectionHeading>{getQueryHeading(rule)}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiCodeBlock
-            language={getCodeBlockLanguage(rule)}
-            fontSize="s"
-            paddingSize="s"
-            overflowHeight={150}
-          >
+          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={150}>
             {query}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
@@ -312,7 +299,7 @@ export const createRuleAttachmentDefinition = ({
       {
         label: onRuleForm
           ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.buildRule', {
-              defaultMessage: 'Build rule',
+              defaultMessage: 'Update rule',
             })
           : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.applyToCreation', {
               defaultMessage: 'Apply to creation',

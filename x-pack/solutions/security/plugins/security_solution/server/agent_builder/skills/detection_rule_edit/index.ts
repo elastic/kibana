@@ -67,7 +67,7 @@ If you are creating a new rule, use the following:
 - after calling the \`security.create_detection_rule\` tool, move to step 4.
 
 
-if you editing rule, adding or changing any field of the rule, use the following:
+When asked to edit or update the rule or any field of the rule, use the following:
 **Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
 "The rule" ALWAYS means the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object. You MUST apply changes directly to the attachment — do NOT just describe or suggest what to change.
