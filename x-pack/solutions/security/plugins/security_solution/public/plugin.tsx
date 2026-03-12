@@ -89,6 +89,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
   private _discoverFlyoutServicesPromise?: Promise<StartServices>;
+  private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
+  private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -126,7 +128,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { renderApp } = await this.lazyApplicationDependencies();
       const [coreStart, startPlugins] = await core.getStartServices();
 
-      const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+      const subPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
       const services = await this.services.generateServices(coreStart, startPlugins, params);
@@ -311,6 +313,45 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._discoverFlyoutServicesPromise;
   }
 
+  private ensureStartedSubPlugins(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins
+  ): Promise<StartedSubPlugins> {
+    if (!this._startedSubPluginsPromise) {
+      this._startedSubPluginsPromise = this.startSubPlugins(
+        this.storage,
+        coreStart,
+        startPlugins
+      ).catch((e) => {
+        // allow retry on next call
+        this._startedSubPluginsPromise = undefined;
+        throw e;
+      });
+    }
+
+    return this._startedSubPluginsPromise;
+  }
+
+  private getDiscoverFlyoutStore(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<SecurityAppStore> {
+    if (!this._discoverFlyoutStorePromise) {
+      this._discoverFlyoutStorePromise = core
+        .getStartServices()
+        .then(async ([coreStart, startPlugins]) => {
+          const startedSubPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
+          return this.store(coreStart, startPlugins, startedSubPlugins);
+        })
+        .catch((e) => {
+          // allow retry if something failed during lazy init
+          this._discoverFlyoutStorePromise = undefined;
+          throw e;
+        });
+    }
+
+    return this._discoverFlyoutStorePromise;
+  }
+
   public async registerDiscoverSharedFeatures(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
@@ -336,10 +377,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: 'security-solution-alert-flyout-overview-tab',
       render: (hit) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
 
         return (
           <React.Suspense fallback={null}>
-            <LazyAlertFlyoutOverviewTab hit={hit} servicesPromise={servicesPromise} />
+            <LazyAlertFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
           </React.Suspense>
         );
       },
