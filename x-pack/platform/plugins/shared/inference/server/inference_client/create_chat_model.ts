@@ -15,6 +15,7 @@ import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
@@ -26,6 +27,7 @@ export interface CreateChatModelOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
 }
@@ -40,6 +42,7 @@ export const createChatModel = async ({
   regexWorker,
   esClient,
   replacementsEsClient,
+  endpointIdCache,
   callbacks,
   anonymization,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
@@ -50,11 +53,12 @@ export const createChatModel = async ({
     regexWorker,
     esClient,
     ...(replacementsEsClient ? { replacementsEsClient } : {}),
+    endpointIdCache,
     logger,
     callbacks,
     anonymization,
   });
-  const connector = await getConnectorById({ connectorId, actions, request });
+  const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({
     ...chatModelOptions,
     chatComplete: client.chatComplete,
