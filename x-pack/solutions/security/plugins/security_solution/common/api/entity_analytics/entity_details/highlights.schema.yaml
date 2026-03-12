@@ -59,14 +59,17 @@ paths:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                       riskScore:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                       vulnerabilities:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                       vulnerabilitiesTotal:
                         type: object
                         additionalProperties:
@@ -75,6 +78,7 @@ paths:
                         type: array
                         items:
                           type: object
+                          additionalProperties: true
                     description: The highlights of the entity.
                   replacements:
                     $ref: '../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

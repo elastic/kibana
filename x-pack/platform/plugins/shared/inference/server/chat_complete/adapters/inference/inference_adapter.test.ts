@@ -69,6 +69,7 @@ describe('inferenceAdapter', () => {
         connectorId: '.id',
         config: {},
         capabilities: {},
+        isInferenceEndpoint: false,
       };
     });
   });

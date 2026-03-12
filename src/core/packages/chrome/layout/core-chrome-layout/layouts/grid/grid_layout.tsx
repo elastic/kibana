@@ -17,6 +17,16 @@ import {
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  ChromeComponentsProvider,
+  ClassicHeader,
+  ProjectHeader,
+  GridLayoutProjectSideNav,
+  HeaderTopBanner,
+  ChromelessHeader,
+  AppMenuBar,
+  Sidebar,
+} from '@kbn/core-chrome-browser-components';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -73,22 +83,9 @@ export class GridLayout implements LayoutService {
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const classicChromeHeader = chrome.getClassicHeaderComponent();
-    const projectChromeHeader = chrome.getProjectHeaderComponent();
-    const headerBanner = chrome.getHeaderBanner();
-
-    // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
-    const chromelessHeader = chrome.getChromelessHeader();
-
-    // in project style, the project app menu is displayed at the top of application area
-    const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
       map(([menu, appMenu]) => !!menu || !!appMenu)
     );
-
-    const projectSideNavigation = chrome.getProjectSideNavComponent();
-
-    const sidebar = chrome.getSidebarComponent();
 
     const footer$ = chrome.getGlobalFooter$();
 
@@ -120,22 +117,22 @@ export class GridLayout implements LayoutService {
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
           // If classic style, we use the classic header and no navigation, since it is part of the header
-          header = classicChromeHeader;
+          header = <ClassicHeader />;
         } else {
           // If project style, we use the project header and navigation
-          header = projectChromeHeader;
+          header = <ProjectHeader />;
           if (hasAppMenu) {
             // If project app menu is present, we use it as the application top bar
-            applicationTopBar = projectAppMenu;
+            applicationTopBar = <AppMenuBar />;
           }
 
-          navigation = projectSideNavigation;
+          navigation = <GridLayoutProjectSideNav />;
         }
       }
 
       if (hasHeaderBanner) {
         // If header banner is present, we use it, even if chrome is not visible
-        banner = headerBanner;
+        banner = <HeaderTopBanner position="static" />;
       }
 
       // If debug, override/add debug overlays
@@ -152,12 +149,12 @@ export class GridLayout implements LayoutService {
       }
 
       return (
-        <>
+        <ChromeComponentsProvider value={chrome.componentDeps}>
           <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
-              sidebar={sidebar}
+              sidebar={<Sidebar />}
               footer={footer}
               navigation={navigation}
               banner={banner}
@@ -166,7 +163,7 @@ export class GridLayout implements LayoutService {
               <>
                 {/* If chrome is not visible, we use the chromeless header to display the*/}
                 {/* data-test-subj and fixed loading bar*/}
-                {!chromeVisible && chromelessHeader}
+                {!chromeVisible && <ChromelessHeader />}
 
                 <div id="globalBannerList">{appBannerComponent}</div>
                 <AppWrapper chromeVisible={chromeVisible}>
@@ -179,7 +176,7 @@ export class GridLayout implements LayoutService {
               </>
             </ChromeLayout>
           </ChromeLayoutConfigProvider>
-        </>
+        </ChromeComponentsProvider>
       );
     });
   }
