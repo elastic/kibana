@@ -9,6 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
+import { transformType as transformBwcType } from '@kbn/embeddable-plugin/server';
 import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
@@ -121,7 +122,8 @@ export function transformWorkpadOut(
         }
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
-        const embeddableType = fn.arguments.type[0] as string;
+        const embeddableType = transformBwcType(fn.arguments.type[0] as string);
+        fn.arguments.type[0] = embeddableType;
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transformType = embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType;
