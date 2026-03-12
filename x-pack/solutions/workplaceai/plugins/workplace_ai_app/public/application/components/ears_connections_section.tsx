@@ -59,7 +59,7 @@ function getEARSAuthUrl(
   const callbackUri = `${kibanaBasePath}/app/workplace_ai`;
 
   const params = new URLSearchParams();
-  GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
+  params.set('scope', GOOGLE_SCOPES.join(','));
   params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
   if (pkceCodeVerifier) {
     params.set('pkce_challenge', calculateCodeChallenge(pkceCodeVerifier));
