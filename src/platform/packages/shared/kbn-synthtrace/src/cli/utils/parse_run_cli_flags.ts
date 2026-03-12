@@ -84,7 +84,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'uniqueIds',
       'insecure'
     ),
-    scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
+    scenarioOpts: flags.scenarioOpts as unknown as Record<string, unknown>,
     logLevel: parsedLogLevel,
     files: parsedFiles,
   };

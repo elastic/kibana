@@ -18,7 +18,7 @@ import { sumTokens } from '../helpers/sum_tokens';
 
 export interface IdentifyFeaturesOptions {
   streamName: string;
-  sampleDocuments: Array<SearchHit<Record<string, any>>>;
+  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
   logger: Logger;

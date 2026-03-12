@@ -6,7 +6,7 @@
  */
 
 import { PATTERN_PRECEDENCE } from '../constants';
-import type { NormalizedToken } from '../types';
+import type { NormalizedToken, SingleLineToken } from '../types';
 import { normalizeTokens } from './normalize_tokens';
 import { findMatchingPatterns } from './tokenize_lines';
 import { uniq } from 'lodash';
@@ -459,7 +459,7 @@ describe('normalizeTokensForColumn', () => {
 
   describe('Edge cases', () => {
     it('handles empty token lists', () => {
-      const tokenLists: any[][] = [[], []];
+      const tokenLists: SingleLineToken[][] = [[], []];
       const result = normalizeTokens(tokenLists);
 
       expect(result).toEqual([]);

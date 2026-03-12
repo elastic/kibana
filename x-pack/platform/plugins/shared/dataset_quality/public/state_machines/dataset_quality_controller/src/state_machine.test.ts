@@ -8,7 +8,10 @@
 import type { IToasts } from '@kbn/core/public';
 import { type AnyActorRef, createActor, type Snapshot, waitFor } from 'xstate';
 import type { DataStreamDocsStat, NonAggregatableDatasets } from '../../../../common/api_types';
-import type { DataStreamStatServiceResponse } from '../../../../common/data_streams_stats';
+import type {
+  DataStreamStat,
+  DataStreamStatServiceResponse,
+} from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import {
@@ -1077,7 +1080,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       const mockDataStream = {
         rawName: 'logs-test-default',
         hasFailureStore: true,
-      } as any;
+      } as unknown as DataStreamStat;
 
       actor.send({ type: 'UPDATE_FAILURE_STORE', dataStream: mockDataStream });
 
@@ -1121,7 +1124,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       const mockDataStream = {
         rawName: 'logs-test-default',
         hasFailureStore: true,
-      } as any;
+      } as unknown as DataStreamStat;
 
       actor.send({ type: 'UPDATE_FAILURE_STORE', dataStream: mockDataStream });
 

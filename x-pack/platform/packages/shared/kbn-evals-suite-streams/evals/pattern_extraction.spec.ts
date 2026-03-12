@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { GrokPatternNode } from '@kbn/grok-heuristics';
 import {
   extractGrokPatternDangerouslySlow,
   getReviewFields as getGrokReviewFields,
   getGrokProcessor,
   getGrokPattern,
 } from '@kbn/grok-heuristics';
+import type { DissectPattern } from '@kbn/dissect-heuristics';
 import {
   extractDissectPattern,
   serializeAST,
@@ -19,6 +21,7 @@ import {
 } from '@kbn/dissect-heuristics';
 import { tags } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
+import type { DefaultEvaluators } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import {
   GROK_PATTERN_DATASETS,
@@ -62,8 +65,9 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   ): Promise<{
     input: typeof example.input;
     output: {
+      patternType: 'grok' | 'dissect';
       heuristicPattern: string;
-      suggestedProcessor: any;
+      suggestedProcessor: Record<string, unknown> | null;
       parsedLogs: ParsedLog[];
       metrics: PatternQualityMetrics;
     };
@@ -104,7 +108,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
     return {
       input,
-      output: { heuristicPattern, suggestedProcessor: processor, parsedLogs, metrics },
+      output: { patternType, heuristicPattern, suggestedProcessor: processor, parsedLogs, metrics },
       expected,
       metadata,
     };
@@ -115,9 +119,12 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     patternType: 'grok' | 'dissect'
   ): {
     heuristicPattern: string;
-    reviewFields: any;
-    patternNodes?: any;
-    dissectResult?: any;
+    reviewFields: Record<
+      string,
+      { example_values: string[]; position?: number; grok_component?: string }
+    >;
+    patternNodes?: GrokPatternNode[];
+    dissectResult?: DissectPattern;
   } {
     if (patternType === 'grok') {
       const patternNodes = extractGrokPatternDangerouslySlow(messages);
@@ -140,13 +147,16 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     kbnClient: KbnClient,
     connectorId: string,
     messages: string[],
-    reviewFields: any,
+    reviewFields: Record<
+      string,
+      { example_values: string[]; position?: number; grok_component?: string }
+    >,
     patternType: 'grok' | 'dissect',
     heuristicPattern: string,
-    patternNodes?: any,
-    dissectResult?: any,
+    patternNodes?: GrokPatternNode[],
+    dissectResult?: DissectPattern,
     fieldToParse?: string
-  ): Promise<{ processor: any; suggestedPattern: string }> {
+  ): Promise<{ processor: Record<string, unknown> | null; suggestedPattern: string }> {
     try {
       const response = await kbnClient.request({
         method: 'POST',
@@ -163,22 +173,28 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
         return { processor: null, suggestedPattern: heuristicPattern };
       }
 
-      if (patternType === 'grok' && suggestionData.grokProcessor) {
-        const processor = getGrokProcessor(patternNodes, suggestionData.grokProcessor);
+      if (patternType === 'grok' && suggestionData.grokProcessor && patternNodes) {
+        const processor = getGrokProcessor(
+          patternNodes,
+          suggestionData.grokProcessor as Parameters<typeof getGrokProcessor>[1]
+        );
         return {
-          processor,
+          processor: processor as unknown as Record<string, unknown>,
           suggestedPattern: processor?.patterns?.[0] || heuristicPattern,
         };
       }
 
-      if (patternType === 'dissect' && suggestionData.dissectProcessor) {
+      if (patternType === 'dissect' && suggestionData.dissectProcessor && dissectResult) {
+        if (!fieldToParse) {
+          return { processor: null, suggestedPattern: heuristicPattern };
+        }
         const processor = getDissectProcessorWithReview(
           dissectResult,
-          suggestionData.dissectProcessor,
-          fieldToParse!
+          suggestionData.dissectProcessor as Parameters<typeof getDissectProcessorWithReview>[1],
+          fieldToParse
         );
         return {
-          processor,
+          processor: processor as unknown as Record<string, unknown>,
           suggestedPattern: processor?.pattern || heuristicPattern,
         };
       }
@@ -191,7 +207,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     }
   }
 
-  function parseSSEResponse(data: string): any {
+  function parseSSEResponse(data: string): Record<string, unknown> | null {
     const lines = data.split('\n').filter((line) => line.startsWith('data: '));
     const lastLine = lines[lines.length - 1];
     return lastLine ? JSON.parse(lastLine.slice(6)) : null;
@@ -202,7 +218,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     messages: string[],
     fieldToParse: string,
     patternType: 'grok' | 'dissect',
-    processor: any,
+    processor: Record<string, unknown> | null,
     suggestedPattern: string
   ): Promise<ParsedLog[]> {
     const step =
@@ -219,7 +235,10 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
             customIdentifier: 'eval-dissect',
             from: fieldToParse,
             pattern: processor?.pattern || suggestedPattern,
-            append_separator: processor?.processor?.dissect?.append_separator,
+            append_separator: (
+              ((processor as Record<string, unknown>)?.processor as Record<string, unknown>)
+                ?.dissect as Record<string, unknown>
+            )?.append_separator,
           };
 
     const documents = messages.map((msg) => ({
@@ -238,7 +257,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
       const result = response.data as {
         documents: Array<{
           status: 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
-          value: Record<string, any>;
+          value: Record<string, unknown>;
         }>;
       };
 
@@ -255,7 +274,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   }
 
   function extractFields(
-    value: Record<string, any>,
+    value: Record<string, unknown>,
     fieldToParse: string,
     originalMessage: string
   ): Record<string, string | number | boolean | null> {
@@ -292,8 +311,11 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
   const codeBasedEvaluator = {
     name: 'pattern_quality_score',
     kind: 'CODE' as const,
-    evaluate: async ({ output }: { output: any }) => {
-      const metrics: PatternQualityMetrics = output?.output?.metrics || output?.metrics;
+    evaluate: async ({ output }: { output: unknown }) => {
+      const out = output as Record<string, unknown>;
+      const metrics = ((out?.output as Record<string, unknown>)?.metrics ?? out?.metrics) as
+        | PatternQualityMetrics
+        | undefined;
 
       if (!metrics) {
         return { score: 0, reasoning: 'No metrics available' };
@@ -328,38 +350,65 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
    * LLM-based evaluator with clear, specific criteria.
    * Uses all relevant ground truth data to evaluate extraction quality.
    */
-  function createLlmEvaluator(evaluators: any) {
+  function createLlmEvaluator(evaluators: DefaultEvaluators) {
     return {
       name: 'llm_extraction_quality',
       kind: 'LLM' as const,
-      evaluate: async ({ input, output, expected }: any) => {
-        const parsedLogs = output?.output?.parsedLogs || output?.parsedLogs || [];
-        const heuristicPattern = output?.output?.heuristicPattern || '';
-        const processor = output?.output?.suggestedProcessor;
+      evaluate: async ({
+        input,
+        output,
+        expected,
+        metadata,
+      }: {
+        input: unknown;
+        output: unknown;
+        expected: unknown;
+        metadata: unknown;
+      }) => {
+        const out = output as Record<string, unknown>;
+        const exp = expected as Record<string, unknown>;
+        const outExp = (out?.expected ?? exp) as Record<string, unknown>;
+        const rawParsedLogs =
+          (out?.output as Record<string, unknown>)?.parsedLogs ?? out?.parsedLogs;
+        const parsedLogs = Array.isArray(rawParsedLogs) ? rawParsedLogs : [];
+        const heuristicPattern =
+          (out?.output as Record<string, unknown>)?.heuristicPattern ?? out?.heuristicPattern ?? '';
+        const processor = (out?.output as Record<string, unknown>)?.suggestedProcessor;
 
         // Extract all ground truth data
-        const expectedFields = expected?.expected_fields || output?.expected?.expected_fields || {};
-        const characteristics =
-          expected?.pattern_characteristics || output?.expected?.pattern_characteristics || {};
+        const expectedFields = (exp?.expected_fields ?? outExp?.expected_fields ?? {}) as Record<
+          string,
+          unknown
+        >;
+        const characteristics = (exp?.pattern_characteristics ??
+          outExp?.pattern_characteristics ??
+          {}) as Record<string, unknown>;
 
         // Timestamp info
-        const expectedTimestamp = expectedFields.timestamp?.field_name;
+        const timestampObj = expectedFields.timestamp as Record<string, unknown> | undefined;
+        const expectedTimestamp = timestampObj?.field_name as string | undefined;
 
         // Log level info with example values
-        const expectedLogLevel = expectedFields.log_level?.field_name;
-        const logLevelValues = expectedFields.log_level?.example_values || [];
+        const logLevelObj = expectedFields.log_level as Record<string, unknown> | undefined;
+        const expectedLogLevel = logLevelObj?.field_name as string | undefined;
+        const logLevelValues = (logLevelObj?.example_values as string[]) ?? [];
 
         // Other fields with type info
-        const requiredFields = (expectedFields.other_fields || [])
-          .filter((f: any) => f.required)
-          .map((f: any) => ({ name: f.name, type: f.type }));
-        const optionalFields = (expectedFields.other_fields || [])
-          .filter((f: any) => !f.required)
-          .map((f: any) => ({ name: f.name, type: f.type }));
+        const otherFields = (expectedFields.other_fields ?? []) as Array<{
+          required?: boolean;
+          name?: string;
+          type?: string;
+        }>;
+        const requiredFields = otherFields
+          .filter((f) => f.required)
+          .map((f) => ({ name: f.name ?? '', type: f.type ?? '' }));
+        const optionalFields = otherFields
+          .filter((f) => !f.required)
+          .map((f) => ({ name: f.name ?? '', type: f.type ?? '' }));
 
         // Field count expectations from ground truth
-        const minFields = characteristics.expected_min_fields || 3;
-        const maxFields = characteristics.expected_max_fields || 10;
+        const minFields = (characteristics.expected_min_fields as number | undefined) ?? 3;
+        const maxFields = (characteristics.expected_max_fields as number | undefined) ?? 10;
 
         // Build extraction examples
         const examples = parsedLogs.map((log: ParsedLog) => ({
@@ -455,23 +504,29 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
            Count the actual extracted fields in each example and compare.`,
         ];
 
+        const inp = input as Record<string, unknown>;
+        const proc = processor as Record<string, unknown>;
+        const procPatterns = proc?.patterns as string[] | undefined;
+        const resolvedPatternType =
+          (out?.output as Record<string, unknown>)?.patternType ?? out?.patternType ?? 'grok';
         return evaluators.criteria(criteria).evaluate({
           input: {
-            sample_logs: input?.sample_messages || [],
-            pattern_type: processor?.patterns ? 'grok' : 'dissect',
+            sample_logs: (inp?.sample_messages as string[]) ?? [],
+            pattern_type: resolvedPatternType,
           },
           output: {
-            pattern: processor?.patterns?.[0] || processor?.pattern || heuristicPattern,
+            pattern: procPatterns?.[0] ?? (proc?.pattern as string | undefined) ?? heuristicPattern,
             extraction_examples: examples,
           },
           expected: {
             timestamp_field: expectedTimestamp,
             log_level_field: expectedLogLevel,
             log_level_values: logLevelValues,
-            required_fields: requiredFields.map((f: { name: string }) => f.name),
-            optional_fields: optionalFields.map((f: { name: string }) => f.name),
+            required_fields: requiredFields.map((f) => f.name),
+            optional_fields: optionalFields.map((f) => f.name),
             field_count_range: `${minFields}-${maxFields}`,
           },
+          metadata: (metadata as Record<string, unknown> | null) ?? null,
         });
       },
     };

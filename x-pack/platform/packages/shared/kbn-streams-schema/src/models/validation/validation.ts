@@ -45,7 +45,7 @@ function createParse<TLeft, TRight extends TLeft>(
   return (value: TLeft): TRight => narrow.parse(value);
 }
 
-export interface Validation<TLeft = any, TRight extends TLeft = any> {
+export interface Validation<TLeft = unknown, TRight extends TLeft = TLeft> {
   is: Is<TLeft, TRight>;
   as: As<TLeft, TRight>;
   asserts: Asserts<TLeft, TRight>;

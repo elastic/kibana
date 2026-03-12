@@ -110,12 +110,15 @@ export async function evaluateDissectSuggestions() {
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(serializeAST(dissectPattern.ast))}`);
 
-      const suggestionData = await getSuggestions(
+      const suggestionData = (await getSuggestions(
         stream,
         connector,
         largestGroup.messages.slice(0, 10),
         reviewFields
-      );
+      )) as { dissectProcessor?: Parameters<typeof getDissectProcessorWithReview>[1] };
+      if (!suggestionData.dissectProcessor) {
+        throw new Error('No dissectProcessor returned from suggestions');
+      }
       const dissectProcessor = getDissectProcessorWithReview(
         dissectPattern,
         suggestionData.dissectProcessor,
@@ -198,7 +201,7 @@ export async function evaluateDissectSuggestions() {
     chalk.bold(`Average Parsing Score (all docs): ${chalk.green(averageParsingScoreAllDocs)}`)
   );
 
-  return output.reduce<Record<string, any>>((acc, suggestion) => {
+  return output.reduce<Record<string, unknown>>((acc, suggestion) => {
     acc[suggestion.stream] = {
       pattern: suggestion.pattern,
       parsing_score_samples: suggestion.parsing_score_samples,
