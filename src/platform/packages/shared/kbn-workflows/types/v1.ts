@@ -115,6 +115,8 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** Caller-supplied execution metadata, separate from workflow inputs */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
