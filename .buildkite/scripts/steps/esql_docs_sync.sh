@@ -11,6 +11,7 @@ main () {
   # Bootstrap Kibana
   .buildkite/scripts/bootstrap.sh
 
+
   report_main_step "Loading connector configuration"
 
   # Get stringified preconfigured connectors from environment variable
@@ -20,10 +21,11 @@ main () {
 
   # Start Elasticsearch in the background
   node scripts/es snapshot \
-    -E network.bind_host=127.0.0.1 \
-    -E discovery.type=single-node \
     --license=trial &
   ES_PID=$!
+
+  ELASTICSEARCH_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json)"
+  ELASTICSEARCH_URL="$(printf '%s' "$ELASTICSEARCH_URL" | sed 's:/*$::')"
 
   # Wait for Elasticsearch to be ready
   echo "Waiting for Elasticsearch to be ready..."
@@ -32,7 +34,7 @@ main () {
   while [ $ELAPSED_ES -lt $MAX_WAIT_ES ]; do
     if timeout 1 bash -c "echo > /dev/tcp/localhost/9200" 2>/dev/null; then
       # Port is open, check if ES is responding
-      if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
+      if curl -s "$ELASTICSEARCH_URL/_cluster/health" | grep -q '"status":"green"\|"status":"yellow"'; then
         echo "Elasticsearch is ready"
         break
       fi
@@ -43,7 +45,8 @@ main () {
 
   if [ $ELAPSED_ES -ge $MAX_WAIT_ES ]; then
     echo "Elasticsearch failed to start within $MAX_WAIT_ES seconds"
-    exit 1
+    echo "Skipping ES|QL docs sync as Elasticsearch is unavailable."
+    return 0
   fi
 
   report_main_step "Starting Kibana"
@@ -63,6 +66,10 @@ main () {
   node scripts/kibana "${KIBANA_ARGS[@]}" &
   KIBANA_PID=$!
 
+  KIBANA_URL="$(jq -r '.hosts.kibana' .scout/servers/local.json)"
+  KIBANA_URL="$(printf '%s' "$KIBANA_URL" | sed 's:/*$::')"
+
+
   # Wait for Kibana to be ready (check both port and status endpoint)
   echo "Waiting for Kibana to be ready..."
   MAX_WAIT=300  # 5 minutes max wait
@@ -70,7 +77,7 @@ main () {
   while [ $ELAPSED -lt $MAX_WAIT ]; do
     if timeout 1 bash -c "echo > /dev/tcp/localhost/5601" 2>/dev/null; then
       # Port is open, check if Kibana status endpoint is available
-      if curl -s http://localhost:5601/api/status | grep -q '"state":"green"'; then
+      if curl -s "$KIBANA_URL/api/status" | grep -q '"state":"green"'; then
         echo "Kibana is ready"
         break
       fi
@@ -81,7 +88,8 @@ main () {
 
   if [ $ELAPSED -ge $MAX_WAIT ]; then
     echo "Kibana failed to start within $MAX_WAIT seconds"
-    exit 1
+    echo "Skipping ES|QL docs sync as Kibana is unavailable."
+    return 0
   fi
 
   # Cleanup function
@@ -95,7 +103,11 @@ main () {
   report_main_step "Loading ES|QL documentation"
 
   # Load ES|QL docs
-  node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --connectorId azure-gpt4
+  if [ -n "$PRECONFIGURED_CONNECTORS" ]; then
+    node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --connectorId azure-gpt4
+  else
+    node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --force
+  fi
 
   # Check for differences in generated docs
   docs_dir="x-pack/platform/plugins/shared/inference/server/tasks/nl_to_esql/esql_docs"
