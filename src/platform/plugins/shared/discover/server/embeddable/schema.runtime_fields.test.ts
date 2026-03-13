@@ -7,7 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  compositeRuntimeFieldSchema,
+  primitiveRuntimeFieldSchema,
+} from './schema.runtime_fields';
 import { RUNTIME_FIELD_TYPES, runtimeFieldsSchema } from './schema.runtime_fields';
+import type { TypeOf } from '@kbn/config-schema';
+
+const buildPrimitiveRuntimeField = (
+  params: Partial<TypeOf<typeof primitiveRuntimeFieldSchema>>
+) => {
+  return { type: 'keyword', name: 'my_runtime_field', script: 'some script', ...params };
+};
+
+const buildCompositeRuntimeField = (
+  params: Partial<TypeOf<typeof compositeRuntimeFieldSchema>>
+) => {
+  return {
+    type: 'composite',
+    name: 'my_runtime_field',
+    script: 'some script',
+    fields: [],
+    ...params,
+  };
+};
 
 describe('schema.runtime_fields', () => {
   describe('given an invalid type', () => {
@@ -22,14 +45,38 @@ describe('schema.runtime_fields', () => {
     });
   });
 
+  describe.each(RUNTIME_FIELD_TYPES)('given a %s runtime field', (type) => {
+    it('should be a valid type', () => {
+      // Given
+      const runtimeField = {
+        name: 'my_runtime_field',
+        type,
+      };
+
+      // When/Then
+      expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+    });
+  });
+
   describe('given a composite runtime field', () => {
-    describe('when it DOES NOT have a name', () => {
-      it('should be invalid', () => {
+    it('should be a valid type', () => {
+      // Given
+      const runtimeField = {
+        type: 'composite',
+        name: 'my_runtime_field',
+        fields: [],
+      };
+
+      // When/Then
+      expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+    });
+
+    describe('when it does NOT have fields', () => {
+      it('should throw an error', () => {
         // Given
         const runtimeField = {
           type: 'composite',
-          script: 'some script',
-          fields: [],
+          name: 'my_runtime_field',
         };
 
         // When/Then
@@ -37,31 +84,278 @@ describe('schema.runtime_fields', () => {
       });
     });
 
-    describe('when there are no fields', () => {
+    describe('when fields is not an array', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = buildCompositeRuntimeField({
+          // @ts-expect-error - we want to test an invalid type
+          fields: { name: 'my_runtime_subfield', type: 'keyword' },
+        });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has too many subfields', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = buildCompositeRuntimeField({
+          fields: Array.from({ length: 101 }, (_, i) => ({
+            name: `subfield_${i}`,
+            type: 'keyword',
+          })),
+        });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has subfields', () => {
+      describe('when the subfield DOES NOT have a type', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            fields: [
+              {
+                name: 'my_runtime_subfield',
+                // @ts-expect-error - we want to test an invalid type
+                type: undefined,
+              },
+            ],
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the subfield has an invalid type', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            fields: [
+              {
+                name: 'my_runtime_subfield',
+                // @ts-expect-error - we want to test an invalid type
+                type: 'invalid',
+              },
+            ],
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the subfield DOES NOT have a name', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            // @ts-expect-error - we want to test an invalid type
+            fields: [{ name: undefined, type: 'keyword' }],
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the subfield has an empty name', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            fields: [{ name: '', type: 'keyword' }],
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the subfield has a name that is too long', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            fields: [{ name: 'a'.repeat(1001), type: 'keyword' }],
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the subfield has a valid name', () => {
+        it('should be valid', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            fields: [{ name: 'my_runtime_field', type: 'keyword' }],
+          });
+
+          // When/Then
+          expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+        });
+      });
+    });
+
+    describe('when it has top-level field formatting settings', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = buildCompositeRuntimeField({
+          // @ts-expect-error - we want to test an invalid type
+          format: { type: 'number', params: { decimals: 2 } },
+        });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe.each(['custom_label', 'custom_description', 'popularity'])(
+      'when it has a top-level %s',
+      (field) => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildCompositeRuntimeField({
+            [field]: field === 'popularity' ? 1 : 'my_runtime_field',
+          });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      }
+    );
+  });
+
+  describe.each([
+    ...RUNTIME_FIELD_TYPES.map((type) => ({
+      type,
+      build: buildPrimitiveRuntimeField,
+      buildWithFields: buildPrimitiveRuntimeField,
+    })),
+    {
+      type: 'composite',
+      build: buildCompositeRuntimeField,
+      buildWithFields: (
+        field: Partial<TypeOf<typeof compositeRuntimeFieldSchema>['fields'][number]>
+      ) =>
+        buildCompositeRuntimeField({
+          fields: [{ name: 'my_runtime_subfield', type: 'keyword', ...field }],
+        }),
+    },
+  ])('given a $type runtime field', ({ build, buildWithFields }) => {
+    describe('when it DOES NOT have a name', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = build({ name: undefined });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has an empty name', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = build({ name: '' });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has a name that is too long', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = build({ name: 'a'.repeat(1001) });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has a valid name', () => {
       it('should be valid', () => {
         // Given
-        const runtimeField = {
-          type: 'composite',
-          name: 'my_runtime_field',
-          script: 'some script',
-          fields: [],
-        };
+        const runtimeField = build({ name: 'my_runtime_field' });
 
         // When/Then
         expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
       });
     });
 
-    describe('when it has a single field', () => {
-      describe.each(RUNTIME_FIELD_TYPES)('when it is of %s type', (type) => {
+    describe('when it does NOT have a script', () => {
+      it('should be valid', () => {
+        // Given
+        const runtimeField = build({ script: undefined });
+
+        // When/Then
+        expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+      });
+    });
+
+    describe('when it has an empty script', () => {
+      it('should throw an error', () => {
+        // Given
+        const runtimeField = build({ script: '' });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has a script that is not a string', () => {
+      it('should throw an error', () => {
+        // Given
+        // @ts-expect-error - we want to test an invalid type
+        const runtimeField = build({ script: { source: 'some script' } });
+
+        // When/Then
+        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+      });
+    });
+
+    describe('when it has a script that is a string', () => {
+      it('should be valid', () => {
+        // Given
+        const runtimeField = build({ script: 'some script' });
+
+        // When/Then
+        expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+      });
+    });
+
+    describe('when it has a format', () => {
+      describe('when the format is not a string', () => {
+        it('should throw an error', () => {
+          // Given
+          // @ts-expect-error - we want to test an invalid type
+          const runtimeField = buildWithFields({ format: { type: 1, params: 1 } });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when the format is a string', () => {
+        describe('when the params are not present', () => {
+          it('should throw an error', () => {
+            // Given
+            const runtimeField = buildWithFields({ format: { type: 'number', params: undefined } });
+
+            // When/Then
+            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+          });
+        });
+      });
+
+      describe('when the params are present', () => {
         it('should be valid', () => {
           // Given
-          const runtimeField = {
-            type: 'composite',
-            name: 'my_runtime_field',
-            script: 'some script',
-            fields: [{ type, name: 'my_field' }],
-          };
+          const runtimeField = buildWithFields({
+            format: { type: 'number', params: { decimals: 2 } },
+          });
 
           // When/Then
           expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
@@ -69,41 +363,42 @@ describe('schema.runtime_fields', () => {
       });
     });
 
-    describe('when it has a multiple fields', () => {
-      describe.each(RUNTIME_FIELD_TYPES)('when they are of %s type', (type) => {
+    describe.each(['custom_label', 'custom_description'])('given a %s', (field) => {
+      describe('when the it is not present', () => {
         it('should be valid', () => {
           // Given
-          const runtimeField = {
-            type: 'composite',
-            name: 'my_runtime_field',
-            script: 'some script',
-            fields: [
-              { type, name: 'my_field' },
-              { type, name: 'my_field_2' },
-            ],
-          };
+          const runtimeField = buildWithFields({ [field]: undefined });
 
           // When/Then
           expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
         });
       });
 
-      describe('when they are of different types', () => {
-        describe.each([
-          [['keyword', 'long']],
-          [['long', 'keyword']],
-          [['keyword', 'long', 'keyword']],
-          [['geo_point', 'boolean']],
-          [['ip', 'date']],
-        ])('when they are of %s types', (types: string[]) => {
+      describe('when it is not a string', () => {
+        it('should throw an error', () => {
+          // Given
+          const runtimeField = buildWithFields({ [field]: 1 });
+
+          // When/Then
+          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+        });
+      });
+
+      describe('when it is a string', () => {
+        describe('when it is empty', () => {
+          it('should throw an error', () => {
+            // Given
+            const runtimeField = buildWithFields({ [field]: '' });
+
+            // When/Then
+            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+          });
+        });
+
+        describe('when it is a valid string', () => {
           it('should be valid', () => {
             // Given
-            const runtimeField = {
-              type: 'composite',
-              name: 'my_runtime_field',
-              script: 'some script',
-              fields: types.map((type) => ({ type, name: `my_field_${type}` })),
-            };
+            const runtimeField = buildWithFields({ [field]: 'my_runtime_field' });
 
             // When/Then
             expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
@@ -111,92 +406,48 @@ describe('schema.runtime_fields', () => {
         });
       });
     });
-  });
 
-  describe.each(RUNTIME_FIELD_TYPES)('given a %s runtime field', (type) => {
-    describe('when it has a name', () => {
-      it('should be valid', () => {
-        // Given
-        const runtimeField = {
-          type,
-          name: 'my_runtime_field',
-        };
-
-        // When/Then
-        expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
-      });
-    });
-
-    describe('when it does NOT have a name', () => {
-      it('should throw an error', () => {
-        // Given
-        const runtimeField = {
-          type,
-        };
-
-        // When/Then
-        expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
-      });
-    });
-
-    describe('when it has a script', () => {
-      describe('when it is a string', () => {
-        it('should be valid', () => {
-          // Given
-          const runtimeField = {
-            type,
-            name: 'my_runtime_field',
-            script: 'some script',
-          };
-
-          // When/Then
-          expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
-        });
-      });
-
-      describe('when it is NOT a string', () => {
+    describe('when it has a popularity', () => {
+      describe('when it is not a number', () => {
         it('should throw an error', () => {
           // Given
-          const runtimeField = {
-            type,
-            name: 'my_runtime_field',
-            script: { source: 'some script' },
-          };
+          // @ts-expect-error - we want to test an invalid type
+          const runtimeField = buildWithFields({ popularity: 'a' });
 
           // When/Then
           expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
         });
       });
-    });
 
-    describe('when it has a format', () => {
-      describe('when it is a valid format', () => {
-        it('should be valid', () => {
-          // Given
-          const runtimeField = {
-            type,
-            name: 'my_runtime_field',
-            script: 'some script',
-            format: { type: 'number', params: {} },
-          };
+      describe('when it is a number', () => {
+        describe('when it is less than 0', () => {
+          it('should throw an error', () => {
+            // Given
+            const runtimeField = buildWithFields({ popularity: -1 });
 
-          // When/Then
-          expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+            // When/Then
+            expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+          });
         });
-      });
 
-      describe('when it is NOT a valid format', () => {
-        it('should throw an error', () => {
-          // Given
-          const runtimeField = {
-            type,
-            name: 'my_runtime_field',
-            script: 'some script',
-            format: { type: 'number', decimals: 2 },
-          };
+        describe('when it is 0', () => {
+          it('should be valid', () => {
+            // Given
+            const runtimeField = buildWithFields({ popularity: 0 });
 
-          // When/Then
-          expect(() => runtimeFieldsSchema.validate(runtimeField)).toThrow();
+            // When/Then
+            expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+          });
+        });
+
+        describe('when it is greater than 0', () => {
+          it('should be valid', () => {
+            // Given
+            const runtimeField = buildWithFields({ popularity: 1 });
+
+            // When/Then
+            expect(runtimeFieldsSchema.validate(runtimeField)).toBeTruthy();
+          });
         });
       });
     });
