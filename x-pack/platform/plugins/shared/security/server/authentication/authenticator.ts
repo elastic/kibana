@@ -993,11 +993,10 @@ export class Authenticator {
     sessionValue,
     skipAuditEvent,
   }: InvalidateSessionValueParams) {
-    if (isSessionAuthenticated(sessionValue)) {
-      if (!skipAuditEvent) {
-        const auditLogger = this.options.audit.asScoped(request);
-        auditLogger.log(userLogoutEvent(sessionValue));
-      }
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(userLogoutEvent(sessionValue));
+
       this.options.userActivity.trackUserAction({
         message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
         event: { action: 'log_out_user', type: 'end' },

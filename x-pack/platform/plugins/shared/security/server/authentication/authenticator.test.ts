@@ -708,6 +708,26 @@ describe('Authenticator', () => {
         expect(mockOptions.userActivity.trackUserAction).not.toHaveBeenCalled();
       });
 
+      it('does not track log_out_user when invalidating an intermediate session during login', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockOptions.session.get.mockResolvedValue({
+          error: null,
+          value: { ...mockSessVal, username: undefined },
+        });
+
+        const user = mockAuthenticatedUser();
+        mockBasicAuthenticationProvider.login.mockResolvedValue(
+          AuthenticationResult.succeeded(user, { state: { authorization: 'Basic .....' } })
+        );
+
+        await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(mockOptions.userActivity.trackUserAction).toHaveBeenCalledWith(
+          expect.objectContaining({ event: { action: 'log_in_user', type: 'start' } })
+        );
+      });
+
       it('tracks log_out_user when login overwrites an existing session with a different username', async () => {
         const request = httpServerMock.createKibanaRequest();
         const user = mockAuthenticatedUser();
