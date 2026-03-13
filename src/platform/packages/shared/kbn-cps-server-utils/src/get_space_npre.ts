@@ -29,12 +29,12 @@ import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-utils';
  */
 export function getSpaceNPRE(spaceIdOrRequest: string | { url: URL }): string {
   if (typeof spaceIdOrRequest === 'string') {
-    return `kibana_space_${spaceIdOrRequest || DEFAULT_SPACE_ID}_default`;
+    return `@kibana_space_${spaceIdOrRequest || DEFAULT_SPACE_ID}_default`;
   }
   // Explicitly widen to URL | undefined so the defensive check below is valid.
   const url: URL | undefined = spaceIdOrRequest.url;
   if (!url) {
     throw new Error(`Cannot determine space NPRE: the Request object is missing a 'url' property.`);
   }
-  return `kibana_space_${getSpaceIdFromPath(url.pathname).spaceId}_default`;
+  return `@kibana_space_${getSpaceIdFromPath(url.pathname).spaceId}_default`;
 }
