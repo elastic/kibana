@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-plugins-server-internal'
-  - '@kbn/tooling-log'
 tags:
   - test-helper
   - package
