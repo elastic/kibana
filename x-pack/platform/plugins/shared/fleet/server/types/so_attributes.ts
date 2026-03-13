@@ -44,6 +44,8 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  VerificationStatus,
+  VerificationPermissionResult,
 } from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -325,4 +327,10 @@ export interface CloudConnectorSOAttributes {
   vars: CloudConnectorVars;
   created_at: string;
   updated_at: string;
+  verification_id?: string;
+  verification_status?: VerificationStatus;
+  verification_timestamp?: string;
+  verification_started_at?: string;
+  verification_failed_at?: string;
+  verification_permissions?: VerificationPermissionResult[];
 }

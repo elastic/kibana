@@ -221,6 +221,15 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  is_verifier: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'Indicates this is a short-lived verifier policy used for OTel permission verification.',
+      },
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {

@@ -235,6 +235,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         vars,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        verification_status: 'pending',
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
