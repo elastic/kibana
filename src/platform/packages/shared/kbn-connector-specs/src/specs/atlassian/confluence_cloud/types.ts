@@ -33,7 +33,7 @@ export const ListPagesInputSchema = z.object({
 export type ListPagesInput = z.infer<typeof ListPagesInputSchema>;
 
 export const GetPageInputSchema = z.object({
-  id: z.string().describe('The ID of the page to retrieve'),
+  id: z.string().trim().min(1).describe('The ID of the page to retrieve'),
   bodyFormat: z
     .string()
     .optional()
@@ -58,6 +58,6 @@ export const ListSpacesInputSchema = z.object({
 export type ListSpacesInput = z.infer<typeof ListSpacesInputSchema>;
 
 export const GetSpaceInputSchema = z.object({
-  id: z.string().describe('The ID of the space to retrieve'),
+  id: z.string().trim().min(1).describe('The ID of the space to retrieve'),
 });
 export type GetSpaceInput = z.infer<typeof GetSpaceInputSchema>;
