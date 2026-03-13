@@ -67,6 +67,13 @@ export interface WorkflowProperties {
 
 export type WorkflowStorageSettings = typeof storageSettings;
 
+/**
+ * The storage adapter generic constraint expects `tags` to be `string`
+ * (matching the ES keyword mapping), but at application level `tags` is
+ * `string[]` because ES keyword fields transparently accept arrays.
+ * We use a storage-level type where `tags` is `string` to satisfy the
+ * generic and expose the application type externally.
+ */
 // @ts-expect-error type mismatch for tags type
 export type WorkflowStorage = StorageIndexAdapter<WorkflowStorageSettings, WorkflowProperties>;
 
