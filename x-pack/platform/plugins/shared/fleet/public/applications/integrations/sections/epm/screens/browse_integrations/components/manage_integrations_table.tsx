@@ -425,11 +425,21 @@ export const ManageIntegrationsTable: React.FC<{
         ),
         render: (status: TaskStatus) => {
           const { color, iconType, label, isInProgress } = getStatusDisplay(status);
+          const badgeStyle = {
+            borderRadius: euiTheme.border.radius.small,
+            padding: `2px ${euiTheme.size.m}`,
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fontSize: euiTheme.size.m,
+          };
           if (isInProgress) {
             return (
               <EuiBadge
                 color={color}
-                style={{ backgroundColor: euiTheme.colors.backgroundLightText }}
+                style={{
+                  ...badgeStyle,
+                  backgroundColor: euiTheme.colors.backgroundLightText,
+                }}
               >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -441,7 +451,7 @@ export const ManageIntegrationsTable: React.FC<{
             );
           }
           return (
-            <EuiBadge color={color} iconType={iconType}>
+            <EuiBadge color={color} iconType={iconType} style={badgeStyle}>
               {label}
             </EuiBadge>
           );
@@ -459,9 +469,10 @@ export const ManageIntegrationsTable: React.FC<{
                   color: euiTheme.colors.backgroundFilledText,
                   borderRadius: euiTheme.border.radius.small,
                   border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-                  padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+                  padding: `2px ${euiTheme.size.m}`,
                   fontFamily: euiTheme.font.family,
-                  fontWeight: euiTheme.font.weight.regular,
+                  fontWeight: euiTheme.font.weight.medium,
+                  fontSize: euiTheme.size.m,
                 }}
               >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -567,9 +578,8 @@ export const ManageIntegrationsTable: React.FC<{
       euiTheme.colors.borderBasePlain,
       euiTheme.border.radius.small,
       euiTheme.font.family,
-      euiTheme.font.weight.regular,
-      euiTheme.size.xs,
-      euiTheme.size.s,
+      euiTheme.font.weight.medium,
+      euiTheme.size.m,
       userProfiles,
     ]
   );
