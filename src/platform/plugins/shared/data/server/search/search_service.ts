@@ -544,7 +544,10 @@ export class SearchService {
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: elasticsearch.client.asScoped(request, opts ?? { projectRouting: 'request-header' }),
+        esClient: elasticsearch.client.asScoped(
+          request,
+          opts ?? { projectRouting: 'request-header' }
+        ),
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
