@@ -47,7 +47,8 @@ export class MonitorIntegrationHealthApi {
   constructor(
     private readonly server: SyntheticsServerSetup,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly monitorConfigRepository: MonitorConfigRepository
+    private readonly monitorConfigRepository: MonitorConfigRepository,
+    private readonly spaceId: string
   ) {}
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
@@ -79,15 +80,20 @@ export class MonitorIntegrationHealthApi {
       };
     }
 
+    const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
+    const allSpaces = new Set([this.spaceId, ...allSpacesWithMonitors]);
+
     const referencedAgentPolicyIds = [
       ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
     ];
     const [existingPackagePoliciesMap, existingAgentPoliciesMap] = await Promise.all([
       this.getExistingPackagePoliciesMap(
-        this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI)
+        this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
       ),
       this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
     ]);
+
+    const existingPoliciesArray = [...existingPackagePoliciesMap.values()];
 
     const monitors: MonitorHealthStatus[] = foundMonitors.map(({ so }) => {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
@@ -95,7 +101,7 @@ export class MonitorIntegrationHealthApi {
 
       const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
-        const expectedPackagePolicyId = privateLocationAPI.getPolicyId(
+        const newFormatPolicyId = privateLocationAPI.getPolicyId(
           { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
           loc.id
         );
@@ -105,7 +111,7 @@ export class MonitorIntegrationHealthApi {
             loc.id,
             loc.label ?? loc.id,
             LocationHealthStatusValue.MissingLocation,
-            expectedPackagePolicyId
+            newFormatPolicyId
           );
         }
 
@@ -114,31 +120,40 @@ export class MonitorIntegrationHealthApi {
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.MissingAgentPolicy,
-            expectedPackagePolicyId
+            newFormatPolicyId
           );
         }
 
-        const existingPackagePolicy = existingPackagePoliciesMap.get(expectedPackagePolicyId);
+        const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
+          privateLocationAPI.getPolicyIdFormatInfo(
+            { id: so.id },
+            loc.id,
+            existingPoliciesArray,
+            allSpaces
+          );
 
-        if (!existingPackagePolicy) {
+        if (!hasNewFormatPolicyId && !hasAnyLegacyPolicyId) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.MissingPackagePolicy,
-            expectedPackagePolicyId
+            newFormatPolicyId
           );
         }
 
+        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
+        const existingPackagePolicy = existingPackagePoliciesMap.get(resolvedPolicyId);
+
         const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
-        const attachedPolicyIds = existingPackagePolicy.policy_ids ?? [
-          existingPackagePolicy.policy_id,
+        const attachedPolicyIds = existingPackagePolicy?.policy_ids ?? [
+          existingPackagePolicy?.policy_id,
         ];
         if (!attachedPolicyIds.includes(expectedAgentPolicyId)) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
             LocationHealthStatusValue.AgentPolicyMismatch,
-            expectedPackagePolicyId
+            resolvedPolicyId
           );
         }
 
@@ -146,7 +161,7 @@ export class MonitorIntegrationHealthApi {
           loc.id,
           existingPrivateLocation.label,
           LocationHealthStatusValue.Healthy,
-          expectedPackagePolicyId
+          resolvedPolicyId
         );
       });
 
@@ -188,25 +203,33 @@ export class MonitorIntegrationHealthApi {
 
   private getExpectedPackagePolicyIds(
     foundMonitors: FoundMonitor[],
-    privateLocationAPI: SyntheticsPrivateLocation
+    privateLocationAPI: SyntheticsPrivateLocation,
+    allSpaces: Set<string>
   ): string[] {
-    const ids: string[] = [];
+    const ids = new Set<string>();
 
     for (const { so } of foundMonitors) {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const loc of privateLocations) {
-        ids.push(
+        ids.add(
           privateLocationAPI.getPolicyId(
             { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
             loc.id
           )
         );
+        for (const legacyId of privateLocationAPI.getLegacyPolicyIdsForAllSpaces(
+          so.id,
+          loc.id,
+          allSpaces
+        )) {
+          ids.add(legacyId);
+        }
       }
     }
 
-    return ids;
+    return [...ids];
   }
 
   private async getExistingPackagePoliciesMap(expectedPackagePolicyIds: string[]) {
