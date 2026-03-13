@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDetectionRulesByIntegration, useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { AllRuleCoveragePanel } from './rule_coverage_panels/all_rules';
 import { MitreAttackRuleCoveragePanel } from './rule_coverage_panels/mitre_attack_rules';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import { hasMissingIntegrations as checkMissingIntegrations } from '../../../hooks/visibility_status_utils';
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
@@ -64,15 +64,9 @@ export const RuleCoveragePanel: React.FC = () => {
   );
 
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getDetectionRules } = useSiemReadinessApi();
 
-  const getInstalledIntegrations =
-    getIntegrations?.data?.items?.filter(
-      (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
-    ) || [];
-
-  const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
-  const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
+  const installedIntegrationRules = useDetectionRulesByIntegration();
 
   const caseDescription = useMemo(
     () =>
@@ -119,8 +113,8 @@ export const RuleCoveragePanel: React.FC = () => {
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
 
-  const hasMissingIntegrations = Boolean(
-    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
+  const hasMissingIntegrations = checkMissingIntegrations(
+    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations
   );
 
   return (

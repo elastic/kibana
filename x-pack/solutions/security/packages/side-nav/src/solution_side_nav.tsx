@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { css } from '@emotion/react';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
@@ -103,7 +104,13 @@ export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(functi
 
   return (
     <TelemetryContextProvider tracker={tracker}>
-      <EuiFlexGroup gutterSize="none" direction="column">
+      <EuiFlexGroup
+        gutterSize="none"
+        direction="column"
+        css={css`
+          height: 100%;
+        `}
+      >
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem grow={false}>
@@ -271,7 +278,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem>{label}</EuiFlexItem>
           <EuiFlexItem grow={0} id={`solutionSideNavCustomIconItem-${id}`}>
-            <EuiIcon type={iconType} color="text" />
+            <EuiIcon type={iconType} color="text" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
