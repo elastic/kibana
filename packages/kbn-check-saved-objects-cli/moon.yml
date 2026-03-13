@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/check-saved-objects-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/check-saved-objects-cli'
+  title: '@kbn/check-saved-objects-cli'
   description: Moon project for @kbn/check-saved-objects-cli
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: packages/kbn-check-saved-objects-cli
+  sourceRoot: packages/kbn-check-saved-objects-cli
 dependsOn:
   - '@kbn/some-dev-log'
   - '@kbn/dev-cli-errors'
@@ -53,14 +52,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -100,6 +100,24 @@ export const EditDslStepsFlyout = ({
   const hasInitializedSubscriptionRef = useRef(false);
   const pendingOnChangeOutputRef = useRef<IngestStreamLifecycleDSL | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAppliedInitialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
+
+  useEffect(() => {
+    if (lastAppliedInitialStepsRef.current === initialSteps) return;
+    lastAppliedInitialStepsRef.current = initialSteps;
+
+    // Keep `hook_form_lib`'s defaultValue in sync with the latest draft owned by the parent.
+    // This allows fields to rehydrate correctly if flyout contents are remounted (e.g. push↔overlay).
+    lastEmittedOutputRef.current = initialSteps;
+
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+      pendingOnChangeTimeoutRef.current = null;
+    }
+    pendingOnChangeOutputRef.current = null;
+
+    form.updateFieldValues(initialSteps);
+  }, [form, initialSteps]);
 
   const { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths, reindexErrorsAfterRemoval } =
     useDslStepsFlyoutTabErrors();

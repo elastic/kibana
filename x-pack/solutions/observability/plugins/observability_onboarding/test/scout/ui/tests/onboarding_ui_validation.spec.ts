@@ -21,11 +21,7 @@ test.describe('Onboarding UI Validation', () => {
   test(
     'validates main page structure and navigation',
     {
-      tag: [
-        ...tags.stateful.classic,
-        ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
-      ],
+      tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
     },
     async ({ page, pageObjects }) => {
       await test.step('shows core use case tiles', async () => {
