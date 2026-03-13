@@ -200,4 +200,121 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
     await expect(task()).rejects.toThrow();
   });
+
+  it('resolves with `left:unavailable_shards_exception` if all errors are unavailable_shards_exception', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+        ],
+      })
+    );
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+    });
+
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
+    expect((result as Either.Left<any>).left.message).toContain('new_index');
+  });
+
+  it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'version conflict',
+              },
+            },
+          },
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+        ],
+      })
+    );
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+    });
+
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
+  });
+
+  it('throws if errors are a mix of unavailable_shards_exception and other non-retryable errors', async () => {
+    (catchRetryableEsClientErrors as jest.Mock).mockImplementation((e) => {
+      throw e;
+    });
+
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+          {
+            index: {
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'failed to parse',
+              },
+            },
+          },
+        ],
+      })
+    );
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+    });
+
+    await expect(task()).rejects.toThrow();
+  });
 });

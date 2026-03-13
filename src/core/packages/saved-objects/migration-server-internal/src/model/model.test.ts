@@ -2378,6 +2378,17 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK retries with exponential backoff on unavailable_shards_exception', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'unavailable_shards_exception' as const,
+          message: 'Not enough active copies to meet shard count of [ALL]',
+        });
+        const newState = model(reindexSourceToTempIndexBulkState, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
     });
 
     describe('SET_TEMP_WRITE_BLOCK', () => {
@@ -3074,6 +3085,17 @@ describe('migrations v2 model', () => {
         expect(newState.reason).toMatchInlineSnapshot(
           `"While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option."`
         );
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX retries with exponential backoff on unavailable_shards_exception', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'unavailable_shards_exception' as const,
+          message: 'Not enough active copies to meet shard count of [ALL]',
+        });
+        const newState = model(transformedDocumentsBulkIndexState, res);
+        expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
 
