@@ -388,10 +388,11 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             </>
           )}
           <RulesTableFiltersLayout
-            searchBar={<RulesTableSearchBar />}
             sidebarContent={<RulesTableFiltersSidebarContent selectedTab={selectedTab} />}
             onClearFilters={rulesTableContext.actions.clearFilters}
           >
+            <RulesTableSearchBar />
+            <EuiSpacer />
             <RulesTableWarnings warnings={warnings} />
             <RulesTableUtilityBar
               canBulkEdit={canEditRules}
@@ -405,6 +406,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               noItemsMessage={NO_ITEMS_MESSAGE}
               onChange={tableOnChangeCallback}
               pagination={paginationMemo}
+              tableCaption={i18n.RULES_TABLE_CAPTION}
               selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
               sorting={{
                 sort: {
@@ -414,6 +416,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
                 },
               }}
               {...tableProps}
+              tableLayout="auto"
+              css={{ overflowX: 'auto' }}
             />
           </RulesTableFiltersLayout>
         </>

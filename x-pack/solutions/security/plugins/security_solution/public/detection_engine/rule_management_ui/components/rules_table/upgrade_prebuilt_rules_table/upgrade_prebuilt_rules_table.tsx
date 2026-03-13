@@ -15,6 +15,7 @@ import {
   EuiSkeletonLoading,
   EuiSkeletonText,
   EuiSkeletonTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
@@ -24,8 +25,10 @@ import { RulesTableFiltersLayout } from '../rules_table_filters/rules_table_filt
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import { UpgradePrebuiltRulesTableSearchBar } from './upgrade_prebuilt_rules_table_filters';
-import { UpgradePrebuiltRulesTableFiltersSidebarContent } from './upgrade_prebuilt_rules_table_filters';
+import {
+  UpgradePrebuiltRulesTableSearchBar,
+  UpgradePrebuiltRulesTableFiltersSidebarContent,
+} from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
@@ -97,20 +100,18 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
             NO_ITEMS_MESSAGE
           ) : (
             <RulesTableFiltersLayout
-              searchBar={<UpgradePrebuiltRulesTableSearchBar />}
               sidebarContent={<UpgradePrebuiltRulesTableFiltersSidebarContent />}
               onClearFilters={() => setFilterOptions({})}
             >
-              <EuiFlexGroup
-                alignItems="flexStart"
-                gutterSize="s"
-                responsive={false}
-                wrap={true}
-              >
+              <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap={true}>
                 <EuiFlexItem grow={true}>
+                  <UpgradePrebuiltRulesTableSearchBar />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <UpgradePrebuiltRulesTableButtons selectedRules={selected} />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer />
               <EuiBasicTable
                 loading={isFetching}
                 items={ruleUpgradeStates}
@@ -136,6 +137,9 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
                 onChange={handleTableChange}
+                tableCaption={i18n.RULES_TABLE_CAPTION}
+                tableLayout="auto"
+                css={{ overflowX: 'auto' }}
               />
             </RulesTableFiltersLayout>
           )

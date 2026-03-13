@@ -28,8 +28,6 @@ const RULES_TABLE_FILTERS_SIDEBAR_PANEL_ID = 'rulesTableFiltersSidebar';
 const RULES_TABLE_FILTERS_MAIN_PANEL_ID = 'rulesTableFiltersMain';
 
 export interface RulesTableFiltersLayoutProps {
-  /** Search bar rendered at the top of the main content area (beside the sidebar) */
-  searchBar: React.ReactNode;
   /** Filter controls rendered in the left sidebar */
   sidebarContent: React.ReactNode;
   /** Main content (e.g. utility bar + table) */
@@ -39,7 +37,7 @@ export interface RulesTableFiltersLayoutProps {
 }
 
 export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
-  function RulesTableFiltersLayout({ searchBar, sidebarContent, children, onClearFilters }) {
+  function RulesTableFiltersLayout({ sidebarContent, children, onClearFilters }) {
     const [sidebarWidthPercent, setSidebarWidthPercent] = useState(
       RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT
     );
@@ -122,14 +120,11 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
               size={mainPanelSizePercent}
               initialSize={mainPanelSizePercent}
               minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT}%`}
-              scrollable={true}
               paddingSize="m"
               style={{ paddingBottom: 0, minHeight: 400 }}
               data-test-subj="rulesTableFiltersMainContent"
             >
-              <EuiSpacer />
               <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem grow={false}>{searchBar}</EuiFlexItem>
                 <EuiFlexItem grow={true}>{children}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiResizablePanel>

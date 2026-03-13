@@ -12,6 +12,7 @@ import {
   EuiSkeletonTitle,
   EuiSkeletonText,
   EuiBasicTable,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
@@ -102,10 +103,11 @@ export const AddPrebuiltRulesTable = React.memo(() => {
             <AddPrebuiltRulesTableNoItemsMessage />
           ) : (
             <RulesTableFiltersLayout
-              searchBar={<AddPrebuiltRulesTableSearchBar />}
               sidebarContent={<AddPrebuiltRulesTableFiltersSidebarContent />}
               onClearFilters={() => setFilterOptions({ name: '', tags: [] })}
             >
+              <AddPrebuiltRulesTableSearchBar />
+              <EuiSpacer />
               <EuiBasicTable
                 loading={isFetching}
                 items={rules}
@@ -126,6 +128,8 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 columns={rulesColumns}
                 onChange={handleTableChange}
                 tableCaption={i18n.PAGE_TITLE}
+                tableLayout="auto"
+                css={{ overflowX: 'auto' }}
               />
             </RulesTableFiltersLayout>
           )
