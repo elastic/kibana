@@ -312,7 +312,7 @@ describe('run_all.ts', () => {
       expect(mockSpawn).toHaveBeenCalledWith(
         process.execPath,
         [
-          'scripts/jest',
+          'scripts/jest.ts',
           '--config',
           'config1.js',
           '--runInBand',

@@ -58,7 +58,7 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   });
 
   const runStartTime = Date.now();
-  const reportTime = getTimeReporter(log, 'scripts/jest');
+  const reportTime = getTimeReporter(log, 'scripts/jest.ts');
 
   // Set default NODE_ENV
   if (!process.env.NODE_ENV) {

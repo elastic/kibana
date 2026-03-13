@@ -262,7 +262,7 @@ async function runConfigs(
         log.info(`Starting ${relConfig}`);
 
         const args = [
-          'scripts/jest',
+          'scripts/jest.ts',
           '--config',
           relative(REPO_ROOT, cleanConfig),
           '--runInBand',

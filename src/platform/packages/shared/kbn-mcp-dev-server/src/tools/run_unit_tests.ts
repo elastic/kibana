@@ -374,10 +374,10 @@ const runJestWithDetails = async (
   // Otherwise, run all tests for the package.
   const testCommand =
     files && files.length > 0
-      ? `node scripts/jest --config ${configPath}/jest.config.js --findRelatedTests ${files.join(
+      ? `node scripts/jest.ts --config ${configPath}/jest.config.js --findRelatedTests ${files.join(
           ' '
         )} --json --outputFile ${reportPath} ${coverageArgs}`
-      : `node scripts/jest --config ${configPath}/jest.config.js --json --outputFile ${reportPath} ${coverageArgs}`;
+      : `node scripts/jest.ts --config ${configPath}/jest.config.js --json --outputFile ${reportPath} ${coverageArgs}`;
 
   try {
     const { all: combinedOutput = '', exitCode } = await execa.command(testCommand, {

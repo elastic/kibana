@@ -83,7 +83,7 @@ it('discovers failures in jest report', async () => {
     Array [
       Object {
         "classname": "X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp",
-        "commandLine": "node scripts/jest --config some/jest/config.ts",
+        "commandLine": "node scripts/jest.ts --config some/jest/config.ts",
         "failure": "
             TypeError: Cannot read property '0' of undefined
         at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)

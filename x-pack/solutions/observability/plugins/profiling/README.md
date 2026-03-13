@@ -43,7 +43,7 @@ The authentication and authorization on this endpoint are provided as part of th
 ### Unit Tests (Jest)
 
 ```
-node scripts/jest --config x-pack/solutions/observability/plugins/profiling/jest.config.js [--watchAll]
+node scripts/jest.ts --config x-pack/solutions/observability/plugins/profiling/jest.config.js [--watchAll]
 ```
 
 ## E2E Tests (Scout)

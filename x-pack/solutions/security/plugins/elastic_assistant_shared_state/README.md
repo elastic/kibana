@@ -18,4 +18,4 @@ Maintained by the Security Solution team - @elastic/security-generative-ai
 
 ### Testing
 
-To run the tests for this plugin, run `node scripts/jest --watch x-pack/solutions/security/plugins/elastic_assistant_shared_state/jest.config.js --coverage` from the Kibana root directory.
+To run the tests for this plugin, run `node scripts/jest.ts --watch x-pack/solutions/security/plugins/elastic_assistant_shared_state/jest.config.js --coverage` from the Kibana root directory.

@@ -201,7 +201,7 @@ function runInlineJest(inlineConfig, testFile) {
   const res = spawnSync(
     process.execPath,
     [
-      path.join(REPO_ROOT, 'scripts/jest.js'),
+      path.join(REPO_ROOT, 'scripts/jest.ts'),
       '--config',
       JSON.stringify(inlineConfig),
       testFile,

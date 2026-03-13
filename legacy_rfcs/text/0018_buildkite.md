@@ -432,7 +432,7 @@ steps:
       docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
       docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
   - wait
-  - command: node scripts/jest --ci --verbose --maxWorkers=6
+  - command: node scripts/jest.ts --ci --verbose --maxWorkers=6
     label: 'Jest'
     artifact_paths: target/junit/**/*.xml
     plugins:

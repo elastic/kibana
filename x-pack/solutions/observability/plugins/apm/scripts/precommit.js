@@ -47,7 +47,7 @@ const tasks = new Listr(
         execa(
           'node',
           [
-            resolve(__dirname, '../../../../../scripts/jest.js'),
+            resolve(__dirname, '../../../../../scripts/jest.ts'),
             '--config',
             resolve(__dirname, '../jest.config.js'),
             '--maxWorkers',

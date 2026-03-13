@@ -89,5 +89,5 @@ await client.close();
 #### How to run tests
 
 ```bash
-node scripts/jest_integration 'x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'
+node scripts/jest_integration.ts 'x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'
 ```

@@ -156,7 +156,7 @@ it('rewrites jest reports with minimal changes', async () => {
     --- jest.xml
     +++ jest.xml
     @@ -3,13 +3,17 @@
-       ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" command-line="node scripts/jest --config some/jest/config.ts"›
+       ‹testsuite name="x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" timestamp="2019-06-07T03:42:21" time="14.504" tests="5" failures="1" skipped="0" file="/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts" command-line="node scripts/jest.ts --config some/jest/config.ts"›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can start and end a process" time="1.316"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can force kill the process if langServer can not exit" time="3.182"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="launcher can reconnect if process died" time="7.060"›

@@ -14,8 +14,8 @@ function createBenchmark(name: string, config: string, shards: number) {
   return {
     kind: 'script' as const,
     name,
-    beforeAll: `node scripts/jest --clearCache --config ${config} && node scripts/jest --config ${config} --runInBand --shard=1/${shards}`,
-    run: `node scripts/jest --config ${config} --runInBand --shard=1/${shards}`,
+    beforeAll: `node scripts/jest.ts --clearCache --config ${config} && node scripts/jest.ts --config ${config} --runInBand --shard=1/${shards}`,
+    run: `node scripts/jest.ts --config ${config} --runInBand --shard=1/${shards}`,
     compare: {
       exists: 'lhs' as const,
       missing: 'lhs' as const,
