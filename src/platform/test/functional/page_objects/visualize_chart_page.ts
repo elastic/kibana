@@ -28,9 +28,17 @@ export class VisualizeChartPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+  private readonly retryDelay = this.config.get('timeouts.retryDelay');
 
   public async getEsChartDebugState(chartSelector: string) {
-    return await this.elasticChart.getChartDebugData(chartSelector);
+    // `@elastic/charts` debug state is only available after the chart has rendered with the debug flag enabled.
+    // Retry until it's available using the standard waitFor timeout.
+    return await this.retry.tryForTime(
+      this.config.get('timeouts.waitFor'),
+      async () => await this.elasticChart.getChartDebugData(chartSelector),
+      undefined,
+      this.retryDelay
+    );
   }
 
   public async getAllESChartsDebugDataByTestSubj(chartSelector: string) {
@@ -172,8 +180,8 @@ export class VisualizeChartPageObject extends FtrService {
     await this.waitForVisualizationRenderingStabilized();
   }
 
-  public async doesLegendColorChoiceExist(color: string) {
-    return await this.testSubjects.exists(`visColorPickerColor-${color}`);
+  public async doesLegendColorChoiceExist(color: string, timeout = 0) {
+    return await this.testSubjects.exists(`visColorPickerColor-${color}`, { timeout });
   }
 
   public async selectNewLegendColorChoice(color: string) {
@@ -214,19 +222,34 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async waitForVisualizationRenderingStabilized() {
+    const start = Date.now();
     await this.header.waitUntilLoadingHasFinished();
-    // assuming rendering is done when data-rendering-count is constant within 1000 ms
-    await this.retry.waitFor('rendering count to stabilize', async () => {
-      const firstCount = await this.getVisualizationRenderingCount();
-      this.log.debug(`-- firstCount=${firstCount}`);
+    // Wait until the rendering count stays constant across a few consecutive polls.
+    // This avoids hard sleeps while still ensuring we observed "stability" over time.
+    let lastCount: number | undefined;
+    let stablePolls = 0;
+    const requiredStablePolls = 3;
+    await this.retry.tryForTime(
+      this.config.get('timeouts.waitFor'),
+      async () => {
+        const currentCount = await this.getVisualizationRenderingCount();
+        this.log.debug(`-- currentRenderingCount=${currentCount}`);
 
-      await this.common.sleep(2000);
+        if (lastCount === currentCount) {
+          stablePolls++;
+        } else {
+          stablePolls = 0;
+        }
+        lastCount = currentCount;
 
-      const secondCount = await this.getVisualizationRenderingCount();
-      this.log.debug(`-- secondCount=${secondCount}`);
-
-      return firstCount === secondCount;
-    });
+        if (stablePolls < requiredStablePolls) {
+          throw new Error('rendering count not yet stable');
+        }
+      },
+      undefined,
+      this.retryDelay
+    );
+    this.common.logSlowTiming('waitForVisualizationRenderingStabilized', start);
   }
 
   public async waitForVisualization() {
@@ -271,41 +294,77 @@ export class VisualizeChartPageObject extends FtrService {
   }
 
   public async openLegendOptionColorsForXY(name: string, chartSelector: string) {
-    await this.waitForVisualizationRenderingStabilized();
+    const start = Date.now();
     await this.retry.try(async () => {
       const chart = await this.find.byCssSelector(chartSelector);
+      // Prefer the direct elastic-charts readiness signal over generic "stabilized" heuristics.
+      await this.retry.tryForTime(
+        this.config.get('timeouts.waitFor'),
+        async () => {
+          const status = await chart.findByCssSelector('.echChartStatus');
+          const complete = await status.getAttribute('data-ech-render-complete');
+          if (complete !== 'true') {
+            throw new Error(`chart not render-complete yet (data-ech-render-complete=${complete})`);
+          }
+        },
+        undefined,
+        this.retryDelay
+      );
       const legendItemColor = await chart.findByCssSelector(
         `[data-ech-series-name="${name}"] .echLegendItem__color`
       );
       await legendItemColor.click();
 
-      await this.waitForVisualizationRenderingStabilized();
       // arbitrary color chosen, any available would do
       const arbitraryColor = '#ee72a6';
-      const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
-      if (!isOpen) {
-        throw new Error('legend color selector not open');
-      }
+      await this.retry.tryForTime(
+        this.config.get('timeouts.waitFor'),
+        async () => {
+          const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor, 250);
+          if (!isOpen) throw new Error('legend color selector not open yet');
+        },
+        undefined,
+        this.retryDelay
+      );
     });
+    this.common.logSlowTiming('openLegendOptionColorsForXY', start);
   }
 
   public async openLegendOptionColorsForPie(name: string, chartSelector: string) {
-    await this.waitForVisualizationRenderingStabilized();
+    const start = Date.now();
     await this.retry.try(async () => {
       const chart = await this.find.byCssSelector(chartSelector);
+      // Prefer the direct elastic-charts readiness signal over generic "stabilized" heuristics.
+      await this.retry.tryForTime(
+        this.config.get('timeouts.waitFor'),
+        async () => {
+          const status = await chart.findByCssSelector('.echChartStatus');
+          const complete = await status.getAttribute('data-ech-render-complete');
+          if (complete !== 'true') {
+            throw new Error(`chart not render-complete yet (data-ech-render-complete=${complete})`);
+          }
+        },
+        undefined,
+        this.retryDelay
+      );
       const legendItemColor = await chart.findByCssSelector(
         `[data-ech-series-name="${name}"] .echLegendItem__color`
       );
       await legendItemColor.click();
 
-      await this.waitForVisualizationRenderingStabilized();
       // arbitrary color chosen, any available would do
       const arbitraryColor = '#f66d64';
-      const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
-      if (!isOpen) {
-        throw new Error('legend color selector not open');
-      }
+      await this.retry.tryForTime(
+        this.config.get('timeouts.waitFor'),
+        async () => {
+          const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor, 250);
+          if (!isOpen) throw new Error('legend color selector not open yet');
+        },
+        undefined,
+        this.retryDelay
+      );
     });
+    this.common.logSlowTiming('openLegendOptionColorsForPie', start);
   }
 
   public async filterOnTableCell(columnIndex: number, rowIndex: number) {
