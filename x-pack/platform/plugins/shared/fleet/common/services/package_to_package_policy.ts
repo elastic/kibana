@@ -141,6 +141,7 @@ export const packageToPackagePolicyInputs = (
         // disable deprecated streams on new installations
         enabled: packageStream.deprecated ? false : packageStream.enabled !== false,
         data_stream: packageStream.data_stream,
+        ...(packageStream.migrate_from ? { migrate_from: packageStream.migrate_from } : {}),
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
