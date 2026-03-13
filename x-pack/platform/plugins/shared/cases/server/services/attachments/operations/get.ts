@@ -21,6 +21,7 @@ import type {
 } from '../../../common/types/attachments_v1';
 import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
@@ -47,6 +48,9 @@ import {
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import type { AttachmentSavedObject } from '../../../common/types';
 import { getCaseReferenceId } from '../../../common/references';
+import { getAttachmentSavedObjectType } from '../../../common/attachments';
+import { UnifiedAttachmentAttributesRt } from '../../../../common/types/domain/attachment/v2';
+import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -58,6 +62,37 @@ export class AttachmentGetter {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
       );
+
+      const savedObjectType = getAttachmentSavedObjectType(this.context.config);
+
+      if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
+        const [newTypeResponse, legacyResponse] = await Promise.all([
+          this.context.unsecuredSavedObjectsClient.bulkGet<UnifiedAttachmentAttributes>(
+            attachmentIds.map((id) => ({ id, type: CASE_ATTACHMENT_SAVED_OBJECT }))
+          ),
+          this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
+            attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
+          ),
+        ]);
+
+        const merged: Array<SavedObject<AttachmentPersistedAttributes>> = [];
+        for (let i = 0; i < attachmentIds.length; i++) {
+          const newSo = newTypeResponse.saved_objects[i];
+          const legacySo = legacyResponse.saved_objects[i];
+
+          if (!isSOError(newSo)) {
+            merged.push(newSo as unknown as SavedObject<AttachmentPersistedAttributes>);
+          } else if (!isSOError(legacySo)) {
+            merged.push(legacySo);
+          } else {
+            merged.push(legacySo);
+          }
+        }
+
+        return this.transformAndDecodeBulkGetResponse(
+          Object.assign(legacyResponse, { saved_objects: merged })
+        );
+      }
 
       const response =
         await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
@@ -80,10 +115,12 @@ export class AttachmentGetter {
 
     for (const so of response.saved_objects) {
       if (isSOError(so)) {
-        // Forcing the type here even though it is an error. The caller is responsible for
-        // determining what to do with the errors
-        // TODO: we should fix the return type of this bulkGet so that it can return errors
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+      } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        validatedAttachments.push(
+          Object.assign(so, { attributes: validatedAttributes }) as unknown as AttachmentSavedObjectTransformed
+        );
       } else {
         const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
           so,
@@ -271,13 +308,40 @@ export class AttachmentGetter {
   public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
-        CASE_COMMENT_SAVED_OBJECT,
-        attachmentId
-      );
+
+      const savedObjectType = getAttachmentSavedObjectType(this.context.config);
+
+      let res: SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>;
+
+      if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
+        try {
+          res = await this.context.unsecuredSavedObjectsClient.get<UnifiedAttachmentAttributes>(
+            CASE_ATTACHMENT_SAVED_OBJECT,
+            attachmentId
+          );
+        } catch {
+          res =
+            await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
+              CASE_COMMENT_SAVED_OBJECT,
+              attachmentId
+            );
+        }
+      } else {
+        res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
+          CASE_COMMENT_SAVED_OBJECT,
+          attachmentId
+        );
+      }
+
+      if (res.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(res.attributes);
+        return Object.assign(res, {
+          attributes: validatedAttributes,
+        }) as unknown as AttachmentSavedObjectTransformed;
+      }
 
       const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-        res,
+        res as SavedObject<AttachmentPersistedAttributes>,
         this.context.persistableStateAttachmentTypeRegistry
       );
 

@@ -9,6 +9,7 @@ import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -53,6 +54,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const handleOutlineComment = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
   return {
     userAction,
@@ -60,6 +62,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     currentUserProfile: userProfiles[0],
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
     attachments: basicCase.comments,
