@@ -10,7 +10,6 @@ import React from 'react';
 import { redirectToDetections } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
