@@ -22,8 +22,6 @@ import { createUserProfile, createUserService } from '../services/user_service/u
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 describe('NotificationPolicyClient', () => {
   let client: NotificationPolicyClient;
@@ -33,6 +31,7 @@ describe('NotificationPolicyClient', () => {
   let userProfile: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
+  let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -50,14 +49,14 @@ describe('NotificationPolicyClient', () => {
       if (id === 'policy-id-del-1') return { apiKey: 'some-key', createdByUser: false };
       return null;
     });
+    mockEsoClient = mockEncryptedSavedObjects.getClient();
 
     client = new NotificationPolicyClient(
       notificationPolicySavedObjectService,
       userService,
       apiKeyService,
-      httpServerMock.createKibanaRequest(),
-      mockEncryptedSavedObjects as any,
-      spacesMock.createStart()
+      mockEsoClient as any,
+      'default'
     );
 
     userProfile.getCurrent.mockResolvedValue(createUserProfile('elastic_profile_uid'));

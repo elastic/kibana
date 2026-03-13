@@ -63,23 +63,13 @@ export class ApiKeyService implements ApiKeyServiceContract {
       return;
     }
     const apiKeysToInvalidate = apiKeys.map((key) => {
-      let apiKeyId: string;
-      let apiKeyValue: string | undefined;
-
-      const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-
-      if (apiKey && isUiamCredential(apiKey)) {
-        apiKeyId = id;
-        apiKeyValue = apiKey;
-      } else {
-        apiKeyId = id;
-      }
+      const { apiKeyId, apiKeyValue } = this.decodeApiKey(key);
 
       return {
         attributes: {
           apiKeyId,
           createdAt: new Date().toISOString(),
-          ...(apiKeyValue ? { uiamApiKey: apiKeyValue } : {}),
+          ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
         },
         type: API_KEY_PENDING_INVALIDATION_TYPE,
       };
@@ -99,6 +89,11 @@ export class ApiKeyService implements ApiKeyServiceContract {
     }
   }
 
+  private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
+    const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
+    return { apiKeyId: id, apiKeyValue: apiKey };
+  }
+
   private isAuthenticationTypeAPIKey(): boolean {
     const user = this.securityService.authc.getCurrentUser(this.request);
     return user?.authentication_type === 'api_key';
@@ -112,21 +107,19 @@ export class ApiKeyService implements ApiKeyServiceContract {
       );
     }
 
-    const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
-      .toString()
-      .split(':');
+    const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);
 
-    if (!apiKeyId || !apiKey) {
+    if (!apiKeyId || !apiKeyValue) {
       throw new Error(
         `Failed to parse API key credentials from authorization header for notification policy: ${name}`
       );
     }
 
-    if (isUiamCredential(apiKey) && !this.shouldGrantUiam()) {
+    if (isUiamCredential(apiKeyValue) && !this.shouldGrantUiam()) {
       throw new Error('UIAM API keys should only be used in serverless environments');
     }
 
-    const encoded = encodeApiKey(apiKeyId, apiKey)!;
+    const encoded = encodeApiKey(apiKeyId, apiKeyValue)!;
 
     return {
       apiKey: encoded,

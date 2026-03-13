@@ -17,6 +17,7 @@ import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
+import { NotificationPolicyNamespaceToken } from '../lib/notification_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
@@ -66,7 +67,25 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
-  bind(NotificationPolicyClient).toSelf().inRequestScope();
+  bind(NotificationPolicyNamespaceToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const spaceId = spaces.spacesService.getSpaceId(request);
+      return spaces.spacesService.spaceIdToNamespace(spaceId);
+    })
+    .inRequestScope();
+  bind(NotificationPolicyClient)
+    .toDynamicValue(({ get }) => {
+      return new NotificationPolicyClient(
+        get(NotificationPolicySavedObjectServiceScopedToken),
+        get(UserService),
+        get(ApiKeyService),
+        get(EncryptedSavedObjectsClientToken),
+        get(NotificationPolicyNamespaceToken)
+      );
+    })
+    .inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();

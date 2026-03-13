@@ -6,35 +6,34 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { Request } from '@kbn/core-di-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { PluginStart } from '@kbn/core-di';
 import {
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   type NotificationPolicySavedObjectAttributes,
 } from '../../saved_objects';
+import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import type { AlertingServerStartDependencies } from '../../types';
 import type {
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
   UpdateNotificationPolicyParams,
 } from './types';
+import { NotificationPolicyNamespaceToken } from './tokens';
 
 const toAuthResponse = (
   auth: NotificationPolicySavedObjectAttributes['auth']
@@ -50,13 +49,10 @@ export class NotificationPolicyClient {
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(
-      PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>('encryptedSavedObjects')
-    )
-    private readonly encryptedSavedObjects: AlertingServerStartDependencies['encryptedSavedObjects'],
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: AlertingServerStartDependencies['spaces']
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly esoClient: EncryptedSavedObjectsClient,
+    @inject(NotificationPolicyNamespaceToken)
+    private readonly namespace: string | undefined
   ) {}
 
   public async createNotificationPolicy(
@@ -91,7 +87,7 @@ export class NotificationPolicyClient {
 
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
-      this._markApiKeysForInvalidation(attributes.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(`Notification policy with id "${conflictId}" already exists`);
@@ -183,7 +179,7 @@ export class NotificationPolicyClient {
       });
     } catch (e) {
       // If update fails we explicitly mark the new API key for invalidation
-      this._markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
+      this.markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -192,7 +188,7 @@ export class NotificationPolicyClient {
       throw e;
     }
 
-    this._markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
 
     return {
       id: params.options.id,
@@ -226,10 +222,10 @@ export class NotificationPolicyClient {
     await this.getNotificationPolicy({ id });
     const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
-    this._markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+    this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
   }
 
-  private _markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
     if (!apiKey || createdByUser) {
       return;
     }
@@ -242,16 +238,11 @@ export class NotificationPolicyClient {
     id: string
   ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
     try {
-      const spaceId = this.spaces.spacesService.getSpaceId(this.request);
-      const namespace = this.spaces.spacesService.spaceIdToNamespace(spaceId);
-      const esoClient = this.encryptedSavedObjects.getClient({
-        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
-      });
       const doc =
-        await esoClient.getDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+        await this.esoClient.getDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
           id,
-          { namespace }
+          this.namespace ? { namespace: this.namespace } : undefined
         );
       const auth = doc.attributes?.auth;
       if (!auth?.apiKey) return null;
