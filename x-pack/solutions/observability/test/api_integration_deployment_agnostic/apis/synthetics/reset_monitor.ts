@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidv4 } from 'uuid';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type {
   EncryptedSyntheticsSavedMonitor,
@@ -45,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(monitor);
+        .send({ ...monitor, name: `${monitor.name}-${uuidv4()}` });
 
       expect(res.status).to.eql(200, JSON.stringify(res.body));
       return res.body;

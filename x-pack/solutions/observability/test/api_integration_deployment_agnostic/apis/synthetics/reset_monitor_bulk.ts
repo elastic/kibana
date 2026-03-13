@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { v4 as uuidv4 } from 'uuid';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type {
   EncryptedSyntheticsSavedMonitor,
@@ -45,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(monitor);
+        .send({ ...monitor, name: `${monitor.name}-${uuidv4()}` });
 
       expect(res.status).to.eql(200, JSON.stringify(res.body));
       return res.body;
@@ -255,21 +256,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
-      it('returns per-monitor error for unauthorized monitors', async () => {
+      it('returns 403 for viewer user', async () => {
         const mon1 = await saveMonitor(httpMonitorJson as MonitorFields);
         const mon2 = await saveMonitor(httpMonitorJson as MonitorFields);
         try {
           const viewerUser = await samlAuth.createM2mApiKeyWithRoleScope('viewer');
-          const res = await supertest
+          await supertest
             .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_RESET)
             .set(viewerUser.apiKeyHeader)
             .set(samlAuth.getInternalRequestHeader())
             .send({ ids: [mon1.id, mon2.id] })
-            .expect(200);
-
-          const results = res.body.result;
-          expect(results.every((r: any) => r.reset === false)).to.eql(true);
-          expect(results.every((r: any) => r.error != null)).to.eql(true);
+            .expect(403);
         } finally {
           await monitorTestService.deleteMonitor(editorUser, mon1.id, 200, 'default');
           await monitorTestService.deleteMonitor(editorUser, mon2.id, 200, 'default');
