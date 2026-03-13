@@ -96,6 +96,13 @@ var IGNORE_WARNINGS = [
     code: 'DEP0060',
     message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
   },
+  // cliui has a malformed repository URL in its package.json
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0170',
+    message:
+      'The URL git+ssh://git@github.com:isaacs/cliui is invalid. Future versions of Node.js will throw an error.',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

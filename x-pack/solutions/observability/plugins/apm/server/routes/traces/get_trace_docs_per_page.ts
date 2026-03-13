@@ -159,12 +159,18 @@ export async function getTraceDocsPerPage({
           .requireFields(requiredSpanFields)
           .unflatten();
 
+        const hasCompleteSpanComposite =
+          !!span.composite &&
+          !!span.composite.sum?.us &&
+          !!span.composite.count &&
+          !!span.composite.compression_strategy;
+
         const spanWaterfallEvent: WaterfallSpan = {
           ...spanEvent,
           processor: processor as { event: 'span' },
           span: {
             ...span,
-            composite: span.composite
+            composite: hasCompleteSpanComposite
               ? (span.composite as Required<WaterfallSpan['span']>['composite'])
               : undefined,
             links: spanLinks,
