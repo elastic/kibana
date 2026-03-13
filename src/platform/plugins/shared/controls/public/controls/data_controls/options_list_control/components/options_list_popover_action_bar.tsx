@@ -104,9 +104,9 @@ export const OptionsListPopoverActionBar = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (!field) return [];
-    return getCompatibleSearchTechniques(field.type);
-  }, [field]);
+    if (!isDSLOptionsListApi(componentApi)) return getCompatibleSearchTechniques('string');
+    return field ? getCompatibleSearchTechniques(field.type) : [];
+  }, [componentApi, field]);
 
   const defaultSearchTechnique = useMemo(
     () => searchTechnique ?? compatibleSearchTechniques[0],

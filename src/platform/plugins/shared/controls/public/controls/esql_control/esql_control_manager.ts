@@ -26,7 +26,6 @@ import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
 } from '@kbn/controls-schemas';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -340,8 +339,7 @@ export function initializeESQLControlManager(
       totalCardinality$,
       setSelectedOptions,
       setSearchString,
-      field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
-      searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('wildcard'),
+      searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique>('wildcard'),
       searchString$,
       searchStringValid$: new BehaviorSubject(true),
       invalidSelections$: temporaryStateManager.api.invalidSelections$,
