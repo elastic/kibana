@@ -99,7 +99,9 @@ describe('useStatusAction', () => {
         expect(onAction).toHaveBeenCalled();
       });
 
-      expect(onActionSuccess).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onActionSuccess).toHaveBeenCalled();
+      });
       expect(updateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           cases: [{ status, id: basicCase.id, version: basicCase.version }],
@@ -123,14 +125,14 @@ describe('useStatusAction', () => {
   it('shows closed alert count details when closing with a reason', async () => {
     const coreStart = coreMock.createStart();
     jest.spyOn(api, 'updateCases').mockResolvedValue({
-      cases: [basicCase],
-      alertsStatusUpdateSummary: {
-        total: 3,
-        closed: 3,
-        open: 0,
-        inProgress: 0,
-        versionConflicts: 0,
-      },
+      cases: [
+        {
+          ...basicCase,
+          patchCaseStats: {
+            numberOfAlertsSyncedWithCloseReason: 3,
+          },
+        },
+      ],
     });
 
     const { result } = renderHook(

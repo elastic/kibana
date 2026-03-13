@@ -20,8 +20,8 @@ export const CLOSED_CASES = ({
     defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
-export const CLOSED_ALERTS_SYNC_SUMMARY = (closedAlertsCount: number) =>
-  i18n.translate('xpack.cases.actions.closedAlertsSyncSummary', {
+export const CLOSED_CASES_SUMMARY = (closedAlertsCount: number) =>
+  i18n.translate('xpack.cases.actions.closedCasesSummary', {
     values: { closedAlertsCount },
     defaultMessage:
       '{closedAlertsCount, plural, =0 {No attached alerts were closed.} =1 {Closed 1 attached alert.} other {Closed {closedAlertsCount} attached alerts.}}',

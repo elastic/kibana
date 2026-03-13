@@ -40,7 +40,6 @@ describe('useUpdateCases', () => {
     await waitFor(() =>
       expect(spy).toHaveBeenCalledWith({
         cases: allCases.cases,
-        includeAlertsStatusUpdateSummary: undefined,
       })
     );
   });

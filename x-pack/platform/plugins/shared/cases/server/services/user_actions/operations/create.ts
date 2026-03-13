@@ -26,6 +26,7 @@ import { isUserActionType } from '../../../../common/utils/user_actions';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  AddSyncedAlertsCountToUserActionsParams,
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
@@ -123,6 +124,43 @@ export class UserActionPersister {
         });
 
       acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
+  // Returns a new UserActionsDict with syncedAlertsCount added to status actions
+  public addSyncedAlertsCountToUserActions({
+    userActionsDict,
+    syncedAlertsCountByCaseId,
+  }: AddSyncedAlertsCountToUserActionsParams): UserActionsDict {
+    return Object.keys(userActionsDict).reduce<UserActionsDict>((acc, caseId) => {
+      const syncedAlertsCount = syncedAlertsCountByCaseId.get(caseId);
+      const userActions = userActionsDict[caseId];
+
+      if (syncedAlertsCount == null) {
+        acc[caseId] = userActions;
+        return acc;
+      }
+
+      acc[caseId] = userActions.map((userAction) => {
+        if (userAction.parameters.attributes.type !== UserActionTypes.status) {
+          return userAction;
+        }
+
+        return {
+          ...userAction,
+          parameters: {
+            ...userAction.parameters,
+            attributes: {
+              ...userAction.parameters.attributes,
+              payload: {
+                ...userAction.parameters.attributes.payload,
+                syncedAlerts: syncedAlertsCount,
+              },
+            },
+          },
+        };
+      });
+
       return acc;
     }, {});
   }

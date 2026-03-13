@@ -764,9 +764,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
+    const casesSnakeWithBulkUpdateStats = casesSnake.map((theCase) => ({
+      ...theCase,
+      patchCaseStats: {
+        numberOfAlertsSyncedWithCloseReason: 0,
+      },
+    }));
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
+      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
     });
 
     const data = [
@@ -788,7 +795,15 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual({ cases });
+      expect(resp.cases).toHaveLength(cases.length);
+      expect(resp.cases[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          patchCaseStats: {
+            numberOfAlertsSyncedWithCloseReason: 0,
+          },
+        })
+      );
     });
 
     it('returns an empty array if the cases are empty', async () => {
@@ -796,41 +811,29 @@ describe('Cases API', () => {
       expect(resp).toEqual({ cases: [] });
     });
 
-    it('returns cases with alert status update summary when requested', async () => {
-      fetchMock.mockResolvedValue({
-        cases: casesSnake,
-        alertsStatusUpdateSummary: {
-          total: 2,
-          closed: 2,
-          open: 0,
-          inProgress: 0,
-          versionConflicts: 0,
-        },
-      });
+    it('returns cases with per-case alert status update summary', async () => {
+      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
 
       const resp = await updateCases({
         cases: data,
         signal: abortCtrl.signal,
-        includeAlertsStatusUpdateSummary: true,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
         body: JSON.stringify({ cases: data }),
-        query: { include_alerts_status_update_summary: true },
         signal: abortCtrl.signal,
       });
 
-      expect(resp).toEqual({
-        cases,
-        alertsStatusUpdateSummary: {
-          total: 2,
-          closed: 2,
-          open: 0,
-          inProgress: 0,
-          versionConflicts: 0,
-        },
-      });
+      expect(resp.cases).toHaveLength(cases.length);
+      expect(resp.cases[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          patchCaseStats: {
+            numberOfAlertsSyncedWithCloseReason: 0,
+          },
+        })
+      );
     });
   });
 

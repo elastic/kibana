@@ -366,6 +366,11 @@ export interface BuildUserActionsDictParams {
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
 
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertsCountByCaseId: Map<string, number>;
+}
+
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];
 }

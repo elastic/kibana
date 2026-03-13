@@ -28,8 +28,8 @@ import type {
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
+  PatchCaseStats,
   CasesPatchResponse,
-  AlertsStatusUpdateSummary,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -106,7 +106,7 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
-  decodeCasesPatchResponse,
+  decodeCasesWithBulkUpdateStatsResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
@@ -373,42 +373,29 @@ export const patchCase = async ({
 
 export const updateCases = async ({
   cases,
-  includeAlertsStatusUpdateSummary = false,
   signal,
 }: {
   cases: CaseUpdateRequest[];
-  includeAlertsStatusUpdateSummary?: boolean;
   signal?: AbortSignal;
 }): Promise<{
-  cases: CasesUI;
-  alertsStatusUpdateSummary?: AlertsStatusUpdateSummary;
+  cases: Array<CaseUI & { patchCaseStats: PatchCaseStats }>;
 }> => {
   if (cases.length === 0) {
     return { cases: [] };
   }
 
-  if (includeAlertsStatusUpdateSummary) {
-    const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
-      method: 'PATCH',
-      body: JSON.stringify({ cases }),
-      query: { include_alerts_status_update_summary: true },
-      signal,
-    });
-
-    const decodedResponse = decodeCasesPatchResponse(response);
-    return {
-      cases: convertCasesToCamelCase(decodedResponse.cases),
-      alertsStatusUpdateSummary: decodedResponse.alertsStatusUpdateSummary,
-    };
-  }
-
-  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
   });
 
-  return { cases: convertCasesToCamelCase(decodeCasesResponse(response)) };
+  const decodedResponse = decodeCasesWithBulkUpdateStatsResponse(response);
+  return {
+    cases: convertArrayToCamelCase(decodedResponse) as Array<
+      CaseUI & { patchCaseStats: PatchCaseStats }
+    >,
+  };
 };
 
 export const replaceCustomField = async ({

@@ -315,6 +315,28 @@ describe('UserActionPersister', () => {
       ).toEqual(getBothSettingsUserActions({ isMock: false }));
     });
 
+    it('adds synced alerts count only to status user actions', () => {
+      const userActionsDict = persister.buildUserActions({
+        updatedCases: patchCasesRequest,
+        user: testUser,
+      });
+
+      const updatedUserActionsDict = persister.addSyncedAlertsCountToUserActions({
+        userActionsDict,
+        syncedAlertsCountByCaseId: new Map([['1', 3]]),
+      });
+
+      const statusAction = updatedUserActionsDict['1'].find(
+        ({ parameters }) => parameters.attributes.type === UserActionTypes.status
+      );
+
+      expect(statusAction?.parameters.attributes.payload).toEqual({
+        status: 'closed',
+        syncedAlerts: 3,
+      });
+      expect(updatedUserActionsDict['2']).toEqual(userActionsDict['2']);
+    });
+
     it('adds close reason details to the status audit message when alerts are synced', () => {
       const updatedCases = {
         ...patchCasesRequest,

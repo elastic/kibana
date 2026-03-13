@@ -30,7 +30,7 @@ import type {
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
-  CasesPatchResponseRt,
+  PatchCasesResponseRt,
   CaseUserActionStatsResponseRt,
   FindCasesContainingAllAlertsResponseRt,
   SingleCaseMetricsResponseRt,
@@ -77,8 +77,8 @@ export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResp
 export const decodeCasesResponse = (respCase?: Cases) =>
   pipe(CasesRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
-export const decodeCasesPatchResponse = (response?: CasesPatchResponse) =>
-  pipe(CasesPatchResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
+export const decodeCasesWithBulkUpdateStatsResponse = (response?: CasesPatchResponse) =>
+  pipe(PatchCasesResponseRt.decode(response), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: Configurations) => {
   return pipe(

@@ -18,34 +18,31 @@ import { statuses } from '../../status';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
 
-const getStatusToasterMessage = (status: CaseStatuses, cases: CasesUI): string => {
+const getStatusToast = ({
+  status,
+  cases,
+  closedAlertsCount,
+}: {
+  status: CaseStatuses;
+  cases: CasesUI;
+  closedAlertsCount?: number;
+}): { title: string; text?: string } => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
 
   if (status === CaseStatuses.open) {
-    return i18n.REOPENED_CASES({ totalCases, caseTitle });
+    return { title: i18n.REOPENED_CASES({ totalCases, caseTitle }) };
   } else if (status === CaseStatuses['in-progress']) {
-    return i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle });
+    return { title: i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle }) };
   } else if (status === CaseStatuses.closed) {
-    return i18n.CLOSED_CASES({ totalCases, caseTitle });
+    return {
+      title: i18n.CLOSED_CASES({ totalCases, caseTitle }),
+      text: closedAlertsCount == null ? undefined : i18n.CLOSED_CASES_SUMMARY(closedAlertsCount),
+    };
   }
 
-  return '';
+  return { title: '' };
 };
-
-const getCloseStatusToast = ({
-  cases,
-  closedAlertsCount,
-}: {
-  cases: CasesUI;
-  closedAlertsCount: number;
-}) => ({
-  title: i18n.CLOSED_CASES({
-    totalCases: cases.length,
-    caseTitle: cases.length === 1 ? cases[0].title : '',
-  }),
-  text: i18n.CLOSED_ALERTS_SYNC_SUMMARY(closedAlertsCount),
-});
 
 interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
@@ -72,19 +69,17 @@ export const useStatusAction = ({
       updateCases(
         {
           cases: casesToUpdate,
-          successToasterTitle:
-            closeReason != null && status === CaseStatuses.closed
-              ? undefined
-              : getStatusToasterMessage(status, selectedCases),
-          includeAlertsStatusUpdateSummary: closeReason != null && status === CaseStatuses.closed,
-          getSuccessToast:
-            closeReason != null && status === CaseStatuses.closed
-              ? ({ alertsStatusUpdateSummary }) =>
-                  getCloseStatusToast({
-                    cases: selectedCases,
-                    closedAlertsCount: alertsStatusUpdateSummary?.closed ?? 0,
-                  })
-              : undefined,
+          getUpdateSuccessToast: ({ patchCaseStats }) =>
+            getStatusToast({
+              status,
+              cases: selectedCases,
+              closedAlertsCount:
+                closeReason != null && status === CaseStatuses.closed
+                  ? patchCaseStats?.reduce((total, stats) => {
+                      return total + (stats?.numberOfAlertsSyncedWithCloseReason ?? 0);
+                    }, 0) ?? 0
+                  : undefined,
+            }),
         },
         { onSuccess: onActionSuccess }
       );

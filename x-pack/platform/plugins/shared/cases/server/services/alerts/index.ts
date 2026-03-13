@@ -29,22 +29,6 @@ import type {
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
-export interface AlertsStatusUpdateSummary {
-  total: number;
-  closed: number;
-  open: number;
-  inProgress: number;
-  versionConflicts: number;
-}
-
-const EMPTY_ALERTS_STATUS_UPDATE_SUMMARY: AlertsStatusUpdateSummary = {
-  total: 0,
-  closed: 0,
-  open: 0,
-  inProgress: 0,
-  versionConflicts: 0,
-};
-
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
@@ -102,10 +86,9 @@ export class AlertService {
     };
   }
 
-  public async updateAlertsStatus(
-    alerts: UpdateAlertStatusRequest[]
-  ): Promise<AlertsStatusUpdateSummary> {
+  public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]): Promise<number> {
     try {
+      // Map of <index, <alert status, <alert close reason, alerts to update>>
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
 
@@ -115,16 +98,7 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
-      return updateResults.reduce<AlertsStatusUpdateSummary>(
-        (acc, updateResult) => ({
-          total: acc.total + updateResult.total,
-          closed: acc.closed + updateResult.closed,
-          open: acc.open + updateResult.open,
-          inProgress: acc.inProgress + updateResult.inProgress,
-          versionConflicts: acc.versionConflicts + updateResult.versionConflicts,
-        }),
-        { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY }
-      );
+      return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
@@ -178,7 +152,7 @@ export class AlertService {
   private async updateByQuery([index, statusAndReasonBuckets]: [
     string,
     StatusAndReasonBuckets
-  ]): Promise<AlertsStatusUpdateSummary> {
+  ]): Promise<number> {
     const statusBuckets = Array.from(statusAndReasonBuckets.entries());
     const updateRequests = statusBuckets.flatMap(([status, reasonToAlerts]) =>
       Array.from(reasonToAlerts.entries()).map(async ([reason, alerts]) => {
@@ -191,30 +165,12 @@ export class AlertService {
           ignore_unavailable: true,
         });
 
-        const updated = updateResponse?.updated ?? 0;
-        const versionConflicts = updateResponse?.version_conflicts ?? 0;
-
-        return {
-          total: updated,
-          closed: status === 'closed' ? updated : 0,
-          open: status === 'open' ? updated : 0,
-          inProgress: status === 'acknowledged' ? updated : 0,
-          versionConflicts,
-        };
+        return updateResponse?.updated ?? 0;
       })
     );
 
     const updatesForIndex = await Promise.all(updateRequests);
-    return updatesForIndex.reduce<AlertsStatusUpdateSummary>(
-      (acc, updateResult) => ({
-        total: acc.total + updateResult.total,
-        closed: acc.closed + updateResult.closed,
-        open: acc.open + updateResult.open,
-        inProgress: acc.inProgress + updateResult.inProgress,
-        versionConflicts: acc.versionConflicts + updateResult.versionConflicts,
-      }),
-      { ...EMPTY_ALERTS_STATUS_UPDATE_SUMMARY }
-    );
+    return updatesForIndex.reduce((acc, updatedCount) => acc + updatedCount, 0);
   }
 
   private getNonEmptyAlerts(alerts: AlertInfo[]): AlertInfo[] {

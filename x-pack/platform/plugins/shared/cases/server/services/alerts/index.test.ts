@@ -115,7 +115,7 @@ describe('updateAlertsStatus', () => {
       expect(scriptSource).toMatch(/ctx\.op = 'noop';/);
     });
 
-    it('returns aggregated update counts by status', async () => {
+    it('returns total updated alert count', async () => {
       esClient.updateByQuery
         .mockResolvedValueOnce({ updated: 2, version_conflicts: 0 })
         .mockResolvedValueOnce({ updated: 1, version_conflicts: 1 });
@@ -126,13 +126,7 @@ describe('updateAlertsStatus', () => {
         { id: 'id3', index: '1', status: CaseStatuses.open },
       ]);
 
-      expect(result).toEqual({
-        total: 3,
-        closed: 2,
-        open: 1,
-        inProgress: 0,
-        versionConflicts: 1,
-      });
+      expect(result).toBe(3);
     });
 
     it('buckets the alerts by index', async () => {
