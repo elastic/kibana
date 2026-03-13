@@ -9,15 +9,70 @@ import type { z } from '@kbn/zod/v4';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
-import { type InputTextFieldSchema } from '../../../../../common/types/domain/template/fields';
+import type {
+  InputTextFieldSchema,
+  ConditionRenderProps,
+} from '../../../../../common/types/domain/template/fields';
 
-export const InputText = ({ label, name, type }: z.infer<typeof InputTextFieldSchema>) => {
+const { emptyField } = fieldValidators;
+
+type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
+
+export const InputText = ({
+  label,
+  name,
+  type,
+  isRequired,
+  patternValidation,
+  minLength,
+  maxLength,
+}: InputTextProps) => {
+  const validations = [];
+
+  if (isRequired) {
+    validations.push({ validator: emptyField('Required') });
+  }
+
+  if (patternValidation) {
+    const { regex, message } = patternValidation;
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value !== 'string' || value === '') return;
+        if (!new RegExp(regex).test(value)) {
+          return { message: message ?? `Value does not match pattern: ${regex}` };
+        }
+      },
+    });
+  }
+
+  if (minLength !== undefined) {
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value === 'string' && value.length < minLength) {
+          return { message: `Must be at least ${minLength} characters` };
+        }
+      },
+    });
+  }
+
+  if (maxLength !== undefined) {
+    validations.push({
+      validator: ({ value }: { value: unknown }) => {
+        if (typeof value === 'string' && value.length > maxLength) {
+          return { message: `Must be at most ${maxLength} characters` };
+        }
+      },
+    });
+  }
+
   return (
     <UseField
       key={name}
       path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
       component={TextField}
+      config={{ validations }}
       componentProps={{
         label,
       }}

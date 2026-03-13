@@ -33,14 +33,6 @@ fields:
     control: INPUT_TEXT
     label: Summary
     type: keyword
-  - name: effort
-    control: INPUT_NUMBER
-    label: Effort estimate
-    type: integer
-  - name: details
-    control: TEXTAREA
-    label: Details
-    type: keyword
   - name: priority
     control: SELECT_BASIC
     label: Priority
@@ -51,4 +43,34 @@ fields:
         - medium
         - high
         - urgent
+  # display.show_when hides this field unless priority is urgent
+  - name: urgency_reason
+    control: TEXTAREA
+    label: Reason for urgency
+    type: keyword
+    display:
+      show_when:
+        field: priority
+        operator: eq
+        value: urgent
+    validation:
+      required_when:
+        field: priority
+        operator: eq
+        value: urgent
+      pattern:
+        regex: "^[A-Z]"
+        message: "Must start with a capital letter"
+  - name: score
+    control: INPUT_NUMBER
+    label: Score
+    type: integer
+    validation:
+      required: true
+      min: 0
+      max: 100
+  - name: details
+    control: TEXTAREA
+    label: Details
+    type: keyword
 `.trimStart();
