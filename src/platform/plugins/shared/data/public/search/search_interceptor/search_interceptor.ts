@@ -303,32 +303,41 @@ export class SearchInterceptor {
   ) {
     const { sessionId, strategy } = options;
 
+    let firstSearchResult: Promise<IKibanaSearchResponse> | undefined;
+
     const search = ({
       abortSignal = searchAbortController.getSignal(),
     }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
+      const isFirstSearch = !firstSearchResult;
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
       ];
       const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
-      return this.runSearch(
+      const result = this.runSearch(
         { id, ...request },
         {
           ...options,
           projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
-          abortSignal,
+          abortSignal: isFirstSearch ? new AbortController().signal : abortSignal,
           isSearchStored,
         }
       )
-        .then((result) => {
-          afterPoll({ isSearchStored: result.isStored ?? false });
-          return result;
+        .then((r) => {
+          afterPoll({ isSearchStored: r.isStored ?? false });
+          return r;
         })
         .catch((err) => {
           afterPoll({ isSearchStored: false });
           throw err;
         });
+
+      if (isFirstSearch) {
+        firstSearchResult = result;
+      }
+
+      return result;
     };
 
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
@@ -430,12 +439,40 @@ export class SearchInterceptor {
               [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
             });
           }
-          return from(
-            this.runSearch(
-              { id, ...request },
-              { ...options, abortSignal: new AbortController().signal, retrieveResults: true }
-            )
-          ).pipe(
+
+          // If the poll chain was aborted before the first response arrived, the
+          // async search ID hasn't been captured yet. Await the initial request
+          // (which uses a non-abortable signal) so we can use its ID for partial
+          // result retrieval.
+          const ensureId$ = id
+            ? of(undefined)
+            : from(firstSearchResult ?? Promise.reject(e)).pipe(
+                tap((response) => {
+                  id = response.id;
+                  if (!firstRequestParams && response.requestParams) {
+                    firstRequestParams = response.requestParams;
+                  }
+                }),
+                map(() => undefined),
+                catchError(() => EMPTY)
+              );
+
+          return ensureId$.pipe(
+            switchMap(() => {
+              if (!id) {
+                return EMPTY;
+              }
+              return from(
+                this.runSearch(
+                  { id, ...request },
+                  {
+                    ...options,
+                    abortSignal: new AbortController().signal,
+                    retrieveResults: true,
+                  }
+                )
+              );
+            }),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)
