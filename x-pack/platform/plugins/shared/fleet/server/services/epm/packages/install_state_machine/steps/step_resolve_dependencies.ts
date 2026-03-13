@@ -82,7 +82,8 @@ export async function stepResolveDependencies(context: InstallContext) {
                   version: dependency.resolvedVersion,
                 }),
                 spaceId: context.spaceId,
-                force: context.force,
+                // install dependency even if it's not the latest in the registry
+                force: true,
                 prerelease: isPrerelease,
               });
               completed.push({ dependency });
