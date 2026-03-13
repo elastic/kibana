@@ -41,7 +41,10 @@ export const getImageEmbeddableFactory = () => {
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig ?? {
+        src: '',
+        sizing: { objectFit: 'fill' }
+      });
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
