@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { paths } from '../../constants';
@@ -24,16 +23,9 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
   showDeleteConfirmation,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
-
-  const deleteButtonStyles = css`
-    .ruleDetailsActionsMenu__deleteButton {
-      color: ${euiTheme.colors.textDanger};
-    }
-  `;
 
   const handleToggleEnable = () => {
     setIsPopoverOpen(false);
@@ -111,7 +103,6 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
       closePopover={() => setIsPopoverOpen(false)}
       ownFocus
       panelPaddingSize="none"
-      css={deleteButtonStyles}
     >
       <EuiContextMenu
         initialPanelId={0}
