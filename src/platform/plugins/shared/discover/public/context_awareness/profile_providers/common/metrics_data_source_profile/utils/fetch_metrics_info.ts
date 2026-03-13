@@ -15,6 +15,11 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from './execution_context_enums';
+import { getMetricsExecutionContext } from './execution_context';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 
 export interface FetchMetricsInfoParams {
@@ -60,7 +65,10 @@ export async function fetchMetricsInfo({
     filter,
     timeRange,
     variables,
-    executionContext: { page: 'metrics_info' },
+    ...getMetricsExecutionContext(
+      MetricsExecutionContextAction.FETCH,
+      MetricsExecutionContextName.METRICS_INFO
+    ),
   });
 
   return response;
