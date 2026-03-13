@@ -10,6 +10,7 @@ import React from 'react';
 
 import { AppLayout } from './components/layout';
 import { RouteDisplay } from './components/common/route_display';
+import { RootRedirect, LegacyConversationRedirect } from './components/redirects';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
   return (
@@ -76,14 +77,14 @@ export const AgentBuilderRoutes: React.FC<{}> = () => {
           <RouteDisplay />
         </Route>
 
-        {/* Legacy routes (will redirect in Phase 5) */}
+        {/* Legacy routes - redirect to new structure */}
         <Route path="/conversations/:conversationId">
-          <RouteDisplay />
+          <LegacyConversationRedirect />
         </Route>
 
-        {/* Root route (will redirect in Phase 5) */}
+        {/* Root route - redirect to last used agent */}
         <Route path="/">
-          <RouteDisplay />
+          <RootRedirect />
         </Route>
       </Routes>
     </AppLayout>
