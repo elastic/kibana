@@ -11,8 +11,6 @@ import type { AlertsEmbeddableState } from '../../../../server/lib/embeddables/a
  * Transforms SLO Alerts embeddable state for serialization.
  * Pass-through for now; add legacy state migration here if needed.
  */
-export function transformAlertsOut(
-  storedState: AlertsEmbeddableState
-): AlertsEmbeddableState {
+export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEmbeddableState {
   return storedState;
 }
