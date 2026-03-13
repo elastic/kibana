@@ -18,6 +18,7 @@ import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   type DataGridCellValueElementProps,
+  type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import {
@@ -28,6 +29,8 @@ import {
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiToolTip,
   type EuiDataGridCellValueElementProps,
   type EuiDataGridControlColumn,
@@ -596,12 +599,68 @@ export const EntitiesDataTable = ({
     />
   );
 
-  const externalAdditionalControlsRight = (
-    <>
-      <InspectButton queryId={ENTITY_ANALYTICS_TABLE_ID} title={INSPECT_TITLE} />
-      <LastUpdated updatedAt={lastUpdatedAt} />
-      {groupSelectorComponent}
-    </>
+  const customRenderToolbar: UnifiedDataTableRenderCustomToolbar = useCallback(
+    ({ toolbarProps, gridProps }) => {
+      const {
+        hasRoomForGridControls,
+        columnControl,
+        columnSortingControl,
+        fullScreenControl,
+        keyboardShortcutsControl,
+        displayControl,
+      } = toolbarProps;
+
+      return (
+        <EuiFlexGroup
+          responsive={false}
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          css={{ padding: '8px 0px 4px 0px' }}
+          data-test-subj="entityAnalyticsTableToolbar"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              {gridProps.additionalControls && (
+                <EuiFlexItem grow={false}>{gridProps.additionalControls}</EuiFlexItem>
+              )}
+              {hasRoomForGridControls && columnControl && (
+                <EuiFlexItem grow={false}>{columnControl}</EuiFlexItem>
+              )}
+              {hasRoomForGridControls && columnSortingControl && (
+                <EuiFlexItem grow={false}>{columnSortingControl}</EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={ENTITY_ANALYTICS_TABLE_ID} title={INSPECT_TITLE} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <LastUpdated updatedAt={lastUpdatedAt} />
+              </EuiFlexItem>
+              {groupSelectorComponent && (
+                <EuiFlexItem grow={false}>{groupSelectorComponent}</EuiFlexItem>
+              )}
+              {gridProps.inTableSearchControl && (
+                <EuiFlexItem grow={false}>{gridProps.inTableSearchControl}</EuiFlexItem>
+              )}
+              {hasRoomForGridControls && keyboardShortcutsControl && (
+                <EuiFlexItem grow={false}>{keyboardShortcutsControl}</EuiFlexItem>
+              )}
+              {hasRoomForGridControls && displayControl && (
+                <EuiFlexItem grow={false}>{displayControl}</EuiFlexItem>
+              )}
+              {hasRoomForGridControls && fullScreenControl && (
+                <EuiFlexItem grow={false}>{fullScreenControl}</EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    },
+    [lastUpdatedAt, groupSelectorComponent]
   );
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
@@ -652,7 +711,7 @@ export const EntitiesDataTable = ({
             onFetchMoreRecords={loadMore}
             externalCustomRenderers={externalCustomRenderers}
             externalAdditionalControls={externalAdditionalControls}
-            externalAdditionalControlsRight={externalAdditionalControlsRight}
+            renderCustomToolbar={customRenderToolbar}
             gridStyleOverride={gridStyle}
             rowLineHeightOverride="24px"
             dataGridDensityState={DataGridDensity.EXPANDED}

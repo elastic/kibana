@@ -370,10 +370,6 @@ interface InternalUnifiedDataTableProps {
    */
   externalAdditionalControls?: React.ReactNode;
   /**
-   * Optional value for providing additional controls on the right side of the toolbar.
-   */
-  externalAdditionalControlsRight?: React.ReactNode;
-  /**
    * Optional list of number type values to set custom UnifiedDataTable paging options to display the records per page.
    */
   rowsPerPageOptions?: number[];
@@ -556,7 +552,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       showMultiFields = true,
       maxDocFieldsDisplayed = 50,
       externalAdditionalControls,
-      externalAdditionalControlsRight,
       rowsPerPageOptions,
       externalCustomRenderers,
       consumer = 'discover',
@@ -1094,12 +1089,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     ]);
 
     const additionalControls = useMemo(() => {
-      if (
-        !externalAdditionalControls &&
-        !externalAdditionalControlsRight &&
-        !selectedDocsCount &&
-        !inTableSearchControl
-      ) {
+      if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
         return null;
       }
 
@@ -1132,22 +1122,16 @@ const InternalUnifiedDataTable = React.forwardRef<
         </EuiFlexGroup>
       );
 
-      if (!renderCustomToolbar && (inTableSearchControl || externalAdditionalControlsRight)) {
+      if (!renderCustomToolbar && inTableSearchControl) {
         return {
           left: leftControls,
-          right: (
-            <>
-              {externalAdditionalControlsRight}
-              {inTableSearchControl}
-            </>
-          ),
+          right: inTableSearchControl,
         };
       }
 
       return leftControls;
     }, [
       externalAdditionalControls,
-      externalAdditionalControlsRight,
       selectedDocsCount,
       inTableSearchControl,
       isPlainRecord,
