@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -23,7 +22,6 @@ export function EmptyState({
   return (
     <EuiEmptyPrompt
       titleSize="xs"
-
       body={
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
