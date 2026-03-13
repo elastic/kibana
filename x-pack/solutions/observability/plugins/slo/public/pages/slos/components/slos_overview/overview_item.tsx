@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiStat, EuiToolTip } from '@elastic/eui';
+import { EuiFlexItem, EuiStat, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
+
+interface Props {
+  title?: string | number;
+  description: string;
+  titleColor: string;
+  isLoading: boolean;
+  tooltip?: string;
+  onClick?: () => void;
+  subtitle?: string;
+  subtitleTooltip?: string;
+  onSubtitleClick?: () => void;
+}
 
 export function OverviewItem({
   title,
   description,
   titleColor,
   isLoading,
-  query,
   tooltip,
   onClick,
-}: {
-  title?: string | number;
-  description: string;
-  titleColor: string;
-  isLoading: boolean;
-  query?: string;
-  tooltip?: string;
-  onClick?: () => void;
-}) {
-  const { onStateChange } = useUrlSearchState();
-
+  subtitle,
+  subtitleTooltip,
+  onSubtitleClick,
+}: Props) {
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip content={tooltip}>
@@ -35,21 +38,21 @@ export function OverviewItem({
           title={title}
           description={description}
           titleColor={titleColor}
-          reverse={true}
           isLoading={isLoading}
-          onClick={() => {
-            if (onClick) {
-              onClick();
-              return;
-            }
-            onStateChange({
-              kqlQuery: query,
-            });
-          }}
-          css={{
-            cursor: 'pointer',
-          }}
+          onClick={() => onClick?.()}
+          css={{ cursor: 'pointer' }}
         />
+      </EuiToolTip>
+      <EuiToolTip content={subtitleTooltip}>
+        <EuiText
+          tabIndex={-1}
+          size="xs"
+          color="subdued"
+          onClick={() => onSubtitleClick?.()}
+          css={{ cursor: 'pointer' }}
+        >
+          {subtitle}
+        </EuiText>
       </EuiToolTip>
     </EuiFlexItem>
   );

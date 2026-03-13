@@ -13,19 +13,22 @@ const getSLOStatsOverviewParamsSchema = t.partial({
   }),
 });
 
-const getSLOStatsOverviewResponseSchema = t.type({
-  violated: t.number,
-  degrading: t.number,
-  stale: t.number,
-  healthy: t.number,
-  noData: t.number,
-  burnRateRules: t.number,
-  burnRateActiveAlerts: t.number,
-  burnRateRecoveredAlerts: t.number,
-});
+interface StatusStatsOverview {
+  total: number;
+  stale: number;
+}
+
+interface GetSLOStatsOverviewResponse {
+  healthy: StatusStatsOverview;
+  violated: StatusStatsOverview;
+  degrading: StatusStatsOverview;
+  noData: StatusStatsOverview;
+  burnRateRules: number;
+  burnRateActiveAlerts: number;
+  burnRateRecoveredAlerts: number;
+}
 
 type GetSLOStatsOverviewParams = t.TypeOf<typeof getSLOStatsOverviewParamsSchema.props.query>;
-type GetSLOStatsOverviewResponse = t.OutputOf<typeof getSLOStatsOverviewResponseSchema>;
 
-export { getSLOStatsOverviewParamsSchema, getSLOStatsOverviewResponseSchema };
+export { getSLOStatsOverviewParamsSchema };
 export type { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse };
