@@ -213,7 +213,7 @@ export const FullScreenWaterfall = ({
           Issue: https://github.com/elastic/kibana/issues/248307
           */}
         <div ref={waterfallContainerRef}>
-          {isWaterfallReady && scrollElement && serviceName ? (
+          {isWaterfallReady && scrollElement ? (
             <FullTraceWaterfall
               traceId={traceId}
               rangeFrom={rangeFrom}
@@ -223,9 +223,9 @@ export const FullScreenWaterfall = ({
               onNodeClick={onNodeClick}
               onErrorClick={onErrorClick}
             />
-          ) : serviceName ? (
+          ) : (
             <EuiSkeletonText lines={4} />
-          ) : null}
+          )}
         </div>
       </EuiFlyoutBody>
 

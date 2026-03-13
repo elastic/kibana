@@ -13974,8 +13974,16 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
+                "plugin": "@kbn/anonymization-ui",
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_preview_document_loader.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -13984,10 +13992,6 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14011,7 +14015,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_all_live_queries.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
               },
               {
                 "plugin": "osquery",
@@ -14213,15 +14225,19 @@
               },
               {
                 "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
+              },
+              {
+                "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_action_license.tsx"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_action_types.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_template.ts"
               },
               {
                 "plugin": "cases",
@@ -14266,10 +14282,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_case_metrics.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/templates_v2/hooks/use_get_templates.ts"
               },
               {
                 "plugin": "cases",
@@ -14337,15 +14349,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/results/use_all_results.ts"
               },
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14377,7 +14389,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_all_live_queries.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_unified_history.ts"
               },
               {
                 "plugin": "osquery",

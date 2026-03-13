@@ -9,7 +9,12 @@ import type { Subscription } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_TITLE } from '../common/constants';
+import {
+  INFERENCE_ENDPOINTS_APP_ID,
+  MODEL_SETTINGS_APP_ID,
+  MODEL_SETTINGS_SECTION_TITLE,
+  PLUGIN_TITLE,
+} from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -19,14 +24,15 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
+import { isModelSettingsEnabled } from './feature_flag';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
 {
   private config: SearchInferenceEndpointsConfigType;
-  private registeredApp?: ManagementApp;
+  private registerInferenceEndpoints?: ManagementApp;
+  private registerModelSettings?: ManagementApp;
   private licenseSubscription?: Subscription;
-
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
   }
@@ -39,23 +45,43 @@ export class SearchInferenceEndpointsPlugin
 
     registerLocators(plugins.share);
 
-    this.registeredApp = plugins.management.sections.section.machineLearning.registerApp({
-      id: INFERENCE_ENDPOINTS_APP_ID,
-      title: PLUGIN_TITLE,
-      order: 2,
-      async mount({ element, history }: ManagementAppMountParams) {
-        const { renderInferenceEndpointsMgmtApp } = await import('./application');
-        const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: AppPluginStartDependencies = {
-          ...depsStart,
-          history,
-        };
+    this.registerInferenceEndpoints =
+      plugins.management.sections.section.machineLearning.registerApp({
+        id: INFERENCE_ENDPOINTS_APP_ID,
+        title: PLUGIN_TITLE,
+        order: 2,
+        async mount({ element, history }: ManagementAppMountParams) {
+          const { renderInferenceEndpointsMgmtApp } = await import('./application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history,
+          };
 
-        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
-      },
-    });
+          return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
+        },
+      });
 
-    this.registeredApp.disable();
+    if (isModelSettingsEnabled(core.uiSettings)) {
+      this.registerModelSettings = plugins.management.sections.section.machineLearning.registerApp({
+        id: MODEL_SETTINGS_APP_ID,
+        title: MODEL_SETTINGS_SECTION_TITLE,
+        order: 3,
+        async mount({ element, history }: ManagementAppMountParams) {
+          const { renderModelSettingsApp } = await import('./model_settings_application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history,
+          };
+
+          return renderModelSettingsApp(coreStart, startDeps, element);
+        },
+      });
+    }
+
+    this.registerInferenceEndpoints.disable();
+    this.registerModelSettings?.disable();
 
     return {};
   }
@@ -71,9 +97,11 @@ export class SearchInferenceEndpointsPlugin
       const hasAccess = core.application.capabilities.management?.ml?.inference_endpoints === true;
 
       if (hasEnterpriseLicense && hasAccess) {
-        this.registeredApp?.enable();
+        this.registerInferenceEndpoints?.enable();
+        this.registerModelSettings?.enable();
       } else {
-        this.registeredApp?.disable();
+        this.registerInferenceEndpoints?.disable();
+        this.registerModelSettings?.disable();
       }
     });
 

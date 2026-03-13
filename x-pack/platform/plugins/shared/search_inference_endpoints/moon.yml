@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-inference-endpoints'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-inference-endpoints'
+  title: '@kbn/search-inference-endpoints'
   description: Moon project for @kbn/search-inference-endpoints
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
+  sourceRoot: x-pack/platform/plugins/shared/search_inference_endpoints
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
@@ -48,8 +47,11 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
+  - '@kbn/core-http-router-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
@@ -65,14 +67,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
