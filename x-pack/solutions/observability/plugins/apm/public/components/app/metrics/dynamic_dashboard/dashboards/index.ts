@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { PanelBuilder } from '../metrics_dashboard/types';
-import { getPanelBuilder } from './dashboard_catalog';
+import type { PanelBuilder } from '../types';
+import { getDashboardPanels } from './dashboard_catalog';
 import { getDashboardDimensions } from './get_dashboard_dimensions';
 
-interface ResolvePanelBuilderProps {
+interface GetDynamicDashboardProps {
   agentName?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
   runtimeVersion?: string;
 }
 
-export const resolvePanelBuilder = ({
+export const getDynamicDashboard = ({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
   runtimeVersion,
-}: ResolvePanelBuilderProps): PanelBuilder | undefined => {
+}: GetDynamicDashboardProps): PanelBuilder | undefined => {
   if (!agentName) {
     return undefined;
   }
@@ -37,7 +37,7 @@ export const resolvePanelBuilder = ({
     return undefined;
   }
 
-  return getPanelBuilder(
+  return getDashboardPanels(
     dimensions.dataFormat,
     dimensions.sdkName,
     dimensions.language,

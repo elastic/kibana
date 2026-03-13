@@ -27,12 +27,12 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { PanelDefinition } from './types';
 
-interface CodeBasedMetricsDashboardProps {
+interface DynamicDashboardProps {
   panels: PanelDefinition[];
   dataView: DataView;
 }
 
-export function CodeBasedMetricsDashboard({ panels, dataView }: CodeBasedMetricsDashboardProps) {
+export function DynamicDashboard({ panels, dataView }: DynamicDashboardProps) {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
   const {
     query: { environment, kuery, rangeFrom, rangeTo },

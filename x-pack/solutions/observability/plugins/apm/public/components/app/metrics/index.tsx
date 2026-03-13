@@ -15,8 +15,8 @@ import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
-import { CodeBasedMetricsDashboard } from './metrics_dashboard';
-import { resolvePanelBuilder } from './dynamic_dashboard';
+import { DynamicDashboard } from './dynamic_dashboard';
+import { getDynamicDashboard } from './dynamic_dashboard/dashboards';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
@@ -26,13 +26,16 @@ export function Metrics() {
 
   const indexPattern = apmIndices?.metric ?? dataView?.getIndexPattern() ?? '';
 
-  const panelBuilder = resolvePanelBuilder({
+  const dashboardPanels = getDynamicDashboard({
     agentName,
     telemetrySdkName,
     telemetrySdkLanguage,
   });
 
-  const codeBasedPanels = useMemo(() => panelBuilder?.(indexPattern), [panelBuilder, indexPattern]);
+  const dynamicDashboardPanels = useMemo(
+    () => dashboardPanels?.(indexPattern),
+    [dashboardPanels, indexPattern]
+  );
 
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
@@ -40,8 +43,8 @@ export function Metrics() {
     return <ServerlessMetrics />;
   }
 
-  if (codeBasedPanels && dataView) {
-    return <CodeBasedMetricsDashboard panels={codeBasedPanels} dataView={dataView} />;
+  if (dynamicDashboardPanels && dataView) {
+    return <DynamicDashboard panels={dynamicDashboardPanels} dataView={dataView} />;
   }
 
   if (hasDashboardFile && dataView) {

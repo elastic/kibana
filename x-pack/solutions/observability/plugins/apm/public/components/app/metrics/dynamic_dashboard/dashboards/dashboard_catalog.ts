@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PanelBuilder } from '../metrics_dashboard/types';
-import { getOtelOtherJavaPanels } from '../metrics_dashboard/panels/jvm_panels';
+import type { PanelBuilder } from '../types';
+import { getOtelOtherJavaPanels } from './panels/jvm_panels';
 
 type VersionPanels = Partial<Record<string, PanelBuilder>> & { default: PanelBuilder };
 type LanguagePanels = Partial<Record<string, VersionPanels>>;
 type SdkNamePanels = Partial<Record<string, LanguagePanels>>;
 type PanelsCatalog = Partial<Record<string, SdkNamePanels>>;
 
-export const panelsCatalog: PanelsCatalog = {
+export const dashboardCatalog: PanelsCatalog = {
   otel_native: {
     otel_other: {
       java: {
@@ -23,13 +23,13 @@ export const panelsCatalog: PanelsCatalog = {
   },
 };
 
-export const getPanelBuilder = (
+export const getDashboardPanels = (
   dataFormat: string,
   sdkName: string,
   language: string,
   version?: string
 ): PanelBuilder | undefined => {
-  const dashboard = panelsCatalog[dataFormat]?.[sdkName]?.[language];
+  const dashboard = dashboardCatalog[dataFormat]?.[sdkName]?.[language];
 
   if (!dashboard) {
     return undefined;

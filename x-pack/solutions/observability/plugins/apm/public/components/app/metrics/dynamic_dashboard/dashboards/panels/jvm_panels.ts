@@ -7,7 +7,7 @@
 
 import type { XYState, DatatableStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
-import type { PanelDefinition } from '../types';
+import type { PanelDefinition } from '../../types';
 
 const CPU_HEAP_COLOR_STEPS = [
   { color: '#209280', lt: 0.5 },
