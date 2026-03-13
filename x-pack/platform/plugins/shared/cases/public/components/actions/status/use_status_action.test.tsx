@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, fireEvent, waitFor, within, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';
@@ -124,12 +124,13 @@ describe('useStatusAction', () => {
 
   it('shows closed alert count details when closing with a reason', async () => {
     const coreStart = coreMock.createStart();
+    coreStart.application.getUrlForApp = jest.fn().mockReturnValue('/app/security/cases/test');
     jest.spyOn(api, 'updateCases').mockResolvedValue({
       cases: [
         {
           ...basicCase,
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: 3,
+            numberOfAlertsWithStatusSynced: 3,
           },
         },
       ],
@@ -150,10 +151,81 @@ describe('useStatusAction', () => {
       );
     });
 
+    await waitFor(() => expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalled());
+
+    const toast = (coreStart.notifications.toasts.addSuccess as jest.Mock).mock.calls[0][0];
+    expect(toast).toEqual(
+      expect.objectContaining({
+        title: 'Closed "Another horrible breach!!"',
+        className: 'eui-textBreakWord',
+      })
+    );
+
+    const domNode = document.createElement('div');
+
+    let unmount: (() => void) | undefined;
+    if (typeof toast.text === 'function') {
+      unmount = toast.text(domNode);
+    } else if (
+      toast.text != null &&
+      'mount' in toast.text &&
+      typeof toast.text.mount === 'function'
+    ) {
+      unmount = toast.text.mount(domNode);
+    }
+
+    expect(within(domNode).getByTestId('cases-status-close-sync-summary')).toHaveTextContent(
+      'Closed 3/4 attached alerts.'
+    );
+
+    fireEvent.click(within(domNode).getByTestId('cases-status-close-sync-see-alerts'));
+    expect(coreStart.application.navigateToUrl).toHaveBeenCalled();
+
+    unmount?.();
+  });
+
+  it('shows only summary text for bulk close with reason', async () => {
+    const coreStart = coreMock.createStart();
+    jest.spyOn(api, 'updateCases').mockResolvedValue({
+      cases: [
+        {
+          ...basicCase,
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 1,
+          },
+        },
+        {
+          ...basicCase,
+          id: 'another-id',
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 1,
+          },
+        },
+      ],
+    });
+
+    const { result } = renderHook(
+      () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
+      {
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+      }
+    );
+
+    act(() => {
+      result.current.handleUpdateCaseStatus(
+        [
+          { ...basicCase, totalAlerts: 2 },
+          { ...basicCase, id: 'another-id', totalAlerts: 2 },
+        ],
+        CaseStatuses.closed,
+        'false_positive'
+      );
+    });
+
     await waitFor(() =>
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Closed "Another horrible breach!!"',
-        text: 'Closed 3/4 attached alerts.',
+        title: 'Closed 2 cases',
+        text: 'Closed 2/4 attached alerts.',
         className: 'eui-textBreakWord',
       })
     );

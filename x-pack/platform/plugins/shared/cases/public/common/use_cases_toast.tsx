@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -184,7 +184,7 @@ export const useCasesToast = () => {
           toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
         }
       },
-      showSuccessToast: (title: string, text?: string) => {
+      showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
         toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
       showDangerToast: (title: string, text?: string) => {

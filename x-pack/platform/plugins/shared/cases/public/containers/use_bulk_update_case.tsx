@@ -6,6 +6,7 @@
  */
 
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import type { ToastInputFields } from '@kbn/core/public';
 import * as i18n from './translations';
 import { updateCases } from './api';
 import type { PatchCaseStats } from '../../common/types/api';
@@ -19,7 +20,7 @@ interface MutationArgs {
   successToasterTitle?: string;
   getUpdateSuccessToast?: (args: { patchCaseStats?: PatchCaseStats[] }) => {
     title: string;
-    text?: string;
+    text?: ToastInputFields['text'];
   };
 }
 

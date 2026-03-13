@@ -589,7 +589,7 @@ export const bulkUpdate = async (
             totalEvents,
           }),
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: syncedAlertsCountByCaseId.get(updatedCase.id) ?? 0,
+            numberOfAlertsWithStatusSynced: syncedAlertsCountByCaseId.get(updatedCase.id) ?? 0,
           },
         };
 

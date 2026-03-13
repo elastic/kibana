@@ -767,7 +767,7 @@ describe('Cases API', () => {
     const casesSnakeWithBulkUpdateStats = casesSnake.map((theCase) => ({
       ...theCase,
       patchCaseStats: {
-        numberOfAlertsSyncedWithCloseReason: 0,
+        numberOfAlertsWithStatusSynced: 0,
       },
     }));
 
@@ -800,7 +800,7 @@ describe('Cases API', () => {
         expect.objectContaining({
           id: cases[0].id,
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: 0,
+            numberOfAlertsWithStatusSynced: 0,
           },
         })
       );
@@ -830,7 +830,7 @@ describe('Cases API', () => {
         expect.objectContaining({
           id: cases[0].id,
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: 0,
+            numberOfAlertsWithStatusSynced: 0,
           },
         })
       );

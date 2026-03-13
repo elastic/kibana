@@ -918,7 +918,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "patchCaseStats": Object {
-              "numberOfAlertsSyncedWithCloseReason": 0,
+              "numberOfAlertsWithStatusSynced": 0,
             },
             "settings": Object {
               "extractObservables": true,
@@ -969,7 +969,7 @@ describe('update', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "patchCaseStats": Object {
-              "numberOfAlertsSyncedWithCloseReason": 0,
+              "numberOfAlertsWithStatusSynced": 0,
             },
             "settings": Object {
               "extractObservables": true,
@@ -2059,7 +2059,7 @@ describe('update', () => {
       expect(result[0]).toEqual(
         expect.objectContaining({
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: 3,
+            numberOfAlertsWithStatusSynced: 3,
           },
         })
       );
@@ -2084,7 +2084,7 @@ describe('update', () => {
       expect(result[0]).toEqual(
         expect.objectContaining({
           patchCaseStats: {
-            numberOfAlertsSyncedWithCloseReason: 0,
+            numberOfAlertsWithStatusSynced: 0,
           },
         })
       );
