@@ -112,7 +112,13 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
-  const resp = await retry(log, async () => await fetch(url, { signal: abc.signal }));
+  const resp = await retry(log, async () => {
+    const r = await fetch(url, { signal: abc.signal });
+    if (r.status >= 500) {
+      throw new Error(`Manifest fetch failed: ${r.status} ${r.statusText}`);
+    }
+    return r;
+  });
   const json = await resp.text();
 
   return { abc, resp, json };
