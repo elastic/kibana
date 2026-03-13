@@ -147,7 +147,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         const params: Record<string, unknown> = {};
         if (input.bodyFormat != null) params['body-format'] = input.bodyFormat;
         const response = await ctx.client.get(
-          `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages/${input.id}`,
+          `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages/${encodeURIComponent(input.id)}`,
           Object.keys(params).length > 0 ? { params } : undefined
         );
         return response.data;
@@ -183,7 +183,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       handler: async (ctx, input: GetSpaceInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces/${input.id}`
+          `${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces/${encodeURIComponent(input.id)}`
         );
         return response.data;
       },
