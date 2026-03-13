@@ -6,10 +6,17 @@
  */
 
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import type { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import type {
+  RuleMonitoring,
+  RuleMonitoringHistory,
+  PublicRuleMonitoringService,
+  ConsumerExecutionMetrics,
+} from '../types';
 
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
+  // Metrics added inside the rule executor
+  private metrics: Partial<ConsumerExecutionMetrics> = {};
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -23,6 +30,12 @@ export class RuleMonitoringService {
 
   public getMonitoring(): RuleMonitoring {
     return this.monitoring;
+  }
+
+  public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> {
+    return {
+      ...this.metrics,
+    };
   }
 
   public addHistory({
@@ -64,6 +77,8 @@ export class RuleMonitoringService {
       setLastRunMetricsTotalAlertsCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
       setLastRunMetricsGapRange: this.setLastRunMetricsGapRange.bind(this),
+      setMetric: this.setMetric.bind(this),
+      setMetrics: this.setMetrics.bind(this),
     };
   }
 
@@ -99,5 +114,56 @@ export class RuleMonitoringService {
   private buildExecutionDurationPercentiles = () => {
     const { history } = this.monitoring.run;
     return getExecutionDurationPercentiles(history);
+  };
+
+  private setMetric = <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => {
+    if (metricName === 'total_search_duration_ms') {
+      this.setLastRunMetricsTotalSearchDurationMs(
+        value as ConsumerExecutionMetrics['total_search_duration_ms']
+      );
+      return;
+    }
+
+    if (metricName === 'total_indexing_duration_ms') {
+      this.setLastRunMetricsTotalIndexingDurationMs(
+        value as ConsumerExecutionMetrics['total_indexing_duration_ms']
+      );
+      return;
+    }
+
+    if (metricName === 'total_alerts_detected') {
+      this.setLastRunMetricsTotalAlertsDetected(
+        value as ConsumerExecutionMetrics['total_alerts_detected']
+      );
+      return;
+    }
+
+    if (metricName === 'total_alerts_created') {
+      this.setLastRunMetricsTotalAlertsCreated(
+        value as ConsumerExecutionMetrics['total_alerts_created']
+      );
+      return;
+    }
+
+    if (metricName === 'gap_duration_s') {
+      this.setLastRunMetricsGapDurationS(value as ConsumerExecutionMetrics['gap_duration_s']);
+      return;
+    }
+
+    if (metricName === 'gap_range') {
+      this.setLastRunMetricsGapRange(value as ConsumerExecutionMetrics['gap_range']);
+      return;
+    }
+
+    this.metrics[metricName] = value;
+  };
+
+  private setMetrics = (metrics: Partial<ConsumerExecutionMetrics>) => {
+    for (const [metricName, value] of Object.entries(metrics)) {
+      this.setMetric(metricName as keyof ConsumerExecutionMetrics, value);
+    }
   };
 }

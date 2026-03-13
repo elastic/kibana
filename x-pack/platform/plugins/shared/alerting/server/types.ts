@@ -451,6 +451,20 @@ export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
+export interface ConsumerExecutionMetrics {
+  total_search_duration_ms: number;
+  total_indexing_duration_ms: number;
+  total_alerts_detected: number;
+  total_alerts_created: number;
+  gap_duration_s: number;
+  gap_range: { lte: string; gte: string };
+  events_found_count: number;
+  candidate_alerts_count: number;
+  unaccounted_events: number;
+  suppressed_alerts: number;
+  frozen_indices_queried_count: number;
+}
+
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
@@ -458,6 +472,11 @@ export interface PublicMetricsSetters {
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
   setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
+  setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => void;
+  setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
 }
 
 export interface PublicLastRunSetters {

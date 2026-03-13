@@ -13,7 +13,11 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import type {
+  AlertInstanceState,
+  ConsumerExecutionMetrics,
+  RuleExecutionStatus,
+} from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
@@ -58,6 +62,7 @@ interface DoneOpts {
   timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
   backfill?: BackfillOpts;
 }
 
@@ -345,7 +350,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, timings, backfill }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -383,6 +388,10 @@ export class AlertingEventLogger {
 
     if (metrics) {
       updateEvent(this.event, { metrics });
+    }
+
+    if (consumerMetrics) {
+      updateEvent(this.event, { consumerMetrics });
     }
 
     if (timings) {
@@ -607,6 +616,7 @@ interface UpdateEventOpts {
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
@@ -700,6 +710,7 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     status,
     reason,
     metrics,
+    consumerMetrics,
     timings,
     alertingOutcome,
     backfill,
@@ -761,6 +772,17 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       number_of_searches: metrics.numSearches ? metrics.numSearches : 0,
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
+    };
+  }
+
+  if (consumerMetrics) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.metrics = {
+      ...event.kibana.alert.rule.execution.metrics,
+      ...consumerMetrics,
     };
   }
 

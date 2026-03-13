@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Duration } from 'moment';
+import type { ConsumerExecutionMetrics } from '@kbn/alerting-plugin/server/types';
 import type {
-  LogLevel,
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -31,40 +30,62 @@ export interface IRuleExecutionLogForExecutors {
   /**
    * Writes a trace message to the event log and console at TRACE level.
    */
-  trace(message: string, options?: LogMessageOptions): void;
+  trace(message: string): void;
 
   /**
    * Writes a debug message to the event log and console at DEBUG level.
    */
-  debug(message: string, options?: LogMessageOptions): void;
+  debug(message: string): void;
 
   /**
    * Writes an info message to the event log at INFO level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  info(message: string, options?: LogMessageOptions): void;
+  info(message: string): void;
 
   /**
    * Writes a warning message to the event log at WARN level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  warn(message: string, options?: LogMessageOptions): void;
+  warn(message: string): void;
 
   /**
    * Writes an error message to the event log at ERROR level.
    * Writes to console at DEBUG level by default (override via options.consoleLogLevel).
    */
-  error(message: string, options?: LogMessageOptions): void;
+  error(message: string): void;
 
   /**
-   * Writes information about new rule statuses and measured execution metrics:
-   *   1. To .kibana-* index as a custom `siem-detection-engine-rule-execution-info` saved object.
-   *      This SO is used for fast access to last execution info of a large amount of rules.
-   *   2. To .kibana-event-log-* index in order to track history of rule executions.
-   *   3. To console logs.
-   * @param args Information about the status change event.
+   * Logs a rule execution metric like a number of source events found and a number of generated alerts.
+   * Metric names are type-checked against RuleExecutionMetrics.
    */
-  logStatusChange(args: StatusChangeArgs): Promise<void>;
+  logMetric<Metric extends keyof ConsumerExecutionMetrics>(
+    metricName: Metric,
+    value: ConsumerExecutionMetrics[Metric]
+  ): void;
+
+  /**
+   * Convenience method to log multiple rule execution metrics like a number of source events
+   * found and a number of generated alerts.
+   * Metric names are type-checked against RuleExecutionMetrics.
+   */
+  logMetrics(metrics: Partial<ConsumerExecutionMetrics>): void;
+
+  /**
+   * Logs rule execution result at the end of rule execution. This includes the final rule outcome (failed, partial failure, succeeded)
+   * and an optional message describing the outcome.
+   */
+  logExecutionResult(args: ExecutionResultArgs): void;
+
+  /**
+   * Whether the logger is closed
+   */
+  closed(): boolean;
+
+  /**
+   * Closes the logger and writes the logged data to the event log
+   */
+  close(): Promise<void>;
 }
 
 /**
@@ -117,25 +138,11 @@ export interface LogMessageOptions {
   consoleLogLevel?: LogLevel;
 }
 
-export interface RunningStatusChangeArgs {
-  newStatus: RuleExecutionStatusEnum['running'];
-}
-
 /**
- * Information about the status change event.
+ * Arguments for logging the final execution result. The outcome must not be 'running'.
  */
-export interface StatusChangeArgs {
-  newStatus: RuleExecutionStatus;
-  message?: string;
-  metrics?: MetricsArgs;
+export interface ExecutionResultArgs {
+  outcome: Exclude<RuleExecutionStatus, RuleExecutionStatusEnum['running']>;
+  message: string;
   userError?: boolean;
-}
-
-export interface MetricsArgs {
-  searchDurations?: string[];
-  indexingDurations?: string[];
-  enrichmentDurations?: string[];
-  executionGap?: Duration;
-  gapRange?: { gte: string; lte: string };
-  frozenIndicesQueriedCount?: number;
 }

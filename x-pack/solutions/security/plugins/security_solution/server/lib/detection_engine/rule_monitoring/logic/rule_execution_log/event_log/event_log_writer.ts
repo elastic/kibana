@@ -9,19 +9,12 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import {
-  eventLogLevelFromExecutionStatus,
-  logLevelToNumber,
-  ruleExecutionStatusToNumber,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { logLevelToNumber } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   RuleExecutionMetrics,
   RuleExecutionStatus,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import {
-  LogLevelEnum,
-  RuleExecutionEventTypeEnum,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { RuleExecutionEventTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import {
   RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
@@ -29,11 +22,9 @@ import {
 
 export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;
-  logStatusChange(args: StatusChangeArgs): void;
-  logExecutionMetrics(args: ExecutionMetricsArgs): void;
 }
 
-export interface BaseArgs {
+export interface RuleInfo {
   ruleId: string;
   ruleUuid: string;
   ruleName: string;
@@ -43,18 +34,24 @@ export interface BaseArgs {
   executionId: string;
 }
 
-export interface MessageArgs extends BaseArgs {
+export interface MessageArgs {
   logLevel: LogLevel;
+  message: string;
+  ruleInfo: RuleInfo;
+}
+
+export interface ExecutionResultLogEntry {
+  timestamp: string;
   message: string;
 }
 
-export interface StatusChangeArgs extends BaseArgs {
-  newStatus: RuleExecutionStatus;
+export interface ExecutionResultArgs {
+  ruleInfo: RuleInfo;
+  outcome: RuleExecutionStatus;
   message?: string;
-}
-
-export interface ExecutionMetricsArgs extends BaseArgs {
   metrics: RuleExecutionMetrics;
+  errors: ExecutionResultLogEntry[];
+  warnings: ExecutionResultLogEntry[];
 }
 
 export const createEventLogWriter = (eventLogService: IEventLogService): IEventLogWriter => {
@@ -70,10 +67,10 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
         '@timestamp': nowISO(),
         message: args.message,
         rule: {
-          id: args.ruleId,
-          uuid: args.ruleUuid,
-          name: args.ruleName,
-          category: args.ruleType,
+          id: args.ruleInfo.ruleId,
+          uuid: args.ruleInfo.ruleUuid,
+          name: args.ruleInfo.ruleName,
+          category: args.ruleInfo.ruleType,
         },
         event: {
           kind: 'event',
@@ -88,104 +85,18 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
           alert: {
             rule: {
               execution: {
-                uuid: args.executionId,
+                uuid: args.ruleInfo.executionId,
               },
-              revision: args.ruleRevision,
+              revision: args.ruleInfo.ruleRevision,
             },
           },
-          space_ids: [args.spaceId],
+          space_ids: [args.ruleInfo.spaceId],
           saved_objects: [
             {
               rel: SAVED_OBJECT_REL_PRIMARY,
               type: RULE_SAVED_OBJECT_TYPE,
-              id: args.ruleId,
-              namespace: spaceIdToNamespace(args.spaceId),
-            },
-          ],
-        },
-      });
-    },
-
-    logStatusChange: (args: StatusChangeArgs): void => {
-      const logLevel = eventLogLevelFromExecutionStatus(args.newStatus);
-      eventLogger.logEvent({
-        '@timestamp': nowISO(),
-        message: args.message,
-        rule: {
-          id: args.ruleId,
-          uuid: args.ruleUuid,
-          name: args.ruleName,
-          category: args.ruleType,
-        },
-        event: {
-          kind: 'event',
-          action: RuleExecutionEventTypeEnum['status-change'],
-          sequence: sequence++,
-          severity: logLevelToNumber(logLevel),
-        },
-        log: {
-          level: logLevel,
-        },
-        kibana: {
-          alert: {
-            rule: {
-              execution: {
-                uuid: args.executionId,
-                status: args.newStatus,
-                status_order: ruleExecutionStatusToNumber(args.newStatus),
-              },
-              revision: args.ruleRevision,
-            },
-          },
-          space_ids: [args.spaceId],
-          saved_objects: [
-            {
-              rel: SAVED_OBJECT_REL_PRIMARY,
-              type: RULE_SAVED_OBJECT_TYPE,
-              id: args.ruleId,
-              namespace: spaceIdToNamespace(args.spaceId),
-            },
-          ],
-        },
-      });
-    },
-
-    logExecutionMetrics: (args: ExecutionMetricsArgs): void => {
-      const logLevel = LogLevelEnum.info;
-      eventLogger.logEvent({
-        '@timestamp': nowISO(),
-        rule: {
-          id: args.ruleId,
-          uuid: args.ruleUuid,
-          name: args.ruleName,
-          category: args.ruleType,
-        },
-        event: {
-          kind: 'metric',
-          action: RuleExecutionEventTypeEnum['execution-metrics'],
-          sequence: sequence++,
-          severity: logLevelToNumber(logLevel),
-        },
-        log: {
-          level: logLevel,
-        },
-        kibana: {
-          alert: {
-            rule: {
-              execution: {
-                uuid: args.executionId,
-                metrics: args.metrics,
-              },
-              revision: args.ruleRevision,
-            },
-          },
-          space_ids: [args.spaceId],
-          saved_objects: [
-            {
-              rel: SAVED_OBJECT_REL_PRIMARY,
-              type: RULE_SAVED_OBJECT_TYPE,
-              id: args.ruleId,
-              namespace: spaceIdToNamespace(args.spaceId),
+              id: args.ruleInfo.ruleId,
+              namespace: spaceIdToNamespace(args.ruleInfo.spaceId),
             },
           ],
         },
