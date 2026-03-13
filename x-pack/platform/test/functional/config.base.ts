@@ -52,16 +52,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        // disable tours globally for all tests (server-level override survives esArchiver.emptyKibanaIndex)
+        '--uiSettings.globalOverrides.hideAnnouncements=true',
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-      },
-      globalDefaults: {
-        // Disable tours globally for all tests
-        hideAnnouncements: true,
       },
     },
     // the apps section defines the urls that
