@@ -84,9 +84,9 @@ export const getPercentileRanksMetricAgg = ({
     ],
     getResponseAggs(agg) {
       const ValueAggConfig = getResponseAggConfigClass(agg, getValueProps(getFieldFormatsStart));
-      const values = agg.getParam('values');
+      const values = agg.getParam('values') as number[];
 
-      return values.map((value: any) => new ValueAggConfig(value));
+      return values.map((value) => new ValueAggConfig(value));
     },
     getSerializedFormat(agg) {
       return {

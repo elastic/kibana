@@ -12,8 +12,8 @@ import type { IMetricAggConfig } from '../metric_agg_type';
 
 export const makeNestedLabel = (aggConfig: IMetricAggConfig, label: string) => {
   const uppercaseLabel = startCase(label);
-  const customMetric = aggConfig.getParam('customMetric');
-  const metricAgg = aggConfig.getParam('metricAgg');
+  const customMetric = aggConfig.getParam('customMetric') as IMetricAggConfig;
+  const metricAgg = aggConfig.getParam('metricAgg') as string;
 
   if (customMetric) {
     let metricLabel = customMetric.makeLabel();

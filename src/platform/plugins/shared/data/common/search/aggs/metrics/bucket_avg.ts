@@ -46,9 +46,10 @@ export const getBucketAvgMetricAgg = () => {
     params: [...params()],
     getSerializedFormat,
     getValue(agg, bucket) {
-      const customMetric = agg.getParam('customMetric');
-      const customBucket = agg.getParam('customBucket');
-      const scaleMetrics = customMetric.type && customMetric.type.isScalable();
+      const customMetric = agg.getParam('customMetric') as IAggConfig;
+      const customBucket = agg.getParam('customBucket') as IAggConfig;
+      const scaleMetrics =
+        customMetric.type && (customMetric.type as unknown as MetricAggType).isScalable();
 
       let value = bucket[agg.id] && bucket[agg.id].value;
 

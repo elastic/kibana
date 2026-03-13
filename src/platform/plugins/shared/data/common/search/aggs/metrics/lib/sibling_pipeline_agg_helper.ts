@@ -78,7 +78,7 @@ export const siblingPipelineAggHelper = {
   },
 
   getSerializedFormat(agg: IMetricAggConfig) {
-    const customMetric = agg.getParam('customMetric');
+    const customMetric = agg.getParam('customMetric') as IMetricAggConfig;
     return customMetric ? customMetric.type.getSerializedFormat(customMetric) : {};
   },
 };

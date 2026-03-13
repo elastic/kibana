@@ -34,7 +34,11 @@ describe('createFormulaColumn', () => {
         params: {
           field: stubLogstashDataView.fields[0],
         },
-      } as IAggConfig,
+        aggConfigs: {
+          aggs: [],
+        },
+        schema: 'metric',
+      } as unknown as IAggConfig,
     },
   };
   test('should return formula column', () => {

@@ -101,7 +101,11 @@ describe('sibling pipeline aggs', () => {
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
         metricAgg = metric.provider;
         aggConfig = aggConfigs.aggs[1] as IMetricAggConfig;
-        aggDsl = aggConfig.toDsl(aggConfigs);
+        const dsl = aggConfig.toDsl(aggConfigs);
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        aggDsl = dsl;
       };
 
       it(`should return a label prefixed with ${metric.title} of`, () => {
@@ -135,6 +139,7 @@ describe('sibling pipeline aggs', () => {
 
         expect(aggDsl[metric.name].buckets_path).toBe('2-bucket>2-metric');
         expect(aggDsl.parentAggs['2-bucket'].date_histogram).not.toBeUndefined();
+        expect(aggDsl.parentAggs['2-bucket'].aggs['2-metric']).toBeDefined();
         expect(aggDsl.parentAggs['2-bucket'].aggs['2-metric'].avg.field).toEqual('field');
       });
 

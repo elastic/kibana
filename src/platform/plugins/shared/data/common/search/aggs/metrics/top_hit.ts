@@ -38,7 +38,7 @@ export interface AggParamsTopHit extends BaseAggParamsTopHit {
 }
 
 const isNumericFieldSelected = (agg: IMetricAggConfig) => {
-  const field = agg.getParam('field');
+  const field = agg.getParam('field') as DataViewField;
 
   return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };

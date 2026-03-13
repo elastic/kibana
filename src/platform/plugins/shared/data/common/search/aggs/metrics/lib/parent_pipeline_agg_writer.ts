@@ -15,10 +15,14 @@ export const parentPipelineAggWriter = (
   output: Record<string, any>,
   aggConfigs?: IAggConfigs
 ): void => {
-  const customMetric = agg.getParam('customMetric');
-  const metricAgg = agg.getParam('metricAgg');
+  const customMetric = agg.getParam('customMetric') as IMetricAggConfig;
+  const metricAgg = agg.getParam('metricAgg') as string;
 
   const selectedMetric = customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
+
+  if (!selectedMetric) {
+    return;
+  }
 
   if (customMetric && customMetric.type.name !== 'count') {
     output.parentAggs = (output.parentAggs || []).concat(selectedMetric);

@@ -196,7 +196,11 @@ describe('Filters Agg', () => {
           ],
         });
 
-        const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.FILTERS]: params } = dsl;
         expect(Object.values(params.filters).map((v: any) => v.bool.must)).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -234,7 +238,11 @@ describe('Filters Agg', () => {
           ],
         });
 
-        const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.FILTERS]: params } = dsl;
         expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -294,7 +302,11 @@ describe('Filters Agg', () => {
           filters: [generateFilter('a', 'kuery', '*'), generateFilter('b', 'kuery', 'foo*')],
         });
 
-        const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.FILTERS]: params } = dsl;
         expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -337,7 +349,11 @@ describe('Filters Agg', () => {
           filters: [generateFilter('a', 'kuery', '*foo*')],
         });
 
-        const { [BUCKET_TYPES.FILTERS]: params } = aggConfigs.aggs[0].toDsl();
+        const dsl = aggConfigs.aggs[0].toDsl();
+        if (!dsl) {
+          throw new Error('dsl is undefined');
+        }
+        const { [BUCKET_TYPES.FILTERS]: params } = dsl;
         expect(Object.values(params.filters).map((v: any) => v.bool.filter)).toMatchInlineSnapshot(`
           Array [
             Array [
