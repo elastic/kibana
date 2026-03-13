@@ -43,6 +43,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     dateRange,
     expressions,
     esqlVariables,
+    enableFormatSelector,
   } = props;
 
   useEffect(() => {
@@ -215,7 +216,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             }}
           />
 
-          {selectedField.meta?.type === 'number' ? (
+          {enableFormatSelector && selectedField.meta?.type === 'number' ? (
             <FormatSelector
               selectedColumn={selectedField}
               onChange={onFormatChange}
