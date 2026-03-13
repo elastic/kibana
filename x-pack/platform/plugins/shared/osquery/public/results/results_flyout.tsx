@@ -12,6 +12,8 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 
+const noop = () => {};
+
 interface OsqueryResultsFlyoutProps {
   hit: DataTableRecord;
   hits: DataTableRecord[];
@@ -37,7 +39,7 @@ const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
 }) => {
   const flyoutServices = React.useMemo(
     () => ({ toastNotifications, chrome }),
-    [toastNotifications, chrome]
+    [toastNotifications, chrome],
   );
 
   return (
@@ -51,6 +53,8 @@ const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
       dataView={dataView}
       setExpandedDoc={setExpandedDoc}
       onClose={onClose}
+      onAddColumn={noop}
+      onRemoveColumn={noop}
       flyoutType="overlay"
       data-test-subj="osqueryResultsFlyout"
     />

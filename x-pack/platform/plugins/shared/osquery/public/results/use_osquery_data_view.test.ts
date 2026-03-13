@@ -50,8 +50,8 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toBe(mockDataView);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.dataView).toBe(mockDataView);
   });
 
   it('creates and saves when find returns empty and user can save', async () => {
@@ -73,8 +73,8 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toBe(createdDv);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.dataView).toBe(createdDv);
   });
 
   it('falls back to ad-hoc create when user cannot save', async () => {
@@ -96,8 +96,8 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toBe(adhocDv);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.dataView).toBe(adhocDv);
   });
 
   it('is disabled when skip is true', () => {
@@ -118,6 +118,6 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.isFetching).toBe(false);
+    expect(result.current.isLoading).toBe(false);
   });
 });
