@@ -11,6 +11,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import userEvent from '@testing-library/user-event';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -23,11 +24,13 @@ import { useSwitchModesTour } from './use_switch_modes_tour';
 describe('useSwitchModesTour', () => {
   const setup = async ({
     enableEsql = true,
+    cpsEnabled = false,
     dismissed = false,
     toursEnabled = true,
     hideTabsBar = false,
   }: {
     enableEsql?: boolean;
+    cpsEnabled?: boolean;
     dismissed?: boolean;
     toursEnabled?: boolean;
     hideTabsBar?: boolean;
@@ -42,6 +45,12 @@ describe('useSwitchModesTour', () => {
 
     if (!toursEnabled) {
       jest.spyOn(toolkit.services.notifications.tours, 'isEnabled').mockReturnValue(false);
+    }
+
+    if (cpsEnabled) {
+      toolkit.services.cps = {
+        cpsManager: {} as NonNullable<CPSPluginStart['cpsManager']>,
+      };
     }
 
     if (hideTabsBar) {
@@ -103,6 +112,12 @@ describe('useSwitchModesTour', () => {
 
   it('returns null when tours are disabled', async () => {
     await setup({ toursEnabled: false });
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
+  });
+
+  it('returns null when CPS is enabled', async () => {
+    await setup({ cpsEnabled: true });
     expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
     expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
   });
