@@ -306,6 +306,11 @@ components:
         version:
           description: The version of the integration
           $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        categories:
+          description: The categories of the integration
+          type: array
+          items:
+            type: string
         langSmithOptions:
           description: The LangSmith tracing options
           $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
