@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/tsconfig-base'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/tsconfig-base'
+  title: '@kbn/tsconfig-base'
   description: Moon project for @kbn/tsconfig-base
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-tsconfig/base
+  sourceRoot: packages/kbn-tsconfig/base
 tags:
   - shared-server
   - package

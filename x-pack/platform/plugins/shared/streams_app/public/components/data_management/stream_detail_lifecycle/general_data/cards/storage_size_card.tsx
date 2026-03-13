@@ -18,11 +18,46 @@ export const StorageSizeCard = ({
   hasMonitorPrivileges,
   stats,
   statsError,
+  isTimeSeriesMode = false,
 }: {
   hasMonitorPrivileges: boolean;
   stats?: DataStreamStats;
   statsError?: Error;
+  isTimeSeriesMode?: boolean;
 }) => {
+  const totalDocs =
+    statsError || !stats || stats.totalDocs === undefined
+      ? '-'
+      : formatNumber(stats.totalDocs, '0,0');
+  const docsText = i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
+    defaultMessage: '{totalDocs} documents',
+    values: { totalDocs },
+  });
+
+  const timeSeriesCount =
+    statsError || !stats || stats.timeSeriesCount === undefined
+      ? '-'
+      : formatNumber(stats.timeSeriesCount, '0,0');
+
+  let subtitle: React.ReactNode | null = null;
+
+  if (hasMonitorPrivileges) {
+    if (isTimeSeriesMode && !statsError && typeof stats?.timeSeriesCount === 'number') {
+      subtitle = i18n.translate(
+        'xpack.streams.streamDetailLifecycle.storageSize.docsAndTimeSeries',
+        {
+          defaultMessage: '{totalDocs} documents · {timeSeriesCount} time series',
+          values: {
+            totalDocs,
+            timeSeriesCount,
+          },
+        }
+      );
+    } else {
+      subtitle = docsText;
+    }
+  }
+
   const metric = [
     {
       data: (
@@ -38,17 +73,7 @@ export const StorageSizeCard = ({
             : formatBytes(stats.sizeBytes)}
         </PrivilegesWarningIconWrapper>
       ),
-      subtitle: hasMonitorPrivileges
-        ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
-            defaultMessage: '{totalDocs} documents',
-            values: {
-              totalDocs:
-                statsError || !stats || stats.totalDocs === undefined
-                  ? '-'
-                  : formatNumber(stats.totalDocs, '0,0'),
-            },
-          })
-        : null,
+      subtitle,
       'data-test-subj': 'storageSize',
     },
   ];

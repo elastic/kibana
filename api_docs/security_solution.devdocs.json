@@ -3780,7 +3780,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 305,
+        "lineNumber": 306,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3835,7 +3835,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 582,
+        "lineNumber": 583,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
