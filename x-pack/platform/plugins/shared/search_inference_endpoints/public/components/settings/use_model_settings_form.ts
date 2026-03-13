@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
-import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 
 type Assignments = Record<string, string[]>;
@@ -21,10 +20,9 @@ const toApiFormat = (assignments: Assignments) =>
 export const useModelSettingsForm = () => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
-  const { isLoading: isEndpointsLoading } = useQueryInferenceEndpoints();
   const { mutate: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
 
-  const isLoading = isFeaturesLoading || isSettingsLoading || isEndpointsLoading;
+  const isLoading = isFeaturesLoading || isSettingsLoading;
 
   const sections = useMemo(() => {
     const children = registeredFeatures.filter((f) => f.parentFeatureId !== undefined);

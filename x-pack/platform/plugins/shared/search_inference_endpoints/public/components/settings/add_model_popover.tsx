@@ -11,23 +11,11 @@ import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { useEndpointInfo } from '../../hooks/use_endpoint_info';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 
 const popoverStyle = css({ width: 400 });
-
-const isElasticService = (service: string): boolean =>
-  service === ServiceProviderKeys.elastic || service === ServiceProviderKeys.elasticsearch;
-
-const ELASTIC_INFERENCE_SERVICE_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.settings.addModel.elasticGroup',
-  { defaultMessage: 'Elastic Inference Service' }
-);
-
-const NON_MANAGED_LABEL = i18n.translate(
-  'xpack.searchInferenceEndpoints.settings.addModel.nonManagedGroup',
-  { defaultMessage: 'Non-managed' }
-);
 
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
@@ -35,53 +23,27 @@ interface AddModelPopoverProps {
 }
 
 export const AddModelPopover: React.FC<AddModelPopoverProps> = ({ existingEndpointIds, onAdd }) => {
-  const { inferenceEndpoints, endpointInfoMap } = useEndpointInfo();
+  const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
   const [isOpen, setIsOpen] = useState(false);
 
   const options: EuiSelectableOption[] = useMemo(() => {
     const existingSet = new Set(existingEndpointIds);
-    const elasticGroup: EuiSelectableOption[] = [];
-    const nonManagedGroup: EuiSelectableOption[] = [];
 
-    inferenceEndpoints.forEach((endpoint) => {
-      if (existingSet.has(endpoint.inference_id)) return;
-
-      const info = endpointInfoMap.get(endpoint.inference_id);
-      const option: EuiSelectableOption = {
-        label: info?.label ?? endpoint.inference_id,
-        key: endpoint.inference_id,
-        prepend: <EuiIcon type={info?.icon ?? 'compute'} size="s" aria-hidden />,
-      };
-
-      if (isElasticService(endpoint.service)) {
-        elasticGroup.push(option);
-      } else {
-        nonManagedGroup.push(option);
-      }
-    });
-
-    const result: EuiSelectableOption[] = [];
-
-    if (elasticGroup.length > 0) {
-      result.push({
-        label: ELASTIC_INFERENCE_SERVICE_LABEL,
-        isGroupLabel: true,
-        key: 'group-elastic',
+    return inferenceEndpoints
+      .filter((endpoint) => !existingSet.has(endpoint.inference_id))
+      .map((endpoint) => {
+        const icon = SERVICE_PROVIDERS[endpoint.service as ServiceProviderKeys]?.icon ?? 'compute';
+        return {
+          label: endpoint.inference_id,
+          key: endpoint.inference_id,
+          prepend: <EuiIcon type={icon} size="s" aria-hidden />,
+        };
       });
-      result.push(...elasticGroup);
-    }
-
-    if (nonManagedGroup.length > 0) {
-      result.push({ label: NON_MANAGED_LABEL, isGroupLabel: true, key: 'group-non-managed' });
-      result.push(...nonManagedGroup);
-    }
-
-    return result;
-  }, [inferenceEndpoints, existingEndpointIds, endpointInfoMap]);
+  }, [inferenceEndpoints, existingEndpointIds]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const selected = newOptions.find((opt) => opt.checked === 'on' && !opt.isGroupLabel);
+      const selected = newOptions.find((opt) => opt.checked === 'on');
       if (selected?.key) {
         onAdd(selected.key);
         setIsOpen(false);
@@ -123,7 +85,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({ existingEndpoi
           }),
           'data-test-subj': 'add-model-search',
         }}
-        listProps={{ bordered: false }}
+        listProps={{ bordered: false, showIcons: false }}
         height={300}
       >
         {(list, search) => (

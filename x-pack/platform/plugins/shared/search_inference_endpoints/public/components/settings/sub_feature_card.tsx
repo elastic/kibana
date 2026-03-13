@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -21,8 +21,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as translations from '../../../common/translations';
-import { useEndpointInfo } from '../../hooks/use_endpoint_info';
+import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import type { InferenceFeatureConfig } from './feature_metadata';
 import { AddModelPopover } from './add_model_popover';
 
@@ -39,8 +41,19 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   endpointIds,
   onEndpointsChange,
 }) => {
-  const { endpointInfoMap } = useEndpointInfo();
+  const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const iconMap = useMemo(
+    () =>
+      new Map(
+        inferenceEndpoints.map((ep) => [
+          ep.inference_id,
+          SERVICE_PROVIDERS[ep.service as ServiceProviderKeys]?.icon ?? 'compute',
+        ])
+      ),
+    [inferenceEndpoints]
+  );
 
   const collapsedCount = 1;
   const hasOverflow = endpointIds.length > collapsedCount;
@@ -94,47 +107,41 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           <EuiSpacer size="s" />
 
           <EuiSplitPanel.Outer hasBorder>
-            {visibleEndpoints.map((endpointId, index) => {
-              const info = endpointInfoMap.get(endpointId);
-              return (
-                <React.Fragment key={endpointId}>
-                  <EuiSplitPanel.Inner
-                    paddingSize="s"
-                    data-test-subj={`endpoint-row-${endpointId}`}
-                  >
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {visibleEndpoints.map((endpointId, index) => (
+              <React.Fragment key={endpointId}>
+                <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={iconMap.get(endpointId) ?? 'compute'} size="m" aria-hidden />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <EuiText size="s">{endpointId}</EuiText>
+                    </EuiFlexItem>
+                    {index === 0 && (
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={info?.icon ?? 'compute'} size="m" aria-hidden />
+                        <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
                       </EuiFlexItem>
-                      <EuiFlexItem grow>
-                        <EuiText size="s">{info?.label ?? endpointId}</EuiText>
+                    )}
+                    {endpointIds.length > 1 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="cross"
+                          aria-label={i18n.translate(
+                            'xpack.searchInferenceEndpoints.settings.removeModel',
+                            { defaultMessage: 'Remove model' }
+                          )}
+                          size="s"
+                          color="text"
+                          onClick={() => handleRemove(index)}
+                          data-test-subj={`remove-endpoint-${endpointId}`}
+                        />
                       </EuiFlexItem>
-                      {index === 0 && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
-                        </EuiFlexItem>
-                      )}
-                      {endpointIds.length > 1 && (
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            iconType="cross"
-                            aria-label={i18n.translate(
-                              'xpack.searchInferenceEndpoints.settings.removeModel',
-                              { defaultMessage: 'Remove model' }
-                            )}
-                            size="s"
-                            color="text"
-                            onClick={() => handleRemove(index)}
-                            data-test-subj={`remove-endpoint-${endpointId}`}
-                          />
-                        </EuiFlexItem>
-                      )}
-                    </EuiFlexGroup>
-                  </EuiSplitPanel.Inner>
-                  {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
-                </React.Fragment>
-              );
-            })}
+                    )}
+                  </EuiFlexGroup>
+                </EuiSplitPanel.Inner>
+                {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
+              </React.Fragment>
+            ))}
           </EuiSplitPanel.Outer>
 
           <EuiSpacer size="xs" />
