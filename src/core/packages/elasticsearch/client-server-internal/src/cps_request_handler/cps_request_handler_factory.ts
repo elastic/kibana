@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSpaceNPRE, PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
+import {
+  getSpaceNPRE,
+  PROJECT_ROUTING_ORIGIN,
+  KBN_PROJECT_ROUTING_HEADER,
+} from '@kbn/cps-server-utils';
 import type { OnRequestHandlerFactory } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 
@@ -18,15 +22,17 @@ import { getCpsRequestHandler } from './cps_request_handler';
  * @internal
  */
 export function getRequestHandlerFactory(cpsEnabled: boolean): OnRequestHandlerFactory {
-  return ({ projectRouting, logger }) => {
-    switch (projectRouting) {
-      case 'origin-only':
-        return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, logger);
-      case 'all':
-        return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ALL, logger);
-      default:
-        // projectRouting is a ScopeableUrlRequest - derive the NPRE from its URL.
-        return getCpsRequestHandler(cpsEnabled, getSpaceNPRE(projectRouting), logger);
+  return (opts) => {
+    if ('projectRouting' in opts) {
+      if (opts.projectRouting === 'space') {
+        return getCpsRequestHandler(cpsEnabled, getSpaceNPRE(opts.request), opts.logger);
+      } else {
+        const raw = opts.request.headers[KBN_PROJECT_ROUTING_HEADER];
+        const value = Array.isArray(raw) ? raw[0] : raw;
+        return getCpsRequestHandler(cpsEnabled, value ?? PROJECT_ROUTING_ORIGIN, opts.logger);
+      }
+    } else {
+      return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN, opts.logger);
     }
   };
 }

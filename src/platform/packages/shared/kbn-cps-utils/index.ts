@@ -22,5 +22,5 @@ export { ProjectPicker } from './components/project_picker';
 export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
 export { useFetchProjects } from './components/use_fetch_projects';
-export { PROJECT_ROUTING } from '@kbn/cps-common';
+export { KBN_PROJECT_ROUTING_HEADER, PROJECT_ROUTING } from '@kbn/cps-common';
 export { ProjectRoutingAccess } from './types';

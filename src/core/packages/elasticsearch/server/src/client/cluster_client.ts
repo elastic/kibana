@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from './client';
 import type { ScopeableRequest, ScopeableUrlRequest } from './types';
 import type { IScopedClusterClient } from './scoped_cluster_client';
@@ -27,32 +28,24 @@ export interface AsScopedOptions {
    * header and Elasticsearch handles execution, security enforcement, and result aggregation.
    *
    * **Options**:
-   * - `'origin-only'`: Requests are routed exclusively to the "origin" Elasticsearch instance
-   *   (i.e., the project that Kibana is directly connected to). Use this for administrative or
-   *   internal operations that must not fan out across other projects.
-   * - `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured for
-   *   the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`
-   *   so that the space can be extracted from the URL pathname. Use this when the scope of the
-   *   query should match the data boundaries of the active space.
-   * - `'all'`: Requests are broadcast to all CPS-connected Elasticsearch instances. This is the
-   *   broadest option and is appropriate when the intent is to search or aggregate data across
-   *   all connected projects.
+   * - `'space'`: Requests are routed to the Named Project Routing Expression (NPRE) configured
+   *   for the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to
+   *   `asScoped` so that the space can be extracted from the URL pathname. Use this when the scope
+   *   of the query should match the data boundaries of the active space (e.g. alerting rules).
+   * - `'request-header'`: The `project_routing` value is read from the `x-kbn-project-routing`
+   *   HTTP header present on the incoming request. Browser-side code sets this header via the
+   *   Kibana HTTP client, eliminating the need to propagate the routing value through request
+   *   bodies or service layers. Falls back to origin-only routing when the header is absent.
+   *
+   * When no options are passed to `asScoped`, requests are always routed to the origin project
+   * (i.e. the Elasticsearch instance Kibana is directly connected to).
    *
    * **Important**: This option only takes effect in CPS-enabled Serverless environments. In all
    * other environments (stateful, non-CPS Serverless), any `project_routing` params are
    * stripped from requests to avoid Elasticsearch rejections and to preserve traditional
    * single-cluster routing behavior.
    */
-  projectRouting: 'origin-only' | 'space' | 'all';
-}
-
-/**
- * {@link AsScopedOptions} variant that locks routing to the origin Elasticsearch instance.
- * Use for administrative or internal operations that must not fan out across CPS-connected projects.
- * @public
- */
-export interface OriginOnlyRouting extends AsScopedOptions {
-  projectRouting: 'origin-only';
+  projectRouting: 'space' | 'request-header';
 }
 
 /**
@@ -66,12 +59,15 @@ export interface SpaceNPRERouting extends AsScopedOptions {
 }
 
 /**
- * {@link AsScopedOptions} variant that broadcasts requests to all CPS-connected Elasticsearch
- * instances. Use when the intent is to search or aggregate data across all available projects.
+ * {@link AsScopedOptions} variant that reads `project_routing` from the `x-kbn-project-routing`
+ * HTTP header present on the incoming request. Browser-side code sets this header via the Kibana
+ * HTTP client (e.g. `http.post('/api/...', { headers: { 'x-kbn-project-routing': value } })`),
+ * eliminating the need to propagate the value through request bodies or service layers.
+ * Falls back to origin-only routing when the header is absent.
  * @public
  */
-export interface AllProjectsRouting extends AsScopedOptions {
-  projectRouting: 'all';
+export interface RequestHeaderRouting extends AsScopedOptions {
+  projectRouting: 'request-header';
 }
 
 /**
@@ -92,35 +88,23 @@ export interface IClusterClient {
    * to `'origin-only'` routing - they will never fan out to other CPS-connected projects.
    */
   readonly asInternalUser: ElasticsearchClient;
+
+  asScoped(request: KibanaRequest, opts: AsScopedOptions): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts?: RequestHeaderRouting): IScopedClusterClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
    * forwarding the request's authentication headers to Elasticsearch.
    *
-   * In CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`
-   * is injected into outgoing requests. See {@link AsScopedOptions} for details.
-   *
-   * @param request - A {@link ScopeableUrlRequest} whose URL is used to extract the active space
-   *   for space-level CPS routing. Accepts both a real {@link KibanaRequest} (the typical caller
-   *   from route handlers) and a synthetic {@link UrlRequest}.
-   * @param opts - {@link SpaceNPRERouting} options with `projectRouting` set to `'space'`.
+   * @param request - The incoming request whose credentials authenticate Elasticsearch calls.
+   *   - {@link KibanaRequest}: supports all routing options via `opts`.
+   *   - {@link ScopeableRequest}: supports `'request-header'` routing or no routing (origin-only).
+   *   - {@link ScopeableUrlRequest}: additionally supports `'space'` routing (space id extracted from URL).
+   * @param opts - Optional {@link AsScopedOptions} to configure CPS routing behavior.
+   *   - 'request-header': Routes the request to the PRE specified in the `x-kbn-project-routing` header.
+   *   - 'space': Routes the request to the NPRE configured for the current Kibana space.
+   *   The client will route the request to the origin project if no options are provided.
    */
-  asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
-  /**
-   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
-   * forwarding the request's authentication headers to Elasticsearch.
-   *
-   * In CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`
-   * is injected into outgoing requests. See {@link AsScopedOptions} for details.
-   *
-   * @param request - The incoming {@link ScopeableRequest | request} whose credentials are used
-   *   to authenticate Elasticsearch calls.
-   * @param opts - Optional {@link AsScopedOptions | options} to configure CPS routing behavior.
-   *   Defaults to `'origin-only'` when not specified.
-   */
-  asScoped(
-    request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
-  ): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts?: SpaceNPRERouting): IScopedClusterClient;
 }
 
 /**

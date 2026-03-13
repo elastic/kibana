@@ -8,4 +8,8 @@
  */
 
 export { getSpaceNPRE } from './src/get_space_npre';
-export { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL } from './src/constants';
+export {
+  PROJECT_ROUTING_ORIGIN,
+  PROJECT_ROUTING_ALL,
+  KBN_PROJECT_ROUTING_HEADER,
+} from './src/constants';

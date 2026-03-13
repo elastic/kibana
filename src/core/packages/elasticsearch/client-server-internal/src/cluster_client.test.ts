@@ -19,6 +19,7 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
+import { KBN_PROJECT_ROUTING_HEADER } from '@kbn/cps-server-utils';
 import { getRequestHandlerFactory } from './cps_request_handler';
 import { ClusterClient } from './cluster_client';
 import type { OnRequestHandler } from './create_transport';
@@ -344,7 +345,7 @@ describe('ClusterClient', () => {
         );
       });
 
-      it("injects '_alias:_origin' when projectRouting is 'origin-only'", () => {
+      it("injects '_alias:_origin' when no projectRouting opts are provided (default)", () => {
         const onRequest = captureTransportOnRequest();
 
         const clusterClient = new ClusterClient({
@@ -358,7 +359,7 @@ describe('ClusterClient', () => {
         });
 
         const request = httpServerMock.createKibanaRequest();
-        client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+        client = clusterClient.asScoped(request).asCurrentUser;
 
         const params = makeSearchParams();
         onRequest.get()({} as never, params, {}, logger);
@@ -366,7 +367,33 @@ describe('ClusterClient', () => {
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
 
-      it("injects '_alias:*' when projectRouting is 'all'", () => {
+      it("reads routing from the x-kbn-project-routing header when projectRouting is 'request-header'", () => {
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest({
+          headers: { [KBN_PROJECT_ROUTING_HEADER]: '_alias:*' },
+        });
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'request-header',
+        }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {}, logger);
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
+      });
+
+      it("falls back to '_alias:_origin' when projectRouting is 'request-header' but header is absent", () => {
         const onRequest = captureTransportOnRequest();
 
         const clusterClient = new ClusterClient({
@@ -380,12 +407,14 @@ describe('ClusterClient', () => {
         });
 
         const request = httpServerMock.createKibanaRequest();
-        client = clusterClient.asScoped(request, { projectRouting: 'all' }).asCurrentUser;
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'request-header',
+        }).asCurrentUser;
 
         const params = makeSearchParams();
         onRequest.get()({} as never, params, {}, logger);
 
-        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
 
       // Note: child() clients that do NOT override Transport inherit the parent's routing
@@ -1386,7 +1415,9 @@ describe('ClusterClient', () => {
         // Even when the scoped client is created with 'space' routing, asSecondaryAuthUser
         // is always a child of asInternalUser, which uses origin-only routing.
         const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-        client = clusterClient.asScoped(request, { projectRouting: 'space' }).asSecondaryAuthUser;
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'space',
+        }).asSecondaryAuthUser;
 
         // No Transport override means the child inherits asInternalUser's origin-only Transport.
         expect(internalClient.child).toHaveBeenCalledWith(
@@ -1568,7 +1599,7 @@ describe('ClusterClient', () => {
       });
 
       const request = httpServerMock.createKibanaRequest();
-      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+      client = clusterClient.asScoped(request).asCurrentUser;
 
       const params = makeSearchParamsWithRouting();
       onRequest.get()({} as never, params, {}, logger);
@@ -1590,7 +1621,7 @@ describe('ClusterClient', () => {
       });
 
       const request = httpServerMock.createKibanaRequest();
-      client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
+      client = clusterClient.asScoped(request).asCurrentUser;
 
       const params = makeSearchParams();
       onRequest.get()({} as never, params, {}, logger);
