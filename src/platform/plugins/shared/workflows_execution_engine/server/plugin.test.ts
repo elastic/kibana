@@ -18,9 +18,18 @@ import {
   NonTerminalExecutionStatuses,
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
+
+const TEST_BACKING_INDEX = '.workflows-executions-000001';
+const createEncodedExecutionId = () =>
+  generateEncodedWorkflowExecutionId({
+    indexName: TEST_BACKING_INDEX,
+    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  });
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
   let esClient: jest.Mocked<Client>;
@@ -368,9 +377,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   describe('taskRunAt comparison logic', () => {
     it('should mark execution as FAILED and proceed when taskRunAt matches AND attempts > 1 (stale execution from task recovery)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
+      const encodedId = createEncodedExecutionId();
       const existingExecution = {
         _source: {
-          id: 'existing-execution-id',
+          id: encodedId,
           workflowId: workflow.id,
           spaceId,
           status: ExecutionStatus.PENDING,
@@ -402,8 +412,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       expect(result).toBe(false); // Proceed with new execution
       expect(esClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
-          id: 'existing-execution-id',
+          index: TEST_BACKING_INDEX,
+          id: encodedId,
           doc: expect.objectContaining({
             status: ExecutionStatus.FAILED,
             error: {
@@ -584,9 +594,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
     it('should handle RUNNING status execution with matching taskRunAt AND attempts > 1 (stale)', async () => {
       const matchingRunAt = baseRunAt.toISOString();
+      const encodedId = createEncodedExecutionId();
       const existingExecution = {
         _source: {
-          id: 'existing-execution-id',
+          id: encodedId,
           workflowId: workflow.id,
           spaceId,
           status: ExecutionStatus.RUNNING,

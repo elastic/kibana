@@ -11,6 +11,8 @@ export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_EXECUTIONS_INDEX}-*`;
+
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 
 // Export shared utilities that are needed by both server and client

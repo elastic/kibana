@@ -14,6 +14,10 @@ import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } f
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
   public workflowExecutions = new Map<string, EsWorkflowExecution>();
 
+  public resolveWriteIndex(): Promise<string> {
+    return Promise.resolve('.workflows-executions-000001');
+  }
+
   public getWorkflowExecutionById(
     workflowExecutionId: string,
     spaceId: string

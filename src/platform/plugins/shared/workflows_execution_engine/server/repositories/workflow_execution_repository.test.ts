@@ -8,8 +8,18 @@
  */
 
 import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
+
+const TEST_BACKING_INDEX = '.workflows-executions-000001';
+
+const createEncodedId = () =>
+  generateEncodedWorkflowExecutionId({
+    indexName: TEST_BACKING_INDEX,
+    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  });
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
@@ -56,7 +66,8 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
 
       expect(esClient.index).toHaveBeenCalledWith(
@@ -69,50 +80,53 @@ describe('WorkflowExecutionRepository', () => {
 
       // Mock get to return a document with different spaceId
       esClient.get.mockResolvedValueOnce({
-        _source: { id: '1', workflowId: 'test-workflow', spaceId: 'space1' },
+        _source: { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' },
       });
 
       // Should return null when spaceId doesn't match
-      const result = await repository.getWorkflowExecutionById('1', 'space2');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space2');
 
       expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
       });
       expect(result).toBeNull();
     });
 
     it('should return document when spaceId matches', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' };
       esClient.get.mockResolvedValueOnce({
         _source: workflowExecution,
       });
 
-      const result = await repository.getWorkflowExecutionById('1', 'space1');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space1');
 
       expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
       });
       expect(result).toEqual(workflowExecution);
     });
 
     it('should return null when document is not found', async () => {
+      const encodedId = createEncodedId();
       const notFoundError = new Error('Not Found');
       (notFoundError as any).meta = { statusCode: 404 };
       esClient.get.mockRejectedValueOnce(notFoundError);
 
-      const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space1');
 
       expect(result).toBeNull();
     });
 
     it('should throw error for non-404 errors', async () => {
+      const encodedId = createEncodedId();
       const serverError = new Error('Internal Server Error');
       (serverError as any).meta = { statusCode: 500 };
       esClient.get.mockRejectedValueOnce(serverError);
 
-      await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
+      await expect(repository.getWorkflowExecutionById(encodedId, 'space1')).rejects.toThrow(
         'Internal Server Error'
       );
     });
@@ -120,11 +134,12 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('updateWorkflowExecution', () => {
     it('should update a workflow execution', async () => {
-      const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, status: ExecutionStatus.RUNNING };
       await repository.updateWorkflowExecution(workflowExecution);
       expect(esClient.update).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
         refresh: false,
         doc: workflowExecution,
       });
@@ -133,6 +148,12 @@ describe('WorkflowExecutionRepository', () => {
     it('should throw an error if ID is missing during update', async () => {
       await expect(repository.updateWorkflowExecution({})).rejects.toThrow(
         'Workflow execution ID is required for update'
+      );
+    });
+
+    it('should throw an error if ID cannot be decoded', async () => {
+      await expect(repository.updateWorkflowExecution({ id: 'invalid-plain-id' })).rejects.toThrow(
+        'Failed to decode workflow execution ID'
       );
     });
   });
@@ -611,23 +632,26 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('bulkUpdateWorkflowExecutions', () => {
-    it('should successfully bulk update multiple workflow executions', async () => {
+    it('should successfully bulk update multiple workflow executions across backing indexes', async () => {
+      const encodedId1 = createEncodedId();
+      const encodedId2 = createEncodedId();
+
       esClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { update: { _id: 'exec-1', status: 200 } },
-          { update: { _id: 'exec-2', status: 200 } },
+          { update: { _id: encodedId1, status: 200 } },
+          { update: { _id: encodedId2, status: 200 } },
         ],
       });
 
       await repository.bulkUpdateWorkflowExecutions([
         {
-          id: 'exec-1',
+          id: encodedId1,
           status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
         },
         {
-          id: 'exec-2',
+          id: encodedId2,
           status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
         },
@@ -635,12 +659,23 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: true,
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        body: [
-          { update: { _id: 'exec-1' } },
-          { doc: { id: 'exec-1', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
-          { update: { _id: 'exec-2' } },
-          { doc: { id: 'exec-2', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
+        operations: [
+          { update: { _index: TEST_BACKING_INDEX, _id: encodedId1 } },
+          {
+            doc: {
+              id: encodedId1,
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
+          { update: { _index: TEST_BACKING_INDEX, _id: encodedId2 } },
+          {
+            doc: {
+              id: encodedId2,
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
         ],
       });
     });
@@ -665,13 +700,16 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should throw error with details when bulk operation has errors', async () => {
+      const encodedId1 = createEncodedId();
+      const encodedId2 = createEncodedId();
+
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { update: { _id: 'exec-1', status: 200 } },
+          { update: { _id: encodedId1, status: 200 } },
           {
             update: {
-              _id: 'exec-2',
+              _id: encodedId2,
               error: { type: 'document_missing_exception', reason: 'document missing' },
               status: 404,
             },
@@ -682,11 +720,11 @@ describe('WorkflowExecutionRepository', () => {
       await expect(
         repository.bulkUpdateWorkflowExecutions([
           {
-            id: 'exec-1',
+            id: encodedId1,
             status: ExecutionStatus.CANCELLED,
           },
           {
-            id: 'exec-2',
+            id: encodedId2,
             status: ExecutionStatus.CANCELLED,
           },
         ])

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as generateUuid } from 'uuid';
 import type {
   CoreSetup,
   CoreStart,
@@ -26,6 +25,7 @@ import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -38,6 +38,7 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -61,6 +62,7 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -343,6 +345,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -401,8 +404,16 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
+              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+                stepExecutionRepository.resolveWriteIndex(),
+                workflowExecutionRepository.resolveWriteIndex(),
+              ]);
+
               const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateUuid(),
+                id: generateEncodedWorkflowExecutionId({
+                  indexName: resolvedExecutionsIndex,
+                  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+                }),
                 spaceId,
                 workflowId: workflow.id,
                 isTestRun: false,
@@ -417,6 +428,8 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
+                stepExecutionsIndex: resolvedStepExecutionsIndex,
+                executionsIndex: resolvedExecutionsIndex,
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {
@@ -497,9 +510,9 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
+    const stepExecutionRepo = new StepExecutionRepository(internalEsClient);
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -533,8 +546,18 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
+
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateUuid(),
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
         spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
@@ -711,8 +734,15 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const workflowExecution = {
-        id: generateUuid(),
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
+      const workflowExecution: Partial<EsWorkflowExecution> = {
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
@@ -724,6 +754,8 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
@@ -852,6 +884,8 @@ export class WorkflowsExecutionEnginePlugin
     if (!this.initializePromise) {
       this.initializePromise = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
+        rolloverMaxAge: this.config.rolloverMaxAge,
+        rolloverMaxDocs: this.config.rolloverMaxDocs,
         logger: this.logger,
       });
     }

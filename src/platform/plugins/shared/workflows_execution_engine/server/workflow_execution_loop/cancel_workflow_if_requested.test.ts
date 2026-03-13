@@ -38,6 +38,7 @@ describe('cancelWorkflowIfRequested', () => {
       status: ExecutionStatus.RUNNING,
       cancelRequested: false,
       startedAt: '2025-08-05T20:00:00.000Z',
+      stepExecutionsIndex: '.workflows-step-executions-000001',
     } as EsWorkflowExecution;
 
     workflowExecutionRepository = {

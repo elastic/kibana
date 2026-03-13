@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_STEP_EXECUTIONS_INDEX } from './step_executions_index';
-export { WORKFLOWS_EXECUTIONS_INDEX } from './workflow_executions_index';
-export { createIndexes } from './create_indexes';
+export {
+  generateEncodedWorkflowExecutionId,
+  decodeEncodedWorkflowExecutionId,
+} from './generate_execution_id/generate_execution_id';
+export { resolveIndex } from './resolve_index/resolve_index';
+export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
+export {
+  generateEncodedStepExecutionId,
+  decodeEncodedStepExecutionId,
+} from './generate_step_execution_id/generate_step_execution_id';

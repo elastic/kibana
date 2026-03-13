@@ -207,6 +207,7 @@ export class WorkflowExecuteSyncStrategy {
           const stepExecutions =
             await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
               state.executionId,
+              execution.stepExecutionsIndex,
               execution.stepExecutionIds
             );
           // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)

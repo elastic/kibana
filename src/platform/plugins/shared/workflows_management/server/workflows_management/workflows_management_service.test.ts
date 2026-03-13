@@ -14,10 +14,15 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
 import { WorkflowsService } from './workflows_management_service';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
@@ -2215,10 +2220,20 @@ steps:
   });
 
   describe('getWorkflowExecution', () => {
+    const TEST_BACKING_INDEX = '.workflows-executions-000001';
+
+    const createEncodedExecId = () =>
+      generateEncodedWorkflowExecutionId({
+        indexName: TEST_BACKING_INDEX,
+        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      });
+
     it('should return workflow execution with steps, excluding I/O by default', async () => {
+      const encodedExecId = createEncodedExecId();
+
       // Mock the get call for execution (using direct GET by ID)
       const mockExecutionGetResponse = {
-        _id: 'execution-1',
+        _id: encodedExecId,
         _source: {
           spaceId: 'default',
           status: 'completed',
@@ -2238,7 +2253,7 @@ steps:
               _id: 'step-1',
               _source: {
                 spaceId: 'default',
-                executionId: 'execution-1',
+                executionId: encodedExecId,
                 stepName: 'first-step',
                 status: 'completed',
                 startedAt: '2023-01-01T00:00:00Z',
@@ -2254,23 +2269,23 @@ steps:
       mockEsClient.get.mockResolvedValueOnce(mockExecutionGetResponse as any);
       mockEsClient.search.mockResolvedValueOnce(mockStepExecutionsResponse as any);
 
-      const result = await service.getWorkflowExecution('execution-1', 'default');
+      const result = await service.getWorkflowExecution(encodedExecId, 'default');
 
       expect(result).toBeDefined();
-      expect(result!.id).toBe('execution-1');
+      expect(result!.id).toBe(encodedExecId);
       expect(result!.status).toBe('completed');
 
-      // Verify the execution get call (now uses GET instead of search)
+      // Verify the execution get call (now uses GET with resolved backing index)
       expect(mockEsClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: 'execution-1',
+        index: TEST_BACKING_INDEX,
+        id: encodedExecId,
       });
 
       // Verify the step executions search call (includeInput/includeOutput default to false)
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
-          match: { workflowRunId: 'execution-1' },
+          match: { workflowRunId: encodedExecId },
         },
         _source: { excludes: ['input', 'output'] },
         sort: 'startedAt:desc',
@@ -2279,20 +2294,24 @@ steps:
     });
 
     it('should return null when execution not found (404)', async () => {
+      const encodedExecId = createEncodedExecId();
+
       // Mock 404 error for document not found
       const notFoundError = new Error('Not Found') as Error & { meta?: { statusCode?: number } };
       notFoundError.meta = { statusCode: 404 };
       mockEsClient.get.mockRejectedValueOnce(notFoundError);
 
-      const result = await service.getWorkflowExecution('non-existent', 'default');
+      const result = await service.getWorkflowExecution(encodedExecId, 'default');
 
       expect(result).toBeNull();
     });
 
     it('should return null when spaceId does not match', async () => {
+      const encodedExecId = createEncodedExecId();
+
       // Mock execution with different spaceId
       const mockExecutionGetResponse = {
-        _id: 'execution-1',
+        _id: encodedExecId,
         _source: {
           spaceId: 'different-space',
           status: 'completed',
@@ -2301,16 +2320,17 @@ steps:
 
       mockEsClient.get.mockResolvedValueOnce(mockExecutionGetResponse as any);
 
-      const result = await service.getWorkflowExecution('execution-1', 'default');
+      const result = await service.getWorkflowExecution(encodedExecId, 'default');
 
       expect(result).toBeNull();
     });
 
     it('should handle get errors', async () => {
+      const encodedExecId = createEncodedExecId();
       const error = new Error('Get failed');
       mockEsClient.get.mockRejectedValue(error);
 
-      await expect(service.getWorkflowExecution('execution-1', 'default')).rejects.toThrow(
+      await expect(service.getWorkflowExecution(encodedExecId, 'default')).rejects.toThrow(
         'Get failed'
       );
     });

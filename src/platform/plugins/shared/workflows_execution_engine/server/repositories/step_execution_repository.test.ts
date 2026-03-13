@@ -9,13 +9,17 @@
 
 import { StepExecutionRepository } from './step_execution_repository';
 
+const TARGET_INDEX = '.workflows-step-executions-000001';
+
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
   let esClient: {
     index: jest.Mock;
     update: jest.Mock;
     bulk: jest.Mock;
-    indices: { exists: jest.Mock; create: jest.Mock };
+    mget: jest.Mock;
+    search: jest.Mock;
+    indices: { exists: jest.Mock; create: jest.Mock; getAlias: jest.Mock };
   };
 
   beforeEach(() => {
@@ -23,9 +27,12 @@ describe('StepExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       bulk: jest.fn(),
+      mget: jest.fn(),
+      search: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
+        getAlias: jest.fn(),
       },
     };
     underTest = new StepExecutionRepository(esClient as any);
@@ -48,11 +55,11 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
-        index: expect.any(String),
+        index: TARGET_INDEX,
         body: [
           { update: { _id: 'step-1' } },
           { doc: stepExecutions[0], doc_as_upsert: true },
@@ -65,7 +72,7 @@ describe('StepExecutionRepository', () => {
     });
 
     it('should handle empty array without making ES call', async () => {
-      await underTest.bulkUpsert([]);
+      await underTest.bulkUpsert([], TARGET_INDEX);
 
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
@@ -76,7 +83,7 @@ describe('StepExecutionRepository', () => {
         { stepId: 'test-step-2' }, // Missing id
       ];
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Step execution ID is required for upsert'
       );
 
@@ -117,7 +124,7 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Failed to upsert 2 step executions'
       );
 
@@ -146,7 +153,7 @@ describe('StepExecutionRepository', () => {
       });
 
       try {
-        await underTest.bulkUpsert(stepExecutions as any);
+        await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
         fail('Should have thrown an error');
       } catch (error: any) {
         expect(error.message).toContain('Failed to upsert 1 step executions');
@@ -178,7 +185,7 @@ describe('StepExecutionRepository', () => {
       });
 
       try {
-        await underTest.bulkUpsert(stepExecutions as any);
+        await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
         fail('Should have thrown an error');
       } catch (error: any) {
         expect(error.message).toContain('Failed to upsert 1 step executions');
@@ -196,7 +203,7 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
       expect(bulkCall.body[1]).toEqual({
@@ -213,11 +220,11 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
-        index: expect.any(String),
+        index: TARGET_INDEX,
         body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
       });
     });
@@ -239,7 +246,7 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
       expect(bulkCall.body[1].doc).toEqual(stepExecutions[0]);
@@ -251,7 +258,7 @@ describe('StepExecutionRepository', () => {
         { stepId: 'test-step-2' }, // Missing id
       ];
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Step execution ID is required for upsert'
       );
     });
@@ -264,13 +271,81 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           refresh: false,
         })
       );
+    });
+  });
+
+  describe('getStepExecutionsByIds', () => {
+    it('should return found step executions via mget', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            found: true,
+            _id: 'step-1',
+            _source: { id: 'step-1', stepId: 'a', status: 'completed' },
+          },
+          { found: true, _id: 'step-2', _source: { id: 'step-2', stepId: 'b', status: 'running' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2'], TARGET_INDEX);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: TARGET_INDEX,
+        ids: ['step-1', 'step-2'],
+      });
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'a', status: 'completed' },
+        { id: 'step-2', stepId: 'b', status: 'running' },
+      ]);
+    });
+
+    it('should skip documents that were not found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { found: true, _id: 'step-1', _source: { id: 'step-1', stepId: 'a' } },
+          { found: false, _id: 'step-2' },
+          { found: true, _id: 'step-3', _source: { id: 'step-3', stepId: 'c' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(
+        ['step-1', 'step-2', 'step-3'],
+        TARGET_INDEX
+      );
+
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'a' },
+        { id: 'step-3', stepId: 'c' },
+      ]);
+    });
+
+    it('should return empty array when no documents are found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [{ found: false, _id: 'step-1' }],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], TARGET_INDEX);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should use the provided index for the mget call', async () => {
+      const customIndex = '.custom-step-index-000003';
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1'], customIndex);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: customIndex,
+        ids: ['step-1'],
+      });
     });
   });
 });

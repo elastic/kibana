@@ -34,6 +34,24 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
+  rolloverMaxAge: schema.string({
+    defaultValue: '1d',
+    meta: {
+      description:
+        'ILM rollover max_age for workflow execution indices. ' +
+        'Controls how frequently new backing indices are created. ' +
+        'Changes take effect on next Kibana restart.',
+    },
+  }),
+  rolloverMaxDocs: schema.number({
+    defaultValue: 100000,
+    meta: {
+      description:
+        'ILM rollover max_docs for workflow execution indices. ' +
+        'Triggers a rollover when the document count reaches this threshold. ' +
+        'Changes take effect on next Kibana restart.',
+    },
+  }),
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;

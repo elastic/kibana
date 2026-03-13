@@ -115,6 +115,10 @@ export interface EsWorkflowExecution {
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+  /** Pinned backing index for step executions — prevents cross-index splitting on rollover */
+  stepExecutionsIndex?: string;
+  /** Pinned backing index for workflow execution — all updates target this index after creation */
+  executionsIndex?: string;
 }
 
 export interface ProviderInput {
