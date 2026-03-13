@@ -86,6 +86,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   forceShowErrors?: boolean;
   isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -98,6 +99,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     forceShowErrors,
     isSingleInputAndStreams = false,
     isEditPage = false,
+    isUpgrade = false,
     varGroupSelections = {},
   }) => {
     const theme = useEuiTheme();
@@ -302,6 +304,22 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                         </h3>
                       </EuiTitle>
                     </EuiFlexItem>
+                    {isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          type="info"
+                          color="subdued"
+                          content={i18n.translate(
+                            'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+                            {
+                              defaultMessage:
+                                'This input was automatically migrated from {migrateFrom}.',
+                              values: { migrateFrom: packagePolicyInput.migrate_from },
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    )}
                     {isDeprecatedInput && (
                       <EuiFlexItem grow={false}>
                         <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
