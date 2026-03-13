@@ -18,10 +18,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
  * @returns A FieldSpec that can be used to create a DataView field
  *
  * Note: `isComputedColumn` is explicitly set by the ES|QL backend in the response.
- * We default to `false` when the property is absent because:
- * 1. The backend always sends this flag for ES|QL columns since 8.15+
- * 2. Missing flag indicates an index field (not computed)
- * 3. This behavior is consistent with how the backend marks computed fields
+ * We default to `true` when the property is absent because of the legacy behaviour of the function.
  */
 export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColumn): FieldSpec {
   let esType = column.meta?.esType;

@@ -13,6 +13,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -91,6 +92,7 @@ describe('test fetchAll', () => {
       searchSource,
       services,
       getCurrentTab: toolkit.getCurrentTab,
+      esqlDataViewEnricher: createEsqlDataViewEnricher(),
     };
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });

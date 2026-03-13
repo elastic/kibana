@@ -31,6 +31,7 @@ import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/disco
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { isEqual, sortBy } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
@@ -174,6 +175,7 @@ export function getDataStateContainer({
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
+  const esqlDataViewEnricher = createEsqlDataViewEnricher();
   let numberOfFetches = 0;
   let unsubscribeIsRequested = false;
 
@@ -218,12 +220,17 @@ export function getDataStateContainer({
   /**
    * Subscribes to ES|QL fetches to handle state changes when loading or before a fetch completes
    */
-  const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
+  const { esqlFetchSubscribe, cleanupEsql: cleanupEsqlState } = buildEsqlFetchSubscribe({
     internalState,
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
   });
+
+  const cleanupEsql = () => {
+    cleanupEsqlState();
+    esqlDataViewEnricher.clear();
+  };
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
@@ -310,6 +317,7 @@ export function getDataStateContainer({
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
+            esqlDataViewEnricher,
           };
 
           cancel(AbortReason.REPLACED);
@@ -545,6 +553,7 @@ export function getDataStateContainer({
 
   const reset = () => {
     sendResetMsg(dataSubjects, getInitialFetchStatus());
+    esqlDataViewEnricher.clear();
   };
 
   const cancel = (reason: AbortReason = AbortReason.CANCELED) => {

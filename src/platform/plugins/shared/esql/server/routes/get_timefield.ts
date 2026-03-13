@@ -17,8 +17,22 @@ import { EsqlService } from '../services/esql_service';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 
-const hasTimestampInFieldCapsResponse = (result: FieldCapsResponse) =>
-  Boolean(result.fields && result.fields['@timestamp']);
+type TimeFieldType = 'date' | 'date_nanos';
+
+interface TimestampFieldInfo {
+  hasTimestamp: boolean;
+  type?: TimeFieldType;
+}
+
+const getTimestampFieldInfo = (result: FieldCapsResponse): TimestampFieldInfo => {
+  const timestampField = result.fields?.['@timestamp'];
+  if (!timestampField) {
+    return { hasTimestamp: false };
+  }
+  const fieldTypes = Object.keys(timestampField) as TimeFieldType[];
+  const type = fieldTypes.includes('date_nanos') ? 'date_nanos' : 'date';
+  return { hasTimestamp: true, type };
+};
 
 const toDebugString = (error: unknown): string =>
   error instanceof Error ? error.stack ?? error.message : String(error);
@@ -140,19 +154,21 @@ export const registerGetTimeFieldRoute = (
                 fields: '@timestamp',
                 include_unmapped: false,
               });
-              return hasTimestampInFieldCapsResponse(fieldCapsResp);
+              return getTimestampFieldInfo(fieldCapsResp);
             } catch (fieldCapsError) {
               logger.get().debug(toDebugString(fieldCapsError));
-              return false;
+              return { hasTimestamp: false };
             }
           })
         );
 
-        const allHaveTimestamp = fieldCapsResults.every(Boolean);
+        const allHaveTimestamp = fieldCapsResults.every((r) => r.hasTimestamp);
 
         if (allHaveTimestamp) {
+          const hasDateNanos = fieldCapsResults.some((r) => r.type === 'date_nanos');
+          const timeFieldType: TimeFieldType = hasDateNanos ? 'date_nanos' : 'date';
           return response.ok({
-            body: { timeField: ES_TIMESTAMP_FIELD_NAME },
+            body: { timeField: ES_TIMESTAMP_FIELD_NAME, timeFieldType },
           });
         }
 

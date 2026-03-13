@@ -10,7 +10,7 @@
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
+import type { EsqlDataViewEnricher } from '@kbn/data-view-utils';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -51,6 +51,7 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  esqlDataViewEnricher: EsqlDataViewEnricher;
 }
 
 /**
@@ -78,6 +79,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    esqlDataViewEnricher,
   } = params;
   const { data, expressions } = services;
 
@@ -188,12 +190,8 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
-        // Create enriched DataView with ES|QL column fields if available
-        let esqlDataView;
-        if (esqlQueryColumns && esqlQueryColumns.length > 0) {
-          const fields = convertDatatableColumnsToFieldSpecs(esqlQueryColumns);
-          esqlDataView = dataView.cloneWithFields(fields);
-        }
+        // Create enriched DataView with ES|QL column fields if available (memoized)
+        const esqlDataView = esqlDataViewEnricher.enrich(dataView, esqlQueryColumns);
 
         dataSubjects.documents$.next({
           fetchStatus,

@@ -11,7 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
-import { convertDatatableColumnsToFieldSpecs } from '@kbn/data-view-utils';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -145,6 +145,7 @@ export function initializeFetch({
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  const esqlDataViewEnricher = createEsqlDataViewEnricher();
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
 
@@ -224,12 +225,8 @@ export function initializeFetch({
               projectRouting: fetchContext.projectRouting,
             });
 
-            // Create enriched DataView with ES|QL column fields if available
-            let esqlDataView;
-            if (result.esqlQueryColumns && result.esqlQueryColumns.length > 0) {
-              const fields = convertDatatableColumnsToFieldSpecs(result.esqlQueryColumns);
-              esqlDataView = dataView.cloneWithFields(fields);
-            }
+            // Create enriched DataView with ES|QL column fields if available (memoized)
+            const esqlDataView = esqlDataViewEnricher.enrich(dataView, result.esqlQueryColumns);
 
             return {
               esqlDataView,
@@ -304,5 +301,6 @@ export function initializeFetch({
 
   return () => {
     fetchSubscription.unsubscribe();
+    esqlDataViewEnricher.clear();
   };
 }

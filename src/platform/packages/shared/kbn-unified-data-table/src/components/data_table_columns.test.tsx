@@ -408,6 +408,51 @@ describe('Data table columns', function () {
       expect(gridColumns[0].isSortable).toBe(true);
     });
 
+    it('should use type override from enriched DataView for ES|QL (version field)', async () => {
+      // Create an enriched DataView where 'app_version' is a version field
+      const enrichedDataView = {
+        ...dataViewWithTimefieldMock,
+        getFieldByName: (fieldName: string) => {
+          if (fieldName === 'app_version') {
+            return {
+              name: 'app_version',
+              type: 'string',
+              esTypes: ['version'],
+              searchable: true,
+              aggregatable: true,
+            };
+          }
+          return dataViewWithTimefieldMock.getFieldByName(fieldName);
+        },
+        fields: dataViewWithTimefieldMock.fields,
+      };
+
+      const gridColumns = getEuiGridColumns({
+        columns: ['app_version'],
+        settings: {},
+        dataView: enrichedDataView as any,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      // Version fields should be sortable and use 'string' schema
+      expect(gridColumns[0].schema).toBe('string');
+      expect(gridColumns[0].isSortable).toBe(true);
+    });
+
     it('returns columns in correct format when column customisation is provided', async () => {
       const gridColumns = getEuiGridColumns({
         columns,

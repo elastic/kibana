@@ -10,6 +10,7 @@
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -45,6 +46,7 @@ const getDeps = async (): Promise<CommonFetchParams> => {
     scopedProfilesManager: scopedProfilesManager$.getValue(),
     scopedEbtManager: scopedEbtManager$.getValue(),
     getCurrentTab: toolkit.getCurrentTab,
+    esqlDataViewEnricher: createEsqlDataViewEnricher(),
   };
 };
 
