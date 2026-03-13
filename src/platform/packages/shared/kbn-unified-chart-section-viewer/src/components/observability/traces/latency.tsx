@@ -14,6 +14,7 @@ import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getLatencyChart } from './trace_charts_definition';
+import { getMetricKey } from '../../../common/utils/fields';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
@@ -35,6 +36,7 @@ const LatencyChartContent = ({
       index: indexes,
       dimensions: [],
       type: ES_FIELD_TYPES.DOUBLE,
+      uniqueKey: getMetricKey(indexes, 'duration_ms'),
     },
     color,
     seriesType,

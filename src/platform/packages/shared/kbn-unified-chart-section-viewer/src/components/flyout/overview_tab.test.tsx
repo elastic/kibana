@@ -33,6 +33,7 @@ describe('Metric Flyout Overview Tab', () => {
     index: 'test-index',
     type: ES_FIELD_TYPES.DOUBLE,
     unit: 'ms',
+    uniqueKey: 'test-index::test.metric',
     dimensions: [],
     ...overrides,
   });

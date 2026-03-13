@@ -10,6 +10,15 @@
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { Dimension } from './types';
 
+export type FlyoutTabId = 'overview' | 'esql-query';
+
+export interface FlyoutState {
+  gridPosition: number;
+  metricUniqueKey: string;
+  esqlQuery: string;
+  selectedTabId?: FlyoutTabId;
+}
+
 export interface MetricsExperienceRestorableState {
   // Pagination page index
   currentPage: number;
@@ -22,6 +31,9 @@ export interface MetricsExperienceRestorableState {
 
   // Selected dimensions
   selectedDimensions: Dimension[];
+
+  // Flyout state
+  flyoutState?: FlyoutState;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

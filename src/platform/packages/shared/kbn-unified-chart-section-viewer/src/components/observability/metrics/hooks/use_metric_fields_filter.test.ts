@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
 import type { MetricField, Dimension } from '../../../../types';
+import { getMetricKey } from '../../../../common/utils/fields';
 
 describe('useMetricFieldsFilter', () => {
   const baseDimensions: Dimension[] = [
@@ -24,18 +25,21 @@ describe('useMetricFieldsFilter', () => {
       index: 'metrics-*',
       type: ES_FIELD_TYPES.DOUBLE,
       dimensions: [baseDimensions[0], baseDimensions[1]],
+      uniqueKey: getMetricKey('metrics-*', 'system.cpu.utilization'),
     },
     {
       name: 'system.memory.utilization',
       index: 'metrics-*',
       type: ES_FIELD_TYPES.DOUBLE,
       dimensions: [baseDimensions[0]],
+      uniqueKey: getMetricKey('metrics-*', 'system.memory.utilization'),
     },
     {
       name: 'system.disk.io',
       index: 'metrics-*',
       type: ES_FIELD_TYPES.LONG,
       dimensions: [baseDimensions[1]],
+      uniqueKey: getMetricKey('metrics-*', 'system.disk.io'),
     },
   ];
 

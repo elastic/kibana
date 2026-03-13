@@ -56,6 +56,7 @@ describe('MetricInsightsFlyout', () => {
     type: ES_FIELD_TYPES.DOUBLE,
     dimensions: [],
     ...overrides,
+    uniqueKey: overrides.uniqueKey ?? 'test-index::test.metric',
   });
 
   const defaultProps = {
