@@ -64,6 +64,7 @@ describe('SchedulerTaskRunner', () => {
       analyticsConfig: analyticsConfigDisabled,
       getTaskManager,
       getESClient,
+      isServerless: false,
     });
 
     await taskRunner.run();
@@ -80,6 +81,7 @@ describe('SchedulerTaskRunner', () => {
       analyticsConfig,
       getTaskManager,
       getESClient,
+      isServerless: false,
     });
 
     await taskRunner.run();
@@ -112,6 +114,7 @@ describe('SchedulerTaskRunner', () => {
       analyticsConfig,
       getTaskManager,
       getESClient,
+      isServerless: false,
     });
 
     await taskRunner.run();
@@ -143,6 +146,7 @@ describe('SchedulerTaskRunner', () => {
       analyticsConfig,
       getTaskManager,
       getESClient,
+      isServerless: false,
     });
 
     await taskRunner.run();
@@ -165,6 +169,7 @@ describe('SchedulerTaskRunner', () => {
       analyticsConfig,
       getTaskManager,
       getESClient,
+      isServerless: false,
     });
 
     await taskRunner.run();

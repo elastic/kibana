@@ -114,6 +114,7 @@ export class CasePlugin
       logger: this.logger,
       core,
       analyticsConfig: this.caseConfig.analytics,
+      isServerless: this.isServerless,
     });
 
     this.securityPluginSetup = plugins.security;

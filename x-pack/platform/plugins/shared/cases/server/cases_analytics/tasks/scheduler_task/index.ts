@@ -23,11 +23,13 @@ export function registerCAISchedulerTask({
   logger,
   core,
   analyticsConfig,
+  isServerless,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
   analyticsConfig: ConfigType['analytics'];
+  isServerless: boolean;
 }) {
   const getUnsecureSavedObjectsClient = async (): Promise<SavedObjectsClientContract> => {
     const [{ savedObjects }] = await core.getStartServices();
@@ -61,6 +63,7 @@ export function registerCAISchedulerTask({
           logger,
           analyticsConfig,
           getESClient,
+          isServerless,
         }).create();
       },
     },

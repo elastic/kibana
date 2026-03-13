@@ -22,6 +22,7 @@ interface SchedulerTaskRunnerFactoryConstructorParams {
   analyticsConfig: ConfigType['analytics'];
   getTaskManager: () => Promise<TaskManagerStartContract>;
   getESClient: () => Promise<ElasticsearchClient>;
+  isServerless: boolean;
 }
 
 export class SchedulerTaskRunner implements CancellableTask {
@@ -30,6 +31,7 @@ export class SchedulerTaskRunner implements CancellableTask {
   private readonly analyticsConfig: ConfigType['analytics'];
   private readonly getTaskManager: () => Promise<TaskManagerStartContract>;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
+  private readonly isServerless: boolean;
 
   constructor({
     getUnsecureSavedObjectsClient,
@@ -37,12 +39,14 @@ export class SchedulerTaskRunner implements CancellableTask {
     analyticsConfig,
     getTaskManager,
     getESClient,
+    isServerless,
   }: SchedulerTaskRunnerFactoryConstructorParams) {
     this.getUnsecureSavedObjectsClient = getUnsecureSavedObjectsClient;
     this.logger = logger;
     this.analyticsConfig = analyticsConfig;
     this.getTaskManager = getTaskManager;
     this.getESClient = getESClient;
+    this.isServerless = isServerless;
   }
 
   public async run() {
@@ -66,7 +70,7 @@ export class SchedulerTaskRunner implements CancellableTask {
             owner,
             esClient,
             logger: this.logger,
-            isServerless: false,
+            isServerless: this.isServerless,
             taskManager,
           }).catch(() => {
             this.logger.error(
