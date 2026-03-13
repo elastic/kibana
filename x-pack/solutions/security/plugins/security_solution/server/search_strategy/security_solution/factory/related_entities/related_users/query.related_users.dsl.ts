@@ -15,7 +15,9 @@ export const buildRelatedUsersQuery = ({
   from,
 }: RelatedUsersRequestOptions): ISearchRequestParams => {
   const now = new Date();
-  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers, {
+    includeEuidSourceFilter: false,
+  });
   const filter = [
     ...(entityFilters ? [entityFilters] : []),
     { term: { 'event.category': 'authentication' } },

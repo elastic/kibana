@@ -125,7 +125,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
             id: GenericEntityPanelKey,
             params: {
               entityDocId,
-              entityId: entityIdentifiers?.['related.entity'],
+              entityIdentifiers: identifiers,
               scopeId,
               contextId,
               isEngineMetadataExist: Boolean(effectiveEntityType),

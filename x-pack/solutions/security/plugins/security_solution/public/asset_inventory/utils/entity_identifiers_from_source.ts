@@ -58,10 +58,7 @@ const getEntityIdentifiersFromDslFilter = (
 
 /** Euid API shape needed for getEntityIdentifiersFromSource (from useEntityStoreEuidApi().euid). */
 export interface EuidApiForIdentifiers {
-  getEuidDslFilterBasedOnDocument: (
-    entityType: string,
-    doc: unknown
-  ) => QueryDslQueryContainer | undefined;
+  getEuidDslFilterBasedOnDocument: (entityType: EntityType, doc: unknown) => unknown;
 }
 
 /**
@@ -99,7 +96,9 @@ export const getEntityIdentifiersFromSource = (
     }
   }
 
-  const dsl = euidApi.getEuidDslFilterBasedOnDocument(storeType, raw);
+  const dsl = euidApi.getEuidDslFilterBasedOnDocument(storeType as EntityType, raw) as
+    | QueryDslQueryContainer
+    | undefined;
   const identifiers = getEntityIdentifiersFromDslFilter(dsl);
   if (!identifiers || Object.keys(identifiers).length === 0) {
     return null;

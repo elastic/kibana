@@ -100,10 +100,11 @@ export const HostPanel = ({
   });
   const hostFilterQuery = useMemo(
     () =>
-      (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers) as
-        | ESQuery
-        | undefined) ?? (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
-    [euidApi?.euid, entityIdentifiers, effectiveHostName]
+      (euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
+        includeEuidSourceFilter: entityStoreV2Enabled,
+      }) as ESQuery | undefined) ??
+      (effectiveHostName ? buildHostNamesFilter([effectiveHostName]) : undefined),
+    [euidApi?.euid, entityIdentifiers, effectiveHostName, entityStoreV2Enabled]
   );
 
   // Risk score index is keyed by host.name; use host name filter so the API finds the host

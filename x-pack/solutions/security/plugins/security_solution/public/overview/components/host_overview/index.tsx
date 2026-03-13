@@ -114,15 +114,20 @@ export const HostOverview = React.memo<HostSummaryProps>(
         Object.entries(entityIdentifiers).find(([k]) => k.startsWith('host.'))?.[1],
       [entityIdentifiers]
     );
+    const useEntityStoreV2AsDataSource = Boolean(riskScoreStateFromEntityStore);
     const filterQuery = useMemo(() => {
-      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
+      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument(
+        'host',
+        entityIdentifiers,
+        { includeEuidSourceFilter: useEntityStoreV2AsDataSource }
+      );
       if (euidFilter) {
         return JSON.stringify(euidFilter);
       }
       return effectiveHostName
         ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
         : undefined;
-    }, [euidApi?.euid, entityIdentifiers, effectiveHostName]);
+    }, [euidApi?.euid, entityIdentifiers, effectiveHostName, useEntityStoreV2AsDataSource]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {

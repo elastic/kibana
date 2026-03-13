@@ -13,7 +13,7 @@ export interface EntityFlyoutPreviewApi {
     entityIdentifiers: Record<string, string>,
     status?: string,
     queryField?: string
-  ) => { bool: { filter: unknown[] } };
+  ) => NonNullable<UseCspOptions['query']>;
 }
 
 /**

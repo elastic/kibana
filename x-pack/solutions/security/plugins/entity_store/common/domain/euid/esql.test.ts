@@ -97,6 +97,16 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       );
     });
 
+    it('omits event.module/data_stream.dataset source clause when includeEuidSourceFilter is false', () => {
+      const result = getEuidEsqlFilterBasedOnDocument(
+        'user',
+        { user: { email: 'alice@example.com' } },
+        { includeEuidSourceFilter: false }
+      );
+
+      expect(result).toBe('(user.email == "alice@example.com")');
+    });
+
     it('returns filter with user.name and source clause (event.module whenClause) and null/empty checks on higher-ranked identity fields', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'alice' },

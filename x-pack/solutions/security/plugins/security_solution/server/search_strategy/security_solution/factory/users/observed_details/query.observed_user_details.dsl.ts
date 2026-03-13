@@ -24,7 +24,9 @@ export const buildObservedUserDetailsQuery = ({
   const entityFilters =
     isExploreContext && userName
       ? { term: { 'user.name': userName } }
-      : euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
+      : euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers, {
+          includeEuidSourceFilter: false,
+        });
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
     ...(entityFilters ? [entityFilters] : []),

@@ -26,6 +26,19 @@ import {
 import type { FieldEvaluation } from '../definitions/entity_schema';
 
 /**
+ * Options for building EUID-based DSL/ESQL filters.
+ * When entity store v2 is not used as the data source (e.g. querying raw indices),
+ * set includeEuidSourceFilter to false to omit the event.module / data_stream.dataset clause.
+ */
+export interface GetEuidFilterOptions {
+  /**
+   * When true (default), include the source clause (event.module / data_stream.dataset) in the filter.
+   * When false, omit it so the filter only uses identity fields (e.g. user.name, user.email).
+   */
+  includeEuidSourceFilter?: boolean;
+}
+
+/**
  * Returns a DSL filter that matches documents considered for the given entity type.
  * This is the translation of {@link CalculatedEntityIdentity.documentsFilter}.
  *
@@ -80,11 +93,13 @@ export function getEuidDslDocumentsContainsIdFilter(
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
+ * @param options - Optional. Set includeEuidSourceFilter: false when entity store v2 is not the data source to omit event.module / data_stream.dataset from the filter.
  * @returns An Elasticsearch DSL query container, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
-  doc: any
+  doc: any,
+  options?: GetEuidFilterOptions
 ): QueryDslQueryContainer | undefined {
   if (!doc) {
     return undefined;
@@ -142,7 +157,8 @@ export function getEuidDslFilterBasedOnDocument(
     };
   }
 
-  if (identityField.fieldEvaluations?.length) {
+  const includeEuidSourceFilter = options?.includeEuidSourceFilter !== false;
+  if (includeEuidSourceFilter && identityField.fieldEvaluations?.length) {
     const filterList = Array.isArray(dsl.bool?.filter) ? dsl.bool.filter : [];
     for (const evaluation of identityField.fieldEvaluations) {
       const spec = getSourceMatchSpec(doc, evaluation);

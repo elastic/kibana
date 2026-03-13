@@ -17,7 +17,11 @@ export interface EntityStoreEuidApi {
       type: 'keyword';
       script: { source: string };
     };
-    getEuidDslFilterBasedOnDocument: (entityType: EntityType, doc: unknown) => unknown;
+    getEuidDslFilterBasedOnDocument: (
+      entityType: EntityType,
+      doc: unknown,
+      options?: { includeEuidSourceFilter?: boolean }
+    ) => unknown;
     getEuidDslDocumentsContainsIdFilter: (entityType: EntityType) => unknown;
     getEuidSourceFields: (entityType: EntityType) => IdentitySourceFields;
     getEntityIdentifiersFromDocument: (

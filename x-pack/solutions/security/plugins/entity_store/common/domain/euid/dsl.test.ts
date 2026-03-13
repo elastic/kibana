@@ -166,6 +166,20 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
+    it('omits event.module/data_stream.dataset source clause when includeEuidSourceFilter is false', () => {
+      const result = getEuidDslFilterBasedOnDocument(
+        'user',
+        { user: { email: 'alice@example.com' } },
+        { includeEuidSourceFilter: false }
+      );
+
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
+        },
+      });
+    });
+
     it('returns filter with term on user.name and source clause and must_not on higher-ranked identity fields', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },

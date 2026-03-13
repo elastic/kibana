@@ -15,7 +15,9 @@ export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) 
 
   const entityFilters =
     hostEntityIdentifiers && Object.keys(hostEntityIdentifiers).length > 0
-      ? euid.getEuidDslFilterBasedOnDocument('host', hostEntityIdentifiers)
+      ? euid.getEuidDslFilterBasedOnDocument('host', hostEntityIdentifiers, {
+          includeEuidSourceFilter: false,
+        })
       : { term: { [field]: value } };
 
   const filter = [
