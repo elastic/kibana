@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import { SECURITY_FEATURE_ID, ALERTS_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { Role } from '../../../utils/auth/types';
 
 export const noIndexPrivileges: Role = {
@@ -18,6 +18,7 @@ export const noIndexPrivileges: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
         },
@@ -42,6 +43,7 @@ export const noAdhocIndexPrivileges: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
         },
@@ -66,6 +68,7 @@ export const noAttacksIndexPrivileges: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
         },
@@ -90,6 +93,7 @@ export const allIndexPrivileges: Role = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['read'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
         },
