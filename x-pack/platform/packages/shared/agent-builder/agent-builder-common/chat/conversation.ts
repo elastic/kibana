@@ -258,6 +258,11 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Whether the conversation has been flagged for handover to an external agent.
+   * When true, an external agent (e.g. opencode) can pick up this conversation.
+   */
+  handover_requested?: boolean;
 }
 
 /**

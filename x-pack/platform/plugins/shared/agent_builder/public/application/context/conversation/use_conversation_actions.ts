@@ -73,6 +73,7 @@ export interface ConversationActions {
   }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
+  requestHandover: (id: string, requested: boolean) => Promise<void>;
 }
 
 interface UseConversationActionsParams {
@@ -305,6 +306,20 @@ const createConversationActions = ({
 
       // Invalidate conversation list to get updated data from server
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+    },
+    requestHandover: async (id: string, requested: boolean) => {
+      await conversationsService.requestHandover({ conversationId: id, requested });
+
+      const conversationQueryKey = queryKeys.conversations.byId(id);
+      const currentConversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+      if (currentConversation) {
+        queryClient.setQueryData<Conversation>(
+          conversationQueryKey,
+          produce(currentConversation, (draft) => {
+            draft.handover_requested = requested;
+          })
+        );
+      }
     },
   };
 };

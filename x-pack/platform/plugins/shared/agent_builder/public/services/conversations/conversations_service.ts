@@ -11,11 +11,14 @@ import type {
   ListConversationsResponse,
   DeleteConversationResponse,
   RenameConversationResponse,
+  UpdateConversationResponse,
+  HandoverConversationResponse,
 } from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
   ConversationDeleteOptions,
+  ConversationUpdateOptions,
 } from '../../../common/conversations';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -53,6 +56,34 @@ export class ConversationsService {
       `${internalApiPath}/conversations/${conversationId}/_rename`,
       {
         body: JSON.stringify({ title }),
+      }
+    );
+  }
+
+  async update({ conversationId, title, rounds }: ConversationUpdateOptions) {
+    const response = await this.http.put<UpdateConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}`,
+      {
+        body: JSON.stringify({
+          ...(title !== undefined && { title }),
+          ...(rounds !== undefined && { rounds }),
+        }),
+      }
+    );
+    return response.conversation;
+  }
+
+  async requestHandover({
+    conversationId,
+    requested,
+  }: {
+    conversationId: string;
+    requested: boolean;
+  }) {
+    return await this.http.post<HandoverConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}/_handover`,
+      {
+        body: JSON.stringify({ requested }),
       }
     );
   }

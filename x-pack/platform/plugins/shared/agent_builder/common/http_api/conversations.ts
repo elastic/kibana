@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 export interface ListConversationsResponse {
   results: ConversationWithoutRounds[];
@@ -18,4 +18,16 @@ export interface DeleteConversationResponse {
 export interface RenameConversationResponse {
   id: string;
   title: string;
+}
+
+export interface CreateConversationResponse {
+  conversation: Conversation;
+}
+
+export interface UpdateConversationResponse {
+  conversation: Conversation;
+}
+
+export interface HandoverConversationResponse {
+  conversation: ConversationWithoutRounds;
 }

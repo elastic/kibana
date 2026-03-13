@@ -74,12 +74,20 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
-    const { agentId } = options;
+    const { agentId, handoverRequested } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
-      _source: ['agent_id', 'user_id', 'user_name', 'title', 'created_at', 'updated_at'],
+      _source: [
+        'agent_id',
+        'user_id',
+        'user_name',
+        'title',
+        'created_at',
+        'updated_at',
+        'handover_requested',
+      ],
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],
@@ -88,6 +96,9 @@ class ConversationClientImpl implements ConversationClient {
               term: { user_name: this.user.username },
             },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
+            ...(handoverRequested != null
+              ? [{ term: { handover_requested: handoverRequested } }]
+              : []),
           ],
         },
       },
