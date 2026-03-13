@@ -1,0 +1,47 @@
+version: '1'
+name: 'sources.sharepoint-server.list'
+description: 'List/fetch SharePoint Server resources. Actions and inputs: getWeb (no inputs); getLists (no inputs); getListItems (list_title); getFolderContents (path).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "getWeb"
+      - "getLists"
+      - "getListItems"
+      - "getFolderContents"
+    required: true
+  - name: list_title
+    type: string
+    required: false
+    description: "Title of the list (for getListItems)"
+  - name: path
+    type: string
+    required: false
+    description: "Server-relative folder path (for getFolderContents)"
+steps:
+  - name: get-web
+    type: sharepoint-server.getWeb
+    if: "${{ inputs.list_action == 'getWeb' }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with: {}
+  - name: get-lists
+    type: sharepoint-server.getLists
+    if: "${{ inputs.list_action == 'getLists' }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with: {}
+  - name: get-list-items
+    type: sharepoint-server.getListItems
+    if: "${{ inputs.list_action == 'getListItems' and inputs.list_title }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      listTitle: "${{ inputs.list_title }}"
+  - name: get-folder-contents
+    type: sharepoint-server.getFolderContents
+    if: "${{ inputs.list_action == 'getFolderContents' and inputs.path }}"
+    connector-id: <%= sharepoint-server-stack-connector-id %>
+    with:
+      path: "${{ inputs.path }}"

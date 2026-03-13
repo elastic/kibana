@@ -11,6 +11,7 @@ import { githubDataSource } from './github';
 import { googleCalendarDataSource } from './google_calendar';
 import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
+import { sharepointServerDataSource } from './sharepoint_server';
 import { slackDataSource } from './slack';
 import { jiraDataSource } from './jira-cloud';
 import { firecrawlDataSource } from './firecrawl';
@@ -29,6 +30,7 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(googleCalendarDataSource);
   dataCatalog.register(googleDriveDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
+  dataCatalog.register(sharepointServerDataSource);
   dataCatalog.register(slackDataSource);
   dataCatalog.register(jiraDataSource);
   dataCatalog.register(firecrawlDataSource);
