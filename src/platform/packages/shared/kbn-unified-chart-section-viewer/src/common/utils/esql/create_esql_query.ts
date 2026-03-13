@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from, stats, timeseries, where } from '@kbn/esql-composer';
+import { from, limit, stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricField } from '../../../types';
 import {
@@ -51,7 +51,7 @@ export function createESQLQuery({
     return trimmed.length > 0 ? [where(trimmed)] : [];
   });
 
-  const queryPipeline = source.pipe(
+  const pipelineStages = [
     ...whereCommands,
     stats(
       `${createMetricAggregation({
@@ -66,10 +66,11 @@ export function createESQLQuery({
       {
         metricField,
       }
-    )
-  );
+    ),
+    ...(targetBuckets ? [limit(targetBuckets)] : []),
+  ];
 
-  return queryPipeline.toString();
+  return source.pipe(...pipelineStages).toString();
 }
 
 interface CreateM4DownsampledESQLQueryParams {
