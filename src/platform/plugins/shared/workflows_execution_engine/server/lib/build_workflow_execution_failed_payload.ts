@@ -19,7 +19,7 @@ export function buildWorkflowExecutionFailedPayload(
   execution: EsWorkflowExecution,
   failedStepContext?: FailedStepContext
 ): WorkflowExecutionFailedEvent {
-  const stepId = failedStepContext?.stepId ?? '';
+  const stepId = failedStepContext?.stepId;
   const stepName = failedStepContext?.stepName ?? stepId;
   const stepExecutionId = failedStepContext?.stepExecutionId;
   const stackTrace = failedStepContext?.stack;
@@ -38,8 +38,8 @@ export function buildWorkflowExecutionFailedPayload(
     },
     error: {
       message: execution.error?.message ?? 'Unknown error',
-      stepId,
-      stepName,
+      ...(stepId && { stepId }),
+      ...(stepName && { stepName }),
       ...(stepExecutionId && { stepExecutionId }),
       ...(stackTrace && { stackTrace }),
     },

@@ -34,7 +34,7 @@ const baseExecution: EsWorkflowExecution = {
   finishedAt: '2024-01-01T10:05:00.000Z',
   createdBy: 'system',
   duration: 300000,
-  error: { type: 'Error', message: 'Step failed' },
+  error: { type: 'Error', message: 'General error' },
   cancelRequested: false,
   triggeredBy: 'manual',
 } as EsWorkflowExecution;
@@ -45,7 +45,7 @@ describe('buildWorkflowExecutionFailedPayload', () => {
       stepId: 'step_1',
       stepName: 'Send HTTP request',
       stepExecutionId: 'step-exec-abc',
-      stack: 'Error: Step failed\n  at ...',
+      stack: 'Error: General error\n  at ...',
     };
     const payload = buildWorkflowExecutionFailedPayload(baseExecution, failedStepContext);
 
@@ -61,11 +61,11 @@ describe('buildWorkflowExecutionFailedPayload', () => {
       failedAt: '2024-01-01T10:05:00.000Z',
     });
     expect(payload.error).toEqual({
-      message: 'Step failed',
+      message: 'General error',
       stepId: 'step_1',
       stepName: 'Send HTTP request',
       stepExecutionId: 'step-exec-abc',
-      stackTrace: 'Error: Step failed\n  at ...',
+      stackTrace: 'Error: General error\n  at ...',
     });
   });
 
@@ -83,12 +83,12 @@ describe('buildWorkflowExecutionFailedPayload', () => {
     expect(payload.workflow.isErrorHandler).toBe(true);
   });
 
-  it('builds payload without failedStepContext (empty step fields, no stepExecutionId or stackTrace)', () => {
+  it('builds payload without failedStepContext', () => {
     const payload = buildWorkflowExecutionFailedPayload(baseExecution);
 
-    expect(payload.error.message).toBe('Step failed');
-    expect(payload.error.stepId).toBe('');
-    expect(payload.error.stepName).toBe('');
+    expect(payload.error.message).toBe('General error');
+    expect(payload.error).not.toHaveProperty('stepId');
+    expect(payload.error).not.toHaveProperty('stepName');
     expect(payload.error).not.toHaveProperty('stepExecutionId');
     expect(payload.error).not.toHaveProperty('stackTrace');
   });

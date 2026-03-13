@@ -177,7 +177,7 @@ export class StepExecutionRuntime {
       stepId: this.node.stepId,
       stepName,
       stepExecutionId: this.stepExecutionId,
-      stack: executionError.stack,
+      stack: executionError.details?.stack as string,
     });
 
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);

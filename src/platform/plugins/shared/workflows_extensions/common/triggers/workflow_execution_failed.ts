@@ -78,16 +78,25 @@ const workflowExecutionFailedErrorSchema = z
         defaultMessage: 'The error message.',
       })
     ),
-    stepId: z.string().describe(
-      i18n.translate('workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepId', {
-        defaultMessage: 'The step id where the failure occurred.',
-      })
-    ),
-    stepName: z.string().describe(
-      i18n.translate('workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepName', {
-        defaultMessage: 'The step name where the failure occurred.',
-      })
-    ),
+    stepId: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate('workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepId', {
+          defaultMessage: 'Optional step id where the failure occurred.',
+        })
+      ),
+    stepName: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate(
+          'workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepName',
+          {
+            defaultMessage: 'Optional step name where the failure occurred.',
+          }
+        )
+      ),
     stepExecutionId: z
       .string()
       .optional()
@@ -95,7 +104,7 @@ const workflowExecutionFailedErrorSchema = z
         i18n.translate(
           'workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepExecutionId',
           {
-            defaultMessage: 'ID of the step execution where the failure occurred.',
+            defaultMessage: 'Optional id of the step execution where the failure occurred.',
           }
         )
       ),

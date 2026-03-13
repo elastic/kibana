@@ -121,6 +121,42 @@ describe('runWorkflow', () => {
     });
   });
 
+  it('emits workflow_execution_failed with no step fields when failure was not due to a step', async () => {
+    mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Runtime error'));
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-1',
+      spaceId,
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      workflowDefinition: { name: 'Test Workflow', steps: [] },
+      error: { type: 'Error', message: 'Runtime error' },
+      createdAt: '2024-01-01T10:00:00.000Z',
+      finishedAt: '2024-01-01T10:05:00.000Z',
+      triggeredBy: 'manual',
+    });
+    // getLastFailedStepContext returns undefined: no step caused the failure
+    mockGetLastFailedStepContext.mockReturnValue(undefined);
+
+    await expect(
+      runWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+        fakeRequest,
+        dependencies,
+      })
+    ).rejects.toThrow('Runtime error');
+
+    expect(mockEmitEvent).toHaveBeenCalledTimes(1);
+    const emittedPayload = mockEmitEvent.mock.calls[0][0].payload;
+    expect(emittedPayload.error.message).toBe('Runtime error');
+    expect(emittedPayload.error).not.toHaveProperty('stepId');
+    expect(emittedPayload.error).not.toHaveProperty('stepName');
+  });
+
   it('does not emit when execution status is not FAILED', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
     mockGetWorkflowExecutionById.mockResolvedValue({
