@@ -80,7 +80,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    showPanelOnClick,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -101,7 +100,6 @@ export class Simulator {
     history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    showPanelOnClick?: () => void;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -151,7 +149,6 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        showPanelOnClick={showPanelOnClick}
       />
     );
   }

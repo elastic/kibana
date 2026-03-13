@@ -120,7 +120,7 @@ describe('SearchAndFiltersBar', () => {
   describe('Search Bar', () => {
     it('renders the search input', () => {
       const { getByTestId } = renderSearchAndFiltersBar();
-      expect(getByTestId('browseIntegrations.searchBar.input')).toBeInTheDocument();
+      expect(getByTestId('epmList.searchBar')).toBeInTheDocument();
     });
 
     it('displays the search query from URL', () => {
@@ -131,7 +131,7 @@ describe('SearchAndFiltersBar', () => {
       });
 
       const { getByTestId } = renderSearchAndFiltersBar();
-      const searchInput = getByTestId('browseIntegrations.searchBar.input') as HTMLInputElement;
+      const searchInput = getByTestId('epmList.searchBar') as HTMLInputElement;
 
       expect(searchInput.value).toBe('apache');
     });
@@ -168,7 +168,7 @@ describe('SearchAndFiltersBar', () => {
       const { getByTestId } = renderSearchAndFiltersBar();
 
       // Search should show query
-      const searchInput = getByTestId('browseIntegrations.searchBar.input') as HTMLInputElement;
+      const searchInput = getByTestId('epmList.searchBar') as HTMLInputElement;
       expect(searchInput.value).toBe('apache');
 
       // Status filter should show count

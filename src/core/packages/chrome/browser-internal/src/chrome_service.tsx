@@ -26,11 +26,11 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
-import { createChromeComponents } from './ui/chrome_components';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 import { createChromeState } from './state';
@@ -184,8 +184,8 @@ export class ChromeService {
     const homeHref = http.basePath.prepend('/app/home');
     const kibanaVersion = this.params.kibanaVersion;
 
-    // 7. Create chrome components
-    const components = createChromeComponents({
+    // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
+    const componentDeps: ChromeComponentsDeps = {
       config: {
         isServerless: this.isServerless,
         kibanaVersion,
@@ -195,26 +195,41 @@ export class ChromeService {
       application,
       basePath: http.basePath,
       docLinks,
-      state,
       navControls: {
         left$: navControls.getLeft$(),
         center$: navControls.getCenter$(),
         right$: navControls.getRight$(),
         extension$: navControls.getExtension$(),
       },
-      projectNavigation: {
+      classic: {
+        breadcrumbs$: state.breadcrumbs.classic.$,
+        badge$: state.badge.$,
+        recentlyAccessed$,
+        customNavLink$: state.customNavLink.$,
+      },
+      project: {
         breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
         homeHref$: projectNavigation.getProjectHome$(),
         navigation$,
       },
       loadingCount$,
-      helpMenuLinks$,
+      helpMenu: {
+        menuLinks$: helpMenuLinks$,
+        extension$: state.help.extension.$,
+        supportUrl$: state.help.supportUrl.$,
+        globalExtensionMenuLinks$: state.help.globalMenuLinks.$,
+      },
       navLinks$,
-      recentlyAccessed$,
       customBranding$: customBranding.customBranding$,
-      appMenuActions$: application.currentActionMenu$,
-      prependBasePath: http.basePath.prepend,
-    });
+      breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
+      appMenu$: state.appMenu.$,
+      headerBanner$: state.headerBanner.$,
+      sideNav: {
+        collapsed$: state.sideNav.collapsed.$,
+        initialCollapsed: state.sideNav.collapsed.get(),
+        onToggleCollapsed: state.sideNav.collapsed.set,
+      },
+    };
 
     // 8. Return chrome API
     return createChromeApi({
@@ -226,7 +241,7 @@ export class ChromeService {
         docTitle,
         projectNavigation,
       },
-      components,
+      componentDeps,
       sidebar,
     });
   }

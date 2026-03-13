@@ -95,8 +95,14 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(3);
-      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual(['if', 'foreach', 'wait']);
+      expect(flowControlGroup.options).toHaveLength(5);
+      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
+        'if',
+        'foreach',
+        'wait',
+        'workflow.execute',
+        'workflow.executeAsync',
+      ]);
     }
   });
 

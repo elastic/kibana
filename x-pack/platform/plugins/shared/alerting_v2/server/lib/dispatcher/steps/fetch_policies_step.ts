@@ -25,22 +25,8 @@ export class FetchPoliciesStep implements DispatcherStep {
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { rules } = state;
-    if (!rules || rules.size === 0) {
-      return { type: 'continue', data: { policies: new Map() } };
-    }
-
-    const uniquePolicyIds = Array.from(
-      new Set(rules.values().flatMap((r) => r.notificationPolicyIds))
-    );
-    if (uniquePolicyIds.length === 0) {
-      return { type: 'continue', data: { policies: new Map() } };
-    }
-
-    const result = await this.notificationPolicySavedObjectService.bulkGetDecryptedByIds(
-      uniquePolicyIds
-    );
+  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+    const result = await this.notificationPolicySavedObjectService.findAllDecrypted();
 
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
@@ -56,6 +42,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         matcher: doc.attributes.matcher,
         groupBy: doc.attributes.group_by ?? [],
         throttle: doc.attributes.throttle,
+        ruleLabels: doc.attributes.rule_labels ?? [],
         apiKey: doc.attributes.auth.apiKey,
       });
     }

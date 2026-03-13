@@ -84,6 +84,8 @@ export class AgentBuilderPlugin
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
       trackingService: this.trackingService,
+      cloud: setupDeps.cloud,
+      usageApi: setupDeps.usageApi,
     });
 
     registerTaskDefinitions({
