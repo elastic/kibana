@@ -213,7 +213,7 @@ export const EventSchema = schema.maybe(
                         candidate_alerts_count: ecsStringOrNumber(),
                         unaccounted_events: ecsStringOrNumber(),
                         suppressed_alerts: ecsStringOrNumber(),
-                      }, { unknowns: 'allow' })
+                      })
                     ),
                     errors: schema.maybe(
                       schema.object({
