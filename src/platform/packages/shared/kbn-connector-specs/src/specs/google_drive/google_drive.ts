@@ -54,8 +54,18 @@ export const GoogleDriveConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
+
   auth: {
-    types: ['bearer'],
+    types: [
+      'bearer',
+      {
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'profile,email,https://www.googleapis.com/auth/drive.readonly',
+        },
+      },
+    ],
     headers: {
       Accept: 'application/json',
     },

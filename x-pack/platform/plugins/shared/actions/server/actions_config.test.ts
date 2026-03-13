@@ -50,6 +50,7 @@ const defaultActionsConfig: ActionsConfig = {
       },
     },
   },
+  ears: {},
 };
 
 describe('ensureUriAllowed', () => {
@@ -767,6 +768,21 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when ears.url is set in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      ears: { url: 'https://ears.example.com' },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
   });
 });
 

@@ -217,6 +217,11 @@ export const configSchema = schema.object({
       rate_limits: oauthAuthorizationCodeRateLimitsSchema,
     }),
   }),
+  ears: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
