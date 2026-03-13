@@ -30,6 +30,8 @@ interface UseAllResults {
   sort: Array<{ field: string; direction: Direction }>;
   kuery?: string;
   isLive?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 export const useAllResults = ({
@@ -41,14 +43,40 @@ export const useAllResults = ({
   sort,
   kuery,
   isLive = false,
+  scheduleId,
+  executionCount,
 }: UseAllResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const isScheduled = !!scheduleId && executionCount != null;
+
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
-    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort }],
-    () =>
-      http.get<{ data: ResultsStrategyResponse }>(
+    [
+      'allActionResults',
+      { actionId, liveQueryActionId, activePage, limit, sort, scheduleId, executionCount },
+    ],
+    () => {
+      if (isScheduled) {
+        return http.get<{ data: ResultsStrategyResponse }>(
+          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results`,
+          {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page: activePage,
+              pageSize: limit,
+              ...(sort.length > 0 && {
+                sort: sort[0].field,
+                sortOrder: sort[0].direction,
+              }),
+              ...(kuery && { kuery }),
+              ...(startDate && { startDate }),
+            },
+          }
+        );
+      }
+
+      return http.get<{ data: ResultsStrategyResponse }>(
         `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,
         {
           version: API_VERSIONS.public.v1,
@@ -63,7 +91,8 @@ export const useAllResults = ({
             ...(startDate && { startDate }),
           },
         }
-      ),
+      );
+    },
     {
       select: (response) => ({
         id: actionId,
