@@ -48,11 +48,16 @@ steps:
     with:
       index: workflow-errors
       body:
-        workflow_id: "{{event.workflow.id}}"
-        error: "{{event.error.message}}"
-        timestamp: "{{event.execution.failedAt}}"
+        workflow_id: "{eventWorkflowId}"
+        error: "{eventErrorMessage}"
+        timestamp: "{eventFailedAt}"
 \`\`\``,
-          values: { triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID },
+          values: {
+            triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
+            eventWorkflowId: '{{event.workflow.id}}',
+            eventErrorMessage: '{{event.error.message}}',
+            eventFailedAt: '{{event.execution.failedAt}}',
+          },
         }
       ),
       i18n.translate(

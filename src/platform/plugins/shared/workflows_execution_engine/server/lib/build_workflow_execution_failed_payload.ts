@@ -32,7 +32,7 @@ export function buildWorkflowExecutionFailedPayload(
     },
     execution: {
       id: execution.id,
-      startedAt: execution.createdAt,
+      startedAt: execution.startedAt ?? execution.createdAt,
       failedAt: execution.finishedAt ?? new Date().toISOString(),
     },
     error: {

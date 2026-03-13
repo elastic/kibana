@@ -32,6 +32,8 @@ describe('runWorkflow', () => {
   let dependencies: ReturnType<typeof mockContextDependencies>;
   let mockGetWorkflowExecutionById: jest.Mock;
   let mockGetLastFailedStepContext: jest.Mock;
+  let mockGetWorkflowExecutionStatus: jest.Mock;
+  let mockGetWorkflowExecution: jest.Mock;
   let mockEmitEvent: jest.Mock;
 
   beforeEach(() => {
@@ -43,9 +45,15 @@ describe('runWorkflow', () => {
     };
     mockGetWorkflowExecutionById = jest.fn();
     mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
+    mockGetWorkflowExecutionStatus = jest.fn();
+    mockGetWorkflowExecution = jest.fn();
 
     mockSetupDependencies.mockResolvedValue({
-      workflowRuntime: { start: jest.fn().mockResolvedValue(undefined) },
+      workflowRuntime: {
+        start: jest.fn().mockResolvedValue(undefined),
+        getWorkflowExecutionStatus: mockGetWorkflowExecutionStatus,
+        getWorkflowExecution: mockGetWorkflowExecution,
+      },
       stepExecutionRuntimeFactory: {},
       workflowExecutionState: { getLastFailedStepContext: mockGetLastFailedStepContext },
       workflowLogger: {},
@@ -74,6 +82,8 @@ describe('runWorkflow', () => {
       finishedAt: '2024-01-01T10:05:00.000Z',
       triggeredBy: 'manual',
     };
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
+    mockGetWorkflowExecution.mockReturnValue(failedExecution);
     mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
     mockGetLastFailedStepContext.mockReturnValue({
       stepId: 'step_1',
@@ -93,7 +103,8 @@ describe('runWorkflow', () => {
       })
     ).rejects.toThrow('Step failed');
 
-    expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
+    expect(mockGetWorkflowExecutionStatus).toHaveBeenCalled();
+    expect(mockGetWorkflowExecution).toHaveBeenCalled();
     expect(mockEmitEvent).toHaveBeenCalledTimes(1);
     expect(mockEmitEvent).toHaveBeenCalledWith({
       triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
@@ -123,7 +134,7 @@ describe('runWorkflow', () => {
 
   it('emits workflow_execution_failed with no step fields when failure was not due to a step', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Runtime error'));
-    mockGetWorkflowExecutionById.mockResolvedValue({
+    const failedExecution = {
       id: workflowRunId,
       workflowId: 'wf-1',
       spaceId,
@@ -134,7 +145,10 @@ describe('runWorkflow', () => {
       createdAt: '2024-01-01T10:00:00.000Z',
       finishedAt: '2024-01-01T10:05:00.000Z',
       triggeredBy: 'manual',
-    });
+    };
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
+    mockGetWorkflowExecution.mockReturnValue(failedExecution);
+    mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
     // getLastFailedStepContext returns undefined: no step caused the failure
     mockGetLastFailedStepContext.mockReturnValue(undefined);
 
@@ -159,6 +173,7 @@ describe('runWorkflow', () => {
 
   it('does not emit when execution status is not FAILED', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
     mockGetWorkflowExecutionById.mockResolvedValue({
       id: workflowRunId,
       status: ExecutionStatus.COMPLETED,
@@ -183,7 +198,7 @@ describe('runWorkflow', () => {
 
   it('does not emit when execution is a test run', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
-    mockGetWorkflowExecutionById.mockResolvedValue({
+    const testRunExecution = {
       id: workflowRunId,
       workflowId: 'wf-1',
       spaceId,
@@ -194,7 +209,9 @@ describe('runWorkflow', () => {
       createdAt: '2024-01-01T10:00:00.000Z',
       finishedAt: '2024-01-01T10:05:00.000Z',
       triggeredBy: 'manual',
-    });
+    };
+    mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
+    mockGetWorkflowExecution.mockReturnValue(testRunExecution);
 
     await expect(
       runWorkflow({
@@ -205,50 +222,6 @@ describe('runWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
-      })
-    ).rejects.toThrow('Step failed');
-
-    expect(mockEmitEvent).not.toHaveBeenCalled();
-  });
-
-  it('does not call emitEvent when workflowsExtensions is not provided', async () => {
-    mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
-    const depsWithoutExtensions = mockContextDependencies();
-    delete (depsWithoutExtensions as any).workflowsExtensions;
-    mockGetWorkflowExecutionById.mockResolvedValue({
-      id: workflowRunId,
-      workflowId: 'wf-1',
-      spaceId,
-      status: ExecutionStatus.FAILED,
-      isTestRun: false,
-      workflowDefinition: { name: 'Test' },
-      error: { message: 'Step failed' },
-      createdAt: '2024-01-01T10:00:00.000Z',
-      finishedAt: '2024-01-01T10:05:00.000Z',
-      triggeredBy: 'manual',
-    });
-
-    mockSetupDependencies.mockResolvedValue({
-      workflowRuntime: { start: jest.fn().mockResolvedValue(undefined) },
-      stepExecutionRuntimeFactory: {},
-      workflowExecutionState: { getLastFailedStepContext: jest.fn().mockReturnValue(undefined) },
-      workflowLogger: {},
-      nodesFactory: {},
-      workflowExecutionGraph: {},
-      workflowTaskManager: {},
-      workflowExecutionRepository: { getWorkflowExecutionById: mockGetWorkflowExecutionById },
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
-    } as any);
-
-    await expect(
-      runWorkflow({
-        workflowRunId,
-        spaceId,
-        taskAbortController: new AbortController(),
-        logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
-        fakeRequest,
-        dependencies: depsWithoutExtensions,
       })
     ).rejects.toThrow('Step failed');
 

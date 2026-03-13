@@ -9,11 +9,9 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/workflows';
-import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { buildWorkflowExecutionFailedPayload } from '../lib/build_workflow_execution_failed_payload';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -105,32 +103,15 @@ export async function runWorkflow({
   } finally {
     loopSpan?.end();
 
-    if (dependencies.workflowsExtensions) {
-      try {
-        const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-          workflowRunId,
-          spaceId
-        );
-        if (execution?.status === ExecutionStatus.FAILED && !execution.isTestRun) {
-          const payload = buildWorkflowExecutionFailedPayload(
-            execution,
-            workflowExecutionState.getLastFailedStepContext()
-          );
-          await dependencies.workflowsExtensions.emitEvent({
-            triggerId: WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
-            spaceId,
-            payload,
-            request: fakeRequest,
-          });
-        }
-      } catch (err) {
-        logger.warn(
-          `Failed to emit workflow execution failed event (execution=${workflowRunId}): ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      }
-    }
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      workflowsExtensions: dependencies.workflowsExtensions,
+      spaceId,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
   // Report metering after execution completes and state is flushed.
