@@ -84,6 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('queryCancelButton');
         });
+        // Wait for the async search to be established on ES so that
+        // cancellation can retrieve partial results via the async search ID
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
@@ -125,6 +129,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           await testSubjects.existOrFail('queryCancelButton');
         });
+        // Wait for the async search to be established on ES so that
+        // cancellation can retrieve partial results via the async search ID
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await testSubjects.existOrFail('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
