@@ -8,7 +8,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { getSidebarViewForRoute } from './get_sidebar_view';
@@ -20,23 +20,27 @@ const SIDEBAR_WIDTH = 200;
 
 export const UnifiedSidebar: React.FC = () => {
   const location = useLocation();
-  const { euiTheme } = useEuiTheme();
   const sidebarView = getSidebarViewForRoute(location.pathname);
 
   const sidebarStyles = css`
     width: ${SIDEBAR_WIDTH}px;
     min-width: ${SIDEBAR_WIDTH}px;
     height: 100%;
-    padding: ${euiTheme.size.m};
-    border-right: ${euiTheme.border.thin};
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border-radius: 0;
   `;
 
   return (
-    <nav css={sidebarStyles} aria-label="Agent Builder navigation">
+    <EuiPanel
+      css={sidebarStyles}
+      paddingSize="m"
+      hasShadow={false}
+      hasBorder
+      role="navigation"
+      aria-label="Agent Builder navigation"
+    >
       {sidebarView === 'conversation' && <ConversationSidebarView pathname={location.pathname} />}
       {sidebarView === 'agentSettings' && <AgentSettingsSidebarView pathname={location.pathname} />}
       {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
-    </nav>
+    </EuiPanel>
   );
 };
