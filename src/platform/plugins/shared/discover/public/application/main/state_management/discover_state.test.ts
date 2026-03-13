@@ -8,19 +8,6 @@
  */
 
 import { omit } from 'lodash';
-
-jest.mock('../data_fetching/fetch_documents', () => ({
-  fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
-}));
-
-jest.mock('../data_fetching/fetch_esql', () => ({
-  fetchEsql: jest.fn().mockResolvedValue({ records: [] }),
-}));
-
-jest.mock('@kbn/ebt-tools', () => ({
-  reportPerformanceMetricEvent: jest.fn(),
-}));
-
 import type { DiscoverStateMockParams } from '../../../__mocks__/discover_state.mock';
 import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
@@ -65,6 +52,18 @@ import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+
+jest.mock('../data_fetching/fetch_documents', () => ({
+  fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
+}));
+
+jest.mock('../data_fetching/fetch_esql', () => ({
+  fetchEsql: jest.fn().mockResolvedValue({ records: [] }),
+}));
+
+jest.mock('@kbn/ebt-tools', () => ({
+  reportPerformanceMetricEvent: jest.fn(),
+}));
 
 async function getState(
   url: string = '/',

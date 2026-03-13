@@ -41,7 +41,6 @@ export {
   useInternalStateGetState,
   useInternalStateSelector,
   CurrentTabProvider,
-  useCurrentTabContext,
   useCurrentTabSelector,
   useAppStateSelector,
   useCurrentTabAction,

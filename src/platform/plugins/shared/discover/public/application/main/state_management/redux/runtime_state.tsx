@@ -190,16 +190,8 @@ export const useCurrentTabRuntimeState = <T,>(
 };
 
 export const useCurrentTabDataStateContainer = () => {
-  const runtimeStateManager = useContext(runtimeStateManagerContext);
   const { currentTabId } = useCurrentTabContext();
-
-  if (!runtimeStateManager) {
-    throw new Error('useCurrentTabDataStateContainer requires RuntimeStateManagerProvider');
-  }
-
-  const dataStateContainer = useRuntimeState(
-    selectTabRuntimeState(runtimeStateManager, currentTabId).dataStateContainer$
-  );
+  const dataStateContainer = useCurrentTabRuntimeState((tab) => tab.dataStateContainer$);
 
   if (!dataStateContainer) {
     throw new Error(

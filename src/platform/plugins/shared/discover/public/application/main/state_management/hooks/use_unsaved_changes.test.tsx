@@ -76,15 +76,7 @@ describe('useUnsavedChanges', () => {
 
     return {
       result,
-      toolkit,
-      internalState: toolkit.internalState,
-      runtimeStateManager: toolkit.runtimeStateManager,
-      services: toolkit.services,
-      initializeTabs: toolkit.initializeTabs,
-      initializeSingleTab: toolkit.initializeSingleTab,
-      addNewTab: toolkit.addNewTab,
-      getCurrentTab: toolkit.getCurrentTab,
-      saveDiscoverSession: toolkit.saveDiscoverSession,
+      ...toolkit,
     };
   };
 
