@@ -1023,6 +1023,7 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
@@ -2628,7 +2629,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
 /x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
-/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration @elastic/security-engineering-productivity   
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity

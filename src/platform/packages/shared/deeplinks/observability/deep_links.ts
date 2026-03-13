@@ -64,6 +64,7 @@ export type InventoryLinkId = 'datastreams';
 
 export type ObservabilityOverviewLinkId =
   | 'alerts'
+  | 'alerts_v2'
   | 'cases'
   | 'cases_configure'
   | 'cases_create'

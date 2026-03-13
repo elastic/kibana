@@ -63,6 +63,14 @@ export function updateGlobalNavigation({
             };
           }
           return null;
+        case 'alerts_v2':
+          if (someVisible) {
+            return {
+              ...link,
+              visibleIn: ['sideNav', 'globalSearch'],
+            };
+          }
+          return null;
         case 'rules':
           if (someVisible) {
             return {

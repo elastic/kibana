@@ -19,7 +19,7 @@ import type { DiscoverServices } from '../../../../build_services';
 export async function getEsqlDataView(
   query: AggregateQuery,
   currentDataView: DataView | undefined,
-  services: DiscoverServices
+  services: Pick<DiscoverServices, 'dataViews' | 'http'>
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   // Convert undefined time fields to a string since '' and undefined are equivalent here
