@@ -8,6 +8,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
@@ -31,8 +32,11 @@ export interface UserStorageSetupDeps {
 /** @internal */
 export class UserStorageService {
   private readonly definitions = new Map<string, UserStorageDefinition>();
+  private readonly logger: Logger;
 
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly coreContext: CoreContext) {
+    this.logger = coreContext.logger.get('user-storage');
+  }
 
   public setup({ http, savedObjects }: UserStorageSetupDeps): UserStorageServiceSetup {
     this.logger.debug('Setting up user storage service');
