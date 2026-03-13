@@ -39,7 +39,6 @@ const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name
 
 You can review and edit everything before enabling the rule. 
 Desired behavior or activity to detect:
-Detect users who, within a 2 hour interval window, either transfer over 100 MB of data or generate 100 or more events to a direct IP address (not a domain name)
 
 `;
 
