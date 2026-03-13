@@ -18,19 +18,24 @@ import {
   EuiText,
   EuiButtonGroup,
   EuiCopy,
-  EuiImage,
   EuiCallOut,
   EuiSkeletonText,
 } from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { ProgressIndicator } from '../shared/progress_indicator';
+import { GetStartedPanel } from '../shared/get_started_panel';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
@@ -54,6 +59,9 @@ const HOST_COMMAND = i18n.translate(
   }
 );
 
+const FETCH_INTERVAL = 2000;
+const SHOW_TROUBLESHOOTING_DELAY = 120_000;
+
 export const OtelLogsPanel: React.FC = () => {
   useFlowBreadcrumb({
     text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
@@ -62,7 +70,7 @@ export const OtelLogsPanel: React.FC = () => {
   });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, http, docLinks },
+    services: { share, docLinks, analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const {
@@ -86,6 +94,68 @@ export const OtelLogsPanel: React.FC = () => {
       });
     }
   }, [onPageReady, setupData]);
+
+  const [sessionStartTime] = useState(() => new Date().toISOString());
+  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
+
+  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+    isActive: !!setupData,
+    onboardingFlowType: 'otel_logs',
+    onboardingId: setupData?.onboardingId,
+  });
+
+  const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
+  useEffect(() => {
+    if (isMonitoringStepActive && checkDataStartTime === null) {
+      setCheckDataStartTime(Date.now());
+    }
+  }, [isMonitoringStepActive, checkDataStartTime]);
+
+  const {
+    data: hasDataResponse,
+    status: hasDataStatus,
+    refetch: refetchHasData,
+  } = useFetcher(
+    (callApi) => {
+      if (!isMonitoringStepActive) return;
+      return callApi('GET /internal/observability_onboarding/otel_host/has-data', {
+        params: {
+          query: { start: sessionStartTime },
+        },
+      });
+    },
+    [isMonitoringStepActive, sessionStartTime],
+    { showToastOnError: false }
+  );
+
+  useEffect(() => {
+    const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
+    if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      refetchHasData();
+    }, FETCH_INTERVAL);
+    return () => clearTimeout(timeout);
+  }, [hasDataResponse?.hasData, refetchHasData, hasDataStatus]);
+
+  useEffect(() => {
+    if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
+      setDataReceivedTelemetrySent(true);
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: 'otel_logs',
+        flow_id: setupData?.onboardingId ?? '',
+        step: 'logs-ingest',
+        step_status: 'complete',
+      });
+    }
+  }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, setupData?.onboardingId]);
+
+  const isTroubleshootingVisible =
+    isMonitoringStepActive &&
+    hasDataResponse?.hasData === false &&
+    checkDataStartTime !== null &&
+    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
 
   const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -118,6 +188,45 @@ export const OtelLogsPanel: React.FC = () => {
   useEffect(() => {
     getDeeplinks();
   }, [getDeeplinks]);
+
+  const visualizeActionLinks = useMemo(
+    () =>
+      [
+        ...(deeplinks?.logs
+          ? [
+              {
+                id: 'logs',
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.logsTitle',
+                  { defaultMessage: 'View and analyze your logs' }
+                ),
+                label: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.logsLabel',
+                  { defaultMessage: 'Explore logs' }
+                ),
+                href: deeplinks.logs,
+              },
+            ]
+          : []),
+        ...(isMetricsOnboardingEnabled && deeplinks?.metrics
+          ? [
+              {
+                id: 'metrics',
+                title: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.metricsTitle',
+                  { defaultMessage: 'View and analyze your metrics' }
+                ),
+                label: i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.metricsLabel',
+                  { defaultMessage: 'Open Hosts' }
+                ),
+                href: deeplinks.metrics,
+              },
+            ]
+          : []),
+      ],
+    [deeplinks, isMetricsOnboardingEnabled]
+  );
 
   const installTabContents = useMemo(
     () => [
@@ -359,111 +468,76 @@ export const OtelLogsPanel: React.FC = () => {
                   defaultMessage: 'Visualize your data',
                 }
               ),
-              children: (
+              status: (hasDataResponse?.hasData
+                ? 'complete'
+                : isMonitoringStepActive
+                  ? 'current'
+                  : 'incomplete') as EuiStepStatus,
+              children: isMonitoringStepActive ? (
                 <>
-                  <EuiText>
-                    <p>
-                      {i18n.translate(
-                        'xpack.observability_onboarding.otelLogsPanel.waitForTheDataLabel',
-                        {
-                          defaultMessage:
-                            'After running the previous command, come back and view your data.',
-                        }
-                      )}
-                    </p>
-                  </EuiText>
-                  <EuiSpacer />
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiImage
-                        src={http?.staticAssets.getPluginAssetHref('waterfall_screen.svg')}
-                        width={160}
-                        alt="Illustration"
-                        hasShadow
+                  <ProgressIndicator
+                    title={
+                      hasDataResponse?.hasData
+                        ? i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
+                            { defaultMessage: 'We are monitoring your host' }
+                          )
+                        : i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.waitingForData',
+                            { defaultMessage: 'Waiting for data to be shipped' }
+                          )
+                    }
+                    iconType="checkInCircleFilled"
+                    isLoading={!hasDataResponse?.hasData}
+                    css={css`
+                      max-width: 40%;
+                    `}
+                    data-test-subj="observabilityOnboardingOtelHostDataProgressIndicator"
+                  />
+
+                  {isTroubleshootingVisible && (
+                    <>
+                      <EuiSpacer />
+                      <EuiText color="subdued" size="s">
+                        <FormattedMessage
+                          id="xpack.observability_onboarding.otelLogsPanel.troubleshootingTextLabel"
+                          defaultMessage="Find more details and troubleshooting solutions in our documentation. {troubleshootingLink}"
+                          values={{
+                            troubleshootingLink: (
+                              <EuiLink
+                                data-test-subj="observabilityOnboardingOtelLogsPanelTroubleshootingLink"
+                                href="https://ela.st/elastic-otel"
+                                external
+                                target="_blank"
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.otelLogsPanel.troubleshootingLinkText',
+                                  { defaultMessage: 'Open documentation' }
+                                )}
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                    </>
+                  )}
+
+                  {hasDataResponse?.hasData === true && visualizeActionLinks.length > 0 && (
+                    <>
+                      <EuiSpacer />
+                      <GetStartedPanel
+                        onboardingFlowType="otel_logs"
+                        dataset="otel_logs"
+                        integration="system_otel"
+                        onboardingId={setupData?.onboardingId ?? ''}
+                        newTab={false}
+                        isLoading={false}
+                        actionLinks={visualizeActionLinks}
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow>
-                      <EuiFlexGroup direction="column" gutterSize="xs" justifyContent="center">
-                        {deeplinks?.logs && (
-                          <>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s">
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel',
-                                  { defaultMessage: 'View and analyze your logs' }
-                                )}
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                data-test-subj="obltOnboardingExploreLogs"
-                                href={deeplinks.logs}
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.exploreLogs',
-                                  {
-                                    defaultMessage: 'Explore logs',
-                                  }
-                                )}
-                              </EuiLink>
-                            </EuiFlexItem>
-                          </>
-                        )}
-                        <EuiSpacer size="s" />
-                        {isMetricsOnboardingEnabled && deeplinks?.metrics && (
-                          <>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s">
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel',
-                                  { defaultMessage: 'View and analyze your metrics' }
-                                )}
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiLink
-                                data-test-subj="obltOnboardingExploreMetrics"
-                                href={deeplinks.metrics}
-                              >
-                                {i18n.translate(
-                                  'xpack.observability_onboarding.otelLogsPanel.exploreMetrics',
-                                  {
-                                    defaultMessage: 'Open Hosts',
-                                  }
-                                )}
-                              </EuiLink>
-                            </EuiFlexItem>
-                          </>
-                        )}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer />
-                  <EuiText size="xs" color="subdued">
-                    <FormattedMessage
-                      id="xpack.observability_onboarding.otelLogsPanel.troubleshooting"
-                      defaultMessage="Find more details and troubleshooting solution in our documentation. {link}"
-                      values={{
-                        link: (
-                          <EuiLink
-                            data-test-subj="observabilityOnboardingOtelLogsPanelDocumentationLink"
-                            href="https://ela.st/elastic-otel"
-                            target="_blank"
-                            external
-                          >
-                            {i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.documentationLink',
-                              {
-                                defaultMessage: 'Open documentation',
-                              }
-                            )}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiText>
+                    </>
+                  )}
                 </>
-              ),
+              ) : null,
             },
           ]}
         />
