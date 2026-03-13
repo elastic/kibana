@@ -13,6 +13,10 @@ import {
 } from './migrate_alert_page_controls';
 import type { StartPlugins } from '../../../types';
 import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 
 const OLD_FORMAT = {
   viewMode: 'view',
@@ -39,8 +43,6 @@ const OLD_FORMAT = {
         hideActionBar: true,
         persist: true,
         hideExists: true,
-        existsSelected: false,
-        exclude: false,
       },
     },
     '1': {
@@ -60,11 +62,8 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
-        selectedOptions: [],
         hideActionBar: true,
         hideExists: true,
-        existsSelected: false,
-        exclude: false,
       },
     },
     '2': {
@@ -84,9 +83,6 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
-        selectedOptions: [],
-        existsSelected: false,
-        exclude: false,
       },
     },
     '3': {
@@ -95,6 +91,7 @@ const OLD_FORMAT = {
       grow: true,
       width: 'small',
       explicitInput: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         id: '3',
         dataViewId: 'security_solution_alerts_dv',
         fieldName: 'host.name',
@@ -106,9 +103,6 @@ const OLD_FORMAT = {
         ignoreParentSettings: {
           ignoreValidations: true,
         },
-        selectedOptions: [],
-        existsSelected: false,
-        exclude: false,
       },
     },
   },
@@ -154,6 +148,7 @@ const OLD_FORMAT = {
 const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
   initialChildControlState: {
     '0': {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       type: 'optionsListControl',
       order: 0,
       displaySettings: {
@@ -171,6 +166,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       persist: true,
     },
     '1': {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       type: 'optionsListControl',
       order: 1,
       displaySettings: {
@@ -188,6 +184,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       persist: false,
     },
     '2': {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       type: 'optionsListControl',
       order: 2,
       displaySettings: {
@@ -206,6 +203,7 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       persist: false,
     },
     '3': {
+      ...DEFAULT_PINNED_CONTROL_STATE,
       type: 'optionsListControl',
       order: 3,
       displaySettings: {

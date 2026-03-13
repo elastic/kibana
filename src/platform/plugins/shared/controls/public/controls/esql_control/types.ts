@@ -6,37 +6,67 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type {
+  OptionsListESQLControlState,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
+// import type { Filter } from '@kbn/es-query';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
-import type { HasEditCapabilities, PublishesDataLoading } from '@kbn/presentation-publishing';
-import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
+import type {
+  HasEditCapabilities,
+  PublishesDataLoading,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import type { OptionsListSuggestions } from '../../../common/options_list';
+// import type { OptionsListCom+ponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
   PublishesDataLoading;
 
-type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
-type HideExistsUnusedState = Pick<OptionsListComponentState, 'exists_selected'>;
-type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
-type DisableLoadSuggestionsUnusedState = Pick<
-  OptionsListComponentState,
-  'requestSize' | 'run_past_timeout'
->;
-type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
+export interface ESQLOptionsListComponentApi {
+  uuid: string;
+  availableOptions$: PublishingSubject<OptionsListSuggestions>;
+  invalidSelections$: PublishingSubject<Set<string | number>>;
+  variableName$: PublishingSubject<OptionsListESQLControlState['variable_name']>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
+  dataLoading$: PublishingSubject<boolean | undefined>;
+  label$: PublishingSubject<string>;
+  totalCardinality$: PublishingSubject<number>;
+  singleSelect$: PublishingSubject<boolean>;
+  searchString$: PublishingSubject<string>;
+  searchStringValid$: PublishingSubject<boolean>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
+  makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
+  deselectOption: (key: string | undefined) => void;
+  setSearchString: (next: string) => void;
+  setDataLoading: (loading: boolean | undefined) => void;
+  selectAll: (keys: string[]) => void;
+  deselectAll: () => void;
+}
 
-export type OptionsListESQLUnusedState = HideExcludeUnusedState &
-  HideExistsUnusedState &
-  HideSortUnusedState &
-  DisableLoadSuggestionsUnusedState &
-  DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListComponentState, 'field_name'> & {
-    use_global_filters?: boolean;
-    ignore_validations?: boolean;
-    data_view_id: string;
-    blockingError?: Error;
-    filtersLoading: boolean;
-    appliedFilters: Filter[] | undefined;
-  };
+// type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;
+// type HideExistsUnusedState = Pick<OptionsListComponentState, 'exists_selected'>;
+// type HideSortUnusedState = Pick<OptionsListComponentState, 'sort'>;
+// type DisableLoadSuggestionsUnusedState = Pick<
+//   OptionsListComponentState,
+//   'requestSize' | 'run_past_timeout'
+// >;
+// type DisableInvalidSelectionsUnusedState = Pick<OptionsListComponentState, 'invalidSelections'>;
+
+// export type OptionsListESQLUnusedState = HideExcludeUnusedState &
+//   HideExistsUnusedState &
+//   HideSortUnusedState &
+//   DisableLoadSuggestionsUnusedState &
+//   DisableInvalidSelectionsUnusedState &
+//   Pick<OptionsListComponentState, 'field_name'> & {
+//     use_global_filters: boolean;
+//     ignore_validations: boolean;
+//     data_view_id: string;
+//     blockingError?: Error;
+//     filtersLoading: boolean;
+//     appliedFilters: Filter[] | undefined;
+//   };

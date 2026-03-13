@@ -21,7 +21,6 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import { apiCanLockHoverActions } from '@kbn/presentation-publishing';
@@ -40,11 +39,7 @@ export const ControlDisplaySettingsPopover: React.FC<Props> = ({ api, displayNam
 
   const initialState = useMemo(
     () => {
-      return {
-        width: DEFAULT_CONTROL_WIDTH,
-        grow: DEFAULT_CONTROL_GROW,
-        ...api.parentApi.getLayout(api.uuid),
-      };
+      return api.parentApi.getLayout(api.uuid);
     },
     // We should re-calculate `initialState` when the popover opens/closes
     // eslint-disable-next-line react-hooks/exhaustive-deps

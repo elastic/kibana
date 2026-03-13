@@ -9,6 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DataControlState, LegacyStoredDataControlState } from '@kbn/controls-schemas';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 
@@ -67,10 +68,11 @@ export function transformDataControlOut<
     );
 
   return {
+    ...DEFAULT_DATA_CONTROL_STATE,
     title,
     data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
-    use_global_filters,
-    ignore_validations,
+    ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
+    ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',
   };
 }

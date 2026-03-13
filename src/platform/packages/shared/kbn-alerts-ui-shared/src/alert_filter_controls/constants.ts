@@ -8,12 +8,18 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import type { OptionsListControlState, PinnedControlState } from '@kbn/controls-schemas';
+import type {
+  ControlWidth,
+  OptionsListControlState,
+  PinnedControlState,
+} from '@kbn/controls-schemas';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
 import type { FilterControlConfig } from './types';
 
 export const DEFAULT_CONTROLS: FilterControlConfig[] = [
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.status', {
       defaultMessage: 'Status',
     }),
@@ -23,6 +29,7 @@ export const DEFAULT_CONTROLS: FilterControlConfig[] = [
     persist: true,
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.rule', {
       defaultMessage: 'Rule',
     }),
@@ -30,12 +37,14 @@ export const DEFAULT_CONTROLS: FilterControlConfig[] = [
     display_settings: { hide_exists: true },
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.group', {
       defaultMessage: 'Group',
     }),
     field_name: 'kibana.alert.group.value',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     title: i18n.translate('alertsUIShared.alertFilterControls.defaultControlDisplayNames.tags', {
       defaultMessage: 'Tags',
     }),
@@ -64,10 +73,10 @@ export const TEST_IDS = {
   },
 };
 
-export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Partial<PinnedControlState> &
-  Partial<OptionsListControlState> = {
+export const COMMON_OPTIONS_LIST_CONTROL_INPUTS: Pick<PinnedControlState, 'width' | 'grow'> &
+  Pick<OptionsListControlState, 'display_settings'> = {
   display_settings: { hide_exclude: true, hide_sort: true, placeholder: '' },
-  width: 'small',
+  width: 'small' as ControlWidth,
   grow: true,
 };
 

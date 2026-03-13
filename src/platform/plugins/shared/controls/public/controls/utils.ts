@@ -8,10 +8,10 @@
  */
 
 import type { DSLOptionsListComponentApi } from './data_controls/options_list_control/types';
-import type { ESQLOptionsListComponentApi } from './esql_control/types';
+import type { OptionsListComponentApi } from './types';
 
-export interface HasCustomPrepend {
-  CustomPrependComponent: React.FC<{}>;
-}
-
-export type OptionsListComponentApi = DSLOptionsListComponentApi | ESQLOptionsListComponentApi;
+export const isDSLOptionsListApi = (
+  api: OptionsListComponentApi
+): api is DSLOptionsListComponentApi => {
+  return 'field$' in api;
+};

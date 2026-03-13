@@ -28,6 +28,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { buildEntityAlertsQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import {
@@ -337,6 +338,7 @@ export const AlertsDetailsTable = memo(
         openAlertsPageWithFilters(
           [
             {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               title:
                 field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
@@ -345,6 +347,7 @@ export const AlertsDetailsTable = memo(
               field_name: field,
             },
             {
+              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               title: OPEN_IN_ALERTS_TITLE_STATUS,
               selected_options: [FILTER_OPEN, FILTER_ACKNOWLEDGED],
               field_name: 'kibana.alert.workflow_status',

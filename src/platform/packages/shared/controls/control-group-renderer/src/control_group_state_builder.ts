@@ -10,6 +10,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -61,16 +63,20 @@ export const controlGroupStateBuilder = {
   },
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<
-      Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
-        OptionsListDSLControlState,
-      'type'
+    controlState: Partial<
+      Omit<
+        Omit<PinnedControlState, keyof OptionsListDSLControlState | 'config'> &
+          OptionsListDSLControlState,
+        'type'
+      >
     >,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: OPTIONS_LIST_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
@@ -104,6 +110,7 @@ export const controlGroupStateBuilder = {
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
+        grow: true,
       },
     };
   },

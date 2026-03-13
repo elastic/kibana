@@ -16,7 +16,12 @@ export const FieldType = ({ type, aliasFor }: { type: FieldTypeOption; aliasFor?
     return (
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToken iconType="tokenAlias" aria-label="alias" />
+          <EuiToken
+            iconType="tokenAlias"
+            aria-label={i18n.translate('xpack.streams.fieldType.euiToken.aliasLabel', {
+              defaultMessage: 'alias',
+            })}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           {i18n.translate('xpack.streams.fieldType.aliasFor', {

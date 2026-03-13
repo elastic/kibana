@@ -18,7 +18,7 @@ import {
   EuiTablePagination,
   EuiToolTip,
 } from '@elastic/eui';
-
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
@@ -57,6 +57,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     ({ hostName, severity }: { hostName: string; severity?: string }) =>
       openAlertsPageWithFilters([
         {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           title: i18n.OPEN_IN_ALERTS_TITLE_HOSTNAME,
           selected_options: [hostName],
           field_name: 'host.name',
@@ -65,6 +66,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
         ...(severity
           ? [
               {
+                ...DEFAULT_DSL_OPTIONS_LIST_STATE,
                 title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
                 selected_options: [severity],
                 field_name: ALERT_SEVERITY,

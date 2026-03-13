@@ -7,6 +7,10 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 import type { StartPlugins } from '../../../types';
 
 export const GET_PAGE_FILTER_STORAGE_KEY = (spaceId: string = 'default') =>
@@ -114,6 +118,8 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
 
     for (const [key, value] of Object.entries(oldFormat.panels)) {
       newFormat.initialChildControlState[key] = {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: 'optionsListControl',
         order: value.order,
         displaySettings: {

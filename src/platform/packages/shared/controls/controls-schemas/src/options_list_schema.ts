@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_SEARCH_TECHNIQUE, OPTIONS_LIST_DEFAULT_SORT } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { controlSchema, dataControlSchema } from './control_schema';
 
 export const optionsListDisplaySettingsSchema = schema.object({
@@ -21,7 +21,7 @@ export const optionsListDisplaySettingsSchema = schema.object({
 
 export const optionsListSearchTechniqueSchema = schema.oneOf(
   [schema.literal('prefix'), schema.literal('wildcard'), schema.literal('exact')],
-  { defaultValue: DEFAULT_SEARCH_TECHNIQUE }
+  { defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique }
 );
 
 export const optionsListSortSchema = schema.object(
@@ -29,27 +29,31 @@ export const optionsListSortSchema = schema.object(
     by: schema.oneOf([schema.literal('_count'), schema.literal('_key')]),
     direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
   },
-  { defaultValue: OPTIONS_LIST_DEFAULT_SORT }
+  { defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.sort }
 );
 
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()]);
 
 const optionsListControlBaseParameters = {
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
-  single_select: schema.maybe(schema.boolean({ defaultValue: false })),
+  single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
 };
 
 export const optionsListDSLControlSchema = dataControlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
-    exclude: schema.maybe(schema.boolean({ defaultValue: false })),
-    exists_selected: schema.maybe(schema.boolean({ defaultValue: false })),
-    run_past_timeout: schema.maybe(schema.boolean({ defaultValue: false })),
-    search_technique: schema.maybe(optionsListSearchTechniqueSchema),
-    selected_options: schema.maybe(
-      schema.arrayOf(optionsListSelectionSchema, { defaultValue: [] })
-    ),
-    sort: schema.maybe(optionsListSortSchema),
+    exclude: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exclude }),
+    exists_selected: schema.boolean({
+      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected,
+    }),
+    run_past_timeout: schema.boolean({
+      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout,
+    }),
+    search_technique: optionsListSearchTechniqueSchema,
+    selected_options: schema.arrayOf(optionsListSelectionSchema, {
+      defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
+    }),
+    sort: optionsListSortSchema,
   });
 
 export const optionsListESQLControlSchema = controlSchema

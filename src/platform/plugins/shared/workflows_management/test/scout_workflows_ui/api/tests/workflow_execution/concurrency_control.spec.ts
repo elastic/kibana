@@ -50,6 +50,7 @@ steps:
     with:
       message: "Hello from Scout API test 2"
 `;
+
 spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },

@@ -62,7 +62,6 @@ export const FilterGroupContextMenu = () => {
       controlGroupStateBuilder.addOptionsListControl(
         newInput,
         {
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           data_view_id: dataViewId ?? '',

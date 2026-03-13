@@ -13,6 +13,7 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
@@ -58,6 +59,7 @@ export const AlertDetailsRedirect = () => {
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${alertId}` });
 
   const statusPageFilter: FilterControlConfig = {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: ALERT_WORKFLOW_STATUS,
     title: 'Status',
     selected_options: [],

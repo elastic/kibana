@@ -21,6 +21,7 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -56,6 +57,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     ({ userName, severity }: { userName: string; severity?: string }) =>
       openAlertsPageWithFilters([
         {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
           selected_options: [userName],
           field_name: 'user.name',
@@ -64,6 +66,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
         ...(severity
           ? [
               {
+                ...DEFAULT_DSL_OPTIONS_LIST_STATE,
                 title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
                 selected_options: [severity],
                 field_name: ALERT_SEVERITY,

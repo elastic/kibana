@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+
 import { assertFilterControlsWithFilterObject } from '../../../../tasks/alerts_page_filters';
 import { getNewRule } from '../../../../objects/rule';
 import { FILTER_GROUP_CHANGED_BANNER } from '../../../../screens/common/filter_group';
@@ -26,30 +28,37 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const customFilters = [
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'kibana.alert.workflow_status',
     title: 'Workflow Status',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'kibana.alert.severity',
     title: 'Severity',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'user.name',
     title: 'User Name',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'process.name',
     title: 'ProcessName',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: '@timestamp',
     title: '@timestamp',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'agent.type',
     title: 'AgentType',
   },
   {
+    ...DEFAULT_DSL_OPTIONS_LIST_STATE,
     field_name: 'kibana.alert.rule.name',
     title: 'Rule Name',
   },

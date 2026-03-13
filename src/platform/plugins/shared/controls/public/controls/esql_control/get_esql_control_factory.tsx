@@ -13,20 +13,14 @@ import { BehaviorSubject } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import {
-  type PublishingSubject,
-  apiHasPinnedPanels,
-  initializeStateManager,
-  initializeUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import { apiHasPinnedPanels, initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
-import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
-import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
+import type { ESQLControlApi, ESQLOptionsListComponentApi } from './types';
 import { VariableControlsStrings } from './constants';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
@@ -123,39 +117,13 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         serializeState,
       });
 
-      const componentStaticState = {
-        single_select: state.single_select ?? true,
-        exclude: false,
-        exists_selected: false,
-        requestSize: 0,
-        sort: undefined,
-        run_past_timeout: false,
-        invalidSelections: new Set<OptionsListSelection>(),
-        field_name: state.variable_name,
-        use_global_filters: false,
-        ignore_validations: false,
-        data_view_id: '',
-        blockingError: undefined,
-        filtersLoading: false,
-        appliedFilters: undefined,
-        dataViews: undefined,
-      };
-      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
-      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
-        componentStaticState,
-        componentStaticState
-      );
-
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: ESQLOptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
         ...labelManager.api,
-        isExpandable: false,
-        isCustomizable: false,
-        isDuplicable: false,
-        isPinnable: true,
         uuid,
         setDataLoading,
+
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;
           if (singleSelect && key) {
@@ -173,8 +141,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
           }
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
-        ...componentStaticStateManager.api,
-        singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
+        singleSelect$: selections.api.singleSelect$,
         invalidSelections$: selections.internalApi.invalidSelections$,
         deselectOption: (key?: string) => {
           const incompatibleSelections = selections.internalApi.invalidSelections$.value;
@@ -197,9 +164,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         deselectAll: () => {
           // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
         },
-        loadMoreSubject: new BehaviorSubject<void>(undefined),
-        fieldFormatter: new BehaviorSubject((v: string) => v),
-        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;

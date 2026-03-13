@@ -20,7 +20,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/control_group_state_builder';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE, OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -268,6 +268,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
     overridingControls = overridingControls.map((item) => {
       return {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         // give default value to params which are coming from the URL
         field_name: item.field_name,
         title: item.title,
@@ -358,7 +359,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
             // option List controls will handle an invalid dataview
             // & display an appropriate message
             data_view_id: dataViewId ?? '',
-            selected_options: control.selected_options,
             ...control,
             display_settings: {
               ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
