@@ -9,7 +9,7 @@ import { useState, useCallback } from 'react';
 import type { TriggerMatchResult } from './types';
 import { matchTrigger, getTextBeforeCursor } from './trigger_matcher';
 
-export interface InlineActionTriggerState {
+export interface CommandMenuTriggerState {
   /** Current trigger match result */
   readonly match: TriggerMatchResult;
   /** Dismiss the current trigger (e.g., user presses Escape) */
@@ -18,7 +18,7 @@ export interface InlineActionTriggerState {
   readonly checkInputForTrigger: (element: HTMLElement) => void;
 }
 
-interface UseInlineActionTriggerOptions {
+interface UseCommandMenuTriggerOptions {
   /** Whether trigger detection is enabled. Defaults to true. */
   readonly enabled?: boolean;
 }
@@ -29,14 +29,14 @@ const INACTIVE_MATCH: TriggerMatchResult = {
 };
 
 /**
- * Hook that detects inline action triggers in a contentEditable element.
+ * Hook that detects command menu triggers in a contentEditable element.
  *
  * Used internally by useMessageEditor to track trigger state as the
- * user types. Check `match.isActive` to show/hide the inline action dialog.
+ * user types. Check `match.isActive` to show/hide the command menu.
  */
-export const useInlineActionTrigger = (
-  options: UseInlineActionTriggerOptions = {}
-): InlineActionTriggerState => {
+export const useCommandMenuTrigger = (
+  options: UseCommandMenuTriggerOptions = {}
+): CommandMenuTriggerState => {
   const { enabled = true } = options;
 
   const [match, setMatch] = useState<TriggerMatchResult>(INACTIVE_MATCH);

@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useInlineActionTrigger } from './use_inline_action_trigger';
+import { useCommandMenuTrigger } from './use_command_menu_trigger';
 import * as triggerMatcherModule from './trigger_matcher';
 
 jest.mock('./trigger_matcher', () => {
@@ -28,13 +28,13 @@ const mockGetTextBeforeCursor = triggerMatcherModule.getTextBeforeCursor as jest
 
 const mockElement = document.createElement('div');
 
-describe('useInlineActionTrigger', () => {
+describe('useCommandMenuTrigger', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns inactive match initially', () => {
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     expect(result.current.match.isActive).toBe(false);
     expect(result.current.match.activeTrigger).toBeNull();
@@ -43,7 +43,7 @@ describe('useInlineActionTrigger', () => {
   it('detects trigger on handleInput', () => {
     mockGetTextBeforeCursor.mockReturnValue('@');
 
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     act(() => {
       result.current.checkInputForTrigger(mockElement);
@@ -57,7 +57,7 @@ describe('useInlineActionTrigger', () => {
   it('updates query as user types after trigger', () => {
     mockGetTextBeforeCursor.mockReturnValue('@joh');
 
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     act(() => {
       result.current.checkInputForTrigger(mockElement);
@@ -68,7 +68,7 @@ describe('useInlineActionTrigger', () => {
   });
 
   it('keeps trigger active when query contains whitespace', () => {
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     mockGetTextBeforeCursor.mockReturnValue('@john');
     act(() => {
@@ -87,7 +87,7 @@ describe('useInlineActionTrigger', () => {
   it('dismiss() deactivates the current trigger', () => {
     mockGetTextBeforeCursor.mockReturnValue('@john');
 
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     act(() => {
       result.current.checkInputForTrigger(mockElement);
@@ -101,7 +101,7 @@ describe('useInlineActionTrigger', () => {
   });
 
   it('dismissed trigger re-activates on next input', () => {
-    const { result } = renderHook(() => useInlineActionTrigger());
+    const { result } = renderHook(() => useCommandMenuTrigger());
 
     mockGetTextBeforeCursor.mockReturnValue('@john');
     act(() => {
@@ -125,7 +125,7 @@ describe('useInlineActionTrigger', () => {
   it('disabled option prevents trigger detection', () => {
     mockGetTextBeforeCursor.mockReturnValue('@john');
 
-    const { result } = renderHook(() => useInlineActionTrigger({ enabled: false }));
+    const { result } = renderHook(() => useCommandMenuTrigger({ enabled: false }));
 
     act(() => {
       result.current.checkInputForTrigger(mockElement);

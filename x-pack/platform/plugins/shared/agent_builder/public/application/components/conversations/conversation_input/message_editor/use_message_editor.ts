@@ -6,8 +6,8 @@
  */
 
 import { useRef, useMemo, useState, useCallback } from 'react';
-import type { TriggerMatchResult } from './inline_actions';
-import { useInlineActionTrigger } from './inline_actions';
+import type { TriggerMatchResult } from './command_menu';
+import { useCommandMenuTrigger } from './command_menu';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
@@ -18,7 +18,7 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
 }
 
-interface MessageEditorController {
+export interface MessageEditorController {
   focus: () => void;
   getContent: () => string;
   setContent: (text: string) => void;
@@ -50,7 +50,7 @@ export const useMessageEditor = (): {
     match: triggerMatch,
     dismiss: dismissActionMenu,
     checkInputForTrigger,
-  } = useInlineActionTrigger();
+  } = useCommandMenuTrigger();
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 

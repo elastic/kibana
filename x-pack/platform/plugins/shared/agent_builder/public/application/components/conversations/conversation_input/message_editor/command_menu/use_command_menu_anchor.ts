@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import type { TriggerMatchResult, AnchorPosition } from './types';
 import { getRectAtOffset } from './cursor_rect';
 
-interface UseInlineActionsMenuAnchorOptions {
+interface UseCommandMenuAnchorOptions {
   readonly triggerMatch: TriggerMatchResult;
   readonly editorRef: React.RefObject<HTMLDivElement>;
   readonly containerRef: React.RefObject<HTMLDivElement>;
@@ -20,11 +20,11 @@ interface UseInlineActionsMenuAnchorOptions {
  * offset. Retains the last known position when the trigger becomes inactive
  * so the popover can animate closed in place.
  */
-export const useInlineActionsMenuAnchor = ({
+export const useCommandMenuAnchor = ({
   triggerMatch,
   editorRef,
   containerRef,
-}: UseInlineActionsMenuAnchorOptions): AnchorPosition | null => {
+}: UseCommandMenuAnchorOptions): AnchorPosition | null => {
   const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
   const triggerStartOffset = triggerMatch.activeTrigger?.triggerStartOffset;
 

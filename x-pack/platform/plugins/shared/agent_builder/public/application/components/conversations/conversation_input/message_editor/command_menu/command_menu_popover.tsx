@@ -11,7 +11,7 @@ import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TriggerMatchResult, AnchorPosition } from './types';
 
-interface InlineActionPopoverProps {
+interface CommandMenuPopoverProps {
   triggerMatch: TriggerMatchResult;
   anchorPosition: AnchorPosition | null;
   'data-test-subj'?: string;
@@ -35,10 +35,10 @@ const anchorStyles = css`
   height: 0;
 `;
 
-export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
+export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   triggerMatch,
   anchorPosition,
-  'data-test-subj': dataTestSubj = 'inlineActionPopover',
+  'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
   const { activeTrigger, isActive } = triggerMatch;
   const isOpen = isActive && activeTrigger !== null && anchorPosition !== null;

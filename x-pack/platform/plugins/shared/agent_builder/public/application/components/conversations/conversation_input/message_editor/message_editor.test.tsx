@@ -8,15 +8,15 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
-import type { MessageEditorInstance } from './use_message_editor';
-import { TriggerId } from './inline_actions';
+import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
+import { TriggerId } from './command_menu';
 
 // TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
 jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: () => true,
 }));
 
-jest.mock('./inline_actions/cursor_rect', () => ({
+jest.mock('./command_menu/cursor_rect', () => ({
   getRectAtOffset: () => ({
     left: 100,
     top: 200,
@@ -32,20 +32,26 @@ jest.mock('./inline_actions/cursor_rect', () => ({
 
 const mockOnSubmit = jest.fn();
 
-const createMockMessageEditor = (): MessageEditorInstance => {
+const createMockMessageEditor = (): {
+  messageEditor: MessageEditorInstance;
+  controller: MessageEditorController;
+} => {
   const mockRef = { current: null } as React.RefObject<HTMLDivElement>;
   return {
-    _internal: {
+    messageEditor: {
       ref: mockRef,
       onChange: jest.fn(),
+      onFocus: jest.fn(),
       triggerMatch: { isActive: false, activeTrigger: null },
+      dismissActionMenu: jest.fn(),
     },
-    clear: jest.fn(),
-    focus: jest.fn(),
-    getContent: jest.fn(() => ''),
-    setContent: jest.fn(),
-    isEmpty: false,
-    dismissTrigger: jest.fn(),
+    controller: {
+      clear: jest.fn(),
+      focus: jest.fn(),
+      getContent: jest.fn(() => ''),
+      setContent: jest.fn(),
+      isEmpty: false,
+    },
   };
 };
 
@@ -55,7 +61,7 @@ describe('MessageEditor', () => {
   });
 
   it('renders correctly', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -68,7 +74,7 @@ describe('MessageEditor', () => {
   });
 
   it('renders with placeholder', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     const placeholder = 'Type a message...';
     render(
       <MessageEditor
@@ -84,7 +90,7 @@ describe('MessageEditor', () => {
   });
 
   it('renders as disabled', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -100,7 +106,7 @@ describe('MessageEditor', () => {
   });
 
   it('does not submit form during IME composition', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -133,7 +139,7 @@ describe('MessageEditor', () => {
   });
 
   it('allows line break with Shift+Enter', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -153,7 +159,7 @@ describe('MessageEditor', () => {
   });
 
   it('submits form with Enter key when not composing', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -173,7 +179,7 @@ describe('MessageEditor', () => {
   });
 
   it('calls dismissTrigger when Escape is pressed', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -185,12 +191,12 @@ describe('MessageEditor', () => {
     const editor = screen.getByTestId('messageEditor');
     fireEvent.keyDown(editor, { key: 'Escape' });
 
-    expect(messageEditor.dismissTrigger).toHaveBeenCalled();
+    expect(messageEditor.dismissActionMenu).toHaveBeenCalled();
     expect(mockOnSubmit).not.toHaveBeenCalled();
   });
 
   it('renders container wrapper around editor', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -205,7 +211,7 @@ describe('MessageEditor', () => {
   });
 
   it('has aria-haspopup="dialog" on the editor', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
         messageEditor={messageEditor}
@@ -218,7 +224,7 @@ describe('MessageEditor', () => {
   });
 
   it('renders popover content when trigger is active', () => {
-    const messageEditor = createMockMessageEditor();
+    const { messageEditor } = createMockMessageEditor();
 
     const { rerender } = render(
       <MessageEditor
@@ -228,10 +234,10 @@ describe('MessageEditor', () => {
       />
     );
 
-    messageEditor._internal.triggerMatch = {
+    messageEditor.triggerMatch = {
       isActive: true,
       activeTrigger: {
-        trigger: { id: TriggerId.Attachment, sequence: '@' },
+        trigger: { id: TriggerId.Attachment, sequence: '@', name: 'Attachment' },
         triggerStartOffset: 0,
         query: 'test',
       },
@@ -245,6 +251,6 @@ describe('MessageEditor', () => {
       />
     );
 
-    expect(screen.getByTestId('inlineActionPopover-content')).toBeInTheDocument();
+    expect(screen.getByTestId('commandMenuPopover-content')).toBeInTheDocument();
   });
 });

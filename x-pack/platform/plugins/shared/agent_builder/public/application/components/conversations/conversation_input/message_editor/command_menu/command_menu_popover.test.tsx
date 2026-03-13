@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { InlineActionPopover } from './inline_action_popover';
+import { CommandMenuPopover } from './command_menu_popover';
 import type { TriggerMatchResult } from './types';
 import { TriggerId } from './types';
 
@@ -19,20 +19,17 @@ const inactiveMatch: TriggerMatchResult = {
 const activeMatch: TriggerMatchResult = {
   isActive: true,
   activeTrigger: {
-    trigger: { id: TriggerId.Attachment, sequence: '@' },
+    trigger: { id: TriggerId.Attachment, sequence: '@', name: 'Attachment' },
     triggerStartOffset: 0,
     query: 'joh',
   },
 };
 
-const onClose = jest.fn();
-
-describe('InlineActionPopover', () => {
+describe('CommandMenuPopover', () => {
   it('renders closed when trigger is inactive', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={inactiveMatch}
-        onClose={onClose}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -43,9 +40,8 @@ describe('InlineActionPopover', () => {
 
   it('renders closed when anchorPosition is null', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={activeMatch}
-        onClose={onClose}
         anchorPosition={null}
         data-test-subj="testPopover"
       />
@@ -56,9 +52,8 @@ describe('InlineActionPopover', () => {
 
   it('renders open when trigger is active and anchorPosition is provided', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={activeMatch}
-        onClose={onClose}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -69,9 +64,8 @@ describe('InlineActionPopover', () => {
 
   it('renders screen reader announcement when trigger is active', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={activeMatch}
-        onClose={onClose}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -82,9 +76,8 @@ describe('InlineActionPopover', () => {
 
   it('does not render screen reader announcement when trigger is inactive', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={inactiveMatch}
-        onClose={onClose}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -95,9 +88,8 @@ describe('InlineActionPopover', () => {
 
   it('displays trigger id and query', () => {
     render(
-      <InlineActionPopover
+      <CommandMenuPopover
         triggerMatch={activeMatch}
-        onClose={onClose}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />

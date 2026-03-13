@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
-import { InlineActionsContainer } from './inline_actions';
+import { CommandMenuContainer } from './command_menu';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -79,7 +79,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   };
 
   return (
-    <InlineActionsContainer
+    <CommandMenuContainer
       triggerMatch={triggerMatch}
       editorRef={ref}
       data-test-subj={`${dataTestSubj}-container`}
@@ -112,6 +112,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           }
         }}
       />
-    </InlineActionsContainer>
+    </CommandMenuContainer>
   );
 };

@@ -8,8 +8,8 @@
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import type { TriggerMatchResult } from './types';
-import { InlineActionPopover } from './inline_action_popover';
-import { useInlineActionsMenuAnchor } from './use_inline_actions_menu_anchor';
+import { CommandMenuPopover } from './command_menu_popover';
+import { useCommandMenuAnchor } from './use_command_menu_anchor';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 
 const containerStyles = css`
@@ -18,21 +18,21 @@ const containerStyles = css`
   height: 100%;
 `;
 
-interface InlineActionsContainerProps {
+interface CommandMenuContainerProps {
   triggerMatch: TriggerMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
 
-export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
+export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
   triggerMatch,
   editorRef,
   children,
   'data-test-subj': dataTestSubj,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const anchorPosition = useInlineActionsMenuAnchor({
+  const anchorPosition = useCommandMenuAnchor({
     triggerMatch,
     editorRef,
     containerRef,
@@ -44,7 +44,7 @@ export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
       {isExperimentalFeaturesEnabled && (
-        <InlineActionPopover triggerMatch={triggerMatch} anchorPosition={anchorPosition} />
+        <CommandMenuPopover triggerMatch={triggerMatch} anchorPosition={anchorPosition} />
       )}
     </div>
   );
