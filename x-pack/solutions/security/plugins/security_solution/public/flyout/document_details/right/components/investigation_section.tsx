@@ -31,14 +31,8 @@ const KEY = 'investigation';
  * For generic events (event.kind is event), it shows only highlighted fields.
  */
 export const InvestigationSection = memo(() => {
-  const {
-    dataFormattedForFieldBrowser,
-    getFieldsData,
-    investigationFields,
-    isRulePreview,
-    scopeId,
-    searchHit,
-  } = useDocumentDetailsContext();
+  const { getFieldsData, investigationFields, isRulePreview, scopeId, searchHit } =
+    useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
@@ -77,7 +71,7 @@ export const InvestigationSection = memo(() => {
         </>
       )}
       <HighlightedFields
-        dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+        hit={hit}
         investigationFields={investigationFields}
         scopeId={scopeId}
         showCellActions={true}

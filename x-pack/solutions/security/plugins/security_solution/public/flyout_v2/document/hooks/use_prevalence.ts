@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
 import { useHighlightedFields } from './use_highlighted_fields';
-import { convertHighlightedFieldsToPrevalenceFilters } from '../utils/highlighted_fields_helpers';
-import type { AggregationValue } from './use_fetch_prevalence';
+import { convertHighlightedFieldsToPrevalenceFilters } from '../../../flyout/document_details/shared/utils/highlighted_fields_helpers';
+import type { AggregationValue } from '../../../flyout/document_details/shared/hooks/use_fetch_prevalence';
 import {
   EVENT_KIND_AGG_KEY,
   FIELD_NAMES_AGG_KEY,
@@ -18,8 +18,8 @@ import {
   useFetchPrevalence,
   USER_NAME_AGG_KEY,
   USERS_AGG_KEY,
-} from './use_fetch_prevalence';
-import { EventKind } from '../constants/event_kinds';
+} from '../../../flyout/document_details/shared/hooks/use_fetch_prevalence';
+import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 
 export interface PrevalenceData {
   field: string;
@@ -35,9 +35,9 @@ export interface UsePrevalenceParams {
    */
   interval: { from: string; to: string };
   /**
-   * An array of field objects with category and value
+   * Document record to extract prevalence data from
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  hit: DataTableRecord;
   /**
    * User defined fields to highlight (defined on the rule)
    */
@@ -65,11 +65,11 @@ export interface UsePrevalenceResult {
  */
 export const usePrevalence = ({
   interval,
-  dataFormattedForFieldBrowser,
+  hit,
   investigationFields,
 }: UsePrevalenceParams): UsePrevalenceResult => {
   const highlightedFields = useHighlightedFields({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
   });
   const highlightedFieldsFilters = useMemo(
