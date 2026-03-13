@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiCard,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useQueryIndices } from '../../hooks/use_query_indices';
@@ -28,6 +29,22 @@ import { CreateIndexButton } from './create_index_button';
 import { UploadFileButton } from '../upload_file_button';
 import { PlaygroundBodySection } from '../playground_body_section';
 
+const EmptyPromptContentStyle = css({
+  maxInlineSize: '36em',
+  margin: 'auto',
+});
+const EmptyPromptStyle = css({
+  '.euiEmptyPrompt__content': {
+    maxInlineSize: '56em',
+    inlineSize: '100%',
+  },
+
+  '.euiEmptyPrompt__footer': {
+    maxInlineSize: '36em',
+    margin: 'auto',
+  },
+});
+
 export const ChatSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
   const { indices, isLoading: isIndicesLoading } = useQueryIndices();
@@ -39,6 +56,7 @@ export const ChatSetupPage: React.FC = () => {
   return (
     <PlaygroundBodySection>
       <EuiEmptyPrompt
+        css={EmptyPromptStyle}
         iconType="discuss"
         data-test-subj="setupPage"
         title={
@@ -50,7 +68,7 @@ export const ChatSetupPage: React.FC = () => {
           </h2>
         }
         body={
-          <>
+          <div css={EmptyPromptContentStyle}>
             <p>
               <FormattedMessage
                 id="xpack.searchPlayground.setupPage.description"
@@ -63,10 +81,10 @@ export const ChatSetupPage: React.FC = () => {
                 defaultMessage="Connect to your LLM provider and select your data sources to get started."
               />
             </p>
-          </>
+          </div>
         }
         actions={
-          <EuiFlexGroup justifyContent="center">
+          <EuiFlexGroup justifyContent="center" wrap>
             {isIndicesLoading ? (
               <EuiLoadingSpinner />
             ) : (

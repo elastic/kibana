@@ -124,6 +124,7 @@ describe('applyConfigOverrides', () => {
       plugins: { paths: [] },
       xpack: {
         cloud: {
+          id: 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw',
           organization_id: 'org1234567890',
           projects_url: '',
           serverless: { project_id: 'abcdef12345678901234567890123456' },

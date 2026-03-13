@@ -142,7 +142,7 @@ export class MonacoEditorOutputActionsProvider {
     endLineNumber: number
   ): Promise<AdjustedParsedRequest[]> {
     const parser = createOutputParser();
-    const parsedRequests = await parser(model.getValue(), undefined).responses;
+    const parsedRequests = parser(model.getValue())?.responses ?? [];
 
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {

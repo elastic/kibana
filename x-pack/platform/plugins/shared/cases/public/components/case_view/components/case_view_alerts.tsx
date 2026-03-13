@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as DefaultAlertsTable } from '@kbn/response-ops-alerts-table';
@@ -35,7 +36,7 @@ export const CaseViewAlerts = ({
     services as SetRequired<typeof services, 'licensing'>;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
-    () => ({
+    (): NonNullable<QueryDslQueryContainer> => ({
       ids: {
         values: alertIds,
       },
@@ -53,7 +54,7 @@ export const CaseViewAlerts = ({
     [onAlertsTableLoaded]
   );
 
-  if (alertIdsQuery.ids.values.length === 0) {
+  if (alertIdsQuery.ids?.values?.length === 0) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>

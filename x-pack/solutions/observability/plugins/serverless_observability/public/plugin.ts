@@ -62,8 +62,7 @@ export class ServerlessObservabilityPlugin
         });
       })
     );
-    serverless.setProjectHome('/app/observability/landing');
-    serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
+    serverless.initNavigation('oblt', navigationTree$);
 
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
     const roleManagementEnabled = security.authz.isRoleManagementEnabled();

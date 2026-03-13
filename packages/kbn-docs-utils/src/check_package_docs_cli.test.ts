@@ -44,6 +44,7 @@ const createBaseStats = (pluginId: string): AllPluginStats => ({
     isAnyType: [],
     noReferences: [],
     paramDocMismatches: [],
+    missingReturns: [],
     apiCount: 0,
     missingExports: 0,
     deprecatedAPIsReferencedCount: 0,
@@ -57,6 +58,7 @@ const createBaseStats = (pluginId: string): AllPluginStats => ({
     eslintDisableFileCount: 0,
     eslintDisableLineCount: 0,
     enzymeImportCount: 0,
+    unnamedExports: [],
   },
 });
 

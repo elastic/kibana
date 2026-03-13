@@ -13,7 +13,9 @@ import {
   createRuleAssetSavedObjectOfType,
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
+  installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
+import { createMlRuleThroughAlertingEndpoint } from '../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -73,6 +75,45 @@ export default ({ getService }: FtrProviderContext): void => {
             rules: [{ rule_id: mlRuleFields.rule_id }],
           },
         ],
+      });
+    });
+
+    describe('legacy (PUT /api/detection_engine/rules/prepackaged)', () => {
+      it('ML rules are silently excluded from installation', async () => {
+        const mlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning');
+        const nonMlRuleAsset = createRuleAssetSavedObjectOfType('query');
+        await createPrebuiltRuleAssetSavedObjects(es, [mlRuleAsset, nonMlRuleAsset]);
+
+        const response = await installPrebuiltRulesAndTimelines(es, supertest);
+
+        expect(response.rules_installed).toBe(1);
+        expect(response.rules_updated).toBe(0);
+      });
+
+      it('ML rules are silently excluded from updates', async () => {
+        const queryRuleAsset = createRuleAssetSavedObjectOfType('query', {
+          rule_id: 'query-rule',
+          version: 1,
+        });
+        await createPrebuiltRuleAssetSavedObjects(es, [queryRuleAsset]);
+        await installPrebuiltRulesAndTimelines(es, supertest);
+
+        await createMlRuleThroughAlertingEndpoint(supertest, { ruleId: 'ml-rule', version: 1 });
+
+        const targetQueryRuleAsset = createRuleAssetSavedObjectOfType('query', {
+          rule_id: 'query-rule',
+          version: 2,
+        });
+        const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
+          rule_id: 'ml-rule',
+          version: 2,
+        });
+        await createPrebuiltRuleAssetSavedObjects(es, [targetQueryRuleAsset, targetMlRuleAsset]);
+
+        const response = await installPrebuiltRulesAndTimelines(es, supertest);
+
+        expect(response.rules_installed).toBe(0);
+        expect(response.rules_updated).toBe(1);
       });
     });
   });

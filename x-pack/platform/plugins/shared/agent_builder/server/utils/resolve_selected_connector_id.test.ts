@@ -135,6 +135,31 @@ describe('resolveSelectedConnectorId', () => {
     expect(inference.getConnectorList).not.toHaveBeenCalled();
   });
 
+  it('prefers first recommended connector over inference when falling back to connector list', async () => {
+    const { savedObjects, uiSettings, request } = setupCoreMocks({
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'NO_DEFAULT_CONNECTOR',
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: false,
+    });
+    const inference = inferenceMock.createStartContract();
+    (inference.getDefaultConnector as jest.Mock).mockRejectedValue(new Error('no default'));
+    (inference.getConnectorList as jest.Mock).mockResolvedValue([
+      { connectorId: 'inference-id', type: InferenceConnectorType.Inference } as InferenceConnector,
+      {
+        connectorId: 'Google-Gemini-2-5-Pro',
+        type: InferenceConnectorType.Gemini,
+      } as InferenceConnector,
+    ]);
+
+    const result = await resolveSelectedConnectorId({
+      uiSettings,
+      savedObjects,
+      request,
+      inference,
+    });
+
+    expect(result).toBe('Google-Gemini-2-5-Pro');
+  });
+
   it('prefers Anthropic-Claude-Sonnet-4-5 when available in connector list', async () => {
     const { savedObjects, uiSettings, request } = setupCoreMocks({
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: 'NO_DEFAULT_CONNECTOR',

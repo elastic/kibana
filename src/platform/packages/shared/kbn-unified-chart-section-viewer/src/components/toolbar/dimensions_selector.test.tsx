@@ -26,6 +26,7 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
       options,
       onChange,
       buttonLabel,
+      buttonTooltipContent,
       popoverContentBelowSearch,
       'data-test-subj': dataTestSubj,
       singleSelection,
@@ -33,12 +34,21 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
       options: any[];
       onChange?: (option: any) => void;
       buttonLabel: React.ReactNode;
+      buttonTooltipContent?: React.ReactNode;
       popoverContentBelowSearch?: React.ReactNode;
       'data-test-subj'?: string;
       singleSelection?: boolean;
     }) => (
       <div data-test-subj={dataTestSubj}>
-        <div data-test-subj={`${dataTestSubj}Button`}>{buttonLabel}</div>
+        <div
+          data-test-subj={`${dataTestSubj}Button`}
+          data-tooltip-content={buttonTooltipContent ? 'true' : 'false'}
+        >
+          {buttonLabel}
+          {buttonTooltipContent && (
+            <div data-test-subj={`${dataTestSubj}ButtonTooltip`}>{buttonTooltipContent}</div>
+          )}
+        </div>
         <div data-test-subj={`${dataTestSubj}Popover`}>
           {popoverContentBelowSearch}
           {options.map((option) => (
@@ -83,7 +93,7 @@ jest.mock('../../common/constants', () => {
   const actual = jest.requireActual('../../common/constants');
   return {
     ...actual,
-    MAX_DIMENSIONS_SELECTIONS: 10, // Override for tests to allow multiple selections
+    MAX_DIMENSIONS_SELECTIONS: 5, // Override for tests to allow multiple selections
   };
 });
 
@@ -173,8 +183,17 @@ describe('DimensionsSelector', () => {
       expect(button).toHaveTextContent('Dimensions');
       expect(button).toHaveTextContent(String(MAX_DIMENSIONS_SELECTIONS));
 
-      const tooltipAnchor = button.querySelector('.euiToolTipAnchor');
-      expect(tooltipAnchor).toBeInTheDocument();
+      expect(button).toHaveAttribute('data-tooltip-content', 'true');
+
+      const tooltip = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}ButtonTooltip`
+      );
+      expect(tooltip).toBeInTheDocument();
+
+      const tooltipText = tooltip.textContent || '';
+      expect(tooltipText).toContain('Maximum');
+      expect(tooltipText).toContain(String(MAX_DIMENSIONS_SELECTIONS));
+      expect(tooltipText).toContain('dimensions selected');
     });
   });
 
@@ -225,31 +244,6 @@ describe('DimensionsSelector', () => {
       const clearButton = screen.getByText('Clear selection');
       fireEvent.click(clearButton);
       expect(onChange).toHaveBeenCalledWith([]);
-    });
-  });
-
-  describe('Option sorting', () => {
-    it('sorts options correctly using helper functions', () => {
-      renderWithIntl(
-        <DimensionsSelector
-          {...defaultProps}
-          selectedDimensions={[mockDimensions[2], mockDimensions[0]]}
-        />
-      );
-      const options = screen.getAllByTestId(
-        new RegExp(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-`)
-      );
-
-      const firstUnselectedIndex = options.findIndex(
-        (opt) => opt.getAttribute('data-checked') !== 'on'
-      );
-      const lastSelectedIndex = options.findLastIndex(
-        (opt) => opt.getAttribute('data-checked') === 'on'
-      );
-
-      if (firstUnselectedIndex >= 0 && lastSelectedIndex >= 0) {
-        expect(lastSelectedIndex).toBeLessThan(firstUnselectedIndex);
-      }
     });
   });
 

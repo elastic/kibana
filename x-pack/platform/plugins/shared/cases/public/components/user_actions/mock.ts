@@ -13,11 +13,11 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UserActionBuilderArgs } from './types';
+import type { CommentRenderingContextValue } from './comment/comment_rendering_context';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const userAction = getUserAction('title', UserActionActions.update);
-  const commentRefs = { current: {} };
 
   const alertData = {
     'alert-id-1': {
@@ -49,10 +49,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
   const getRuleDetailsHref = jest.fn().mockReturnValue('https://example.com');
   const onRuleDetailsClick = jest.fn();
   const onShowAlertDetails = jest.fn();
-  const handleManageMarkdownEditId = jest.fn();
-  const handleSaveComment = jest.fn();
   const handleDeleteComment = jest.fn();
-  const handleManageQuote = jest.fn();
   const handleOutlineComment = jest.fn();
   const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
@@ -68,7 +65,6 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     attachments: basicCase.comments,
     index: 0,
     alertData,
-    commentRefs,
     manageMarkdownEditIds: [],
     selectedOutlineCommentId: '',
     loadingCommentIds: [],
@@ -77,10 +73,31 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     getRuleDetailsHref,
     onRuleDetailsClick,
     onShowAlertDetails,
-    handleManageMarkdownEditId,
-    handleSaveComment,
     handleDeleteComment,
-    handleManageQuote,
     handleOutlineComment,
   };
 };
+
+/**
+ * Returns a full CommentRenderingContextValue for tests. Override with partial as needed.
+ */
+export const getMockCommentRenderingContext = (
+  overrides: Partial<CommentRenderingContextValue> = {}
+): CommentRenderingContextValue => ({
+  appId: '',
+  caseData: basicCase,
+  userProfiles: userProfilesMap,
+  commentRefs: { current: {} },
+  manageMarkdownEditIds: [],
+  selectedOutlineCommentId: '',
+  loadingCommentIds: [],
+  euiTheme: {
+    border: { thin: '1px solid #d3dae6' },
+    size: { s: '8px' },
+  } as CommentRenderingContextValue['euiTheme'],
+  handleManageMarkdownEditId: jest.fn(),
+  handleSaveComment: jest.fn(),
+  handleManageQuote: jest.fn(),
+  handleDeleteComment: jest.fn(),
+  ...overrides,
+});

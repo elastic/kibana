@@ -42,10 +42,37 @@ export async function createConnectorFixture({
   log: ToolingLog;
   use: (connector: AvailableConnectorWithId) => Promise<void>;
 }) {
+  interface ConnectorGetResponse {
+    is_preconfigured?: boolean;
+  }
+
+  async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
+    try {
+      const res = (await fetch({
+        path: `/api/actions/connector/${encodeURIComponent(connectorId)}`,
+        method: 'GET',
+      })) as ConnectorGetResponse;
+
+      return res?.is_preconfigured === true;
+    } catch (error) {
+      const status = isAxiosError(error) ? error.status : (error as any)?.status;
+      if (status === 404) return false;
+      throw error;
+    }
+  }
+
   if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {
     log.info(
       `Skipping connector setup/teardown for: ${predefinedConnector.id} (KBN_EVALS_SKIP_CONNECTOR_SETUP is set)`
     );
+    await use(predefinedConnector);
+    return;
+  }
+
+  // If this connector is already preconfigured in the Kibana instance (e.g. EIS-managed connectors),
+  // we should reuse it rather than creating/deleting a saved object connector.
+  if (await isPreconfiguredConnector(predefinedConnector.id)) {
+    log.info(`Reusing preconfigured connector: ${predefinedConnector.id}`);
     await use(predefinedConnector);
     return;
   }

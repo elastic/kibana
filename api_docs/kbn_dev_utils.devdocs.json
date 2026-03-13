@@ -21,6 +21,138 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.countCommitsBetweenRefs",
+        "type": "Function",
+        "tags": [],
+        "label": "countCommitsBetweenRefs",
+        "description": [
+          "Counts commits reachable from `head` that are not reachable from `base`."
+        ],
+        "signature": [
+          "({ base, head, }: { base: string; head: string; }) => Promise<number>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/count_commits_between_refs.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.countCommitsBetweenRefs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  base,\n  head,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/count_commits_between_refs.ts",
+            "lineNumber": 18,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.countCommitsBetweenRefs.$1.base",
+                "type": "string",
+                "tags": [],
+                "label": "base",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/count_commits_between_refs.ts",
+                "lineNumber": 19,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.countCommitsBetweenRefs.$1.head",
+                "type": "string",
+                "tags": [],
+                "label": "head",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/count_commits_between_refs.ts",
+                "lineNumber": 20,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.createIndexSnapshotCommit",
+        "type": "Function",
+        "tags": [],
+        "label": "createIndexSnapshotCommit",
+        "description": [
+          "\nCreates an ephemeral commit from the current Git index without updating any refs.\nUsed by staged-scope affected checks where tooling needs a real `head` SHA for\nindex contents (for example Moon comparisons with `base=HEAD` and `head=<index snapshot>`)."
+        ],
+        "signature": [
+          "({ parentRef, message, }?: { parentRef?: string | undefined; message?: string | undefined; }) => Promise<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.createIndexSnapshotCommit.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  parentRef = 'HEAD',\n  message = 'Temporary commit for staged-scope tooling\\n',\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
+            "lineNumber": 22,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.createIndexSnapshotCommit.$1.parentRef",
+                "type": "string",
+                "tags": [],
+                "label": "parentRef",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
+                "lineNumber": 23,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.createIndexSnapshotCommit.$1.message",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/create_index_snapshot_commit.ts",
+                "lineNumber": 24,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.diffStrings",
         "type": "Function",
         "tags": [],
@@ -116,6 +248,46 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.getRemoteDefaultBranchRefs",
+        "type": "Function",
+        "tags": [],
+        "label": "getRemoteDefaultBranchRefs",
+        "description": [],
+        "signature": [
+          "() => Promise<string[]>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/get_remote_default_branch_refs.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.hasStagedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "hasStagedChanges",
+        "description": [
+          "Returns true when the Git index contains staged changes relative to HEAD."
+        ],
+        "signature": [
+          "() => Promise<boolean>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/has_staged_changes.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
         "id": "def-common.isAxiosRequestError",
         "type": "Function",
         "tags": [],
@@ -198,6 +370,83 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.resolveNearestMergeBase",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveNearestMergeBase",
+        "description": [
+          "\nResolves the closest merge-base candidate between `headRef` and the provided base refs.\n\"Closest\" is the candidate with the smallest ahead count from the merge base to head."
+        ],
+        "signature": [
+          "({ baseRefs, headRef, }: { baseRefs: string[]; headRef?: string | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/dev-utils",
+            "scope": "common",
+            "docId": "kibKbnDevUtilsPluginApi",
+            "section": "def-common.NearestMergeBaseCandidate",
+            "text": "NearestMergeBaseCandidate"
+          },
+          " | undefined>"
+        ],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.resolveNearestMergeBase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseRefs,\n  headRef = 'HEAD',\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+            "lineNumber": 27,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.resolveNearestMergeBase.$1.baseRefs",
+                "type": "Array",
+                "tags": [],
+                "label": "baseRefs",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dev-utils",
+                "id": "def-common.resolveNearestMergeBase.$1.headRef",
+                "type": "string",
+                "tags": [],
+                "label": "headRef",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -396,6 +645,61 @@
               "<T, any, {}>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dev-utils",
+        "id": "def-common.NearestMergeBaseCandidate",
+        "type": "Interface",
+        "tags": [],
+        "label": "NearestMergeBaseCandidate",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.NearestMergeBaseCandidate.baseRef",
+            "type": "string",
+            "tags": [],
+            "label": "baseRef",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.NearestMergeBaseCandidate.mergeBase",
+            "type": "string",
+            "tags": [],
+            "label": "mergeBase",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dev-utils",
+            "id": "def-common.NearestMergeBaseCandidate.aheadCount",
+            "type": "number",
+            "tags": [],
+            "label": "aheadCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/git/resolve_nearest_merge_base.ts",
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,

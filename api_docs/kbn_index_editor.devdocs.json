@@ -22,7 +22,7 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
-        "lineNumber": 17,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
-            "lineNumber": 17,
+            "lineNumber": 13,
             "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
@@ -375,17 +375,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -457,7 +455,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
@@ -594,23 +592,6 @@
           "\"ACTION_EDIT_LOOKUP_INDEX\""
         ],
         "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
-        "lineNumber": 20,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/index-editor",
-        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
-        "type": "string",
-        "tags": [],
-        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
-        "description": [],
-        "signature": [
-          "\"EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID\""
-        ],
-        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
         "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
@@ -618,31 +599,7 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/index-editor",
-        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
-        "type": "Object",
-        "tags": [],
-        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/ui-actions-browser",
-            "scope": "common",
-            "docId": "kibKbnUiActionsBrowserPluginApi",
-            "section": "def-common.Trigger",
-            "text": "Trigger"
-          }
-        ],
-        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "server": {
     "classes": [],

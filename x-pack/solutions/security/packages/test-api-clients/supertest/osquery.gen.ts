@@ -54,6 +54,13 @@ import type {
   OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type {
+  OsqueryGetScheduledActionResultsRequestQueryInput,
+  OsqueryGetScheduledActionResultsRequestParamsInput,
+  OsqueryGetScheduledQueryResultsRequestQueryInput,
+  OsqueryGetScheduledQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
+import type { OsqueryGetUnifiedHistoryRequestQueryInput } from '@kbn/osquery-plugin/common/api/unified_history/unified_history.gen';
+import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
 } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
@@ -297,6 +304,64 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
+
+      */
+  osqueryGetScheduledActionResults(
+    props: OsqueryGetScheduledActionResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get paginated query result rows (the actual osquery output data) for a specific scheduled query execution.
+
+      */
+  osqueryGetScheduledQueryResults(
+    props: OsqueryGetScheduledQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+
+      */
+  osqueryGetUnifiedHistory(props: OsqueryGetUnifiedHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/osquery/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Update a query pack using the pack ID.
 > info
 > You cannot update a prebuilt pack.
@@ -428,6 +493,17 @@ export interface OsqueryGetPacksDetailsProps {
 }
 export interface OsqueryGetSavedQueryDetailsProps {
   params: OsqueryGetSavedQueryDetailsRequestParamsInput;
+}
+export interface OsqueryGetScheduledActionResultsProps {
+  query: OsqueryGetScheduledActionResultsRequestQueryInput;
+  params: OsqueryGetScheduledActionResultsRequestParamsInput;
+}
+export interface OsqueryGetScheduledQueryResultsProps {
+  query: OsqueryGetScheduledQueryResultsRequestQueryInput;
+  params: OsqueryGetScheduledQueryResultsRequestParamsInput;
+}
+export interface OsqueryGetUnifiedHistoryProps {
+  query: OsqueryGetUnifiedHistoryRequestQueryInput;
 }
 export interface OsqueryUpdatePacksProps {
   params: OsqueryUpdatePacksRequestParamsInput;

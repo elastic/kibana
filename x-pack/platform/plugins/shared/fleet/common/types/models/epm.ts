@@ -244,7 +244,9 @@ export interface ConfigurationLink {
 export interface DeprecationInfo {
   description: string;
   since?: string;
-  replaced_by?: Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>;
+  replaced_by?: Partial<
+    Record<'package' | 'policyTemplate' | 'input' | 'dataStream' | 'variable', string>
+  >;
 }
 
 export enum RegistryPolicyTemplateKeys {
@@ -312,6 +314,7 @@ export enum RegistryInputKeys {
   vars = 'vars',
   deployment_modes = 'deployment_modes',
   hide_in_var_group_options = 'hide_in_var_group_options',
+  deprecated = 'deprecated',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -327,6 +330,7 @@ export interface RegistryInput {
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
   [RegistryInputKeys.deployment_modes]?: string[];
   [RegistryInputKeys.hide_in_var_group_options]?: Record<string, string[]>;
+  [RegistryInputKeys.deprecated]?: DeprecationInfo;
 }
 
 export enum RegistryStreamKeys {
@@ -339,6 +343,7 @@ export enum RegistryStreamKeys {
   template_path = 'template_path',
   ingestion_method = 'ingestion_method',
   var_groups = 'var_groups',
+  deprecated = 'deprecated',
 }
 
 export interface RegistryStream {
@@ -351,6 +356,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.template_path]: string;
   [RegistryStreamKeys.ingestion_method]?: string;
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryStreamKeys.deprecated]?: DeprecationInfo;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -536,6 +542,7 @@ export enum RegistryVarsEntryKeys {
   min_duration = 'min_duration',
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
+  deprecated = 'deprecated',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -562,6 +569,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.min_duration]?: string;
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
+  [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -591,7 +599,6 @@ export type InstallationInfo = {
   | 'es_index_patterns'
   | 'install_version'
   | 'install_started_at'
-  | 'keep_policies_up_to_date'
   | 'internal'
   | 'removable'
 >;
@@ -736,6 +743,13 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
+  pending_upgrade_review?: {
+    target_version: string;
+    reason: 'deprecated';
+    created_at: string;
+    deprecation_details?: DeprecationInfo;
+    action?: 'accepted' | 'declined' | 'pending';
+  };
 }
 
 export interface PackageUsageStats {
