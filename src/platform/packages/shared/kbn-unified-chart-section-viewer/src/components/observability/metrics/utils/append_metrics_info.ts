@@ -8,7 +8,7 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { appendToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { appendToESQLQuery, hasTransformationalCommand, sanitazeESQLInput } from '@kbn/esql-utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
@@ -40,7 +40,8 @@ export function buildMetricsInfoQuery(esql?: string, dimensions?: string[]): str
   }
 
   const filteringDimensions =
-    dimensions?.map((dimension) => `${dimension} is not null`).join(' AND ') ?? [];
+    dimensions?.map((dimension) => `${sanitazeESQLInput(dimension)} IS NOT NULL`).join(' AND ') ??
+    [];
 
   const esqlQuery = appendToESQLQuery(
     trimmed,

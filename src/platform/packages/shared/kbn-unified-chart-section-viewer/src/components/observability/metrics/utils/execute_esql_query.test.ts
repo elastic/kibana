@@ -13,6 +13,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { executeEsqlQuery } from './execute_esql_query';
+import { dataViewWithAtTimefieldMock } from '@kbn/unified-histogram/__mocks__/data_view_with_timefield';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: jest.fn(),
@@ -34,7 +35,17 @@ const mockGetTime = getTime as jest.MockedFunction<typeof getTime>;
 describe('executeEsqlQuery', () => {
   const mockSearch = jest.fn();
   const mockUiSettings = {} as Parameters<typeof executeEsqlQuery>[0]['uiSettings'];
-  const mockResponse = { columns: [], values: [] };
+  const mockResponse = {
+    columns: [
+      { name: 'metric_name', type: 'keyword' },
+      { name: 'data_stream', type: 'keyword' },
+      { name: 'unit', type: 'keyword' },
+      { name: 'metric_type', type: 'keyword' },
+      { name: 'field_type', type: 'keyword' },
+      { name: 'dimension_fields', type: 'keyword' },
+    ],
+    values: [['metric.name', 'metrics-stream-1', 'ms', 'counter', 'gauge', 'host']],
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -54,7 +65,7 @@ describe('executeEsqlQuery', () => {
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       signal,
-      dataView: dataViewWithTimefieldMock,
+      dataView: dataViewWithAtTimefieldMock,
       timeRange,
       filters: [],
       variables,
@@ -77,11 +88,20 @@ describe('executeEsqlQuery', () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithTimefieldMock,
+      dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,
     });
 
-    expect(result).toBe(mockResponse);
+    expect(result).toStrictEqual([
+      {
+        metric_name: 'metric.name',
+        data_stream: 'metrics-stream-1',
+        unit: 'ms',
+        metric_type: 'counter',
+        field_type: 'gauge',
+        dimension_fields: 'host',
+      },
+    ]);
   });
 
   it('builds filter from time and filters when timeRange and dataView have timeFieldName', async () => {
@@ -94,16 +114,16 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithTimefieldMock,
+      dataView: dataViewWithAtTimefieldMock,
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
       uiSettings: mockUiSettings,
     });
 
     expect(mockGetTime).toHaveBeenCalledWith(
-      dataViewWithTimefieldMock,
+      dataViewWithAtTimefieldMock,
       { from: 'now-1h', to: 'now' },
-      { fieldName: dataViewWithTimefieldMock.timeFieldName }
+      { fieldName: dataViewWithAtTimefieldMock.timeFieldName }
     );
     expect(mockBuildEsQuery).toHaveBeenCalled();
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -119,7 +139,7 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
-      dataView: dataViewWithTimefieldMock,
+      dataView: dataViewWithAtTimefieldMock,
       filters: [],
       uiSettings: mockUiSettings,
     });
