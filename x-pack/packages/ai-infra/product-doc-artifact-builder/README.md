@@ -12,11 +12,22 @@ node scripts/kibana --dev --no-base-path
 ```
 node scripts/build_product_doc_artifacts.js --stack-version {version} --product-name {product}
 ```
-
 Example:
 
 ```
 node scripts/build_product_doc_artifacts.js --product-name=security --stack-version=8.18  --inference-id=.multilingual-e5-small-elasticsearch
+```
+
+To generate artifacts using **Jina embeddings v5 nano**, first we need to connect Elasticsearch to EIS. See x-pack/platform/packages/shared/kbn-inference-cli/README.md for full instructions
+
+(Connect to Elastic's VPN)
+```
+vault login -method oidc
+node scripts/eis.js
+```
+
+```bash
+node scripts/build_product_doc_artifacts.js --product-name=kibana --stack-version=9.4 --inference-id=.jina-embeddings-v5-text-nano
 ```
 
 ### parameters
@@ -83,8 +94,17 @@ Example:
 node scripts/build_openapi_artifacts.js --stack-version=9.4 --embedding-cluster-url=http://localhost:9200 --embedding-cluster-username=elastic --embedding-cluster-password=changeme
 ```
 
-For multilingual, add
+For multilingual, add:
+
+```bash
 --inference-id=.multilingual-e5-small-elasticsearch
+```
+
+To use **Jina embeddings v5 nano** for OpenAPI artifacts, configure a `semantic_text` field in your embedding cluster as shown above and pass:
+
+```bash
+--inference-id=.jina-embeddings-v5-text-nano
+```
 
 ### Parameters
 
