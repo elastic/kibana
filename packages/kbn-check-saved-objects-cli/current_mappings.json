@@ -304,20 +304,6 @@
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
-      "auth": {
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
-      },
       "createdAt": {
         "type": "date"
       },
@@ -333,17 +319,6 @@
         },
         "type": "text"
       },
-      "destinations": {
-        "properties": {
-          "id": {
-            "type": "keyword"
-          },
-          "type": {
-            "type": "keyword"
-          }
-        },
-        "type": "object"
-      },
       "name": {
         "fields": {
           "keyword": {
@@ -357,6 +332,34 @@
         "type": "date"
       },
       "updatedBy": {
+        "type": "keyword"
+      },
+      "destinations": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "auth": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        }
+      },
+      "rule_labels": {
         "type": "keyword"
       }
     }
@@ -399,9 +402,6 @@
       },
       "metadata": {
         "properties": {
-          "description": {
-            "type": "text"
-          },
           "labels": {
             "type": "keyword"
           },
