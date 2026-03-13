@@ -1097,6 +1097,7 @@
     "@kbn/slo-schema": "link:x-pack/platform/packages/shared/kbn-slo-schema",
     "@kbn/slo-shared-plugin": "link:x-pack/platform/plugins/shared/slo_shared",
     "@kbn/snapshot-restore-plugin": "link:x-pack/platform/plugins/private/snapshot_restore",
+    "@kbn/solution-context": "link:src/platform/packages/shared/kbn-solution-context",
     "@kbn/sort-predicates": "link:src/platform/packages/shared/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/platform/plugins/shared/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin",
