@@ -92,6 +92,7 @@
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
     "**/langchain": "0.3.35",
+    "**/qs": "6.15.0",
     "**/remark-parse/trim": "1.0.1",
     "**/sharp": "0.34.4",
     "**/typescript": "5.9.3",
