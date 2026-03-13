@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-v2-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/rna-project-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-v2-plugin'
+  title: '@kbn/alerting-v2-plugin'
   description: Moon project for @kbn/alerting-v2-plugin
   channel: ''
   owner: '@elastic/rna-project-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/alerting_v2
+  sourceRoot: x-pack/platform/plugins/shared/alerting_v2
 dependsOn:
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
@@ -69,7 +68,6 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/core-http-server-utils'
-  - '@kbn/es-query'
   - '@kbn/eval-kql'
   - '@kbn/react-query'
 tags:
@@ -86,14 +84,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
