@@ -108,17 +108,6 @@ const workflowExecutionFailedErrorSchema = z
           }
         )
       ),
-    stackTrace: z
-      .string()
-      .optional()
-      .describe(
-        i18n.translate(
-          'workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stackTrace',
-          {
-            defaultMessage: 'Optional stack trace.',
-          }
-        )
-      ),
   })
   .strict();
 
