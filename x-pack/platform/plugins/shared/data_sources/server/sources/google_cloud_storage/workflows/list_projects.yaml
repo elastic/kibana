@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.google_cloud_storage.list_projects'
-description: List Google Cloud projects accessible to the configured credentials. Use this to discover project IDs needed by list_buckets.
+description: "List Google Cloud projects accessible to the configured credentials. This is the starting point for exploring Google Cloud Storage — use the returned project IDs with list_buckets."
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
