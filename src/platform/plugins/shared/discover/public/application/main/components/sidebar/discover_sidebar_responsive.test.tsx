@@ -8,7 +8,7 @@
  */
 
 import { render, screen, within, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import React from 'react';
@@ -251,7 +251,10 @@ async function renderComponent(
     })
   );
 
-  const user = userEvent.setup();
+  const user = userEvent.setup({
+    pointerEventsCheck: PointerEventsCheckLevel.Never,
+    skipHover: true,
+  });
   const result = render(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSidebarResponsive {...props} />
@@ -750,8 +753,7 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225127
-  describe.skip('search bar customization', () => {
+  describe('search bar customization', () => {
     it(
       'should not render CustomDataViewPicker',
       async () => {
