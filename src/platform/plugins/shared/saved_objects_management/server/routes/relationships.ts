@@ -13,6 +13,7 @@ import { chain } from 'lodash';
 import { findRelationships } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
 import type { v1 } from '../../common';
+import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
 
 export const registerRelationshipsRoute = (
   router: IRouter,
@@ -36,7 +37,7 @@ export const registerRelationshipsRoute = (
           size: schema.number({ defaultValue: 10000 }),
           savedObjectTypes: schema.oneOf([
             schema.string(),
-            schema.arrayOf(schema.string(), { maxSize: 100 }),
+            schema.arrayOf(schema.string(), { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
           ]),
         }),
       },

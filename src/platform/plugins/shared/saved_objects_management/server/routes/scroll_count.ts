@@ -12,6 +12,7 @@ import type { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/c
 import { chain } from 'lodash';
 import type { v1 } from '../../common';
 import { getSavedObjectCounts } from '../lib';
+import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
@@ -25,7 +26,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       },
       validate: {
         body: schema.object({
-          typesToInclude: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          typesToInclude: schema.arrayOf(schema.string(), { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
           searchString: schema.maybe(schema.string()),
           references: schema.maybe(
             schema.arrayOf(
@@ -33,7 +34,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
                 type: schema.string(),
                 id: schema.string(),
               }),
-              { maxSize: 100 }
+              { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }
             )
           ),
         }),
