@@ -6,6 +6,7 @@
  */
 
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import {
   buildThreatDetailsItems,
@@ -15,406 +16,75 @@ import {
   parseExistingEnrichments,
 } from './threat_intelligence';
 
+const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
+
 describe('parseExistingEnrichments', () => {
-  it('returns an empty array if data is empty', () => {
-    expect(parseExistingEnrichments([])).toEqual([]);
+  it('returns an empty array if hit has no fields', () => {
+    expect(parseExistingEnrichments(createMockHit())).toEqual([]);
   });
 
-  it('returns an empty array if data contains no enrichment field', () => {
-    const data = [
-      {
-        category: 'host',
-        field: 'host.os.name.text',
-        isObjectArray: false,
-        originalValue: ['Mac OS X'],
-        values: ['Mac OS X'],
-      },
-    ];
-    expect(parseExistingEnrichments(data)).toEqual([]);
+  it('returns an empty array if hit contains no enrichment field', () => {
+    const hit = createMockHit({
+      'host.os.name.text': ['Mac OS X'],
+    });
+
+    expect(parseExistingEnrichments(hit)).toEqual([]);
   });
 
   it('returns an empty array if enrichment field contains invalid JSON', () => {
-    const data = [
-      {
-        category: 'threat',
-        field: 'threat.enrichments',
-        isObjectArray: true,
-        originalValue: ['whoops'],
-        values: ['whoops'],
-      },
-    ];
-    expect(parseExistingEnrichments(data)).toEqual([]);
+    const hit = createMockHit({
+      'threat.enrichments': ['whoops'],
+    });
+
+    expect(parseExistingEnrichments(hit)).toEqual([]);
   });
 
-  it('returns an array if enrichment field contains valid JSON', () => {
-    const data = [
-      {
-        category: 'threat',
-        field: 'threat.enrichments',
-        isObjectArray: true,
-        originalValue: [
-          '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-        ],
-        values: [
-          '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-        ],
-      },
-    ];
-
-    expect(parseExistingEnrichments(data)).toEqual([
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['matched_field', 'other_matched_field'],
-          values: ['matched_field', 'other_matched_field'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.first_seen',
-          isObjectArray: false,
-          originalValue: ['2021-02-22T17:29:25.195Z'],
-          values: ['2021-02-22T17:29:25.195Z'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.provider',
-          isObjectArray: false,
-          originalValue: ['yourself'],
-          values: ['yourself'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.type',
-          isObjectArray: false,
-          originalValue: ['custom'],
-          values: ['custom'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['matched_atomic'],
-          values: ['matched_atomic'],
-        },
-        {
-          category: 'lazer',
-          field: 'lazer',
-          isObjectArray: true,
-          originalValue: ['{"great.field":["grrrrr"]}', '{"great.field":["grrrrr_2"]}'],
-          values: ['{"great.field":["grrrrr"]}', '{"great.field":["grrrrr_2"]}'],
-        },
+  it('returns an array of enrichments when threat.enrichments contains valid JSON strings', () => {
+    const hit = createMockHit({
+      'threat.enrichments': [
+        '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"]}',
       ],
+    });
+
+    expect(parseExistingEnrichments(hit)).toEqual([
+      {
+        'matched.field': ['matched_field', 'other_matched_field'],
+        'indicator.first_seen': ['2021-02-22T17:29:25.195Z'],
+        'indicator.provider': ['yourself'],
+        'indicator.type': ['custom'],
+        'matched.atomic': ['matched_atomic'],
+      },
     ]);
   });
 
-  it('returns multiple arrays for multiple enrichments', () => {
-    const data = [
-      {
-        category: 'threat',
-        field: 'threat.enrichments',
-        isObjectArray: true,
-        originalValue: [
-          '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-          '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
-          '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
-          '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-        ],
-        values: [
-          '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-          '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
-          '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
-          '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-          '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-        ],
-      },
-    ];
+  it('returns multiple enrichments for multiple values', () => {
+    const hit = createMockHit({
+      'threat.enrichments': [
+        '{"matched.field":["host.name"],"matched.id":["1"],"matched.type":["indicator_match_rule"],"matched.atomic":["host-1"]}',
+        '{"matched.field":["host.hostname"],"matched.id":["2"],"matched.type":["indicator_match_rule"],"matched.atomic":["host-2"]}',
+      ],
+    });
 
-    expect(parseExistingEnrichments(data)).toEqual([
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['matched_field', 'other_matched_field'],
-          values: ['matched_field', 'other_matched_field'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.first_seen',
-          isObjectArray: false,
-          originalValue: ['2021-02-22T17:29:25.195Z'],
-          values: ['2021-02-22T17:29:25.195Z'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.provider',
-          isObjectArray: false,
-          originalValue: ['yourself'],
-          values: ['yourself'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.type',
-          isObjectArray: false,
-          originalValue: ['custom'],
-          values: ['custom'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['matched_atomic'],
-          values: ['matched_atomic'],
-        },
-        {
-          category: 'lazer',
-          field: 'lazer',
-          isObjectArray: true,
-          originalValue: ['{"great.field":["grrrrr"]}', '{"great.field":["grrrrr_2"]}'],
-          values: ['{"great.field":["grrrrr"]}', '{"great.field":["grrrrr_2"]}'],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['matched_field_2'],
-          values: ['matched_field_2'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.first_seen',
-          isObjectArray: false,
-          originalValue: ['2021-02-22T17:29:25.195Z'],
-          values: ['2021-02-22T17:29:25.195Z'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.provider',
-          isObjectArray: false,
-          originalValue: ['other_you'],
-          values: ['other_you'],
-        },
-        {
-          category: 'indicator',
-          field: 'indicator.type',
-          isObjectArray: false,
-          originalValue: ['custom'],
-          values: ['custom'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['matched_atomic_2'],
-          values: ['matched_atomic_2'],
-        },
-        {
-          category: 'lazer',
-          field: 'lazer',
-          isObjectArray: true,
-          originalValue: [
-            '{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}',
-          ],
-          values: [
-            '{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}',
-          ],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['host.name'],
-          values: ['host.name'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.index',
-          isObjectArray: false,
-          originalValue: ['im'],
-          values: ['im'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.type',
-          isObjectArray: false,
-          originalValue: ['indicator_match_rule'],
-          values: ['indicator_match_rule'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.id',
-          isObjectArray: false,
-          originalValue: ['FFEtSYIBZ61VHL7LvV2j'],
-          values: ['FFEtSYIBZ61VHL7LvV2j'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['MacBook-Pro-de-Gloria.local'],
-          values: ['MacBook-Pro-de-Gloria.local'],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['host.hostname'],
-          values: ['host.hostname'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.index',
-          isObjectArray: false,
-          originalValue: ['im'],
-          values: ['im'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.type',
-          isObjectArray: false,
-          originalValue: ['indicator_match_rule'],
-          values: ['indicator_match_rule'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.id',
-          isObjectArray: false,
-          originalValue: ['E1EtSYIBZ61VHL7Ltl3m'],
-          values: ['E1EtSYIBZ61VHL7Ltl3m'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['MacBook-Pro-de-Gloria.local'],
-          values: ['MacBook-Pro-de-Gloria.local'],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['host.architecture'],
-          values: ['host.architecture'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.index',
-          isObjectArray: false,
-          originalValue: ['im'],
-          values: ['im'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.type',
-          isObjectArray: false,
-          originalValue: ['indicator_match_rule'],
-          values: ['indicator_match_rule'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.id',
-          isObjectArray: false,
-          originalValue: ['E1EtSYIBZ61VHL7Ltl3m'],
-          values: ['E1EtSYIBZ61VHL7Ltl3m'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['x86_64'],
-          values: ['x86_64'],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['host.name'],
-          values: ['host.name'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.index',
-          isObjectArray: false,
-          originalValue: ['im'],
-          values: ['im'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.type',
-          isObjectArray: false,
-          originalValue: ['indicator_match_rule'],
-          values: ['indicator_match_rule'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.id',
-          isObjectArray: false,
-          originalValue: ['E1EtSYIBZ61VHL7Ltl3m'],
-          values: ['E1EtSYIBZ61VHL7Ltl3m'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['MacBook-Pro-de-Gloria.local'],
-          values: ['MacBook-Pro-de-Gloria.local'],
-        },
-      ],
-      [
-        {
-          category: 'matched',
-          field: 'matched.field',
-          isObjectArray: false,
-          originalValue: ['host.hostname'],
-          values: ['host.hostname'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.index',
-          isObjectArray: false,
-          originalValue: ['im'],
-          values: ['im'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.type',
-          isObjectArray: false,
-          originalValue: ['indicator_match_rule'],
-          values: ['indicator_match_rule'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.id',
-          isObjectArray: false,
-          originalValue: ['CFErSYIBZ61VHL7LIV1N'],
-          values: ['CFErSYIBZ61VHL7LIV1N'],
-        },
-        {
-          category: 'matched',
-          field: 'matched.atomic',
-          isObjectArray: false,
-          originalValue: ['MacBook-Pro-de-Gloria.local'],
-          values: ['MacBook-Pro-de-Gloria.local'],
-        },
-      ],
-    ]);
+    const enrichments = parseExistingEnrichments(hit);
+    expect(enrichments).toHaveLength(2);
+    expect(enrichments[0]).toEqual({
+      'matched.field': ['host.name'],
+      'matched.id': ['1'],
+      'matched.type': ['indicator_match_rule'],
+      'matched.atomic': ['host-1'],
+    });
+    expect(enrichments[1]).toEqual({
+      'matched.field': ['host.hostname'],
+      'matched.id': ['2'],
+      'matched.type': ['indicator_match_rule'],
+      'matched.atomic': ['host-2'],
+    });
   });
 });
 
@@ -447,28 +117,16 @@ describe('filterDuplicateEnrichments', () => {
 });
 
 describe('getEnrichmentFields', () => {
-  it('returns an empty object if items is empty', () => {
-    expect(getEnrichmentFields([])).toEqual({});
+  it('returns an empty object if hit is empty', () => {
+    expect(getEnrichmentFields(createMockHit())).toEqual({});
   });
 
   it('returns an object of event fields and values', () => {
-    const data = [
-      {
-        category: 'source',
-        field: 'source.ip',
-        isObjectArray: false,
-        originalValue: ['192.168.1.1'],
-        values: ['192.168.1.1'],
-      },
-      {
-        category: 'event',
-        field: 'event.reference',
-        isObjectArray: false,
-        originalValue: ['https://urlhaus.abuse.ch/url/1055419/'],
-        values: ['https://urlhaus.abuse.ch/url/1055419/'],
-      },
-    ];
-    expect(getEnrichmentFields(data)).toEqual({
+    const hit = createMockHit({
+      'source.ip': ['192.168.1.1'],
+      'event.reference': ['https://urlhaus.abuse.ch/url/1055419/'],
+    });
+    expect(getEnrichmentFields(hit)).toEqual({
       'source.ip': '192.168.1.1',
     });
   });

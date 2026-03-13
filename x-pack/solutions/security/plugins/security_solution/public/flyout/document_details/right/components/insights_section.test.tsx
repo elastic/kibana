@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
   CORRELATIONS_TEST_ID,
@@ -69,6 +70,13 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
+const mockSearchHit = {
+  _id: 'some-id',
+  _index: 'alerts-index',
+  _source: {
+    '@timestamp': '2022-04-05T12:00:00.000Z',
+  },
+} as EsHitRecord;
 
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -163,6 +171,7 @@ describe('<InsightsSection />', () => {
       ...mockContextValue,
       eventId: 'some_Id',
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -181,6 +190,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -196,6 +206,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
@@ -217,6 +228,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: true,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderInsightsSection(contextValue);
@@ -241,6 +253,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: false,
+      searchHit: mockSearchHit,
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId, queryByTestId } = renderInsightsSection(contextValue);

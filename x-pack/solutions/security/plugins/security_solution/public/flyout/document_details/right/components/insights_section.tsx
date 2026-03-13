@@ -23,6 +23,7 @@ import { EventKind } from '../../shared/constants/event_kinds';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 const KEY = 'insights';
 
@@ -39,6 +40,10 @@ export const InsightsSection = memo(() => {
   const goToPrevalenceTab = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
     subTab: PREVALENCE_TAB_ID,
+  });
+  const goToThreatIntelligenceTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: THREAT_INTELLIGENCE_TAB_ID,
   });
 
   const expanded = useExpandSection({
@@ -64,7 +69,11 @@ export const InsightsSection = memo(() => {
       {eventKind === EventKind.signal && (
         <>
           <EuiSpacer size="s" />
-          <ThreatIntelligenceOverview />
+          <ThreatIntelligenceOverview
+            hit={hit}
+            showIcon={!isPreviewMode}
+            onShowThreatIntelligence={goToThreatIntelligenceTab}
+          />
         </>
       )}
       <EuiSpacer size="s" />

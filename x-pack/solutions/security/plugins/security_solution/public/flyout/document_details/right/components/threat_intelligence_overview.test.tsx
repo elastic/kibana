@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { useDocumentDetailsContext } from '../../shared/context';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import {
@@ -26,15 +26,10 @@ import {
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { useKibana } from '../../../../common/lib/kibana';
 
-jest.mock('../../shared/context');
 jest.mock('../hooks/use_fetch_threat_intelligence');
 jest.mock('../../../../common/lib/kibana');
-
-const mockNavigateToLeftPanel = jest.fn();
-jest.mock('../../shared/hooks/use_navigate_to_left_panel');
 
 const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID
@@ -65,26 +60,41 @@ const ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID
 );
 
-const dataFormattedForFieldBrowser = ['scopeId'];
+const createMockHit = (flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
 
-const renderThreatIntelligenceOverview = () =>
+const mockOnShowThreatIntelligence = jest.fn();
+
+const renderThreatIntelligenceOverview = ({
+  hit = createMockHit(),
+  showIcon = true,
+  onShowThreatIntelligence = mockOnShowThreatIntelligence,
+}: {
+  hit?: DataTableRecord;
+  showIcon?: boolean;
+  onShowThreatIntelligence?: () => void;
+} = {}) =>
   render(
     <IntlProvider locale="en">
-      <ThreatIntelligenceOverview />
+      <ThreatIntelligenceOverview
+        hit={hit}
+        showIcon={showIcon}
+        onShowThreatIntelligence={onShowThreatIntelligence}
+      />
     </IntlProvider>
   );
 
 describe('<ThreatIntelligenceOverview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      dataFormattedForFieldBrowser,
-      isPreviewMode: false,
-    });
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
     });
-    (useNavigateToLeftPanel as jest.Mock).mockReturnValue(mockNavigateToLeftPanel);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         storage: {
@@ -124,12 +134,7 @@ describe('<ThreatIntelligenceOverview />', () => {
   });
 
   it('should render link without icon if in preview mode', () => {
-    (useDocumentDetailsContext as jest.Mock).mockReturnValue({
-      dataFormattedForFieldBrowser,
-      isPreviewMode: true,
-    });
-
-    const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview();
+    const { getByTestId, queryByTestId } = renderThreatIntelligenceOverview({ showIcon: false });
     expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
   });
@@ -189,7 +194,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getByTestId } = renderThreatIntelligenceOverview();
 
     getByTestId(TITLE_LINK_TEST_ID).click();
-    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+    expect(mockOnShowThreatIntelligence).toHaveBeenCalled();
   });
 
   it('should open the expanded section to the correct tab when the number is clicked', () => {
@@ -202,10 +207,10 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getByTestId } = renderThreatIntelligenceOverview();
     getByTestId(THREAT_MATCHES_BUTTON_TEST_ID).click();
 
-    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+    expect(mockOnShowThreatIntelligence).toHaveBeenCalled();
 
     getByTestId(ENRICHED_WITH_THREAT_INTELLIGENCE_BUTTON_TEST_ID).click();
 
-    expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+    expect(mockOnShowThreatIntelligence).toHaveBeenCalled();
   });
 });

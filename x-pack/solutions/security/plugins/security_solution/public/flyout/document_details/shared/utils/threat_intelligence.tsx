@@ -6,8 +6,7 @@
  */
 
 import { groupBy, isObject } from 'lodash';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { getDataFromFieldsHits } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { ThreatDetailsRow } from '../../left/components/threat_details_view_enrichment_accordion';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
@@ -43,6 +42,9 @@ const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
 const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
   array ? array[0] : undefined;
 
+const getFirstValue = (value: unknown): unknown =>
+  Array.isArray(value) ? getFirstElement(value) : value;
+
 /**
  * Returns true if the enrichment type is 'investigation_time'
  */
@@ -50,45 +52,48 @@ export const isInvestigationTimeEnrichment = (type: string | undefined): boolean
   type === ENRICHMENT_TYPES.InvestigationTime;
 
 /**
- * Parses existing enrichments from the timeline data
+ * Parses existing enrichments from the hit data
  */
-export const parseExistingEnrichments = (
-  data: TimelineEventsDetailsItem[]
-): TimelineEventsDetailsItem[][] => {
-  const threatIndicatorField = data.find(
-    ({ field, originalValue }) => field === ENRICHMENT_DESTINATION_PATH && originalValue
-  );
-  if (!threatIndicatorField) {
+export const parseExistingEnrichments = (hit: DataTableRecord): CtiEnrichment[] => {
+  const existingEnrichmentField = hit.flattened[ENRICHMENT_DESTINATION_PATH];
+  if (existingEnrichmentField == null) {
     return [];
   }
 
-  const { originalValue } = threatIndicatorField;
-  const enrichmentStrings: string[] = Array.isArray(originalValue)
-    ? originalValue
-    : [originalValue];
+  const enrichments = Array.isArray(existingEnrichmentField)
+    ? existingEnrichmentField
+    : [existingEnrichmentField];
 
-  return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
-    (enrichments, enrichmentString) => {
-      try {
-        const enrichment = getDataFromFieldsHits(JSON.parse(enrichmentString));
-        enrichments.push(enrichment);
-      } catch (e) {
-        // omit failed parse
-      }
-      return enrichments;
-    },
-    []
-  );
-};
+  return enrichments.reduce<CtiEnrichment[]>((acc, enrichment) => {
+    const parsedEnrichment =
+      typeof enrichment === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(enrichment);
+            } catch {
+              return null;
+            }
+          })()
+        : enrichment;
 
-/**
- * Converts timeline data to a CtiEnrichment object
- */
-export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): CtiEnrichment =>
-  data.reduce<CtiEnrichment>((acc, item) => {
-    acc[item.field] = item.originalValue;
+    if (!isObject(parsedEnrichment)) {
+      return acc;
+    }
+
+    const normalizedEnrichment = Object.entries(parsedEnrichment).reduce<CtiEnrichment>(
+      (normalized, [field, value]) => {
+        if (value != null) {
+          normalized[field] = Array.isArray(value) ? value : [value];
+        }
+        return normalized;
+      },
+      {}
+    );
+
+    acc.push(normalizedEnrichment);
     return acc;
-  }, {});
+  }, []);
+};
 
 /**
  * Extracts the first value from an enrichment field
@@ -156,14 +161,14 @@ export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnr
 };
 
 /**
- * Returns the fields from the enrichments
+ * Returns event fields from the hit
  */
-export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFields =>
-  items.reduce<EventFields>((fields, item) => {
-    if (isValidEventField(item.field)) {
-      const value = getFirstElement(item.originalValue);
+export const getEnrichmentFields = (hit: DataTableRecord): EventFields =>
+  Object.entries(hit.flattened).reduce<EventFields>((fields, [field, flattenedValue]) => {
+    if (isValidEventField(field)) {
+      const value = getFirstValue(flattenedValue);
       if (value) {
-        return { ...fields, [item.field]: value };
+        return { ...fields, [field]: value };
       }
     }
     return fields;

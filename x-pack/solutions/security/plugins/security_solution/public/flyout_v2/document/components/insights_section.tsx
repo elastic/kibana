@@ -15,6 +15,7 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { PrevalenceOverview } from './prevalence_overview';
+import { ThreatIntelligenceOverview } from '../../../flyout/document_details/right/components/threat_intelligence_overview';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -60,6 +61,7 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
   );
 
   const onShowPrevalenceDetails = useCallback(() => {}, []);
+  const onShowThreatIntelligenceDetails = useCallback(() => {}, []);
 
   return (
     <ExpandableSection
@@ -70,6 +72,13 @@ export const InsightsSection = memo(({ hit }: InsightsSectionProps) => {
       sectionId={LOCAL_STORAGE_SECTION_KEY}
       title={INSIGHTS_SECTION_TITLE}
     >
+      {isAlert && (
+        <ThreatIntelligenceOverview
+          hit={hit}
+          onShowThreatIntelligence={onShowThreatIntelligenceDetails}
+          showIcon={false}
+        />
+      )}
       <PrevalenceOverview
         hit={hit}
         investigationFields={investigationFields}
