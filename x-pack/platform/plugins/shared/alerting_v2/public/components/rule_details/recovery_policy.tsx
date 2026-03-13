@@ -36,22 +36,30 @@ export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
     return <>{typeLabel}</>;
   }
 
-  const queryText = [recoveryPolicy.query?.base, recoveryPolicy.query?.condition]
-    .filter(Boolean)
-    .join('\n');
-
   return (
     <>
       <EuiText size="s">{typeLabel}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiCodeBlock
-        language="esql"
-        isCopyable
-        paddingSize="m"
-        data-test-subj="alertingV2RuleDetailsRecoveryQuery"
-      >
-        {queryText}
-      </EuiCodeBlock>
+      {recoveryPolicy.query?.base && (
+        <EuiCodeBlock
+          language="esql"
+          isCopyable
+          paddingSize="m"
+          data-test-subj="alertingV2RuleDetailsRecoveryQuery"
+        >
+          {recoveryPolicy.query?.base}
+        </EuiCodeBlock>
+      )}
+      {recoveryPolicy.query?.condition && (
+        <EuiCodeBlock
+          language="esql"
+          isCopyable
+          paddingSize="m"
+          data-test-subj="alertingV2RuleDetailsRecoveryQuery"
+        >
+          {recoveryPolicy.query.condition}
+        </EuiCodeBlock>
+      )}
     </>
   );
 };
