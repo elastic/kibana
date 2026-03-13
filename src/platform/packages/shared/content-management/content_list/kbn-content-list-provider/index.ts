@@ -23,6 +23,7 @@ export type {
   ContentListConfig,
   ContentListServices,
 } from './src/context';
+export type { UserProfileService } from './src/services';
 
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
@@ -35,7 +36,14 @@ export {
   useFilterDisplay,
   useContentListFilters,
   useTagFilterToggle,
+  useContentListUserFilter,
+  useUserFilterToggle,
   TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_QUERY_VALUE,
+  NO_CREATOR_QUERY_VALUE,
   DeleteConfirmationModal,
   DeleteConfirmationComponent,
   useDeleteConfirmation,
@@ -61,6 +69,9 @@ export type {
   UseContentListSelectionReturn,
   FilterDisplayState,
   UseContentListFiltersReturn,
+  CreatorsList,
+  UseContentListUserFilterReturn,
+  UserFilterToggleFn,
   DeleteConfirmationModalProps,
   DeleteConfirmationComponentProps,
   UseDeleteConfirmationOptions,
@@ -69,6 +80,7 @@ export type {
 export type {
   ActiveFilters,
   IncludeExcludeFilter,
+  UserFilter,
   FilterCounts,
   FindItemsFn,
   FindItemsParams,

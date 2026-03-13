@@ -22,6 +22,24 @@ export interface IncludeExcludeFilter {
 /** Filter dimension key for tag-based filtering. Matches the `fieldName` used in tag filter popovers. */
 export const TAG_FILTER_ID = 'tag';
 
+/** Filter dimension key for creator-based filtering. */
+export const CREATED_BY_FILTER_ID = 'createdBy';
+
+/**
+ * User filter state for creator-based filtering.
+ *
+ * Separate from {@link IncludeExcludeFilter} because it carries resolved UIDs
+ * rather than display values. The resolver hook maps query-bar values (emails,
+ * sentinels) to UIDs and writes them here; they are forwarded to `findItems`
+ * via `FindItemsParams.filters.user`.
+ */
+export interface UserFilter {
+  /** UIDs that items must match (include filter). */
+  include: string[];
+  /** UIDs that items must not match (exclude filter). */
+  exclude: string[];
+}
+
 /**
  * Active filters applied to the content list.
  *
@@ -38,7 +56,9 @@ export interface ActiveFilters {
   search?: string;
   /** When `true`, restrict results to starred items only. */
   starredOnly?: boolean;
-  [filterId: string]: IncludeExcludeFilter | string | boolean | undefined;
+  /** User filter for creator-based filtering. Resolved UIDs forwarded to `findItems`. */
+  user?: UserFilter;
+  [filterId: string]: IncludeExcludeFilter | UserFilter | string | boolean | undefined;
 }
 
 /**
@@ -108,13 +128,22 @@ export interface FindItemsResult {
   /**
    * Optional per-filter counts, indexed by filter identifier.
    *
-   * Each key (e.g. `tag`, `type`, `lastResponse`) maps to a `Record<string, number>` of
-   * value → count for the full result set (not just the current page). When present for a
-   * filter, the corresponding filter popover displays counts next to each option.
+   * Each key (e.g. `tag`, `createdBy`) maps to a `Record<string, number>` of
+   * value → count for the full result set (not just the current page). When
+   * present for a filter, the corresponding filter popover displays counts
+   * next to each option.
    *
-   * Client-side data sources that iterate the full item set before paginating can compute
-   * this cheaply. Server-side data sources should omit entries unless they can retrieve
-   * counts via an aggregation query.
+   * **Important for `createdBy`:** counts must be computed BEFORE applying the
+   * user filter so the "Created by" popover always shows all creators for the
+   * current search/tag context (standard faceted-search behavior). Keys are
+   * user profile UIDs, plus the sentinel values {@link MANAGED_USER_FILTER}
+   * (`__managed__`) and {@link NO_CREATOR_USER_FILTER} (`__no_creator__`)
+   * when applicable. Without `counts.createdBy`, the provider falls back to
+   * scanning the current page's items, which may miss creators on other pages.
+   *
+   * Client-side data sources that iterate the full item set before paginating
+   * can compute this cheaply. Server-side data sources should omit entries
+   * unless they can retrieve counts via an aggregation query.
    */
   counts?: Record<string, FilterCounts>;
 }

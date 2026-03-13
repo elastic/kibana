@@ -33,7 +33,7 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  */
 export const useContentListItemsQuery = (
   clientState: ContentListClientState
-): ContentListQueryData & { refetch: () => void } => {
+): Omit<ContentListQueryData, 'allCreators'> & { refetch: () => void } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
 
   // Build query parameters from client state.

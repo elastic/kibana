@@ -28,12 +28,25 @@ export type { UseContentListSelectionReturn } from './selection';
 export { useContentListSelection } from './selection';
 
 // Filtering feature.
-export type { FilterDisplayState, UseContentListFiltersReturn } from './filtering';
+export type {
+  FilterDisplayState,
+  UseContentListFiltersReturn,
+  CreatorsList,
+  UseContentListUserFilterReturn,
+  UserFilterToggleFn,
+} from './filtering';
 export {
   useFilterDisplay,
   useContentListFilters,
   useTagFilterToggle,
+  useContentListUserFilter,
+  useUserFilterToggle,
   TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_QUERY_VALUE,
+  NO_CREATOR_QUERY_VALUE,
 } from './filtering';
 
 // Delete feature.

@@ -9,6 +9,7 @@
 
 import { isValidElement } from 'react';
 import type { FC, ReactNode } from 'react';
+import type { OmitIndexSignature } from 'type-fest';
 import type { ParsedItem, ParsedPart } from './parsing';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
@@ -92,12 +93,14 @@ export interface PartFactory<
    * @param definition.name - Preset name, constrained to `keyof TPresetMap`.
    * @param definition.resolve - Optional callback to resolve attributes into output.
    *   Return `undefined` to signal that the part should be skipped (e.g., disabled).
-   * @returns An `FC` whose props type is `TPresetMap[K]`.
+   * @returns An `FC` whose props type is `OmitIndexSignature<TPresetMap[K]>`, so
+   *   that React's reconciliation props (e.g., `key`) are always accepted in JSX
+   *   even when the preset declares no configurable attributes via `Record<string, never>`.
    */
   createPreset: <K extends keyof TPresetMap & string>(definition: {
     name: K;
     resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
-  }) => FC<TPresetMap[K]>;
+  }) => FC<OmitIndexSignature<TPresetMap[K]>>;
 
   /**
    * Resolve a parsed part into concrete output by dispatching to the
@@ -315,7 +318,7 @@ export const defineAssembly = <const TName extends string>(config: {
       createPreset: <K extends keyof TPresetMap & string>(definition: {
         name: K;
         resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
-      }): FC<TPresetMap[K]> => {
+      }): FC<OmitIndexSignature<TPresetMap[K]>> => {
         if (definition.resolve) {
           resolvers.set(
             definition.name,
@@ -326,20 +329,27 @@ export const defineAssembly = <const TName extends string>(config: {
           );
         }
 
+        // Cast is safe: declarative components never render, so the props type
+        // only matters for call-site type checking. Stripping the index signature
+        // lets React's reconciliation props (e.g., `key`) pass through in JSX.
         return createDeclarativeComponent<TPresetMap[K]>({
           assembly: config.name,
           part: partDefinition.name,
           preset: definition.name,
-        });
+        }) as unknown as FC<OmitIndexSignature<TPresetMap[K]>>;
       },
 
       resolve: (part: ParsedPart, context: TContext): TOutput | undefined => {
         // Preset resolvers take priority.
         const resolver = part.preset ? resolvers.get(part.preset) : undefined;
-        if (resolver) return resolver(part.attributes, context);
+        if (resolver) {
+          return resolver(part.attributes, context);
+        }
 
         // Fall back to the custom component resolver.
-        if (customResolver) return customResolver(part.attributes, context);
+        if (customResolver) {
+          return customResolver(part.attributes, context);
+        }
 
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console

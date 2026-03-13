@@ -10,6 +10,7 @@
 import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
 import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
 import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
+import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
@@ -89,11 +90,16 @@ export const ContentListProvider = ({
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
-  const { tags: tagsService, favorites: favoritesService } = services ?? {};
+  const {
+    tags: tagsService,
+    favorites: favoritesService,
+    userProfile: userProfileService,
+  } = services ?? {};
 
   // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
   const supportsTags = features.tags !== false && !!tagsService;
   const supportsStarred = features.starred !== false && !!favoritesService;
+  const supportsCreatedBy = features.createdBy !== false && !!userProfileService;
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
@@ -105,6 +111,7 @@ export const ContentListProvider = ({
       selection: features.selection !== false && !isReadOnly,
       tags: supportsTags,
       starred: supportsStarred,
+      createdBy: supportsCreatedBy,
     }),
     [
       features.sorting,
@@ -114,6 +121,7 @@ export const ContentListProvider = ({
       isReadOnly,
       supportsTags,
       supportsStarred,
+      supportsCreatedBy,
     ]
   );
 
@@ -158,6 +166,18 @@ export const ContentListProvider = ({
       <FavoritesContextProvider favoritesClient={favoritesService}>
         {content}
       </FavoritesContextProvider>
+    );
+  }
+
+  // Wrap with user profiles provider when user profile service is available.
+  if (supportsCreatedBy && userProfileService) {
+    content = (
+      <UserProfilesProvider
+        getUserProfile={userProfileService.getUserProfile}
+        bulkGetUserProfiles={userProfileService.bulkGetUserProfiles}
+      >
+        {content}
+      </UserProfilesProvider>
     );
   }
 

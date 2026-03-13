@@ -22,6 +22,7 @@ import { parseFiltersFromQuery } from './filters/query_parser';
 import type { QueryParser } from './filters/query_parser';
 import { useTagQueryParser } from './filters/tags/use_tag_query_parser';
 import { useStarredQueryParser } from './filters/starred/use_starred_query_parser';
+import { useCreatedByQueryParser } from './filters/created_by/use_created_by_query_parser';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
 
@@ -100,10 +101,11 @@ const ContentListToolbarComponent = ({
   // `handleSearchChange` itself never needs to change.
   const tagParser = useTagQueryParser();
   const starredParser = useStarredQueryParser();
+  const createdByParser = useCreatedByQueryParser();
   const queryParsers = useMemo(
     (): ReadonlyArray<QueryParser> =>
-      [tagParser, starredParser].filter((p): p is QueryParser => p !== null),
-    [tagParser, starredParser]
+      [tagParser, starredParser, createdByParser].filter((p): p is QueryParser => p !== null),
+    [tagParser, starredParser, createdByParser]
   );
 
   const handleSearchChange = useCallback(

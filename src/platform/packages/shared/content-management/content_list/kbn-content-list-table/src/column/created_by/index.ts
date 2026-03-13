@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListServices } from './types';
-export type { UserProfileService } from './user_profile';
+export {
+  CreatedByColumn,
+  type CreatedByColumnProps,
+  buildCreatedByColumn,
+} from './created_by_builder';
+export { CreatedByCell, type CreatedByCellProps } from './created_by_cell';

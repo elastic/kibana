@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListServices } from './types';
-export type { UserProfileService } from './user_profile';
+/**
+ * Summary of unique creators from the current item set.
+ *
+ * Derived from either server-provided counts or a client-side item scan.
+ * Used by the "Created by" filter popover to build its option list.
+ */
+export interface CreatorsList {
+  /** Real user UIDs (excludes sentinel values). */
+  uids: string[];
+  /** Whether any items have no `createdBy` value. */
+  hasNoCreator: boolean;
+  /** Whether any items are system-managed. */
+  hasManaged: boolean;
+}

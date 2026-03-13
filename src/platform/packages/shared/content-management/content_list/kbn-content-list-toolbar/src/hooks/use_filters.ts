@@ -16,11 +16,10 @@ import { filter } from '../filters/part';
 import { Filters, type FiltersProps } from '../filters/filters';
 import type { FilterContext } from '../filters/part';
 
-// Default order: starred toggle → tag facet → sort. Each resolves to undefined when its
-// corresponding service/feature is absent, so unused entries are silently dropped.
 const DEFAULT_PARTS: ParsedPart[] = [
   { type: 'part', part: 'filter', preset: 'starred', instanceId: 'starred', attributes: {} },
   { type: 'part', part: 'filter', preset: 'tags', instanceId: 'tags', attributes: {} },
+  { type: 'part', part: 'filter', preset: 'createdBy', instanceId: 'createdBy', attributes: {} },
   { type: 'part', part: 'filter', preset: 'sort', instanceId: 'sort', attributes: {} },
 ];
 
@@ -81,19 +80,19 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  */
 export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   const { isSupported: hasSorting } = useContentListSort();
-  const { hasTags, hasStarred } = useFilterDisplay();
+  const { hasTags, hasStarred, hasCreatedBy } = useFilterDisplay();
 
-  // Note: `children` is used as a memo dependency. React children are often
+  // `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
   // recompute more than expected. The parsing logic is cheap, so this is
   // acceptable today. If the filter set grows or resolution becomes expensive,
   // consider keying on a more stable signal.
   return useMemo(() => {
     const parts = parseFilterParts(children);
-    const context: FilterContext = { hasSorting, hasTags, hasStarred };
+    const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
 
     return parts
       .map((part) => filter.resolve(part, context))
       .filter((f): f is SearchFilterConfig => f !== undefined);
-  }, [children, hasSorting, hasTags, hasStarred]);
+  }, [children, hasSorting, hasTags, hasStarred, hasCreatedBy]);
 };
