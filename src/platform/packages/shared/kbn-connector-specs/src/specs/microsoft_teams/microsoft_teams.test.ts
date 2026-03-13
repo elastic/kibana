@@ -701,6 +701,38 @@ describe('MicrosoftTeams', () => {
       expect(result.value[0].hitsContainers[0].total).toBe(0);
     });
 
+    it('should throw when called with app-only (oauth_client_credentials) auth', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.searchMessages.handler(appOnlyContext, {
+          query: 'test',
+        })
+      ).rejects.toThrow(
+        'searchMessages requires delegated authentication (bearer token). ' +
+          'Microsoft Graph does not support app-only (client credentials) access ' +
+          'to the /search/query API for chatMessage entities.'
+      );
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('should not throw for delegated auth (bearer token)', async () => {
+      const bearerContext = {
+        ...mockContext,
+        secrets: { authType: 'bearer' },
+      } as unknown as ActionContext;
+
+      mockClient.post.mockResolvedValue({ data: { value: [] } });
+
+      await expect(
+        MicrosoftTeams.actions.searchMessages.handler(bearerContext, { query: 'test' })
+      ).resolves.not.toThrow();
+      expect(mockClient.post).toHaveBeenCalled();
+    });
+
     it('should propagate search API errors', async () => {
       mockClient.post.mockRejectedValue(new Error('Invalid search query'));
 

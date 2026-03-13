@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.microsoft-teams.search'
-description: 'Search messages across Microsoft Teams using KQL syntax. Actions and inputs: searchMessages (query, optional from, optional size, optional enable_top_results).'
+description: 'Search messages across Microsoft Teams using KQL syntax. Actions and inputs: searchMessages (query, optional from, optional size, optional enable_top_results). Note that this requires *delegated* authentication (bearer token), as it is not supported with app-only (client credentials) auth; Microsoft does not allow application permissions for chatMessage search, see known limitations: https://learn.microsoft.com/en-us/graph/search-concept-chat-messages?tabs=http#known-limitations'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

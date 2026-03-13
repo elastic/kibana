@@ -203,6 +203,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
+      description:
+        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
       output: z
         .object({
@@ -218,6 +220,14 @@ export const MicrosoftTeams: ConnectorSpec = {
         })
         .describe('Microsoft Graph Search API response'),
       handler: async (ctx, input: SearchMessagesInput) => {
+        if (ctx.secrets?.authType === 'oauth_client_credentials') {
+          throw new Error(
+            'searchMessages requires delegated authentication (bearer token). ' +
+              'Microsoft Graph does not support app-only (client credentials) access ' +
+              'to the /search/query API for chatMessage entities.'
+          );
+        }
+
         const searchRequest = {
           requests: [
             {
