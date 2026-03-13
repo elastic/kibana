@@ -23,7 +23,7 @@ import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
 };
