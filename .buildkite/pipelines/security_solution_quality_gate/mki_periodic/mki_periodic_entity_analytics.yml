@@ -15,6 +15,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 2
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:dashboards
         label: 'Cypress MKI - Dashboards'
@@ -29,6 +33,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:host_details
         label: 'Cypress MKI - Host Details'
@@ -43,6 +51,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:hosts
         label: 'Cypress MKI - Hosts'
@@ -57,6 +69,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:priv_mon
         label: 'Cypress MKI - Priv Mon'
@@ -113,6 +129,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:machine_learning
         label: 'Cypress MKI - Explore - Machine Learning'
@@ -127,6 +147,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:network
         label: 'Cypress MKI - Explore - Network'
@@ -141,6 +165,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:users
         label: 'Cypress MKI - Explore - Users'
@@ -155,6 +183,10 @@ steps:
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 1
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 1
 
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
@@ -171,7 +203,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - entity_analytics:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless
@@ -185,7 +217,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:hosts:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless
@@ -199,7 +231,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:network:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
@@ -213,7 +245,7 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1
 
       - label: 'API MKI - explore:users:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
@@ -227,4 +259,4 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2
+              limit: 1

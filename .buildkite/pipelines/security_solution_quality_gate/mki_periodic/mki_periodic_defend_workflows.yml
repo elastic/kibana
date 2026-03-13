@@ -15,7 +15,7 @@ steps:
         parallelism: 5
         retry:
           automatic:
-            - exit_status: "*"
+            - exit_status: "1"
               limit: 1
 
   - group: "Osquery MKI - Defend Workflows"
@@ -34,7 +34,7 @@ steps:
         parallelism: 3
         retry:
           automatic:
-            - exit_status: "*"
+            - exit_status: "1"
               limit: 1
 
   - group: "API MKI - Defend Workflows"
