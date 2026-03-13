@@ -341,6 +341,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
