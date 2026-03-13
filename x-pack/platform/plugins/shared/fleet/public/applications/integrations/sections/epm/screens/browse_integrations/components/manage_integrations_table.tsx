@@ -15,6 +15,7 @@ import {
   EuiFilterGroup,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -299,6 +300,43 @@ export const ManageIntegrationsTable: React.FC<{
     [http, notifications, onRefetch]
   );
 
+  const installToCluster = useCallback(
+    async (integrationId: string) => {
+      try {
+        const zipBlob = await http.get(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          {
+            version: '1',
+            headers: { Accept: 'application/zip' },
+          }
+        );
+
+        await http.post('/api/fleet/epm/packages', {
+          headers: {
+            'Elastic-Api-Version': '2023-10-31',
+            'Content-Type': 'application/zip',
+          },
+          body: zipBlob as unknown as BodyInit,
+        });
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
+            { defaultMessage: 'Integration installed to cluster successfully' }
+          ),
+        });
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.installErrorTitle',
+            { defaultMessage: 'Failed to install integration to cluster' }
+          ),
+        });
+      }
+    },
+    [http, notifications]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
       {
@@ -413,6 +451,29 @@ export const ManageIntegrationsTable: React.FC<{
       {
         name: '',
         render: (item: CreatedIntegrationRow) => {
+          if (item.status === 'approved') {
+            return (
+              <EuiBadge color="hollow" style={{ color: euiTheme.colors.textSubdued }}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type="checkInCircleFilled"
+                      color="success"
+                      size="m"
+                      aria-hidden={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.status.approved"
+                      defaultMessage="Approved"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiBadge>
+            );
+          }
+
           if (isIntegrationPackageReady(item)) {
             return (
               <ManageIntegrationActions
@@ -428,6 +489,7 @@ export const ManageIntegrationsTable: React.FC<{
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
                 onDownloadZip={downloadZipPackage}
+                onInstallToCluster={installToCluster}
               />
             );
           }
@@ -447,6 +509,7 @@ export const ManageIntegrationsTable: React.FC<{
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
                 onDownloadZip={downloadZipPackage}
+                onInstallToCluster={installToCluster}
               />
             );
           }
@@ -475,6 +538,7 @@ export const ManageIntegrationsTable: React.FC<{
             onFetchReviewDetails={fetchIntegrationReviewDetails}
             onApproveAndDeploy={approveAndDeployIntegration}
             onDownloadZip={downloadZipPackage}
+            onInstallToCluster={installToCluster}
           />
         ),
       },
@@ -486,8 +550,10 @@ export const ManageIntegrationsTable: React.FC<{
       fetchIntegrationReviewDetails,
       approveAndDeployIntegration,
       downloadZipPackage,
+      installToCluster,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
+      euiTheme.colors.textSubdued,
       userProfiles,
     ]
   );
