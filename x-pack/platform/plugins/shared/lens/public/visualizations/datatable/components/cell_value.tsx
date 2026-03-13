@@ -95,6 +95,14 @@ export const createGridCell = (
     if (colorMode === 'badge') {
       const badgeTextColor = badgeColor ? getContrastColor(badgeColor, isDarkMode) : undefined;
       const label = content ?? '';
+      const clickProps = filterOnClick
+        ? {
+            onClick: () => {
+              handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
+            },
+            onClickAriaLabel: getBadgeLabel(label),
+          }
+        : {};
 
       return (
         <div
@@ -107,14 +115,7 @@ export const createGridCell = (
           <EuiBadge
             color={badgeColor ?? 'hollow'}
             style={badgeTextColor ? { color: badgeTextColor } : undefined}
-            onClick={
-              filterOnClick
-                ? () => {
-                    handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
-                  }
-                : undefined
-            }
-            onClickAriaLabel={filterOnClick ? getBadgeLabel(label) : undefined}
+            {...clickProps}
           >
             {label}
           </EuiBadge>
