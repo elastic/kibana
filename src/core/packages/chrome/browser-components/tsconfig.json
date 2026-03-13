@@ -24,6 +24,8 @@
     "@kbn/core-application-common",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-browser",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-internal-types",
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-navigation",
@@ -38,5 +40,6 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-label-formatter",
     "@kbn/test-jest-helpers",
+    "@kbn/use-observable",
   ]
 }

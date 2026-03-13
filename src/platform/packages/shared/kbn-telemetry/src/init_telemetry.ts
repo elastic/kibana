@@ -71,12 +71,22 @@ export const initTelemetry = (
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
-      initTracing({ resource, tracingConfig: telemetryConfig.tracing });
       maybeInitAutoInstrumentations();
     }
 
-    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
-    }
+    const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
+    asyncSettled.then(() => {
+      if (telemetryConfig.tracing.enabled) {
+        initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      }
+
+      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+        initMetrics({
+          resource,
+          metricsConfig: telemetryConfig.metrics,
+          monitoringCollectionConfig,
+        });
+      }
+    });
   }
 };
