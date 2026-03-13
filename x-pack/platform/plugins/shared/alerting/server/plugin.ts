@@ -114,6 +114,10 @@ import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
 import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_fill_scheduler_task';
+import { createIndices } from './v2/create_indices';
+import { startEsqlRules } from './v2/esql_rules';
+import { alertDispatcher } from './v2/alert_dispatcher';
+import { startDataSimulator } from './v2/data_simulator';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -461,6 +465,17 @@ export class AlertingPlugin {
       core,
     });
 
+    (async () => {
+      try {
+        const esClient = await core
+          .getStartServices()
+          .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser);
+        await createIndices({ esClient });
+      } catch (e) {
+        console.error('Failed to createIndices:', e.message);
+      }
+    })();
+
     return {
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
@@ -769,6 +784,12 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
       () => {}
     ); // it shouldn't reject, but just in case
+
+    setTimeout(() => {
+      startEsqlRules({ esClient: core.elasticsearch.client.asInternalUser });
+      alertDispatcher({ esClient: core.elasticsearch.client.asInternalUser });
+      startDataSimulator({ esClient: core.elasticsearch.client.asInternalUser });
+    }, 5000);
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
