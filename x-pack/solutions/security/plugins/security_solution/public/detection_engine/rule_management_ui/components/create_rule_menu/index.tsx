@@ -73,8 +73,8 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       },
     };
 
-    if (agentBuilder?.openConversationFlyout) {
-      agentBuilder.openConversationFlyout({
+    if (agentBuilder?.openChat) {
+      agentBuilder.openChat({
         newConversation: true,
         initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
         autoSendInitialMessage: false,

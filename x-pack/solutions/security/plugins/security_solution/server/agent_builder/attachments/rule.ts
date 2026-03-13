@@ -62,7 +62,7 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       return `
       A security rule attachment containing a detection rule as stringified JSON in the "text" field. It may be an existing rule, or an empty placeholder for a new rule.
       
-      If asked to modify, update, make any change to rule fieldsor create rule(ES|QL SIEM detection rule, security detection rule, detecttion rule), use the detection-rule-edit skill from the skills/security/rules directory.
+      When asked to modify, update, make any change to rule fields or create a new rule(ES|QL SIEM detection rule, security detection rule, detecttion rule), use the detection-rule-edit skill from the skills/security/rules directory.
       Load the detection-rule-edit skill from the skills/security/rules directory.`;
     },
   };
