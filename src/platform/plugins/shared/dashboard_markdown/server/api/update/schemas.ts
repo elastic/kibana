@@ -17,5 +17,4 @@ export const updateResponseBodySchema = schema.object({
   id: schema.string(),
   data: markdownAttributesSchema,
   meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-  spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1 })),
 });

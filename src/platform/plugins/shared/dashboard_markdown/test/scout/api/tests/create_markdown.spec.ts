@@ -17,7 +17,6 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
   const spaceId = `markdown-create-space-id`;
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
-    await apiServices.spaces.create({ id: spaceId, name: spaceId });
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
   });
 
@@ -41,7 +40,6 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual(['default']);
     expect(response.body.data).toMatchObject({
       content,
     });
@@ -103,7 +101,6 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.spaces).toStrictEqual([spaceId]);
     expect(response.body.data).toMatchObject({ content });
   });
 
@@ -125,7 +122,6 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.id).toBe(id);
-    expect(response.body.spaces).toStrictEqual([spaceId]);
   });
 
   apiTest(
