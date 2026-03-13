@@ -171,7 +171,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           jobIds: [selectedJobId],
           selectedDetectorIndex,
           selectedEntities,
-          timeRange: globalTimeRange,
+          time_range: globalTimeRange,
         });
       }),
     });
