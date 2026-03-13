@@ -24,9 +24,10 @@ import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new
 import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../../assistant/helpers';
 import {
-  ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
+  getAlertDataViewAnonymizationTarget,
   stringifyEssentialAlertData,
 } from '../../../agent_builder/helpers';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
@@ -57,6 +58,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
     isAlert,
   });
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const spaceId = useSpaceId();
 
   const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -66,10 +68,10 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
         alert: stringifyEssentialAlertData(rawData),
         attachmentLabel: isAlert ? rawData['kibana.alert.rule.name']?.[0] : EVENT,
       },
-      anonymizationTarget: ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
+      anonymizationTarget: spaceId ? getAlertDataViewAnonymizationTarget(spaceId) : undefined,
       attachmentPrompt: isAlert ? ALERT_ATTACHMENT_PROMPT : EVENT_ATTACHMENT_PROMPT,
     };
-  }, [dataFormattedForFieldBrowser, isAlert]);
+  }, [dataFormattedForFieldBrowser, isAlert, spaceId]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
