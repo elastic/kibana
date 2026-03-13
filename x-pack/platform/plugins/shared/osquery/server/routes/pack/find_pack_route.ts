@@ -10,6 +10,7 @@ import { filter, map, omit } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { escapeQuotes } from '@kbn/es-query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { FindPacksRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -60,7 +61,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         if (request.query.createdBy) {
           const users = request.query.createdBy.split(',');
           const userFilters = users.map(
-            (u) => `${packSavedObjectType}.attributes.created_by: "${u}"`
+            (u) => `${packSavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
           );
           filters.push(`(${userFilters.join(' OR ')})`);
         }

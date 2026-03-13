@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -59,7 +60,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           if (request.query.createdBy) {
             const users = request.query.createdBy.split(',');
             const userFilters = users.map(
-              (u) => `${savedQuerySavedObjectType}.attributes.created_by: "${u}"`
+              (u) => `${savedQuerySavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
             );
             filters.push(`(${userFilters.join(' OR ')})`);
           }
