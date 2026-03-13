@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ensureNoUnsafeProperties } from '@kbn/std';
 import { getVisData } from '../lib/get_vis_data';
@@ -15,7 +16,7 @@ import type { Framework } from '../plugin';
 import type { VisTypeTimeseriesRouter } from '../types';
 import type { VisPayload } from '../../common/types';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
+const escapeHatch = schema.object({}, { unknowns: 'allow' }) as unknown as Type<VisPayload>;
 
 export const visDataRoutes = (router: VisTypeTimeseriesRouter, framework: Framework) => {
   router.post<{}, {}, VisPayload>(

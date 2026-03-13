@@ -20,7 +20,7 @@ export const title = i18n.translate('xpack.maps.tileMap.vis.title', {
 
 const LazyTileMapEditor = function (props: VisEditorOptionsProps) {
   const Component = dynamic(async () => {
-    const { TileMapEditor } = await import('./tile_map_editor');
+    const { TileMapEditor } = await import('./tile_map_editor.js');
     return {
       default: TileMapEditor,
     };

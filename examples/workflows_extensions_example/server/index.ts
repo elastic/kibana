@@ -8,6 +8,6 @@
  */
 
 export const plugin = async () => {
-  const { WorkflowsExtensionsExamplePlugin } = await import('./plugin');
+  const { WorkflowsExtensionsExamplePlugin } = await import('./plugin.js');
   return new WorkflowsExtensionsExamplePlugin();
 };

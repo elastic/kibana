@@ -10,6 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export async function plugin(context: PluginInitializerContext) {
-  const { IngestPipelinesPlugin } = await import('./plugin');
+  const { IngestPipelinesPlugin } = await import('./plugin.js');
   return new IngestPipelinesPlugin(context);
 }

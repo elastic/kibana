@@ -211,7 +211,7 @@ export class UptimePlugin
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-        const { renderApp } = await import('./legacy_uptime/app/render_app');
+        const { renderApp } = await import('./legacy_uptime/app/render_app.js');
         return renderApp(
           coreStart,
           plugins,

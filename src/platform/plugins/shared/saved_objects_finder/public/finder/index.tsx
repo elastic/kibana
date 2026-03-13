@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { HOCProps } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectFinderItem, SavedObjectFinderProps } from './saved_object_finder';
 
-const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
+const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder.js'));
 const SavedObjectFinder = (props: HOCProps<SavedObjectFinderItem, SavedObjectFinderProps>) => (
   <React.Suspense
     fallback={

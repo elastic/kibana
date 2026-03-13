@@ -38,7 +38,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { HomeServerPlugin } = await import('./plugin');
+  const { HomeServerPlugin } = await import('./plugin.js');
   return new HomeServerPlugin(initContext);
 };
 

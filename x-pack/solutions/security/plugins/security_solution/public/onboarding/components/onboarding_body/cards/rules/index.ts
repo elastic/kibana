@@ -21,7 +21,7 @@ export const rulesCardConfig: OnboardingCardConfig = {
     () =>
       import(
         /* webpackChunkName: "onboarding_rules_card" */
-        './rules_card'
+        './rules_card.js'
       )
   ),
   checkComplete: checkRulesComplete,

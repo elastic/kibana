@@ -12,7 +12,7 @@ import type { CopyToSpaceFlyoutProps } from '../types';
 export const getCopyToSpaceFlyoutComponent = async (): Promise<
   React.FC<CopyToSpaceFlyoutProps>
 > => {
-  const { CopyToSpaceFlyoutInternal } = await import('./copy_to_space_flyout_internal');
+  const { CopyToSpaceFlyoutInternal } = await import('./copy_to_space_flyout_internal.js');
   return (props: CopyToSpaceFlyoutProps) => {
     return <CopyToSpaceFlyoutInternal {...props} />;
   };

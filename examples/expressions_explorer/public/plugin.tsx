@@ -47,7 +47,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(
           {
             expressions: depsStart.expressions,

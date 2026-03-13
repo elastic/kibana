@@ -12,7 +12,7 @@ import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { RootStreamEmptyPrompt } from './empty_prompts';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
-  import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({
+  import(/* webpackChunkName: "management_enrichment" */ './page_content.js').then((mod) => ({
     default: mod.StreamDetailEnrichmentContent,
   }))
 );

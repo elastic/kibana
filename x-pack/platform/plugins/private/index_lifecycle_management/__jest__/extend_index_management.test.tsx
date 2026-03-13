@@ -32,7 +32,7 @@ initHttp(httpSetup);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
 jest.mock('@kbn/index-management-plugin/public', async () => {
-  const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
+  const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks.js');
   return indexManagementMock.createSetup();
 });
 

@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { CustomBrandingPlugin } = await import('./plugin');
+  const { CustomBrandingPlugin } = await import('./plugin.js');
   return new CustomBrandingPlugin(initializerContext);
 }

@@ -24,116 +24,168 @@ export const ConnectorIconsMap: Map<
 > = new Map([
   [
     '.virustotal',
-    lazy(() => import(/* webpackChunkName: "connectorIconVirustotal" */ './specs/virustotal/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconVirustotal" */ './specs/virustotal/icon/index.js')
+    ),
   ],
   [
     '.alienvault-otx',
     lazy(
       () =>
-        import(/* webpackChunkName: "connectorIconAlienvaultOtx" */ './specs/alienvault_otx/icon')
+        import(
+          /* webpackChunkName: "connectorIconAlienvaultOtx" */ './specs/alienvault_otx/icon/index.js'
+        )
     ),
   ],
-  ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
+  [
+    '.notion',
+    lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon/index.js')),
+  ],
   [
     '.pagerduty-v2',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon/index.js')
+    ),
   ],
   [
     '.pagerduty',
-    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon/index.js')
+    ),
   ],
   [
     '.brave-search',
     lazy(
-      () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon/index.js'
+        )
     ),
   ],
   [
     '.github',
-    lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon/index.js')
+    ),
   ],
   [
     '.jina',
-    lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
+    lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina.js')),
   ],
   [
     '.sharepoint-online',
     lazy(
       () =>
         import(
-          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
+          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon/index.js'
         )
     ),
   ],
   [
     '.salesforce',
-    lazy(() => import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconSalesforce" */ './specs/salesforce/icon/index.js')
+    ),
   ],
   [
     '.abuseipdb',
-    lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon/index.js')
+    ),
   ],
   [
     '.greynoise',
-    lazy(() => import(/* webpackChunkName: "connectorIconGreynoise" */ './specs/greynoise/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconGreynoise" */ './specs/greynoise/icon/index.js')
+    ),
   ],
   [
     '.shodan',
-    lazy(() => import(/* webpackChunkName: "connectorIconShodan" */ './specs/shodan/icon')),
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconShodan" */ './specs/shodan/icon/index.js')
+    ),
   ],
   [
     '.urlvoid',
-    lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon/index.js')
+    ),
   ],
   [
     '.jira-cloud',
     lazy(
       () =>
-        import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
+        import(
+          /* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon/index.js'
+        )
     ),
   ],
   [
     '.google_drive',
     lazy(
-      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon/index.js'
+        )
     ),
   ],
   [
     '.slack2',
-    lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon/index.js')),
   ],
 
   [
     '.firecrawl',
-    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon/index.js')
+    ),
   ],
-  ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
+  [
+    '.zoom',
+    lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon/index.js')),
+  ],
   [
     '.zendesk',
-    lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon/index.js')
+    ),
   ],
   [
     '.servicenow_search',
     lazy(
       () =>
         import(
-          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon'
+          /* webpackChunkName: "connectorIconservicenowsearch" */ './specs/servicenow_search/icon/index.js'
         )
     ),
   ],
   [
     '.tavily',
-    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon/index.js')
+    ),
   ],
   [
     '.google_calendar',
     lazy(
       () =>
-        import(/* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon')
+        import(
+          /* webpackChunkName: "connectorIconGoogleCalendar" */ './specs/google_calendar/icon/index.js'
+        )
     ),
   ],
   [
     '.aws_lambda',
-    lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon/index.js')
+    ),
   ],
 ]);

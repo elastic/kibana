@@ -17,7 +17,7 @@ import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 // Initializing react-query
 const queryClient = new QueryClient();
 
-const SessionViewLazy = lazy(() => import('../components/session_view'));
+const SessionViewLazy = lazy(() => import('../components/session_view/index.js'));
 
 export const ELASTIC_DEFEND_DATA_SOURCE = 'endpoint';
 export const CLOUD_DEFEND_DATA_SOURCE = 'cloud_defend';

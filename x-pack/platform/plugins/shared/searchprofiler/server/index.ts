@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { SearchProfilerServerPlugin } = await import('./plugin');
+  const { SearchProfilerServerPlugin } = await import('./plugin.js');
   return new SearchProfilerServerPlugin(ctx);
 };

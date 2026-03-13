@@ -25,7 +25,7 @@ export class EventAnnotationService {
 
   public getService(): Promise<EventAnnotationServiceType> {
     if (!this.servicePromise) {
-      this.servicePromise = import('./service').then(({ getEventAnnotationService }) =>
+      this.servicePromise = import('./service.js').then(({ getEventAnnotationService }) =>
         getEventAnnotationService(this.core, this.contentManagement)
       );
     }

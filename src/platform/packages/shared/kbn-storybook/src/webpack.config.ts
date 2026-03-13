@@ -53,6 +53,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
+      extensionAlias: {
+        '.js': ['.ts', '.tsx', '.js'],
+      },
       mainFields: ['browser', 'main'],
       alias: {
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),

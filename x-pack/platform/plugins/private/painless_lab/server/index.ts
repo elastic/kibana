@@ -21,6 +21,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { PainlessLabServerPlugin } = await import('./plugin');
+  const { PainlessLabServerPlugin } = await import('./plugin.js');
   return new PainlessLabServerPlugin(ctx);
 };

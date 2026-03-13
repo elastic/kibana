@@ -15,7 +15,7 @@ import { type FieldListItem } from '../../types';
 const Fallback = () => <Fragment />;
 
 const LazyFieldListGrouped = React.lazy(
-  () => import('./field_list_grouped')
+  () => import('./field_list_grouped.js')
 ) as GenericFieldListGrouped;
 
 function WrappedFieldListGrouped<T extends FieldListItem = DataViewField>(

@@ -12,7 +12,7 @@ import type { LiveQueryQueryFieldProps } from '../live_queries/form/live_query_q
 import type { ServicesWrapperProps } from './services_wrapper';
 import ServicesWrapper from './services_wrapper';
 
-const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field'));
+const LiveQueryField = lazy(() => import('../live_queries/form/live_query_query_field.js'));
 
 export const getLazyLiveQueryField =
   (services: ServicesWrapperProps['services']) =>

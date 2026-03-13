@@ -31,11 +31,11 @@ const LoadingIndicator = () => (
 export type CreateModalOpener = (options: OpenCreateModalOptions) => Promise<OverlayRef>;
 
 const LazyCreateTagModal = React.lazy(() =>
-  import('./create_modal').then(({ CreateTagModal }) => ({ default: CreateTagModal }))
+  import('./create_modal.js').then(({ CreateTagModal }) => ({ default: CreateTagModal }))
 );
 
 const LazyEditTagModal = React.lazy(() =>
-  import('./edit_modal').then(({ EditTagModal }) => ({ default: EditTagModal }))
+  import('./edit_modal.js').then(({ EditTagModal }) => ({ default: EditTagModal }))
 );
 
 export const getCreateModalOpener =

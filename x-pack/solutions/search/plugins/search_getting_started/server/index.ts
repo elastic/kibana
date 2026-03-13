@@ -10,7 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { config } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { SearchGettingStartedPlugin } = await import('./plugin');
+  const { SearchGettingStartedPlugin } = await import('./plugin.js');
   return new SearchGettingStartedPlugin(initContext);
 };
 

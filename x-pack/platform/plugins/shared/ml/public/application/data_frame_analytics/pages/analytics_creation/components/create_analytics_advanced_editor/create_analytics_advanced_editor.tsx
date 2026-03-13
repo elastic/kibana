@@ -20,7 +20,7 @@ import { CreateStep } from '../create_step';
 import { ANALYTICS_STEPS } from '../../page';
 
 const EditorComponent = dynamic(async () => ({
-  default: (await import('./editor_component')).EditorComponent,
+  default: (await import('./editor_component.js')).EditorComponent,
 }));
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {

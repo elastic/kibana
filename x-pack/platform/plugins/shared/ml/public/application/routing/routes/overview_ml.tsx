@@ -21,7 +21,7 @@ import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
 
-const OverviewMlPage = React.lazy(() => import('../../overview/overview_ml_page'));
+const OverviewMlPage = React.lazy(() => import('../../overview/overview_ml_page.js'));
 
 export const overviewRouteFactory = (
   navigateToPath: NavigateToPath,

@@ -36,7 +36,7 @@ import type { Section } from './constants';
 import { queryClient } from './query_client';
 
 const ActionsConnectorsHome = lazy(
-  () => import('./sections/actions_connectors_list/components/actions_connectors_home')
+  () => import('./sections/actions_connectors_list/components/actions_connectors_home.js')
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {

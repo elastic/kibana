@@ -141,7 +141,7 @@ export class MonitoringPlugin
 
         const config = Object.fromEntries(externalConfig);
         setConfig(config);
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         return renderApp(coreStart, pluginsStart, params, config);
       },
     };

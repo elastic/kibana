@@ -16,7 +16,7 @@ import type { ComponentType } from 'react';
 import type { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
 
 export const IndexTemplateFlyout = dynamic<ComponentType<IndexTemplateFlyoutWithContextProps>>(() =>
-  import('./index_template_flyout_with_context').then((mod) => ({
+  import('./index_template_flyout_with_context.js').then((mod) => ({
     default: mod.IndexTemplateFlyoutWithContext,
   }))
 );

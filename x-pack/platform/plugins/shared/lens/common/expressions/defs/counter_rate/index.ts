@@ -90,7 +90,7 @@ export const counterRate: CounterRateExpressionFunction = {
 
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { counterRateFn } = await import('../../impl/async_fns');
+    const { counterRateFn } = await import('../../impl/async_fns.js');
     return counterRateFn(...args);
   },
 };

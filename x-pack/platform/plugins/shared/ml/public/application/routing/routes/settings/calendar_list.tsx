@@ -19,7 +19,7 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
 
 const CalendarsList = dynamic(async () => ({
-  default: (await import('../../../settings/calendars')).CalendarsList,
+  default: (await import('../../../settings/calendars/index.js')).CalendarsList,
 }));
 
 export const calendarListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

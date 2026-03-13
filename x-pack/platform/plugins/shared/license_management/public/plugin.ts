@@ -105,7 +105,7 @@ export class LicenseManagementUIPlugin
           docLinks: appDocLinks,
         };
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         const unmountAppCallback = renderApp(element, appDependencies);
 
         return () => {

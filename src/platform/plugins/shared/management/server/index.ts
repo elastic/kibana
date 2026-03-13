@@ -11,6 +11,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ManagementServerPlugin } = await import('./plugin');
+  const { ManagementServerPlugin } = await import('./plugin.js');
   return new ManagementServerPlugin(initContext);
 };

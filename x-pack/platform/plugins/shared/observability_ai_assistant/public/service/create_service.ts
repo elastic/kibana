@@ -61,7 +61,7 @@ export function createService({
       registrations.push(fn);
     },
     start: async ({ signal }) => {
-      const mod = await import('./create_chat_service');
+      const mod = await import('./create_chat_service.js');
       return await mod.createChatService({
         analytics,
         apiClient,

@@ -11,7 +11,7 @@ import type { EmbeddableFlamegraphSharedComponent, FlamegraphProps } from './emb
 import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableFlamegraph = dynamic(async () => {
-  const Component = await import('./embeddable_flamegraph');
+  const Component = await import('./embeddable_flamegraph.js');
   return { default: Component.EmbeddableFlamegraph };
 });
 

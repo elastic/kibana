@@ -294,6 +294,9 @@ export function getWebpackConfig(
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensionAlias: {
+        '.js': ['.ts', '.tsx', '.js'],
+      },
       mainFields: ['browser', 'module', 'main'],
       alias: {
         'react-dom$': 'react-dom/profiling',

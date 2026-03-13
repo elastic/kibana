@@ -26,7 +26,7 @@ export async function renderApp(
   services: ServerlessSearchContext,
   queryClient: QueryClient
 ) {
-  const { WebCrawlersRouter } = await import('./components/web_crawlers_router');
+  const { WebCrawlersRouter } = await import('./components/web_crawlers_router.js');
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

@@ -47,7 +47,7 @@ export class UpgradeAssistantUIPlugin
       });
 
       if (usageCollection) {
-        import('./application/lib/ui_metric').then(({ uiMetricService }) => {
+        import('./application/lib/ui_metric.js').then(({ uiMetricService }) => {
           uiMetricService.setup(usageCollection);
         });
       }
@@ -80,7 +80,9 @@ export class UpgradeAssistantUIPlugin
             },
           };
 
-          const { mountManagementSection } = await import('./application/mount_management_section');
+          const { mountManagementSection } = await import(
+            './application/mount_management_section.js'
+          );
           const unmountAppCallback = mountManagementSection(params, appDependencies);
 
           return () => {

@@ -61,7 +61,7 @@ export const filterByMapExtentAction = createAction<EmbeddableApiContext>({
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     const core = getCore();
     const LazyModal = lazy(async () => {
-      const { FilterByMapExtentModal } = await import('./modal');
+      const { FilterByMapExtentModal } = await import('./modal.js');
       return {
         default: FilterByMapExtentModal,
       };

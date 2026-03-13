@@ -101,7 +101,7 @@ describe('getJestConfigs', () => {
       return { stdout: '' };
     };
 
-    const { getJestConfigs } = await import('./get_jest_configs');
+    const { getJestConfigs } = await import('./get_jest_configs.js');
     const result = await getJestConfigs();
 
     expect(result.configsWithTests).toHaveLength(2);
@@ -120,7 +120,7 @@ describe('getJestConfigs', () => {
       return { stdout: '' };
     };
 
-    const { getJestConfigs } = await import('./get_jest_configs');
+    const { getJestConfigs } = await import('./get_jest_configs.js');
     const result = await getJestConfigs(configPaths);
 
     expect(result.configsWithTests).toHaveLength(1);
@@ -144,7 +144,7 @@ describe('getJestConfigs', () => {
       return { stdout: '' };
     };
 
-    const { getJestConfigs } = await import('./get_jest_configs');
+    const { getJestConfigs } = await import('./get_jest_configs.js');
     const result = await getJestConfigs();
 
     expect(result.orphanedTestFiles).toHaveLength(1);
@@ -168,7 +168,7 @@ describe('getJestConfigs', () => {
       return { stdout: '' };
     };
 
-    const { getJestConfigs } = await import('./get_jest_configs');
+    const { getJestConfigs } = await import('./get_jest_configs.js');
     const result = await getJestConfigs();
 
     expect(result.emptyConfigs).toHaveLength(1);
@@ -192,7 +192,7 @@ describe('getJestConfigs', () => {
       return { stdout: '' };
     };
 
-    const { getJestConfigs } = await import('./get_jest_configs');
+    const { getJestConfigs } = await import('./get_jest_configs.js');
     const result = await getJestConfigs();
 
     // For this simple case, we shouldn't have duplicates

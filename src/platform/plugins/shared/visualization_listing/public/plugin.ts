@@ -62,7 +62,7 @@ export class VisualizationListingPlugin
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi,
         };
 
-        const { getTableList } = await import('./get_table_list');
+        const { getTableList } = await import('./get_table_list.js');
         return getTableList(props, services);
       },
       deepLink: {

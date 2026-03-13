@@ -14,7 +14,7 @@ import type LogsOverview from './doc_viewer_logs_overview';
 import type { LogsOverviewApi } from './doc_viewer_logs_overview/logs_overview';
 
 export const UnifiedDocViewerLogsOverview = dynamic<typeof LogsOverview, LogsOverviewApi>(
-  () => import('./doc_viewer_logs_overview'),
+  () => import('./doc_viewer_logs_overview/index.js'),
   {
     fallback: (
       <EuiDelayRender delay={300}>

@@ -32,7 +32,7 @@ export class UrlDrilldownPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
 
     plugins.embeddable.registerDrilldown(URL_DRILLDOWN_TYPE, async () => {
-      const { getUrlDrilldown } = await import('./lib/get_url_drilldown');
+      const { getUrlDrilldown } = await import('./lib/get_url_drilldown.js');
       return getUrlDrilldown({
         externalUrl: core.http.externalUrl,
         getGlobalScope: () => ({

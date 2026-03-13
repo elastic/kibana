@@ -33,7 +33,7 @@ export const mapToColumns: MapToColumnsExpressionFunction = {
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
     const { mapToOriginalColumns, mapToOriginalColumnsTextBased } = await import(
-      '../../impl/async_fns'
+      '../../impl/async_fns.js'
     );
 
     return args?.[1]?.isTextBased

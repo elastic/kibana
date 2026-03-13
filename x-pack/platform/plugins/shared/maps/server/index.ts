@@ -112,6 +112,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { MapsPlugin } = await import('./plugin');
+  const { MapsPlugin } = await import('./plugin.js');
   return new MapsPlugin(initializerContext);
 };

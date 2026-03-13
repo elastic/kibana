@@ -15,7 +15,7 @@ import type { ChromeNavigationProps } from './navigation';
 
 export type { ChromeNavigationProps } from './navigation';
 
-const NavigationComponentLazy = React.lazy(() => import('./navigation'));
+const NavigationComponentLazy = React.lazy(() => import('./navigation.js'));
 
 export const Navigation: FC<ChromeNavigationProps> = (props) => {
   const { euiTheme } = useEuiTheme();

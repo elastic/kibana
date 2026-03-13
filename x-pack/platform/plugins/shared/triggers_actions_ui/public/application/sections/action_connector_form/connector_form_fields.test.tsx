@@ -50,7 +50,7 @@ describe('ConnectorFormFields', () => {
 
   it('shows the connector fields', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
     });
 
     const result = appMockRenderer.render(

@@ -109,7 +109,7 @@ export const getPatternAnalysisEmbeddableFactory = (
         onEdit: async () => {
           try {
             const { resolveEmbeddablePatternAnalysisUserInput } = await import(
-              './resolve_pattern_analysis_config_input'
+              './resolve_pattern_analysis_config_input.js'
             );
 
             const result = await resolveEmbeddablePatternAnalysisUserInput(

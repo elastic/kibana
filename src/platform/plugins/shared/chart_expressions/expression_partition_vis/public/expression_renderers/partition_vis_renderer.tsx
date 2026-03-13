@@ -48,7 +48,7 @@ export const strings = {
     }),
 };
 
-const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
+const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component.js'));
 const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
 
 const partitionVisRenderer = css({

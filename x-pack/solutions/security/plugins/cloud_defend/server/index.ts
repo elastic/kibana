@@ -11,7 +11,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { CloudDefendPlugin } = await import('./plugin');
+  const { CloudDefendPlugin } = await import('./plugin.js');
   return new CloudDefendPlugin(initializerContext);
 }
 

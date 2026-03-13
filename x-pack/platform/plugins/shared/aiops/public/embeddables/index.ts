@@ -18,27 +18,27 @@ export const registerEmbeddables = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
   embeddable.registerReactEmbeddableFactory(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
-    const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
+    const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart/index.js');
     return getChangePointChartEmbeddableFactory(core.getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
-    const { transformOut } = await import('./change_point_chart');
+    const { transformOut } = await import('./change_point_chart/index.js');
     return transformOut as (storedState: object, references?: Reference[]) => object;
   });
   embeddable.registerReactEmbeddableFactory(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
-    const { getPatternAnalysisEmbeddableFactory } = await import('./pattern_analysis');
+    const { getPatternAnalysisEmbeddableFactory } = await import('./pattern_analysis/index.js');
     return getPatternAnalysisEmbeddableFactory(core.getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
-    const { transformOut } = await import('./pattern_analysis');
+    const { transformOut } = await import('./pattern_analysis/index.js');
     return transformOut as (storedState: object, references?: Reference[]) => object;
   });
   embeddable.registerReactEmbeddableFactory(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
-    const { getLogRateAnalysisEmbeddableFactory } = await import('./log_rate_analysis');
+    const { getLogRateAnalysisEmbeddableFactory } = await import('./log_rate_analysis/index.js');
     return getLogRateAnalysisEmbeddableFactory(core.getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
-    const { transformOut } = await import('./log_rate_analysis');
+    const { transformOut } = await import('./log_rate_analysis/index.js');
     return transformOut;
   });
 };

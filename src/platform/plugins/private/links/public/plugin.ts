@@ -85,7 +85,7 @@ export class LinksPlugin
       });
 
       plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
-        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
+        const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable.js');
         return getLinksEmbeddableFactory();
       });
 
@@ -117,7 +117,7 @@ export class LinksPlugin
                 editor: {
                   onEdit: async (savedObjectId: string) => {
                     const { onVisualizationsEdit } = await import(
-                      './editor/on_visualizations_edit'
+                      './editor/on_visualizations_edit.js'
                     );
                     onVisualizationsEdit(savedObjectId);
                   },
@@ -143,7 +143,7 @@ export class LinksPlugin
       ADD_PANEL_TRIGGER,
       ADD_LINKS_PANEL_ACTION_ID,
       async () => {
-        const { addLinksPanelAction } = await import('./actions/add_links_panel_action');
+        const { addLinksPanelAction } = await import('./actions/add_links_panel_action.js');
         return addLinksPanelAction;
       }
     );
@@ -151,7 +151,7 @@ export class LinksPlugin
     plugins.presentationUtil.registerPanelPlacementSettings(
       LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: LinksEmbeddableState) => {
-        const { getPanelPlacement } = await import('./embeddable/embeddable_module');
+        const { getPanelPlacement } = await import('./embeddable/embeddable_module.js');
         const placementSettings = await getPanelPlacement(serializedState);
         return { placementSettings };
       }

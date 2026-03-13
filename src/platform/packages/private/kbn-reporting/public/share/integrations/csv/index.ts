@@ -21,7 +21,7 @@ export const reportingCsvExportShareIntegration = ({
     id: 'csvReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
-      const { getShareMenuItems } = await import('./csv_export_config');
+      const { getShareMenuItems } = await import('./csv_export_config.js');
       return getShareMenuItems({ apiClient, startServices$, csvConfig, isServerless })(...args);
     },
     prerequisiteCheck: ({ license, capabilities }) => {

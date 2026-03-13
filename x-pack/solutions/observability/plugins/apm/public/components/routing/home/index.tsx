@@ -23,29 +23,31 @@ import { storageExplorer } from './storage_explorer';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
 const ServiceGroupTemplate = dynamic(() =>
-  import('../templates/service_group_template').then((mod) => ({
+  import('../templates/service_group_template.js').then((mod) => ({
     default: mod.ServiceGroupTemplate,
   }))
 );
 const ServiceInventory = dynamic(() =>
-  import('../../app/service_inventory').then((mod) => ({ default: mod.ServiceInventory }))
+  import('../../app/service_inventory/index.js').then((mod) => ({ default: mod.ServiceInventory }))
 );
 const ServiceMapHome = dynamic(() =>
-  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapHome }))
+  import('../../app/service_map/index.js').then((mod) => ({ default: mod.ServiceMapHome }))
 );
 const TopTracesOverview = dynamic(() =>
-  import('../../app/top_traces_overview').then((mod) => ({ default: mod.TopTracesOverview }))
+  import('../../app/top_traces_overview/index.js').then((mod) => ({
+    default: mod.TopTracesOverview,
+  }))
 );
 const TraceExplorer = dynamic(() =>
-  import('../../app/trace_explorer').then((mod) => ({ default: mod.TraceExplorer }))
+  import('../../app/trace_explorer/index.js').then((mod) => ({ default: mod.TraceExplorer }))
 );
 const TraceExplorerWaterfall = dynamic(() =>
-  import('../../app/trace_explorer/trace_explorer_waterfall').then((mod) => ({
+  import('../../app/trace_explorer/trace_explorer_waterfall.js').then((mod) => ({
     default: mod.TraceExplorerWaterfall,
   }))
 );
 const TraceOverview = dynamic(() =>
-  import('../../app/trace_overview').then((mod) => ({ default: mod.TraceOverview }))
+  import('../../app/trace_overview/index.js').then((mod) => ({ default: mod.TraceOverview }))
 );
 
 function serviceGroupPage<TPath extends string>({

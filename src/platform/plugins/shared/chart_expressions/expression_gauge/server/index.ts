@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { ExpressionGaugePlugin } = await import('./plugin');
+  const { ExpressionGaugePlugin } = await import('./plugin.js');
   return new ExpressionGaugePlugin();
 }

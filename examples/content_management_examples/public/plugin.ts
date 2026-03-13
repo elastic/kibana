@@ -25,7 +25,7 @@ export class ContentManagementExamplesPlugin
       title: `Content Management Examples`,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./examples');
+        const { renderApp } = await import('./examples/index.js');
         const [coreStart, deps] = await core.getStartServices();
         return renderApp(coreStart, deps, params);
       },

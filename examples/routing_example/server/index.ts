@@ -10,6 +10,6 @@
 import type { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<{}, {}> = async () => {
-  const { RoutingExamplePlugin } = await import('./plugin');
+  const { RoutingExamplePlugin } = await import('./plugin.js');
   return new RoutingExamplePlugin();
 };

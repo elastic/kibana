@@ -241,7 +241,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         filter((cfg) => cfg.localShipper === true),
         first(),
         map(async () => {
-          const { initializeLocalShipper } = await import('./local_shipper');
+          const { initializeLocalShipper } = await import('./local_shipper/index.js');
           initializeLocalShipper(this.logger.get('local-shipper'), coreSetup);
         })
       )

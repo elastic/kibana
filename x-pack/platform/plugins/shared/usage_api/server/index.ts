@@ -17,6 +17,6 @@ export type {
 export { config } from './config';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { UsageApiPlugin } = await import('./plugin');
+  const { UsageApiPlugin } = await import('./plugin.js');
   return new UsageApiPlugin(initializerContext);
 };

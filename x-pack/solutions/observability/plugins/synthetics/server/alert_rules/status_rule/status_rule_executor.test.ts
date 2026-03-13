@@ -114,7 +114,7 @@ describe('StatusRuleExecutor', () => {
 
     it('should use all monitorLocationIds when params locations is an empty array', async () => {
       // Create a spy on the queryMonitorStatusAlert function
-      const queryMonitorStatusAlertModule = await import('./queries/query_monitor_status_alert');
+      const queryMonitorStatusAlertModule = await import('./queries/query_monitor_status_alert.js');
       const spy = jest
         .spyOn(queryMonitorStatusAlertModule, 'queryMonitorStatusAlert')
         .mockResolvedValue({

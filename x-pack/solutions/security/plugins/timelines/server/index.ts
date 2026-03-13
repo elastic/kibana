@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { ConfigSchema } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { TimelinesPlugin } = await import('./plugin');
+  const { TimelinesPlugin } = await import('./plugin.js');
   return new TimelinesPlugin(initializerContext);
 }
 

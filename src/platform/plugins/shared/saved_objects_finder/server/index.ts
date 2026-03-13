@@ -8,6 +8,6 @@
  */
 
 export const plugin = async () => {
-  const { SavedObjectsServerPlugin } = await import('./plugin');
+  const { SavedObjectsServerPlugin } = await import('./plugin.js');
   return new SavedObjectsServerPlugin();
 };

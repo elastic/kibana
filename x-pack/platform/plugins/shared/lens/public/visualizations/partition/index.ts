@@ -28,7 +28,7 @@ export class PieVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const [{ getPieVisualization }, paletteService] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
       ]);
 

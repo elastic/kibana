@@ -22,7 +22,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques.js'
   );
 };
 

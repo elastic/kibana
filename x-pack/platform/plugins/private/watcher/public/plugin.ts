@@ -55,8 +55,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
 
         docTitle.change(pluginName);
 
-        const { renderApp } = await import('./application');
-        const { TimeBuckets } = await import('./legacy');
+        const { renderApp } = await import('./application/index.js');
+        const { TimeBuckets } = await import('./legacy/index.js');
 
         const unmountAppCallback = renderApp({
           // Skip the first license status, because that's already been used to determine

@@ -17,7 +17,7 @@ interface PluginStartDeps {
 }
 
 const LazyInspectButton = lazy(() =>
-  import('./components/inspect/inspect_button').then(({ InspectButton }) => ({
+  import('./components/inspect/inspect_button.js').then(({ InspectButton }) => ({
     default: InspectButton,
   }))
 );

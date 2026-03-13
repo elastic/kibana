@@ -13,7 +13,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { TelemetryCollectionManagerPlugin } = await import('./plugin');
+  const { TelemetryCollectionManagerPlugin } = await import('./plugin.js');
   return new TelemetryCollectionManagerPlugin(initializerContext);
 }
 

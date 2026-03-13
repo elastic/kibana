@@ -25,7 +25,7 @@ export async function createEMSClientLazy(
   lazyLoaded = await new Promise(async (resolve, reject) => {
     try {
       try {
-        const { createEMSClient } = await import('./create_ems_client');
+        const { createEMSClient } = await import('./create_ems_client.js');
         resolve(createEMSClient);
       } catch (error) {
         reject(error);

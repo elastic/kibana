@@ -32,7 +32,7 @@ export class EvalsPublicPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       visibleIn: ['sideNav', 'globalSearch'],
       mount: async (appMountParameters: AppMountParameters) => {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await coreSetup.getStartServices();
         return renderApp(coreStart, appMountParameters);
       },

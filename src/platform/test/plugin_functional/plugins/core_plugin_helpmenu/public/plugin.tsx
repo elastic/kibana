@@ -31,7 +31,7 @@ export class CoreHelpMenuPlugin
           ],
         });
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp('Help Menu Test App', params, startServices);
       },
     });

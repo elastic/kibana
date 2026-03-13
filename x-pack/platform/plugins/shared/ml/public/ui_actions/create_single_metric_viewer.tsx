@@ -64,7 +64,7 @@ export function createAddSingleMetricViewerPanelAction(
 
       const [coreStart, { data, share }] = await getStartServices();
 
-      const { mlApiProvider } = await import('../application/services/ml_api_service');
+      const { mlApiProvider } = await import('../application/services/ml_api_service/index.js');
       const httpService = new HttpService(coreStart.http);
       const mlApi: MlApi = mlApiProvider(httpService);
 

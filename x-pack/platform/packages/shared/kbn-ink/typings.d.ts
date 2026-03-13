@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-declare module 'ink' {
-  export * from 'ink/build';
-}
+export {};

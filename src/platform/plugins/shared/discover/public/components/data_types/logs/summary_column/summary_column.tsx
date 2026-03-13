@@ -15,7 +15,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 const LazySummaryColumn = dynamic(
   () =>
     import(
-      '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column'
+      '@kbn/discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.js'
     )
 );
 

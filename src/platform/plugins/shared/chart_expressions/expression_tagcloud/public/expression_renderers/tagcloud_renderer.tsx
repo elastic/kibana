@@ -47,7 +47,7 @@ const tagCloudVisClass = {
   height: '100%',
 };
 
-const TagCloudChart = lazy(() => import('../components/tagcloud_component'));
+const TagCloudChart = lazy(() => import('../components/tagcloud_component.js'));
 
 export const tagcloudRenderer: (
   deps: ExpressionTagcloudRendererDependencies

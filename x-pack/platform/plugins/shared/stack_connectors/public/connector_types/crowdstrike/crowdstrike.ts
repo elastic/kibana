@@ -34,7 +34,7 @@ export function getConnectorType(): ConnectorTypeModel<
   return {
     id: CONNECTOR_ID,
     actionTypeTitle: CONNECTOR_NAME,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     isExperimental: false,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.crowdstrike.config.selectMessageText',
@@ -45,7 +45,7 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: CrowdstrikeActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors: ValidationErrors = {
         subAction: [],
       };
@@ -59,8 +59,8 @@ export function getConnectorType(): ConnectorTypeModel<
       }
       return { errors };
     },
-    actionConnectorFields: lazy(() => import('./crowdstrike_connector')),
-    actionParamsFields: lazy(() => import('./crowdstrike_params')),
+    actionConnectorFields: lazy(() => import('./crowdstrike_connector.js')),
+    actionParamsFields: lazy(() => import('./crowdstrike_params.js')),
     subFeature: 'endpointSecurity',
   };
 }

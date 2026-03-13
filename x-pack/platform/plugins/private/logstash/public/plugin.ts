@@ -51,7 +51,7 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       order: 1,
       mount: async (params) => {
         const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         const isMonitoringEnabled = 'monitoring' in plugins;
 
         const { docTitle } = coreStart.chrome;

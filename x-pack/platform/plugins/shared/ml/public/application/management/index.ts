@@ -167,7 +167,7 @@ export function registerManagementSections(
             ...deps,
           };
 
-          const { mountApp } = await import('./mount_management_app');
+          const { mountApp } = await import('./mount_management_app.js');
           const unmountAppCallback = await mountApp(
             core,
             params,

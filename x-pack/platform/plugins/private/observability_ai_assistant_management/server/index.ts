@@ -8,6 +8,6 @@
 export { config } from './config';
 
 export const plugin = async () => {
-  const { AiAssistantManagementPlugin } = await import('./plugin');
+  const { AiAssistantManagementPlugin } = await import('./plugin.js');
   return new AiAssistantManagementPlugin();
 };

@@ -32,18 +32,18 @@ export const getMlServices = async (
     { toastNotificationServiceProvider },
     { mlJobServiceFactory },
   ] = await Promise.all([
-    await import('../../application/services/anomaly_detector_service'),
-    await import('../../application/services/field_format_service_factory'),
-    await import('../../application/util/index_service'),
-    await import('../../application/util/time_series_explorer_service'),
-    await import('../../application/services/ml_api_service'),
-    await import('../../application/services/results_service'),
-    await import('../../application/capabilities/check_capabilities'),
+    await import('../../application/services/anomaly_detector_service.js'),
+    await import('../../application/services/field_format_service_factory.js'),
+    await import('../../application/util/index_service.js'),
+    await import('../../application/util/time_series_explorer_service.js'),
+    await import('../../application/services/ml_api_service/index.js'),
+    await import('../../application/services/results_service/index.js'),
+    await import('../../application/capabilities/check_capabilities.js'),
     await import(
-      '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
+      '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service.js'
     ),
-    await import('../../application/services/toast_notification_service'),
-    await import('../../application/services/job_service'),
+    await import('../../application/services/toast_notification_service/index.js'),
+    await import('../../application/services/job_service.js'),
   ]);
 
   const httpService = new HttpService(coreStart.http);

@@ -50,7 +50,7 @@ export function createAddPatternAnalysisEmbeddableAction(
 
       try {
         const { resolveEmbeddablePatternAnalysisUserInput } = await import(
-          '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input'
+          '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input.js'
         );
 
         const embeddable = await presentationContainerParent.addNewPanel<

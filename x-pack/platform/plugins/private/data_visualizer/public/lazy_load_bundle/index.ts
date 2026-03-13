@@ -23,7 +23,7 @@ export async function lazyLoadModules(resultsLinks: ResultLinks): Promise<LazyLo
 
   loadModulesPromise = new Promise(async (resolve, reject) => {
     try {
-      const lazyImports = await import('./lazy');
+      const lazyImports = await import('./lazy/index.js');
       resolve({ ...lazyImports, resultsLinks });
     } catch (error) {
       reject(error);

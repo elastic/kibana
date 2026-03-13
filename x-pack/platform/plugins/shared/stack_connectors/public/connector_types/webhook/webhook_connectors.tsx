@@ -28,7 +28,7 @@ const HTTP_VERBS = [
 ];
 const { emptyField, urlField } = fieldValidators;
 
-const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
+const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config.js'));
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,

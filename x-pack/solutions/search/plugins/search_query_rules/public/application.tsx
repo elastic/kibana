@@ -22,7 +22,7 @@ export const renderApp = async (
   services: AppPluginStartDependencies,
   element: HTMLElement
 ) => {
-  const { QueryRulesRouter } = await import('./search_query_router');
+  const { QueryRulesRouter } = await import('./search_query_router.js');
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

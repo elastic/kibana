@@ -31,7 +31,7 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
   const validateParams = async (
     actionParams: TorqActionParams
   ): Promise<GenericValidationResult<TorqActionParams>> => {
-    const translations = await import('./translations');
+    const translations = await import('./translations.js');
     const errors = {
       body: [] as string[],
     };
@@ -50,12 +50,12 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
   };
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.TORQ_SELECT_MESSAGE,
     actionTypeTitle: i18n.TORQ_ACTION_TYPE_TITLE,
     validateParams,
-    actionConnectorFields: lazy(() => import('./torq_connectors')),
-    actionParamsFields: lazy(() => import('./torq_params')),
+    actionConnectorFields: lazy(() => import('./torq_connectors.js')),
+    actionParamsFields: lazy(() => import('./torq_params.js')),
     defaultActionParams: {
       body: torqDefaultBody,
     },

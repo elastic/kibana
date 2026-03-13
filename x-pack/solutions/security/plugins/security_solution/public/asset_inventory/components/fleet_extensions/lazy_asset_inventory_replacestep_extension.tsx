@@ -8,5 +8,5 @@
 import { lazy } from 'react';
 
 export const LazyAssetInventoryReplaceDefineStepExtension = lazy(
-  () => import('./policy_template_form')
+  () => import('./policy_template_form.js')
 );

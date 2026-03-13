@@ -8,7 +8,7 @@
 export { config } from './config';
 
 export const plugin = async () => {
-  const { ServerlessPlugin } = await import('./plugin');
+  const { ServerlessPlugin } = await import('./plugin.js');
   return new ServerlessPlugin();
 };
 

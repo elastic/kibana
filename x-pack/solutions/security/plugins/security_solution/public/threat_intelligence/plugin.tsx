@@ -9,7 +9,9 @@ import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EnterpriseGuard } from './containers/enterprise_guard';
 
-const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicators_page_wrapper'));
+const LazyIndicatorsPageWrapper = React.lazy(
+  () => import('./containers/indicators_page_wrapper.js')
+);
 
 export const ThreatIntelligenceApp = () => {
   return (

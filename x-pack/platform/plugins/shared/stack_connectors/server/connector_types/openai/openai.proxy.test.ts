@@ -105,13 +105,16 @@ describe('OpenAI with proxy config', () => {
   it('verifies that the OpenAI client is initialized with the custom proxy HTTP agent', () => {
     // @ts-ignore .openAI is private
     const openAIClient = connector.openAI;
+    const httpAgent = openAIClient.httpAgent as
+      | { proxy: { host: string; port: number } }
+      | undefined;
 
     // Verify the client was initialized with the custom agent configuration
     expect(openAIClient).toBeDefined();
-    expect(openAIClient.httpAgent).toBeDefined();
-    expect(openAIClient.httpAgent.proxy).toBeDefined();
-    expect(openAIClient.httpAgent.proxy.host).toBe(PROXY_HOST);
-    expect(openAIClient.httpAgent.proxy.port).toBe(80);
+    expect(httpAgent).toBeDefined();
+    expect(httpAgent!.proxy).toBeDefined();
+    expect(httpAgent!.proxy.host).toBe(PROXY_HOST);
+    expect(httpAgent!.proxy.port).toBe(80);
   });
 
   it('verifies that requests use the configured HTTP agent', async () => {

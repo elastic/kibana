@@ -19,8 +19,8 @@ export const getLazyEndpointGenericErrorsListExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackageGenericErrorsListComponent>(async () => {
     const [{ withSecurityContext }, { EndpointGenericErrorsList }] = await Promise.all([
-      import('../../../../../common/components/with_security_context/with_security_context'),
-      import('./endpoint_generic_errors_list'),
+      import('../../../../../common/components/with_security_context/with_security_context.js'),
+      import('./endpoint_generic_errors_list.js'),
     ]);
 
     return {

@@ -95,7 +95,7 @@ export class EventAnnotationListingPlugin
           },
         };
 
-        const { getTableList } = await import('./get_table_list');
+        const { getTableList } = await import('./get_table_list.js');
         return getTableList(props, services);
       },
     };

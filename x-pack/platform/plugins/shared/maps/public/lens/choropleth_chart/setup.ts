@@ -26,7 +26,7 @@ export function setupLensChoroplethChart(
   lens.registerVisualization(async () => {
     const [coreStart, plugins]: [CoreStart, MapsPluginStartDependencies, unknown] =
       await coreSetup.getStartServices();
-    const { getVisualization } = await import('./visualization');
+    const { getVisualization } = await import('./visualization.js');
 
     return getVisualization({
       theme: coreStart.theme,

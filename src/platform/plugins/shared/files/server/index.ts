@@ -45,6 +45,6 @@ export type {
 export type { FileServiceFactory } from './file_service/file_service_factory';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { FilesPlugin } = await import('./plugin');
+  const { FilesPlugin } = await import('./plugin.js');
   return new FilesPlugin(initializerContext);
 }

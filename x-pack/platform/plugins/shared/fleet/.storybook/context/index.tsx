@@ -153,7 +153,7 @@ export const StorybookContext: React.FC<{
     setCustomIntegrations({
       getAppendCustomIntegrations: async () => [],
       getReplacementCustomIntegrations: async () => {
-        const { integrations } = await import('./fixtures/replacement_integrations');
+        const { integrations } = await import('./fixtures/replacement_integrations.js');
         return integrations;
       },
     });

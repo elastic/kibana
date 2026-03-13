@@ -15,7 +15,7 @@ import { UserAPIClient } from '../../management/users';
 export const getChangePasswordComponent = async (
   core: CoreStart
 ): Promise<React.FC<ChangePasswordProps>> => {
-  const { ChangePassword } = await import('./change_password');
+  const { ChangePassword } = await import('./change_password.js');
 
   return (props: ChangePasswordProps) => {
     return (

@@ -74,7 +74,7 @@ export class PluginContract {
 const lazyResolver = async () => {
   const { resolverPluginSetup } = await import(
     /* webpackChunkName: "resolver" */
-    './resolver'
+    './resolver/index.js'
   );
   return resolverPluginSetup();
 };

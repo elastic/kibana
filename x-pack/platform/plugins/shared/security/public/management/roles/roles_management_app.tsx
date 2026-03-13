@@ -59,12 +59,12 @@ export const rolesManagementApp = Object.freeze({
           { UserAPIClient },
         ] = await Promise.all([
           getStartServices(),
-          import('./roles_grid'),
-          import('./edit_role'),
-          import('./roles_api_client'),
-          import('./indices_api_client'),
-          import('./privileges_api_client'),
-          import('../users'),
+          import('./roles_grid/index.js'),
+          import('./edit_role/index.js'),
+          import('./roles_api_client.js'),
+          import('./indices_api_client.js'),
+          import('./privileges_api_client.js'),
+          import('../users/index.js'),
         ]);
 
         const { application, http, chrome } = startServices;

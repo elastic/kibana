@@ -47,7 +47,7 @@ export async function loadESQLAttributes({
       query: `FROM ${indexName}`,
       http: coreStart.http,
     }),
-    import('../async_services'),
+    import('../async_services.js'),
   ]);
 
   const esqlQuery = getInitialESQLQuery(dataView);

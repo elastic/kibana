@@ -105,7 +105,7 @@ export const EmbeddableRenderer = <
               embeddableUuid: string,
               state: SerializedDrilldowns
             ) => {
-              const { initializeDrilldownsManager } = await import('../async_module');
+              const { initializeDrilldownsManager } = await import('../async_module.js');
               return initializeDrilldownsManager(embeddableUuid, state);
             },
           });

@@ -13,7 +13,7 @@ import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constan
 const queryClient = new QueryClient();
 
 const RulesSettingsLinkLazy: React.FC<{ alertDeleteCategoryIds?: AlertDeleteCategoryIds[] }> = lazy(
-  () => import('../application/components/rules_setting/rules_settings_link')
+  () => import('../application/components/rules_setting/rules_settings_link.js')
 );
 
 export const getRulesSettingsLinkLazy = ({

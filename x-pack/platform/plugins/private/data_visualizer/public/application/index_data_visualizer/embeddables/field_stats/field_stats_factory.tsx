@@ -61,7 +61,7 @@ export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
 }
 
-const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
+const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper.js'));
 
 const ERROR_MSG = {
   APPLY_FILTER_ERR: i18n.translate('xpack.dataVisualizer.fieldStats.errors.errorApplyingFilter', {
@@ -245,7 +245,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             },
             loadContent: async ({ closeFlyout }) => {
               const { EmbeddableFieldStatsUserInput } = await import(
-                './field_stats_embeddable_input'
+                './field_stats_embeddable_input.js'
               );
               return (
                 <EmbeddableFieldStatsUserInput

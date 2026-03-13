@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: WorkflowsActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors = {
         'subActionParams.workflowId': [] as string[],
       };
@@ -46,8 +46,8 @@ export function getConnectorType(): ConnectorTypeModel<
       }
       return validationResult;
     },
-    actionConnectorFields: lazy(() => import('./workflows_connectors')),
-    actionParamsFields: lazy(() => import('./workflows_params')),
+    actionConnectorFields: lazy(() => import('./workflows_connectors.js')),
+    actionParamsFields: lazy(() => import('./workflows_params.js')),
     isSystemActionType: true,
   };
 }

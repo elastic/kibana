@@ -14,7 +14,7 @@ import type { PresentationPanelErrorProps } from './presentation_panel_error_int
 
 const Component = dynamic(
   async () => {
-    const { PresentationPanelErrorInternal } = await import('./panel_module');
+    const { PresentationPanelErrorInternal } = await import('./panel_module.js');
     return {
       default: PresentationPanelErrorInternal,
     };

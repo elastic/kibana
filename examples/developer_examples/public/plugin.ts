@@ -27,7 +27,7 @@ export class DeveloperExamplesPlugin implements Plugin<DeveloperExamplesSetup, v
       order: -2000,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         const [coreStart] = await core.getStartServices();
         const { rendering } = coreStart;
         return renderApp(

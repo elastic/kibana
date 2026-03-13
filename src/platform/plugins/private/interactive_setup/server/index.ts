@@ -23,6 +23,6 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
 export const plugin: PluginInitializer<void, never> = async (
   initializerContext: PluginInitializerContext
 ) => {
-  const { InteractiveSetupPlugin } = await import('./plugin');
+  const { InteractiveSetupPlugin } = await import('./plugin.js');
   return new InteractiveSetupPlugin(initializerContext);
 };

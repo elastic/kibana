@@ -10,6 +10,6 @@
 import type { LoadFieldStatsHandler } from './load_field_stats';
 
 export const loadFieldStats: LoadFieldStatsHandler = async (params) => {
-  const { loadFieldStats: loadFieldStatsHandler } = await import('./load_field_stats');
+  const { loadFieldStats: loadFieldStatsHandler } = await import('./load_field_stats.js');
   return await loadFieldStatsHandler(params);
 };

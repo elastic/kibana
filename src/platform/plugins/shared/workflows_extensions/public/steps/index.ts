@@ -10,39 +10,43 @@
 import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
-  stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
-    import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
+    import('./data/data_map_step.js').then((m) => m.dataMapStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_filter_step').then((m) => m.dataFilterStepDefinition)
+    import('./data/data_dedupe_step.js').then((m) => m.dataDedupeStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_find_step').then((m) => m.dataFindStepDefinition)
+    import('./data/data_filter_step.js').then((m) => m.dataFilterStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_regex_extract_step').then((m) => m.dataRegexExtractStepDefinition)
+    import('./data/data_find_step.js').then((m) => m.dataFindStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_regex_replace_step').then((m) => m.dataRegexReplaceStepDefinition)
+    import('./data/data_regex_extract_step.js').then((m) => m.dataRegexExtractStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_aggregate_step').then((m) => m.dataAggregateStepDefinition)
-  );
-  stepRegistry.register(() => import('./ai/ai_prompt_step').then((m) => m.AiPromptStepDefinition));
-  stepRegistry.register(() =>
-    import('./ai/ai_summarize_step').then((m) => m.AiSummarizeStepDefinition)
+    import('./data/data_regex_replace_step.js').then((m) => m.dataRegexReplaceStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./ai/ai_classify_step').then((m) => m.AiClassifyStepDefinition)
+    import('./data/data_aggregate_step.js').then((m) => m.dataAggregateStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_stringify_json_step').then((m) => m.dataStringifyJsonStepDefinition)
+    import('./ai/ai_prompt_step.js').then((m) => m.AiPromptStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_parse_json_step').then((m) => m.dataParseJsonStepDefinition)
+    import('./ai/ai_summarize_step.js').then((m) => m.AiSummarizeStepDefinition)
   );
   stepRegistry.register(() =>
-    import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
+    import('./ai/ai_classify_step.js').then((m) => m.AiClassifyStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_stringify_json_step.js').then((m) => m.dataStringifyJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_parse_json_step.js').then((m) => m.dataParseJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_concat_step.js').then((m) => m.dataConcatStepDefinition)
   );
 };

@@ -195,7 +195,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application/app');
+        const { renderApp } = await import('./application/app.js');
         return renderApp(
           coreStart,
           {
@@ -280,7 +280,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             }
 
             const { registerMlUiActions, registerSearchLinks, registerCasesAttachments } =
-              await import('./register_helper');
+              await import('./register_helper/index.js');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -297,7 +297,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             ) {
               // This module contains async imports itself, and it is conditionally loaded based on the license. We'll save
               // traffic if we load it async.
-              const { registerMlAlerts } = await import('./alerting/register_ml_alerts');
+              const { registerMlAlerts } = await import('./alerting/register_ml_alerts.js');
 
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
@@ -327,7 +327,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 if (pluginsSetup.maps) {
                   // This module contains async imports itself, and it is conditionally loaded if maps is enabled. We'll save
                   // traffic if we load it async.
-                  const { registerMapExtension } = await import('./maps/register_map_extension');
+                  const { registerMapExtension } = await import('./maps/register_map_extension.js');
 
                   // Pass canGetJobs as minimum permission to show anomalies card in maps layers
                   await registerMapExtension(pluginsSetup.maps, core, {

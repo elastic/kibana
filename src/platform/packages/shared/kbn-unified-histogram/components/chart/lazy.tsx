@@ -14,7 +14,7 @@ import type { BreakdownFieldSelectorProps } from './breakdown_field_selector';
 
 export type { BreakdownFieldSelectorProps } from './breakdown_field_selector';
 
-const LazyUnifiedBreakdownFieldSelector = lazy(() => import('./breakdown_field_selector'));
+const LazyUnifiedBreakdownFieldSelector = lazy(() => import('./breakdown_field_selector.js'));
 
 /**
  * A resizable layout component with two panels that renders a histogram with a hits

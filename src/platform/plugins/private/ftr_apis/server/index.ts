@@ -10,7 +10,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { FtrApisPlugin } = await import('./plugin');
+  const { FtrApisPlugin } = await import('./plugin.js');
   return new FtrApisPlugin(initializerContext);
 }
 

@@ -20,7 +20,7 @@ export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
     }),
     iconClass: 'alert',
     documentationUrl: (docLinks) => docLinks.links.alerting.indexThreshold,
-    ruleParamsExpression: lazy(() => import('./expression')),
+    ruleParamsExpression: lazy(() => import('./expression.js')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',

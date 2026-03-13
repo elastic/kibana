@@ -10,7 +10,7 @@ import { type PluginConfigDescriptor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { Plugin } = await import('./plugin');
+  const { Plugin } = await import('./plugin.js');
   return new Plugin();
 };
 

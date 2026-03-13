@@ -50,12 +50,12 @@ export function createLogThresholdRuleType(
 ): ObservabilityRuleTypeModel<PartialRuleParams> {
   const ruleParamsExpression = createLazyComponentWithKibanaContext(
     core,
-    () => import('./components/expression_editor/editor')
+    () => import('./components/expression_editor/editor.js')
   );
 
   const alertDetailsAppSection = createLazyComponentWithKibanaContext(
     core,
-    () => import('./components/alert_details_app_section')
+    () => import('./components/alert_details_app_section/index.js')
   );
 
   const logsLocator = getLogsLocatorFromUrlService(urlService)!;

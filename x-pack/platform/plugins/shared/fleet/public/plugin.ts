@@ -215,7 +215,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud,
           authz: fleetStart.authz,
         };
-        const { renderApp, teardownIntegrations } = await import('./applications/integrations');
+        const { renderApp, teardownIntegrations } = await import(
+          './applications/integrations/index.js'
+        );
 
         const Tracker =
           deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -258,7 +260,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud,
           authz: fleetStart.authz,
         };
-        const { renderApp, teardownFleet } = await import('./applications/fleet');
+        const { renderApp, teardownFleet } = await import('./applications/fleet/index.js');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
         return () => {
           unmount();

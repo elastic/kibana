@@ -23,10 +23,10 @@ import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 import { Panel, PanelIndicator } from './summary/panel';
 import { Card } from './quality_summary_cards/card';
 
-const OverviewHeader = dynamic(() => import('./header'), {
+const OverviewHeader = dynamic(() => import('./header.js'), {
   fallback: <EuiSkeletonTitle size="m" />,
 });
-const Summary = dynamic(() => import('./summary'), {
+const Summary = dynamic(() => import('./summary/index.js'), {
   fallback: (
     <EuiFlexGroup gutterSize="m">
       <Panel title="" isLoading={true}>
@@ -40,7 +40,7 @@ const Summary = dynamic(() => import('./summary'), {
     </EuiFlexGroup>
   ),
 });
-const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
+const QualitySummaryCards = dynamic(() => import('./quality_summary_cards/index.js'), {
   fallback: (
     <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
       <EuiFlexItem grow={true}>
@@ -53,7 +53,7 @@ const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
   ),
 });
 
-const DocumentTrends = dynamic(() => import('./document_trends'));
+const DocumentTrends = dynamic(() => import('./document_trends/index.js'));
 
 export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const {

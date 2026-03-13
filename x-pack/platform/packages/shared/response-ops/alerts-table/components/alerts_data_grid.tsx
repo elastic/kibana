@@ -34,7 +34,7 @@ import { IndividualTagsActionContextProvider } from '../contexts/individual_tags
 import { useTagsAction } from './tags/use_tags_action';
 
 const AlertDetailFlyout = lazy(
-  () => import('./alert_detail_flyout')
+  () => import('./alert_detail_flyout.js')
 ) as typeof AlertDetailFlyoutType;
 
 const defaultGridStyle: EuiDataGridStyle = {

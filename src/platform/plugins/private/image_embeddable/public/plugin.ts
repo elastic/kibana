@@ -63,7 +63,7 @@ export class ImageEmbeddablePlugin
     plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
       const [_, { getImageEmbeddableFactory }] = await Promise.all([
         untilPluginStartServicesReady(),
-        import('./image_embeddable/get_image_embeddable_factory'),
+        import('./image_embeddable/get_image_embeddable_factory.js'),
       ]);
       return getImageEmbeddableFactory();
     });
@@ -78,7 +78,7 @@ export class ImageEmbeddablePlugin
         ADD_PANEL_TRIGGER,
         ADD_IMAGE_EMBEDDABLE_ACTION_ID,
         async () => {
-          const { createImageAction } = await import('./actions/create_image_action');
+          const { createImageAction } = await import('./actions/create_image_action.js');
           return createImageAction;
         }
       );

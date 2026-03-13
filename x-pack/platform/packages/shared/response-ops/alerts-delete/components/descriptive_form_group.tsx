@@ -14,7 +14,7 @@ import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constan
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import * as i18n from '../translations';
 
-const ModalComponent = lazy(() => import('./modal'));
+const ModalComponent = lazy(() => import('./modal.js'));
 
 interface AlertDeleteDescriptiveFormGroupProps {
   services: { http: HttpStart; notifications: NotificationsStart };

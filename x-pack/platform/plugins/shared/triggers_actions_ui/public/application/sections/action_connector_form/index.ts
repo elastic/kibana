@@ -12,19 +12,19 @@ import type { CreateConnectorFlyoutProps } from './create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './edit_connector_flyout';
 
 export const CreateConnectorFlyout = suspendedComponentWithProps<CreateConnectorFlyoutProps>(
-  lazy(() => import('./create_connector_flyout'))
+  lazy(() => import('./create_connector_flyout/index.js'))
 );
 export const EditConnectorFlyout = suspendedComponentWithProps<EditConnectorFlyoutProps>(
-  lazy(() => import('./edit_connector_flyout'))
+  lazy(() => import('./edit_connector_flyout/index.js'))
 );
-export const ActionForm = suspendedComponentWithProps(lazy(() => import('./action_form')));
+export const ActionForm = suspendedComponentWithProps(lazy(() => import('./action_form.js')));
 
 export const ConnectorAddModal = suspendedComponentWithProps<ConnectorAddModalProps>(
-  lazy(() => import('./connector_add_modal'))
+  lazy(() => import('./connector_add_modal.js'))
 );
 
 export const AddConnectorInline = suspendedComponentWithProps(
-  lazy(() => import('./connector_add_inline'))
+  lazy(() => import('./connector_add_inline.js'))
 );
 
 export type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';

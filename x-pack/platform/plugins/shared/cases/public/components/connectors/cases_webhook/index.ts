@@ -13,7 +13,7 @@ import { ConnectorTypes } from '../../../../common/types/domain';
 export const getCaseConnector = (): CaseConnector<null> => {
   return {
     id: ConnectorTypes.casesWebhook,
-    fieldsComponent: lazy(() => import('./case_fields')),
-    previewComponent: lazy(() => import('./case_fields_preview')),
+    fieldsComponent: lazy(() => import('./case_fields.js')),
+    previewComponent: lazy(() => import('./case_fields_preview.js')),
   };
 };

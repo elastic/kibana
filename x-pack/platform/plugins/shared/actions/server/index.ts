@@ -43,7 +43,7 @@ export {
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ActionsPlugin } = await import('./plugin');
+  const { ActionsPlugin } = await import('./plugin.js');
   return new ActionsPlugin(initContext);
 };
 

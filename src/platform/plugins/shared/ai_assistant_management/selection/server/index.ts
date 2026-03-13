@@ -12,6 +12,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { AIAssistantManagementSelectionPlugin } = await import('./plugin');
+  const { AIAssistantManagementSelectionPlugin } = await import('./plugin.js');
   return new AIAssistantManagementSelectionPlugin(initContext);
 };

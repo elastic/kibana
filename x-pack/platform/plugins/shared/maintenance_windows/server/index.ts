@@ -12,7 +12,7 @@ import type { MaintenanceWindowsConfig } from './config';
 import { configSchema } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { MaintenanceWindowsPlugin } = await import('./plugin');
+  const { MaintenanceWindowsPlugin } = await import('./plugin.js');
   return new MaintenanceWindowsPlugin(initContext);
 };
 

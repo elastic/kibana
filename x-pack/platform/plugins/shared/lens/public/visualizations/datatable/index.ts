@@ -29,7 +29,7 @@ export class DatatableVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const [{ getDatatableRenderer, getDatatableVisualization }, palettes] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
       ]);
 

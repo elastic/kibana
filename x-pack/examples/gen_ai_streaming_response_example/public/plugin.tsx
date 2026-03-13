@@ -41,7 +41,7 @@ export class GenAiStreamingResponseExamplePlugin
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp(coreStart, depsStart, params);
       },
     });

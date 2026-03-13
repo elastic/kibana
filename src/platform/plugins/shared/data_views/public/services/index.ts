@@ -19,6 +19,6 @@ export async function getIndices(props: {
   isRollupIndex: (indexName: string) => boolean;
   projectRouting?: string;
 }): Promise<MatchedItem[]> {
-  const { getIndices: getIndicesLazy } = await import('./get_indices');
+  const { getIndices: getIndicesLazy } = await import('./get_indices.js');
   return getIndicesLazy(props);
 }

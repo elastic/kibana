@@ -24,7 +24,7 @@ export function registerAnomalyDetectionRule(
   getStartServices: MlCoreSetup['getStartServices'],
   mlCapabilities: MlCapabilities
 ) {
-  const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
+  const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger.js'));
 
   triggersActionsUi.ruleTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,

@@ -27,6 +27,6 @@ export type {
 } from './persistable_state';
 
 export const plugin = async () => {
-  const { EmbeddableServerPlugin } = await import('./plugin');
+  const { EmbeddableServerPlugin } = await import('./plugin.js');
   return new EmbeddableServerPlugin();
 };

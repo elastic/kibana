@@ -16,8 +16,8 @@ export const getLazyEndpointPackageCustomExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackageCustomExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPackageCustomExtension }] = await Promise.all([
-      import('../../../../../common/components/with_security_context/with_security_context'),
-      import('./endpoint_package_custom_extension'),
+      import('../../../../../common/components/with_security_context/with_security_context.js'),
+      import('./endpoint_package_custom_extension/index.js'),
     ]);
     return {
       default: withSecurityContext({

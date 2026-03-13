@@ -228,7 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { renderApp, services, store } = await mountDependencies();
         const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
         const { RedirectIfUnauthorized } = await import(
-          './assistant/stack_management/redirect_if_unauthorized'
+          './assistant/stack_management/redirect_if_unauthorized.js'
         );
 
         return renderApp({
@@ -400,7 +400,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "one_discover_shared_deps" */
-      './one_discover'
+      './one_discover/index.js'
     );
   }
 
@@ -641,7 +641,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazyHelpersForRoutes" */
-      './helpers'
+      './helpers.js'
     );
   }
 
@@ -656,7 +656,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_application_dependencies" */
-      './lazy_application_dependencies'
+      './lazy_application_dependencies.js'
     );
   }
 
@@ -671,7 +671,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_sub_plugins" */
-      './lazy_sub_plugins'
+      './lazy_sub_plugins.js'
     );
   }
 
@@ -682,7 +682,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_app_links" */
-      './app/links'
+      './app/links/index.js'
     );
   }
 
@@ -693,7 +693,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_actions" */
-      './lazy_actions'
+      './lazy_actions.js'
     );
   }
 
@@ -704,7 +704,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_assistant_settings_management" */
-      './lazy_assistant_settings_management'
+      './lazy_assistant_settings_management.js'
     );
   }
 }

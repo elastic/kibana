@@ -13,7 +13,7 @@ export { ImageViewerContext, type ImageViewerContextValue } from './image_viewer
 import type { ImageViewerProps } from './image_viewer';
 
 const LazyImageViewer = React.lazy(() =>
-  import('./image_viewer').then((m) => ({ default: m.ImageViewer }))
+  import('./image_viewer.js').then((m) => ({ default: m.ImageViewer }))
 );
 export const ImageViewer = (props: ImageViewerProps) => (
   <React.Suspense fallback={<></>}>

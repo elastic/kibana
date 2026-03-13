@@ -24,7 +24,7 @@ export const getInputControlVisRenderer: (
     let registeredController = inputControlVisRegistry.get(domNode);
 
     if (!registeredController) {
-      const { createInputControlVisController } = await import('./vis_controller');
+      const { createInputControlVisController } = await import('./vis_controller.js');
 
       registeredController = createInputControlVisController(coreStart, deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);

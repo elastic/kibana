@@ -11,7 +11,7 @@ import type { ConfigSchema } from '@kbn/file-upload-common';
 import { configSchema } from './config_schema';
 
 export const plugin = async (initializerContext: PluginInitializerContext<ConfigSchema>) => {
-  const { DataVisualizerPlugin } = await import('./plugin');
+  const { DataVisualizerPlugin } = await import('./plugin.js');
   return new DataVisualizerPlugin(initializerContext);
 };
 

@@ -21,6 +21,6 @@ export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
 };
 
 export async function plugin() {
-  const { NewsfeedPlugin } = await import('./plugin');
+  const { NewsfeedPlugin } = await import('./plugin.js');
   return new NewsfeedPlugin();
 }

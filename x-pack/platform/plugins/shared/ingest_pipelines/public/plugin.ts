@@ -71,7 +71,9 @@ export class IngestPipelinesPlugin
 
         docTitle.change(pluginName);
 
-        const { mountManagementSection } = await import('./application/mount_management_section');
+        const { mountManagementSection } = await import(
+          './application/mount_management_section.js'
+        );
         const unmountAppCallback = await mountManagementSection(coreSetup, {
           ...params,
           license: this.license,

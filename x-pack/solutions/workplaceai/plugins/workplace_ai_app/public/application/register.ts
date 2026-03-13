@@ -32,7 +32,7 @@ export const registerApp = ({
     async mount({ element, history }) {
       const [coreStart, startPluginDeps] = await core.getStartServices();
       const services = getServices();
-      const { mountApp } = await import('./mount');
+      const { mountApp } = await import('./mount.js');
       return mountApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
     },
   });

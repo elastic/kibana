@@ -39,7 +39,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(coreStart, depsStart, params);
       },
     });
@@ -52,7 +52,7 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
     });
 
     embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
-      const { factory } = await import('./filter_debugger_embeddable');
+      const { factory } = await import('./filter_debugger_embeddable.js');
       return factory;
     });
   }

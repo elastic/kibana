@@ -23,7 +23,7 @@ export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
 };
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { VisTypeTimeseriesPlugin } = await import('./plugin');
+  const { VisTypeTimeseriesPlugin } = await import('./plugin.js');
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
 

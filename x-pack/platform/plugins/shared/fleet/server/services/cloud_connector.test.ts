@@ -99,7 +99,7 @@ describe('CloudConnectorService', () => {
 
     it('should create a cloud connector successfully with space awareness enabled', async () => {
       jest
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
       // Mock the find call for duplicate name checking
@@ -167,7 +167,7 @@ describe('CloudConnectorService', () => {
 
     it('should create a cloud connector with accountType', async () => {
       jest
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
@@ -199,7 +199,7 @@ describe('CloudConnectorService', () => {
 
     it('should create a cloud connector with organization accountType', async () => {
       jest
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
         .mockResolvedValue(true);
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
@@ -305,7 +305,7 @@ describe('CloudConnectorService', () => {
     describe('duplicate name validation', () => {
       it('should check for duplicate names using optimized query (SO_SEARCH_LIMIT and fields)', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         const existingConnectors = {
@@ -343,7 +343,7 @@ describe('CloudConnectorService', () => {
 
       it('should throw error when duplicate name exists (case-insensitive)', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         const existingConnectors = {
@@ -372,7 +372,7 @@ describe('CloudConnectorService', () => {
 
       it('should throw error when duplicate name exists with extra whitespace', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         const existingConnectors = {
@@ -401,7 +401,7 @@ describe('CloudConnectorService', () => {
 
       it('should allow creation when no duplicate names exist', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         const existingConnectors = {
@@ -432,7 +432,7 @@ describe('CloudConnectorService', () => {
 
       it('should normalize connector name by trimming and collapsing spaces', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         const requestWithSpaces: CreateCloudConnectorRequest = {
@@ -473,7 +473,7 @@ describe('CloudConnectorService', () => {
 
       it('should handle large number of existing connectors efficiently', async () => {
         jest
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+          .spyOn(await import('./spaces/helpers.js'), 'isSpaceAwarenessEnabled')
           .mockResolvedValue(true);
 
         // Simulate 500 existing connectors

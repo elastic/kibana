@@ -68,7 +68,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
           .registerIntercept?.({
             id: triggerId,
             config: () =>
-              import('./intercept_registration_config').then(
+              import('./intercept_registration_config.js').then(
                 ({ productInterceptRegistrationConfig: registrationConfig }) =>
                   registrationConfig({
                     productOffering,

@@ -72,7 +72,7 @@ export class WorkflowsPlugin
 
     // Register workflows connector UI component lazily to reduce main bundle size
     const registerConnectorType = async () => {
-      const { getWorkflowsConnectorType } = await import('./connectors/workflows');
+      const { getWorkflowsConnectorType } = await import('./connectors/workflows/index.js');
       plugins.triggersActionsUi.actionTypeRegistry.register(getWorkflowsConnectorType());
     };
 
@@ -89,7 +89,7 @@ export class WorkflowsPlugin
       updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const services = await this.createWorkflowsStartServices(core);
 
         return renderApp(services, params);

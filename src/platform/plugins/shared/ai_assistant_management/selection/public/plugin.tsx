@@ -130,7 +130,7 @@ export class AIAssistantManagementPlugin
         }
 
         // User has both assistants - show selection page
-        const { mountManagementSection } = await import('./management_section/mount_section');
+        const { mountManagementSection } = await import('./management_section/mount_section.js');
         const securityAIAssistantEnabled = !!management?.sections.section.ai
           .getAppsEnabled()
           .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);

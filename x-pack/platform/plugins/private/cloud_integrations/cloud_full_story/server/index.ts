@@ -8,6 +8,6 @@
 export { config } from './config';
 
 export async function plugin() {
-  const { CloudFullStoryPlugin } = await import('./plugin');
+  const { CloudFullStoryPlugin } = await import('./plugin.js');
   return new CloudFullStoryPlugin();
 }

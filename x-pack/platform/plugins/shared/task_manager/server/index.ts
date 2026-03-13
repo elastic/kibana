@@ -11,7 +11,7 @@ import type { TaskManagerConfig } from './config';
 import { configSchema, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { TaskManagerPlugin } = await import('./plugin');
+  const { TaskManagerPlugin } = await import('./plugin.js');
   return new TaskManagerPlugin(initContext);
 };
 

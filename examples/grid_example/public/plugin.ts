@@ -36,7 +36,7 @@ export class GridExamplePlugin
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [{ renderGridExampleApp }, [coreStart, deps]] = await Promise.all([
-          import('./app'),
+          import('./app.js'),
           core.getStartServices(),
         ]);
         return renderGridExampleApp(params.element, { coreStart, uiActions: deps.uiActions });

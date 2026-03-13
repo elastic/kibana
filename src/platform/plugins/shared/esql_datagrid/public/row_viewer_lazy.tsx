@@ -11,4 +11,4 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { lazy } from 'react';
 export type { RowViewerProps } from './row_viewer';
 
-export const RowViewer = withSuspense(lazy(() => import('./row_viewer')));
+export const RowViewer = withSuspense(lazy(() => import('./row_viewer.js')));

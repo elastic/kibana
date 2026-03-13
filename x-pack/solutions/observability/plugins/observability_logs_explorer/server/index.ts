@@ -8,6 +8,6 @@
 export { config } from './config';
 
 export const plugin = async () => {
-  const { ObservabilityLogsExplorerServerPlugin } = await import('./plugin');
+  const { ObservabilityLogsExplorerServerPlugin } = await import('./plugin.js');
   return new ObservabilityLogsExplorerServerPlugin();
 };

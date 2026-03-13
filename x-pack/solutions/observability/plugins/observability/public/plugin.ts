@@ -279,7 +279,7 @@ export class Plugin
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
-      const { renderApp } = await import('./application');
+      const { renderApp } = await import('./application/index.js');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
@@ -529,7 +529,7 @@ export class Plugin
       pricing: coreStart.pricing,
     });
 
-    import('./navigation_tree').then(({ createDefinition }) => {
+    import('./navigation_tree.js').then(({ createDefinition }) => {
       return pluginsStart.navigation.addSolutionNavigation(
         createDefinition(coreStart, pluginsStart)
       );

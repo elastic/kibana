@@ -20,7 +20,7 @@ export interface OpenRuntimeFieldEditorProps {
 
 export const getRuntimeFieldEditorLoader =
   (coreSetup: CoreSetup) => async (): Promise<LoadEditorResponse> => {
-    const { RuntimeFieldEditorFlyoutContent } = await import('./components');
+    const { RuntimeFieldEditorFlyoutContent } = await import('./components/index.js');
     const [core] = await coreSetup.getStartServices();
     const { uiSettings, theme, overlays, docLinks, settings } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({

@@ -59,7 +59,7 @@ export const getMetricRenderer =
       config: MetricRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { MetricComponent } = await import('./metric_component');
+      const { MetricComponent } = await import('./metric_component.js');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });

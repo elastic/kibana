@@ -38,8 +38,8 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
   defaultMessage: 'Saved Objects',
 });
 
-const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
-const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
+const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page.js'));
+const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page.js'));
 export const mountManagementSection = async ({
   core,
   mountParams,

@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<XyConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { VisTypeXYServerPlugin } = await import('./plugin');
+  const { VisTypeXYServerPlugin } = await import('./plugin.js');
   return new VisTypeXYServerPlugin(initializerContext);
 };

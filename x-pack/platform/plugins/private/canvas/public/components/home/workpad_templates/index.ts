@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const LazyWorkpadTemplates = React.lazy(() => import('./workpad_templates'));
+export const LazyWorkpadTemplates = React.lazy(() => import('./workpad_templates.js'));

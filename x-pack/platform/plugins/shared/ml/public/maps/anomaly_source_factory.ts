@@ -26,7 +26,7 @@ export class AnomalySourceFactory {
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
-    const { mlApiProvider } = await import('../application/services/ml_api_service');
+    const { mlApiProvider } = await import('../application/services/ml_api_service/index.js');
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
     const httpService = new HttpService(coreStart.http);
@@ -37,7 +37,7 @@ export class AnomalySourceFactory {
 
   public async create(): Promise<any> {
     const { mlResultsService, mlLocator } = await this.getServices();
-    const { AnomalySource } = await import('./anomaly_source');
+    const { AnomalySource } = await import('./anomaly_source.js');
     AnomalySource.mlResultsService = mlResultsService;
     AnomalySource.mlLocator = mlLocator;
     return AnomalySource;

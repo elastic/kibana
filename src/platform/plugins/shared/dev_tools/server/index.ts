@@ -12,6 +12,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { DevToolsServerPlugin } = await import('./plugin');
+  const { DevToolsServerPlugin } = await import('./plugin.js');
   return new DevToolsServerPlugin(initContext);
 };

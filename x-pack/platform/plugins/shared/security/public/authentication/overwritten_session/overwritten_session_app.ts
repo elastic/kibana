@@ -28,7 +28,7 @@ export const overwrittenSessionApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderOverwrittenSessionPage }] = await Promise.all([
           getStartServices(),
-          import('./overwritten_session_page'),
+          import('./overwritten_session_page.js'),
         ]);
         return renderOverwrittenSessionPage(
           coreStart,

@@ -22,7 +22,7 @@ export const reportingPDFExportShareIntegration = ({
     id: 'pdfReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
-      const { getShareMenuItems } = await import('./pdf_export_config');
+      const { getShareMenuItems } = await import('./pdf_export_config.js');
       return getShareMenuItems({ apiClient, startServices$ })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {

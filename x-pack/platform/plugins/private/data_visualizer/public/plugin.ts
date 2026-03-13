@@ -84,13 +84,13 @@ export class DataVisualizerPlugin
       FieldStatsUnavailableMessage: dynamic(
         async () =>
           import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg'
+            './application/index_data_visualizer/embeddables/grid_embeddable/embeddable_error_msg.js'
           )
       ),
       FieldStatisticsTable: dynamic(
         async () =>
           import(
-            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper'
+            './application/index_data_visualizer/embeddables/grid_embeddable/field_stats_wrapper.js'
           )
       ),
     };

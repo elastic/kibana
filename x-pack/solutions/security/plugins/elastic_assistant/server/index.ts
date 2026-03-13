@@ -12,7 +12,7 @@ export const config: PluginConfigDescriptor = {
   schema: configSchema,
 };
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ElasticAssistantPlugin } = await import('./plugin');
+  const { ElasticAssistantPlugin } = await import('./plugin.js');
   return new ElasticAssistantPlugin(initializerContext);
 }
 

@@ -32,8 +32,8 @@ import { NON_SIEM_CONSUMERS } from '../alerts_search_bar/constants';
 import type { Section } from '../../constants';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 
-const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list'));
-const RulesList = lazy(() => import('../rules_list/components/rules_list'));
+const LogsList = lazy(() => import('../rule_details/components/global_rule_event_log_list.js'));
+const RulesList = lazy(() => import('../rules_list/components/rules_list.js'));
 
 const RulesPage = () => {
   const history = useHistory();

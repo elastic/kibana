@@ -12,7 +12,7 @@ import type {
 } from './field_value_suggestions/types';
 
 const FieldValueSelectionLazy = lazy(
-  () => import('./field_value_suggestions/field_value_selection')
+  () => import('./field_value_suggestions/field_value_selection.js')
 );
 
 export function FieldValueSelection(props: FieldValueSelectionProps) {
@@ -23,7 +23,7 @@ export function FieldValueSelection(props: FieldValueSelectionProps) {
   );
 }
 
-const FieldValueSuggestionsLazy = lazy(() => import('./field_value_suggestions'));
+const FieldValueSuggestionsLazy = lazy(() => import('./field_value_suggestions/index.js'));
 
 export function FieldValueSuggestions(props: FieldValueSuggestionsProps) {
   return (

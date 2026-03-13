@@ -64,8 +64,8 @@ export class SearchIndicesPlugin
         defaultMessage: 'Elasticsearch Indices',
       }),
       async mount({ element, history }) {
-        const { renderApp } = await import('./application');
-        const { SearchIndicesRouter } = await import('./components/indices_router');
+        const { renderApp } = await import('./application.js');
+        const { SearchIndicesRouter } = await import('./components/indices_router.js');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: SearchIndicesServicesContextDeps = {
           ...depsStart,
@@ -83,7 +83,7 @@ export class SearchIndicesPlugin
         defaultMessage: 'Index Management',
       }),
       async mount({ element, history }) {
-        const { renderIndexManagementApp } = await import('./index_management_application');
+        const { renderIndexManagementApp } = await import('./index_management_application.js');
         return renderIndexManagementApp(element, {
           core,
           history,

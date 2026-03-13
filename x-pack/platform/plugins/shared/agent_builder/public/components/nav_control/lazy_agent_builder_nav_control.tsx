@@ -14,7 +14,7 @@ import type { AgentBuilderStartDependencies } from '../../types';
 import type { AgentBuilderPluginStart } from '../../types';
 
 const LazyAgentBuilderNavControlWithProvider = dynamic(() =>
-  import('./agent_builder_nav_control_with_provider').then((m) => ({
+  import('./agent_builder_nav_control_with_provider.js').then((m) => ({
     default: m.AgentBuilderNavControlWithProvider,
   }))
 );

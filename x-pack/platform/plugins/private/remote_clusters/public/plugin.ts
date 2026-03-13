@@ -70,7 +70,7 @@ export class RemoteClustersUIPlugin
           const cloudBaseUrl: string = cloud?.baseUrl ?? '';
           const cloudDeploymentUrl: string = cloud?.deploymentUrl ?? '';
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application/index.js');
           const unmountAppCallback = await renderApp(
             element,
             {

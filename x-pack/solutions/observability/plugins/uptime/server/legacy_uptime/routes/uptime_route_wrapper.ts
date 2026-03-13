@@ -6,7 +6,7 @@
  */
 
 import { isKibanaResponse } from '@kbn/core-http-server';
-import type { UMKibanaRouteWrapper } from './types';
+import type { UMKibanaRouteWrapper, UptimeRouteContext } from './types';
 import { UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
@@ -40,7 +40,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       request,
       response,
       server,
-    });
+    } as UptimeRouteContext);
 
     if (isKibanaResponse(res)) {
       return res;

@@ -7,11 +7,11 @@
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
-import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { DatasetInfo } from '@arizeai/phoenix-client/types/datasets';
 import type {
   ExperimentRun,
   ExperimentEvaluationRun,
-} from '@arizeai/phoenix-client/dist/esm/types/experiments';
+} from '@arizeai/phoenix-client/types/experiments';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
@@ -53,7 +53,14 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
   }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
-    const datasets = await import('@arizeai/phoenix-client/datasets');
+    const datasets = (await import('@arizeai/phoenix-client/datasets')).default as unknown as {
+      createDataset: (opts: {
+        client: PhoenixClient;
+        name: string;
+        description?: string;
+        examples: Array<{ input: Record<string, unknown>; output: unknown; metadata: unknown }>;
+      }) => Promise<{ datasetId: string }>;
+    };
 
     const getDatasetsByNameResponse = await this.phoenixClient.GET('/v1/datasets', {
       params: {
@@ -189,7 +196,16 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         ? (await this.getDatasetByName(dataset.name)).id
         : (await this.syncDataSet(dataset)).datasetId;
 
-      const experiments = await import('@arizeai/phoenix-client/experiments');
+      const experiments = (await import('@arizeai/phoenix-client/experiments'))
+        .default as unknown as {
+        runExperiment: (opts: Record<string, unknown>) => Promise<{
+          id: string;
+          datasetId: string;
+          runs: Record<string, ExperimentRun>;
+          evaluationRuns: ExperimentEvaluationRun[];
+          experimentMetadata?: Record<string, unknown>;
+        }>;
+      };
 
       const ran = await experiments.runExperiment({
         client: this.phoenixClient,

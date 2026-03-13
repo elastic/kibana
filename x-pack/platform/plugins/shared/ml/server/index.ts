@@ -42,6 +42,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = async (ctx: PluginInitializerContext<ConfigSchema>) => {
-  const { MlServerPlugin } = await import('./plugin');
+  const { MlServerPlugin } = await import('./plugin.js');
   return new MlServerPlugin(ctx);
 };

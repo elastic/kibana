@@ -22,7 +22,7 @@ describe('StatusHandler', () => {
   let server: Server;
 
   beforeAll(async () => {
-    jest.spyOn(await import('node-fetch'), 'default');
+    jest.spyOn((await import('node-fetch')) as unknown as { default: typeof fetch }, 'default');
   });
 
   beforeEach(async () => {

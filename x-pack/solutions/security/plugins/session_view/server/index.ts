@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SessionViewPlugin } = await import('./plugin');
+  const { SessionViewPlugin } = await import('./plugin.js');
   return new SessionViewPlugin(initializerContext);
 }

@@ -13,7 +13,7 @@ import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
 
 const LazyNavControlWithProvider = dynamic(() =>
-  import('.').then((m) => ({ default: m.NavControlWithProvider }))
+  import('./index.js').then((m) => ({ default: m.NavControlWithProvider }))
 );
 
 interface NavControlInitiatorProps {

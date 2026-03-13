@@ -64,7 +64,7 @@ export function registerSearchSessionsMgmt(
     title: APP.getI18nName(),
     order: 1.75,
     mount: async (params) => {
-      const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
+      const { SearchSessionsMgmtApp: MgmtApp } = await import('./application/index.js');
       const mgmtApp = new MgmtApp(coreSetup, deps, config, kibanaVersion, params);
       return mgmtApp.mountManagementSection();
     },

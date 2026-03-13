@@ -57,7 +57,7 @@ export const config: PluginConfigDescriptor<ProfilingConfig> = {
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ProfilingPlugin } = await import('./plugin');
+  const { ProfilingPlugin } = await import('./plugin.js');
   return new ProfilingPlugin(initializerContext);
 }
 

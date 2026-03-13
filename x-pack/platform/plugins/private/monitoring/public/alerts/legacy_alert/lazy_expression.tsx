@@ -8,4 +8,4 @@
 import React from 'react';
 
 export type { Props as LazyExpressionProps } from '../components/param_details_form/expression';
-export const LazyExpression = React.lazy(() => import('./expression'));
+export const LazyExpression = React.lazy(() => import('./expression.js'));

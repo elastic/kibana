@@ -15,7 +15,7 @@ import type { TopNavMenuProps } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 const LazyTopNavMenu = lazy(async () => {
-  const { TopNavMenu } = await import('./top_nav_menu');
+  const { TopNavMenu } = await import('./top_nav_menu.js');
   return { default: TopNavMenu };
 });
 

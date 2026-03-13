@@ -41,7 +41,7 @@ export const getRevealImageRenderer =
       config: RevealImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { RevealImageComponent } = await import('./reveal_image_component');
+      const { RevealImageComponent } = await import('./reveal_image_component.js');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });

@@ -32,7 +32,7 @@ interface NewCalendarPageProps extends PageProps {
 }
 
 const NewCalendar = dynamic(async () => ({
-  default: (await import('../../../settings/calendars')).NewCalendar,
+  default: (await import('../../../settings/calendars/index.js')).NewCalendar,
 }));
 
 export const newCalendarRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

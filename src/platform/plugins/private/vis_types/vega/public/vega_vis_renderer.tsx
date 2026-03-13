@@ -18,7 +18,7 @@ import type { VegaVisualizationDependencies } from './plugin';
 import { getUsageCollectionStart } from './services';
 import type { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
-  import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
+  import('./async_services.js').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
 
 /** @internal **/

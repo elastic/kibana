@@ -77,7 +77,7 @@ export class DataViewEditorPlugin
        * @returns DataViewEditorService
        */
       dataViewEditorServiceFactory: async () => {
-        const module = await import('./data_view_editor_service_lazy');
+        const module = await import('./data_view_editor_service_lazy.js');
         return module;
       },
     };

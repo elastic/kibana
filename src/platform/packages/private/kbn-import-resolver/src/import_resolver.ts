@@ -230,6 +230,30 @@ export class ImportResolver {
       };
     } catch (error) {
       if (error && error.code === 'MODULE_NOT_FOUND') {
+        // Under moduleResolution: nodenext, TypeScript requires .js extensions
+        // in dynamic imports that map to .ts source files at development time.
+        // Try resolving .js -> .ts/.tsx before other fallbacks.
+        if (req.endsWith('.js')) {
+          const tsReq = req.slice(0, -3) + '.ts';
+          const tsxReq = req.slice(0, -3) + '.tsx';
+          for (const alt of [tsReq, tsxReq]) {
+            try {
+              const altPath = Resolve.sync(alt, {
+                basedir: dirname,
+                ...this.baseResolveOpts,
+              });
+              if (Path.isAbsolute(altPath)) {
+                const pkgId = this.getPackageIdForPath(altPath);
+                if (pkgId) {
+                  return { type: 'file', absolute: altPath, pkgId };
+                }
+              }
+            } catch {
+              // continue to next alternative
+            }
+          }
+        }
+
         // fallback: attempt to resolve using the "exports" map in package.json
         //
         // TODO: Kibana operations team to look again into this once working on https://github.com/elastic/kibana-operations/issues/309 . Resolve library should have added native support for exports by then.

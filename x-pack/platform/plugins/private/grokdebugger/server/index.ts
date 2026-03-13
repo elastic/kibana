@@ -8,7 +8,7 @@
 import { config } from './plugin';
 
 export async function plugin() {
-  const { Plugin } = await import('./plugin');
+  const { Plugin } = await import('./plugin.js');
   return new Plugin();
 }
 

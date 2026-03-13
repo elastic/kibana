@@ -14,7 +14,7 @@ import type { InspectorViewDescription } from '../../types';
 import type { Adapters } from '../../../common';
 
 const RequestsViewComponent = lazy(() =>
-  import('../../async_services').then((module) => ({ default: module.RequestsViewComponent }))
+  import('../../async_services.js').then((module) => ({ default: module.RequestsViewComponent }))
 );
 
 export const getRequestsViewDescription = (): InspectorViewDescription => ({

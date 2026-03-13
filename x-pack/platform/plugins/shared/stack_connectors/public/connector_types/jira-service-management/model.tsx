@@ -42,12 +42,12 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => {
   return {
     id: '.jira-service-management',
-    iconClass: lazy(() => import('./jsm_logo')),
+    iconClass: lazy(() => import('./jsm_logo.js')),
     selectMessage: SELECT_MESSAGE,
     actionTypeTitle: TITLE,
     validateParams,
-    actionConnectorFields: lazy(() => import('./connector_params')),
-    actionParamsFields: lazy(() => import('./params')),
+    actionConnectorFields: lazy(() => import('./connector_params.js')),
+    actionParamsFields: lazy(() => import('./params.js')),
     defaultActionParams: {
       subAction: SUB_ACTION.CreateAlert,
       subActionParams: {
@@ -67,7 +67,7 @@ export const getConnectorType = (): ConnectorTypeModel<
 const validateParams = async (
   actionParams: ValidationParams
 ): Promise<GenericValidationResult<unknown>> => {
-  const translations = await import('./translations');
+  const translations = await import('./translations.js');
   const errors = {
     'subActionParams.message': new Array<string>(),
     'subActionParams.alias': new Array<string>(),

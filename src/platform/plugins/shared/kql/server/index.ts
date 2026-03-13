@@ -18,7 +18,7 @@ import type { KQLServerPlugin, KQLServerPluginSetup, KQLServerPluginStart } from
  */
 
 export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
-  const { KQLServerPlugin } = await import('./plugin');
+  const { KQLServerPlugin } = await import('./plugin.js');
   return new KQLServerPlugin(initializerContext);
 }
 

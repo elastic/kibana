@@ -18,7 +18,7 @@ export class MetricVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: MetricVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const [{ getMetricVisualization }, paletteService] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
       ]);
 

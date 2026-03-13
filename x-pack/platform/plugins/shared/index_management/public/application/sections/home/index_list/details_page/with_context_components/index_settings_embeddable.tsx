@@ -18,7 +18,9 @@ import React, { Suspense } from 'react';
 import type { IndexSettingWithContextProps } from './index_settings_with_context_types';
 
 const IndexSettingsWithContext = dynamic<ComponentType<IndexSettingWithContextProps>>(() =>
-  import('./index_settings_with_context').then((mod) => ({ default: mod.IndexSettingsWithContext }))
+  import('./index_settings_with_context.js').then((mod) => ({
+    default: mod.IndexSettingsWithContext,
+  }))
 );
 
 export const IndexSettings: React.FC<IndexSettingWithContextProps> = (props) => {

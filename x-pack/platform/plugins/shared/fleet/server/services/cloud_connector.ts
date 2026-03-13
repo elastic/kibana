@@ -223,7 +223,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const name = await this.validateAndNormalizeName(soClient, cloudConnector.name);
 
       // Check if space awareness is enabled for namespace handling
-      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
+      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers.js');
       const useSpaceAwareness = await isSpaceAwarenessEnabled();
       const namespace = useSpaceAwareness ? '*' : undefined;
 

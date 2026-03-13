@@ -12,7 +12,7 @@ export async function compile(
   context: object,
   doEncode: boolean = true
 ): Promise<string> {
-  const { handlebars } = await import('./handlebars');
+  const { handlebars } = await import('./handlebars.js');
   const { compileFnName } = await import('@kbn/handlebars');
   const handlebarsTemplate = handlebars[compileFnName](urlTemplate, {
     strict: true,

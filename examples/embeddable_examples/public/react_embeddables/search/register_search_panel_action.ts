@@ -13,7 +13,7 @@ import { ADD_SEARCH_ACTION_ID } from './constants';
 
 export const registerSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID, async () => {
-    const { createSearchPanelAction } = await import('./create_search_panel_action');
+    const { createSearchPanelAction } = await import('./create_search_panel_action.js');
     return createSearchPanelAction;
   });
 };

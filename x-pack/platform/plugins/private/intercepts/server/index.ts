@@ -11,6 +11,6 @@ export { config } from '../common/config';
 export type { InterceptSetup, InterceptStart } from './plugin';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { InterceptsServerPlugin } = await import('./plugin');
+  const { InterceptsServerPlugin } = await import('./plugin.js');
   return new InterceptsServerPlugin(initContext);
 };

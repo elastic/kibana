@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { ExpressionHeatmapPlugin } = await import('./plugin');
+  const { ExpressionHeatmapPlugin } = await import('./plugin.js');
   return new ExpressionHeatmapPlugin();
 }

@@ -19,7 +19,7 @@ export const renderInferenceEndpointsMgmtApp = async (
   services: AppPluginStartDependencies,
   element: HTMLElement
 ) => {
-  const { InferenceEndpointsOverview } = await import('./inference_endpoints_overview');
+  const { InferenceEndpointsOverview } = await import('./inference_endpoints_overview.js');
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

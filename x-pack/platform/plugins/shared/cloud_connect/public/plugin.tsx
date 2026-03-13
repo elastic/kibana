@@ -79,7 +79,7 @@ export class CloudConnectedPlugin
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const apiService = new CloudConnectApiService(coreStart.http);
-        const { CloudConnectedApp } = await import('./application/mount_plugin');
+        const { CloudConnectedApp } = await import('./application/mount_plugin.js');
         return CloudConnectedApp(
           coreStart,
           depsStart,

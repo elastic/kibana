@@ -12,6 +12,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export type { BookAttributes, BookState } from './book';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { EmbeddableExamplesPlugin } = await import('./plugin');
+  const { EmbeddableExamplesPlugin } = await import('./plugin.js');
   return new EmbeddableExamplesPlugin(initializerContext);
 }

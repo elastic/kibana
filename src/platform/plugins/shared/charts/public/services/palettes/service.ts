@@ -26,7 +26,7 @@ export class PaletteService {
     return {
       getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
-          const { buildPalettes } = await import('./palettes');
+          const { buildPalettes } = await import('./palettes.js');
           this.palettes = buildPalettes(theme);
         }
         return {

@@ -52,7 +52,7 @@ export class SearchPlaygroundPlugin
       euiIconType: 'logoElasticsearch',
       title: PLUGIN_NAME,
       mount: async ({ element, history }: AppMountParameters) => {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart, depsStart] = await core.getStartServices();
 
         coreStart.chrome.docTitle.change(PLUGIN_NAME);

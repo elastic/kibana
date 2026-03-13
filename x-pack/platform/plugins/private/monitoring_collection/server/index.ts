@@ -14,7 +14,7 @@ export type { MonitoringCollectionConfig } from './config';
 export type { MonitoringCollectionSetup, MetricResult, Metric } from './plugin';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { MonitoringCollectionPlugin } = await import('./plugin');
+  const { MonitoringCollectionPlugin } = await import('./plugin.js');
   return new MonitoringCollectionPlugin(initContext);
 };
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {

@@ -123,8 +123,8 @@ export const getConnectorType = (): ConnectorTypeModel<
 
     return validationResult;
   },
-  actionConnectorFields: lazy(() => import('./slack_connectors')),
-  actionParamsFields: lazy(() => import('./slack_params')),
+  actionConnectorFields: lazy(() => import('./slack_connectors.js')),
+  actionParamsFields: lazy(() => import('./slack_params.js')),
   convertParamsBetweenGroups: (
     params: SlackActionParams | PostMessageParams | PostBlockkitParams
   ): SlackActionParams | PostMessageParams | PostBlockkitParams | {} => {

@@ -113,7 +113,7 @@ export class AgentBuilderPlugin
       appId: 'agentBuilder',
       restoreOnReload: false,
       loadComponent: async () => {
-        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+        const { SidebarConversation } = await import('./sidebar/sidebar_conversation.js');
         return SidebarConversation;
       },
     });

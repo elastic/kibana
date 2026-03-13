@@ -35,6 +35,6 @@ export const config: PluginConfigDescriptor<Config> = {
 };
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { AlertingBuiltinsPlugin } = await import('./plugin');
+  const { AlertingBuiltinsPlugin } = await import('./plugin.js');
   return new AlertingBuiltinsPlugin(ctx);
 };

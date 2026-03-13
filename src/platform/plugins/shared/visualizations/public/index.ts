@@ -68,7 +68,7 @@ export {
 } from './triggers';
 
 export const getConvertToLensModule = async () => {
-  return await import('./convert_to_lens');
+  return await import('./convert_to_lens/index.js');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
 

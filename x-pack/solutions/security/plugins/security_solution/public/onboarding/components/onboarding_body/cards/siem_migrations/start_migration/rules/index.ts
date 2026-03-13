@@ -21,7 +21,7 @@ export const startRuleMigrationCardConfig: OnboardingCardConfig<StartMigrationCa
     () =>
       import(
         /* webpackChunkName: "onboarding_siem_migrations_start_migration_card" */
-        './start_migration_card'
+        './start_migration_card.js'
       )
   ),
   checkComplete: checkStartMigrationCardComplete,

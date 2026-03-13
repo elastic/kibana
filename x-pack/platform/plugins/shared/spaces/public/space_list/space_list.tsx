@@ -10,7 +10,7 @@ import React from 'react';
 import type { SpaceListProps } from './types';
 
 export const getSpaceListComponent = async (): Promise<React.FC<SpaceListProps>> => {
-  const { SpaceListInternal } = await import('./space_list_internal');
+  const { SpaceListInternal } = await import('./space_list_internal.js');
   return (props: SpaceListProps) => {
     return <SpaceListInternal {...props} />;
   };

@@ -42,7 +42,7 @@ export class SearchGettingStartedPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: 'logoElasticsearch',
       async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart, depsStart] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
         const services: SearchGettingStartedServicesContextDeps = {

@@ -117,7 +117,9 @@ export class PluginServices {
     params?: AppMountParameters<unknown>
   ): Promise<StartServices> {
     const { apm } = await import('@elastic/apm-rum');
-    const { SecuritySolutionTemplateWrapper } = await import('./app/home/template_wrapper');
+    const { SecuritySolutionTemplateWrapper } = await import(
+      './app/home/template_wrapper/index.js'
+    );
 
     const { savedObjectsTaggingOss, ...plugins } = startPlugins;
 

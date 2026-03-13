@@ -9,12 +9,12 @@
 
 import React, { Suspense } from 'react';
 
-type Loader<TElement extends React.ComponentType<any>> = () => Promise<{
-  default: TElement;
-}>;
+type Loader<TElement extends React.ComponentType<any>> = () => Promise<
+  { default: TElement } | { default: { default: TElement; [key: string]: any } }
+>;
 
 function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(loader: Loader<TElement>) {
-  const Component = React.lazy(loader);
+  const Component = React.lazy(loader as () => Promise<{ default: TElement }>);
 
   return React.forwardRef<TRef, React.ComponentPropsWithRef<TElement>>((props, ref) => (
     <Suspense fallback={null}>{React.createElement(Component, { ...props, ref })}</Suspense>
@@ -25,4 +25,4 @@ export { usePerformanceContext } from './context/use_performance_context';
 export { perfomanceMarkers } from './performance_markers';
 export { usePageReady } from './context/use_page_ready';
 export { type Meta } from './context/performance_context';
-export const PerformanceContextProvider = dynamic(() => import('./context/performance_context'));
+export const PerformanceContextProvider = dynamic(() => import('./context/performance_context.js'));
