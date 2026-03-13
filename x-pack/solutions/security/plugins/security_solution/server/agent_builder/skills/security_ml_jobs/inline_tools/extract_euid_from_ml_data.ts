@@ -7,37 +7,46 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ModuleJob } from '@kbn/ml-plugin/common/types/modules';
-import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../common/constants';
-import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../common/constants';
-import { IdentifierType } from '../../../../../common/api/entity_analytics/common/common.gen';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
-import type { SecurityMlJobsSkillsContext } from '../security_ml_jobs_skill';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { compact } from 'lodash';
+
+const ALLOWED_ENTITY_TYPES = ['host', 'user'] as const;
 
 export const EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL = `security.ml.jobs.extract_euid`;
 
 export const mlJobsToolSchema = z.object({
-  anomalyRecords: z.array(z.unknown()).describe('Array of anomaly records from ML jobs'),
+  anomalyRecords: z.array(z.record(z.string(), z.unknown())).describe('Array of anomaly records from ML jobs'),
 });
 
-export const extractEuidFromMlDataTool = (ctx: SecurityMlJobsSkillsContext): SkillBoundedTool => ({
+export const extractEuidFromMlDataTool = (): SkillBoundedTool => ({
   id: EXTRACT_EUID_FROM_SECURITY_ML_JOBS_INLINE_TOOL,
   type: ToolType.builtin,
   schema: mlJobsToolSchema,
-  description: `Call this tool to find relevant security ML jobs and their corresponding indices to investigate anomalous or unusual behavior in your environment`,
-  handler: async (args, context) => {
+  description: `Use this tool to extract EUIDs (Entity Unique Identifiers) from security ML job anomaly records. This tool processes the provided anomaly records and identifies any associated EUIDs based on the entity types (e.g., users, hosts) present in the data. It returns a list of unique EUIDs that can be used for further investigation or analysis in the context of security entity behavior.`,
+  handler: async (args) => {
     try {
+      const anomalyRecords = args.anomalyRecords as Array<Record<string, unknown>>;
+      const euids = [];
+      for (const record of anomalyRecords) {
+        const ids: string[] = compact(ALLOWED_ENTITY_TYPES.map((entityType) =>
+          euid.getEuidFromObject(entityType, record)
+        ));
+        if (!ids.length) {
+          euids.push(undefined);
+        } else if (ids.length === 1) {
+          euids.push(ids[0]);
+        } else if (ids.length > 1) {
+          euids.push(ids);
+        }
+      }
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: 'euid',
-            data: { euids: [] }, // Placeholder for extracted EUIDs
+            data: { euids },
           },
         ],
       };
@@ -47,7 +56,7 @@ export const extractEuidFromMlDataTool = (ctx: SecurityMlJobsSkillsContext): Ski
           {
             type: ToolResultType.error,
             data: {
-              error: `Error retrieving security ml job data: ${
+              error: `Error calculating EUIDs from anomaly records: ${
                 error instanceof Error ? error.message : 'Unknown error'
               }`,
             },
