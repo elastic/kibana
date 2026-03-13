@@ -23,7 +23,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
     }
 
     return template.definition.fields.map((field) => {
-      const Control = controlRegistry[field.control] as FC<Record<string, unknown>>;
+      const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
 
       if (!Control) {
         return null;

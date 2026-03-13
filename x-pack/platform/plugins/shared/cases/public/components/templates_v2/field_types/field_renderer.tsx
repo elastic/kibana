@@ -65,7 +65,7 @@ const FieldsRenderer: FC<{
             ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
             : false);
 
-        const Control = controlRegistry[field.control] as FC<Record<string, unknown>>;
+        const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         const controlProps = {
           ...field,
           value: values[field.name],
