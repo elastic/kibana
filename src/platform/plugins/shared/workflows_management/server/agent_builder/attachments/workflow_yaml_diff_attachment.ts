@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
@@ -28,30 +29,18 @@ const workflowYamlDiffDataSchema = z.object({
 type WorkflowYamlDiffData = z.infer<typeof workflowYamlDiffDataSchema>;
 
 const buildUnifiedDiff = (beforeYaml: string, afterYaml: string): string => {
-  const beforeLines = beforeYaml.split('\n');
-  const afterLines = afterYaml.split('\n');
-  const maxLines = Math.max(beforeLines.length, afterLines.length);
-  const diffLines: string[] = [];
+  const parts = diffLines(beforeYaml, afterYaml);
+  const result: string[] = [];
 
-  for (let index = 0; index < maxLines; index++) {
-    const before = beforeLines[index];
-    const after = afterLines[index];
-
-    if (before === after) {
-      if (before !== undefined) {
-        diffLines.push(` ${before}`);
-      }
-    } else {
-      if (before !== undefined) {
-        diffLines.push(`-${before}`);
-      }
-      if (after !== undefined) {
-        diffLines.push(`+${after}`);
-      }
+  for (const part of parts) {
+    const lines = part.value.replace(/\n$/, '').split('\n');
+    const prefix = part.added ? '+' : part.removed ? '-' : ' ';
+    for (const line of lines) {
+      result.push(`${prefix}${line}`);
     }
   }
 
-  return diffLines.join('\n');
+  return result.join('\n');
 };
 
 const workflowYamlDiffAttachmentType = {

@@ -11,7 +11,25 @@ import { baseProposalId, changeFingerprint, computeChanges } from './attachment_
 import { modifyWorkflowProperty } from '../../../server/agent_builder/tools/yaml_edit_utils';
 
 describe('changeFingerprint', () => {
-  it('produces consistent fingerprint for same type and newText', () => {
+  it('produces consistent fingerprint for same startLine, type, and newText', () => {
+    const fp1 = changeFingerprint({
+      proposalId: 'p1',
+      type: 'replace',
+      startLine: 3,
+      endLine: 3,
+      newText: 'description: updated\n',
+    });
+    const fp2 = changeFingerprint({
+      proposalId: 'p2',
+      type: 'replace',
+      startLine: 3,
+      endLine: 5,
+      newText: 'description: updated\n',
+    });
+    expect(fp1).toBe(fp2);
+  });
+
+  it('produces different fingerprints for different startLines', () => {
     const fp1 = changeFingerprint({
       proposalId: 'p1',
       type: 'replace',
@@ -26,7 +44,7 @@ describe('changeFingerprint', () => {
       endLine: 10,
       newText: 'description: updated\n',
     });
-    expect(fp1).toBe(fp2);
+    expect(fp1).not.toBe(fp2);
   });
 
   it('produces different fingerprints for different types', () => {
@@ -64,17 +82,17 @@ describe('changeFingerprint', () => {
     expect(fp1).not.toBe(fp2);
   });
 
-  it('is independent of proposalId and line numbers', () => {
+  it('is independent of proposalId but depends on startLine', () => {
     const fp1 = changeFingerprint({
       proposalId: 'abc',
       type: 'insert',
-      startLine: 1,
+      startLine: 5,
       newText: 'content\n',
     });
     const fp2 = changeFingerprint({
       proposalId: 'xyz',
       type: 'insert',
-      startLine: 99,
+      startLine: 5,
       newText: 'content\n',
     });
     expect(fp1).toBe(fp2);

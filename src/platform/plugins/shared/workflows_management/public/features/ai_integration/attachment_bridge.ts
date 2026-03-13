@@ -28,7 +28,7 @@ export interface WorkflowYamlChangedPayload {
 }
 
 export const changeFingerprint = (change: ProposedChange): string =>
-  `${change.type}:${change.newText}`;
+  `${change.startLine}:${change.type}:${change.newText}`;
 
 export const baseProposalId = (hunkId: string): string => {
   const sep = hunkId.indexOf('::');
@@ -149,6 +149,8 @@ export const computeChanges = (
  * tight per-event hunks without explicit collapsing.
  */
 export class AttachmentBridge {
+  private static readonly PROCESSED_PROPOSALS_CAP = 500;
+
   private subscription: Subscription | null = null;
   private proposalManager: ProposalManager | null = null;
   private tracker: ProposalTracker | null = null;
@@ -200,6 +202,9 @@ export class AttachmentBridge {
     const { proposalId, beforeYaml, afterYaml, attachmentVersion } = payload;
 
     if (this.processedProposals.has(proposalId)) return;
+    if (this.processedProposals.size >= AttachmentBridge.PROCESSED_PROPOSALS_CAP) {
+      this.processedProposals.clear();
+    }
     this.processedProposals.add(proposalId);
 
     this.tracker.setRecord({
