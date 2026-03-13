@@ -67,6 +67,21 @@ import {
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
 import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
+import {
+  GENERATE_LEADS_URL,
+  GET_LEADS_URL,
+  GET_LEAD_BY_ID_URL,
+  LEAD_GENERATION_STATUS_URL,
+  DISMISS_LEAD_URL,
+  BULK_UPDATE_LEADS_URL,
+} from '../../../common/entity_analytics/lead_generation/constants';
+import type {
+  FindLeadsResponse,
+  GenerateLeadsResponse,
+  Lead,
+  LeadGenerationStatus,
+  BulkUpdateLeadsResponse,
+} from '../../../common/entity_analytics/lead_generation/types';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -487,6 +502,75 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const fetchLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: {
+        page?: number;
+        perPage?: number;
+        sortField?: 'priority' | 'timestamp';
+        sortOrder?: 'asc' | 'desc';
+        status?: 'active' | 'dismissed' | 'expired';
+      };
+    }) =>
+      http.fetch<FindLeadsResponse>(GET_LEADS_URL, {
+        version: '1',
+        method: 'GET',
+        query: params,
+        signal,
+      });
+
+    const fetchLeadById = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<Lead>(GET_LEAD_BY_ID_URL.replace('{id}', id), {
+        version: '1',
+        method: 'GET',
+        signal,
+      });
+
+    const fetchLeadGenerationStatus = ({ signal }: { signal?: AbortSignal }) =>
+      http.fetch<LeadGenerationStatus>(LEAD_GENERATION_STATUS_URL, {
+        version: '1',
+        method: 'GET',
+        signal,
+      });
+
+    const generateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params?: { maxLeads?: number; connectorId?: string };
+    }) =>
+      http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(params ?? {}),
+        signal,
+      });
+
+    const dismissLead = ({ signal, id }: { signal?: AbortSignal; id: string }) =>
+      http.fetch<void>(DISMISS_LEAD_URL.replace('{id}', id), {
+        version: '1',
+        method: 'POST',
+        signal,
+      });
+
+    const bulkUpdateLeads = ({
+      signal,
+      params,
+    }: {
+      signal?: AbortSignal;
+      params: { ids: string[]; status: 'active' | 'dismissed' | 'expired' };
+    }) =>
+      http.fetch<BulkUpdateLeadsResponse>(BULK_UPDATE_LEADS_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -519,6 +603,12 @@ export const useEntityAnalyticsRoutes = () => {
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
       fetchWatchlists,
+      fetchLeads,
+      fetchLeadById,
+      fetchLeadGenerationStatus,
+      generateLeads,
+      dismissLead,
+      bulkUpdateLeads,
     };
   }, [http]);
 };
