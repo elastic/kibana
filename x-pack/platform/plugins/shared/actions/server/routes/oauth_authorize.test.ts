@@ -280,6 +280,7 @@ describe('oauthAuthorizeRoute', () => {
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/my-page',
       spaceId: 'default',
+      createdBy: 'test-profile-uid',
     });
 
     // Verify authorization URL was built with correct params

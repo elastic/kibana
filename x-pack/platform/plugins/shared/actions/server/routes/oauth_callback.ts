@@ -491,6 +491,22 @@ export const oauthCallbackRoute = (
 
         const { connectorId: stateConnectorId, kibanaReturnUrl } = oauthState;
 
+        if (!oauthState.createdBy || oauthState.createdBy !== profileUid) {
+          routeLogger.warn(
+            `OAuth callback user mismatch for connector ${stateConnectorId}: expected ${
+              oauthState.createdBy ?? 'none'
+            }, got ${profileUid}`
+          );
+          return respondWithError(res, {
+            details: i18n.translate('xpack.actions.oauthCallback.error.userMismatch', {
+              defaultMessage:
+                'This authorization session was not initiated by you. Please start a new authorization flow.',
+            }),
+            connectorId: stateConnectorId,
+            returnUrl: kibanaReturnUrl,
+          });
+        }
+
         if (error || !code) {
           const providerError =
             error ||
