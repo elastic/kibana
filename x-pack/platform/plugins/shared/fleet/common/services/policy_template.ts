@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import {
   DATASET_VAR_NAME,
   dataTypes,
@@ -20,14 +22,19 @@ import type {
   RegistryVarsEntry,
   RegistryDataStream,
   InstallablePackage,
+  NewPackagePolicy,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: DATASET_VAR_NAME,
   type: 'text',
-  title: 'Dataset name',
-  description:
-    "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
+  title: i18n.translate('xpack.fleet.policyTemplate.datasetVar.title', {
+    defaultMessage: 'Dataset name',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.datasetVar.description', {
+    defaultMessage:
+      "Set the name for your dataset. Once selected a dataset cannot be changed without creating a new integration policy. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html) are permitted.\n",
+  }),
   multi: false,
   required: true,
   show_user: true,
@@ -36,8 +43,13 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
 const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
-  title: 'Use Elastic APM',
-  description: 'enables the apm collector and processor.',
+  title: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.title', {
+    defaultMessage: 'Enable Elastic APM Enrichment',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.useAPMVar.description', {
+    defaultMessage:
+      "Include additional policy configuration to integrate trace data with Elastic's APM UI",
+  }),
   multi: false,
   required: false,
   show_user: true,
@@ -101,9 +113,11 @@ export const getNormalizedDataStreams = (
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    const isOtelTraces = (dataStreamType || policyTemplate.type) === dataTypes.Traces;
+    const isOtelDynamicSignalTypes = policyTemplate.dynamic_signal_types === true;
     if (
       policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      (dataStreamType || policyTemplate.type) === dataTypes.Traces
+      (isOtelTraces || isOtelDynamicSignalTypes)
     ) {
       vars = addUseAPMVarIfNotPresent(vars);
     }
@@ -182,6 +196,16 @@ const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
+  const enabledPolicyTemplates = new Set(
+    packagePolicy?.inputs
+      .filter((input) => input.enabled)
+      .map((input) => input.policy_template)
+      .filter((policyTemplate): policyTemplate is string => !!policyTemplate) ?? []
+  );
+  return enabledPolicyTemplates.size > 1;
+};
 
 export function filterPolicyTemplatesTiles<T>(
   templatesBehavior: string | undefined,

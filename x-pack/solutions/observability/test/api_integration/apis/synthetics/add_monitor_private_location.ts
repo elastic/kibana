@@ -103,12 +103,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const packagePolicy = policyResponse.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-${SPACE_ID}`
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + pvtLoc.id
         );
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
-        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
+        expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0`);
         comparePolicies(
           packagePolicy,
           getTestSyntheticsPolicy({
@@ -117,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
             spaceId: SPACE_ID,
+            packageVersion: testPrivateLocations.installedVersion,
           })
         );
         await supertestWithoutAuth

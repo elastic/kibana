@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/newsfeed-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/newsfeed-plugin'
+  title: '@kbn/newsfeed-plugin'
   description: Moon project for @kbn/newsfeed-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/newsfeed
+  sourceRoot: src/platform/plugins/shared/newsfeed
 dependsOn:
   - '@kbn/core'
   - '@kbn/screenshot-mode-plugin'
@@ -24,7 +23,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
-  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod
@@ -39,14 +37,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

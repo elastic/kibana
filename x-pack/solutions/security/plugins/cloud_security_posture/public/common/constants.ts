@@ -117,30 +117,3 @@ export const VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS: string[] = [
   VULNERABILITY_FIELDS.PACKAGE_VERSION,
   VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION,
 ];
-
-/*
-The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
-The runtime mappings are used to prevent filtering out the data when any of these columns are sorted in the Data Table.
-TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
-the fields from the runtime mappings if they are removed from the Data Table.
-*/
-export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [];
-export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
-  'rule.benchmark.rule_number',
-  'rule.section',
-  'resource.sub_type',
-];
-
-/*
-The fields below are used to group the data in the Cloud Security Data Table.
-The keys are the fields that are used to group the data, and the values are the fields that need to have keyword mapping
-to prevent filtering out the data when grouping by the key field.
-WARNING: only add keys which are not mapped as keywords - casting to keywords could have negative effect on performance.
-TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
-the fields from the runtime mappings if they are removed from the Data Table.
-*/
-export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
-export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
-  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]: ['orchestrator.cluster.id'],
-  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]: ['cloud.account.id'],
-};

@@ -251,7 +251,8 @@ describe('getAxiosInstance', () => {
       'https://test/oauth/token',
       logger,
       { clientId: 'my-client-id', clientSecret: 'my-client-secret', scope: 'grant' },
-      configurationUtilities
+      configurationUtilities,
+      'client_secret_post'
     );
 
     expect(result).not.toBeUndefined();

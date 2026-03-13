@@ -29,7 +29,9 @@ export const toMilliseconds = (value: string, unit: PreservedTimeUnit): number =
   if (value.trim() === '') return -1;
   const resolvedValue = value.trim();
   const ms = toMillis(`${resolvedValue}${unit}`);
-  return ms === undefined ? Number.NaN : ms;
+  // Convert a numeric value + unit into milliseconds.
+  // Returns `-1` when the input cannot be parsed.
+  return ms === undefined ? -1 : ms;
 };
 
 const toSafeNumber = (

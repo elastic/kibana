@@ -92,7 +92,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
               references,
             },
-            timeRange,
+            time_range: timeRange,
             nonPersistedDisplayOptions: {
               solutionNavIdOverride,
               enableDocumentViewer: documentViewerEnabled,

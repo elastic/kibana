@@ -15,6 +15,12 @@
 import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import {
+  DEFAULT_MAX_STEP_SIZE,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+} from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -33,6 +39,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  'max-step-size'?: string;
   spaceId: string;
 }
 
@@ -100,7 +107,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
-  protected connectorExecutor: ConnectorExecutor;
+  protected connectorExecutor: ConnectorExecutor | undefined;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
@@ -111,8 +118,28 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   ) {
     this.step = step;
     this.stepExecutionRuntime = stepExecutionRuntime;
-    this.connectorExecutor = connectorExecutor as any;
+    this.connectorExecutor = connectorExecutor;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
+
+    // Graph nodes use `stepId` instead of `name`. When the factory passes a
+    // graph node directly (e.g. for ES/Kibana steps), bridge the gap so that
+    // error messages and APM spans always have a human-readable step name.
+    if (!this.step.name) {
+      const graphStepId = (step as any).stepId;
+      if (graphStepId) {
+        (this.step as any).name = graphStepId;
+      }
+    }
+
+    // Auto-populate max-step-size from the graph node configuration.
+    // This ensures every step respects the YAML limit regardless of how
+    // the subclass constructs its step object.
+    if (!this.step['max-step-size']) {
+      const nodeConfig = (stepExecutionRuntime.node as any)?.configuration;
+      if (nodeConfig?.['max-step-size']) {
+        this.step['max-step-size'] = nodeConfig['max-step-size'];
+      }
+    }
   }
 
   public getName(): string {
@@ -124,6 +151,12 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
+    // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
+    if (this.stepExecutionRuntime.abortController.signal.aborted) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+      return;
+    }
+
     let input: any;
     this.stepExecutionRuntime.startStep();
     // flush event logs after start step
@@ -141,6 +174,19 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       input = await this.getInput();
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
+
+      // Layer 2: Enforce output size limit before storing in execution state.
+      // This is the generic catch-all that protects every step type against context growth.
+      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
+      if (result.output != null && !result.error) {
+        const maxBytes = this.getMaxResponseBytes();
+        if (maxBytes > 0) {
+          const outputSize = safeOutputSize(result.output);
+          if (outputSize > 0 && outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name);
+          }
+        }
+      }
 
       // Don't update step execution runtime if abort was initiated
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
@@ -182,6 +228,44 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   // Subclasses implement this to execute the step logic
   protected abstract _run(input?: any): Promise<RunStepResult>;
+
+  /**
+   * Resolves the maximum step size in bytes.
+   * Resolution order: step-level > workflow settings > plugin config > DEFAULT_MAX_STEP_SIZE.
+   * Returns 0 if the configured value is explicitly "0" (disables the limit).
+   * Returns the default on invalid/unparseable values to avoid crashing the step.
+   */
+  protected getMaxResponseBytes(): number {
+    try {
+      // 1. Step-level override (from YAML — auto-populated in constructor)
+      const stepLimit = this.step['max-step-size'];
+      if (stepLimit) {
+        return parseByteSize(stepLimit);
+      }
+
+      // 2. Workflow-level override (from YAML settings, via runtime — not user-facing context)
+      const workflowSettings =
+        this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
+      const workflowLimit = workflowSettings?.['max-step-size'];
+      if (workflowLimit) {
+        return parseByteSize(workflowLimit);
+      }
+
+      // 3. Plugin config default (from kibana.yml)
+      const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
+      if (pluginConfig?.maxResponseSize) {
+        const configValue = pluginConfig.maxResponseSize;
+        return typeof configValue === 'number'
+          ? configValue
+          : (configValue as any).getValueInBytes();
+      }
+
+      // 4. Hardcoded fallback
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    } catch {
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    }
+  }
 
   // Helper for handling on-failure, retries, etc.
   protected handleFailure(input: any, error: any): RunStepResult {

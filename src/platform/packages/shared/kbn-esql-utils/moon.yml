@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-esql'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-utils'
+  title: '@kbn/esql-utils'
   description: Moon project for @kbn/esql-utils
   channel: ''
   owner: '@elastic/kibana-esql'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-utils
+  sourceRoot: src/platform/packages/shared/kbn-esql-utils
 dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/crypto-browser'
@@ -32,7 +31,6 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/monaco'
   - '@kbn/core'
-  - '@kbn/projects-solutions-groups'
   - '@kbn/index-management-shared-types'
   - '@kbn/licensing-types'
   - '@kbn/controls-constants'
@@ -53,14 +51,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

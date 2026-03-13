@@ -13,7 +13,10 @@ import {
   DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
   WaitGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
 } from './base';
 import {
   EnterConditionBranchNodeSchema,
@@ -21,7 +24,12 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
-import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import {
+  EnterForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitForeachNodeSchema,
+  ExitWhileNodeSchema,
+} from './loop_nodes';
 import {
   EnterContinueNodeSchema,
   EnterFallbackPathNodeSchema,
@@ -46,12 +54,17 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
   WaitGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitWhileNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,

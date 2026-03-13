@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiButtonGroup,
   EuiCopy,
-  EuiLink,
   EuiImage,
   EuiCallOut,
   EuiSkeletonText,
@@ -31,14 +31,20 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import {
+  WiredStreamsIngestionSelector,
+  type IngestionMode,
+} from '../shared/wired_streams_ingestion_selector';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallCommand } from './build_install_command';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
+import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -56,7 +62,7 @@ export const OtelLogsPanel: React.FC = () => {
   });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, http },
+    services: { share, http, docLinks },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const {
@@ -86,76 +92,95 @@ export const OtelLogsPanel: React.FC = () => {
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
+  const {
+    isEnabled: isWiredStreamsEnabled,
+    isLoading: isWiredStreamsLoading,
+    isEnabling,
+    enableWiredStreams,
+  } = useWiredStreamsStatus();
+  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const useWiredStreams = ingestionMode === 'wired';
+
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
+  const logsLocatorParams = useMemo<LogsLocatorParams>(
+    () => (useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {}),
+    [useWiredStreams]
+  );
 
   const [{ value: deeplinks }, getDeeplinks] = useAsyncFn(async () => {
     return {
-      logs: logsLocator?.getRedirectUrl({}),
+      logs: logsLocator?.getRedirectUrl(logsLocatorParams),
       metrics: hostsLocator?.getRedirectUrl({}),
     };
-  }, [logsLocator]);
+  }, [logsLocator, logsLocatorParams, hostsLocator]);
 
   useEffect(() => {
     getDeeplinks();
   }, [getDeeplinks]);
 
-  const installTabContents = [
-    {
-      id: 'linux',
-      name: 'Linux',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'linux',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
-        : '',
-      start: 'sudo ./otelcol --config otel.yml',
-      codeLanguage: 'sh',
-    },
-    {
-      id: 'mac',
-      name: 'Mac',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'mac',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
-        : '',
-      start: './otelcol --config otel.yml',
-      codeLanguage: 'sh',
-    },
-    {
-      id: 'windows',
-      name: 'Windows',
-      firstStepTitle: HOST_COMMAND,
-      content: setupData
-        ? buildInstallCommand({
-            platform: 'windows',
-            isMetricsOnboardingEnabled,
-            isManagedOtlpServiceAvailable,
-            managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-            elasticsearchUrl: setupData.elasticsearchUrl,
-            apiKeyEncoded: setupData.apiKeyEncoded,
-            agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-          })
-        : '',
-      start: '.\\otelcol.ps1 --config otel.yml',
-      codeLanguage: 'powershell',
-    },
-  ];
+  const installTabContents = useMemo(
+    () => [
+      {
+        id: 'linux',
+        name: 'Linux',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'linux',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: 'sudo ./otelcol --config otel.yml',
+        codeLanguage: 'sh',
+      },
+      {
+        id: 'mac',
+        name: 'Mac',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'mac',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: './otelcol --config otel.yml',
+        codeLanguage: 'sh',
+      },
+      {
+        id: 'windows',
+        name: 'Windows',
+        firstStepTitle: HOST_COMMAND,
+        content: setupData
+          ? buildInstallCommand({
+              platform: 'windows',
+              isMetricsOnboardingEnabled,
+              isManagedOtlpServiceAvailable,
+              managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+              elasticsearchUrl: setupData.elasticsearchUrl,
+              apiKeyEncoded: setupData.apiKeyEncoded,
+              agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+              useWiredStreams,
+            })
+          : '',
+        start: '.\\otelcol.ps1 --config otel.yml',
+        codeLanguage: 'powershell',
+      },
+    ],
+    [setupData, isMetricsOnboardingEnabled, isManagedOtlpServiceAvailable, useWiredStreams]
+  );
 
   const [selectedTab, setSelectedTab] = React.useState(installTabContents[0].id);
 
@@ -178,40 +203,74 @@ export const OtelLogsPanel: React.FC = () => {
               }),
 
               children: (
-                <EuiFlexGroup direction="column">
-                  <EuiButtonGroup
-                    legend={i18n.translate(
-                      'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                      {
-                        defaultMessage: 'Choose platform',
-                      }
-                    )}
-                    options={installTabContents.map(({ id, name }) => ({
-                      id,
-                      label: name,
-                    }))}
-                    type="single"
-                    idSelected={selectedTab}
-                    onChange={(id: string) => {
-                      setSelectedTab(id);
-                    }}
-                  />
+                <EuiFlexGroup direction="column" gutterSize="l">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {!isWiredStreamsLoading && (
+                        <EuiText size="s">
+                          <strong>
+                            {i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.osSelector',
+                              {
+                                defaultMessage: 'OS selector',
+                              }
+                            )}
+                          </strong>
+                        </EuiText>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend={i18n.translate(
+                            'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
+                            {
+                              defaultMessage: 'Choose platform',
+                            }
+                          )}
+                          options={installTabContents.map(({ id, name }) => ({
+                            id,
+                            label: name,
+                          }))}
+                          type="single"
+                          idSelected={selectedTab}
+                          onChange={(id: string) => {
+                            setSelectedTab(id);
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  {!isWiredStreamsLoading && (
+                    <EuiFlexItem grow={false}>
+                      <WiredStreamsIngestionSelector
+                        ingestionMode={ingestionMode}
+                        onChange={setIngestionMode}
+                        streamsDocLink={docLinks?.links.observability.logsStreams}
+                        isWiredStreamsEnabled={isWiredStreamsEnabled}
+                        isEnabling={isEnabling}
+                        flowType="otel_host"
+                        onEnableWiredStreams={enableWiredStreams}
+                      />
+                    </EuiFlexItem>
+                  )}
 
                   {!setupData && <EuiSkeletonText lines={6} />}
 
                   {setupData && (
                     <>
-                      <EuiText>
-                        <p>{selectedContent.firstStepTitle}</p>
-                      </EuiText>
-                      <EuiFlexItem>
-                        <EuiCodeBlock
-                          language={selectedContent.codeLanguage}
-                          isCopyable
-                          overflowHeight={300}
-                        >
-                          {selectedContent.content}
-                        </EuiCodeBlock>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup direction="column" gutterSize="s">
+                          <EuiText size="s">
+                            <strong>{selectedContent.firstStepTitle}</strong>
+                          </EuiText>
+                          <EuiCodeBlock
+                            language={selectedContent.codeLanguage}
+                            isCopyable
+                            overflowHeight={300}
+                          >
+                            {selectedContent.content}
+                          </EuiCodeBlock>
+                        </EuiFlexGroup>
                       </EuiFlexItem>
                       <EuiFlexItem align="left">
                         <EuiFlexGroup>

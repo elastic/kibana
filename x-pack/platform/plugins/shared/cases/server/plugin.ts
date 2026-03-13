@@ -55,6 +55,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { registerCaseWorkflowSteps } from './workflows';
 
 export class CasePlugin
   implements
@@ -208,6 +209,8 @@ export class CasePlugin
       serverlessProjectType,
     });
 
+    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -318,7 +321,6 @@ export class CasePlugin
           return this.clientFactory.create({
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
-            internalClusterClient: coreContext.elasticsearch.client.asInternalUser,
             savedObjectsService: savedObjects,
           });
         },
@@ -334,7 +336,6 @@ export class CasePlugin
       return this.clientFactory.create({
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
-        internalClusterClient: client.asInternalUser,
         savedObjectsService: core.savedObjects,
       });
     };

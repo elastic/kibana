@@ -28,12 +28,22 @@ export interface TimeRangeBounds {
   start: DateString;
 }
 
-export interface TimeRangeBoundsPreset extends TimeRangeBounds {
-  label: string;
+/** Used for presets and recent options */
+export interface TimeRangeBoundsOption extends TimeRangeBounds {
+  label?: string;
+}
+
+/** Calendar-specific configuration options. */
+export interface CalendarOptions {
+  /**
+   * First day of the week: 0 for Sunday, 1 for Monday.
+   * @default 0
+   */
+  firstDayOfWeek?: 0 | 1;
 }
 
 export interface TimeRangeTransformOptions {
-  presets?: TimeRangeBoundsPreset[];
+  presets?: TimeRangeBoundsOption[];
   delimiter?: string;
   dateFormat?: string;
 }
