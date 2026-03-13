@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/actions-simulators-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/actions-simulators-plugin'
+  title: '@kbn/actions-simulators-plugin'
   description: Moon project for @kbn/actions-simulators-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+  sourceRoot: x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
