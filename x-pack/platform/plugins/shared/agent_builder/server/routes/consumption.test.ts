@@ -114,10 +114,7 @@ describe('Consumption route', () => {
       addVersion: jest
         .fn()
         .mockImplementation(
-          (
-            verConfig: any,
-            handler: (ctx: any, req: any, res: any) => Promise<any>
-          ) => {
+          (verConfig: any, handler: (ctx: any, req: any, res: any) => Promise<any>) => {
             routeConfigs[`${method}:${path}`] = config;
             versionConfigs[`${method}:${path}`] = verConfig;
             routeHandlers[`${method}:${path}`] = handler;
