@@ -13,12 +13,14 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
-import { MagnifyGradientIcon } from './magnify_gradient_icon';
+import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { MagnifySparklesIcon } from './magnify_sparkles_icon';
 import {
   addStarredQueryLabel,
   helpLabel,
   hideHistoryLabel,
   searchTooltipLabel,
+  searchWithNlTooltipLabel,
   removeStarredQueryLabel,
   showHistoryLabel,
 } from './menu_i18n';
@@ -37,7 +39,11 @@ export function ESQLMenu({
 } = {}) {
   const editorActions = useEsqlEditorActions();
   const { euiTheme } = useEuiTheme();
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
   const commandKey = isMac ? '⌘' : 'Ctrl';
+  const visorTooltip = isNlToEsqlEnabled
+    ? searchWithNlTooltipLabel(commandKey)
+    : searchTooltipLabel(commandKey);
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
@@ -68,13 +74,9 @@ export function ESQLMenu({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={searchTooltipLabel(commandKey)}
-          disableScreenReaderOutput
-        >
+        <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={MagnifyGradientIcon}
+            iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
             size="xs"
             aria-label={searchPlaceholder}
             onClick={onToggleVisor}

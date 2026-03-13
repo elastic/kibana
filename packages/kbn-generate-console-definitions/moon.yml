@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/generate-console-definitions'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/generate-console-definitions'
+  title: '@kbn/generate-console-definitions'
   description: Moon project for @kbn/generate-console-definitions
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: packages/kbn-generate-console-definitions
+  sourceRoot: packages/kbn-generate-console-definitions
 dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
@@ -36,14 +35,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
