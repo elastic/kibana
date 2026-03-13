@@ -30,6 +30,7 @@ import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import {
   createESQLQuery,
   createM4DownsampledESQLQuery,
+  getLensMetricFormat,
   M4_VALUE_COLUMN,
 } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
@@ -294,11 +295,12 @@ const ChartItem = React.memo(
               label: metric.name,
               compactValues: true,
               seriesColor: color,
+              ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
             },
           ],
         },
       ],
-      [metric.name, color]
+      [metric.name, metric.unit, color]
     );
 
     const activeQuery = isM4Compatible ? m4Query : standardQuery;
