@@ -7,15 +7,18 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-models-utils';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import Boom from '@hapi/boom';
 import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
 import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
 import { modelsProvider } from '../models/model_management';
+import type { MlClient } from '../lib/ml_client/types';
 import type { RouteInitialization } from '../types';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import {
@@ -50,6 +53,46 @@ export function filterForEnabledFeatureModels<
     );
   }
   return filteredModels;
+}
+
+async function isRerankTrainedModel({
+  mlClient,
+  client,
+  modelId,
+}: {
+  mlClient: MlClient;
+  client: ElasticsearchClient;
+  modelId: string;
+}) {
+  const { trained_model_configs: trainedModelConfigs } = await mlClient.getTrainedModels({
+    model_id: modelId,
+    size: 1,
+  });
+
+  if (trainedModelConfigs.length === 0) return false;
+
+  const model = trainedModelConfigs[0];
+
+  if (model.model_type?.includes('text_similarity')) {
+    return true;
+  }
+
+  if (typeof model.inference_config === 'object' && model.inference_config !== null) {
+    const taskKeys = Object.keys(model.inference_config);
+    if (taskKeys.includes('rerank') || taskKeys.includes('text_similarity')) {
+      return true;
+    }
+  }
+
+  const { endpoints } = await client.inference.get({
+    task_type: 'rerank',
+    inference_id: '_all',
+  });
+
+  return endpoints.some(
+    (endpoint: estypes.InferenceInferenceEndpointInfo) =>
+      endpoint.service_settings.model_id === modelId
+  );
 }
 
 export function trainedModelsRoutes(
@@ -434,9 +477,14 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
         try {
           const { modelId } = request.params;
+          if (await isRerankTrainedModel({ mlClient, client: client.asInternalUser, modelId })) {
+            throw Boom.badRequest(
+              'Start deployment and update deployment actions are not supported for rerank models.'
+            );
+          }
 
           // TODO use mlClient.startTrainedModelDeployment when esClient is updated
           const body = await mlClient.startTrainedModelDeployment(
@@ -478,9 +526,14 @@ export function trainedModelsRoutes(
           request: { params: modelAndDeploymentIdSchema, body: updateDeploymentParamsSchema },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ mlClient, client, request, response }) => {
         try {
           const { modelId, deploymentId } = request.params;
+          if (await isRerankTrainedModel({ mlClient, client: client.asInternalUser, modelId })) {
+            throw Boom.badRequest(
+              'Start deployment and update deployment actions are not supported for rerank models.'
+            );
+          }
           const body = await mlClient.updateTrainedModelDeployment({
             model_id: modelId,
             deployment_id: deploymentId,

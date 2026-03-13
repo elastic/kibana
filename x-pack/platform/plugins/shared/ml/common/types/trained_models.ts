@@ -430,6 +430,26 @@ export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDown
   return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
 }
 
+export function isRerankModelItem(item: TrainedModelUIItem): boolean {
+  if (Array.isArray(item.type) && item.type.includes('text_similarity')) {
+    return true;
+  }
+
+  if (
+    'inference_config' in item &&
+    typeof item.inference_config === 'object' &&
+    item.inference_config !== null
+  ) {
+    const taskKeys = Object.keys(item.inference_config);
+    if (taskKeys.includes('rerank') || taskKeys.includes('text_similarity')) {
+      return true;
+    }
+  }
+
+  // fallback to inference_apis
+  return !!item.inference_apis?.some((inference) => inference.task_type === 'rerank');
+}
+
 export const isBuiltInModel = (item: TrainedModelConfigResponse | TrainedModelUIItem) =>
   item.tags.includes(BUILT_IN_MODEL_TAG);
 
