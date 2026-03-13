@@ -133,9 +133,12 @@ settingComponentRegistry.set(
           <EuiCheckbox
             data-test-subj={fieldKey}
             id={fieldKey}
-            label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
-              defaultMessage: 'Enable',
-            })}
+            label={
+              settingsConfig.checkboxLabel ??
+              i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
+                defaultMessage: 'Enable',
+              })
+            }
             checked={fieldValue}
             onChange={handleChange}
           />
