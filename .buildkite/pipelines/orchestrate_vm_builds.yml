@@ -12,40 +12,78 @@ steps:
         hint: 'Branch in elastic/kibana to run build image cache build on'
         default: '${BUILDKITE_BRANCH}'
         required: true
+      - select: 'Steps to skip'
+        key: 'SKIP_STEPS'
+        hint: 'Optionally select steps to skip (none checked = build all)'
+        required: false
+        multiple: true
+        options:
+          - label: 'Build base image'
+            value: 'skip-base-image'
+          - label: 'Build packages layer'
+            value: 'skip-packages-layer'
+          - label: 'Build image cache'
+            value: 'skip-image-cache'
 
   - name: 'Upload trigger steps'
     command: |
       VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
       KIBANA_BRANCH="$$(buildkite-agent meta-data get "KIBANA_BRANCH")"
+      SKIP_STEPS="$$(buildkite-agent meta-data get "SKIP_STEPS" --default "")"
 
-      buildkite-agent pipeline upload << PIPELINE
-      steps:
+      PIPELINE="steps:"
+      LAST_KEY=""
+
+      if [[ "$$SKIP_STEPS" != *"skip-base-image"* ]]; then
+        DEPENDS_ON=""
+        if [[ -n "$$LAST_KEY" ]]; then
+          DEPENDS_ON=$$'\n'"          depends_on: $$LAST_KEY"
+        fi
+        PIPELINE="$$PIPELINE
         - name: 'Build base image'
-          key: build-base-image
+          key: build-base-image$$DEPENDS_ON
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '$${VM_IMAGES_BRANCH}'
+            branch: '$$VM_IMAGES_BRANCH'
             env:
-              IMAGES_CONFIG: kibana/base_image.yml
+              IMAGES_CONFIG: kibana/base_image.yml"
+        LAST_KEY="build-base-image"
+      fi
+
+      if [[ "$$SKIP_STEPS" != *"skip-packages-layer"* ]]; then
+        DEPENDS_ON=""
+        if [[ -n "$$LAST_KEY" ]]; then
+          DEPENDS_ON=$$'\n'"          depends_on: $$LAST_KEY"
+        fi
+        PIPELINE="$$PIPELINE
         - name: 'Build packages layer'
-          key: build-packages-layer
-          depends_on: build-base-image
+          key: build-packages-layer$$DEPENDS_ON
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '$${VM_IMAGES_BRANCH}'
+            branch: '$$VM_IMAGES_BRANCH'
             env:
               IMAGES_CONFIG: kibana/packages_layer.yml
-              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-        - name: 'Build image cache'
-          depends_on: build-packages-layer
+              BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'"
+        LAST_KEY="build-packages-layer"
+      fi
+
+      if [[ "$$SKIP_STEPS" != *"skip-image-cache"* ]]; then
+        DEPENDS_ON=""
+        if [[ -n "$$LAST_KEY" ]]; then
+          DEPENDS_ON=$$'\n'"          depends_on: $$LAST_KEY"
+        fi
+        PIPELINE="$$PIPELINE
+        - name: 'Build image cache'$$DEPENDS_ON
           trigger: kibana-vm-images
           async: false
           build:
-            branch: '$${VM_IMAGES_BRANCH}'
+            branch: '$$VM_IMAGES_BRANCH'
             env:
               IMAGES_CONFIG: kibana/image_cache.tpl.yml
               BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
-              KIBANA_BRANCH: '$${KIBANA_BRANCH}'
-      PIPELINE
+              KIBANA_BRANCH: '$$KIBANA_BRANCH'"
+      fi
+
+      echo "$$PIPELINE" | buildkite-agent pipeline upload
