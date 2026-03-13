@@ -47,9 +47,9 @@ export const useInlineActionTrigger = (
         setMatch((prev) => (prev.isActive ? INACTIVE_MATCH : prev));
         return;
       }
-
       const textBeforeCursor = getTextBeforeCursor(element);
-      setMatch(matchTrigger(textBeforeCursor));
+      const nextMatch = matchTrigger(textBeforeCursor);
+      setMatch(nextMatch);
     },
     [enabled]
   );

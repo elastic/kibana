@@ -13,7 +13,6 @@ import type { TriggerMatchResult, AnchorPosition } from './types';
 
 interface InlineActionPopoverProps {
   triggerMatch: TriggerMatchResult;
-  onClose: () => void;
   anchorPosition: AnchorPosition | null;
   'data-test-subj'?: string;
 }
@@ -38,7 +37,6 @@ const anchorStyles = css`
 
 export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
   triggerMatch,
-  onClose,
   anchorPosition,
   'data-test-subj': dataTestSubj = 'inlineActionPopover',
 }) => {
@@ -68,7 +66,11 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
       <EuiPopover
         button={<span css={anchorStyles} />}
         isOpen={isOpen}
-        closePopover={onClose}
+        closePopover={() => {
+          // Do nothing
+          // The popover does not control its own visibility state.
+          // The external state of triggerMatch controls this popover's visibility.
+        }}
         anchorPosition="upLeft"
         panelPaddingSize="s"
         panelProps={{ 'aria-label': panelAriaLabel }}

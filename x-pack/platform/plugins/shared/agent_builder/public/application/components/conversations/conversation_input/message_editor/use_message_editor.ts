@@ -10,43 +10,49 @@ import type { TriggerMatchResult } from './inline_actions';
 import { useInlineActionTrigger } from './inline_actions';
 
 export interface MessageEditorInstance {
-  _internal: {
-    ref: React.RefObject<HTMLDivElement>;
-    onChange: () => void;
-    /** Current inline action trigger state */
-    triggerMatch: TriggerMatchResult;
-  };
+  ref: React.RefObject<HTMLDivElement>;
+  onChange: () => void;
+  onFocus: () => void;
+  triggerMatch: TriggerMatchResult;
+  /** Dismiss the active action menu */
+  dismissActionMenu: () => void;
+}
+
+interface MessageEditorController {
   focus: () => void;
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
-
-  /** Dismiss the active trigger menu */
-  dismissTrigger: () => void;
 }
 
 /**
- * Creates an imperative handle for controlling MessageEditor
+ * Creates reactive and imperative handles for controlling MessageEditor.
+ *
+ * `messageEditor` should be passed to MessageEditor component.
+ * `controller` can be used by consumer to imperatively control and access the state of a child message editor component.
  *
  * @example
- * const editor = useMessageEditor();
- * editor.focus();
- * const content = editor.getContent();
- * if (editor.isEmpty) {
+ * const { messageEditor, controller } = useMessageEditor();
+ * controller.focus();
+ * const content = controller.getContent();
+ * if (controller.isEmpty) {
  *   // Submit button disabled
  * }
  *
- * <MessageEditor messageEditor={editor} />
+ * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
-export const useMessageEditor = (): MessageEditorInstance => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isEmpty, setIsEmpty] = useState(true);
+export const useMessageEditor = (): {
+  messageEditor: MessageEditorInstance;
+  controller: MessageEditorController;
+} => {
   const {
     match: triggerMatch,
     dismiss: dismissActionMenu,
     checkInputForTrigger,
   } = useInlineActionTrigger();
+  const ref = useRef<HTMLDivElement>(null);
+  const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
     if (!ref?.current) {
@@ -61,18 +67,31 @@ export const useMessageEditor = (): MessageEditorInstance => {
     setIsEmpty(nextIsEmpty);
   }, []);
 
-  const instance = useMemo(
+  const messageEditor = useMemo(
     () => ({
-      _internal: {
-        ref,
-        onChange: () => {
-          syncIsEmpty();
+      ref,
+      onChange: () => {
+        syncIsEmpty();
+        if (ref.current) {
+          checkInputForTrigger(ref.current);
+        }
+      },
+      onFocus: () => {
+        // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
+        requestAnimationFrame(() => {
           if (ref.current) {
             checkInputForTrigger(ref.current);
           }
-        },
-        triggerMatch,
+        });
       },
+      triggerMatch,
+      dismissActionMenu,
+    }),
+    [syncIsEmpty, checkInputForTrigger, triggerMatch, dismissActionMenu]
+  );
+
+  const controller = useMemo(
+    () => ({
       focus: () => {
         ref.current?.focus();
       },
@@ -97,10 +116,9 @@ export const useMessageEditor = (): MessageEditorInstance => {
         }
       },
       isEmpty,
-      dismissTrigger: dismissActionMenu,
     }),
-    [isEmpty, syncIsEmpty, triggerMatch, dismissActionMenu, checkInputForTrigger]
+    [isEmpty, syncIsEmpty]
   );
 
-  return instance;
+  return { messageEditor, controller };
 };

@@ -20,7 +20,6 @@ const containerStyles = css`
 
 interface InlineActionsContainerProps {
   triggerMatch: TriggerMatchResult;
-  onClose: () => void;
   editorRef: React.RefObject<HTMLDivElement>;
   children: React.ReactNode;
   'data-test-subj'?: string;
@@ -28,7 +27,6 @@ interface InlineActionsContainerProps {
 
 export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
   triggerMatch,
-  onClose,
   editorRef,
   children,
   'data-test-subj': dataTestSubj,
@@ -46,11 +44,7 @@ export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
       {isExperimentalFeaturesEnabled && (
-        <InlineActionPopover
-          triggerMatch={triggerMatch}
-          onClose={onClose}
-          anchorPosition={anchorPosition}
-        />
+        <InlineActionPopover triggerMatch={triggerMatch} anchorPosition={anchorPosition} />
       )}
     </div>
   );

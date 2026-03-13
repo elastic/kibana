@@ -51,7 +51,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
-  const { ref, onChange, triggerMatch } = messageEditor._internal;
+  const { ref, onChange, onFocus, triggerMatch } = messageEditor;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
   const placeholderStyles = css`
@@ -81,7 +81,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   return (
     <InlineActionsContainer
       triggerMatch={triggerMatch}
-      onClose={messageEditor.dismissTrigger}
       editorRef={ref}
       data-test-subj={`${dataTestSubj}-container`}
     >
@@ -99,12 +98,14 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         data-test-subj={dataTestSubj}
         css={editorStyles}
         onInput={onChange}
+        onFocus={onFocus}
+        onBlur={messageEditor.dismissActionMenu}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
         onKeyDown={(event) => {
           if (event.key === keys.ESCAPE) {
             event.stopPropagation();
-            messageEditor.dismissTrigger();
+            messageEditor.dismissActionMenu();
           } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
             event.preventDefault();
             onSubmit();
