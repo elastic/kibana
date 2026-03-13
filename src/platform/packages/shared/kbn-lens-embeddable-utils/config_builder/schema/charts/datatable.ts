@@ -361,7 +361,7 @@ function validateSortBy({
 
 export const datatableStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -414,7 +414,7 @@ export const datatableStateSchemaNoESQL = schema.object(
 
 export const datatableStateSchemaESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,

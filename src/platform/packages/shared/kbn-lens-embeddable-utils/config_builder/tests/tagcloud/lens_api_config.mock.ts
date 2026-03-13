@@ -14,7 +14,7 @@ import type { TagcloudState } from '../../schema';
  */
 export const basicTagcloudWithAdHocDataView = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'index',
     index: 'test-index',
@@ -40,7 +40,7 @@ export const basicTagcloudWithAdHocDataView = {
  */
 export const basicTagcloudWithDataView = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'dataView',
     id: 'test-id',
@@ -65,7 +65,7 @@ export const basicTagcloudWithDataView = {
  */
 export const basicEsqlTagcloud = {
   title: 'Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
@@ -87,7 +87,7 @@ export const basicEsqlTagcloud = {
  */
 export const comprehensiveTagcloudWithAdHocDataView = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'dataView',
     id: 'my-custom-data-view-id',
@@ -150,7 +150,7 @@ export const comprehensiveTagcloudWithAdHocDataView = {
  */
 export const comprehensiveTagcloudWithDataView = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'dataView',
     id: 'my-custom-data-view-id',
@@ -213,7 +213,7 @@ export const comprehensiveTagcloudWithDataView = {
  */
 export const comprehensiveEsqlTagcloud = {
   title: 'Comprehensive Test Tagcloud',
-  type: 'tagcloud',
+  type: 'tag_cloud',
   dataset: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',

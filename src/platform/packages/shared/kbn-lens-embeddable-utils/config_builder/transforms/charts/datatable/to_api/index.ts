@@ -33,7 +33,7 @@ export function buildVisualizationAPI(
     const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
 
     return {
-      type: 'datatable',
+      type: 'data_table',
       dataset,
       ...generateApiLayer(layer),
       ...columns,
@@ -52,7 +52,7 @@ export function buildVisualizationAPI(
   const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
 
   return {
-    type: 'datatable',
+    type: 'data_table',
     dataset,
     ...generateApiLayer(layer),
     ...columns,
