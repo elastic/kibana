@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
     'timedTaskWithSingleConcurrency',
     'taskToDisable',
     'sampleLongRunningRecurringTask',
+    'sampleRecurringTaskTimingOutWithError',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.
