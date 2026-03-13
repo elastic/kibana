@@ -2255,6 +2255,11 @@
   resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-2.2.4.tgz#d77bfa9ff49e2307c0c6e6b8b26b5dd3c05816c4"
   integrity sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==
 
+"@date-fns/tz@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@date-fns/tz/-/tz-1.4.1.tgz#2d905f282304630e07bef6d02d2e7dbf3f0cc4e4"
+  integrity sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==
+
 "@dependents/detective-less@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@dependents/detective-less/-/detective-less-4.1.0.tgz#4a979ee7a6a79eb33602862d6a1263e30f98002e"
@@ -10117,49 +10122,49 @@
     zod "^3.25 || ^4.0"
     zod-to-json-schema "^3.25.1"
 
-"@moonrepo/cli@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.0.1.tgz#268160bad970ba2104d13bef47effef8d23d8429"
-  integrity sha512-uR1yul8g/oRWbxRnYXcMk0A3J2sL31tB3U8mUb2K1J2w/455H5sj8P+yjraUXsuXdial08Td5sAWenrsQ4V7JQ==
+"@moonrepo/cli@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-2.0.4.tgz#2ebc52411ae3c280dc4485a6e6360f877603ef00"
+  integrity sha512-cP62Fa7hzToEi0I2i3Gx7zhPPdimVCeW8WqbSlE5y6fhjH38g1N77vZg4A6rcauDEUl/cpA5+vWQyxm4KCsqUA==
   dependencies:
     detect-libc "^2.1.2"
   optionalDependencies:
-    "@moonrepo/core-linux-arm64-gnu" "2.0.1"
-    "@moonrepo/core-linux-arm64-musl" "2.0.1"
-    "@moonrepo/core-linux-x64-gnu" "2.0.1"
-    "@moonrepo/core-linux-x64-musl" "2.0.1"
-    "@moonrepo/core-macos-arm64" "2.0.1"
-    "@moonrepo/core-windows-x64-msvc" "2.0.1"
+    "@moonrepo/core-linux-arm64-gnu" "2.0.4"
+    "@moonrepo/core-linux-arm64-musl" "2.0.4"
+    "@moonrepo/core-linux-x64-gnu" "2.0.4"
+    "@moonrepo/core-linux-x64-musl" "2.0.4"
+    "@moonrepo/core-macos-arm64" "2.0.4"
+    "@moonrepo/core-windows-x64-msvc" "2.0.4"
 
-"@moonrepo/core-linux-arm64-gnu@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-2.0.1.tgz#889d14fe41779efeaeb7e47576fe3de914efe163"
-  integrity sha512-hbXc095vQl7uBoZcUKauLUPrqbNbAsm/JlKVAzy00VuJcAmyEt4fgwnaMMfFAt1EycbILBJs6GJ5+FKckHWBxQ==
+"@moonrepo/core-linux-arm64-gnu@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-2.0.4.tgz#a75e60d40831cf358fde7cb26f7fd8f2afd116b4"
+  integrity sha512-pvMgTfYUN8ARvhOgVumR1j1XQY0V+59qz+Bi9BBmgOJsaB/QosGGWkCfdV2dChpzfE9AELnjIBgrazUGcOX9KA==
 
-"@moonrepo/core-linux-arm64-musl@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-2.0.1.tgz#5c25a5d3c2a5219aabcd038b4933aff84624010a"
-  integrity sha512-jMmljBv5SLSpfZWthehqETuWd8GUFtEznfXMPndvKH0GiS6IWb4+hBrztK/lPdIIeLfTgpZwpI3z0/KFAQWeXQ==
+"@moonrepo/core-linux-arm64-musl@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-2.0.4.tgz#386f6cb0086765e30eb7b79608dc543c7b3fc6c0"
+  integrity sha512-lF+KuN8ymTR+kynI7OU+CN//V6hSGL9eq8+7VUVFY3cRobyzjEulB7xkPgVYH2C81E8TUK2tp1R79Y8nOgEHaA==
 
-"@moonrepo/core-linux-x64-gnu@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-2.0.1.tgz#49d43435c36baec7772b8cdbe9caf8a9e896a1de"
-  integrity sha512-2Ybnde5RHFTKQ3kYRx8nZG66Q5J/X7iLyF3cpgCUJM6+7MXwNXKClblKjVCS7kzIOHxVX4uimVqMVu5rvihtxQ==
+"@moonrepo/core-linux-x64-gnu@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-2.0.4.tgz#4588a785168a1efbbead17a029b05926ae36f1b5"
+  integrity sha512-0auEy/jyMm5vjIZy/dLdrIoOJ0hnoxcEk+veBGwZatS65dSKEvXdUYrYSGWTRvykbsXDBTAaXFUtj1enGzIXmg==
 
-"@moonrepo/core-linux-x64-musl@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-2.0.1.tgz#8631e29a08421567c6753298e117946664cb1ce4"
-  integrity sha512-c3qDYMYTRcB49/jvYqI+l8lv/+XAUXMlB2b6MtQ0w4psnFaYHCSdSLJ5kGvxZ4ztHjnM757A36PpHLC3XA44bQ==
+"@moonrepo/core-linux-x64-musl@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-2.0.4.tgz#5c2e9a71e68df0275899b186bf29e8dde55f222b"
+  integrity sha512-h7b7uw8GdhTyZg2R7rHA04mqBIvYvcHtgtVBUXwwZQlh6jprFFtxuvehAdK32PN8sxygwRa+AdTfgq3vZHXFmw==
 
-"@moonrepo/core-macos-arm64@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-2.0.1.tgz#b1f19800edcfdbb628f30fbdd8d71fee4f0998af"
-  integrity sha512-gGHP1u9n0A2XQbtkNU7OyCmPDknAf56IgSjI8rnIcaYXBFnsbJNt7/41luYajlFwy5wbihSY6IzAJd3m4nXDLw==
+"@moonrepo/core-macos-arm64@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-2.0.4.tgz#e5e6d30ebaf72a545d07b583c740b1be5afd7a58"
+  integrity sha512-gz2FO0xRHUOXQjzBAz97S4pShL0YbTeNWLdCuRyjX8SNU1l82TX+l20e6OKfyt6jThWvCZeSiolx7W02xDT+iA==
 
-"@moonrepo/core-windows-x64-msvc@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-2.0.1.tgz#5defbd9d5857f88b0630396f9728b5dc45176a82"
-  integrity sha512-1BNmu2G09veKznKh1t7O5WdM3pTbuAT2qrIkI5g3LdPhvanBEnAfcVjkwDC5aWQd+UaXxrPLb2VUawqeAXItig==
+"@moonrepo/core-windows-x64-msvc@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-2.0.4.tgz#3bbf9bdb749ab5792f6575f483ee50554ebef696"
+  integrity sha512-LjwpvjWTeusQjpqLNK7N7tVr/IQSd0W8v0L7fUIKBXNGmuONhDCHwgDqSs3yVzwcQMluiHM2qwu9YSKIEVfTIw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -19289,10 +19294,20 @@ data-view-byte-offset@^1.0.0:
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
 
+date-fns-jalali@^4.1.0-0:
+  version "4.1.0-0"
+  resolved "https://registry.yarnpkg.com/date-fns-jalali/-/date-fns-jalali-4.1.0-0.tgz#9c7fb286004fab267a300d3e9f1ada9f10b4b6b0"
+  integrity sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==
+
 date-fns@^1.30.1:
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
+
+date-fns@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-4.1.0.tgz#64b3d83fff5aa80438f5b1a633c2e83b8a1c2d14"
+  integrity sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==
 
 date-now@^0.1.4:
   version "0.1.4"
@@ -29634,6 +29649,15 @@ react-clientside-effect@^1.2.6:
   integrity sha512-XGGGRQAKY+q25Lz9a/4EPqom7WRjz3z9R2k4jhVKA/puQFH/5Nt27vFZYql4m4NVNdUvX8PS3O7r/Zzm7cjUlg==
   dependencies:
     "@babel/runtime" "^7.12.13"
+
+react-day-picker@9.13.2:
+  version "9.13.2"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.13.2.tgz#64dd06ca149adb1488e331f6888befb4b0833fe0"
+  integrity sha512-IMPiXfXVIAuR5Yk58DDPBC8QKClrhdXV+Tr/alBrwrHUw0qDDYB1m5zPNuTnnPIr/gmJ4ChMxmtqPdxm8+R4Eg==
+  dependencies:
+    "@date-fns/tz" "^1.4.1"
+    date-fns "^4.1.0"
+    date-fns-jalali "^4.1.0-0"
 
 react-diff-view@3.3.1:
   version "3.3.1"
