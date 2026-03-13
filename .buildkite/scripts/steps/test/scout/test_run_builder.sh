@@ -62,6 +62,8 @@ else
     .buildkite/pipeline-utils/affected-packages/list_affected \
       --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
       > "$AFFECTED_MODULES_FILE"
+    # TODO: remove this temp exclusion after selective testing is validated
+    node -e "const f='$AFFECTED_MODULES_FILE'; const d=JSON.parse(require('fs').readFileSync(f,'utf8')); require('fs').writeFileSync(f, JSON.stringify(d.filter(id => !id.startsWith('@kbn/scout'))))"
     AFFECTED_MODULES_FLAG="--affected-modules $AFFECTED_MODULES_FILE"
   fi
 
