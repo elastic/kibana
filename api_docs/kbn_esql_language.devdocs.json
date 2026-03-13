@@ -1203,7 +1203,7 @@
           "ISuggestionItem"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-        "lineNumber": 540,
+        "lineNumber": 400,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1219,7 +1219,7 @@
               "ISuggestionItem"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/autocomplete/helpers.ts",
-            "lineNumber": 547,
+            "lineNumber": 407,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
