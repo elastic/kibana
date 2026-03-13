@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-settings-components-field-input'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-settings-components-field-input'
+  title: '@kbn/management-settings-components-field-input'
   description: Moon project for @kbn/management-settings-components-field-input
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-management/settings/components/field_input
+  sourceRoot: src/platform/packages/shared/kbn-management/settings/components/field_input
 dependsOn:
   - '@kbn/management-settings-types'
   - '@kbn/management-settings-field-definition'
