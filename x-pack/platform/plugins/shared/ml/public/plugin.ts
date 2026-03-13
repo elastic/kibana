@@ -281,8 +281,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlUiActions(pluginsSetup.uiActions, core);
             }
 
-            const { registerSearchLinks, registerCasesAttachments } =
-              await import('./register_helper');
+            const { registerSearchLinks, registerCasesAttachments } = await import(
+              './register_helper'
+            );
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
