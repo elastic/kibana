@@ -712,6 +712,7 @@
     "title",
     "type"
   ],
+  "inference-settings": [],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",

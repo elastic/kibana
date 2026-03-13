@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useDeleteSkill } from '../../hooks/skills/use_delete_skill';
 import { useSkillsService } from '../../hooks/skills/use_skills';
@@ -83,7 +83,7 @@ export const AgentBuilderSkillsTable = memo(() => {
         itemId="id"
         error={skillsError ? labels.skills.listSkillsErrorMessage : undefined}
         search={searchConfig}
-        onTableChange={({ page }: CriteriaWithPagination<PublicSkillDefinition>) => {
+        onTableChange={({ page }: CriteriaWithPagination<PublicSkillSummary>) => {
           if (page) {
             setTablePageIndex(page.index);
             if (page.size !== tablePageSize) {
@@ -140,8 +140,8 @@ const useSkillsTableColumns = ({
   onDelete,
 }: {
   onDelete: (skillId: string) => void;
-}): Array<EuiBasicTableColumn<PublicSkillDefinition>> => {
-  const { manageTools } = useUiPrivileges();
+}): Array<EuiBasicTableColumn<PublicSkillSummary>> => {
+  const { manageSkills } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const handleSkillClick = useCallback(
@@ -152,10 +152,10 @@ const useSkillsTableColumns = ({
   );
 
   return useMemo(
-    (): Array<EuiBasicTableColumn<PublicSkillDefinition>> => [
+    (): Array<EuiBasicTableColumn<PublicSkillSummary>> => [
       {
         width: '30px',
-        render: (skill: PublicSkillDefinition) => {
+        render: (skill: PublicSkillSummary) => {
           if (skill.readonly) {
             return <EuiIconTip type="lock" content={labels.skills.readOnly} />;
           }
@@ -186,13 +186,23 @@ const useSkillsTableColumns = ({
         ),
       },
       {
+        field: 'referenced_content_count',
+        name: labels.skills.referencedContentLabel,
+        width: '80px',
+        render: (count: number) => (
+          <EuiText size="xs" color="subdued">
+            {count}
+          </EuiText>
+        ),
+      },
+      {
         width: '60px',
         align: 'right' as const,
-        render: (skill: PublicSkillDefinition) => (
-          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageTools} />
+        render: (skill: PublicSkillSummary) => (
+          <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageSkills} />
         ),
       },
     ],
-    [manageTools, handleSkillClick, onDelete]
+    [manageSkills, handleSkillClick, onDelete]
   );
 };
