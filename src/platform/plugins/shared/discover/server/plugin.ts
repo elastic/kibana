@@ -28,7 +28,12 @@ import {
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
-import { getSearchEmbeddableTransforms } from '../common/embeddable';
+import {
+  getSearchEmbeddableTransforms,
+  getSearchEmbeddableAsCodeTransforms,
+  SEARCH_EMBEDDABLE_DASHBOARD_APP_TYPE,
+} from '../common/embeddable';
+import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -66,6 +71,10 @@ export class DiscoverServerPlugin
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+      getTransforms: getSearchEmbeddableAsCodeTransforms,
+      getSchema: (getDrilldownsSchema) => getDiscoverSessionEmbeddableSchema(getDrilldownsSchema),
+    });
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_DASHBOARD_APP_TYPE, {
       getTransforms: getSearchEmbeddableTransforms,
     });
 

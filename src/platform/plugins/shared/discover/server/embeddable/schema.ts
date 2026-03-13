@@ -330,6 +330,16 @@ export const discoverSessionEmbeddableSchema = schema.oneOf([
   discoverSessionByReferenceEmbeddableSchema,
 ]);
 
+export function getDiscoverSessionEmbeddableSchema(
+  _getDrilldownsSchema?: (triggers: string[]) => { getPropSchemas: () => Record<string, unknown> }
+) {
+  // Discover sessions do not support drilldown triggers yet. Return the static
+  // schema directly to avoid calling getDrilldownsSchema with an empty trigger
+  // list, which would produce an invalid schema.oneOf([]) inside the drilldown
+  // registry. When drilldown support is added, pass the supported triggers here.
+  return discoverSessionEmbeddableSchema;
+}
+
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
   typeof discoverSessionByValueEmbeddableSchema
 >;
