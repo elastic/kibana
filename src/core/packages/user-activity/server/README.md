@@ -40,7 +40,7 @@ core.userActivity.trackUserAction({
 
 ## Registering new actions
 
-Every action must be registered in `userActivityActions` (`src/user_activity_actions.ts`).
+Every action must be registered in `userActivityActions` ([`src/user_activity_actions.ts`](./src/user_activity_actions.ts)).
 Each entry requires a `description`, an `ownerTeam` (GitHub team handle), and a `versionAddedAt` (Stack version when the action was introduced).
 
 ```ts
