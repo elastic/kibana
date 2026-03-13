@@ -683,6 +683,7 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 }
 
 export enum INSTALL_STATES {
+  RESOLVE_DEPENDENCIES = 'resolve_dependencies',
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
   INSTALL_ESQL_VIEWS = 'install_esql_views',
@@ -715,6 +716,11 @@ export interface StateContext<T> {
   [key: string]: any;
   latestExecutedState?: LatestExecutedState<T>;
 }
+
+export type PackageDependencies = { name: string; version: string }[];
+
+/** Packages (name, version) that have this package as a dependency */
+export type IsDependencyOf = PackageDependencies;
 
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
@@ -750,6 +756,9 @@ export interface Installation {
     deprecation_details?: DeprecationInfo;
     action?: 'accepted' | 'declined' | 'pending';
   };
+  dependencies?: PackageDependencies | null;
+  /** Packages (name, version) that have this package as a dependency */
+  is_dependency_of?: IsDependencyOf | null;
 }
 
 export interface PackageUsageStats {

@@ -228,6 +228,7 @@ interface GetInstalledPackagesOptions {
   perPage: number;
   sortOrder: 'asc' | 'desc';
   showOnlyActiveDataStreams?: boolean;
+  dependencyPackageName?: string;
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
@@ -359,7 +360,8 @@ export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
-  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType, dependencyPackageName } =
+    options;
 
   const result = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -378,6 +380,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
+      ...(dependencyPackageName
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.dependencies`,
+              nodeBuilder.is('name', dependencyPackageName)
+            ),
+          ]
+        : []),
       ...(dataStreamType
         ? [
             // Filter for a "queryable" marker

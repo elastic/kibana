@@ -36,6 +36,8 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV7,
+  EpmPackagesSchemaV8,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1184,6 +1186,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1219,6 +1228,13 @@ export const getSavedObjectTypes = (
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
           install_source: { type: 'keyword' },
+          is_dependency_of: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           install_format_schema_version: { type: 'version' },
           experimental_data_stream_features: {
             type: 'nested',
@@ -1415,6 +1431,46 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
+          },
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                is_dependency_of: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV8.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV8,
           },
         },
       },
