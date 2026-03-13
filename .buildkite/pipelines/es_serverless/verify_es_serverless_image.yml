@@ -75,6 +75,7 @@ steps:
         depends_on:
           - build
         env:
+          SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
           SERVERLESS_TESTS_ONLY: 'true'
           SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
         retry:
