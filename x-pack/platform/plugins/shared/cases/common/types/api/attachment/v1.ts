@@ -30,7 +30,6 @@ import {
   PersistableStateAttachmentPayloadRt,
   AttachmentType,
   AttachmentRt,
-  AttachmentsRt,
   EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 import { AttachmentRtV2 } from '../../domain/attachment/v2';

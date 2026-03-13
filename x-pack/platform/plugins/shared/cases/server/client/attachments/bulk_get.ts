@@ -62,7 +62,10 @@ export async function bulkGet(
             savedObjects: legacyAttachments,
             operation: Operations.bulkGetAttachments,
           })
-        : { authorized: [] as AttachmentSavedObject[], unauthorized: [] as AttachmentSavedObject[] };
+        : {
+            authorized: [] as AttachmentSavedObject[],
+            unauthorized: [] as AttachmentSavedObject[],
+          };
 
     const errors = constructErrors({
       associationErrors: invalidAssociationAttachments,

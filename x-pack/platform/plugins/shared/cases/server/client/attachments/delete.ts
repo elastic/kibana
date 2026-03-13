@@ -147,9 +147,7 @@ export async function deleteComment(
     });
 
     if (!isUnifiedAttachment) {
-      const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(
-        attachment.attributes
-      );
+      const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
 
       await userActionService.creator.createUserAction({
         userAction: {
