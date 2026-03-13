@@ -822,5 +822,29 @@ describe('MicrosoftTeams', () => {
       expect(result.ok).toBe(false);
       expect(result.message).toBe('Unknown error');
     });
+
+    it('should return failure when response is missing value array', async () => {
+      mockClient.get.mockResolvedValue({ data: { unexpected: true } });
+
+      if (!MicrosoftTeams.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toBe('Unexpected Graph API response: missing value array');
+    });
+
+    it('should return failure when response data is null', async () => {
+      mockClient.get.mockResolvedValue({ data: null });
+
+      if (!MicrosoftTeams.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toBe('Unexpected Graph API response: missing value array');
+    });
   });
 });

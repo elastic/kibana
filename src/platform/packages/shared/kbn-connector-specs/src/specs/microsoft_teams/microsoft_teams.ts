@@ -260,6 +260,12 @@ export const MicrosoftTeams: ConnectorSpec = {
         const response = await ctx.client.get(url, {
           params: { $select: 'id,displayName' },
         });
+        if (!response?.data || !Array.isArray(response.data.value)) {
+          return {
+            ok: false,
+            message: 'Unexpected Graph API response: missing value array',
+          };
+        }
         const numOfTeams = response.data.value.length;
         return {
           ok: true,
