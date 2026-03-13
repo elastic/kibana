@@ -143,6 +143,7 @@
     "@kbn/cps-utils",
     "@kbn/controls-constants",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/calculate-auto",
   ],
   "exclude": ["target/**/*"]
 }

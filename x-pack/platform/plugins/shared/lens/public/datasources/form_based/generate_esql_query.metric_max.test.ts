@@ -73,7 +73,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.esql).toBe(
-        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes) | EVAL static_value = 100'
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend) | EVAL static_value = 100'
       );
       expect(result.esAggsIdMap).toHaveProperty('static_value');
       expect(result.esAggsIdMap.static_value[0].id).toBe('3');
