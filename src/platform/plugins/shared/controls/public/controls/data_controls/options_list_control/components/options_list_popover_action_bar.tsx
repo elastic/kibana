@@ -23,7 +23,6 @@ import {
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
-  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
@@ -35,7 +34,6 @@ import { isDSLOptionsListApi } from '../../../utils';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
-import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 interface OptionsListPopoverProps {
@@ -81,22 +79,7 @@ export const OptionsListPopoverActionBar = ({
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
-  const searchString = useStateFromPublishingSubject(
-    isDSLOptionsListApi(componentApi) ? componentApi.searchString$ : new BehaviorSubject(undefined)
-  );
-
-  const conditionalApiSubjects: [
-    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchStringValid$'] | PublishingSubject<undefined>
-  ] = useMemo(() => {
-    const isDSLControl = isDSLOptionsListApi(componentApi);
-    return [
-      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.searchStringValid$ : new BehaviorSubject(undefined),
-    ];
-  }, [componentApi]);
+  const searchString = useStateFromPublishingSubject(componentApi.searchString$);
 
   const [
     selectedOptions = [],
@@ -105,9 +88,9 @@ export const OptionsListPopoverActionBar = ({
     availableOptions = [],
     dataLoading,
     singleSelect,
-    field,
     searchTechnique,
     searchStringValid,
+    field,
   ] = useBatchedPublishingSubjects(
     componentApi.selectedOptions$,
     componentApi.totalCardinality$,
@@ -115,7 +98,9 @@ export const OptionsListPopoverActionBar = ({
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$,
-    ...conditionalApiSubjects
+    componentApi.searchTechnique$,
+    componentApi.searchStringValid$,
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -233,7 +218,6 @@ export const OptionsListPopoverActionBar = ({
                   disabled={isBulkSelectDisabled}
                   data-test-subj="optionsList-control-selectAll"
                   onChange={() => {
-                    if (!isDSLOptionsListApi(componentApi)) return;
                     if (areAllSelected) {
                       handleBulkAction(componentApi.deselectAll);
                       setAllSelected(false);

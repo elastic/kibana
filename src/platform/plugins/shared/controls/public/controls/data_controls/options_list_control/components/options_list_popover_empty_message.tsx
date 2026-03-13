@@ -10,13 +10,12 @@
 import React, { useMemo } from 'react';
 
 import { EuiIcon, EuiSelectableMessage, EuiSpacer } from '@elastic/eui';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
-import type { DSLOptionsListComponentApi } from '../types';
 
 export const OptionsListPopoverEmptyMessage = ({
   showOnlySelected,
@@ -25,21 +24,10 @@ export const OptionsListPopoverEmptyMessage = ({
 }) => {
   const { componentApi } = useOptionsListContext();
 
-  const conditionalApiSubjects: [
-    DSLOptionsListComponentApi['searchStringValid$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>
-  ] = useMemo(() => {
-    const isDSLControl = isDSLOptionsListApi(componentApi);
-    return [
-      isDSLControl ? componentApi.searchStringValid$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
-    ];
-  }, [componentApi]);
-
-  const [searchTechnique, searchStringValid, field] = useBatchedPublishingSubjects(
-    ...conditionalApiSubjects
+  const [searchStringValid, searchTechnique, field] = useBatchedPublishingSubjects(
+    componentApi.searchStringValid$,
+    componentApi.searchTechnique$,
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
 
   const noResultsMessage = useMemo(() => {

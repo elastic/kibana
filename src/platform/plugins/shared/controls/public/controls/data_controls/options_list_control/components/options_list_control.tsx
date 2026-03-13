@@ -100,7 +100,6 @@ export const OptionsListControl = ({
   const conditionalApiSubjects: [
     PublishingSubject<boolean>,
     PublishingSubject<boolean>,
-    DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
   ] = useMemo(() => {
@@ -108,7 +107,6 @@ export const OptionsListControl = ({
     return [
       isDSLControl ? componentApi.exclude$ : new BehaviorSubject(false),
       isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
-      isDSLControl ? componentApi.invalidSelections$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
     ];
@@ -116,15 +114,16 @@ export const OptionsListControl = ({
 
   const [
     selectedOptions,
+    invalidSelections,
     loading,
     label,
     excludeSelected,
     existsSelected,
-    invalidSelections,
     field,
     fieldFormatter,
   ] = useBatchedPublishingSubjects(
     componentApi.selectedOptions$,
+    componentApi.invalidSelections$,
     componentApi.dataLoading$,
     componentApi.label$,
     ...conditionalApiSubjects

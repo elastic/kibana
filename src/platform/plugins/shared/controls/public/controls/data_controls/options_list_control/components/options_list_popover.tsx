@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { css } from '@emotion/react';
-import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
-import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
@@ -35,21 +34,11 @@ export const OptionsListPopover = ({
 }) => {
   const { componentApi, displaySettings } = useOptionsListContext();
 
-  const conditionalApiSubjects: [
-    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>
-  ] = useMemo(() => {
-    const isDSLControl = isDSLOptionsListApi(componentApi);
-    return [
-      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.invalidSelections$ : new BehaviorSubject(undefined),
-    ];
-  }, [componentApi]);
-
-  const [loading, availableOptions, field, invalidSelections] = useBatchedPublishingSubjects(
+  const [loading, availableOptions, invalidSelections, field] = useBatchedPublishingSubjects(
     componentApi.dataLoading$,
     componentApi.availableOptions$,
-    ...conditionalApiSubjects
+    componentApi.invalidSelections$,
+    isDSLOptionsListApi(componentApi) ? componentApi.field$ : new BehaviorSubject(undefined)
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 

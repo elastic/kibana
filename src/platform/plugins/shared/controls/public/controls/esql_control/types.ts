@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import type {
+  OptionsListESQLControlState,
+  OptionsListSearchTechnique,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 // import type { Filter } from '@kbn/es-query';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
@@ -33,6 +37,9 @@ export interface ESQLOptionsListComponentApi {
   label$: PublishingSubject<string>;
   totalCardinality$: PublishingSubject<number>;
   singleSelect$: PublishingSubject<boolean>;
+  searchString$: PublishingSubject<string>;
+  searchStringValid$: PublishingSubject<boolean>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
   makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
   deselectOption: (key: string | undefined) => void;
   setSearchString: (next: string) => void;
