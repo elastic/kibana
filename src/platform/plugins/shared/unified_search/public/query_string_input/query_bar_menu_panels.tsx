@@ -36,9 +36,8 @@ import {
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { QueryLanguageSwitcher, fromUser } from '@kbn/kql/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { fromUser } from './from_user';
-import { QueryLanguageSwitcher } from './language_switcher';
 import type { FilterPanelOption } from '../types';
 import { PanelTitle } from './panel_title';
 

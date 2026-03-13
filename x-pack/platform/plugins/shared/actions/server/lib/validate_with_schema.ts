@@ -15,7 +15,7 @@ import type {
   ActionTypeParams,
   ValidatorServices,
 } from '../types';
-import { formatZodError } from './format_zod_error';
+import { formatZodV3Error } from './format_zod_v3_error';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -132,7 +132,7 @@ function validateWithSchema<
           break;
         case 'secrets':
           name = 'connector type secrets';
-          if (actionType.validate.secrets) {
+          if (actionType.validate.secrets && value !== undefined && value !== null) {
             const validatedValue = actionType.validate.secrets.schema.parse(value);
 
             if (actionType.validate.secrets.customValidator) {
@@ -151,7 +151,7 @@ function validateWithSchema<
     } catch (err) {
       let errMessage = err.message;
       if (err instanceof z3.ZodError) {
-        errMessage = formatZodError(err);
+        errMessage = formatZodV3Error(err);
       } else if (err instanceof z4.ZodError) {
         errMessage = z4.prettifyError(err);
       }

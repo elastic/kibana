@@ -17,6 +17,7 @@ import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
+const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned
@@ -123,7 +124,10 @@ export const buildEsqlFetchSubscribe = ({
     if (next.result?.length) {
       nextAllColumns = Object.keys(next.result[0].raw);
 
-      if (hasTransformationalCommand(nextQuery.esql)) {
+      if (
+        hasTransformationalCommand(nextQuery.esql) ||
+        nextAllColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
+      ) {
         nextDefaultColumns = nextAllColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
       } else {
         nextDefaultColumns = [];
@@ -134,7 +138,12 @@ export const buildEsqlFetchSubscribe = ({
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
-      prevEsqlData.defaultColumns = nextDefaultColumns;
+
+      const appStateColumns = getCurrentTab().appState.columns;
+      const hasNoKnownAppStateColumns = appStateColumns === undefined;
+      const shouldTriggerColumnsUpdate = nextDefaultColumns.length > 0 && hasNoKnownAppStateColumns;
+
+      prevEsqlData.defaultColumns = shouldTriggerColumnsUpdate ? [] : nextDefaultColumns;
     }
 
     const indexPatternChanged =

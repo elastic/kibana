@@ -71,7 +71,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
           await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
-          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
           await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
           await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkMissingInMoreOptions();
         });
@@ -189,6 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
           it('add field button is enabled', async () => {
             await pageObjects.searchIndexDetailsPage.changeTab('mappingsTab');
+            await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
             await pageObjects.searchIndexDetailsPage.expectAddFieldToBeEnabled();
           });
           it('edit settings button is enabled', async () => {

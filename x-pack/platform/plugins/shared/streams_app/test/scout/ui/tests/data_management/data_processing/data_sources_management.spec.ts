@@ -7,13 +7,14 @@
 
 /* eslint-disable playwright/expect-expect */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data processing - data sources management',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -41,10 +42,26 @@ test.describe(
     test('should allow adding a new kql data source', async ({ page, pageObjects }) => {
       await pageObjects.streams.clickManageDataSourcesButton();
       await pageObjects.streams.addDataSource('kql');
-      await page.getByTestId('streamsAppKqlSamplesDataSourceNameField').fill('Kql Samples');
-      await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
-      await page.getByTestId('unifiedQueryInput').getByRole('textbox').fill('log.level: warn');
-      await page.getByTestId('querySubmitButton').click();
+      // Scope interactions to the KQL data source card to avoid conflicts with other data sources (e.g., failure store)
+      const kqlDataSourceCard = page.getByTestId('streamsAppKqlSamplesDataSourceCard');
+      await kqlDataSourceCard
+        .getByTestId('streamsAppKqlSamplesDataSourceNameField')
+        .fill('Kql Samples');
+      // Set date range within the KQL data source card
+      await kqlDataSourceCard
+        .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+        .click();
+      await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
+        from: DATE_RANGE.from,
+        to: DATE_RANGE.to,
+        containerLocator: kqlDataSourceCard,
+      });
+      await pageObjects.datePicker.waitToBeHidden();
+      await kqlDataSourceCard
+        .getByTestId('unifiedQueryInput')
+        .getByRole('textbox')
+        .fill('log.level: warn');
+      await kqlDataSourceCard.getByTestId('querySubmitButton').click();
 
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();

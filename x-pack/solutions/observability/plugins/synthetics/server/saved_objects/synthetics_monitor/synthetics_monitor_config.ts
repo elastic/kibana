@@ -14,6 +14,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
   return {
     name: syntheticsMonitorSavedObjectType,
     hidden: false,
+    hiddenFromHttpApis: true,
     namespaceType: 'multiple',
     mappings: monitorConfigMappings,
     management: {

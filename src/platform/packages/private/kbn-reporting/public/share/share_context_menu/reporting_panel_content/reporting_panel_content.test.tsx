@@ -39,7 +39,7 @@ describe('ReportingPanelContent', () => {
     uiSettings.get.mockImplementation((key: string) => {
       switch (key) {
         case 'dateFormat:tz':
-          return 'Mars';
+          return 'America/Los_Angeles';
       }
     });
     apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0-test');
@@ -91,14 +91,14 @@ describe('ReportingPanelContent', () => {
       const wrapper = mountComponent({ requiresSavedState: false, isDirty: false });
       wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CbrowserTimezone%3AMars%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_cool_app_state_X%2CbrowserTimezone%3AAmerica%2FLos_Angeles%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
       );
 
       jobParams.appState = 'very_NOT_cool_app_state_Y';
       wrapper.setProps({ layoutId: 'super_cool_layout_id_Y' }); // update the component internal state
       wrapper.update();
       expect(wrapper.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_NOT_cool_app_state_Y%2CbrowserTimezone%3AMars%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
+        `"http://localhost/api/reporting/generate/test?jobParams=%28appState%3Avery_NOT_cool_app_state_Y%2CbrowserTimezone%3AAmerica%2FLos_Angeles%2CobjectType%3Anoice_object%2Ctitle%3Aultimate_title%2Cversion%3A%277.15.0-test%27%29"`
       );
     });
   });

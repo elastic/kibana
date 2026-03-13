@@ -6,4 +6,4 @@
  */
 
 export type { LoginFormProps } from './login_form';
-export { LoginForm, MessageType as LoginFormMessageType } from './login_form';
+export { LoginForm } from './login_form';

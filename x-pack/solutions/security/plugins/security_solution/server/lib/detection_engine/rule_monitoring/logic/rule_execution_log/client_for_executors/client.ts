@@ -35,6 +35,7 @@ import { getCorrelationIds } from './correlation_ids';
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import type {
   IRuleExecutionLogForExecutors,
+  LogMessageOptions,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
@@ -61,24 +62,39 @@ export const createRuleExecutionLogClientForExecutors = (
       return context;
     },
 
-    trace(...messages: string[]): void {
-      writeMessage(messages, LogLevelEnum.trace);
+    trace(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.trace,
+        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.trace,
+      });
     },
 
-    debug(...messages: string[]): void {
-      writeMessage(messages, LogLevelEnum.debug);
+    debug(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.debug,
+        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.debug,
+      });
     },
 
-    info(...messages: string[]): void {
-      writeMessage(messages, LogLevelEnum.info);
+    info(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.info,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
-    warn(...messages: string[]): void {
-      writeMessage(messages, LogLevelEnum.warn);
+    warn(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.warn,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
-    error(...messages: string[]): void {
-      writeMessage(messages, LogLevelEnum.error);
+    error(message: string, options?: LogMessageOptions): void {
+      writeMessage(message, {
+        eventLogLevel: LogLevelEnum.error,
+        consoleLogLevel: options?.consoleLogLevel,
+      });
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
@@ -104,10 +120,12 @@ export const createRuleExecutionLogClientForExecutors = (
     },
   };
 
-  const writeMessage = (messages: string[], logLevel: LogLevel): void => {
-    const message = messages.join(' ');
-    writeMessageToConsole(message, logLevel, baseLogMeta);
-    writeMessageToEventLog(message, logLevel);
+  const writeMessage = (
+    message: string,
+    levels: { eventLogLevel: LogLevel; consoleLogLevel?: LogLevel }
+  ): void => {
+    writeMessageToConsole(message, levels.consoleLogLevel ?? LogLevelEnum.debug, baseLogMeta);
+    writeMessageToEventLog(message, levels.eventLogLevel);
   };
 
   const writeMessageToConsole = (message: string, logLevel: LogLevel, logMeta: ExtMeta): void => {

@@ -13,12 +13,14 @@ import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 export const getValueColumn = (
   id: string,
   fieldName?: string,
-  fieldType: DatatableColumnType = 'string'
+  fieldType: DatatableColumnType = 'string',
+  inMetricDimension?: boolean
 ): TextBasedLayerColumn => {
   return {
     columnId: id,
     fieldName: fieldName || id,
     ...(fieldType ? { meta: { type: fieldType } } : {}),
+    ...(inMetricDimension != null ? { inMetricDimension } : {}),
   };
 };
 

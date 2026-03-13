@@ -17,11 +17,11 @@ import { useUserPrivileges } from './common/components/user_privileges';
  * privileges
  */
 export function useReadonlyHeader(tooltip: string) {
-  const { rulesPrivileges } = useUserPrivileges();
+  const { read, edit } = useUserPrivileges().rulesPrivileges.rules;
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {
-    if (rulesPrivileges.read && !rulesPrivileges.edit) {
+    if (read && !edit) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip,
@@ -33,5 +33,5 @@ export function useReadonlyHeader(tooltip: string) {
     return () => {
       chrome.setBadge();
     };
-  }, [chrome, tooltip, rulesPrivileges.read, rulesPrivileges.edit]);
+  }, [chrome, tooltip, read, edit]);
 }

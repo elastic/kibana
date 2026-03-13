@@ -8,22 +8,30 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiHighlight,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
+  EuiPopoverFooter,
   EuiSelectable,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
+import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
 import { useDefaultConnector } from '../../../../../hooks/chat/use_default_connector';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { getMaxListHeight, useSelectorListStyles } from '../input_actions.styles';
+import { isRecommendedConnector } from '../../../../../../../common/recommended_connectors';
+import {
+  getMaxListHeight,
+  selectorPopoverPanelStyles,
+  useSelectorListStyles,
+} from '../input_actions.styles';
 import { InputPopoverButton } from '../input_popover_button';
+import { OptionText } from '../option_text';
 import { ConnectorIcon } from './connector_icon';
 
 const selectableAriaLabel = i18n.translate(
@@ -37,6 +45,21 @@ const defaultConnectorLabel = i18n.translate(
   {
     defaultMessage: 'Default',
   }
+);
+
+const recommendedSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.recommendedSectionLabel',
+  { defaultMessage: 'Recommended' }
+);
+
+const otherSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.otherSectionLabel',
+  { defaultMessage: 'Other' }
+);
+
+const customSectionLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.customSectionLabel',
+  { defaultMessage: 'Custom' }
 );
 
 const connectorSelectId = 'agentBuilderConnectorSelect';
@@ -71,28 +94,12 @@ const ConnectorPopoverButton: React.FC<{
 const ConnectorOption: React.FC<{
   connectorId?: string;
   connectorName: string;
-  searchValue: string;
-}> = ({ connectorId, connectorName, searchValue }) => {
-  const { euiTheme } = useEuiTheme();
+}> = ({ connectorId, connectorName }) => {
   if (!connectorId) {
     return null;
   }
 
-  const fontWeightStyles = css`
-    h4 {
-      font-weight: ${euiTheme.font.weight.regular};
-    }
-    .euiSelectableListItem-isFocused & h4 {
-      font-weight: ${euiTheme.font.weight.semiBold};
-    }
-  `;
-  return (
-    <EuiText size="s" css={fontWeightStyles}>
-      <h4>
-        <EuiHighlight search={searchValue}>{connectorName}</EuiHighlight>
-      </h4>
-    </EuiText>
-  );
+  return <OptionText>{connectorName}</OptionText>;
 };
 
 const DefaultConnectorBadge = () => {
@@ -103,10 +110,42 @@ const DefaultConnectorBadge = () => {
   );
 };
 
+const manageConnectorsAriaLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectors.ariaLabel',
+  {
+    defaultMessage: 'Manage connectors',
+  }
+);
+
+const ConnectorListFooter: React.FC = () => {
+  const { manageConnectorsUrl } = useNavigation();
+  const { write: hasWritePrivilege } = useUiPrivileges();
+  return (
+    <EuiPopoverFooter paddingSize="s">
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            color="text"
+            aria-label={manageConnectorsAriaLabel}
+            href={manageConnectorsUrl}
+            disabled={!hasWritePrivilege}
+          >
+            <FormattedMessage
+              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+              defaultMessage="Manage"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
+  );
+};
+
 type ConnectorOptionData = EuiSelectableOption<{}>;
 
 export const ConnectorSelector: React.FC<{}> = () => {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { http, settings },
   } = useKibana();
@@ -127,30 +166,65 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
 
+  const { recommendedConnectors, otherConnectors, customConnectors } = useMemo(() => {
+    const recommended = connectors.filter((c) => isRecommendedConnector(c.id));
+    const notRecommended = connectors.filter((c) => !isRecommendedConnector(c.id));
+    return {
+      recommendedConnectors: recommended,
+      otherConnectors: notRecommended.filter((c) => c.isPreconfigured),
+      customConnectors: notRecommended.filter((c) => !c.isPreconfigured),
+    };
+  }, [connectors]);
+
   const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const panelStyles = css`
-    inline-size: calc(${euiTheme.size.xxl} * 8);
-  `;
-
   const connectorOptions = useMemo(() => {
-    const options = connectors.map((connector) => {
-      let checked: 'on' | undefined;
-      if (connector.id === selectedConnectorId) {
-        checked = 'on';
-      }
-      const option: ConnectorOptionData = {
-        key: connector.id,
-        label: connector.name,
-        checked,
-        prepend: <ConnectorIcon connectorName={connector.name} />,
-        append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
-      };
-      return option;
+    const toOption = (connector: (typeof connectors)[0]): ConnectorOptionData => ({
+      key: connector.id,
+      label: connector.name,
+      checked: connector.id === selectedConnectorId ? 'on' : undefined,
+      prepend: <ConnectorIcon connectorName={connector.name} />,
+      append: connector.id === defaultConnectorId ? <DefaultConnectorBadge /> : undefined,
     });
-    return options;
-  }, [connectors, selectedConnectorId, defaultConnectorId]);
+    const groupLabel = (label: string, dataTestSubj: string): ConnectorOptionData =>
+      ({
+        label,
+        isGroupLabel: true as const,
+        'data-test-subj': dataTestSubj,
+      } as ConnectorOptionData);
+
+    const recommendedOptions = recommendedConnectors.map(toOption);
+    const otherOptions = otherConnectors.map(toOption);
+    const customOptions = customConnectors.map(toOption);
+
+    const sections: ConnectorOptionData[] = [];
+    if (recommendedConnectors.length > 0) {
+      sections.push(
+        groupLabel(recommendedSectionLabel, 'connectorSelectorSectionHeader-recommended'),
+        ...recommendedOptions
+      );
+    }
+    if (otherConnectors.length > 0) {
+      sections.push(
+        groupLabel(otherSectionLabel, 'connectorSelectorSectionHeader-other'),
+        ...otherOptions
+      );
+    }
+    if (customConnectors.length > 0) {
+      sections.push(
+        groupLabel(customSectionLabel, 'connectorSelectorSectionHeader-custom'),
+        ...customOptions
+      );
+    }
+    return sections;
+  }, [
+    recommendedConnectors,
+    otherConnectors,
+    customConnectors,
+    selectedConnectorId,
+    defaultConnectorId,
+  ]);
 
   const initialConnectorId = useDefaultConnector({
     connectors,
@@ -180,7 +254,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   return (
     <EuiPopover
-      panelProps={{ css: panelStyles }}
+      panelProps={{ css: selectorPopoverPanelStyles }}
       button={
         <ConnectorPopoverButton
           isPopoverOpen={isPopoverOpen}
@@ -202,20 +276,21 @@ export const ConnectorSelector: React.FC<{}> = () => {
         options={connectorOptions}
         onChange={(_options, _event, changedOption) => {
           const { checked, key: connectorId } = changedOption;
-          const isChecked = checked === 'on';
-          if (isChecked && connectorId) {
+          if (checked === 'on' && connectorId) {
             onSelectConnector(connectorId);
             closePopover();
           }
         }}
-        renderOption={(option, searchValue) => {
+        renderOption={(option) => {
+          if (option.isGroupLabel) {
+            return <OptionText key={option.label}>{option.label}</OptionText>;
+          }
           const { key: connectorId, label: connectorName } = option;
           return (
             <ConnectorOption
               key={connectorId}
               connectorId={connectorId}
               connectorName={connectorName}
-              searchValue={searchValue}
             />
           );
         }}
@@ -227,7 +302,12 @@ export const ConnectorSelector: React.FC<{}> = () => {
           onFocusBadge: false,
         }}
       >
-        {(list) => <div>{list}</div>}
+        {(list) => (
+          <div>
+            {list}
+            <ConnectorListFooter />
+          </div>
+        )}
       </EuiSelectable>
     </EuiPopover>
   );

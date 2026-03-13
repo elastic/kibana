@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-ai-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-ai-server'
+  title: '@kbn/observability-ai-server'
   description: Moon project for @kbn/observability-ai-server
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/packages/observability-ai/observability-ai-server
+  sourceRoot: x-pack/solutions/observability/packages/observability-ai/observability-ai-server
 dependsOn:
   - '@kbn/observability-utils-common'
   - '@kbn/alerting-plugin'
@@ -30,6 +29,7 @@ dependsOn:
   - '@kbn/traced-es-client'
   - '@kbn/es-query'
   - '@kbn/ai-tools'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
@@ -43,14 +43,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

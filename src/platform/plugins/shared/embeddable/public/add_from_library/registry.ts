@@ -8,7 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';
@@ -74,9 +74,9 @@ export function useAddFromLibraryTypes() {
 
 /**
  * Getter for accessing saved object type from AddFromLibrary registry
- * @param type string
+ * @param libraryType string
  * @returns registry item for saved object type
  */
-export const getAddFromLibraryType = (type: string) => {
-  return registry.get(type);
+export const getAddFromLibraryType = (libraryType: string) => {
+  return registry.get(libraryType);
 };

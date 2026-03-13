@@ -11,7 +11,7 @@ import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 
 export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];
@@ -88,7 +88,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 minute, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
+            queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 m, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
           },
         ]
       : []),
@@ -210,6 +210,15 @@ export async function getTimeAndCategorizationFields(
   return { timeField, categorizationField };
 }
 
+const buildRecommendedQueryCommand = (
+  queryLabel: string,
+  queryText?: string
+): ISuggestionItem['command'] => ({
+  id: 'esql.recommendedQuery.accept',
+  title: 'Accept recommended query',
+  arguments: [queryText ? { queryLabel, queryText } : { queryLabel }],
+});
+
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
@@ -230,16 +239,29 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       detail: query.description,
       sortText: query?.sortText ?? 'E',
       category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
-      command: {
-        id: 'esql.recommendedQuery.accept',
-        title: 'Accept recommended query',
-        arguments: [{ queryLabel: query.label }],
-      },
+      command: buildRecommendedQueryCommand(query.label),
     };
   });
 
   return suggestions;
 };
+
+const buildExtensionSuggestion = (
+  recommendedQuery: RecommendedQuery,
+  text: string,
+  command?: ISuggestionItem['command']
+): ISuggestionItem => ({
+  label: recommendedQuery.name,
+  text,
+  detail: recommendedQuery.name ?? '',
+  ...(recommendedQuery.description
+    ? { documentation: { value: recommendedQuery.description } }
+    : {}),
+  kind: 'Issue',
+  sortText: 'D',
+  category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
+  ...(command ? { command } : {}),
+});
 
 /**
  * This function extracts the templates from the recommended queries extensions.
@@ -255,25 +277,21 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
     return [];
   }
 
-  // the templates are the recommended queries without the source command (FROM)
-  const recommendedQueriesTemplates: ISuggestionItem[] = recommendedQueriesExtensions.map(
-    (recommendedQuery) => {
-      const formattedQuery = prettifyQueryTemplate(recommendedQuery.query);
-      return {
-        label: recommendedQuery.name,
-        text: formattedQuery,
-        detail: recommendedQuery.name ?? '',
-        ...(recommendedQuery.description
-          ? { documentation: { value: recommendedQuery.description } }
-          : {}),
-        kind: 'Issue',
-        sortText: 'D',
-        category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
-      };
+  return recommendedQueriesExtensions.map((recommendedQuery) => {
+    if (recommendedQuery.isStandalone) {
+      const queryText = prettifyQuery(recommendedQuery.query);
+      return buildExtensionSuggestion(
+        recommendedQuery,
+        '',
+        buildRecommendedQueryCommand(recommendedQuery.name, queryText)
+      );
     }
-  );
 
-  return recommendedQueriesTemplates;
+    return buildExtensionSuggestion(
+      recommendedQuery,
+      prettifyQueryTemplate(recommendedQuery.query)
+    );
+  });
 };
 
 // Function returning suggestions from static templates and editor extensions

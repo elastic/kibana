@@ -58,9 +58,7 @@ export const mockDataStreamParams: DataStreamParams = {
 
 export const mockIntegrationData: IntegrationAttributes = {
   integration_id: 'test-integration-id',
-  data_stream_count: 2,
   created_by: 'test-user',
-  status: TASK_STATUSES.pending,
   metadata: {
     title: 'Test Integration',
     description: 'A test integration',
@@ -87,10 +85,11 @@ export const mockDataStreamData: DataStreamAttributes = {
     created_at: '2024-01-01T00:00:00.000Z',
   },
   result: {
-    ingest_pipeline: 'test-pipeline',
-    field_mapping: {
-      'test-field': 'test-value',
-    },
+    ingest_pipeline: { name: 'test-pipeline', processors: [] },
+    field_mapping: [
+      { name: 'source.ip', type: 'ip', is_ecs: true },
+      { name: 'custom_app.request_id', type: 'keyword', is_ecs: false },
+    ],
   },
 };
 

@@ -19,6 +19,8 @@ import {
   isInScheduledTriggerWithBlock,
   isInStepsContext,
   isInTriggersContext,
+  isInWorkflowInputsByPosition,
+  isInWorkflowInputsPath,
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
@@ -40,9 +42,11 @@ export function buildAutocompleteContext({
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+  const workflows = editorState?.workflows;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
+  const yamlLineCounter = editorState?.computed?.yamlLineCounter;
   const focusedStepId = editorState?.focusedStepId;
   const workflowDefinition = editorState?.computed?.workflowDefinition;
   // monaco-related
@@ -91,7 +95,13 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path);
+    contextSchema = getContextSchemaForPath(
+      workflowDefinition,
+      workflowGraph,
+      path,
+      yamlDocument,
+      absoluteOffset
+    );
   }
 
   if (parseResult?.fullKey) {
@@ -129,12 +139,12 @@ export function buildAutocompleteContext({
     absoluteOffset,
     focusedStepInfo,
     focusedYamlPair,
-    // TODO: add currentTriggerInfo
 
     // context
     contextSchema,
     contextScopedToPath,
     yamlDocument,
+    yamlLineCounter: yamlLineCounter ?? null,
     scalarType,
 
     // kind of ast info
@@ -142,8 +152,16 @@ export function buildAutocompleteContext({
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     isInTriggersContext: isInTriggersContext(path),
     isInStepsContext: isInStepsContext(path),
+    isInWorkflowInputsContext:
+      isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+    workflows: workflows ?? {
+      workflows: {},
+      totalWorkflows: 0,
+    },
+    currentWorkflowId: editorState?.workflow?.id ?? null,
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

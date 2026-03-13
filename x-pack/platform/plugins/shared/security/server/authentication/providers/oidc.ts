@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type from 'type-detect';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions, AuthenticationProviderSpecificOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -22,7 +23,6 @@ import { getDetailedErrorMessage, InvalidGrantError } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 

@@ -13,7 +13,7 @@ import type {
   PartialFieldsMetadataClient,
 } from '@kbn/esql-types';
 import { setup } from './helpers';
-import { SuggestionCategory } from '../../../shared';
+import { SuggestionCategory } from '../utils';
 
 const fields: ESQLFieldWithMetadata[] = [
   { name: 'other.field', type: 'keyword', userDefined: false },

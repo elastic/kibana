@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -14,11 +13,11 @@
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/test",
-    "@kbn/test-suites-xpack-platform",
+    "@kbn/test-suites-xpack-platform"
   ]
 }

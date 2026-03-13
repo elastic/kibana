@@ -6,7 +6,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
 >
   <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -478,7 +478,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -496,7 +496,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Filter lists"
               class="euiPagination emotion-euiPagination"
             >
               <span
@@ -540,7 +540,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>
@@ -577,7 +577,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
 >
   <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -1050,7 +1050,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -1068,7 +1068,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Filter lists"
               class="euiPagination emotion-euiPagination"
             >
               <span
@@ -1112,7 +1112,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>

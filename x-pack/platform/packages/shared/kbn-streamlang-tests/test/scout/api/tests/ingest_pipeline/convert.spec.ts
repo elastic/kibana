@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { ConvertProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Convert Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should convert a field to a different type', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-convert-value';
@@ -33,7 +34,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]attributes.size', '4096');
+      expect(ingestedDocs[0]?.attributes?.size).toBe('4096');
     });
 
     // Template syntax validation tests - these should now REJECT Mustache templates
@@ -103,8 +104,8 @@ apiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.size', 4096);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.size_str', '4096');
+        expect(ingestedDocs[0]?.attributes?.size).toBe(4096);
+        expect(ingestedDocs[0]?.attributes?.size_str).toBe('4096');
       }
     );
 
@@ -134,8 +135,8 @@ apiTest.describe(
         await testBed.ingest(indexName, docs, processors);
 
         const ingestedDocs = await testBed.getDocs(indexName);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.size', 4096);
-        expect(ingestedDocs).toHaveProperty('[0]attributes.size_str', '4096');
+        expect(ingestedDocs[0]?.attributes?.size).toBe(4096);
+        expect(ingestedDocs[0]?.attributes?.size_str).toBe('4096');
       }
     );
   }

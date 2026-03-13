@@ -11,18 +11,18 @@ import { TestProviders } from '../../common/mock';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { useAgentBuilderAttachment } from './use_agent_builder_attachment';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { THREAT_HUNTING_AGENT_ID } from '../../../common/constants';
 
-const mockFlyoutRef = {
+const mockChatRef = {
   close: jest.fn(),
 };
 
-const mockOpenConversationFlyout = jest.fn<
-  unknown,
-  Parameters<AgentBuilderPluginStart['openConversationFlyout']>
->(() => ({
-  flyoutRef: mockFlyoutRef,
-}));
+const mockOpenAgentBuilderChat = jest.fn<unknown, Parameters<AgentBuilderPluginStart['openChat']>>(
+  () => ({
+    chatRef: mockChatRef,
+  })
+);
 
 const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   const mockStartServices = createStartServicesMock();
@@ -37,16 +37,9 @@ const createWrapper = (agentBuilderService?: AgentBuilderPluginStart) => {
   );
 };
 
-const mockAgentBuilderService: AgentBuilderPluginStart = {
-  openConversationFlyout:
-    mockOpenConversationFlyout as AgentBuilderPluginStart['openConversationFlyout'],
-  toggleConversationFlyout: jest.fn(),
-  agents: {} as AgentBuilderPluginStart['agents'],
-  tools: {} as AgentBuilderPluginStart['tools'],
-  attachments: {} as AgentBuilderPluginStart['attachments'],
-  setConversationFlyoutActiveConfig: jest.fn(),
-  clearConversationFlyoutActiveConfig: jest.fn(),
-};
+const mockAgentBuilderService = agentBuilderMocks.createStart();
+mockAgentBuilderService.openChat =
+  mockOpenAgentBuilderChat as unknown as (typeof mockAgentBuilderService)['openChat'];
 
 describe('useAgentBuilderAttachment', () => {
   const defaultParams = {
@@ -82,8 +75,8 @@ describe('useAgentBuilderAttachment', () => {
       result.current.openAgentBuilderFlyout();
     });
 
-    expect(mockOpenConversationFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenConversationFlyout).toHaveBeenCalledWith({
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledTimes(1);
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith({
       newConversation: true,
       autoSendInitialMessage: false,
       initialMessage: 'Analyze this alert',
@@ -108,7 +101,7 @@ describe('useAgentBuilderAttachment', () => {
       result.current.openAgentBuilderFlyout();
     });
 
-    expect(mockOpenConversationFlyout).toHaveBeenCalledWith(
+    expect(mockOpenAgentBuilderChat).toHaveBeenCalledWith(
       expect.objectContaining({
         sessionTag: 'security',
       })
@@ -124,17 +117,14 @@ describe('useAgentBuilderAttachment', () => {
       result.current.openAgentBuilderFlyout();
     });
 
-    expect(mockOpenConversationFlyout).not.toHaveBeenCalled();
+    expect(mockOpenAgentBuilderChat).not.toHaveBeenCalled();
   });
 
-  it('handles missing openConversationFlyout method gracefully', () => {
+  it('handles missing openChat method gracefully', () => {
     const partialAgentBuilderService: Partial<AgentBuilderPluginStart> &
-      Pick<
-        AgentBuilderPluginStart,
-        'tools' | 'setConversationFlyoutActiveConfig' | 'clearConversationFlyoutActiveConfig'
-      > = {
+      Pick<AgentBuilderPluginStart, 'tools' | 'setChatConfig' | 'clearChatConfig'> = {
       ...mockAgentBuilderService,
-      openConversationFlyout: undefined,
+      openChat: undefined,
     };
 
     const { result } = renderHook(() => useAgentBuilderAttachment(defaultParams), {
@@ -145,7 +135,7 @@ describe('useAgentBuilderAttachment', () => {
       result.current.openAgentBuilderFlyout();
     });
 
-    expect(mockOpenConversationFlyout).not.toHaveBeenCalled();
+    expect(mockOpenAgentBuilderChat).not.toHaveBeenCalled();
   });
 
   it('generates attachment ID with timestamp', async () => {
@@ -157,7 +147,7 @@ describe('useAgentBuilderAttachment', () => {
       result.current.openAgentBuilderFlyout();
     });
 
-    const callArgs = mockOpenConversationFlyout.mock.calls[0][0];
+    const callArgs = mockOpenAgentBuilderChat.mock.calls[0][0];
     const attachment = callArgs?.attachments?.length ? callArgs?.attachments[0] : { id: '' };
 
     expect(attachment.id).toBe('alert-1234567890');

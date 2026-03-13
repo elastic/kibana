@@ -33,6 +33,8 @@
           "\"fleet\""
         ],
         "path": "src/platform/packages/shared/deeplinks/fleet/deep_links.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"fleet\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
         ],
         "path": "src/platform/packages/shared/deeplinks/fleet/deep_links.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "\"settings\" | \"agents\" | \"policies\" | \"data_streams\" | \"enrollment_tokens\" | \"uninstall_tokens\""
         ],
         "path": "src/platform/packages/shared/deeplinks/fleet/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { SuggestionCategory } from '../../../shared';
+import { SuggestionCategory } from '../utils';
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {

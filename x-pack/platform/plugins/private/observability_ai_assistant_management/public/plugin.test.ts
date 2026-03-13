@@ -54,8 +54,11 @@ describe('Observability AI Assistant Management plugin', () => {
     } as any);
 
   describe('Licensing', () => {
-    it('is disabled by default, enabled only for enterprise, and disabled for platinum', async () => {
-      const plugin = new AiAssistantManagementObservabilityPlugin({
+    let plugin: any;
+    let management: ManagementSetup;
+    let coreSetup: CoreSetup<any, any>;
+    beforeEach(async () => {
+      plugin = new AiAssistantManagementObservabilityPlugin({
         config: {
           get: jest.fn(() => ({
             logSourcesEnabled: true,
@@ -64,28 +67,64 @@ describe('Observability AI Assistant Management plugin', () => {
         },
         env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
       } as unknown as PluginInitializerContext);
-
-      const management = createManagementMock();
-      const coreSetup = createCoreSetupMock();
-
+      management = createManagementMock();
+      coreSetup = createCoreSetupMock();
       await plugin.setup(coreSetup, {
         management,
         observabilityAIAssistant: {} as any,
         ml: {} as any,
       });
+    });
+    afterEach(() => {
+      plugin.stop();
+    });
 
+    it('is disabled by default, enabled for enterprise if the AI Assistant is enabled, and disabled for platinum', () => {
       const app = (management.sections.section.ai as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
       // Start with platinum
       const license$ = new BehaviorSubject<any>(makeLicense('platinum'));
-      plugin.start({} as CoreStart, { licensing: { license$ } } as any);
+      plugin.start(
+        {
+          application: { capabilities: { observabilityAIAssistant: { show: true } } },
+        } as unknown as CoreStart,
+        { licensing: { license$ } } as any
+      );
       expect(app.enabled).toBe(false);
 
       // Switch to enterprise
       license$.next(makeLicense('enterprise'));
       expect(app.enabled).toBe(true);
+
+      // Switch to gold
+      license$.next(makeLicense('gold'));
+      expect(app.enabled).toBe(false);
+
+      // Switch to basic
+      license$.next(makeLicense('basic'));
+      expect(app.enabled).toBe(false);
+    });
+
+    it('is disabled by default for all license types when the AI Assistant is disabled', () => {
+      const app = (management.sections.section.ai as any).getApps()[0];
+      expect(app).toBeDefined();
+      expect(app.enabled).toBe(false);
+
+      // Start with platinum
+      const license$ = new BehaviorSubject<any>(makeLicense('platinum'));
+      plugin.start(
+        {
+          application: { capabilities: { observabilityAIAssistant: { show: false } } },
+        } as unknown as CoreStart,
+        { licensing: { license$ } } as any
+      );
+      expect(app.enabled).toBe(false);
+
+      // Switch to enterprise
+      license$.next(makeLicense('enterprise'));
+      expect(app.enabled).toBe(false);
 
       // Switch to gold
       license$.next(makeLicense('gold'));

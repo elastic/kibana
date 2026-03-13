@@ -112,7 +112,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type secrets: Field \"routingKey\": Required`,
+            message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at routingKey`,
           });
         });
     });

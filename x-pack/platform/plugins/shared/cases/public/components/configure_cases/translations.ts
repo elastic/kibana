@@ -207,3 +207,10 @@ export const EDIT_OBSERVABLE_TYPE = i18n.translate(
     defaultMessage: 'Edit observable type',
   }
 );
+
+export const SHOW_ALL_TEMPLATES = i18n.translate(
+  'xpack.cases.configureCases.templates.showAllTemplates',
+  {
+    defaultMessage: 'Show all templates',
+  }
+);

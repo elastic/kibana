@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
+import { within } from '@elastic/esql';
 import { suggestForExpression } from '../suggestion_engine';
-import type { ExpressionContext, FunctionParameterContext } from '../types';
-import { getFunctionDefinition } from '../../../functions';
+import type { ExpressionContext } from '../types';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../../types';
-import { SignatureAnalyzer } from '../signature_analyzer';
+import { buildExpressionFunctionParameterContext } from '../utils';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;
@@ -32,26 +32,18 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   } = ctx;
 
   const functionExpression = expressionRoot as ESQLFunction;
-  const functionDefinition = getFunctionDefinition(functionExpression.name);
+  const paramContext = buildExpressionFunctionParameterContext(functionExpression, context);
 
-  if (!functionDefinition || !context) {
+  if (!paramContext) {
     return [];
   }
-
-  const analyzer = SignatureAnalyzer.fromNode(functionExpression, context, functionDefinition);
-
-  if (!analyzer) {
-    return [];
-  }
-
-  const paramContext = buildInFunctionParameterContext(
-    analyzer,
-    functionExpression.name,
-    functionDefinition,
-    options.functionParameterContext
-  );
 
   const targetExpression = determineTargetExpression(functionExpression, innerText);
+
+  const existing = options.parentFunctionNames ?? [];
+  const parentFunctionNames = existing.includes(functionExpression.name)
+    ? existing
+    : [...existing, functionExpression.name];
 
   const { suggestions } = await suggestForExpression({
     query,
@@ -64,34 +56,11 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     options: {
       ...options,
       functionParameterContext: paramContext,
+      parentFunctionNames,
     },
   });
 
   return suggestions;
-}
-
-/** Builds function parameter context, adding current function to ignore list */
-function buildInFunctionParameterContext(
-  analyzer: SignatureAnalyzer,
-  functionName: string,
-  functionDefinition: ReturnType<typeof getFunctionDefinition>,
-  existingContext?: FunctionParameterContext
-): FunctionParameterContext {
-  const existingIgnored = existingContext?.functionsToIgnore || [];
-  const functionsToIgnore = existingIgnored.includes(functionName)
-    ? existingIgnored
-    : [...existingIgnored, functionName];
-
-  return {
-    paramDefinitions: analyzer.getCompatibleParamDefs(),
-    functionsToIgnore,
-    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-    functionDefinition,
-    firstArgumentType: analyzer.getFirstArgumentType(),
-    firstValueType: analyzer.getFirstValueType(),
-    currentParameterIndex: analyzer.getCurrentParameterIndex(),
-    validSignatures: analyzer.getValidSignatures(),
-  };
 }
 
 /** Determines which expression to use as target for recursive suggestion */
@@ -103,13 +72,20 @@ function determineTargetExpression(
   const startingNewParam = STARTING_NEW_PARAM_REGEX.test(innerText);
   const firstArgEmpty = isFirstArgumentEmpty(args, innerText);
 
+  const lastArg = args[args.length - 1];
+  const lastArgNode = (Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem;
+
+  // Recurse into nested function when cursor is inside its bounds
+  // Example: SCORE(MATCH_PHRASE(textField, /)) → return MATCH_PHRASE as new expressionRoot
+  if (startingNewParam && lastArgNode && within(innerText.length, lastArgNode)) {
+    return lastArgNode;
+  }
+
   if (startingNewParam || firstArgEmpty) {
     return undefined;
   }
 
-  const lastArg = args[args.length - 1] as ESQLAstItem;
-
-  return (Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem;
+  return lastArgNode;
 }
 
 /** Checks if cursor is immediately after opening parenthesis with no argument */

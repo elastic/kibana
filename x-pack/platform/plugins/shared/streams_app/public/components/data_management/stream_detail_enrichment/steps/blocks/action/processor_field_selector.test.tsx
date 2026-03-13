@@ -35,6 +35,7 @@ jest.mock('../../../../../../hooks/use_stream_data_view_field_types', () => ({
       ['service.name', 'keyword'],
       ['error.message', 'text'],
     ]),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dataView: {} as any,
   })),
 }));
@@ -96,6 +97,7 @@ const TestWrapper = ({
   defaultValues = {},
 }: {
   children: React.ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValues?: Record<string, any>;
 }) => {
   const methods = useForm({ defaultValues });
@@ -116,11 +118,11 @@ describe('ProcessorFieldSelector', () => {
   });
 
   describe('Default Configuration', () => {
-    it('renders with default labels', () => {
+    it('renders with default label and no default help text', () => {
       renderComponent();
 
-      expect(screen.getByLabelText('Source Field')).toBeInTheDocument();
-      expect(screen.getByText('Select or enter a field name')).toBeInTheDocument();
+      expect(screen.getByLabelText('Field')).toBeInTheDocument();
+      expect(screen.queryByText('Select or enter a field name')).not.toBeInTheDocument();
     });
 
     it('uses default fieldKey', () => {

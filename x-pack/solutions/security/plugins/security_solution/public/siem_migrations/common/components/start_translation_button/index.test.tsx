@@ -8,9 +8,20 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { StartTranslationButton } from '.';
+import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../types';
 
 describe('StartTranslationButton', () => {
   const startMigration = jest.fn();
+  const defaultMigrationStats = {
+    id: '1',
+    status: SiemMigrationTaskStatus.READY,
+    vendor: MigrationSource.SPLUNK,
+    name: 'Test Migration',
+    items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+    created_at: '2025-01-01T00:00:00Z',
+    last_updated_at: '2025-01-01T01:00:00Z',
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -19,7 +30,7 @@ describe('StartTranslationButton', () => {
   it('renders button component', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={false}
         startMigration={startMigration}
         isStarting={false}
@@ -31,7 +42,7 @@ describe('StartTranslationButton', () => {
   it('renders the start button', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={false}
         startMigration={startMigration}
         isStarting={false}
@@ -43,7 +54,7 @@ describe('StartTranslationButton', () => {
   it('renders the resume button', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={true}
         startMigration={startMigration}
         isStarting={false}
@@ -55,7 +66,7 @@ describe('StartTranslationButton', () => {
   it('renders the starting button', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={false}
         startMigration={startMigration}
         isStarting={true}
@@ -67,7 +78,7 @@ describe('StartTranslationButton', () => {
   it('renders the resuming button', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={true}
         startMigration={startMigration}
         isStarting={true}
@@ -79,13 +90,13 @@ describe('StartTranslationButton', () => {
   it('calls startMigration when the button is clicked', () => {
     const { getByTestId } = render(
       <StartTranslationButton
-        migrationId="1"
+        migrationStats={defaultMigrationStats}
         isStopped={false}
         startMigration={startMigration}
         isStarting={false}
       />
     );
     fireEvent.click(getByTestId('startMigrationButton'));
-    expect(startMigration).toHaveBeenCalledWith('1');
+    expect(startMigration).toHaveBeenCalledWith(defaultMigrationStats);
   });
 });

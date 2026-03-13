@@ -10,12 +10,12 @@
 import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
+  DASHBOARD_APP_API_PATH,
   DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
@@ -37,20 +37,13 @@ const cache = new LRUCache<string, DashboardReadResponseBody>({
 export const dashboardClient = {
   create: async (
     dashboardState: DashboardState,
-    references: Reference[],
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
-    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_API_PATH, {
+    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
       version: DASHBOARD_API_VERSION,
-      query: {
-        allowUnmappedKeys: true,
-      },
       body: JSON.stringify({
-        data: {
-          ...dashboardState,
-          ...(accessMode && { access_control: { access_mode: accessMode } }),
-          references,
-        },
+        ...dashboardState,
+        ...(accessMode && { access_control: { access_mode: accessMode } }),
       }),
     });
   },
@@ -66,11 +59,8 @@ export const dashboardClient = {
     }
 
     const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`${DASHBOARD_API_PATH}/${id}`, {
+      .get<DashboardReadResponseBody>(`${DASHBOARD_APP_API_PATH}/${id}`, {
         version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
-        },
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -101,20 +91,12 @@ export const dashboardClient = {
       }
     );
   },
-  update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
+  update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `${DASHBOARD_API_PATH}/${id}`,
+      `${DASHBOARD_APP_API_PATH}/${id}`,
       {
         version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
-        },
-        body: JSON.stringify({
-          data: {
-            ...dashboardState,
-            references,
-          },
-        }),
+        body: JSON.stringify(dashboardState),
       }
     );
     cache.delete(id);

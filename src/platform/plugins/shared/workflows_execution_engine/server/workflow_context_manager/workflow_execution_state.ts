@@ -136,6 +136,10 @@ export class WorkflowExecutionState {
     await this.workflowExecutionRepository.updateWorkflowExecution({
       ...changes,
       id: this.workflowExecution.id,
+      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
+      stepExecutionIds: Array.from(this.stepExecutions.values())
+        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
+        .map((step) => step.id),
     });
   }
 
@@ -159,10 +163,14 @@ export class WorkflowExecutionState {
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
-    this.stepExecutions.set(step.id!, {
-      ...this.stepExecutions.get(step.id!),
+    const existingStep = this.stepExecutions.get(step.id!);
+    const updatedStep = {
+      ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution);
+    } as EsWorkflowStepExecution;
+    this.stepExecutions.set(step.id!, updatedStep);
+    // Accumulate changes for the next flush — merge with any pending changes
+    // ES partial update (doc_as_upsert) preserves fields not included in the update
     this.stepDocumentsChanges.set(step.id as string, {
       ...(this.stepDocumentsChanges.get(step.id as string) || {}),
       ...step,

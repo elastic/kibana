@@ -5,31 +5,4 @@
  * 2.0.
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
-
-export function defineRoutes(router: IRouter, logger: Logger) {
-  router.versioned
-    .get({
-      path: '/internal/entity-store',
-      access: 'internal',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Under development, permissions will be evaluated later',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: false,
-      },
-      async (ctx, req, res) => {
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
-      }
-    );
-}
+export { registerRoutes } from './register_routes';

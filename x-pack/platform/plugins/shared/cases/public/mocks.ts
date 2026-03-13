@@ -62,6 +62,7 @@ export interface CaseUiClientMock {
   ui: jest.Mocked<CasesPublicStart['ui']>;
   hooks: jest.Mocked<CasesPublicStart['hooks']>;
   helpers: jest.Mocked<CasesPublicStart['helpers']>;
+  config: CasesPublicStart['config'];
 }
 
 export const mockCasesContract = (): CaseUiClientMock => ({
@@ -69,6 +70,7 @@ export const mockCasesContract = (): CaseUiClientMock => ({
   ui: uiMock,
   hooks: hooksMock,
   helpers: helpersMock,
+  config: { templatesEnabled: false },
 });
 
 export const casesPluginMock = {

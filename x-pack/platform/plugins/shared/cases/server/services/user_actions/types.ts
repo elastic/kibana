@@ -35,7 +35,7 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
@@ -253,6 +253,42 @@ export interface UserActionsStatsAggsResult {
       }>;
     };
   };
+  creations: {
+    doc_count: number;
+    creations: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+  nonDeletedCommentUpdates: {
+    doc_count: number;
+    comments: {
+      doc_count: number;
+      byCommentId: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          reverse: {
+            doc_count: number;
+            hasDelete: {
+              doc_count: number;
+            };
+            updates: {
+              doc_count: number;
+              byCommentType: {
+                buckets: Array<{
+                  key: string;
+                  doc_count: number;
+                }>;
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
 }
 
 export interface MultipleCasesUserActionsTotalAggsResult {
@@ -330,7 +366,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

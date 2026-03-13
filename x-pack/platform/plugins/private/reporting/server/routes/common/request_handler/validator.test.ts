@@ -365,4 +365,21 @@ describe('validateJobParams', () => {
       ]"
     `);
   });
+
+  it('validates multiple locator params', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: {
+        id: idSchema.Enum.print,
+        dimensions: { width: 800, height: 600 },
+      },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+      locatorParams: [{ id: 'some-id' }, { version: 'some-version' }],
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
+  });
 });

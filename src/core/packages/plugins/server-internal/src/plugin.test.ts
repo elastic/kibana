@@ -95,6 +95,7 @@ beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
   instanceInfo = {
     uuid: 'instance-uuid',
+    airgapped: false,
   };
   nodeInfo = nodeServiceMock.createInternalPrebootContract();
   runtimeResolver = createRuntimePluginContractResolverMock();
@@ -633,7 +634,7 @@ test('`stop` cleans up the plugin container', async () => {
 });
 
 describe('#getConfigSchema()', () => {
-  it('reads config schema from plugin', () => {
+  it('reads config schema from plugin', async () => {
     const pluginSchema = schema.any();
     const configDescriptor = {
       schema: pluginSchema,
@@ -660,10 +661,10 @@ describe('#getConfigSchema()', () => {
       }),
     });
 
-    expect(plugin.getConfigDescriptor()).toBe(configDescriptor);
+    expect(await plugin.getConfigDescriptor()).toBe(configDescriptor);
   });
 
-  it('returns null if config definition not specified', () => {
+  it('returns null if config definition not specified', async () => {
     jest.doMock(join('plugin-with-no-definition', 'server'), () => ({}), { virtual: true });
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
@@ -679,10 +680,10 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(plugin.getConfigDescriptor()).toBe(null);
+    expect(await plugin.getConfigDescriptor()).toBe(null);
   });
 
-  it('returns null for plugins without a server part', () => {
+  it('returns null for plugins without a server part', async () => {
     const manifest = createPluginManifest({ server: false });
     const opaqueId = Symbol();
     const plugin = new PluginWrapper({
@@ -697,10 +698,10 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(plugin.getConfigDescriptor()).toBe(null);
+    expect(await plugin.getConfigDescriptor()).toBe(null);
   });
 
-  it('throws if plugin contains invalid schema', () => {
+  it('throws if plugin contains invalid schema', async () => {
     jest.doMock(
       join('plugin-invalid-schema', 'server'),
       () => ({
@@ -726,7 +727,7 @@ describe('#getConfigSchema()', () => {
         nodeInfo,
       }),
     });
-    expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(
+    await expect(() => plugin.getConfigDescriptor()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`
     );
   });

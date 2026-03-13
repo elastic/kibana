@@ -6,8 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { EuiContextMenuItem } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -199,134 +202,137 @@ export const useGroupTakeActionsItems = ({
   const { item: alertClosingReasonItem, getPanels: getAlertClosingReasonPanels } =
     useBulkAlertClosingReasonItems();
 
-  return useMemo(
-    (): GroupTakeActionItems =>
-      ({ query, tableId, groupNumber, selectedGroup }) => {
-        const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
+  return useCallback(
+    ({ query, tableId, groupNumber, selectedGroup }) => {
+      const actionItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-        if (!showAlertStatusActions) {
-          return { items: actionItems, panels: [] };
+      if (!showAlertStatusActions) {
+        return;
+      }
+
+      if (currentStatus && currentStatus.length === 1) {
+        const singleStatus = currentStatus[0];
+        if (singleStatus !== FILTER_OPEN) {
+          actionItems.push({
+            key: 'open',
+            renderItem: () => (
+              <EuiContextMenuItem
+                key="open"
+                data-test-subj="open-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_OPEN as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_OPEN_SELECTED}
+              </EuiContextMenuItem>
+            ),
+          });
         }
-
-        if (currentStatus && currentStatus.length === 1) {
-          const singleStatus = currentStatus[0];
-          if (singleStatus !== FILTER_OPEN) {
-            actionItems.push({
-              key: 'open',
-              renderItem: () => (
-                <EuiContextMenuItem
-                  key="open"
-                  data-test-subj="open-alert-status"
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: FILTER_OPEN as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {BULK_ACTION_OPEN_SELECTED}
-                </EuiContextMenuItem>
-              ),
-            });
-          }
-          if (singleStatus !== FILTER_ACKNOWLEDGED) {
-            actionItems.push({
-              key: 'acknowledge',
-              renderItem: () => (
-                <EuiContextMenuItem
-                  key="acknowledge"
-                  data-test-subj="acknowledged-alert-status"
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {BULK_ACTION_ACKNOWLEDGED_SELECTED}
-                </EuiContextMenuItem>
-              ),
-            });
-          }
-          if (singleStatus !== FILTER_CLOSED && alertClosingReasonItem) {
+        if (singleStatus !== FILTER_ACKNOWLEDGED) {
+          actionItems.push({
+            key: 'acknowledge',
+            renderItem: () => (
+              <EuiContextMenuItem
+                key="acknowledge"
+                data-test-subj="acknowledged-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_ACKNOWLEDGED_SELECTED}
+              </EuiContextMenuItem>
+            ),
+          });
+        }
+        if (singleStatus !== FILTER_CLOSED && alertClosingReasonItem) {
+          actionItems.push({
+            'data-test-subj': alertClosingReasonItem['data-test-subj'],
+            name: alertClosingReasonItem.label,
+            panel: alertClosingReasonItem?.panel,
+            key: alertClosingReasonItem.key,
+          });
+        }
+      } else {
+        const statusArr = {
+          [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
+          [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
+          [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
+        };
+        Object.keys(statusArr).forEach((workflowStatus) => {
+          if (workflowStatus === FILTER_CLOSED && alertClosingReasonItem) {
             actionItems.push({
               'data-test-subj': alertClosingReasonItem['data-test-subj'],
               name: alertClosingReasonItem.label,
               panel: alertClosingReasonItem?.panel,
               key: alertClosingReasonItem.key,
             });
+          } else {
+            actionItems.push({
+              renderItem: () => (
+                <EuiContextMenuItem
+                  key={workflowStatus}
+                  data-test-subj={`${workflowStatus}-alert-status`}
+                  onClick={() =>
+                    onClickUpdate({
+                      groupNumber,
+                      query,
+                      selectedGroup,
+                      status: workflowStatus as AlertWorkflowStatus,
+                      tableId,
+                    })
+                  }
+                >
+                  {statusArr[workflowStatus]}
+                </EuiContextMenuItem>
+              ),
+            });
           }
-        } else {
-          const statusArr = {
-            [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
-            [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
-            [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
-          };
-          Object.keys(statusArr).forEach((workflowStatus) => {
-            if (workflowStatus === FILTER_CLOSED && alertClosingReasonItem) {
-              actionItems.push({
-                'data-test-subj': alertClosingReasonItem['data-test-subj'],
-                name: alertClosingReasonItem.label,
-                panel: alertClosingReasonItem?.panel,
-                key: alertClosingReasonItem.key,
-              });
-            } else {
-              actionItems.push({
-                renderItem: () => (
-                  <EuiContextMenuItem
-                    key={workflowStatus}
-                    data-test-subj={`${workflowStatus}-alert-status`}
-                    onClick={() =>
-                      onClickUpdate({
-                        groupNumber,
-                        query,
-                        selectedGroup,
-                        status: workflowStatus as AlertWorkflowStatus,
-                        tableId,
-                      })
-                    }
-                  >
-                    {statusArr[workflowStatus]}
-                  </EuiContextMenuItem>
-                ),
-              });
-            }
-          });
-        }
+        });
+      }
 
-        return {
-          items: actionItems,
-          panels: getAlertClosingReasonPanels({
-            onSubmitCloseReason({ reason }) {
-              onClickUpdate({
-                groupNumber,
-                query,
-                selectedGroup,
-                status: FILTER_CLOSED as AlertWorkflowStatus,
-                tableId,
-                reason,
-              });
-            },
-          }).map((panel) => ({
-            ...panel,
-            content: panel.renderContent({
-              alertItems: [],
-              setIsBulkActionsLoading: () => {},
-              closePopoverMenu: () => {},
-            }),
-          })),
-        };
-      },
+      const alertClosingReasonPanels = getAlertClosingReasonPanels({
+        onSubmitCloseReason({ reason }) {
+          onClickUpdate({
+            groupNumber,
+            query,
+            selectedGroup,
+            status: FILTER_CLOSED as AlertWorkflowStatus,
+            tableId,
+            reason,
+          });
+        },
+      }).map((panel) => ({
+        ...panel,
+        content: panel.renderContent({
+          alertItems: [],
+          setIsBulkActionsLoading: () => {},
+          closePopoverMenu: () => {},
+        }),
+      }));
+
+      const panels: EuiContextMenuPanelDescriptor[] = [
+        { id: 0, items: actionItems },
+        ...alertClosingReasonPanels,
+      ];
+
+      return <EuiContextMenu panels={panels} initialPanelId={0} />;
+    },
     [
       alertClosingReasonItem,
-      getAlertClosingReasonPanels,
       currentStatus,
+      getAlertClosingReasonPanels,
       onClickUpdate,
       showAlertStatusActions,
     ]

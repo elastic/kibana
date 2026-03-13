@@ -13,6 +13,10 @@ import type { ShareMenuManager, ShareMenuManagerStart } from './share_menu_manag
 const createStartMock = (): jest.Mocked<ShareMenuManagerStart> => {
   const start = {
     toggleShareContextMenu: jest.fn(),
+    availableIntegrations: jest.fn(),
+    navigate: jest.fn(),
+    getExportHandler: jest.fn(),
+    getExportDerivativeHandler: jest.fn(),
   };
   return start;
 };

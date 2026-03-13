@@ -8,13 +8,14 @@
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import * as i18n from './translations';
 import type { ActionLicense } from '../../containers/types';
 import type { ErrorMessage } from './callout/types';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 
-export const getLicenseError = () => ({
+export const getLicenseError = (docLinks: DocLinksStart) => ({
   id: 'license-error',
   title: '',
   description: (
@@ -23,12 +24,12 @@ export const getLicenseError = () => ({
       id="xpack.cases.caseView.pushToServiceDisableByLicenseDescription"
       values={{
         appropriateLicense: (
-          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+          <EuiLink href={docLinks.links.subscriptions} target="_blank">
             {i18n.LINK_APPROPRIATE_LICENSE}
           </EuiLink>
         ),
         cloud: (
-          <EuiLink href="https://www.elastic.co/cloud/elasticsearch-service/signup" target="_blank">
+          <EuiLink href={docLinks.links.cloud.deploymentSignup} target="_blank">
             {i18n.LINK_CLOUD_DEPLOYMENT}
           </EuiLink>
         ),
@@ -37,7 +38,7 @@ export const getLicenseError = () => ({
   ),
 });
 
-export const getKibanaConfigError = () => ({
+export const getKibanaConfigError = (docLinks: DocLinksStart) => ({
   id: 'kibana-config-error',
   title: i18n.PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE,
   description: (
@@ -46,10 +47,7 @@ export const getKibanaConfigError = () => ({
       id="xpack.cases.caseView.pushToServiceDisableByConfigDescription"
       values={{
         link: (
-          <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html"
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.generalSettings} target="_blank">
             {i18n.LINK_ACTIONS_CONFIGURATION}
           </EuiLink>
         ),
@@ -58,13 +56,16 @@ export const getKibanaConfigError = () => ({
   ),
 });
 
-export const getActionLicenseError = (actionLicense: ActionLicense | null): ErrorMessage[] => {
+export const getActionLicenseError = (
+  actionLicense: ActionLicense | null,
+  docLinks: DocLinksStart
+): ErrorMessage[] => {
   let errors: ErrorMessage[] = [];
   if (actionLicense != null && !actionLicense.enabledInLicense) {
-    errors = [...errors, getLicenseError()];
+    errors = [...errors, getLicenseError(docLinks)];
   }
   if (actionLicense != null && !actionLicense.enabledInConfig) {
-    errors = [...errors, getKibanaConfigError()];
+    errors = [...errors, getKibanaConfigError(docLinks)];
   }
   return errors;
 };
@@ -75,7 +76,7 @@ export const getConnectorMissingInfo = () => ({
   description: i18n.CONFIGURE_CONNECTOR,
 });
 
-export const getDeletedConnectorError = () => ({
+export const getDeletedConnectorError = (docLinks: DocLinksStart) => ({
   id: 'connector-deleted-error',
   title: '',
   description: (
@@ -84,7 +85,7 @@ export const getDeletedConnectorError = () => ({
       id="xpack.cases.configureCases.warningMessage"
       values={{
         appropriateLicense: (
-          <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+          <EuiLink href={docLinks.links.subscriptions} target="_blank">
             {i18n.LINK_APPROPRIATE_LICENSE}
           </EuiLink>
         ),

@@ -31,7 +31,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices, TabsEBTEvent } from '../../types';
+import type { TabItem, TabsServices, TabsEBTEvent, RecentlyClosedTabItem } from '../../types';
 import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
@@ -67,7 +67,7 @@ export type TabsBarProps = Pick<
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
-  recentlyClosedItems: TabItem[];
+  recentlyClosedItems: RecentlyClosedTabItem[];
   unsavedItemIds?: string[];
   maxItemsCount?: number;
   services: TabsServices;
@@ -385,6 +385,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
               items={items}
               selectedItem={selectedItem}
               recentlyClosedItems={recentlyClosedItems}
+              getPreviewData={getPreviewData}
               onSelect={onSelect}
               onSelectRecentlyClosed={onSelectRecentlyClosed}
               onClearRecentlyClosed={onClearRecentlyClosed}

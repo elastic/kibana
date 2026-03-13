@@ -30,6 +30,7 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
+import type { AddToTimelineHandler } from '../types';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -37,11 +38,9 @@ import { useKibana } from '../common/lib/kibana';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../common/constants';
 import { useActionResults } from '../action_results/use_action_results';
 import { generateEmptyDataMessage, PAGINATION_LIMIT_TITLE } from './translations';
-import {
-  ViewResultsInDiscoverAction,
-  ViewResultsInLensAction,
-  ViewResultsActionButtonType,
-} from '../packs/pack_queries_status_table';
+import { ViewResultsInDiscoverAction } from '../discover/view_results_in_discover';
+import { ViewResultsInLensAction } from '../lens/view_results_in_lens';
+import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
@@ -99,6 +98,9 @@ export interface ResultsTableComponentProps {
   startDate?: string;
   liveQueryActionId?: string;
   error?: string;
+  addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -109,6 +111,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
   liveQueryActionId,
   error,
+  addToTimeline,
+  scheduleId,
+  executionCount,
 }) => {
   const [isLive, setIsLive] = useState(true);
 
@@ -121,12 +126,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    scheduleId,
+    executionCount,
   });
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
     application: { getUrlForApp },
     appName,
-    timelines,
     notifications: { toasts },
     i18n: i18nStart,
     theme,
@@ -189,6 +195,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
+    scheduleId,
+    executionCount,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
@@ -369,7 +377,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const edges = allResultsData?.edges;
-    if (timelines && edges) {
+    if (addToTimeline && edges) {
       return [
         {
           id: 'timeline',
@@ -381,14 +389,21 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = edges[visibleRowIndex]?._id;
 
-            return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
+            return (
+              <AddToTimelineButton
+                field="_id"
+                value={eventId!}
+                isIcon={true}
+                addToTimeline={addToTimeline}
+              />
+            );
           },
         },
       ];
     }
 
     return [];
-  }, [allResultsData?.edges, timelines]);
+  }, [addToTimeline, allResultsData?.edges]);
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -401,21 +416,41 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             buttonType={ViewResultsActionButtonType.button}
             endDate={endDate}
             startDate={startDate}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
           <ViewResultsInLensAction
             actionId={actionId}
             buttonType={ViewResultsActionButtonType.button}
             endDate={endDate}
             startDate={startDate}
+            scheduleId={scheduleId}
+            executionCount={executionCount}
           />
-          <AddToTimelineButton field="action_id" value={actionId} />
-          {liveQueryActionId && (
-            <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
+          <AddToTimelineButton field="action_id" value={actionId} addToTimeline={addToTimeline} />
+          {(liveQueryActionId || scheduleId) && (
+            <AddToCaseWrapper
+              actionId={liveQueryActionId || scheduleId || ''}
+              queryId={actionId}
+              agentIds={agentIds}
+              scheduleId={scheduleId}
+              executionCount={executionCount}
+            />
           )}
         </>
       ),
     }),
-    [actionId, agentIds, appName, endDate, liveQueryActionId, startDate]
+    [
+      actionId,
+      addToTimeline,
+      agentIds,
+      appName,
+      endDate,
+      executionCount,
+      liveQueryActionId,
+      scheduleId,
+      startDate,
+    ]
   );
 
   useEffect(

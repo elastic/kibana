@@ -4,24 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-language'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-esql'
-toolchain:
+toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
-  name: '@kbn/esql-language'
+  title: '@kbn/esql-language'
   description: Moon project for @kbn/esql-language
   channel: ''
   owner: '@elastic/kibana-esql'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-language
+  sourceRoot: src/platform/packages/shared/kbn-esql-language
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-types'
   - '@kbn/core-pricing-common'
   - '@kbn/licensing-types'
+  - '@kbn/field-types'
 tags:
   - shared-common
   - package
@@ -36,14 +38,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

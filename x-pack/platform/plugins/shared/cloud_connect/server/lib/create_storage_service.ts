@@ -15,6 +15,18 @@ interface CloudConnectedStartDeps {
 }
 
 /**
+ * Custom error thrown when the API key is not found in the saved object
+ */
+export class ApiKeyNotFoundError extends Error {
+  public readonly statusCode = 503;
+
+  constructor() {
+    super('Failed to retrieve API key from saved object');
+    this.name = 'ApiKeyNotFoundError';
+  }
+}
+
+/**
  * Helper function to create a StorageService instance with all required clients
  * @param context - The request handler context
  * @param getStartServices - Function to get start services
@@ -42,4 +54,26 @@ export async function createStorageService(
     savedObjectsClient,
     logger,
   });
+}
+
+/**
+ * Helper function to get API key data from storage, throwing if not found
+ */
+export async function getApiKeyData(
+  context: RequestHandlerContext,
+  getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>,
+  logger: Logger
+): Promise<{
+  apiKeyData: { apiKey: string; clusterId: string };
+  storageService: StorageService;
+}> {
+  const storageService = await createStorageService(context, getStartServices, logger);
+  const apiKeyData = await storageService.getApiKey();
+
+  if (!apiKeyData) {
+    logger.warn('No API key found in saved object');
+    throw new ApiKeyNotFoundError();
+  }
+
+  return { apiKeyData, storageService };
 }

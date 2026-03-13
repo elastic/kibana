@@ -51,7 +51,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
@@ -63,7 +63,8 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -97,7 +98,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -114,7 +115,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 10
+    parallelism: 11
     retry:
       automatic:
         - exit_status: '-1'
@@ -131,7 +132,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
@@ -165,7 +166,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -199,7 +200,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -216,7 +217,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -301,7 +302,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 7
     retry:
       automatic:
         - exit_status: '-1'
@@ -335,7 +336,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
@@ -369,7 +370,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -420,7 +421,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 3
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -437,7 +438,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'
@@ -485,10 +486,11 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
     depends_on:
       - build
-    timeout_in_minutes: 60
-    parallelism: 20
+    timeout_in_minutes: 75
+    parallelism: 22
     retry:
       automatic:
         - exit_status: '-1'
@@ -502,9 +504,10 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
     depends_on:
       - build
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     retry:
       automatic:

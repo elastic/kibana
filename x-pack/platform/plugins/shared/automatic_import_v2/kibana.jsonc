@@ -22,7 +22,12 @@
       "inference",
       "security",
       "features",
-      "taskManager"
+      "taskManager",
+      "kibanaUtils",
+      "fieldsMetadata"
+    ],
+    "requiredBundles": [
+      "esUiShared"
     ]
   }
 }

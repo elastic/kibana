@@ -74,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
     });
 
-    it('does not create the rules when there are no connectors defined', async () => {
+    it('does create the rules when there are no connectors defined', async () => {
       await supertest
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)
@@ -89,8 +89,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send()
         .expect(200);
 
-      expect(apiResponse.body.statusRule).to.be(null);
-      expect(apiResponse.body.tlsRule).to.be(null);
+      expect(apiResponse.body.statusRule).not.to.be(null);
+      expect(apiResponse.body.tlsRule).not.to.be(null);
     });
 
     it('returns the created alerted when called', async () => {

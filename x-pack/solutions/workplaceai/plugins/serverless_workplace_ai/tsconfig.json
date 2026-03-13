@@ -21,6 +21,6 @@
     "@kbn/serverless-workplace-ai-settings",
     "@kbn/i18n",
     "@kbn/core-chrome-browser",
-    "@kbn/data-connectors-plugin",
+    "@kbn/data-sources-plugin",
   ]
 }

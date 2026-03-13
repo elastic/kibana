@@ -17,6 +17,7 @@ import {
   MockUiSettingsGlobalClientConstructor,
   MockUiSettingsDefaultsClientConstructor,
   getCoreSettingsMock,
+  getCoreGlobalSettingsMock,
 } from './ui_settings_service.test.mock';
 import type { SetupDeps } from './ui_settings_service';
 import { UiSettingsService } from './ui_settings_service';
@@ -27,6 +28,10 @@ import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client'
 
 const overrides = {
   overrideBaz: 'baz',
+};
+
+const globalOverrides = {
+  globalOverrideBaz: 'baz',
 };
 
 const defaults = {
@@ -46,7 +51,9 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
-    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+    coreContext.configService.atPath.mockReturnValue(
+      new BehaviorSubject({ overrides, globalOverrides })
+    );
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
@@ -58,6 +65,7 @@ describe('uiSettings', () => {
     MockUiSettingsClientConstructor.mockClear();
     MockUiSettingsGlobalClientConstructor.mockClear();
     getCoreSettingsMock.mockClear();
+    getCoreGlobalSettingsMock.mockClear();
   });
 
   describe('#preboot', () => {
@@ -197,6 +205,7 @@ describe('uiSettings', () => {
             overrides: {
               custom: 42,
             },
+            globalOverrides: {},
           })
         );
         const customizedService = new UiSettingsService(coreContext);
@@ -213,12 +222,53 @@ describe('uiSettings', () => {
         );
       });
 
-      it('do not throw on unknown overrides', async () => {
+      it('validates global overrides', async () => {
+        const coreContext = mockCoreContext.create();
+        coreContext.configService.atPath.mockReturnValueOnce(
+          new BehaviorSubject({
+            overrides: {},
+            globalOverrides: {
+              custom: 24,
+            },
+          })
+        );
+        const customizedService = new UiSettingsService(coreContext);
+        const { registerGlobal } = await customizedService.setup(setupDeps);
+        registerGlobal({
+          custom: {
+            value: '24',
+            schema: schema.string(),
+          },
+        });
+
+        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
+          `[Error: [global ui settings overrides [custom]]: expected value of type [string] but got [number]]`
+        );
+      });
+
+      it('does not throw on unknown overrides', async () => {
         const coreContext = mockCoreContext.create();
         coreContext.configService.atPath.mockReturnValueOnce(
           new BehaviorSubject({
             overrides: {
               custom: 42,
+            },
+            globalOverrides: {},
+          })
+        );
+        const customizedService = new UiSettingsService(coreContext);
+        await customizedService.setup(setupDeps);
+
+        await customizedService.start();
+      });
+
+      it('does not throw on unknown global overrides', async () => {
+        const coreContext = mockCoreContext.create();
+        coreContext.configService.atPath.mockReturnValueOnce(
+          new BehaviorSubject({
+            overrides: {},
+            globalOverrides: {
+              custom: 24,
             },
           })
         );
@@ -329,17 +379,20 @@ describe('uiSettings', () => {
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].overrides).toEqual({});
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].overrides).toEqual(
+          globalOverrides
+        );
       });
 
-      it('passes a copy of set defaults to UiSettingsGlobalClient', async () => {
+      it('passes a copy of set global defaults to UiSettingsGlobalClient', async () => {
         const setup = await service.setup(setupDeps);
-        setup.register(defaults);
+        setup.registerGlobal(defaults);
         const start = await service.start();
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual({});
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
+        expect(MockUiSettingsGlobalClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
       });
     });
   });

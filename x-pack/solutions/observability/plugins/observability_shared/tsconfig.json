@@ -28,6 +28,7 @@
     "@kbn/es-types",
     "@kbn/spaces-plugin",
     "@kbn/core-application-browser",
+    "@kbn/core-application-common",
     "@kbn/datemath",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",
@@ -48,6 +49,7 @@
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
+    "@kbn/agent-builder-plugin",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

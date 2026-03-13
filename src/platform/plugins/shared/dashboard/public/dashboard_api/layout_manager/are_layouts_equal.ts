@@ -16,6 +16,16 @@ import type { DashboardLayout } from './types';
  * original layout is deep equal to the layout item at the same ID in the new layout
  */
 export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: DashboardLayout) => {
+  return (
+    arePinnedPanelLayoutsEqual(originalLayout, newLayout) &&
+    arePanelLayoutsEqual(originalLayout, newLayout)
+  );
+};
+
+export const arePanelLayoutsEqual = (
+  originalLayout?: DashboardLayout,
+  newLayout?: DashboardLayout
+) => {
   /**
    * It is safe to assume that there are **usually** more panels than sections, so do cheaper section ID comparison first
    */
@@ -26,8 +36,10 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
   /**
    * Since section IDs are equal, check for more expensive panel ID equality
    */
-  const newPanelUuids = Object.keys(newLayout?.panels ?? {});
-  const panelIdDiff = xor(Object.keys(originalLayout?.panels ?? {}), newPanelUuids);
+  const panelIdDiff = xor(
+    Object.keys(originalLayout?.panels ?? {}),
+    Object.keys(newLayout?.panels ?? {})
+  );
   if (panelIdDiff.length > 0) return false;
 
   /**
@@ -39,11 +51,34 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
       return false;
     }
   }
+
   // then compare panel grid data
-  for (const embeddableId of newPanelUuids) {
+  for (const embeddableId of Object.keys(newLayout?.panels ?? {})) {
     if (
       !deepEqual(originalLayout?.panels[embeddableId]?.grid, newLayout?.panels[embeddableId]?.grid)
     ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const arePinnedPanelLayoutsEqual = (
+  originalLayout?: DashboardLayout,
+  newLayout?: DashboardLayout
+) => {
+  /**
+   * check for pinned panel ID equality
+   */
+  const pinnedPanelIdDiff = xor(
+    Object.keys(originalLayout?.pinnedPanels ?? {}),
+    Object.keys(newLayout?.pinnedPanels ?? {})
+  );
+  if (pinnedPanelIdDiff.length > 0) return false;
+
+  // then compare control state that layout manages (i.e. order, grow, width, etc.)
+  for (const panelId of Object.keys(newLayout?.pinnedPanels ?? {})) {
+    if (!deepEqual(originalLayout?.pinnedPanels[panelId], newLayout?.pinnedPanels[panelId])) {
       return false;
     }
   }

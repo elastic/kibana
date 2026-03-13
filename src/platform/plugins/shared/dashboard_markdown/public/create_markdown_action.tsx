@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
+import { apiCanAddNewPanel } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
@@ -33,12 +33,10 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
       {
         panelType: MARKDOWN_EMBEDDABLE_TYPE,
         serializedState: {
-          rawState: {
-            content: '',
-          },
+          content: '',
         },
       },
-      true
+      { displaySuccessMessage: true }
     );
     return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },

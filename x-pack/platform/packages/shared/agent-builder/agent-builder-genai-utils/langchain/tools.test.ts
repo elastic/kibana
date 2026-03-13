@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
@@ -63,6 +63,7 @@ describe('toolToLangchain', () => {
     expect(tool.execute).toHaveBeenCalledWith({
       toolParams: { hello: 'world' },
       toolCallId: 'unknown',
+      source: 'agent',
     });
 
     expect(JSON.parse(results).results).toEqual([{ type: ToolResultType.other, data: 'foo' }]);

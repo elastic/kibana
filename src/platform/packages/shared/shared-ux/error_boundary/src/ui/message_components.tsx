@@ -44,7 +44,12 @@ const CodePanel: React.FC<CodePanelProps> = (props) => {
   const errorTrace = errorInfo?.componentStack ?? error.stack ?? error.toString();
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby={simpleFlyoutTitleId} paddingSize="none">
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={simpleFlyoutTitleId}
+      paddingSize="none"
+      session="never"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
           <EuiTitle size="m">

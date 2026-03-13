@@ -20,6 +20,7 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -38,6 +39,7 @@ import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
   LICENSING_CASE_ASSIGNMENT_FEATURE,
@@ -53,6 +55,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { registerCaseWorkflowSteps } from './workflows';
 
 export class CasePlugin
   implements
@@ -71,8 +74,10 @@ export class CasePlugin
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
+  private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -82,6 +87,7 @@ export class CasePlugin
     this.clientFactory = new CasesClientFactory(this.logger);
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
@@ -98,7 +104,8 @@ export class CasePlugin
 
     registerInternalAttachments(
       this.externalReferenceAttachmentTypeRegistry,
-      this.persistableStateAttachmentTypeRegistry
+      this.persistableStateAttachmentTypeRegistry,
+      this.unifiedAttachmentTypeRegistry
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
@@ -126,6 +133,7 @@ export class CasePlugin
       logger: this.logger,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
+      config: this.caseConfig,
     });
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
@@ -143,6 +151,7 @@ export class CasePlugin
           usageCollection: plugins.usageCollection,
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
+          templatesConfig: this.caseConfig.templates,
         });
       }
 
@@ -157,17 +166,17 @@ export class CasePlugin
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
-    const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
     registerRoutes({
       router,
       routes: [
         ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.caseConfig),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
-      telemetryUsageCounter,
+      telemetryUsageCounter: this.usageCounter,
     });
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
@@ -200,6 +209,8 @@ export class CasePlugin
       serverlessProjectType,
     });
 
+    registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -207,6 +218,9 @@ export class CasePlugin
         },
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
+        },
+        registerUnified: (unifiedAttachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
         },
       },
       config: this.caseConfig,
@@ -268,10 +282,15 @@ export class CasePlugin
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
       ruleRegistry: plugins.ruleRegistry,
       filesPluginStart: plugins.files,
+      // usageCounter will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      usageCounter: this.usageCounter!,
+      config: this.caseConfig,
     });
 
     return {
@@ -279,6 +298,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
       config: this.caseConfig,
     };
   }

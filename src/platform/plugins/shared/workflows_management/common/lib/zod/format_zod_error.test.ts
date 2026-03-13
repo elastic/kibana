@@ -108,7 +108,7 @@ describe('formatZodError', () => {
     const result = formatZodError(mockError as any, simpleSchema);
 
     // Should fall back to original message since path doesn't exist in schema
-    expect(result.message).toBe('Expected "0 | 1 | 2"');
+    expect(result.message).toBe('Expected "0 | 1 | 2" at nonexistent');
   });
 });
 
@@ -123,7 +123,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"
@@ -157,7 +157,7 @@ describe('Dynamic validation system behavior', () => {
       const yamlDocument = parseDocument(`
   steps:
     - name: createCase
-      type: kibana.createCaseDefaultSpace
+      type: kibana.createCase
       with:
         title: "Test Case"
         description: "Test Description"

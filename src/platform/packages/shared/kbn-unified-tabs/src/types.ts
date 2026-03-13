@@ -19,6 +19,10 @@ export interface TabItem {
   customMenuButton?: React.JSX.Element;
 }
 
+export type RecentlyClosedTabItem = TabItem & {
+  closedAt: number;
+};
+
 export interface TabsSizeConfig {
   isScrollable: boolean;
   regularTabMaxWidth: number;

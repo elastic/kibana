@@ -55,7 +55,7 @@ import type { NormalizedFields, State } from '../../../../components/mappings_ed
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
-import { updateIndexMappings } from '../../../../services/api';
+import { updateIndexMappings, useUserPrivileges } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
@@ -71,8 +71,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  hasUpdateMappingsPrivilege?: boolean;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     core: {
       application: { capabilities, navigateToUrl },
@@ -83,6 +82,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     overlays,
     history,
   } = useAppContext();
+  const { data: userPrivilege } = useUserPrivileges(index.name);
+  const hasUpdateMappingsPrivilege = userPrivilege?.privileges?.canManageIndex === true;
+
   const pendingFieldsRef = useRef<HTMLDivElement>(null);
   const state = useMappingsState();
   const dispatch = useDispatch();
@@ -197,8 +199,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
-        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
+          await ml?.mlApi?.savedObjects.syncSavedObjects();
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
         const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;

@@ -9,8 +9,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { ExecutionStatus, type ExecutionType } from '@kbn/workflows';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 const EXECUTIONS_LIST_REFETCH_INTERVAL = 5000;
@@ -19,11 +21,13 @@ const EXECUTIONS_LIST_REFETCH_INTERVAL_ACTIVE = 1000;
 export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
   executionTypes: ExecutionType[];
+  executedBy: string[];
 }
 
 const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
   statuses: [],
   executionTypes: [],
+  executedBy: [],
 };
 
 interface WorkflowExecutionListProps {
@@ -31,6 +35,9 @@ interface WorkflowExecutionListProps {
 }
 
 export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
+  const { uiSettings } = useKibana().services;
+  const showExecutor =
+    uiSettings?.get<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, false) ?? false;
   const [refetchInterval, setRefetchInterval] = useState(EXECUTIONS_LIST_REFETCH_INTERVAL);
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const {
@@ -40,7 +47,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
   } = useWorkflowExecutions(
-    { workflowId, statuses: filters.statuses, executionTypes: filters.executionTypes },
+    {
+      workflowId,
+      statuses: filters.statuses,
+      executionTypes: filters.executionTypes,
+      executedBy: filters.executedBy,
+    },
     {
       refetchInterval,
     }
@@ -66,6 +78,11 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     }
   }, [workflowExecutions]);
 
+  // Reset scroll when filters change
+  useEffect(() => {
+    // Reset to default when workflow changes
+  }, [filters.statuses, filters.executionTypes, filters.executedBy]);
+
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   const handleViewWorkflowExecution = (executionId: string) => {
@@ -83,6 +100,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       filters={filters}
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
+      showExecutor={showExecutor}
     />
   );
 }

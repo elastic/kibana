@@ -23,6 +23,7 @@ import {
   EisCloudConnectPromoCallout,
   EisPromotionalCallout,
   EisUpdateCallout,
+  useCloudConnectStatus,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
@@ -34,6 +35,7 @@ import {
 } from '../../../../../components/mappings_editor/lib/utils';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 interface MappingsInformationPanelsProps {
   indexName: string;
@@ -47,11 +49,16 @@ export const MappingsInformationPanels = ({
   refetchMapping,
 }: MappingsInformationPanelsProps) => {
   const {
-    plugins: { cloud },
+    plugins: { cloud, cloudConnect },
     core: { application },
-    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
+  const { isAtLeastEnterprise } = useLicense();
+  const {
+    isLoading: isCloudConnectStatusLoading,
+    isCloudConnected,
+    isCloudConnectedWithEisEnabled,
+  } = useCloudConnectStatus(cloudConnect?.hooks.useCloudConnectStatus);
 
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
@@ -64,7 +71,9 @@ export const MappingsInformationPanels = ({
   const hasSemanticText = hasSemanticTextField(state.mappingViewFields);
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
+    ((cloud?.isCloudEnabled || isCloudConnectedWithEisEnabled) &&
+      (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ??
+    false;
 
   return (
     <EuiFlexItem grow={false} css={showAboutMappingsStyles}>
@@ -99,18 +108,20 @@ export const MappingsInformationPanels = ({
             )}
           </>
         )}
-        <EisCloudConnectPromoCallout
-          promoId="indexDetailsMappings"
-          isSelfManaged={!cloud?.isCloudEnabled}
-          direction="column"
-          navigateToApp={() =>
-            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-          }
-        />
+        {!isCloudConnectStatusLoading && !isCloudConnected && (
+          <EisCloudConnectPromoCallout
+            promoId="indexDetailsMappings"
+            isSelfManaged={!cloud?.isCloudEnabled}
+            direction="column"
+            navigateToApp={() =>
+              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+            }
+          />
+        )}
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon aria-hidden={true} type="info" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
@@ -150,7 +161,7 @@ export const MappingsInformationPanels = ({
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon aria-hidden={true} type="info" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">

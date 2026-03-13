@@ -32,6 +32,20 @@ import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestio
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
 
+interface IngestionRateBuckets {
+  start: moment.Moment;
+  end: moment.Moment;
+  interval: string;
+  buckets: Array<{ key: number; value: number }>;
+}
+
+interface IngestionRateTieredBuckets {
+  start: moment.Moment;
+  end: moment.Moment;
+  interval: string;
+  buckets: Record<string, Array<{ key: number; value: number }>>;
+}
+
 interface ChartComponentProps {
   definition: Streams.ingest.all.GetResponse;
   timeState: TimeState;
@@ -119,7 +133,7 @@ export function ChartBarSeriesBase({
   formatAsBytes,
   isFailureStore,
 }: {
-  ingestionRate: any;
+  ingestionRate: IngestionRateBuckets | undefined;
   isLoadingIngestionRate: boolean;
   ingestionRateError: Error | undefined;
   isLoadingStats: boolean;
@@ -135,14 +149,14 @@ export function ChartBarSeriesBase({
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <Chart size={{ height: 250 }}>
+    <div style={{ height: '100%', minHeight: '200px', width: '100%' }}>
+      <Chart size={{ height: '100%', width: '100%' }}>
         <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <BarSeries
           id="ingestionRate"
           name="Ingestion rate"
-          data={ingestionRate.buckets as Array<{ key: any; value: any }>}
+          data={ingestionRate.buckets}
           color={
             isFailureStore ? euiTheme.colors.severity.danger : euiTheme.colors.severity.success
           }
@@ -165,7 +179,7 @@ export function ChartBarSeriesBase({
           gridLine={{ visible: true }}
         />
       </Chart>
-    </>
+    </div>
   );
 }
 
@@ -176,7 +190,7 @@ function ChartBarPhasesSeriesBase({
   isLoadingStats,
   formatAsBytes,
 }: {
-  ingestionRate: any;
+  ingestionRate: IngestionRateTieredBuckets | undefined;
   isLoadingIngestionRate: boolean;
   ingestionRateError: Error | undefined;
   isLoadingStats: boolean;
@@ -189,6 +203,7 @@ function ChartBarPhasesSeriesBase({
     if (!ingestionRate) return {};
     const phaseKeys = Object.keys(ingestionRate.buckets) as (keyof typeof ilmPhases)[];
     return phaseKeys.reduce((acc, phase) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       acc[phase] = { name: phase } as any;
       return acc;
     }, {} as IlmPolicyPhases);
@@ -199,17 +214,21 @@ function ChartBarPhasesSeriesBase({
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <>
-      <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }} gutterSize="s">
+    <div style={{ width: '100%', height: '100%', minHeight: '200px' }}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        css={{ width: '100%', height: '100%' }}
+        gutterSize="s"
+      >
         <EuiFlexItem grow={9}>
-          <Chart size={{ height: 250 }}>
+          <Chart size={{ height: '100%', width: '100%' }}>
             <Settings showLegend={false} baseTheme={chartBaseTheme} />
             {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
               <BarSeries
                 id={`ingestionRate-${tier}`}
                 key={`ingestionRate-${tier}`}
                 name={capitalize(tier)}
-                data={buckets as Array<{ key: any; value: any }>}
+                data={buckets as Array<{ key: number; value: number }>}
                 color={ilmPhases[tier as PhaseName].color}
                 // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
@@ -238,7 +257,7 @@ function ChartBarPhasesSeriesBase({
           <PhasesLegend phases={availablePhases} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </div>
   );
 }
 
@@ -310,7 +329,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
       <EuiSpacer size="s" />
       {availablePhases.map((phase) => (
         <React.Fragment key={phase.name}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false} css={{ width: '20px', alignItems: 'center' }}>
               {'color' in phase ? (
                 <span
@@ -323,7 +342,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
                   }}
                 />
               ) : (
-                <EuiIcon type={phase.icon} />
+                <EuiIcon type={phase.icon} aria-hidden={true} />
               )}
             </EuiFlexItem>
 

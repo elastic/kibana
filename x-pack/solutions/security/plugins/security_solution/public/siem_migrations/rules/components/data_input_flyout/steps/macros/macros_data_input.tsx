@@ -80,8 +80,11 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-      telemetry.reportSetupMacrosQueryCopied({ migrationId: migrationStats.id });
-    }, [telemetry, migrationStats.id]);
+      telemetry.reportSetupMacrosQueryCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+      });
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
     const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step

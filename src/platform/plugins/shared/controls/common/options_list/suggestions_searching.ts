@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type OptionsListSearchTechnique = 'prefix' | 'wildcard' | 'exact';
+import type { OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
 export const getDefaultSearchTechnique = (type: string): OptionsListSearchTechnique | undefined => {
   const compatibleSearchTechniques = getCompatibleSearchTechniques(type);

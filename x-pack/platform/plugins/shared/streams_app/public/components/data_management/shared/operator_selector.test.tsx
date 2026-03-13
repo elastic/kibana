@@ -95,4 +95,45 @@ describe('OperatorSelector', () => {
 
     expect(onChange).toHaveBeenCalledWith({ field: baseField, eq: 'abc' });
   });
+
+  it('renders range operator option', () => {
+    const onChange = jest.fn();
+    render(
+      <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
+    );
+
+    const select = screen.getByRole('combobox');
+    const optionTexts = within(select)
+      .getAllByRole('option')
+      .map((o) => o.textContent);
+
+    expect(optionTexts).toEqual(expect.arrayContaining(['in range']));
+  });
+
+  it('displays range operator when condition has range', () => {
+    const onChange = jest.fn();
+    render(
+      <OperatorSelector
+        condition={{ field: baseField, range: { gte: '0', lt: '100' } }}
+        onConditionChange={onChange}
+      />
+    );
+
+    const select = screen.getByRole('combobox') as HTMLSelectElement;
+    expect(select.value).toBe('range');
+  });
+
+  it('emits appropriate condition when range operator is selected', async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    render(
+      <OperatorSelector condition={{ field: baseField, eq: '' }} onConditionChange={onChange} />
+    );
+
+    const select = screen.getByRole('combobox');
+    await user.selectOptions(select, 'range');
+
+    const expectedDefault = getDefaultFormValueForOperator('range');
+    expect(onChange).toHaveBeenCalledWith({ field: baseField, range: expectedDefault });
+  });
 });

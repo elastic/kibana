@@ -55,5 +55,13 @@ export function AgentConfigurationTable({
     setting: variables[k],
     value: get(data, k), // TODO do we want default values?
   }));
-  return <EuiBasicTable items={items} columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={items}
+      columns={columns}
+      tableCaption={i18n.translate('xpack.apm.tutorial.agent.configurationCaption', {
+        defaultMessage: 'Agent configuration settings',
+      })}
+    />
+  );
 }

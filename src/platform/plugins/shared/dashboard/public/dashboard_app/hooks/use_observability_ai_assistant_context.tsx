@@ -359,7 +359,7 @@ export function useObservabilityAIAssistantContext({
                   .addNewPanel({
                     panelType: 'lens',
                     serializedState: {
-                      rawState: { embeddableInput },
+                      embeddableInput,
                     },
                   })
                   .then(() => {

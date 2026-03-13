@@ -12,8 +12,10 @@ export const TASK_STATUSES = {
   pending: 'pending',
   processing: 'processing',
   completed: 'completed',
+  approved: 'approved',
   failed: 'failed',
   cancelled: 'cancelled',
+  deleting: 'deleting',
 } as const;
 
 export const INPUT_TYPES = {

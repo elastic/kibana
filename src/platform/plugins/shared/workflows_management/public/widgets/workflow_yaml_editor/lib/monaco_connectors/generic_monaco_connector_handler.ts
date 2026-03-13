@@ -107,22 +107,6 @@ ${Object.entries(connectorInfo.examples.params || {})
    * Categorize connector types to provide better help
    */
   private getConnectorInfo(connectorType: string): ConnectorInfo | null {
-    // HTTP-related connectors
-    if (connectorType.includes('http') || connectorType.includes('webhook')) {
-      return {
-        name: 'HTTP',
-        description: 'HTTP request connector for web API integration',
-        documentation: 'Configure URL, method, headers, and body parameters',
-        examples: {
-          params: {
-            url: 'https://api.example.com/endpoint',
-            method: 'GET',
-            headers: { Authorization: 'Bearer token' },
-          },
-        },
-      };
-    }
-
     // Slack connectors
     if (connectorType.includes('slack')) {
       return {
@@ -145,7 +129,7 @@ ${Object.entries(connectorInfo.examples.params || {})
         documentation: 'Configure recipient, subject, and message content',
         examples: {
           params: {
-            to: 'user@example.com',
+            to: ['user@example.com', 'other@example.com'],
             subject: 'Workflow Notification',
             message: 'Your workflow has completed successfully.',
           },

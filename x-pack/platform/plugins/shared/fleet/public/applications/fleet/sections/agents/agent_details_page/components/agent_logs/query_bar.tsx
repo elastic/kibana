@@ -29,9 +29,7 @@ export const LogQueryBar: React.FunctionComponent<{
 }> = memo(({ query, isQueryValid, onUpdateQuery }) => {
   const {
     data,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 

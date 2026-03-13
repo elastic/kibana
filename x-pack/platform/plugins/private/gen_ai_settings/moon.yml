@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/gen-ai-settings-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/gen-ai-settings-plugin'
+  title: '@kbn/gen-ai-settings-plugin'
   description: Moon project for @kbn/gen-ai-settings-plugin
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/gen_ai_settings
+  sourceRoot: x-pack/platform/plugins/private/gen_ai_settings
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -46,9 +45,14 @@ dependsOn:
   - '@kbn/product-doc-base-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/ai-agent-confirmation-modal'
+  - '@kbn/anonymization-ui'
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
   - '@kbn/agent-builder-common'
+  - '@kbn/scout'
+  - '@kbn/workflows'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
@@ -60,17 +64,28 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

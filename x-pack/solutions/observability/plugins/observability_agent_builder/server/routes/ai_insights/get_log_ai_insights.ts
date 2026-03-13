@@ -4,37 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import moment from 'moment';
-import { MessageRole, type InferenceClient } from '@kbn/inference-common';
-import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
-import { safeJsonStringify } from '@kbn/std';
+import type { Observable } from 'rxjs';
+import type {
+  ChatCompletionEvent,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
-import { getLogDocumentById } from './get_log_document_by_id';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
+import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
+import { getToolHandler as getTraces } from '../../tools/get_traces/handler';
+import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
+import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
+import { createAiInsightResult, type AiInsightResult } from './types';
 
 export interface GetLogAiInsightsParams {
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   index: string;
   id: string;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
   inferenceClient: InferenceClient;
   connectorId: string;
+  connector: InferenceConnector;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
+  logger: Logger;
 }
 
 export async function getLogAiInsights({
+  core,
+  plugins,
   index,
   id,
-  request,
   esClient,
-  dataRegistry,
   inferenceClient,
   connectorId,
-}: GetLogAiInsightsParams): Promise<{ summary: string; context: string }> {
-  const systemPrompt = dedent(`
-    You are assisting an SRE who is viewing a log entry in the Kibana Logs UI.
-    Using the provided data produce a concise, action-oriented response.`);
-
+  connector,
+  request,
+  logger,
+}: GetLogAiInsightsParams): Promise<AiInsightResult> {
   const logEntry = await getLogDocumentById({
     esClient: esClient.asCurrentUser,
     index,
@@ -45,6 +60,50 @@ export async function getLogAiInsights({
     throw new Error('Log entry not found');
   }
 
+  const context = await fetchLogContext({
+    core,
+    plugins,
+    logger,
+    esClient,
+    index,
+    id,
+    logEntry,
+  });
+
+  const events$ = generateLogSummary({
+    inferenceClient,
+    connectorId,
+    logEntry,
+    context,
+    core,
+    request,
+  });
+
+  return createAiInsightResult(context, connector, events$);
+}
+
+async function fetchLogContext({
+  core,
+  plugins,
+  logger,
+  esClient,
+  index,
+  id,
+  logEntry,
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  logger: Logger;
+  esClient: IScopedClusterClient;
+  index: string;
+  id: string;
+  logEntry: LogDocument;
+}): Promise<string> {
+  const logTimestamp = logEntry['@timestamp'];
+  const logTime = moment(logTimestamp);
+  const windowStart = logTime.clone().subtract(60, 'minutes').toISOString();
+  const windowEnd = logTime.clone().add(60, 'minutes').toISOString();
+
   let context = dedent(`
     <LogEntryIndex>
     ${index}
@@ -54,41 +113,98 @@ export async function getLogAiInsights({
     </LogEntryId>
     <LogEntryFields>
     \`\`\`json
-    ${safeJsonStringify(logEntry)}
+    ${JSON.stringify(logEntry, null, 2)}
     \`\`\`
     </LogEntryFields>
   `);
 
-  if (logEntry.service?.name && logEntry.service?.environment) {
-    const serviceSummary = await dataRegistry.getData('apmServiceSummary', {
-      request,
-      serviceName: logEntry.service?.name,
-      serviceEnvironment: logEntry.service?.environment,
-      start: moment(logEntry['@timestamp']).subtract(24, 'hours').toISOString(),
-      end: moment(logEntry['@timestamp']).add(24, 'hours').toISOString(),
+  try {
+    const { traces } = await getTraces({
+      core,
+      plugins,
+      logger,
+      esClient,
+      index,
+      start: windowStart,
+      end: windowEnd,
+      kqlFilter: `_id: ${id}`,
+      maxTraces: 10,
+      maxDocsPerTrace: 100,
     });
-    context += dedent(`
-      <ServiceSummary>
+    const trace = traces[0];
+    if (trace) {
+      context += dedent(`
+      <TraceDocuments>
+      Time window: ${windowStart} to ${windowEnd}
       \`\`\`json
-      ${safeJsonStringify(serviceSummary)}
+      ${JSON.stringify(trace, null, 2)}
       \`\`\`
-      </ServiceSummary>
+      </TraceDocuments>
     `);
+    }
+  } catch (error) {
+    logger.debug(`Failed to fetch traces: ${error.message}`);
   }
 
-  const response = await inferenceClient.chatComplete({
-    connectorId,
-    system: systemPrompt,
-    messages: [
-      {
-        role: MessageRole.User,
-        content:
-          dedent(`Explain this log message: what it means, where it is from, whether it is expected, and if it is an issue.
-          ${context}
-          `),
-      },
-    ],
+  return context;
+}
+
+function generateLogSummary({
+  inferenceClient,
+  connectorId,
+  logEntry,
+  context,
+  core,
+  request,
+}: {
+  inferenceClient: InferenceClient;
+  connectorId: string;
+  logEntry: LogDocument;
+  context: string;
+  core: ObservabilityAgentBuilderCoreSetup;
+  request: KibanaRequest;
+}): Observable<ChatCompletionEvent> {
+  const isErrorOrWarning = isWarningOrAbove(logEntry);
+  const entityLinkingInstructions = getEntityLinkingInstructions({
+    urlPrefix: core.http.basePath.get(request),
   });
 
-  return { summary: response.content, context };
+  const systemPrompt = isErrorOrWarning
+    ? dedent(`
+        You are an expert SRE assistant analyzing an ${logEntry['log.level']} log entry. Provide a thorough investigation:
+
+        - **What happened**: Summarize the error in plain language
+        - **Where it originated**: Identify the service, component, or code path
+        - **Root cause analysis**: Use the available context to identify potential causes
+        - **Impact**: Note any affected downstream services or dependencies
+        - **Next steps**: Suggest specific actions for investigation or remediation
+
+        Base your analysis strictly on the provided data.
+
+        ${entityLinkingInstructions}
+      `)
+    : dedent(`
+        You are an expert SRE assistant analyzing an ${logEntry['log.level']} log entry. Keep it concise:
+
+        - Explain what the log message means in context
+        - Identify the source (service, host, container)
+        - If CorrelatedLogSequence is available, use it to provide additional context
+
+        Base your analysis strictly on the provided data. Be specific and reference actual field values.
+
+        ${entityLinkingInstructions}
+      `);
+
+  const userPrompt = dedent(`
+    ${context}
+    Analyze this log entry and generate a summary explaining what it means.
+    Ensure the analysis is grounded in the provided context, and concise.
+  `);
+
+  return inferenceClient.chatComplete({
+    connectorId,
+    system: systemPrompt,
+    messages: [{ role: MessageRole.User, content: userPrompt }],
+    stream: true,
+  });
 }

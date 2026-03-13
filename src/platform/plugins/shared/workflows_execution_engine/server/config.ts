@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -23,6 +24,15 @@ const configSchema = schema.object({
         defaultValue: ['*'],
       }
     ),
+  }),
+  maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
+  collectQueueMetrics: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description:
+        'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
+        'Useful for observability but adds to document size. Disabled by default for performance.',
+    },
   }),
 });
 

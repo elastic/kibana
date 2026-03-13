@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { ContentFrameworkTableProps } from '.';
 import { ContentFrameworkTable } from '.';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../../__mocks__';
 import userEvent from '@testing-library/user-event';
 
@@ -59,7 +59,7 @@ jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 const mockHit = buildHitMock({}, 'index', mockDataView);

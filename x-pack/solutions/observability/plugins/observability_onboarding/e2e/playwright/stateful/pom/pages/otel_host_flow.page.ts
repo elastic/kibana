@@ -20,6 +20,24 @@ export class OtelHostFlowPage {
     this.exploreMetricsButton = this.page.getByTestId('obltOnboardingExploreMetrics');
   }
 
+  public async selectPlatform(osName: string) {
+    const platformLabel = this.getPlatformLabel(osName);
+    await this.page.getByRole('button', { name: platformLabel, exact: true }).click();
+  }
+
+  private getPlatformLabel(osName: string): string {
+    switch (osName.toLowerCase()) {
+      case 'darwin':
+        return 'Mac';
+      case 'windows':
+      case 'win32':
+        return 'Windows';
+      case 'linux':
+      default:
+        return 'Linux';
+    }
+  }
+
   public async copyCollectorDownloadSnippetToClipboard() {
     await this.page.getByTestId('observabilityOnboardingOtelLogsPanelButton').click();
   }

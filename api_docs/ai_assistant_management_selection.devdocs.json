@@ -22,6 +22,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
+            "lineNumber": 28,
+            "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -61,6 +65,8 @@
         "label": "AIAssistantType",
         "description": [],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ai_assistant_type.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -73,6 +79,8 @@
         "label": "AIChatExperience",
         "description": [],
         "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,6 +109,8 @@
           ".Agent"
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -116,6 +126,8 @@
           "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -131,6 +143,8 @@
           "\"aiAssistant:preferredChatExperience\""
         ],
         "path": "src/platform/plugins/shared/ai_assistant_management/selection/common/ui_setting_keys.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,6 +159,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 35,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -159,6 +175,8 @@
       "label": "AIAssistantManagementSelectionPluginPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+      "lineNumber": 37,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -176,6 +194,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -199,6 +219,8 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -213,6 +235,8 @@
             "() => void"
           ],
           "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],

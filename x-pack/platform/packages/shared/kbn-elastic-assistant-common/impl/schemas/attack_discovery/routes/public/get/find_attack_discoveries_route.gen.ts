@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../../../common_attributes.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery_api_alert.gen';
@@ -68,6 +68,10 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    * Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
    */
   shared: BooleanFromString.optional(),
+  /**
+   * Whether to filter by scheduled or ad-hoc attack discoveries. If omitted, both types of attack discoveries are returned. Use `true` to return only scheduled discoveries or `false` to return only ad-hoc discoveries.
+   */
+  scheduled: BooleanFromString.optional(),
   /**
    * Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
    */

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { IModel, OmitUpsertProps } from './core';
 import type { StreamQuery } from '../queries';
 import { streamQuerySchema } from '../queries';
@@ -14,10 +14,19 @@ import { modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BaseStream {
+  export interface QueryStreamReference {
+    name: string;
+  }
+
   export interface Definition {
     name: string;
     description: string;
     updated_at: string;
+    /**
+     * Child query streams that belong to this stream.
+     * Names must follow the parent.childname naming convention.
+     */
+    query_streams?: QueryStreamReference[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -48,7 +57,14 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   Definition: z.object({
     name: z.string(),
     description: z.string(),
-    updated_at: z.string().datetime(),
+    updated_at: z.iso.datetime(),
+    query_streams: z
+      .array(
+        z.object({
+          name: z.string(),
+        })
+      )
+      .optional(),
   }),
   Source: z.object({}),
   GetResponse: z.object({

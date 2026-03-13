@@ -9,7 +9,7 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
 import React from 'react';
-import type { TabularDataResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
@@ -24,7 +24,7 @@ export function VisualizeESQL({
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
-  esqlColumns: TabularDataResult['data']['columns'] | undefined;
+  esqlColumns: EsqlResults['data']['columns'] | undefined;
   uiActions: UiActionsStart;
   esqlQuery: string;
   preferredChartType?: ChartType;

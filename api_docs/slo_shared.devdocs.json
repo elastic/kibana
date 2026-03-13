@@ -23,6 +23,8 @@
       "label": "SloSharedPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/slo_shared/server/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -37,6 +39,8 @@
       "label": "SloSharedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/slo_shared/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -61,6 +65,8 @@
           "\"slo_template\""
         ],
         "path": "x-pack/platform/plugins/shared/slo_shared/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

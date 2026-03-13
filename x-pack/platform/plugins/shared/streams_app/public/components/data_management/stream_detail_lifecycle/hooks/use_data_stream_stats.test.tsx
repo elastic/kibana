@@ -38,6 +38,7 @@ const mockDefinition = {
   stream: {
     name: 'test-stream',
   },
+  index_mode: 'time_series',
   effective_failure_store: {
     lifecycle: {
       enabled: {
@@ -46,6 +47,7 @@ const mockDefinition = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const mockDataStreamStats = {
@@ -68,6 +70,17 @@ const mockTimestate = {
     mode: 'absolute',
   },
 } as TimeState;
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -104,18 +117,30 @@ beforeEach(() => {
         streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
       },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockUseTimefilter.mockReturnValue({
     timeState: {},
     timeState$: of({ kind: 'initial' }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   mockDataStreamsClient.getDataStreamsStats.mockResolvedValue({
     dataStreamsStats: [mockDataStreamStats],
   });
 
-  mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFailureStoreStats);
+  mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+    if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+      return Promise.resolve(mockFailureStoreStats);
+    }
+
+    if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+      return Promise.resolve({ timeSeriesCount: null });
+    }
+
+    return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+  });
 
   mockDataSearch.search.mockReturnValue(
     of({
@@ -152,6 +177,7 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2500000, // mockDataStreamStats.sizeBytes - mockFailureStoreStats.stats.size
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {
@@ -162,12 +188,73 @@ describe('useDataStreamStats', () => {
             creationDate: '2023-01-01T00:00:00Z',
             size: 50000,
             count: 100,
+            perDayDocs: 100,
           },
         },
       });
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeUndefined();
       expect(typeof result.current.refresh).toBe('function');
+    });
+
+    it('includes time series count when available', async () => {
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: 12 });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: mockDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats?.ds.stats.timeSeriesCount).toBe(12);
+      });
+    });
+
+    it('does not request time series count when index mode is not time_series', async () => {
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.reject(new Error('time series count should not be requested'));
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const nonTimeSeriesDefinition = {
+        ...mockDefinition,
+        index_mode: 'standard',
+      };
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: nonTimeSeriesDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      expect(result.current.stats?.ds.stats.timeSeriesCount).toBeUndefined();
+      expect(
+        mockStreamsRepositoryClient.fetch.mock.calls.map(([endpoint]) => endpoint)
+      ).not.toContain('GET /internal/streams/{name}/time_series/_count');
     });
 
     it('should handle zero documents gracefully', async () => {
@@ -181,9 +268,19 @@ describe('useDataStreamStats', () => {
         dataStreamsStats: [statsWithZeroDocs],
       });
 
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        ...mockFailureStoreStats,
-        stats: { ...mockFailureStoreStats.stats, count: 0, size: 0 },
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve({
+            ...mockFailureStoreStats,
+            stats: { ...mockFailureStoreStats.stats, count: 0, size: 0 },
+          });
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: null });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
       });
 
       mockDataSearch.search.mockReturnValue(
@@ -217,6 +314,7 @@ describe('useDataStreamStats', () => {
             size: '1.0 KB',
             sizeBytes: 1000,
             totalDocs: 0,
+            perDayDocs: 0,
           },
         },
         fs: {
@@ -227,14 +325,23 @@ describe('useDataStreamStats', () => {
             creationDate: '2023-01-01T00:00:00Z',
             size: 0,
             count: 0,
+            perDayDocs: 0,
           },
         },
       });
     });
 
     it('should handles disabled failure store', async () => {
-      mockStreamsRepositoryClient.fetch.mockResolvedValue({
-        stats: null,
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve({ stats: null });
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.resolve({ timeSeriesCount: null });
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
       });
 
       const definitionWithDisabledFS = {
@@ -244,6 +351,7 @@ describe('useDataStreamStats', () => {
         effective_failure_store: {
           disabled: {},
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const { result } = renderHook(() =>
@@ -266,6 +374,7 @@ describe('useDataStreamStats', () => {
             size: '2.5 MB',
             sizeBytes: 2550000,
             totalDocs: 500,
+            perDayDocs: 100,
           },
         },
         fs: {
@@ -334,6 +443,41 @@ describe('useDataStreamStats', () => {
       });
       expect(result.current.error).toBe(mockError);
     });
+
+    it('exposes time series count error without failing overall stats', async () => {
+      const countError = new Error('Failed to fetch time series count');
+
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return Promise.reject(countError);
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: mockDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      await waitFor(() => {
+        expect(result.current.timeSeriesCountError).toBe(countError);
+      });
+
+      expect(result.current.error).toBeUndefined();
+      expect(result.current.timeSeriesCountLoading).toBe(false);
+      expect(result.current.stats?.ds.stats.timeSeriesCount).toBeUndefined();
+    });
   });
 
   describe('loading states', () => {
@@ -349,6 +493,48 @@ describe('useDataStreamStats', () => {
       expect(result.current.stats).toBeUndefined();
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
+      });
+    });
+
+    it('exposes time series count loading state separately', async () => {
+      const deferred = createDeferred<{ timeSeriesCount: number }>();
+
+      mockStreamsRepositoryClient.fetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/{name}/failure_store/stats') {
+          return Promise.resolve(mockFailureStoreStats);
+        }
+
+        if (endpoint === 'GET /internal/streams/{name}/time_series/_count') {
+          return deferred.promise;
+        }
+
+        return Promise.reject(new Error(`Unexpected endpoint: ${endpoint}`));
+      });
+
+      const { result } = renderHook(() =>
+        useDataStreamStats({
+          definition: mockDefinition,
+          timeState: mockTimestate,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.stats).toBeDefined();
+      });
+
+      await waitFor(() => {
+        expect(result.current.timeSeriesCountLoading).toBe(true);
+      });
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.timeSeriesCountError).toBeUndefined();
+      expect(result.current.stats?.ds.stats.timeSeriesCount).toBeUndefined();
+
+      deferred.resolve({ timeSeriesCount: 12 });
+
+      await waitFor(() => {
+        expect(result.current.timeSeriesCountLoading).toBe(false);
+        expect(result.current.stats?.ds.stats.timeSeriesCount).toBe(12);
       });
     });
   });

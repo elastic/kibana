@@ -6,40 +6,37 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { get } from 'lodash';
-import type { FieldValues, ResolverOptions } from 'react-hook-form';
+import type { FieldErrors, FieldValues, Resolver } from 'react-hook-form';
 
-export const zodResolver =
-  <T extends FieldValues>(schema: z.ZodSchema<T>) =>
-  async (data: T, context: any, options: ResolverOptions<T>) => {
+export const zodResolver = <T extends FieldValues>(schema: z.ZodType): Resolver<T> => {
+  return async (data, _context, _options) => {
     try {
-      const values = await schema.parseAsync(data);
+      const values = (await schema.parseAsync(data)) as T;
       return {
         values,
-        errors: {},
+        errors: {} as FieldErrors<T>,
       };
     } catch (error: unknown) {
       if (!(error instanceof z.ZodError)) {
         throw error;
       }
-      const errors = error.issues.reduce<Record<string, { type: string; message: string }>>(
-        (errorMap, issue) => {
-          const path = issue.path.join('.');
-          if (!get(errorMap, path)) {
-            set(errorMap, path, {
-              type: issue.code,
-              message: issue.message,
-            });
-          }
-          return errorMap;
-        },
-        {}
-      );
+      const errors = error.issues.reduce<FieldErrors<T>>((errorMap, issue) => {
+        const path = issue.path.join('.');
+        if (!get(errorMap, path)) {
+          set(errorMap, path, {
+            type: issue.code,
+            message: issue.message,
+          });
+        }
+        return errorMap;
+      }, {} as FieldErrors<T>);
 
       return {
-        values: {},
+        values: {} as T,
         errors,
       };
     }
   };
+};

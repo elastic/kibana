@@ -403,6 +403,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           taskInstanceFields,
           cancellationToken,
           stream,
+          useInternalUser: task.useInternalUser,
         })
       ).pipe(timeout(this.queueTimeout)) // throw an error if a value is not emitted before timeout
     );

@@ -32,6 +32,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-try-in-console/components/try_in_console_button.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,6 +48,8 @@
               "TryInConsoleButtonProps"
             ],
             "path": "src/platform/packages/shared/kbn-try-in-console/components/try_in_console_button.tsx",
+            "lineNumber": 44,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

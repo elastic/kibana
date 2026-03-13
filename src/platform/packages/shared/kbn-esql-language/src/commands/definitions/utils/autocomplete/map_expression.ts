@@ -6,14 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { ISuggestionItem } from '../../../registry/types';
-import { findFinalWord, withAutoSuggest } from './helpers';
+import {
+  buildAddValuePlaceholder,
+  buildMapKeySuggestion,
+  type MapValueType,
+} from '../../../registry/complete_items';
+import { findFinalWord } from './helpers';
+import { getMapNestingLevel } from '../maps';
 
-type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+// Strip quoted segments so foo(bar) inside strings doesn't get picked as a function
+export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
+// Extracts all object keys from "key": patterns in JSON-like syntax
+export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
+
 export interface MapParameterValues {
   type: MapValueType;
+  rawType?: string;
   suggestions?: ISuggestionItem[];
+  description?: string;
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
@@ -42,43 +53,26 @@ export type MapParameters = Record<string, MapParameterValues>;
  */
 export function getCommandMapExpressionSuggestions(
   innerText: string,
-  availableParameters: MapParameters
+  availableParameters: MapParameters,
+  includePlaceholder = false
 ): ISuggestionItem[] {
   const finalWord = findFinalWord(innerText);
 
-  // Check if we're inside a nested map by counting braces
-  const openBraces = (innerText.match(/\{/g) || []).length;
-  const closeBraces = (innerText.match(/\}/g) || []).length;
-  const nestingLevel = openBraces - closeBraces;
-
   // Return no suggestions if we're inside a nested map (nesting level > 1)
-  if (nestingLevel > 1) {
+  if (getMapNestingLevel(innerText) > 1) {
     return [];
   }
-
   // Suggest a parameter entry after { or after a comma or when opening quotes after those
   if (/{\s*"?$/i.test(innerText) || /,\s*"?$/.test(innerText)) {
-    const usedParams = new Set<string>();
-    const regex = /"([^"]+)"\s*:/g;
-    let match;
-    while ((match = regex.exec(innerText)) !== null) {
-      usedParams.add(match[1]);
-    }
-
+    const usedParams = new Set([...innerText.matchAll(OBJECT_KEYS_REGEX)].map(([, name]) => name));
     const availableParamNames = Object.keys(availableParameters).filter(
       (paramName) => !usedParams.has(paramName)
     );
 
     return availableParamNames.map((paramName) => {
-      const valueSnippet = SNIPPET_BY_VALUE_TYPE[availableParameters[paramName].type];
-      return withAutoSuggest({
-        label: paramName,
-        kind: 'Constant',
-        asSnippet: true,
-        text: `"${paramName}": ${valueSnippet}`,
+      const { type, description } = availableParameters[paramName];
+      return buildMapKeySuggestion(paramName, type, description, {
         filterText: `"${paramName}`,
-        detail: paramName,
-        sortText: '1',
         rangeToReplace: {
           start: innerText.length - finalWord.length,
           end: innerText.length,
@@ -91,34 +85,35 @@ export function getCommandMapExpressionSuggestions(
   if (/:\s*"?[^"]*$/i.test(innerText)) {
     const match = innerText.match(/"([^"]+)"\s*:\s*"?[^"]*$/);
     const paramName = match ? match[1] : undefined;
+    const paramConfig = paramName ? availableParameters[paramName] : undefined;
 
-    if (paramName && availableParameters[paramName]) {
-      const paramType = availableParameters[paramName].type;
-      return (
-        availableParameters[paramName].suggestions?.map((suggestion) => {
-          if (paramType === 'string') {
-            return {
+    if (paramConfig) {
+      const { type, suggestions = [], description } = paramConfig;
+      const rangeToReplace = {
+        start: innerText.length - finalWord.length,
+        end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length,
+      };
+
+      const allSuggestions: ISuggestionItem[] = suggestions.map((suggestion) =>
+        type === 'string'
+          ? {
               ...suggestion,
+              detail: suggestion.detail || description,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
-              rangeToReplace: {
-                start: innerText.length - finalWord.length,
-                end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length, // to also replace the closing quote and avoid duplicate end quotes.
-              },
-            };
-          } else {
-            return suggestion;
-          }
-        }) ?? []
+              rangeToReplace,
+            }
+          : suggestion
       );
+
+      const isEmptyValue = finalWord === '' || finalWord === '"';
+      if (includePlaceholder && type !== 'boolean' && isEmptyValue) {
+        const placeholderType = type === 'number' ? 'number' : 'value';
+        allSuggestions.push(buildAddValuePlaceholder(placeholderType, { rangeToReplace }));
+      }
+
+      return allSuggestions;
     }
   }
   return [];
 }
-
-const SNIPPET_BY_VALUE_TYPE: Record<MapValueType, string> = {
-  string: '"$0"',
-  number: '',
-  boolean: '',
-  map: '{ $0 }',
-};

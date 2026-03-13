@@ -217,6 +217,76 @@ describe('generateOpenApiDocument', () => {
         )
       ).toMatchSnapshot();
     });
+
+    it('handles discriminator schemas', async () => {
+      const discriminatorSchema = schema.discriminatedUnion('type', [
+        schema.object(
+          { type: schema.literal('a'), value: schema.string() },
+          { meta: { id: 'my-a-my-team' } }
+        ),
+        schema.object(
+          { type: schema.literal('b'), value: schema.number() },
+          { meta: { id: 'my-b-my-team' } }
+        ),
+        schema.object(
+          { type: schema.string(), value: schema.boolean() },
+          { meta: { id: 'my-catch-all-my-team' } }
+        ),
+      ]);
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public' },
+                validationSchemas: {
+                  request: {
+                    body: discriminatorSchema,
+                  },
+                },
+                handler: jest.fn(),
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public', security: { authz: { requiredPrivileges: ['foo'] } } },
+                handlers: [
+                  {
+                    fn: jest.fn(),
+                    options: {
+                      version: '99.99.99',
+                      validate: { request: { body: discriminatorSchema } },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      expect(
+        await generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
   });
 
   describe('Zod', () => {

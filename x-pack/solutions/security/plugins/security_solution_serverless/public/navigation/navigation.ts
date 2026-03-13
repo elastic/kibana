@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import { ProductTier } from '../../common/product';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
 import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
@@ -20,7 +21,7 @@ export const registerSolutionNavigation = async (
   productTypes: SecurityProductTypes
 ) => {
   const shouldUseAINavigation = productTypes.some(
-    (productType) => productType.product_tier === ProductTier.searchAiLake
+    (productType) => productType.product_line === ProductLine.aiSoc
   );
 
   const chatExperience$ = services.settings.client.get$<AIChatExperience>(
@@ -31,13 +32,19 @@ export const registerSolutionNavigation = async (
   // Get initial chat experience for setting initial navigation tree
   const initialChatExperience = await firstValueFrom(chatExperience$);
 
+  const workflowsUiEnabled$ = services.settings.client.get$<boolean>(
+    WORKFLOWS_UI_SETTING_ID,
+    false
+  );
+  const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
+
+  const templatesEnabled = services.cases.config.templatesEnabled;
+
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience)
-    : await createNavigationTree(services, initialChatExperience);
+    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, templatesEnabled)
+    : await createNavigationTree(services, initialChatExperience, templatesEnabled);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree), {
-    dataTestSubj: 'securitySolutionSideNav',
-  });
+  services.serverless.initNavigation('security', Rx.of(navigationTree));
 };

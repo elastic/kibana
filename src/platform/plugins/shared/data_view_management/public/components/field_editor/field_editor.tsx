@@ -491,7 +491,13 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           />
         </EuiCallOut>
         <EuiSpacer size="m" />
-        <EuiBasicTable items={items} columns={columns} />
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          tableCaption={i18n.translate('indexPatternManagement.fieldTypeConflictTableCaption', {
+            defaultMessage: 'Indices listed by conflicting field type',
+          })}
+        />
         <EuiSpacer size="m" />
       </div>
     );

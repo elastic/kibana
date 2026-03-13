@@ -470,7 +470,7 @@ describe('Lens Attribute', () => {
           layerType: 'data',
           palette: undefined,
           seriesType: 'line',
-          splitAccessor: 'breakdown-column-layer0',
+          splitAccessors: ['breakdown-column-layer0'],
           xAccessor: 'x-axis-column-layer0',
           yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0-0', axisMode: 'left' }],
         },

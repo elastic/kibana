@@ -49,7 +49,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
@@ -61,7 +61,8 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -75,8 +76,9 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
-    parallelism: 20
+      diskSizeGb: 105
+    timeout_in_minutes: 75
+    parallelism: 22
     key: defend-workflows-stateful
     depends_on: build
     retry:
@@ -92,7 +94,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+      diskSizeGb: 105
+    timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
     depends_on: build

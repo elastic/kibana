@@ -62,6 +62,34 @@ export interface PersistableStateAttachmentViewProps extends CommonAttachmentVie
   persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
+/**
+ * View props for reference-based unified attachments (e.g., alerts, events)
+ * These attachments reference external entities by ID
+ */
+export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentViewProps {
+  attachmentId: string;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * View props for value-based unified attachments (e.g., lens, user comments)
+ * These attachments contain data/content directly
+ */
+export interface UnifiedValueAttachmentViewProps extends CommonAttachmentViewProps {
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * @deprecated Use UnifiedReferenceAttachmentViewProps or UnifiedValueAttachmentViewProps instead
+ * Kept for backward compatibility during migration
+ */
+export interface UnifiedAttachmentViewProps extends CommonAttachmentViewProps {
+  attachmentId: string;
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
 export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
@@ -72,6 +100,9 @@ export interface AttachmentType<Props> {
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
+export type UnifiedReferenceAttachmentType = AttachmentType<UnifiedReferenceAttachmentViewProps>;
+export type UnifiedValueAttachmentType = AttachmentType<UnifiedValueAttachmentViewProps>;
+export type UnifiedAttachmentType = UnifiedReferenceAttachmentType | UnifiedValueAttachmentType;
 
 export interface AttachmentFramework {
   registerExternalReference: (
@@ -79,5 +110,8 @@ export interface AttachmentFramework {
   ) => void;
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
+  ) => void;
+  registerUnified: (
+    unifiedAttachmentType: UnifiedReferenceAttachmentType | UnifiedValueAttachmentType
   ) => void;
 }

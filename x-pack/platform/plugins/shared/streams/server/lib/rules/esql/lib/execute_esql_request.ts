@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
 type Response = Array<{
   _id: string;
@@ -38,7 +39,7 @@ export const executeEsqlRequest = async ({
     ];
 
     if (sourceIndex === -1 || idIndex === -1) {
-      throw new Error('Invalid ES|QL response format: missing _source or _id column');
+      return [];
     }
 
     const results = values.map((row) => ({
@@ -48,7 +49,10 @@ export const executeEsqlRequest = async ({
 
     return results;
   } catch (error) {
-    logger.debug(`Error executing ES|QL request: ${error.message}`);
-    return [];
+    const message = `Error executing ES|QL request: ${
+      error instanceof Error ? error.message : String(error)
+    }`;
+    logger.debug(message);
+    throw createTaskRunError(new Error(message), TaskErrorSource.USER);
   }
 };

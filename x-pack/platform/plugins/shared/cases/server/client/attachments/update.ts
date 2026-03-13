@@ -7,18 +7,22 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRt } from '../../../common/types/api';
+import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
+import {
+  isCommentRequestTypeExternalReference,
+  isLegacyAttachmentRequest,
+} from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
+import { getCaseOwner } from './utils';
 
 /**
  * Update an attachment.
@@ -34,6 +38,7 @@ export async function update(
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -41,14 +46,18 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(queryParams);
+    } = decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(queryParams);
     await validateMaxUserActions({
       caseId: caseID,
       userActionService,
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
+    decodeCommentRequestV2(
+      queryRestAttributes,
+      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry
+    );
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
@@ -69,7 +78,12 @@ export async function update(
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
 
-    if (myComment.attributes.owner !== queryRestAttributes.owner) {
+    const caseOwner = await getCaseOwner(caseID, clientArgs);
+    const owner = isLegacyAttachmentRequest(queryRestAttributes)
+      ? queryRestAttributes.owner
+      : caseOwner;
+
+    if (myComment.attributes.owner !== owner) {
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 

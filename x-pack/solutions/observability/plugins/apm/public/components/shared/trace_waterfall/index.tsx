@@ -7,10 +7,15 @@
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { AutoSizer, WindowScroller } from 'react-virtualized';
-import type { ListChildComponentProps } from 'react-window';
-import { VariableSizeList as List, areEqual } from 'react-window';
+import React, { useCallback, useMemo, useRef } from 'react';
+import {
+  AutoSizer,
+  WindowScroller,
+  List,
+  CellMeasurerCache,
+  CellMeasurer,
+} from 'react-virtualized';
+import type { ListRowRenderer, ListRowProps } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { Error } from '@kbn/apm-types';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
@@ -40,6 +45,11 @@ export interface Props {
   isFiltered?: boolean;
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
+  children?: React.ReactNode;
+  entryTransactionId?: string;
 }
 
 export function TraceWaterfall({
@@ -57,6 +67,11 @@ export function TraceWaterfall({
   isFiltered,
   agentMarks,
   showCriticalPathControl = false,
+  showCriticalPath,
+  defaultShowCriticalPath,
+  onShowCriticalPathChange,
+  children,
+  entryTransactionId,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -74,10 +89,15 @@ export function TraceWaterfall({
       errors={errors}
       agentMarks={agentMarks}
       showCriticalPathControl={showCriticalPathControl}
+      showCriticalPath={showCriticalPath}
+      defaultShowCriticalPath={defaultShowCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
+      entryTransactionId={entryTransactionId}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
       </TraceWarning>
+      {children}
     </TraceWaterfallContextProvider>
   );
 }
@@ -106,45 +126,73 @@ function TraceWaterfallComponent() {
     return [...agentMarks, ...errorMarks];
   }, [agentMarks, errorMarks]);
 
+  const stickyTop = isEmbeddable
+    ? '0px'
+    : 'var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))';
+
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {showCriticalPathControl && (
         <EuiFlexItem>
           <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
         </EuiFlexItem>
       )}
-      {showLegend && serviceName && (
-        <EuiFlexItem>
-          <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem>
         <div style={{ position: 'relative' }}>
-          <div
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
             css={css`
-              display: flex;
               position: sticky;
-              top: ${isEmbeddable ? '0px' : 'var(--euiFixedHeadersOffset, 0)'};
+              top: ${stickyTop};
               z-index: ${euiTheme.levels.menu};
               background-color: ${euiTheme.colors.emptyShade};
               border-bottom: ${euiTheme.border.thin};
             `}
           >
-            {showAccordion && (
-              <WaterfallAccordionButton isOpen={isAccordionOpen} onClick={toggleAllAccordions} />
+            {showLegend && serviceName && (
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  padding-top: ${euiTheme.size.base};
+                `}
+              >
+                <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+              </EuiFlexItem>
             )}
-            <TimelineAxisContainer
-              xMax={duration}
-              margins={{
-                top: 40,
-                left,
-                right,
-                bottom: 0,
-              }}
-              numberOfTicks={3}
-              marks={marks}
-            />
-          </div>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  position: relative;
+                `}
+              >
+                {showAccordion && (
+                  <EuiFlexItem grow={false}>
+                    <WaterfallAccordionButton
+                      isOpen={isAccordionOpen}
+                      onClick={toggleAllAccordions}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem>
+                  <TimelineAxisContainer
+                    xMax={duration}
+                    margins={{
+                      top: 40,
+                      left,
+                      right,
+                      bottom: 0,
+                    }}
+                    numberOfTicks={3}
+                    marks={marks}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <VerticalLinesContainer
             xMax={duration}
             margins={{
@@ -178,53 +226,64 @@ function TraceTree() {
   } = useTraceWaterfallContext();
 
   const listRef = useRef<List>(null);
-  const rowSizeMapRef = useRef(new Map<number, number>());
 
-  const onRowLoad = (index: number, size: number) => {
-    rowSizeMapRef.current.set(index, size);
-  };
-
-  const getRowSize = (index: number) => {
-    return rowSizeMapRef.current.get(index) || ACCORDION_HEIGHT + BORDER_THICKNESS;
-  };
-
-  const onScroll = ({ scrollTop }: { scrollTop: number }) => {
-    listRef.current?.scrollTo(scrollTop);
-  };
+  const rowHeightCache = useRef(
+    new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: ACCORDION_HEIGHT + BORDER_THICKNESS,
+    })
+  );
 
   const visibleList = useMemo(
     () => convertTreeToList(traceWaterfallMap, accordionStatesMap, traceWaterfall[0]),
     [accordionStatesMap, traceWaterfall, traceWaterfallMap]
   );
 
+  const rowRenderer: ListRowRenderer = useCallback(
+    ({ index, style, key, parent }) => {
+      const item = visibleList[index];
+      const children = traceWaterfallMap[item.id] || [];
+
+      return (
+        <VirtualRow
+          key={key}
+          index={index}
+          style={style}
+          parent={parent}
+          rowHeightCache={rowHeightCache.current}
+          item={item}
+          childrenCount={children.length}
+          accordionState={accordionStatesMap[item.id] || 'open'}
+          onToggle={toggleAccordionState}
+        />
+      );
+    },
+    [visibleList, traceWaterfallMap, accordionStatesMap, toggleAccordionState]
+  );
+
   return (
     <WindowScroller
-      onScroll={onScroll}
       scrollElement={
         scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
       }
     >
-      {({ registerChild }) => (
+      {({ height, isScrolling, onChildScroll, scrollTop, registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
             <div data-test-subj="waterfall" ref={registerChild}>
               <List
                 ref={listRef}
-                style={{ height: '100%' }}
-                itemCount={visibleList.length}
-                itemSize={getRowSize}
-                height={window.innerHeight}
+                autoHeight
+                height={height}
+                isScrolling={isScrolling}
+                onScroll={onChildScroll}
+                scrollTop={scrollTop}
                 width={width}
-                itemData={{
-                  traceList: visibleList,
-                  onLoad: onRowLoad,
-                  traceWaterfallMap,
-                  accordionStatesMap,
-                  toggleAccordionState,
-                }}
-              >
-                {VirtualRow}
-              </List>
+                rowCount={visibleList.length}
+                deferredMeasurementCache={rowHeightCache.current}
+                rowHeight={rowHeightCache.current.rowHeight}
+                rowRenderer={rowRenderer}
+              />
             </div>
           )}
         </AutoSizer>
@@ -233,41 +292,38 @@ function TraceTree() {
   );
 }
 
-const VirtualRow = React.memo(
-  ({
-    index,
-    style,
-    data,
-  }: ListChildComponentProps<{
-    traceList: TraceWaterfallItem[];
-    traceWaterfallMap: Record<string, TraceWaterfallItem[]>;
-    accordionStatesMap: Record<string, EuiAccordionProps['forceState']>;
-    toggleAccordionState: (id: string) => void;
-    onLoad: (index: number, size: number) => void;
-  }>) => {
-    const { onLoad, traceList, accordionStatesMap, toggleAccordionState, traceWaterfallMap } = data;
+interface VirtualRowProps extends Pick<ListRowProps, 'index' | 'style' | 'parent'> {
+  rowHeightCache: CellMeasurerCache;
+  item: TraceWaterfallItem;
+  childrenCount: number;
+  accordionState: EuiAccordionProps['forceState'];
+  onToggle: (id: string) => void;
+}
 
-    const ref = React.useRef<HTMLDivElement | null>(null);
-    useEffect(() => {
-      onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
-    }, [index, onLoad]);
-
-    const item = traceList[index];
-    const children = traceWaterfallMap[item.id] || [];
-    return (
-      <div style={style} ref={ref}>
+function VirtualRow({
+  index,
+  style,
+  parent,
+  rowHeightCache,
+  item,
+  childrenCount,
+  accordionState,
+  onToggle,
+}: VirtualRowProps) {
+  return (
+    <CellMeasurer cache={rowHeightCache} parent={parent} rowIndex={index}>
+      <div style={style}>
         <TraceItemRow
           key={item.id}
           item={item}
-          childrenCount={children.length}
-          state={accordionStatesMap[item.id] || 'open'}
-          onToggle={toggleAccordionState}
+          childrenCount={childrenCount}
+          state={accordionState}
+          onToggle={onToggle}
         />
       </div>
-    );
-  },
-  areEqual
-);
+    </CellMeasurer>
+  );
+}
 
 export function convertTreeToList(
   treeMap: Record<string, TraceWaterfallItem[]>,

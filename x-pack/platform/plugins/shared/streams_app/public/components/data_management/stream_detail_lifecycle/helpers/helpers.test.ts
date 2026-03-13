@@ -103,6 +103,7 @@ describe('helpers', () => {
         cold: { name: 'cold', min_age: '7d' },
         frozen: { name: 'frozen', min_age: '30d' },
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -122,6 +123,7 @@ describe('helpers', () => {
         cold: { name: 'cold', min_age: '7d' },
         frozen: undefined,
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -139,6 +141,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: undefined,
         delete: undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -154,6 +157,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: undefined,
         delete: undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -168,6 +172,7 @@ describe('helpers', () => {
         cold: undefined,
         frozen: { name: 'frozen', min_age: '30d' },
         delete: { name: 'delete', min_age: '365d' },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const result = orderIlmPhases(phases);
@@ -180,8 +185,12 @@ describe('helpers', () => {
   });
 
   describe('getILMRatios', () => {
-    it('should return undefined if no phases', () => {
+    it('should return undefined if phases is undefined', () => {
       expect(getILMRatios(undefined)).toBeUndefined();
+    });
+
+    it('should return undefined if phases is an empty object', () => {
+      expect(getILMRatios({ phases: {} })).toBeUndefined();
     });
 
     it('should calculate grow ratios correctly for multiple phases', () => {
@@ -195,15 +204,15 @@ describe('helpers', () => {
       const result = getILMRatios({ phases });
 
       expect(result).toHaveLength(4);
-      // Phases are reversed: delete(30d), cold(7d), warm(1d), hot(0ms)
-      // totalDuration = 30d = 2592000s
-      expect(result?.[0]).toMatchObject({ name: 'delete', grow: false });
-      // cold: duration = 30d - 7d = 23d = 1987200s, grow = Math.max(2, Math.round((1987200/2592000)*10)) = 8
-      expect(result?.[1]).toMatchObject({ name: 'cold', grow: 8 });
-      // warm: duration = 7d - 1d = 6d = 518400s, grow = Math.max(2, Math.round((518400/2592000)*10)) = 2
-      expect(result?.[2]).toMatchObject({ name: 'warm', grow: 2 });
+      // Phases order is: hot(0ms), warm(1d), cold(7d), delete(30d)
       // hot: duration = 1d - 0 = 1d = 86400s, grow = Math.max(2, Math.round((86400/2592000)*10)) = 2 (Math.max with 2)
-      expect(result?.[3]).toMatchObject({ name: 'hot', grow: 2 });
+      expect(result?.[0]).toMatchObject({ name: 'hot', grow: 2 });
+      // warm: duration = 7d - 1d = 6d = 518400s, grow = Math.max(2, Math.round((518400/2592000)*10)) = 2
+      expect(result?.[1]).toMatchObject({ name: 'warm', grow: 2 });
+      // cold: duration = 30d - 7d = 23d = 1987200s, grow = Math.max(2, Math.round((1987200/2592000)*10)) = 8
+      expect(result?.[2]).toMatchObject({ name: 'cold', grow: 8 });
+      // totalDuration = 30d = 2592000s
+      expect(result?.[3]).toMatchObject({ name: 'delete', grow: false });
     });
 
     it('should assign default grow value for single phase', () => {
@@ -227,14 +236,14 @@ describe('helpers', () => {
       const result = getILMRatios({ phases });
 
       expect(result).toHaveLength(3);
-      // Phases are reversed: cold(0d), warm(0d), hot(0ms)
+      // Phases order is: hot(0ms), warm(0d), cold(0d)
       // totalDuration = 0 (all phases have 0 min_age)
-      // cold is first, no prevPhase, so grow = 2 (not delete phase)
-      expect(result?.[0]).toMatchObject({ name: 'cold', grow: 2 });
+      // hot is first, no prevPhase, so grow = 2 (not delete phase)
+      expect(result?.[0]).toMatchObject({ name: 'hot', grow: 2 });
       // warm: duration diff = 0, totalDuration = 0, ternary returns 2
       expect(result?.[1]).toMatchObject({ name: 'warm', grow: 2 });
-      // hot: duration diff = 0, totalDuration = 0, ternary returns 2
-      expect(result?.[2]).toMatchObject({ name: 'hot', grow: 2 });
+      // cold: duration diff = 0, totalDuration = 0, ternary returns 2
+      expect(result?.[2]).toMatchObject({ name: 'cold', grow: 2 });
     });
   });
 });

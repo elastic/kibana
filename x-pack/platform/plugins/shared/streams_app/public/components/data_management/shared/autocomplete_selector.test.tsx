@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import { AutocompleteSelector } from './autocomplete_selector';
 
 jest.mock('@kbn/react-field', () => ({
@@ -264,6 +265,73 @@ describe('AutocompleteSelector', () => {
       expect(screen.queryByTestId('field-icon-keyword')).not.toBeInTheDocument();
       expect(screen.queryByTestId('field-icon-text')).not.toBeInTheDocument();
       expect(screen.queryByTestId('field-icon-unknown')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Prepend Element', () => {
+    it('does not render prepend element when not provided', () => {
+      render(<AutocompleteSelector {...defaultProps} />);
+
+      expect(screen.queryByTestId('test-prepend-element')).not.toBeInTheDocument();
+    });
+
+    it('renders prepend element when provided', () => {
+      const prependElement = (
+        <span data-test-subj="test-prepend-element">Prepend</span>
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
+      render(<AutocompleteSelector {...defaultProps} prepend={prependElement} />);
+
+      expect(screen.getByTestId('test-prepend-element')).toBeInTheDocument();
+      expect(screen.getByText('Prepend')).toBeInTheDocument();
+    });
+
+    it('renders checkbox as prepend element', () => {
+      const prependCheckbox = (
+        <input
+          type="checkbox"
+          data-test-subj="test-prepend-checkbox"
+          defaultChecked
+          aria-label="Test checkbox"
+        />
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
+      render(<AutocompleteSelector {...defaultProps} prepend={prependCheckbox} />);
+
+      const checkbox = screen.getByTestId('test-prepend-checkbox') as HTMLInputElement;
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('allows interaction with prepended checkbox while using combobox', async () => {
+      const handleCheckboxChange = jest.fn();
+      const handleComboboxChange = jest.fn();
+
+      const prependCheckbox = (
+        <input
+          type="checkbox"
+          data-test-subj="test-prepend-checkbox"
+          onChange={handleCheckboxChange}
+          aria-label="Test checkbox"
+        />
+      ) as unknown as EuiComboBoxProps<string>['prepend'];
+
+      render(
+        <AutocompleteSelector
+          {...defaultProps}
+          prepend={prependCheckbox}
+          onChange={handleComboboxChange}
+        />
+      );
+
+      // Click the checkbox
+      const checkbox = screen.getByTestId('test-prepend-checkbox');
+      await userEvent.click(checkbox);
+      expect(handleCheckboxChange).toHaveBeenCalled();
+
+      // Also ensure combobox still works
+      const input = screen.getByTestId('comboBoxSearchInput');
+      await userEvent.type(input, 'test-value');
+      await userEvent.keyboard('{Enter}');
+      expect(handleComboboxChange).toHaveBeenCalledWith('test-value');
     });
   });
 });

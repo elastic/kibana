@@ -7,7 +7,7 @@
 
 import type { ChangePointType } from '@kbn/es-types/src';
 
-interface ChangePointDetails {
+export interface ChangePointDetails {
   change_point?: number;
   r_value?: number;
   trend?: string;

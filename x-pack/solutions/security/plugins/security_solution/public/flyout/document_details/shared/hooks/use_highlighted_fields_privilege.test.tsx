@@ -41,7 +41,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     jest.clearAllMocks();
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...getUserPrivilegesMockDefaultValue(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: { rules: { read: true, edit: true } },
     });
     (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
     (hasMlLicense as jest.Mock).mockReturnValue(false);
@@ -71,7 +71,7 @@ describe('useHighlightedFieldsPrivilege', () => {
   it('should return isDisabled as true when user does not have CRUD privileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...getUserPrivilegesMockDefaultValue(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: { rules: { read: true, edit: false } },
     });
     const { result } = renderUseHighlightedFieldsPrivilege(defaultProps);
     expect(result.current.isDisabled).toBe(true);

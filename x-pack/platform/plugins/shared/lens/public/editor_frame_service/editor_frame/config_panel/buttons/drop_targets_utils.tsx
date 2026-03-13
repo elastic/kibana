@@ -32,6 +32,18 @@ export function onDropForVisualization<T, P = unknown, E = unknown>(
 
   const previousColumn =
     isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
+  if (isOperation(source) && dropType === 'reorder') {
+    return (
+      activeVisualization.reorderDimension?.({
+        columnId: source.columnId,
+        groupId,
+        layerId,
+        prevState,
+        targetColumnId: target.columnId,
+        frame,
+      }) ?? prevState
+    );
+  }
 
   let newVisState = activeVisualization.setDimension({
     columnId,

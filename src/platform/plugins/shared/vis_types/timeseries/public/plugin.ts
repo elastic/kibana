@@ -15,13 +15,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisTypeTimeseriesPublicConfig } from '../server/config';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
@@ -37,7 +38,7 @@ import {
   setDataViewsStart,
   setCharts,
   setUsageCollectionStart,
-  setUnifiedSearchStart,
+  setKqlStart,
 } from './services';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 import { CREATE_TSVB_PANEL } from './add_tsvb_panel_action';
@@ -55,7 +56,7 @@ export interface MetricsPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
   usageCollection: UsageCollectionStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
 }
@@ -66,7 +67,7 @@ export interface TimeseriesVisDependencies extends Partial<CoreStart> {
   http: HttpSetup;
   timefilter: TimefilterContract;
   appName: string;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   notifications: CoreStart['notifications'];
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
@@ -109,7 +110,7 @@ export class MetricsPlugin implements Plugin<void, void> {
       dataViews,
       usageCollection,
       fieldFormats,
-      unifiedSearch,
+      kql,
       uiActions,
       embeddable,
     }: MetricsPluginStartDependencies
@@ -118,7 +119,7 @@ export class MetricsPlugin implements Plugin<void, void> {
     setI18n(core.i18n);
     setFieldFormats(fieldFormats);
     setDataStart(data);
-    setUnifiedSearchStart(unifiedSearch);
+    setKqlStart(kql);
     setDataViewsStart(dataViews);
     setCoreStart(core);
     setUsageCollectionStart(usageCollection);

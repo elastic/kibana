@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 import {
   createTaskRunError,
   getErrorSource,
@@ -50,6 +52,24 @@ describe('Error Types', () => {
 
     it('getErrorSource return undefined when there is no source data', () => {
       expect(getErrorSource(new Error('OMG'))).toBeUndefined();
+    });
+
+    it('getErrorSource return USER for authentication response errors', () => {
+      const error = new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('getErrorSource return undefined for non-authentication response errors', () => {
+      const error = new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 404,
+      });
+      expect(getErrorSource(error)).toBe(undefined);
     });
   });
 });

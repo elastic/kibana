@@ -14,7 +14,7 @@ describe('StorageSizeCard', () => {
     render(
       <StorageSizeCard
         hasPrivileges={true}
-        stats={{ size: 2048, count: 321, bytesPerDay: 0, bytesPerDoc: 0 }}
+        stats={{ size: 2048, count: 321, bytesPerDay: 0, bytesPerDoc: 0, perDayDocs: 0 }}
       />
     );
     expect(screen.getByTestId('failureStoreStorageSize-title')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('StorageSizeCard', () => {
     render(
       <StorageSizeCard
         hasPrivileges={true}
-        stats={{ size: 4096, count: 10, bytesPerDay: 0, bytesPerDoc: 0 }}
+        stats={{ size: 4096, count: 10, bytesPerDay: 0, bytesPerDoc: 0, perDayDocs: 0 }}
         statsError={new Error('boom')}
       />
     );
@@ -57,7 +57,7 @@ describe('StorageSizeCard', () => {
     render(
       <StorageSizeCard
         hasPrivileges={false}
-        stats={{ size: 100, count: 5, bytesPerDay: 0, bytesPerDoc: 0 }}
+        stats={{ size: 100, count: 5, bytesPerDay: 0, bytesPerDoc: 0, perDayDocs: 0 }}
       />
     );
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
@@ -65,6 +65,7 @@ describe('StorageSizeCard', () => {
   });
 
   it('shows dash if size present but count missing', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     render(<StorageSizeCard hasPrivileges={true} stats={{ size: 512 } as any} />);
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toHaveTextContent(/512(\.0)?\s?B/);

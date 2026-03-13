@@ -15,6 +15,7 @@ import { AttachmentGetter } from './get';
 import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
 import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common';
+import type { ConfigType } from '../../../config';
 
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -31,6 +32,7 @@ describe('AttachmentService getter', () => {
       log: mockLogger,
       persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
+      config: {} as ConfigType,
     });
   });
 

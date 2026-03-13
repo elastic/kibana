@@ -23,8 +23,8 @@ import {
   euiYScroll,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isMac } from '@kbn/shared-ux-utility';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
 const listItems = [
@@ -110,6 +110,7 @@ export function KeyboardShortcuts() {
               data-test-subj="editorKeyboardShortcutsButton"
               onClick={() => setIsOpen(!isOpen)}
               aria-label={label}
+              color="text"
             />
           </EuiToolTip>
         }

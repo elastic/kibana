@@ -19,7 +19,7 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type { GaugeState, LensApiState } from '../../schema';
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
@@ -252,7 +252,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

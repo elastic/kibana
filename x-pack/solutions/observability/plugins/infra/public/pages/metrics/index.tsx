@@ -22,7 +22,7 @@ import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observ
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { HelpCenterContent } from '../../components/help_center_content';
+import { InspectorHeaderLink } from '../../components/inspector_header_link';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
@@ -83,12 +83,6 @@ export const InfrastructurePage = () => {
         <AlertPrefillProvider>
           <ReloadRequestTimeProvider>
             <InfraMLCapabilitiesProvider>
-              <HelpCenterContent
-                feedbackLink="https://discuss.elastic.co/c/metrics"
-                appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                  defaultMessage: 'Metrics',
-                })}
-              />
               {setHeaderActionMenu && theme$ && (
                 <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                   <EuiFlexGroup responsive={false} gutterSize="s">
@@ -110,6 +104,7 @@ export const InfrastructurePage = () => {
                         <EuiHeaderLink color={'primary'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
+                        <InspectorHeaderLink />
                         <Routes>
                           <HeaderLinkAddDataRoute
                             path="/hosts"

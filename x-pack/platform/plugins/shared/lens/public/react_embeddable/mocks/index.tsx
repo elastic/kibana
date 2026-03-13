@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -22,7 +22,6 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
 import type {
   Datasource,
   DatasourceMap,
@@ -180,6 +179,9 @@ export function makeEmbeddableServices(
     visualizations: visualizationsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    eventAnnotationService: {
+      annotationGroupUpdated$: NEVER,
+    } as unknown as LensEmbeddableStartServices['eventAnnotationService'],
     timefilter: services.data.query.timefilter.timefilter,
     coreHttp: services.http,
     coreStart: coreMock.createStart(),
@@ -199,29 +201,8 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
-    },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
-}
-
-export function mockDynamicActionsManager() {
-  return {
-    api: {
-      enhancements: { dynamicActions: {} },
-      setDynamicActions: jest.fn(),
-      dynamicActionsState$: {},
-    } as unknown as EmbeddableDynamicActionsManager['api'],
-    anyStateChange$: of(undefined),
-    comparators: {
-      enhancements: jest.fn(),
-    },
-    getLatestState: jest.fn(),
-    serializeState: jest.fn(),
-    reinitializeState: jest.fn(),
-    startDynamicActions: jest.fn(),
-  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (

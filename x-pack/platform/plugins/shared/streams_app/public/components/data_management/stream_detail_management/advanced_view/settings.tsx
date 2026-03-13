@@ -150,11 +150,10 @@ export function Settings({
 
       refreshDefinition();
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.settings.failedToUpdateSettings', {
           defaultMessage: 'Failed to update settings',
         }),
-        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setIsUpdating(false);

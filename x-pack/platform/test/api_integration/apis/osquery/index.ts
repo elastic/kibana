@@ -10,5 +10,11 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Osquery Endpoints', () => {
     loadTestFile(require.resolve('./packs'));
+    loadTestFile(require.resolve('./assets'));
+    loadTestFile(require.resolve('./fleet_wrapper'));
+    loadTestFile(require.resolve('./saved_queries'));
+    loadTestFile(require.resolve('./privileges_check'));
+    loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./live_queries'));
   });
 }

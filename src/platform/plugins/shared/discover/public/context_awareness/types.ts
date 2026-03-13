@@ -21,9 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -32,7 +30,11 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
+
+export type UpdateESQLQueryFn = (
+  queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
+) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -133,7 +135,7 @@ export interface ChartSectionConfigurationExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
 }
 
@@ -179,6 +181,28 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
+}
+
+/**
+ * Parameters passed to the additional cell actions extension
+ */
+export interface AdditionalCellActionsParams {
+  /**
+   * Available actions for the additional cell actions extension
+   */
+  actions?: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+  };
 }
 
 /**
@@ -197,7 +221,7 @@ export interface DocViewerExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
   };
   /**
    * The record being displayed in the doc viewer
@@ -265,6 +289,16 @@ export interface DefaultAppStateExtension {
 }
 
 /**
+ * Supports setting a default ES|QL query when Discover starts in ES|QL mode
+ */
+export interface DefaultEsqlQueryConfig {
+  /**
+   * The ES|QL query string to use as the default
+   */
+  query: string;
+}
+
+/**
  * Parameters passed to the modified vis attributes extension
  */
 export interface ModifiedVisAttributesExtensionParams {
@@ -312,7 +346,7 @@ export interface RowControlsExtensionParams {
     /**
      * Updates the current ES|QL query
      */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    updateESQLQuery?: UpdateESQLQueryFn;
     /**
      * Sets the expanded document, which is displayed in a flyout
      * @param record - The record to display in the flyout
@@ -329,11 +363,6 @@ export interface RowControlsExtensionParams {
    */
   query?: DiscoverAppState['query'];
 }
-
-/**
- * The Discover cell actions trigger
- */
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 /**
  * Metadata passed to Discover cell actions
@@ -422,14 +451,6 @@ export interface Profile {
    */
 
   /**
-   * Render a custom wrapper component around the Discover application,
-   * e.g. to allow using profile specific context providers
-   * @param props The app wrapper props
-   * @returns The custom app wrapper component
-   */
-  getRenderAppWrapper: FunctionComponent<PropsWithChildren<{}>>;
-
-  /**
    * Gets default Discover app state that should be used when the profile is resolved
    * @param params The default app state extension parameters
    * @returns The default app state
@@ -444,6 +465,16 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Gets the default ES|QL query that should be used when Discover starts in ES|QL mode.
+   *
+   * This extension point is evaluated on Discover app initialization and is resolved from the
+   * root profile only.
+   *
+   * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
+   */
+  getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
 
   /**
    * Chart
@@ -499,7 +530,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: () => AdditionalCellAction[];
+  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration
@@ -531,7 +562,11 @@ export interface Profile {
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */

@@ -14,6 +14,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { CasesSearchRequest } from '../../common/types/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
@@ -23,12 +24,15 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
   AlertService,
+  TemplatesService,
 } from '../services';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
+import type { ConfigType } from '../config';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -39,6 +43,7 @@ export interface CasesServices {
   attachmentService: AttachmentService;
   licensingService: LicensingService;
   notificationService: NotificationService;
+  templatesService: TemplatesService;
 }
 
 /**
@@ -54,11 +59,14 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  readonly unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
   readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
   readonly fileService: FileServiceStart;
+  readonly usageCounter?: IUsageCounter;
+  readonly config: ConfigType;
 }
 
 export type CasesSearchParams = Partial<

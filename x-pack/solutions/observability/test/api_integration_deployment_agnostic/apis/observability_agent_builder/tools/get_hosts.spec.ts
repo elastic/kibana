@@ -6,15 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, InfraSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type ApmSynthtraceEsClient,
+  type InfraSynthtraceEsClient,
+  generateHostsData,
+  indexAll,
+} from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { GetHostsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_hosts/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticInfraData, type HostConfig } from '../utils/synthtrace_scenarios';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_HOSTS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -25,31 +31,39 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      const testHosts: HostConfig[] = [
-        {
-          name: 'test-host-01',
-          cpuUsage: 0.65,
-          memoryUsage: 0.72,
-          diskUsage: 0.45,
-          cloudProvider: 'aws',
-          cloudRegion: 'us-east-1',
-          services: ['payment-service', 'user-service'],
-        },
-        {
-          name: 'test-host-02',
-          cpuUsage: 0.35,
-          memoryUsage: 0.85,
-          diskUsage: 0.68,
-          cloudProvider: 'gcp',
-          cloudRegion: 'us-central1',
-          services: ['order-service'],
-        },
-      ];
+      infraSynthtraceEsClient = synthtrace.createInfraSynthtraceEsClient();
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-      ({ infraSynthtraceEsClient, apmSynthtraceEsClient } = await createSyntheticInfraData({
-        getService,
-        hosts: testHosts,
-      }));
+      await infraSynthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
+
+      await indexAll(
+        generateHostsData({
+          range: timerange('now-15m', 'now'),
+          infraEsClient: infraSynthtraceEsClient,
+          apmEsClient: apmSynthtraceEsClient,
+          hosts: [
+            {
+              name: 'test-host-01',
+              cpuUsage: 0.65,
+              memoryUsage: 0.72,
+              diskUsage: 0.45,
+              cloudProvider: 'aws',
+              cloudRegion: 'us-east-1',
+              services: ['payment-service', 'user-service'],
+            },
+            {
+              name: 'test-host-02',
+              cpuUsage: 0.35,
+              memoryUsage: 0.85,
+              diskUsage: 0.68,
+              cloudProvider: 'gcp',
+              cloudRegion: 'us-central1',
+              services: ['order-service'],
+            },
+          ],
+        })
+      );
     });
 
     after(async () => {

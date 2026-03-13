@@ -6,15 +6,20 @@
  */
 
 import type { MaintenanceWindowAttributes } from '../../data/types/maintenance_window_attributes';
+import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 import type { MaintenanceWindowWithoutComputedProperties } from '../types';
 
 export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
   maintenanceWindow: MaintenanceWindowWithoutComputedProperties
 ): MaintenanceWindowAttributes => {
+  const durationInMilliseconds = getDurationInMilliseconds(
+    maintenanceWindow.schedule.custom.duration
+  );
+
   return {
     title: maintenanceWindow.title,
     enabled: maintenanceWindow.enabled,
-    duration: maintenanceWindow.duration,
+    duration: durationInMilliseconds,
     expirationDate: maintenanceWindow.expirationDate,
     events: maintenanceWindow.events,
     rRule: maintenanceWindow.rRule,
@@ -33,6 +38,20 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
               filters: maintenanceWindow?.scopedQuery?.filters ?? [],
               kql: maintenanceWindow?.scopedQuery?.kql ?? '',
               dsl: maintenanceWindow?.scopedQuery?.dsl ?? '',
+            },
+          }
+      : {}),
+    schedule: maintenanceWindow.schedule,
+    ...(maintenanceWindow.scope !== undefined
+      ? maintenanceWindow.scope == null
+        ? { scope: maintenanceWindow.scope }
+        : {
+            scope: {
+              alerting: {
+                filters: maintenanceWindow.scope.alerting?.filters ?? [],
+                kql: maintenanceWindow.scope.alerting?.kql ?? '',
+                dsl: maintenanceWindow.scope.alerting?.dsl ?? '',
+              },
             },
           }
       : {}),

@@ -7,3 +7,5 @@ xpack.cloud.serverless.product_tier: essentials
 workflowsManagement.enabled: false
 workflowsExecutionEngine.enabled: false
 
+### Agent Builder should not be enabled in this tier
+xpack.agentBuilder.enabled: false

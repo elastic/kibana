@@ -10,5 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 
+/** The request body type for searching dashboards. */
 export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
+/** The response body type for searching dashboards. */
 export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;

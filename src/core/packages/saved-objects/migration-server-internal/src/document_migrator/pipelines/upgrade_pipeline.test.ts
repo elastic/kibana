@@ -199,7 +199,7 @@ describe('DocumentMigratorPipeline', () => {
       });
 
       expect(() => pipeline.run()).toThrowErrorMatchingInlineSnapshot(
-        `"Document \\"foo-1\\" belongs to a more recent version of Kibana [8.9.0] when the last known version is [8.8.0]."`
+        `"Document \\"foo-1\\" of type 'foo' belongs to a more recent version of Kibana [8.9.0] when the last known version is [8.8.0]."`
       );
     });
 

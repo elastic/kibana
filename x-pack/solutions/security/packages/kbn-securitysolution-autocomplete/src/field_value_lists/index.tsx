@@ -12,7 +12,7 @@ import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { getDocLinks } from '@kbn/doc-links';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
@@ -60,6 +60,8 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
   'aria-label': ariaLabel,
   showValueListModal,
 }): JSX.Element => {
+  const { docLinks } = useKibana().services;
+
   const [error, setError] = useState<string | undefined>(undefined);
   const [listData, setListData] = useState<AutocompleteListsData>({
     smallLists: [],
@@ -138,12 +140,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
             <EuiLink
               external
               target="_blank"
-              href={
-                getDocLinks({
-                  kibanaBranch: 'main',
-                  buildFlavor: 'traditional',
-                }).securitySolution.exceptions.value_lists
-              }
+              href={docLinks?.links.securitySolution.exceptions.value_lists}
             >
               {i18n.SEE_DOCUMENTATION}
             </EuiLink>
@@ -151,7 +148,8 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         )}
       </>
     );
-  }, [allowLargeValueLists, selectedValue, ShowValueListModal]);
+  }, [allowLargeValueLists, selectedValue, ShowValueListModal, docLinks]);
+
   return (
     <EuiFormRow
       label={rowLabel}

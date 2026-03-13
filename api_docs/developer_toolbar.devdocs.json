@@ -18,6 +18,8 @@
         "DeveloperToolbarItemRegistry"
       ],
       "path": "src/platform/plugins/shared/developer_toolbar/public/plugin.tsx",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -41,6 +43,8 @@
           "{ readonly enabled: boolean; }"
         ],
         "path": "src/platform/plugins/shared/developer_toolbar/server/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

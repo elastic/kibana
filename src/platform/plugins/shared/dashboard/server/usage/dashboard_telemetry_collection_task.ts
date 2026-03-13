@@ -21,13 +21,14 @@ import type {
   SavedObjectAccessControl,
   SavedObjectReference,
 } from '@kbn/core/server';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import type { LegacyStoredPinnedControlState } from '@kbn/controls-schemas';
 
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import {
-  controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   collectSectionsAndAccessControl,
+  collectPinnedControls,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
@@ -95,18 +96,20 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardHit[]) => {
           for (const dashboard of dashboards) {
             dashboardData = collectSectionsAndAccessControl(dashboard, dashboardData);
-            dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
-
               collectPanelsByType(panels, dashboardData, embeddable);
+
+              const controls = JSON.parse(
+                dashboard.attributes.controlGroupInput?.panelsJSON as string
+              ) as unknown as LegacyStoredPinnedControlState;
+              collectPinnedControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

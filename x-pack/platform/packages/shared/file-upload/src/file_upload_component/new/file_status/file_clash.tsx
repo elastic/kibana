@@ -52,7 +52,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.fileUpload.fileStatus.newFields"
-                defaultMessage="File contains {count} new fields which are not present in the selected index."
+                defaultMessage="The file contains {count} {count, plural, one {field} other {fields}} that {count, plural, one {does} other {do}} not exist yet in the index. {count, plural, one {It} other {They}} will be added upon importing this file. "
                 values={{ count: fileClash.newFields.length }}
               />
             </EuiText>
@@ -64,7 +64,7 @@ export const FileClashResult: FC<Props> = ({ fileClash }) => {
             <EuiText size="xs">
               <FormattedMessage
                 id="xpack.fileUpload.fileStatus.missingFields"
-                defaultMessage="File is missing {count} fields which are present in the selected index"
+                defaultMessage="The file is missing {count} {count, plural, one {field} other {fields}} that {count, plural, one {exists} other {exist}} in the index. {count, plural, one {This field} other {These fields}} will be preserved but no data will be added to {count, plural, one {it} other {them}} upon importing this file."
                 values={{ count: fileClash.missingFields.length }}
               />
             </EuiText>

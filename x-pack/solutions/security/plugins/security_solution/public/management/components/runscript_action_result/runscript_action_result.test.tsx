@@ -30,7 +30,7 @@ jest.mock('../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('#RunscriptActionResult component', () => {
+describe('RunscriptActionResult component', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -67,36 +67,6 @@ describe('#RunscriptActionResult component', () => {
     setUserPrivileges.reset();
   });
 
-  it('should display file link for `microsoft_defender_endpoint` agent type', async () => {
-    render();
-
-    await waitFor(
-      () => {
-        expect(renderResult.getByTestId('test-download')).toBeTruthy();
-      },
-      { timeout: 5000 }
-    );
-  }, 10000);
-
-  it('should display output content for `microsoft_defender_endpoint` agent', () => {
-    action.outputs = {
-      'agent-a': {
-        type: 'json',
-        content: {
-          code: '0',
-          stdout: 'script output',
-          stderr: '',
-        },
-      },
-    };
-
-    render();
-
-    const stdoutAccordion = renderResult.getByTestId('test-output-stdout-title');
-    expect(stdoutAccordion).toBeInTheDocument();
-    expect(stdoutAccordion).toHaveTextContent('Runscript output');
-  });
-
   it.each(['crowdstrike', 'sentinel_one'] as const)(
     'should display no output if %s agent type does not support outputs',
     (agentType) => {
@@ -116,4 +86,62 @@ describe('#RunscriptActionResult component', () => {
       expect(renderResult.queryByTestId('test-download')).toBeNull();
     }
   );
+
+  describe('for Microsoft Defender Endpoint', () => {
+    it('should display file link for `microsoft_defender_endpoint` agent type', async () => {
+      render();
+
+      await waitFor(
+        () => {
+          expect(renderResult.getByTestId('test-download')).toBeTruthy();
+        },
+        { timeout: 5000 }
+      );
+    }, 10000);
+
+    it('should display output content for `microsoft_defender_endpoint` agent', () => {
+      action.outputs = {
+        'agent-a': {
+          type: 'json',
+          content: {
+            code: '0',
+            stdout: 'script output',
+            stderr: '',
+          },
+        },
+      };
+
+      render();
+
+      const stdoutAccordion = renderResult.getByTestId('test-output-stdout-title');
+      expect(stdoutAccordion).toBeInTheDocument();
+      expect(stdoutAccordion).toHaveTextContent('Runscript output');
+    });
+  });
+
+  describe('for Elastic Defend Endpoint', () => {
+    beforeEach(() => {
+      action = new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['agent-a'],
+        agentType: 'endpoint',
+        command: 'runscript',
+      });
+    });
+
+    it('should display results file download', async () => {
+      render();
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('test-download-loading')).toBeNull();
+      });
+
+      expect(renderResult.getByTestId('test-download')).toBeInTheDocument();
+      expect(renderResult.getByTestId('test-download-passcodeMessage')).toBeInTheDocument();
+    });
+
+    it('should display the output content', () => {
+      render();
+
+      expect(renderResult.getByTestId('test-output')).toBeInTheDocument();
+    });
+  });
 });

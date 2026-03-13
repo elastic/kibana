@@ -39,6 +39,7 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     name: 'My connector',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
     ...parts,
   };
 };
@@ -306,6 +307,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',
@@ -339,6 +341,7 @@ describe('InferenceChatModel', () => {
         model: 'super-duper-model',
         functionCallingMode: 'simulated',
         signal: abortCtrl.signal,
+        timeout: 60000,
         telemetryMetadata,
       });
 
@@ -355,6 +358,34 @@ describe('InferenceChatModel', () => {
         temperature: 0.7,
         modelName: 'super-duper-model',
         abortSignal: abortCtrl.signal,
+        timeout: 60000,
+        maxRetries: undefined,
+        stream: false,
+        metadata,
+      });
+    });
+
+    it('accepts timeout argument in constructor', async () => {
+      const timeout = 60000;
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        timeout,
+        telemetryMetadata,
+      });
+
+      const response = createResponse({ content: 'dummy' });
+      chatComplete.mockResolvedValue(response);
+
+      await chatModel.invoke('question');
+
+      // Verify the instance was created successfully and can make calls
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        connectorId: connector.connectorId,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        timeout: 60000,
+        maxRetries: undefined,
         stream: false,
         metadata,
       });
@@ -382,19 +413,24 @@ describe('InferenceChatModel', () => {
       });
 
       expect(chatComplete).toHaveBeenCalledTimes(1);
-      expect(chatComplete).toHaveBeenCalledWith({
-        connectorId: connector.connectorId,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        toolChoice: 'auto',
-        functionCalling: 'simulated',
-        temperature: 0,
-        modelName: 'some-other-model',
-        abortSignal: abortCtrl.signal,
-        stream: false,
-        metadata: {
-          connectorTelemetry: undefined,
-        },
-      });
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: connector.connectorId,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          functionCalling: 'simulated',
+          temperature: 0,
+          modelName: 'some-other-model',
+          abortSignal: abortCtrl.signal,
+          stream: false,
+          metadata: {
+            connectorTelemetry: undefined,
+          },
+        })
+      );
+
+      // We intentionally do not forward tool params unless tools are present.
+      expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
     });
   });
 
@@ -738,6 +774,7 @@ describe('InferenceChatModel', () => {
             content: 'question',
           },
         ],
+        toolChoice: 'auto',
         tools: {
           test_tool: {
             description: 'Just some test tool',

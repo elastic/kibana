@@ -32,7 +32,8 @@ export const ListDataStreamsResponseSchema = schema.object({
         schema.object({
           id: schema.string(),
           title: schema.string(),
-        })
+        }),
+        { maxSize: 10000 }
       ),
       serviceDetails: schema.nullable(
         schema.object({
@@ -40,7 +41,8 @@ export const ListDataStreamsResponseSchema = schema.object({
           serviceName: schema.string(),
         })
       ),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 

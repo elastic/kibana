@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
-  HasAppContext,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesSavedObjectId,
@@ -20,6 +19,7 @@ import { apiHasAppContext } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
+import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux/tab_mapping_utils';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -44,36 +44,39 @@ export async function getAppTarget(
     : await discoverServices.locator.getUrl(locatorParams);
 
   const editPath = discoverServices.core.http.basePath.remove(editUrl);
-  const editApp = useRedirect ? 'r' : 'discover';
 
-  return { path: editPath, app: editApp, editUrl, urlWithoutLocationState };
+  return {
+    editPath,
+    editUrl,
+    urlWithoutLocationState,
+  };
 }
 
-export function initializeEditApi<
-  ParentApiType = unknown,
-  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {}
->({
+export function initializeEditApi({
   uuid,
   parentApi,
   partialApi,
   isEditable,
   discoverServices,
+  getTitle,
 }: {
   uuid: string;
-  parentApi?: ParentApiType;
+  parentApi?: unknown;
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
+  getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
-}): ReturnType {
+}): HasEditCapabilities | undefined {
   /**
    * If the parent is providing context, then the embeddable state transfer service can be used
    * and editing should be allowed; otherwise, do not provide editing capabilities
    */
   if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {} as ReturnType;
+    return;
   }
+
   const parentApiContext = parentApi.getAppContext();
 
   return {
@@ -82,23 +85,47 @@ export function initializeEditApi<
         defaultMessage: 'Discover session',
       }),
     onEdit: async () => {
-      const appTarget = await getAppTarget(partialApi, discoverServices);
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
+      const isByReference = Boolean(partialApi.savedObjectId$.getValue());
+      const valueInput = isByReference
+        ? undefined
+        : fromSavedSearchToSavedObjectTab({
+            tab: {
+              id: uuid,
+              label:
+                getTitle() ||
+                i18n.translate('discover.embeddable.byValueTabName', {
+                  defaultMessage: 'By-value Discover session',
+                }),
+            },
+            savedSearch: partialApi.savedSearch$.getValue(),
+            services: discoverServices,
+          });
+      let app: string;
+      let path: string | undefined;
 
-      await stateTransfer.navigateToEditor(appTarget.app, {
-        path: appTarget.path,
+      if (isByReference) {
+        ({ app, path } = await discoverServices.locator.getLocation(
+          getDiscoverLocatorParams(partialApi)
+        ));
+      } else {
+        ({ app, path } = await discoverServices.locator.getLocation({}));
+      }
+
+      await stateTransfer.navigateToEditor(app, {
+        path,
         state: {
           embeddableId: uuid,
-          valueInput: partialApi.savedSearch$.getValue(),
-          originatingApp: parentApiContext.currentAppId,
+          valueInput,
           searchSessionId: partialApi.fetchContext$.getValue()?.searchSessionId,
+          originatingApp: parentApiContext.currentAppId,
           originatingPath: parentApiContext.getCurrentPath?.(),
         },
       });
     },
     isEditingEnabled: isEditable,
     getEditHref: async () => {
-      return (await getAppTarget(partialApi, discoverServices))?.path;
+      return (await getAppTarget(partialApi, discoverServices))?.editPath;
     },
-  } as ReturnType;
+  };
 }

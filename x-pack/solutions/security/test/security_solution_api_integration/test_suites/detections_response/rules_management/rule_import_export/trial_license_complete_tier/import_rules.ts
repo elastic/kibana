@@ -21,8 +21,11 @@ import type {
 } from '@kbn/securitysolution-exceptions-common/api';
 import { createRule } from '@kbn/detections-response-ftr-services';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
+import type TestAgent from 'supertest/lib/agent';
+import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
+  combineArrayToNdJson,
   fetchRule,
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
@@ -33,6 +36,7 @@ import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
+import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
 
 const RULE_TO_IMPORT_RULE_ID = 'imported-rule';
 const RULE_TO_IMPORT_RULE_ID_2 = 'another-imported-rule';
@@ -43,6 +47,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const exceptionsApi = getService('exceptionsApi');
   const log = getService('log');
   const spacesServices = getService('spaces');
+  const utils = getService('securitySolutionUtils');
+  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI import custom rules', () => {
     const spaceId = '4567-space';
@@ -88,7 +94,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(importResponse.errors[0]).toEqual({
-            error: { status_code: 400, message: 'threshold: Required' },
+            error: {
+              status_code: 400,
+              message: 'threshold: Invalid input: expected object, received undefined',
+            },
           });
         });
 
@@ -110,7 +119,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importResponse.errors[0]).toEqual({
             error: {
-              message: 'threshold.field: Array must contain at most 5 element(s)',
+              message:
+                'Invalid input: expected string, received array, Too big: expected array to have <=5 items',
               status_code: 400,
             },
           });
@@ -134,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importResponse.errors[0]).toEqual({
             error: {
-              message: 'threshold.value: Number must be greater than or equal to 1',
+              message: 'threshold.value: Too small: expected number to be >=1',
               status_code: 400,
             },
           });
@@ -1434,6 +1444,85 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_success_count: 1,
           action_connectors_errors: [],
           action_connectors_warnings: [],
+        });
+      });
+    });
+
+    describe('importing with endpoint response actions', () => {
+      let superTestResponseActionsNoAuthz: TestAgent;
+      let rulesToImport: unknown[];
+
+      before(async () => {
+        superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
+          name: ROLE.endpoint_response_actions_no_access,
+          privileges: rolesUsersProvider.loader.getPreDefinedRole(
+            ROLE.endpoint_response_actions_no_access
+          ),
+        });
+      });
+
+      beforeEach(async () => {
+        rulesToImport = [
+          getCustomQueryRuleParams({
+            rule_id: uuid(),
+            response_actions: [
+              {
+                action_type_id: '.endpoint',
+                params: {
+                  command: 'suspend-process',
+                  config: { field: 'some-field', overwrite: false },
+                },
+              },
+            ],
+          }),
+        ];
+      });
+
+      afterEach(async () => {
+        await deleteAllRules(supertest, log);
+      });
+
+      it('should import rules with response actions when user has authz', async () => {
+        const importResponse = await importRules({
+          getService,
+          rules: rulesToImport,
+          overwrite: false,
+        });
+
+        expect(importResponse).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+        });
+      });
+
+      it('should NOT import rules with response actions when user does NOT have authz', async () => {
+        // @ts-expect-error due to array of `unknown` items
+        const ruleId = rulesToImport[0].rule_id;
+        const fileBuffer = Buffer.from(combineArrayToNdJson(rulesToImport));
+
+        const { body } = await superTestResponseActionsNoAuthz
+          .post('/api/detection_engine/rules/_import')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+          .attach('file', fileBuffer, { filename: 'rules.ndjson' })
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              error: {
+                message: 'User is not authorized to create/update suspend-process response action',
+                status_code: 403,
+              },
+              id: '',
+              rule_id: ruleId,
+            },
+          ],
         });
       });
     });

@@ -16,6 +16,7 @@ import type { ComponentType, JSXElementConstructor } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields } from '../../search_strategy';
 
@@ -91,6 +92,7 @@ export interface ActionProps {
   ecsData: Ecs;
   eventId: string;
   eventIdToNoteIds?: Readonly<Record<string, string[]>>;
+  hit: DataTableRecord | undefined;
   index?: number;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;

@@ -34,20 +34,22 @@ const LIST_PROPS = {
   rowHeight: 60,
 };
 
-interface Props {
+export interface ConnectorFilterProps {
   aiConnectors: AIConnector[] | undefined;
   connectorNames: string[] | undefined;
   isLoading?: boolean;
   selectedConnectorNames: string[];
   setSelectedConnectorNames: React.Dispatch<React.SetStateAction<string[]>>;
+  compressed?: boolean;
 }
 
-const ConnectorFilterComponent: React.FC<Props> = ({
+const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
   aiConnectors,
   connectorNames,
   isLoading = false,
   selectedConnectorNames,
   setSelectedConnectorNames,
+  compressed = false,
 }) => {
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
@@ -182,7 +184,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed={compressed}>
       <EuiPopover
         button={button}
         closePopover={closePopover}

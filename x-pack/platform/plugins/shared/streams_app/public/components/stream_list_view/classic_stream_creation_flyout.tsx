@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { getFormattedError } from '../../util/errors';
 
 interface ClassicStreamCreationFlyoutProps {
   onClose: () => void;
@@ -30,12 +32,15 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       start: {
         share,
         indexManagement,
+        indexLifecycleManagement,
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
 
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const isIlmAvailable = !!indexLifecycleManagement?.apiService;
 
   const templatesListFetch = useStreamsAppFetch(async () => {
     const response = await indexManagement.apiService.getIndexTemplates({ signal });
@@ -43,12 +48,37 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
     // Filter to only show templates that:
     // 1. Have data_stream enabled
     // 2. Have at least one index pattern containing a wildcard
+    // 3. Are not hidden
     return response.templates.filter((template) => {
+      const isHidden = template.dataStream?.hidden === true;
       const hasDataStream = template.dataStream !== undefined;
       const hasWildcardPattern = template.indexPatterns?.some((pattern) => pattern.includes('*'));
-      return hasDataStream && hasWildcardPattern;
+      return hasDataStream && hasWildcardPattern && !isHidden;
     });
   }, [indexManagement.apiService, signal]);
+
+  const getIlmPolicy = useCallback(
+    async (policyName: string) => {
+      if (!isIlmAvailable) {
+        return null;
+      }
+      // Errors are handled in the flyout component
+      const policies = await indexLifecycleManagement.apiService.getPolicies({ signal });
+      return policies.find((policy) => policy.name === policyName) ?? null;
+    },
+    [indexLifecycleManagement?.apiService, isIlmAvailable, signal]
+  );
+
+  const getSimulatedTemplate = useCallback(
+    async (templateName: string, templateSignal?: AbortSignal) => {
+      // Errors are handled in the flyout component
+      return await indexManagement.apiService.simulateIndexTemplate({
+        templateName,
+        signal: templateSignal ?? signal,
+      });
+    },
+    [indexManagement.apiService, signal]
+  );
 
   const handleCreate = useCallback(
     async (streamName: string) => {
@@ -81,12 +111,12 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         router.push('/{key}/management/{tab}', {
           path: { key: streamName, tab: 'retention' },
-          query: {},
+          query: { rangeFrom, rangeTo },
         });
 
         onClose();
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamCreationFailedToastTitle',
             {
@@ -97,7 +127,15 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
         });
       }
     },
-    [streamsRepositoryClient, signal, core.notifications.toasts, router, onClose]
+    [
+      streamsRepositoryClient,
+      signal,
+      core.notifications.toasts,
+      router,
+      onClose,
+      rangeFrom,
+      rangeTo,
+    ]
   );
 
   const handleValidate = useCallback(
@@ -125,7 +163,7 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
 
         return { errorType: null };
       } catch (error) {
-        core.notifications.toasts.addError(error as Error, {
+        core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate(
             'xpack.streams.classicStreamCreationFlyout.streamValidationFailedToastTitle',
             {
@@ -163,7 +201,8 @@ export function ClassicStreamCreationFlyout({ onClose }: ClassicStreamCreationFl
       hasErrorLoadingTemplates={!!templatesListFetch.error}
       onRetryLoadTemplates={handleRetryLoadTemplates}
       onValidate={handleValidate}
-      showDataRetention={false}
+      getIlmPolicy={isIlmAvailable ? getIlmPolicy : undefined}
+      getSimulatedTemplate={getSimulatedTemplate}
     />
   );
 }

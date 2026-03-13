@@ -14,10 +14,10 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { OriginalSource } from '../../common_attributes.gen';
+import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
 
 export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
 export const DeleteDataStreamRequestParams = z.object({
@@ -31,6 +31,73 @@ export const DeleteDataStreamRequestParams = z.object({
   data_stream_id: NonEmptyString,
 });
 export type DeleteDataStreamRequestParamsInput = z.input<typeof DeleteDataStreamRequestParams>;
+
+export type GetDataStreamResultsRequestParams = z.infer<typeof GetDataStreamResultsRequestParams>;
+export const GetDataStreamResultsRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type GetDataStreamResultsRequestParamsInput = z.input<
+  typeof GetDataStreamResultsRequestParams
+>;
+
+export type GetDataStreamResultsResponse = z.infer<typeof GetDataStreamResultsResponse>;
+export const GetDataStreamResultsResponse = z
+  .object({
+    /**
+     * The ingest pipeline as a JSON string.
+     */
+    ingest_pipeline: NonEmptyString,
+    /**
+     * Results array as JSON objects.
+     */
+    results: z.array(z.object({}).catchall(z.unknown())),
+  })
+  .strict();
+
+export type ReanalyzeDataStreamRequestParams = z.infer<typeof ReanalyzeDataStreamRequestParams>;
+export const ReanalyzeDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type ReanalyzeDataStreamRequestParamsInput = z.input<
+  typeof ReanalyzeDataStreamRequestParams
+>;
+
+export type ReanalyzeDataStreamRequestBody = z.infer<typeof ReanalyzeDataStreamRequestBody>;
+export const ReanalyzeDataStreamRequestBody = z.object({
+  /**
+   * The inference connector ID to use for the reanalysis task.
+   */
+  connectorId: NonEmptyString,
+  /**
+   * The LangSmith tracing options
+   */
+  langSmithOptions: LangSmithOptions.optional(),
+});
+export type ReanalyzeDataStreamRequestBodyInput = z.input<typeof ReanalyzeDataStreamRequestBody>;
+
+export type ReanalyzeDataStreamResponse = z.infer<typeof ReanalyzeDataStreamResponse>;
+export const ReanalyzeDataStreamResponse = z
+  .object({
+    /**
+     * Indicates if the reanalysis was scheduled successfully.
+     */
+    success: z.boolean().optional(),
+  })
+  .strict();
 
 export type StopAutoImportDataStreamRequestParams = z.infer<
   typeof StopAutoImportDataStreamRequestParams
@@ -48,6 +115,41 @@ export const StopAutoImportDataStreamRequestParams = z.object({
 export type StopAutoImportDataStreamRequestParamsInput = z.input<
   typeof StopAutoImportDataStreamRequestParams
 >;
+
+export type UpdateDataStreamPipelineRequestParams = z.infer<
+  typeof UpdateDataStreamPipelineRequestParams
+>;
+export const UpdateDataStreamPipelineRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type UpdateDataStreamPipelineRequestParamsInput = z.input<
+  typeof UpdateDataStreamPipelineRequestParams
+>;
+
+export type UpdateDataStreamPipelineRequestBody = z.infer<
+  typeof UpdateDataStreamPipelineRequestBody
+>;
+export const UpdateDataStreamPipelineRequestBody = z.object({
+  ingest_pipeline: z.union([z.string(), z.object({}).catchall(z.unknown())]),
+});
+export type UpdateDataStreamPipelineRequestBodyInput = z.input<
+  typeof UpdateDataStreamPipelineRequestBody
+>;
+
+export type UpdateDataStreamPipelineResponse = z.infer<typeof UpdateDataStreamPipelineResponse>;
+export const UpdateDataStreamPipelineResponse = z
+  .object({
+    ingest_pipeline: z.object({}).catchall(z.unknown()),
+    results: z.array(z.object({}).catchall(z.unknown())),
+  })
+  .strict();
 
 export type UploadSamplesToDataStreamRequestParams = z.infer<
   typeof UploadSamplesToDataStreamRequestParams
@@ -78,6 +180,10 @@ export const UploadSamplesToDataStreamRequestBody = z.object({
    * The original source of the samples
    */
   originalSource: OriginalSource,
+  /**
+   * The LangSmith tracing options
+   */
+  langSmithOptions: LangSmithOptions.optional(),
 });
 export type UploadSamplesToDataStreamRequestBodyInput = z.input<
   typeof UploadSamplesToDataStreamRequestBody

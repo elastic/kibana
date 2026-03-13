@@ -34,6 +34,7 @@ export const PacksComboBoxField = ({
   idAria,
   ...rest
 }: PackComboBoxFieldProps) => {
+  const { packsData, ...restFieldProps } = fieldProps;
   const {
     field: { value, onChange },
     fieldState,
@@ -74,7 +75,7 @@ export const PacksComboBoxField = ({
 
   const packOptions = useMemo<Array<EuiComboBoxOptionOption<PackOption>>>(
     () =>
-      fieldProps?.packsData?.map((packSO) => ({
+      packsData?.map((packSO) => ({
         label: packSO.name ?? '',
         value: {
           id: packSO.saved_object_id,
@@ -82,7 +83,7 @@ export const PacksComboBoxField = ({
           description: packSO.description,
         },
       })) ?? [],
-    [fieldProps?.packsData]
+    [packsData]
   );
 
   const renderOption = useCallback(
@@ -142,7 +143,7 @@ export const PacksComboBoxField = ({
         renderOption={renderOption}
         options={packOptions}
         rowHeight={60}
-        {...fieldProps}
+        {...restFieldProps}
       />
     </EuiFormRow>
   );

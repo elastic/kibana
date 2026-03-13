@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
 import { getToolHandler } from './handler';
 
@@ -25,10 +21,8 @@ const logRateAnalysisSchema = z.object({
   index: z.string().describe(indexDescription),
   timeFieldName: z
     .string()
-    .describe(
-      'Timestamp field used to build the baseline/deviation windows. Defaults to `@timestamp`.'
-    )
-    .optional(),
+    .default('@timestamp')
+    .describe('Timestamp field used to build the baseline/deviation windows.'),
   baseline: z
     .object(timeRangeSchemaRequired)
     .describe(
@@ -38,7 +32,7 @@ const logRateAnalysisSchema = z.object({
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
   searchQuery: z
-    .record(z.any())
+    .record(z.string(), z.any())
     .describe(
       'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
     )
@@ -49,10 +43,7 @@ export function createRunLogRateAnalysisTool({
   core,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
 }): StaticToolRegistration<typeof logRateAnalysisSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof logRateAnalysisSchema> = {
@@ -70,8 +61,8 @@ How it works:
 Compares a baseline time window to a deviation window and performs statistical correlation analysis to find fields/patterns associated with the change.
 
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
-- Getting a general overview of log types (use get_log_categories)
+- Understanding the sequence of events for a specific error (use get_traces)
+- Getting a general overview of log types (use get_log_groups)
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
@@ -82,7 +73,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;

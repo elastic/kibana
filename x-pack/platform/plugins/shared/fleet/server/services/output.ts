@@ -12,7 +12,6 @@ import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -96,21 +95,6 @@ const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
 const DEFAULT_ES_HOSTS = ['http://localhost:9200'];
 
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
-
 // differentiate
 function isUUID(val: string) {
   return (
@@ -137,7 +121,6 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
     parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
   } catch (e) {
     logger.warn(`Unable to parse ssl for output ${so.id}: ${e.message}`);
-    logger.warn(`ssl value: ${ssl}`);
   }
   return {
     id: outputId ?? so.id,
@@ -390,7 +373,7 @@ async function remoteSyncIntegrationsCheck(
 
 class OutputService {
   private get soClient() {
-    return appContextService.getInternalUserSOClient(fakeRequest);
+    return appContextService.getInternalUserSOClient();
   }
 
   private get encryptedSoClient() {
@@ -479,10 +462,6 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
-            // Allow editing the write_to_logs_streams field
-            if (key === 'write_to_logs_streams') {
-              continue;
-            }
             // Allow ssl to differ if set to default empty values
             if (
               key === 'ssl' &&

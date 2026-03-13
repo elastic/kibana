@@ -8,6 +8,7 @@
  */
 
 import { IpFormat } from './ip';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('IP Address Format', () => {
   let ip: IpFormat;
@@ -20,8 +21,14 @@ describe('IP Address Format', () => {
     expect(ip.convert(1186489492)).toBe('70.184.100.148');
   });
 
-  test('converts null and undefined to -', () => {
-    expect(ip.convert(null)).toBe('-');
-    expect(ip.convert(undefined)).toBe('-');
+  test('missing value', () => {
+    expect(ip.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(ip.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(ip.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(ip.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 });

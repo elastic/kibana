@@ -17,8 +17,8 @@ import {
   createRuntimeStateManager,
   type ReactiveTabRuntimeState,
   type RuntimeStateManager,
-  type UnifiedHistogramConfig,
 } from '../runtime_state';
+import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
 
 export function getTabRuntimeStateMock(
   attrs: Partial<ReactiveTabRuntimeState> = {}
@@ -28,16 +28,14 @@ export function getTabRuntimeStateMock(
     customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(
       undefined
     ),
-    unifiedHistogramConfig$: new BehaviorSubject<UnifiedHistogramConfig>({
-      layoutPropsMap: {},
-    }),
-    scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
-      {} as unknown as ScopedProfilesManager
-    ),
-    scopedEbtManager$: new BehaviorSubject<ScopedDiscoverEBTManager>(
-      {} as unknown as ScopedDiscoverEBTManager
+    unifiedHistogramConfig$: new BehaviorSubject({ layoutPropsMap: {} }),
+    scopedProfilesManager$: new BehaviorSubject({} as ScopedProfilesManager),
+    scopedEbtManager$: new BehaviorSubject({} as ScopedDiscoverEBTManager),
+    cascadedDocumentsFetcher$: new BehaviorSubject<CascadedDocumentsFetcher>(
+      {} as CascadedDocumentsFetcher
     ),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+    unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
   };
 }

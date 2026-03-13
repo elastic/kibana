@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
@@ -18,7 +17,7 @@ import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../ro
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
  */
-export interface APIKeys {
+export interface NativeAPIKeysType {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
    */

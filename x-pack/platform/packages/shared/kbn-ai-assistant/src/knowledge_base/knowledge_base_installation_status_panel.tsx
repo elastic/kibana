@@ -75,8 +75,12 @@ const WarmUpModel = ({
 
 export const KnowledgeBaseInstallationStatusPanel = ({
   knowledgeBase,
+  eisCalloutZIndex,
+  isInKnowledgeBaseTab = false,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
+  eisCalloutZIndex?: number;
+  isInKnowledgeBaseTab?: boolean;
 }) => {
   switch (knowledgeBase.status.value?.inferenceModelState) {
     case InferenceModelState.NOT_INSTALLED:
@@ -85,6 +89,8 @@ export const KnowledgeBaseInstallationStatusPanel = ({
           <SelectModelAndInstallKnowledgeBase
             onInstall={knowledgeBase.install}
             isInstalling={knowledgeBase.isInstalling}
+            eisCalloutZIndex={eisCalloutZIndex}
+            isInKnowledgeBaseTab={isInKnowledgeBaseTab}
           />
         </EuiFlexItem>
       );

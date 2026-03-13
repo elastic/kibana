@@ -68,7 +68,11 @@ function toElasticsearchMappingProperty(property: StorageMappingProperty): Mappi
 }
 
 function catchConflictError(error: Error) {
-  if (isResponseError(error) && error.statusCode === 409) {
+  if (
+    isResponseError(error) &&
+    error.statusCode === 400 &&
+    error.body?.error?.type === 'resource_already_exists_exception'
+  ) {
     return;
   }
   throw error;

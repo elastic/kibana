@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-  DataControlApi,
-} from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+} from '@kbn/control-group-renderer';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { DataControlApi } from '@kbn/controls-plugin/public';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
@@ -56,33 +57,11 @@ export const ControlsContent = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupRuntimeState> = {
-      chainingSystem: 'HIERARCHICAL',
-      labelPosition: 'oneLine',
-      initialChildControlState: controlPanels,
+      initialChildControlState: controlPanels as ControlPanelsState,
     };
 
     return { initialState: initialInput };
   }, [controlPanels]);
-
-  useEffect(() => {
-    const current = controlGroupAPI.current;
-    if (!current || !controlConfigs.replace) {
-      return;
-    }
-
-    Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
-      current.replacePanel(key, {
-        panelType: replaceable.control.type,
-        maybePanelId: replaceable.key,
-        serializedState: {
-          rawState: {
-            ...replaceable.control,
-            dataViewId: dataView?.id,
-          },
-        },
-      });
-    });
-  }, [schema, controlConfigs, dataView?.id]);
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupRendererApi) => {
@@ -90,22 +69,23 @@ export const ControlsContent = ({
 
       controlGroupAPI.current = controlGroup;
 
-      controlGroup.untilInitialized().then(() => {
-        subscriptions.current.add(
-          controlGroup.children$.subscribe((children) => {
-            Object.keys(children).map((childId) => {
-              const child = children[childId] as DataControlApi;
-
-              child.CustomPrependComponent = () => (
-                <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
-              );
-            });
-          })
-        );
-      });
+      subscriptions.current.unsubscribe();
+      subscriptions.current = new Subscription();
 
       subscriptions.current.add(
-        controlGroup.filters$.subscribe((newFilters = []) => {
+        controlGroup.children$.subscribe((children) => {
+          Object.keys(children).map((childId) => {
+            const child = children[childId] as DataControlApi;
+
+            child.CustomPrependComponent = () => (
+              <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
+            );
+          });
+        })
+      );
+
+      subscriptions.current.add(
+        controlGroup.appliedFilters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );
@@ -120,10 +100,8 @@ export const ControlsContent = ({
   );
 
   useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-
     return () => {
-      currentSubscriptions.unsubscribe();
+      subscriptions.current.unsubscribe();
     };
   }, []);
 
@@ -134,6 +112,7 @@ export const ControlsContent = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
+        key={schema ?? 'default'}
         getCreationOptions={getInitialInput}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}

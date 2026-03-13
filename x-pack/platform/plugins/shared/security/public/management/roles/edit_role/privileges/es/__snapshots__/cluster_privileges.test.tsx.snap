@@ -1,39 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<EuiFlexGroup>
-  <EuiFlexItem
-    key="clusterPrivs"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
-    <EuiComboBox
-      aria-label="Cluster privileges"
-      async={false}
-      compressed={false}
+    <div
+      class="euiComboBox emotion-euiComboBox"
       data-test-subj="cluster-privileges-combobox"
-      fullWidth={false}
-      isClearable={true}
-      isDisabled={false}
-      onChange={[Function]}
-      onCreateOption={[Function]}
-      optionMatcher={[Function]}
-      options={
-        Array [
-          Object {
-            "label": "all",
-          },
-          Object {
-            "label": "manage",
-          },
-          Object {
-            "label": "monitor",
-          },
-        ]
-      }
-      placeholder="Add a privilege…"
-      selectedOptions={Array []}
-      singleSelection={false}
-      sortMatchesBy="none"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+    >
+      <div
+        class="euiPopover euiInputPopover emotion-euiPopover-block-EuiInputPopover"
+      >
+        <div
+          class="euiFormControlLayout emotion-euiFormControlLayout-euiComboBox__formControlLayout-multiSelect"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 1;"
+          >
+            <div
+              class="euiComboBox__inputWrap emotion-euiComboBoxInputWrapper-multiSelect-plainText"
+              data-test-subj="comboBoxInput"
+              tabindex="-1"
+            >
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-invalid="false"
+                aria-label="Cluster privileges"
+                autocomplete="off"
+                class="euiComboBox__input emotion-euiComboBoxInput"
+                data-test-subj="comboBoxSearchInput"
+                id="generated-id__eui-combobox-id"
+                placeholder="Add a privilege…"
+                role="combobox"
+                style="inline-size: 100%;"
+                value=""
+              />
+            </div>
+            <div
+              class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+            >
+              <button
+                aria-label="Open list of options"
+                class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon-clickable"
+                data-test-subj="comboBoxToggleListButton"
+                tabindex="-1"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

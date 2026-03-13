@@ -57,6 +57,7 @@ export const routeHandlerFactory: (
         analyzer,
         runtimeMappings,
         indicesOptions,
+        projectRouting,
         includeExamples,
       } = request.body;
 
@@ -72,6 +73,7 @@ export const routeHandlerFactory: (
         analyzer ?? {},
         runtimeMappings,
         indicesOptions,
+        projectRouting,
         includeExamples
       );
 

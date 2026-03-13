@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/mock-idp-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/mock-idp-plugin'
+  title: '@kbn/mock-idp-plugin'
   description: Moon project for @kbn/mock-idp-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: packages/kbn-mock-idp-plugin
+  sourceRoot: packages/kbn-mock-idp-plugin
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core-i18n-browser'
@@ -34,6 +33,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/es'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - dev

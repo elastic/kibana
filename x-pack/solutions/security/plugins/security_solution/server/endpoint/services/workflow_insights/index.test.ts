@@ -69,7 +69,7 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
     '@timestamp': moment(),
     message: 'This is a test message',
     category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    type: DefendInsightType.enum.incompatible_antivirus,
     source: {
       type: SourceType.LlmConnector,
       id: 'openai-connector-id',
@@ -251,12 +251,6 @@ describe('SecurityWorkflowInsightsService', () => {
       ];
 
       const workflowInsights: SecurityWorkflowInsight[] = [getDefaultInsight()];
-      const request = { body: { insightType: workflowInsights[0].type } } as KibanaRequest<
-        unknown,
-        unknown,
-        DefendInsightsPostRequestBody
-      >;
-
       const buildWorkflowInsightsMock = buildWorkflowInsights as jest.Mock;
       buildWorkflowInsightsMock.mockResolvedValueOnce(workflowInsights);
 
@@ -278,16 +272,24 @@ describe('SecurityWorkflowInsightsService', () => {
       });
       const result = await securityWorkflowInsightsService.createFromDefendInsights(
         defendInsights,
-        request
+        insight.events.map((e) => e.endpointId),
+        workflowInsights[0].type,
+        workflowInsights[0].source.id,
+        workflowInsights[0].source.type
       );
 
       // four since it calls fetch + update + fetch + create
       expect(isInitializedSpy).toHaveBeenCalledTimes(4);
       expect(buildWorkflowInsightsMock).toHaveBeenCalledWith({
         defendInsights,
-        request,
         endpointMetadataService: expect.any(Object),
         esClient,
+        options: {
+          insightType: workflowInsights[0].type,
+          endpointIds: insight.events.map((e) => e.endpointId),
+          connectorId: workflowInsights[0].source.id,
+          model: workflowInsights[0].source.type,
+        },
       });
       expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
@@ -413,7 +415,7 @@ describe('SecurityWorkflowInsightsService', () => {
         from: 50,
         ids: ['id1', 'id2'],
         categories: [Category.Endpoint],
-        types: [DefendInsightType.Enum.incompatible_antivirus],
+        types: [DefendInsightType.enum.incompatible_antivirus],
         sourceTypes: [SourceType.LlmConnector],
         sourceIds: ['source-id1', 'source-id2'],
         targetTypes: [TargetType.Endpoint],

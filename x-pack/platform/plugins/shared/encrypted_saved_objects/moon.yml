@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/encrypted-saved-objects-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/encrypted-saved-objects-plugin'
+  title: '@kbn/encrypted-saved-objects-plugin'
   description: Moon project for @kbn/encrypted-saved-objects-plugin
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
+  sourceRoot: x-pack/platform/plugins/shared/encrypted_saved_objects
 dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/config-schema'
@@ -33,6 +32,7 @@ dependsOn:
   - '@kbn/core-root-server-internal'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/core-test-helpers-so-type-serializer'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
@@ -46,14 +46,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

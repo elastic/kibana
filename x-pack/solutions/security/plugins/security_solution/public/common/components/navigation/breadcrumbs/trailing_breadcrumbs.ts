@@ -31,6 +31,7 @@ export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (
     case SecurityPageName.rules:
     case SecurityPageName.rulesAdd:
     case SecurityPageName.rulesCreate:
+    case SecurityPageName.aiRuleCreation:
       return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.exceptions:
       return geExceptionsBreadcrumbs(spyState, getSecuritySolutionUrl);

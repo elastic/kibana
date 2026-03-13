@@ -39,6 +39,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,6 +55,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 42,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +86,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,6 +102,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 69,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -117,6 +125,8 @@
           "(obj: any) => string"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,6 +141,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 29,
+            "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -152,6 +164,8 @@
           "(array: any[]) => any"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -166,6 +180,8 @@
               "any[]"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 60,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,6 +201,8 @@
           "(obj: any) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,6 +217,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 22,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -227,6 +247,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +263,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+            "lineNumber": 49,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -280,6 +304,8 @@
           "; } | null"
         ],
         "path": "src/platform/packages/shared/kbn-rison/kbn_rison.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

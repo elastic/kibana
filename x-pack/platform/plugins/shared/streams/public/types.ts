@@ -18,7 +18,13 @@ export interface StreamsNavigationStatus {
 }
 
 export interface WiredStreamsStatus {
-  enabled: boolean | 'conflict' | 'unknown';
+  logs: boolean | 'conflict' | 'unknown';
+  'logs.otel': boolean | 'conflict' | 'unknown';
+  'logs.ecs': boolean | 'conflict' | 'unknown';
+  can_manage: boolean;
+}
+
+export interface ClassicStreamsStatus {
   can_manage: boolean;
 }
 
@@ -29,6 +35,7 @@ export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
   navigationStatus$: Observable<StreamsNavigationStatus>;
   getWiredStatus: () => Promise<WiredStreamsStatus>;
+  getClassicStatus: () => Promise<ClassicStreamsStatus>;
   enableWiredMode: (signal: AbortSignal) => Promise<EnableStreamsResponse>;
   disableWiredMode: (signal: AbortSignal) => Promise<DisableStreamsResponse>;
   config$: Observable<StreamsPublicConfig>;

@@ -100,6 +100,7 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
         closePopover={togglePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={flyoutHistoryButtonTooltip}
       >
         <EuiContextMenuPanel
           size="s"

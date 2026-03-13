@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+  defaultOwner: '@elastic/obs-ai-team'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals'
+  title: '@kbn/evals'
   description: Moon project for @kbn/evals
   channel: ''
-  owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/kbn-evals
+  owner: '@elastic/obs-ai-team'
+  sourceRoot: x-pack/platform/packages/shared/kbn-evals
 dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/inference-common'
@@ -28,12 +27,13 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/some-dev-log'
   - '@kbn/inference-tracing'
-  - '@kbn/apm-config-loader'
   - '@kbn/repo-info'
-  - '@kbn/std'
   - '@kbn/test'
   - '@kbn/inference-prompt-utils'
   - '@kbn/tracing-utils'
+  - '@kbn/dev-cli-errors'
+  - '@kbn/config-schema'
+  - '@kbn/evals-common'
 tags:
   - test-helper
   - package
@@ -47,14 +47,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

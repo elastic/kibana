@@ -17,7 +17,7 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LensAttributes } from '../../types';
-import { DEFAULT_LAYER_ID } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import {
   addLayerColumn,
   buildDatasetState,
@@ -42,7 +42,11 @@ import {
   getLensStateLayer,
   getDatasourceLayers,
 } from './utils';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isColorByValueAbsolute,
+} from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
@@ -108,7 +112,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
-      if (colorByValue?.range === 'absolute') {
+      if (isColorByValueAbsolute(colorByValue)) {
         props.metric.color = colorByValue;
       }
     }
@@ -171,7 +175,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

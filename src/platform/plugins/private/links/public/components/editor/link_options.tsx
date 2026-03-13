@@ -10,22 +10,19 @@
 import React, { useState } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
-import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
-import {
-  DashboardDrilldownOptionsComponent,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
-import type { UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  UrlDrilldownOptionsComponent,
-  DEFAULT_URL_DRILLDOWN_OPTIONS,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 
+import {
+  DashboardNavigationOptionsEditor,
+  DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+} from '@kbn/dashboard-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
 import type { LinkType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
-import type { LinkOptions } from '../../../server';
+import type { ExternalLinkOptions, LinkOptions } from '../../../server';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../external_link/constants';
+import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_edtior';
 
 export const LinkOptionsComponent = ({
   link,
@@ -36,19 +33,19 @@ export const LinkOptionsComponent = ({
   link?: UnorderedLink;
   setLinkOptions: (options: LinkOptions) => void;
 }) => {
-  const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardDrilldownOptions>({
-    ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+  const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardNavigationOptions>({
+    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     ...(link && link.type === DASHBOARD_LINK_TYPE ? link.options : {}),
   });
-  const [externalLinkOptions, setExternalLinkOptions] = useState<UrlDrilldownOptions>({
-    ...DEFAULT_URL_DRILLDOWN_OPTIONS,
+  const [externalLinkOptions, setExternalLinkOptions] = useState<ExternalLinkOptions>({
+    ...DEFAULT_EXTERNAL_LINK_OPTIONS,
     ...(link && link.type === EXTERNAL_LINK_TYPE ? link.options : {}),
   });
 
   return (
     <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkOptionsLabel()}>
       {selectedLinkType === DASHBOARD_LINK_TYPE ? (
-        <DashboardDrilldownOptionsComponent
+        <DashboardNavigationOptionsEditor
           options={dashboardLinkOptions}
           onOptionChange={(change) => {
             setDashboardLinkOptions({ ...dashboardLinkOptions, ...change });
@@ -56,7 +53,7 @@ export const LinkOptionsComponent = ({
           }}
         />
       ) : (
-        <UrlDrilldownOptionsComponent
+        <ExternalLinkOptionsEditor
           options={externalLinkOptions}
           onOptionChange={(change) => {
             setExternalLinkOptions({ ...externalLinkOptions, ...change });

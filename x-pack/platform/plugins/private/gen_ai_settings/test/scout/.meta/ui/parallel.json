@@ -1,0 +1,220 @@
+{
+  "sha1": "4847542db72a231fa1a56ea8d7082c5282080571",
+  "tests": [
+    {
+      "id": "30ebe9a34bf659d-a1567c5f112eb4c",
+      "title": "GenAI Settings - Agent Mode Complete Flow should switch to Agent mode and show Agent button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_mode_complete_flow.spec.ts",
+        "line": 26,
+        "column": 14
+      }
+    },
+    {
+      "id": "9e027472a4d5a66-af60253378cee15",
+      "title": "GenAI Settings - Agent Nav Button without Agent Builder Privileges should not display nav buttons without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/agent_nav_button.no_ab_privilege.spec.ts",
+        "line": 27,
+        "column": 14
+      }
+    },
+    {
+      "id": "eea8aed76d5ebee-74159a9bdad67c4",
+      "title": "GenAI Settings - AI Assistant Visibility without AI Assistants Privileges should not display AI Assistant elements without privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/ai_assistant_visibility.no_assistant_privilege.spec.ts",
+        "line": 34,
+        "column": 14
+      }
+    },
+    {
+      "id": "41648fafd99df04-2f777a05c614670",
+      "title": "GenAI Settings - AI Assistant Visibility should hide AI Assistant Visibility setting in Agent mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/ai_assistant_visibility.spec.ts",
+        "line": 23,
+        "column": 12
+      }
+    },
+    {
+      "id": "4efc85dbb40716c-9961aec1448fe75",
+      "title": "GenAI Settings - Confirmation Modal should cancel Agent selection without saving changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/confirmation_modal.spec.ts",
+        "line": 27,
+        "column": 14
+      }
+    },
+    {
+      "id": "09dd6e1d637aebe-90a30207a358704",
+      "title": "GenAI Settings - Documentation Section should show Documentation section in Agent mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/documentation_section.spec.ts",
+        "line": 26,
+        "column": 14
+      }
+    },
+    {
+      "id": "cc5a0237ff66706-e71616709be1a8a",
+      "title": "GenAI Settings - Page Display without Agent Builder Privileges should display correct UI elements without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.no_ab_privilege.spec.ts",
+        "line": 20,
+        "column": 14
+      }
+    },
+    {
+      "id": "602bc405b492080-a055534c34b87c6",
+      "title": "GenAI Settings - Page Display without AI Assistants Privileges should display correct UI elements without AI Assistants privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt",
+        "@svlSecurity",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.no_assistant_privilege.spec.ts",
+        "line": 27,
+        "column": 14
+      }
+    },
+    {
+      "id": "4c939ca2b72e878-ee032ba495e2030",
+      "title": "GenAI Settings - Page Display should display correct UI elements",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlOblt",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.spec.ts",
+        "line": 20,
+        "column": 14
+      }
+    },
+    {
+      "id": "cdceb40652fc7b9-56020806f0e0dd5",
+      "title": "GenAI Settings - Selection Modal without Agent Builder Privileges AI Agent card selection modal is disabled without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_ab_privilege.spec.ts",
+        "line": 21,
+        "column": 14
+      }
+    },
+    {
+      "id": "fa82b6a9601a92f-a266df6362889b2",
+      "title": "GenAI Settings - Selection Modal without AI Assistants Privileges AI Assistant cards should be disabled without AI Assistants privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.no_assistant_privilege.spec.ts",
+        "line": 20,
+        "column": 14
+      }
+    },
+    {
+      "id": "775241661a05d50-1766da9440bd32c",
+      "title": "GenAI Settings - AI Selection Modal Changes should open card selection modal when AI Assistant visibility is set to default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/selection_modal.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "75d3cbd6024f87a-9778307a26a7782",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Observability Space should change Chat Experience to Agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.observability.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "5b36b8da87d3695-7fdded14d854486",
+      "title": "GenAI Settings - Change Chat Experience to Classic in Search Space should change Chat Experience to Classic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.search.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    },
+    {
+      "id": "3808f991759e937-dc2fc3a60f810d3",
+      "title": "GenAI Settings - Change Chat Experience to Agent in Security Space should change Chat Experience to Agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/solution_space.security.spec.ts",
+        "line": 31,
+        "column": 14
+      }
+    }
+  ]
+}

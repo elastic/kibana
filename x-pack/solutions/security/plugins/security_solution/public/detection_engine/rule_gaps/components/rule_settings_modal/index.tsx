@@ -24,12 +24,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
-  useGetGapAutoFillScheduler,
   useCreateGapAutoFillScheduler,
   useUpdateGapAutoFillScheduler,
 } from '../../api/hooks/use_gap_auto_fill_scheduler';
 import * as i18n from '../../translations';
-import { useGapAutoFillCapabilities } from '../../logic/use_gap_auto_fill_capabilities';
+import { useGapAutoFillSchedulerContext } from '../../context/gap_auto_fill_scheduler_context';
 import { GapAutoFillLogsFlyout } from '../gap_auto_fill_logs';
 
 export interface RuleSettingsModalProps {
@@ -38,9 +37,14 @@ export interface RuleSettingsModalProps {
 }
 
 export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { canEditGapAutoFill, canAccessGapAutoFill } = useGapAutoFillCapabilities();
+  const {
+    canEditGapAutoFill,
+    canAccessGapAutoFill,
+    scheduler: gapAutoFillScheduler,
+    isSchedulerLoading: isLoadingGapAutoFillScheduler,
+  } = useGapAutoFillSchedulerContext();
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(isOpen);
-  const query = useGetGapAutoFillScheduler({ enabled: canAccessGapAutoFill });
   const createMutation = useCreateGapAutoFillScheduler();
   const updateMutation = useUpdateGapAutoFillScheduler();
   const { addSuccess, addError } = useAppToasts();
@@ -48,17 +52,14 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
   const [enabled, setEnabled] = useState<boolean>(false);
   const [isLogsFlyoutOpen, setIsLogsFlyoutOpen] = useState<boolean>(false);
 
-  const gapAutoFillScheduler = query.data;
-
   useEffect(() => {
-    if (isOpen && query.data) {
-      const isEnabled = query.data?.enabled ?? false;
+    if (isOpen && gapAutoFillScheduler) {
+      const isEnabled = gapAutoFillScheduler?.enabled ?? false;
       setEnabled(isEnabled);
     }
-  }, [isOpen, query.data]);
+  }, [isOpen, gapAutoFillScheduler]);
 
   const isSaving = createMutation.isLoading || updateMutation.isLoading;
-  const isLoadingGapAutoFillScheduler = query.isLoading;
 
   const onSave = async () => {
     try {
@@ -71,6 +72,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
         title: i18n.AUTO_GAP_FILL_TOAST_TITLE,
         text: i18n.AUTO_GAP_FILL_TOAST_TEXT,
       });
+      onClose();
     } catch (err) {
       addError(err, { title: i18n.AUTO_GAP_FILL_TOAST_TITLE });
     }
@@ -118,7 +120,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillSchedulerDescriptionDetail"
-                  defaultMessage="The gap fill scheduler controls how often auto gap filling runs to detect and recover missed rule executions. View the gap fill scheduler {logsLink} to monitor its status and errors."
+                  defaultMessage="The Auto gap fill setting lets you specify whether you want to automatically fill execution gaps that are detected for rules. You can track the status and history of gap fill jobs from the {logsLink}."
                   values={{
                     logsLink: (
                       <EuiLink
@@ -130,7 +132,7 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
                       >
                         <FormattedMessage
                           id="xpack.securitySolution.detectionEngine.ruleSettings.autoGapFillSchedulerLogsLinkText"
-                          defaultMessage="logs"
+                          defaultMessage="Gap fill scheduler"
                         />
                       </EuiLink>
                     ),

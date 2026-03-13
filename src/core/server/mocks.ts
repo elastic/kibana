@@ -111,6 +111,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
       },
       instanceUuid: 'instance-uuid',
       configs: ['/some/path/to/config/kibana.yml'],
+      airgapped: false,
     },
     config: pluginInitializerContextConfigMock<T>(config),
     node: nodeServiceMock.createInternalPrebootContract(),

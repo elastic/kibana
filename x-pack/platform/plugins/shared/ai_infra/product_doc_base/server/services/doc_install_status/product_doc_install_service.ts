@@ -85,7 +85,15 @@ export class ProductDocInstallClient {
           )
         : response?.saved_objects.filter((so) => so.attributes.inference_id === inferenceId);
 
-      savedObjects?.forEach(({ attributes }) => {
+      // Filter out Security Labs records (stored in the same SO type) so they don't overwrite
+      // the product docs "security" product status.
+      const productDocsSavedObjects = savedObjects?.filter((so) => {
+        // Treat missing resource_type as product_doc for backwards compatibility.
+        const resourceType = so.attributes?.resource_type ?? ResourceTypes.productDoc;
+        return resourceType === ResourceTypes.productDoc;
+      });
+
+      productDocsSavedObjects?.forEach(({ attributes }) => {
         installStatus[attributes.product_name as ProductName] = {
           status: attributes.installation_status,
           version: attributes.product_version,
@@ -119,6 +127,7 @@ export class ProductDocInstallClient {
       installation_status: 'installing' as const,
       last_installation_failure_reason: '',
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     };
     await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
       upsert: attributes,
@@ -130,6 +139,7 @@ export class ProductDocInstallClient {
     await this.soClient.update<TypeAttributes>(typeName, objectId, {
       installation_status: 'uninstalling',
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -143,6 +153,7 @@ export class ProductDocInstallClient {
       installation_status: 'installed',
       index_name: indexName,
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -156,6 +167,7 @@ export class ProductDocInstallClient {
       installation_status: 'error',
       last_installation_failure_reason: failureReason,
       inference_id: inferenceId,
+      resource_type: ResourceTypes.productDoc,
     });
   }
 
@@ -166,6 +178,7 @@ export class ProductDocInstallClient {
         installation_status: 'uninstalled',
         last_installation_failure_reason: '',
         inference_id: inferenceId,
+        resource_type: ResourceTypes.productDoc,
       });
     } catch (e) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -264,14 +277,115 @@ export class ProductDocInstallClient {
       }
     }
   }
+
+  // OpenAPI spec status helpers (stored in the same SO type but a different object id to avoid collisions)
+
+  async getOpenapiSpecInstallationStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<SecurityLabsStatusResponse> {
+    const objectId = getOpenAPISpecObjectId(inferenceId);
+    try {
+      const so = await this.soClient.get<TypeAttributes>(typeName, objectId);
+      return {
+        status: so.attributes.installation_status,
+        version: so.attributes.product_version,
+        ...(so.attributes.last_installation_failure_reason
+          ? { failureReason: so.attributes.last_installation_failure_reason }
+          : {}),
+      };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return { status: 'uninstalled' };
+      }
+      throw e;
+    }
+  }
+
+  async setOpenapiSpecInstallationStarted(fields: {
+    productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
+    inferenceId: string;
+  }) {
+    const { productName, productVersion, inferenceId } = fields;
+    const objectId = getOpenAPISpecObjectId(inferenceId);
+    const attributes: TypeAttributes = {
+      product_name: productName,
+      product_version: productVersion,
+      installation_status: 'installing',
+      last_installation_failure_reason: '',
+      inference_id: inferenceId,
+      resource_type: ResourceTypes.openapiSpec,
+    };
+    await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
+      upsert: attributes,
+    });
+  }
+
+  async setOpenapiSpecInstallationSuccessful(fields: {
+    productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
+    indexName: string;
+    inferenceId: string;
+  }) {
+    const { productName, productVersion, indexName, inferenceId } = fields;
+    const objectId = getOpenAPISpecObjectId(inferenceId);
+    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+      product_name: productName,
+      product_version: productVersion,
+      installation_status: 'installed',
+      index_name: indexName,
+      inference_id: inferenceId,
+      resource_type: ResourceTypes.openapiSpec,
+    });
+  }
+
+  async setOpenapiSpecInstallationFailed(fields: {
+    productName: 'kibana' | 'elasticsearch';
+    productVersion: string;
+    failureReason: string;
+    inferenceId: string;
+  }) {
+    const { productName, productVersion, failureReason, inferenceId } = fields;
+    const objectId = getOpenAPISpecObjectId(inferenceId);
+    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+      installation_status: 'error',
+      last_installation_failure_reason: failureReason,
+      inference_id: inferenceId,
+      resource_type: ResourceTypes.openapiSpec,
+      product_name: productName,
+      product_version: productVersion,
+    });
+  }
+
+  async setOpenapiSpecUninstalled(inferenceId: string | undefined) {
+    const objectId = getOpenAPISpecObjectId(inferenceId);
+    try {
+      await this.soClient.update<TypeAttributes>(typeName, objectId, {
+        installation_status: 'uninstalled',
+        last_installation_failure_reason: '',
+        inference_id: inferenceId,
+        resource_type: ResourceTypes.openapiSpec,
+      });
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw e;
+      }
+    }
+  }
 }
 
-const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) => {
+const getObjectId = (
+  sourceId: 'security-labs' | 'openapi-spec' | `product-doc-${ProductName}`,
+  inferenceId?: string
+) => {
   const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
-  return `kb-product-doc-${productName}${inferenceIdPart}-status`.toLowerCase();
+  return `kb-${sourceId}${inferenceIdPart}-status`.toLowerCase();
 };
+const getOpenAPISpecObjectId = (inferenceId?: string) => getObjectId('openapi-spec', inferenceId);
 
-const getSecurityLabsObjectId = (inferenceId: string | undefined) => {
-  const inferenceIdPart = !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : '';
-  return `kb-security-labs${inferenceIdPart}-status`.toLowerCase();
-};
+const getObjectIdFromProductName = (productName: ProductName, inferenceId: string | undefined) =>
+  getObjectId(`product-doc-${productName}`, inferenceId);
+
+const getSecurityLabsObjectId = (inferenceId?: string) => getObjectId('security-labs', inferenceId);

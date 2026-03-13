@@ -61,6 +61,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 frequency: '1m',
                 syncDelay: '1m',
               },
+              groupBy: ['host.name', 'service.name'],
+              artifacts: {
+                dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+              },
             },
             overwrite: true,
           });
@@ -96,6 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(template.settings).to.eql({
             frequency: '1m',
             syncDelay: '1m',
+          });
+          expect(template.groupBy).to.eql(['host.name', 'service.name']);
+          expect(template.artifacts).to.eql({
+            dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
           });
         });
       });

@@ -5,20 +5,34 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import '@kbn/code-editor-mock/jest_helper';
+
 import type { Props } from './editor';
 import { Editor } from './editor';
 
 describe('Editor Component', () => {
-  it('renders', async () => {
+  it('renders', () => {
+    const setEditorValue = jest.fn();
+    const onEditorReady = jest.fn();
+
     const props: Props = {
       editorValue: '',
-      setEditorValue: () => {},
+      setEditorValue,
       licenseEnabled: true,
-      onEditorReady: (e: any) => {},
+      onEditorReady,
     };
-    // Ignore the warning about Worker not existing for now...
-    const init = registerTestBed(Editor);
-    await init(props);
+
+    render(<Editor {...props} />);
+
+    const editor = screen.getByLabelText('Query editor');
+    expect(editor).toBeInTheDocument();
+    expect(editor).not.toHaveAttribute('readonly');
+
+    expect(onEditorReady).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(editor, { target: { value: '{ "query": {} }' } });
+    expect(setEditorValue).toHaveBeenCalledWith('{ "query": {} }', {});
   });
 });

@@ -8,9 +8,18 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 
-import { EuiFieldSearch, EuiText, useEuiTheme, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiIcon,
+  EuiScreenReaderOnly,
+  EuiFormPrepend,
+  type UseEuiTheme,
+  mathWithUnits,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type {
   ExtendedIntegrationCategory,
@@ -44,7 +53,7 @@ export const SearchBox: FunctionComponent<Props> = ({
   setUrlandReplaceHistory,
   onlyAgentlessFilter = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(searchBoxStyles);
 
   const onQueryChange = (e: any) => {
     const queryText = e.target.value;
@@ -107,43 +116,42 @@ export const SearchBox: FunctionComponent<Props> = ({
       fullWidth
       prepend={
         selectedCategoryTitle ? (
-          <EuiText
+          <EuiFormPrepend
+            label={
+              <>
+                <EuiScreenReaderOnly>
+                  <span>Searching category: </span>
+                </EuiScreenReaderOnly>
+                {getCategoriesLabel}
+              </>
+            }
             data-test-subj="epmList.categoryBadge"
-            size="xs"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              fontWeight: euiTheme.font.weight.bold,
-              backgroundColor: euiTheme.colors.lightestShade,
-            }}
           >
-            <EuiScreenReaderOnly>
-              <span>Searching category: </span>
-            </EuiScreenReaderOnly>
-            {getCategoriesLabel}
             <button
-              data-test-subj="epmList.categoryBadge.closeBtn"
+              css={styles.clearButton}
               onClick={onCategoryButtonClick}
               aria-label="Remove filter"
-              style={{
-                padding: euiTheme.size.xs,
-                paddingTop: '2px',
-              }}
+              data-test-subj="epmList.categoryBadge.closeBtn"
             >
-              <EuiIcon
-                type="cross"
-                color="text"
-                size="s"
-                style={{
-                  width: 'auto',
-                  padding: 0,
-                  backgroundColor: euiTheme.colors.lightestShade,
-                }}
-              />
+              <EuiIcon type="cross" color="text" size="s" />
             </button>
-          </EuiText>
+          </EuiFormPrepend>
         ) : undefined
       }
     />
   );
+};
+
+const searchBoxStyles = {
+  clearButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      blockSize: euiTheme.size.m,
+      inlineSize: euiTheme.size.m,
+      padding: euiTheme.size.s,
+      borderRadius: mathWithUnits(euiTheme.border.radius.small, (x) => x / 2),
+      backgroundColor: euiTheme.colors.backgroundLightText,
+    }),
 };

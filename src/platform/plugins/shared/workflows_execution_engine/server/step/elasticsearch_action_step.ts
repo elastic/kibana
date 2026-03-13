@@ -10,7 +10,10 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any,  */
 
-import { buildRequestFromConnector } from '@kbn/workflows';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { buildElasticsearchRequest } from '@kbn/workflows';
+import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -77,6 +80,94 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const stepType = (this.step as any).configuration?.type || this.step.type;
       const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
 
+      // Map ES transport maxResponseSize exceeded to our ResponseSizeLimitError
+      if (isMaximumResponseSizeExceededError(error)) {
+        const sizeLimitError = new ResponseSizeLimitError(
+          this.getMaxResponseBytes(),
+          this.step.name
+        );
+        // Run a lightweight query to help the user estimate the needed limit
+        try {
+          const esClient = this.stepExecutionRuntime.contextManager.getEsClientAsUser();
+          const index =
+            stepWith?.index || stepWith?.request?.path?.replace(/^\//, '').split('/')[0];
+          const query = stepWith?.query || stepWith?.body?.query || stepWith?.request?.body?.query;
+          const requestedSize = Number(stepWith?.size ?? stepWith?.body?.size ?? 0);
+
+          if (index) {
+            // Fetch 1 doc + count to estimate full response size
+            const sampleResult: any = await esClient.transport.request({
+              method: 'POST',
+              path: `/${index}/_search`,
+              body: {
+                size: 1,
+                track_total_hits: true,
+                ...(query ? { query } : {}),
+              },
+            });
+            const totalHits = sampleResult?.hits?.total?.value ?? sampleResult?.hits?.total ?? 0;
+            const sampleDoc = sampleResult?.hits?.hits?.[0];
+            const sampleDocBytes = sampleDoc
+              ? Buffer.byteLength(JSON.stringify(sampleDoc), 'utf8')
+              : 0;
+            const docsToFetch = requestedSize > 0 ? Math.min(totalHits, requestedSize) : totalHits;
+            const estimatedFullResponseBytes =
+              sampleDocBytes > 0
+                ? sampleDocBytes * docsToFetch + 500 // 500 bytes for response envelope
+                : undefined;
+
+            if (sizeLimitError.details) {
+              sizeLimitError.details._debug = {
+                totalMatchingDocs: totalHits,
+                requestedSize: requestedSize || '?',
+                avgDocSize: sampleDocBytes,
+                docsToFetch,
+                estimatedFullResponseSize: estimatedFullResponseBytes
+                  ? `~${formatBytes(estimatedFullResponseBytes)}`
+                  : 'unknown',
+                suggestedLimit: estimatedFullResponseBytes
+                  ? `${formatBytes(Math.ceil(estimatedFullResponseBytes * 1.1))}` // 10% headroom
+                  : undefined,
+                suggestion:
+                  `Query matches ${totalHits} docs (avg ~${formatBytes(sampleDocBytes)} each), ` +
+                  `step requests ${requestedSize || 'all'}. ${
+                    estimatedFullResponseBytes
+                      ? `Estimated full response: ~${formatBytes(estimatedFullResponseBytes)}. `
+                      : ''
+                  }To fit within the limit, try: ` +
+                  `(1) reduce 'size', ` +
+                  `(2) use '_source' to return only needed fields, ` +
+                  `(3) add filters to narrow results, or ${
+                    estimatedFullResponseBytes
+                      ? `(4) set max-step-size to at least ${formatBytes(
+                          Math.ceil(estimatedFullResponseBytes * 1.1)
+                        )}.`
+                      : `(4) increase max-step-size.`
+                  }`,
+              };
+            }
+          }
+        } catch {
+          // Best-effort -- don't fail the error handling if the debug query fails
+          if (sizeLimitError.details) {
+            sizeLimitError.details._debug = {
+              stepType,
+              query: stepWith,
+            };
+          }
+        }
+        this.workflowLogger.logError(
+          `Elasticsearch action response size exceeded: ${stepType}`,
+          sizeLimitError,
+          {
+            event: { action: 'elasticsearch-action', outcome: 'failure' },
+            tags: ['elasticsearch', 'internal-action', 'error', 'response-size-exceeded'],
+            labels: { step_type: stepType, action_type: 'elasticsearch' },
+          }
+        );
+        return { input: stepWith, output: undefined, error: sizeLimitError };
+      }
+
       this.workflowLogger.logError(`Elasticsearch action failed: ${stepType}`, error, {
         event: { action: 'elasticsearch-action', outcome: 'failure' },
         tags: ['elasticsearch', 'internal-action', 'error'],
@@ -91,27 +182,34 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
   }
 
   private async executeElasticsearchRequest(
-    esClient: any,
+    esClient: ElasticsearchClient,
     stepType: string,
     params: any
   ): Promise<any> {
+    const maxResponseBytes = this.getMaxResponseBytes();
+    const transportOptions = maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {};
+
     // Support both raw API format and connector-driven syntax
     if (params.request) {
       // Raw API format: { request: { method, path, body } } - like Dev Console
       const { method = 'GET', path, body } = params.request;
-      return esClient.transport.request({ method, path, body });
+      return esClient.transport.request({ method, path, body }, transportOptions);
     } else if (stepType === 'elasticsearch.request') {
       // Special case: elasticsearch.request type uses raw API format at top level
       const { method = 'GET', path, body, headers } = params;
-      return esClient.transport.request({ method, path, body }, headers ? { headers } : {});
+      return esClient.transport.request(
+        { method, path, body },
+        { ...transportOptions, ...(headers ? { headers } : {}) }
+      );
     } else {
       // Use generated connector definitions to determine method and path (covers all 568+ ES APIs)
       const {
         method,
         path,
         body: requestBody,
-        params: queryParams,
-      } = buildRequestFromConnector(stepType, params);
+        query: queryParams,
+        bulkBody,
+      } = buildElasticsearchRequest(stepType, params);
 
       // Build query string manually if needed
       let finalPath = path;
@@ -123,35 +221,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
       const requestOptions = {
         method,
         path: finalPath,
-        body: requestBody,
+        body: !bulkBody ? requestBody : undefined,
+        bulkBody,
       };
 
-      // TODO: This is a hack to handle bulk requests. We should refactor this to use the bulk API properly.
-      if (requestOptions.path.endsWith('/_bulk')) {
-        // Further processing for bulk requests can be added here
-        // SG: ugly hack cuz _bulk is special
-        const docs = requestOptions.body?.operations as Array<Record<string, unknown>> | undefined; // your 3 doc objects
-        // If the index is in the path `/tin-workflows/_bulk`, pass it explicitly:
-        const pathIndex = requestOptions.path.split('/')[1]; // "tin-workflows"
-
-        // Optional: forward query flags like refresh if you have them
-        const refresh = queryParams?.refresh ?? false;
-
-        // Turn each doc into an action+doc pair
-        const bulkBody = docs?.flatMap((doc) => {
-          // If you have ids, use: { index: { _id: doc._id } }
-          return [{ index: {} }, doc];
-        });
-
-        if (bulkBody?.length) {
-          return esClient.bulk({
-            index: pathIndex, // default index for all actions
-            refresh, // true | false | 'wait_for'
-            body: bulkBody, // [ {index:{}}, doc, {index:{}}, doc, ... ]
-          });
-        }
-      }
-      return esClient.transport.request(requestOptions);
+      return esClient.transport.request(requestOptions, transportOptions);
     }
   }
 }

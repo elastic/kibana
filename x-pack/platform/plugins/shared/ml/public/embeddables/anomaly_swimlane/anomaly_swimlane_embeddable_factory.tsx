@@ -42,8 +42,9 @@ import {
   Subscription,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
+import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
@@ -55,7 +56,6 @@ import {
 } from '../../application/explorer/swimlane_container';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeSwimLaneControls, swimLaneComparators } from './initialize_swim_lane_controls';
@@ -116,35 +116,31 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const query$ = ((initialState.rawState.query
-        ? new BehaviorSubject(initialState.rawState.query)
+      const query$ = ((initialState.query
+        ? new BehaviorSubject(initialState.query)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.query$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['query$'];
-      const filters$ = ((initialState.rawState.filters
-        ? new BehaviorSubject(initialState.rawState.filters)
+      const filters$ = ((initialState.filters
+        ? new BehaviorSubject(initialState.filters)
         : (parentApi as Partial<PublishesUnifiedSearch>)?.filters$) ??
         new BehaviorSubject(undefined)) as PublishesUnifiedSearch['filters$'];
 
       const refresh$ = new BehaviorSubject<void>(undefined);
 
-      const titleManager = initializeTitleManager(initialState.rawState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState);
 
-      const swimlaneManager = initializeSwimLaneControls(initialState.rawState, titleManager.api);
+      const swimlaneManager = initializeSwimLaneControls(initialState, titleManager.api);
 
       // Helpers for swim lane data fetching
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
       function serializeState() {
-        const rawState: AnomalySwimLaneEmbeddableState = {
+        return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...swimlaneManager.getLatestState(),
         } as AnomalySwimLaneEmbeddableState;
-        return {
-          rawState,
-          references: [],
-        };
       }
 
       const unsavedChangesApi = initializeUnsavedChanges<AnomalySwimLaneEmbeddableState>({
@@ -168,9 +164,9 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           };
         },
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved) swimlaneManager.reinitializeState(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) swimlaneManager.reinitializeState(lastSaved);
         },
       });
 
@@ -339,7 +335,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
               setSelectedCells(update);
 
               if (update) {
-                uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+                uiActions.executeTriggerActions(SWIM_LANE_SELECTION_TRIGGER, {
                   embeddable: api,
                   data: update,
                   updateCallback: setSelectedCells.bind(null, undefined),
@@ -365,6 +361,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"

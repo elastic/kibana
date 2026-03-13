@@ -8,7 +8,7 @@
  */
 
 import type { DataSetGraphNode } from '@kbn/workflows/graph';
-import { ExecutionError } from '../../utils';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -31,6 +31,7 @@ export class DataSetStepImpl extends BaseAtomicNodeImplementation<DataSetStep> {
       type: node.stepType,
       spaceId: '',
       with: node.configuration.with || {},
+      'max-step-size': node.configuration['max-step-size'],
     };
     super(dataSetStep, stepExecutionRuntime, undefined, workflowRuntime);
   }

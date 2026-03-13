@@ -19,7 +19,7 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { RESOLUTION_MATCH } from './__mocks__';
+import { RESOLUTION_MATCH } from './__mocks__/logs_data_source_resolution_match';
 
 const mockServices = createProfileProviderSharedServicesMock();
 

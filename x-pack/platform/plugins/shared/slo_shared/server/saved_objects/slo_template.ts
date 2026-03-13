@@ -46,6 +46,27 @@ export const sloTemplate: SavedObjectsType = {
         create: schema.object({}, { unknowns: 'allow' }),
       },
     },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attributes) => {
+          const fields = [
+            'name',
+            'description',
+            'indicator',
+            'budgetingMethod',
+            'objective',
+            'timeWindow',
+            'tags',
+            'settings',
+            'groupBy',
+            'artifacts',
+          ];
+          return pick(attributes, fields);
+        },
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
   },
   mappings: {
     dynamic: false,

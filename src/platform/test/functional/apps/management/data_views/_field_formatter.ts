@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async function () {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles([
         'kibana_admin',
         'test_field_formatters',
@@ -37,13 +37,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.replace({
+        'data_views:cache_max_age': 0,
+      });
     });
 
     after(async function afterAll() {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
+      await kibanaServer.uiSettings.replace({});
     });
 
     describe('set and change field formatter', function describeIndexTests() {
@@ -80,6 +83,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: 'A regular text',
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
             expectFormattedValue: 'A regular text',
+
+            // check available formats for ES_FIELD_TYPES.TEXT
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.TRUNCATE,
+              FIELD_FORMAT_IDS.URL,
+            ],
+          },
+          {
+            fieldType: ES_FIELD_TYPES.TEXT,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.STRING,
+            expectFormattedValue: '(blank)',
+
+            // check available formats for ES_FIELD_TYPES.TEXT
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.TRUNCATE,
+              FIELD_FORMAT_IDS.URL,
+            ],
+          },
+          {
+            fieldType: ES_FIELD_TYPES.TEXT,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.STRING,
+            expectFormattedValue: '(null)',
 
             // check available formats for ES_FIELD_TYPES.TEXT
             expectFormatterTypes: [
@@ -164,10 +199,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           },
           {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.TRUNCATE,
+            expectFormattedValue: '(blank)',
+            beforeSave: async () => {
+              await testSubjects.setValue('truncateEditorLength', '3');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.TRUNCATE,
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.setValue('truncateEditorLength', '3');
+            },
+          },
+          {
             fieldType: ES_FIELD_TYPES.INTEGER,
             fieldValue: 324,
             applyFormatterType: FIELD_FORMAT_IDS.STRING,
             expectFormattedValue: '324',
+            // check available formats for ES_FIELD_TYPES.INTEGER
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
+          },
+          {
+            fieldType: ES_FIELD_TYPES.INTEGER,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.STRING,
+            expectFormattedValue: '(null)',
             // check available formats for ES_FIELD_TYPES.INTEGER
             expectFormatterTypes: [
               FIELD_FORMAT_IDS.BOOLEAN,
@@ -208,9 +280,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           {
             fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
+            expectFormattedValue: '(null)',
+            // check available formats for ES_FIELD_TYPES.LONG
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: 324,
             applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
             expectFormattedValue: '+324',
+            beforeSave: async () => {
+              await testSubjects.setValue('numberEditorFormatPattern', '+0,0');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.NUMBER,
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '+0,0');
             },
@@ -239,6 +339,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           {
             fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.URL,
+            expectFormattedValue: '(null)',
+            expect: async (renderedValueContainer) => {
+              expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.URL,
+            expectFormattedValue: '(blank)',
+            expect: async (renderedValueContainer) => {
+              expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.URL,
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.setValue(
+                'urlEditorUrlTemplate',
+                'https://elastic.co/?value={{value}}'
+              );
+            },
+            expect: async (renderedValueContainer) => {
+              expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: 100,
             applyFormatterType: FIELD_FORMAT_IDS.URL,
             expectFormattedValue: 'url label',
@@ -255,6 +388,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               ).to.be('https://elastic.co/?value=100');
             },
           },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.URL,
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.setValue(
+                'urlEditorUrlTemplate',
+                'https://elastic.co/?value={{value}}'
+              );
+              await testSubjects.setValue('urlEditorLabelTemplate', 'url label');
+            },
+            expect: async (renderedValueContainer) => {
+              expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.URL,
+            expectFormattedValue: '(blank)',
+            beforeSave: async () => {
+              await testSubjects.setValue(
+                'urlEditorUrlTemplate',
+                'https://elastic.co/?value={{value}}'
+              );
+              await testSubjects.setValue('urlEditorLabelTemplate', 'url label');
+            },
+            expect: async (renderedValueContainer) => {
+              expect(await renderedValueContainer.findAllByTagName('a')).to.have.length(0);
+            },
+          },
         ]);
       });
 
@@ -265,6 +430,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: '2021-08-05T15:05:37.151Z',
             applyFormatterType: FIELD_FORMAT_IDS.DATE,
             expectFormattedValue: 'Aug 5, 2021',
+            beforeSave: async () => {
+              await testSubjects.setValue('dateEditorPattern', 'MMM D, YYYY');
+            },
+            // check available formats for ES_FIELD_TYPES.DATE
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.DATE,
+              FIELD_FORMAT_IDS.DATE_NANOS,
+              FIELD_FORMAT_IDS.RELATIVE_DATE,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
+          },
+          {
+            fieldType: ES_FIELD_TYPES.DATE,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.DATE,
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.setValue('dateEditorPattern', 'MMM D, YYYY');
             },
@@ -297,6 +479,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             applyFormatterType: FIELD_FORMAT_IDS.DATE_NANOS,
             expectFormattedValue: 'Jan 1, 2015 @ 12:10:30.123456789',
           },
+          {
+            fieldType: ES_FIELD_TYPES.DATE_NANOS,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.DATE_NANOS,
+            expectFormattedValue: '(null)',
+          },
         ]);
       });
 
@@ -307,6 +495,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldValue: 'look me up',
             applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
             expectFormattedValue: 'looked up!',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
+              await testSubjects.setValue('~staticLookupEditorValue', 'looked up!');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: '',
             beforeSave: async () => {
               await testSubjects.click('staticLookupEditorAddEntry');
               await testSubjects.setValue('~staticLookupEditorKey', 'look me up');
@@ -356,16 +555,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await testSubjects.setValue('~staticLookupEditorValue', 'yes');
             },
           },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.STATIC_LOOKUP,
+            expectFormattedValue: '',
+            beforeSave: async () => {
+              await testSubjects.click('staticLookupEditorAddEntry');
+              await testSubjects.setValue('~staticLookupEditorKey', 'true');
+              await testSubjects.setValue('~staticLookupEditorValue', 'yes');
+            },
+          },
         ]);
       });
 
       describe('Other formats', () => {
+        const checkColorPickerColor = async (picker: string, expectedColor: string) => {
+          await retry.waitFor('color swatch to be updated', async () => {
+            const pickerElement = await testSubjects.find(picker);
+            const colorSwatchIcon = await testSubjects.findDescendant(
+              'buttonColorSwatchIcon',
+              pickerElement
+            );
+            const style = await colorSwatchIcon.getAttribute('style');
+            return style?.includes(expectedColor) || false;
+          });
+        };
+
+        const configureRedColor = async () => {
+          await testSubjects.click('~colorEditorColorPicker');
+          await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+          await checkColorPickerColor('~colorEditorColorPicker', 'rgb(255, 255, 255)');
+          await testSubjects.click('~colorEditorColorPicker');
+          await testSubjects.click('~colorEditorBackgroundPicker');
+          await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+          await checkColorPickerColor('~colorEditorBackgroundPicker', 'rgb(255, 0, 0)');
+          await testSubjects.click('~colorEditorBackgroundPicker');
+        };
+
         testFormatEditors([
           {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: 123292,
             applyFormatterType: FIELD_FORMAT_IDS.DURATION,
             expectFormattedValue: '2 minutes',
+            beforeSave: async () => {
+              await testSubjects.setValue('durationEditorInputFormat', 'milliseconds');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.DURATION,
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.setValue('durationEditorInputFormat', 'milliseconds');
             },
@@ -393,10 +635,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
           },
           {
+            fieldType: ES_FIELD_TYPES.DOUBLE,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.PERCENT,
+            // check available formats for ES_FIELD_TYPES.DOUBLE
+            expectFormatterTypes: [
+              FIELD_FORMAT_IDS.BOOLEAN,
+              FIELD_FORMAT_IDS.BYTES,
+              FIELD_FORMAT_IDS.COLOR,
+              FIELD_FORMAT_IDS.CURRENCY,
+              FIELD_FORMAT_IDS.DURATION,
+              FIELD_FORMAT_IDS.NUMBER,
+              FIELD_FORMAT_IDS.PERCENT,
+              FIELD_FORMAT_IDS.STATIC_LOOKUP,
+              FIELD_FORMAT_IDS.STRING,
+              FIELD_FORMAT_IDS.URL,
+            ],
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.setValue('numberEditorFormatPattern', '0.0%');
+            },
+          },
+          {
             fieldType: ES_FIELD_TYPES.LONG,
             fieldValue: 1990000000,
             applyFormatterType: FIELD_FORMAT_IDS.BYTES,
             expectFormattedValue: '2GB',
+            beforeSave: async () => {
+              await testSubjects.setValue('numberEditorFormatPattern', '0b');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.LONG,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.BYTES,
+            expectFormattedValue: '(null)',
             beforeSave: async () => {
               await testSubjects.setValue('numberEditorFormatPattern', '0b');
             },
@@ -409,15 +682,66 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.click('~colorEditorColorPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
-              await testSubjects.click('~colorEditorBackgroundPicker');
-              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
+              await configureRedColor();
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
               expect(await span.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
               expect(await span.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.COLOR,
+            expectFormattedValue: '(null)',
+            beforeSave: async () => {
+              await testSubjects.click('colorEditorAddColor');
+              await testSubjects.setValue('~colorEditorKeyPattern', 'red');
+              await configureRedColor();
+            },
+            expect: async (renderedValueContainer) => {
+              const span = await renderedValueContainer.findByTagName('span');
+              expect(await span.getComputedStyle('background-color')).to.be('rgba(0, 0, 0, 0)');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.KEYWORD,
+            fieldValue: '',
+            applyFormatterType: FIELD_FORMAT_IDS.COLOR,
+            expectFormattedValue: '(blank)',
+            beforeSave: async () => {
+              await testSubjects.click('colorEditorAddColor');
+              await testSubjects.setValue('~colorEditorKeyPattern', '');
+              await configureRedColor();
+            },
+            expect: async (renderedValueContainer) => {
+              const span = await renderedValueContainer.findByTagName('span');
+              expect(await span.getComputedStyle('background-color')).to.be('rgba(0, 0, 0, 0)');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: true,
+            applyFormatterType: FIELD_FORMAT_IDS.COLOR,
+            expectFormattedValue: 'true',
+            beforeSave: async () => {
+              await configureRedColor();
+            },
+            expect: async (renderedValueContainer) => {
+              const span = await renderedValueContainer.findByTagName('span');
+              expect(await span.getComputedStyle('color')).to.be('rgba(255, 255, 255, 1)');
+              expect(await span.getComputedStyle('background-color')).to.be('rgba(255, 0, 0, 1)');
+            },
+          },
+          {
+            fieldType: ES_FIELD_TYPES.BOOLEAN,
+            fieldValue: null,
+            applyFormatterType: FIELD_FORMAT_IDS.COLOR,
+            expectFormattedValue: '(null)',
+            expect: async (renderedValueContainer) => {
+              const span = await renderedValueContainer.findByTagName('span');
+              expect(await span.getComputedStyle('background-color')).to.be('rgba(0, 0, 0, 0)');
             },
           },
         ]);
@@ -481,6 +805,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       if (await es.indices.exists({ index: indexTitle })) {
         await es.indices.delete({ index: indexTitle });
+        await kibanaServer.savedObjects.cleanStandardList();
       }
 
       await es.indices.create({

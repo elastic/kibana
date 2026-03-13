@@ -40,7 +40,18 @@ export async function indexAndAssertTargetStream(
   target: string,
   document: JsonObject
 ) {
-  const response = await esClient.index({ index: 'logs', document, refresh: 'wait_for' });
+  // Determine which root stream to index to based on the target
+  // - If target is logs.otel or starts with logs.otel., index to logs.otel
+  // - If target is logs.ecs or starts with logs.ecs., index to logs.ecs
+  // - Otherwise, index to logs (for legacy streams or migration scenarios)
+  let indexTarget = 'logs';
+  if (target === 'logs.otel' || target.startsWith('logs.otel.')) {
+    indexTarget = 'logs.otel';
+  } else if (target === 'logs.ecs' || target.startsWith('logs.ecs.')) {
+    indexTarget = 'logs.ecs';
+  }
+
+  const response = await esClient.index({ index: indexTarget, document, refresh: 'wait_for' });
   const result = await fetchDocument(esClient, target, response._id);
   expect(result._index).to.match(new RegExp(`^\.ds\-${target}-.*`));
   return result;
@@ -120,6 +131,23 @@ export async function deleteStream(
 ) {
   return await apiClient
     .fetch('DELETE /api/streams/{name} 2023-10-31', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function restoreDataStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('POST /internal/streams/{name}/_restore_data_stream', {
       params: {
         path: {
           name,

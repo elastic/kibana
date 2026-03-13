@@ -151,6 +151,10 @@ export const epmRouteService = {
     );
   },
 
+  getReviewUpgradePath: (pkgName: string) => {
+    return EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN.replace('{pkgName}', pkgName);
+  },
+
   getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)
@@ -351,6 +355,12 @@ export const agentRouteService = {
   postChangeAgentPrivilegeLevel: (agentId: string) =>
     AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN.replace('{agentId}', agentId),
   postBulkChangeAgentPrivilegeLevel: () => AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
+  postAgentRollback: (agentId: string) =>
+    AGENT_API_ROUTES.ROLLBACK_PATTERN.replace('{agentId}', agentId),
+  postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
+  postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
+  getAgentEffectiveConfig: (agentId: string) =>
+    AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
 };
 
 export const outputRoutesService = {

@@ -4,23 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/scout-security'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-qa'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/scout-security'
+  title: '@kbn/scout-security'
   description: Moon project for @kbn/scout-security
   channel: ''
   owner: '@elastic/appex-qa'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-scout-security
+  sourceRoot: x-pack/solutions/security/packages/kbn-scout-security
 dependsOn:
   - '@kbn/scout'
   - '@kbn/es'
   - '@kbn/cloud-security-posture-common'
+  - '@kbn/fleet-plugin'
 tags:
   - test-helper
   - package
@@ -34,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

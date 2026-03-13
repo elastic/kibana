@@ -217,12 +217,24 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  await setupUpgradeManagedPackagePolicies(soClient, esClient);
+  await setupUpgradeManagedPackagePolicies(soClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
-  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  const config = appContextService.getConfig();
+  const shouldDeferPackageBumpInstallVersion =
+    config?.startupOptimization?.deferPackageBumpInstallVersion ?? false;
+
+  if (shouldDeferPackageBumpInstallVersion) {
+    logger.info('Deferring package install version upgrade to background task');
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'upgradePackageInstallVersion',
+    });
+  } else {
+    await upgradePackageInstallVersion({ soClient, esClient, logger });
+  }
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');

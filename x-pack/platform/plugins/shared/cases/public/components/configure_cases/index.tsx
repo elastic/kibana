@@ -31,6 +31,7 @@ import type {
   ActionConnector,
   ObservableTypeConfiguration,
 } from '../../../common/types/domain';
+import { getNoneConnector } from '../../../common/utils/connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -38,7 +39,7 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import type { ClosureType } from '../../containers/configure/types';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
+import { normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
 import { getConnectorById, addOrReplaceField } from '../utils';
 import { HeaderPage } from '../header_page';
@@ -115,14 +116,13 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
-  const { triggersActionsUi } = useKibana().services;
+  const { triggersActionsUi, docLinks } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
   const { isObservablesFeatureEnabled } = useCasesFeatures();
-
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
@@ -178,7 +178,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     },
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
-
   const onConnectorCreated = useCallback(
     async (createdConnector: ActionConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
@@ -646,7 +645,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                         id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
                         values={{
                           appropriateLicense: (
-                            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            <EuiLink href={docLinks.links.subscriptions} target="_blank">
                               {i18n.LINK_APPROPRIATE_LICENSE}
                             </EuiLink>
                           ),

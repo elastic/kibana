@@ -21,7 +21,7 @@
       "serverless",
       "agentBuilder",
       "workflowsManagement",
-      "dataConnectors"
+      "dataSources"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

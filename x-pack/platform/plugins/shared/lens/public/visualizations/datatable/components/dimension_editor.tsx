@@ -262,7 +262,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
-                categories={getColorCategories(currentData?.rows, accessor, [null])}
+                categories={getColorCategories(currentData?.rows, [accessor], [null])}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
               />

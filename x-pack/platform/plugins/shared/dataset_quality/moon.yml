@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dataset-quality-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dataset-quality-plugin'
+  title: '@kbn/dataset-quality-plugin'
   description: Moon project for @kbn/dataset-quality-plugin
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/dataset_quality
+  sourceRoot: x-pack/platform/plugins/shared/dataset_quality
 dependsOn:
   - '@kbn/alerting-comparators'
   - '@kbn/alerting-plugin'
@@ -68,15 +67,12 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/stack-alerts-plugin'
   - '@kbn/std'
-  - '@kbn/task-manager-plugin'
-  - '@kbn/telemetry-plugin'
   - '@kbn/timerange'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ui-theme'
   - '@kbn/unified-histogram'
   - '@kbn/unified-search-plugin'
-  - '@kbn/usage-collection-plugin'
   - '@kbn/xstate-utils'
   - '@kbn/failure-store-modal'
   - '@kbn/logging-mocks'
@@ -98,14 +94,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

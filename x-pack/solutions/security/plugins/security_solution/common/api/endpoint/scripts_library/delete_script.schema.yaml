@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: Delete script schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library/{script_id}:
+    delete:
+      summary: Delete a scripts
+      operationId: EndpointScriptLibraryDeleteScript
+      description: Delete a script
+      x-codegen-enabled: false
+      x-labels: []
+      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+#      x-labels: [ ess, serverless ]
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          description: The ID of the script entry to be deleted.
+          example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+          schema:
+            type: string
+            description: The ID of the script entry to be deleted.
+            example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+
+      responses:
+        '200':
+          description: Delete script response.
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                response:
+                  summary: Delete script response example.
+                  value:
+

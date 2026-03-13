@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-agent-builder-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-agent-builder-plugin'
+  title: '@kbn/observability-agent-builder-plugin'
   description: Moon project for @kbn/observability-agent-builder-plugin
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
+  sourceRoot: x-pack/solutions/observability/plugins/observability_agent_builder
 dependsOn:
   - '@kbn/core'
   - '@kbn/agent-builder-common'
@@ -43,7 +42,6 @@ dependsOn:
   - '@kbn/inference-plugin'
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-utils'
-  - '@kbn/std'
   - '@kbn/spaces-plugin'
   - '@kbn/management-settings-ids'
   - '@kbn/logging'
@@ -54,9 +52,15 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
-  - '@kbn/observability-nav-icons'
-  - '@kbn/server-route-repository-client'
   - '@kbn/agent-builder-browser'
+  - '@kbn/sse-utils-server'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/core-analytics-browser'
+  - '@kbn/apm-types'
+  - '@kbn/slo-schema'
+  - '@kbn/apm-types-shared'
+  - '@kbn/observability-utils-server'
 tags:
   - plugin
   - prod
@@ -71,14 +75,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

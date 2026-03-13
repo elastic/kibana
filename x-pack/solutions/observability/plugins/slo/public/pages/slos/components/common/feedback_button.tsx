@@ -23,8 +23,9 @@ const feedbackButtonLabel = i18n.translate('xpack.slo.featureFeedbackButtonLabel
 });
 
 export function FeedbackButton({ disabled }: Props) {
-  const { kibanaVersion, cloud } = useKibana().services;
+  const { kibanaVersion, cloud, notifications } = useKibana().services;
   const { isServerless } = usePluginContext();
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   const feedbackUrl = getSurveyFeedbackURL({
     formUrl: SLO_FEEDBACK_LINK,
@@ -33,6 +34,8 @@ export function FeedbackButton({ disabled }: Props) {
     isServerlessEnv: isServerless,
     sanitizedPath: window.location.pathname,
   });
+
+  if (!isFeedbackEnabled) return null;
 
   return (
     <EuiHeaderLink

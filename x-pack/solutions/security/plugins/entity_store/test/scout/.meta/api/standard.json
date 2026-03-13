@@ -1,0 +1,1093 @@
+{
+  "sha1": "fb374e0c1241deba340defa265887a6f52e88672",
+  "tests": [
+    {
+      "id": "b766b9bba0d643a-9872ed8d1853c32",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for host and write to updates then latest index",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 140,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-1b29e03e5160c81",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for user and write to updates then latest index",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 258,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-87cc27d441c9286",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for service and write to updates then latest index",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 407,
+        "column": 12
+      }
+    },
+    {
+      "id": "b766b9bba0d643a-f28023257e21fbb",
+      "title": "Entity Store CCS logs extraction (test against local instance) Should run CCS extraction for generic and write to updates then latest index",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/ccs_logs_extraction.spec.ts",
+        "line": 482,
+        "column": 12
+      }
+    },
+    {
+      "id": "cee36c4ddddb47c-a1cb52089c3cbfd",
+      "title": "Entity Store CRUD API tests: 503 errors on stopped engine Should return 503 for bulk upsert when generic engine is stopped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api_stopped.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "be1b7d9a37ee643-77ddb42cb90a9b5",
+      "title": "Entity Store CRUD API tests Should create an entity",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "be1b7d9a37ee643-894f19d701043c3",
+      "title": "Entity Store CRUD API tests Should require a force flag",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "be1b7d9a37ee643-8ef9b6c90f39a9f",
+      "title": "Entity Store CRUD API tests Should perform an upsert",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api.spec.ts",
+        "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "be1b7d9a37ee643-9c629c9eedf9007",
+      "title": "Entity Store CRUD API tests Should perform a bulk upsert",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api.spec.ts",
+        "line": 160,
+        "column": 10
+      }
+    },
+    {
+      "id": "be1b7d9a37ee643-af6fe243706382c",
+      "title": "Entity Store CRUD API tests Should delete an entity",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/crud_api.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-75de561f5a0ef9b",
+      "title": "DSL query translation generic: DSL from doc with entity.id returns exactly that document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 63,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-045ae40a8799c1f",
+      "title": "DSL query translation host: DSL from doc with host.name + host.domain returns expected document(s)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-c7b74c2f13ce5eb",
+      "title": "DSL query translation host: DSL from doc with host.name only returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-922b0783bd35afb",
+      "title": "DSL query translation user: DSL from doc with user.name + event.module returns exactly that document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-be74c4bea6defa2",
+      "title": "DSL query translation user: DSL from doc with user.name + event.module returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-2bf3c0b1ed0fe95",
+      "title": "DSL query translation user: DSL from doc with data_stream.dataset only returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 176,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-ab9079b24d729e5",
+      "title": "DSL query translation user: DSL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 200,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-1d93d30940fd674",
+      "title": "DSL query translation service: DSL from doc with service.name returns exactly that document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 221,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-7b80eae50e38c53",
+      "title": "DSL query translation service: DSL from doc with service.name returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 242,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-3e81ca0df7fd68a",
+      "title": "DSL query translation containsIdFilter: generic filter returns only docs with entity.id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 263,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-5fb70df683a44b2",
+      "title": "DSL query translation containsIdFilter: service filter returns docs with service identity fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 280,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-f241ea11f39a0b4",
+      "title": "DSL query translation containsIdFilter: user filter returns docs with any user identity field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 307,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-536374cbef2ef17",
+      "title": "DSL query translation containsIdFilter: host filter returns docs with any host identity field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 346,
+        "column": 10
+      }
+    },
+    {
+      "id": "0cdf5c38d17a5a2-1d70ab94667db4a",
+      "title": "DSL query translation containsIdFilter: does not match docs with no identity fields for the type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
+        "line": 379,
+        "column": 10
+      }
+    },
+    {
+      "id": "5674044b3969a63-e635b79048cc29b",
+      "title": "Entity Store Logs Extraction with pagination (max 5 docs per page) Should extract properly extract host with pagination",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction_paginated.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee624d51beaf5dc-c56bc0b985a129f",
+      "title": "Entity Store entity maintainers Should return 403 when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee624d51beaf5dc-9611dacc0635259",
+      "title": "Entity Store entity maintainers Should return 403 when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "ee624d51beaf5dc-21c8ba6a65e32ee",
+      "title": "Entity Store entity maintainers Should return 400 when entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_maintainers.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-67ce9cc78bd0642",
+      "title": "ESQL query translation generic: ESQL from doc with entity.id returns exactly that document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-c0d8cbf0780a1fd",
+      "title": "ESQL query translation host: ESQL from doc with host.name + host.domain returns expected document(s)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-657503c2eb00154",
+      "title": "ESQL query translation host: ESQL from doc with host.name only returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-7b70b958f082395",
+      "title": "ESQL query translation user: ESQL from doc with user.name + event.module returns exactly that document (filter without EVAL)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-b7c4ce9ad93e7ee",
+      "title": "ESQL query translation user: ESQL from doc with user.name + event.module returns expected document (filter without EVAL)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 148,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-c429bafa66a1426",
+      "title": "ESQL query translation user: ESQL from doc with data_stream.dataset only (first chunk) returns expected document (filter without EVAL)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 172,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-6e6ed8b86bc712b",
+      "title": "ESQL query translation user: ESQL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 196,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-7e019146ec34854",
+      "title": "ESQL query translation service: ESQL from doc with service.name returns exactly that document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "ed96039c635ba86-6cab0feb220f8ef",
+      "title": "ESQL query translation service: ESQL from doc with service.name returns expected document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
+        "line": 238,
+        "column": 10
+      }
+    },
+    {
+      "id": "9698b39c072261f-fb5d89006e5f2aa",
+      "title": "Entity Store History Snapshot history snapshot: copies latest to history index and resets behaviors on latest",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-e1ef6b799a84fce",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for source index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-62ddc6b33c80984",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 117,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-625d2f2ef49120d",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "b9f6da09bb1a1e2-6c5b60f8439f3d5",
+      "title": "Entity Store API tests Should install the entity store happy path with feature flag enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "b9f6da09bb1a1e2-b00ff4ea2f75181",
+      "title": "Entity Store API tests Should fail with feature flag disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install.spec.ts",
+        "line": 48,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-edf468ca499c251",
+      "title": "Entity Store Main logs extraction Should extract properly extract host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-70644c9ff872ec2",
+      "title": "Entity Store Main logs extraction Should extract properly extract user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-66e9c7a3970c192",
+      "title": "Entity Store Main logs extraction Should extract properly extract service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 130,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-b83bb04860e3ad4",
+      "title": "Entity Store Main logs extraction Should extract properly extract generic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 166,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-e22bf5980fd8c5d",
+      "title": "Entity Store Main logs extraction Should properly handle field retention strategies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 202,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-1152aa9f3d6639f",
+      "title": "Entity Store Main logs extraction Should store user entities from both IDP and non-IDP sources with and without existing latest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 395,
+        "column": 10
+      }
+    },
+    {
+      "id": "eea391c0059ed1b-3226f9613eaf130",
+      "title": "Entity Store Main logs extraction Should store _source as nested objects after ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction.spec.ts",
+        "line": 510,
+        "column": 10
+      }
+    },
+    {
+      "id": "519a3ae85face73-8b7bdf39eb18b15",
+      "title": "Painless runtime field translation user: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-ad3a8d357a613b4",
+      "title": "Painless runtime field translation host: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-5add9fc2b06f046",
+      "title": "Painless runtime field translation service: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "519a3ae85face73-ccc70f24e03541e",
+      "title": "Painless runtime field translation generic: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-ac5435a64b2e2ab",
+      "title": "Entity Store Resolution API tests Link: should link entities to a target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-d540075aa7f17dc",
+      "title": "Entity Store Resolution API tests Link: should skip already-linked entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 86,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-d601e83594ce6b8",
+      "title": "Entity Store Resolution API tests Group: should return resolution group from target",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 113,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-af2b38dc38eb7be",
+      "title": "Entity Store Resolution API tests Group: should return same group from alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-32988f03f9377cd",
+      "title": "Entity Store Resolution API tests Group: should return standalone entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 171,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-17655c41267b0c3",
+      "title": "Entity Store Resolution API tests Unlink: should unlink alias entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 190,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-86d3f3e1e605e28",
+      "title": "Entity Store Resolution API tests Unlink: should skip non-alias entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-f49556f23277ecb",
+      "title": "Entity Store Resolution API tests Link: should return 400 for self-link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 248,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-c0753f88f610cbc",
+      "title": "Entity Store Resolution API tests Link: should return 404 for non-existent entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 262,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-aa054f480907c53",
+      "title": "Entity Store Resolution API tests Link: should return 400 for chain resolution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 272,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-0d7581a3d7d0f60",
+      "title": "Entity Store Resolution API tests Link: should return 400 when linking entity that has aliases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 298,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-2e5ae47106a8a2f",
+      "title": "Entity Store Resolution API tests Unlink: should return 404 for non-existent entities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 324,
+        "column": 10
+      }
+    },
+    {
+      "id": "d70526b3c43ca29-34c8169d17da7a9",
+      "title": "Entity Store Resolution API tests Group: should return 404 for non-existent entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/resolution_api.spec.ts",
+        "line": 334,
+        "column": 10
+      }
+    },
+    {
+      "id": "277ea92fc2a50d8-e81f4ab7b544efb",
+      "title": "Entity Store stop/start API tests Should stop and start the extract entity task after install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/start_stop.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    }
+  ]
+}

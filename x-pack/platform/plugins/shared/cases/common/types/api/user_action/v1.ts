@@ -29,6 +29,8 @@ export const CaseUserActionStatsRt = rt.strict({
   total_deletions: rt.number,
   total_comments: rt.number,
   total_comment_deletions: rt.number,
+  total_comment_creations: rt.number,
+  total_hidden_comment_updates: rt.number,
   total_other_actions: rt.number,
   total_other_action_deletions: rt.number,
 });

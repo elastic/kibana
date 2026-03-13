@@ -83,7 +83,7 @@ exports[`policy table shows empty state when there are no policies 1`] = `
               Create your first index lifecycle policy
             </h1>
             <div
-              class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
               class="euiText emotion-euiText-m-euiTextColor-subdued"

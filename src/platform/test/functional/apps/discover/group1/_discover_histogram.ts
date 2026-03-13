@@ -340,5 +340,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
     });
+
+    it('should save chart interval in persisted discover session', async () => {
+      const savedSearchName = 'with chart interval';
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.setChartInterval('Second');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('auto');
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('s');
+    });
+
+    it('should clear chart interval in persisted discover session', async () => {
+      const savedSearchName = 'with chart interval then cleared';
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.setChartInterval('Minute');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.setChartInterval('Auto');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('auto');
+    });
   });
 }

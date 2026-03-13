@@ -30,6 +30,8 @@
           "\nConfiguration for OpenTelemetry"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nWhether telemetry collection is enabled."
             ],
             "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -65,6 +69,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,6 +93,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-telemetry-config/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -125,6 +133,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry-config/src/config_schema.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

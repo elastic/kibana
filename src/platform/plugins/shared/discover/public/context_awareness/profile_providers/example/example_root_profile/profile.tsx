@@ -7,26 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
-import { AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
-import React, { useState } from 'react';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
+import { getFieldValue } from '@kbn/discover-utils';
+import React from 'react';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { ExampleContextProvider } from '../example_context';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
   isExperimental: true,
   profile: {
-    getRenderAppWrapper,
     getDefaultAdHocDataViews,
+    getDefaultEsqlQuery,
     getCellRenderers: (prev) => (params) => ({
       ...prev(params),
       '@timestamp': (props) => {
@@ -40,7 +32,8 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
       },
     }),
     /**
-     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+     * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
+     * `registerCustomPopoverItem`.
      * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
      * And it supports opening custom flyouts and any other modals on the click.
      * `getAppMenu` can be configured in both root and data source profiles.
@@ -50,48 +43,45 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
       const prevValue = prev(params);
 
       // Check `params` for the available deps
-
       return {
         appMenuRegistry: (registry) => {
           // Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
 
           // Register a custom submenu action
-          registry.registerCustomAction({
+          registry.registerCustomItem({
             id: 'example-custom-root-submenu',
-            type: AppMenuActionType.custom,
+            order: 1,
             label: 'Custom Submenu',
             testId: 'example-custom-root-submenu',
-            actions: [
+            iconType: 'logoElasticsearch',
+            items: [
               {
                 id: 'example-custom-root-action11',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom action 11 (from Root profile)',
-                  testId: 'example-custom-root-action11',
-                  onClick: ({ onFinishAction }) => {
-                    alert('Example Root Custom action 11 clicked');
-                    onFinishAction(); // This allows to close the popover and return focus back to the app menu DOM node
-                  },
+                order: 1,
+                label: 'Custom action 11 (from Root profile)',
+                testId: 'example-custom-root-action11',
+                run: ({ context: { onFinishAction } }) => {
+                  alert('Example Root Custom action 11 clicked');
+                  onFinishAction(); // This allows to return focus back to the app menu DOM node
                 },
               },
               {
                 id: 'example-custom-root-action12',
-                type: AppMenuActionType.custom,
-                controlProps: {
-                  label: 'Custom action 12 (from Root profile)',
-                  testId: 'example-custom-root-action12',
-                  onClick: ({ onFinishAction }) => {
-                    // This is an example of a custom action that opens a flyout or any other custom modal.
-                    // To do so, simply return a React element and call onFinishAction when you're done.
-                    return (
-                      <EuiFlyout
-                        onClose={onFinishAction}
-                        data-test-subj="example-custom-root-action12-flyout"
-                      >
-                        <div>Example custom action clicked</div>
-                      </EuiFlyout>
-                    );
-                  },
+                order: 2,
+                label: 'Custom action 12 (from Root profile)',
+                testId: 'example-custom-root-action12',
+                run: ({ context: { onFinishAction } }) => {
+                  // This is an example of a custom action that opens a flyout or any other custom modal.
+                  // To do so, simply return a React element and call onFinishAction when you're done.
+                  return (
+                    <EuiFlyout
+                      aria-label="Example custom action flyout"
+                      onClose={onFinishAction}
+                      data-test-subj="example-custom-root-action12-flyout"
+                    >
+                      <div>Example custom action clicked</div>
+                    </EuiFlyout>
+                  );
                 },
               },
             ],
@@ -114,45 +104,12 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
 export const createExampleSolutionViewRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-solution-view-root-profile',
   isExperimental: true,
-  profile: { getRenderAppWrapper, getDefaultAdHocDataViews },
+  profile: { getDefaultAdHocDataViews },
   resolve: (params) => ({
     isMatch: true,
     context: { solutionType: params.solutionNavId as SolutionType },
   }),
 });
-
-const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper'] =
-  (PrevWrapper) =>
-  ({ children }) => {
-    const [currentMessage, setCurrentMessage] = useState<string | undefined>(undefined);
-
-    return (
-      <PrevWrapper>
-        <ExampleContextProvider value={{ currentMessage, setCurrentMessage }}>
-          {children}
-          {currentMessage && (
-            <EuiFlyout
-              type="push"
-              maxWidth={500}
-              onClose={() => setCurrentMessage(undefined)}
-              data-test-subj="exampleRootProfileFlyout"
-            >
-              <EuiFlyoutHeader hasBorder>
-                <EuiTitle size="m">
-                  <h2>Inspect message</h2>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody>
-                <EuiCodeBlock isCopyable data-test-subj="exampleRootProfileCurrentMessage">
-                  {currentMessage}
-                </EuiCodeBlock>
-              </EuiFlyoutBody>
-            </EuiFlyout>
-          )}
-        </ExampleContextProvider>
-      </PrevWrapper>
-    );
-  };
 
 const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocDataViews'] =
   (prev) => () =>
@@ -165,3 +122,9 @@ const getDefaultAdHocDataViews: RootProfileProvider['profile']['getDefaultAdHocD
         timeFieldName: '@timestamp',
       },
     ];
+
+const getDefaultEsqlQuery: RootProfileProvider['profile']['getDefaultEsqlQuery'] =
+  (prev) => () => ({
+    ...prev(),
+    query: 'FROM my-example-* | LIMIT 10',
+  });

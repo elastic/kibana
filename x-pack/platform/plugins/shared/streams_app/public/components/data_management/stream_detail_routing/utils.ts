@@ -25,7 +25,7 @@ const toUIDefinition = <TRoutingDefinition extends RoutingDefinition>(
 const toAPIDefinition = (
   routingDefinitionWithAttributes: RoutingDefinitionWithUIAttributes
 ): RoutingDefinition => {
-  return omit(routingDefinitionWithAttributes, 'id');
+  return omit(routingDefinitionWithAttributes, 'id', 'isNew');
 };
 
 export const routingConverter = {

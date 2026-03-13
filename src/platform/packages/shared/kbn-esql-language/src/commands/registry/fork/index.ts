@@ -11,16 +11,19 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import { validate } from './validate';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const forkCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
   autocomplete,
   columnsAfter,
+  summary,
 };
 
 export const forkCommand = {
-  name: 'fork',
+  name: Commands.FORK,
   methods: forkCommandMethods,
   metadata: {
     hidden: false,

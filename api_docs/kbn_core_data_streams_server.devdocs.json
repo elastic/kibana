@@ -36,6 +36,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -10956,6 +10958,8 @@
               " = never>(args: { ...; }) => Promise<...>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -10967,6 +10971,8 @@
                 "label": "args",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 59,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -10988,6 +10994,8 @@
                       "<MappingsInDefinition, FullDocumentType, SRM>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 60,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -11079,7 +11087,7 @@
                       "TransportRequestOptions",
                       " | undefined): Promise<",
                       "WriteResponseBase",
-                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+                      ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
                       "default",
                       "; helpers: ",
                       "default",
@@ -11112,25 +11120,25 @@
                       " | undefined): Promise<",
                       "BulkResponse",
                       ">; }; capabilities: { (this: That, params?: ",
-                      "TODO",
+                      "CapabilitiesRequest",
                       " | undefined, options?: ",
                       "TransportRequestOptionsWithOutMeta",
                       " | undefined): Promise<",
-                      "TODO",
+                      "CapabilitiesResponse",
                       ">; (this: That, params?: ",
-                      "TODO",
+                      "CapabilitiesRequest",
                       " | undefined, options?: ",
                       "TransportRequestOptionsWithMeta",
                       " | undefined): Promise<",
                       "TransportResult",
                       "<",
-                      "TODO",
+                      "CapabilitiesResponse",
                       ", unknown>>; (this: That, params?: ",
-                      "TODO",
+                      "CapabilitiesRequest",
                       " | undefined, options?: ",
                       "TransportRequestOptions",
                       " | undefined): Promise<",
-                      "TODO",
+                      "CapabilitiesResponse",
                       ">; }; cat: ",
                       "default",
                       "; ccr: ",
@@ -11483,27 +11491,27 @@
                       "InfoResponse",
                       ">; }; ingest: ",
                       "default",
-                      "; knnSearch: { (this: That, params?: ",
-                      "TODO",
-                      " | undefined, options?: ",
+                      "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+                      "KnnSearchRequest",
+                      ", options?: ",
                       "TransportRequestOptionsWithOutMeta",
                       " | undefined): Promise<",
-                      "TODO",
-                      ">; (this: That, params?: ",
-                      "TODO",
-                      " | undefined, options?: ",
+                      "KnnSearchResponse",
+                      "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                      "KnnSearchRequest",
+                      ", options?: ",
                       "TransportRequestOptionsWithMeta",
                       " | undefined): Promise<",
                       "TransportResult",
                       "<",
-                      "TODO",
-                      ", unknown>>; (this: That, params?: ",
-                      "TODO",
-                      " | undefined, options?: ",
+                      "KnnSearchResponse",
+                      "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                      "KnnSearchRequest",
+                      ", options?: ",
                       "TransportRequestOptions",
                       " | undefined): Promise<",
-                      "TODO",
-                      ">; }; license: ",
+                      "KnnSearchResponse",
+                      "<TDocument>>; }; license: ",
                       "default",
                       "; logstash: ",
                       "default",
@@ -11642,6 +11650,8 @@
                       " | undefined, options?: ",
                       "TransportRequestOptions",
                       " | undefined): Promise<boolean>; }; profiling: ",
+                      "default",
+                      "; project: ",
                       "default",
                       "; putScript: { (this: That, params: ",
                       "PutScriptRequest",
@@ -11988,6 +11998,8 @@
                       "; }"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 61,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12008,6 +12020,8 @@
                       }
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 62,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -12022,6 +12036,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 63,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -12038,6 +12054,8 @@
             "label": "helpers",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12054,6 +12072,8 @@
                   "<unknown>) => Record<keyof SRM, unknown[]>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -12069,6 +12089,8 @@
                       "<unknown>"
                     ],
                     "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                    "lineNumber": 75,
+                    "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -12080,10 +12102,10 @@
           },
           {
             "parentPluginId": "@kbn/core-data-streams-server",
-            "id": "def-server.DataStreamClient.index",
+            "id": "def-server.DataStreamClient.create",
             "type": "Function",
             "tags": [],
-            "label": "index",
+            "label": "create",
             "description": [],
             "signature": [
               "(args: ",
@@ -12091,69 +12113,22 @@
                 "pluginId": "@kbn/data-streams",
                 "scope": "server",
                 "docId": "kibKbnDataStreamsPluginApi",
-                "section": "def-server.ClientIndexRequest",
-                "text": "ClientIndexRequest"
-              },
-              "<FullDocumentType>) => Promise<",
-              "WriteResponseBase",
-              ">"
-            ],
-            "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-data-streams-server",
-                "id": "def-server.DataStreamClient.index.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/data-streams",
-                    "scope": "server",
-                    "docId": "kibKbnDataStreamsPluginApi",
-                    "section": "def-server.ClientIndexRequest",
-                    "text": "ClientIndexRequest"
-                  },
-                  "<FullDocumentType>"
-                ],
-                "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-data-streams-server",
-            "id": "def-server.DataStreamClient.bulk",
-            "type": "Function",
-            "tags": [],
-            "label": "bulk",
-            "description": [],
-            "signature": [
-              "(args: ",
-              {
-                "pluginId": "@kbn/data-streams",
-                "scope": "server",
-                "docId": "kibKbnDataStreamsPluginApi",
-                "section": "def-server.ClientBulkRequest",
-                "text": "ClientBulkRequest"
+                "section": "def-server.ClientCreateRequest",
+                "text": "ClientCreateRequest"
               },
               "<FullDocumentType>) => Promise<",
               "BulkResponse",
               ">"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-data-streams-server",
-                "id": "def-server.DataStreamClient.bulk.$1",
+                "id": "def-server.DataStreamClient.create.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
@@ -12163,12 +12138,14 @@
                     "pluginId": "@kbn/data-streams",
                     "scope": "server",
                     "docId": "kibKbnDataStreamsPluginApi",
-                    "section": "def-server.ClientBulkRequest",
-                    "text": "ClientBulkRequest"
+                    "section": "def-server.ClientCreateRequest",
+                    "text": "ClientCreateRequest"
                   },
                   "<FullDocumentType>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 81,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12178,63 +12155,17 @@
           },
           {
             "parentPluginId": "@kbn/core-data-streams-server",
-            "id": "def-server.DataStreamClient.get",
+            "id": "def-server.DataStreamClient.exists",
             "type": "Function",
             "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              "(args: ",
-              {
-                "pluginId": "@kbn/data-streams",
-                "scope": "server",
-                "docId": "kibKbnDataStreamsPluginApi",
-                "section": "def-server.ClientGetRequest",
-                "text": "ClientGetRequest"
-              },
-              ") => Promise<",
-              "GetResponse",
-              "<FullDocumentType>>"
-            ],
-            "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-data-streams-server",
-                "id": "def-server.DataStreamClient.get.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/data-streams",
-                    "scope": "server",
-                    "docId": "kibKbnDataStreamsPluginApi",
-                    "section": "def-server.ClientGetRequest",
-                    "text": "ClientGetRequest"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-data-streams-server",
-            "id": "def-server.DataStreamClient.existsIndex",
-            "type": "Function",
-            "tags": [],
-            "label": "existsIndex",
+            "label": "exists",
             "description": [],
             "signature": [
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -12265,6 +12196,8 @@
               "<FullDocumentType, Agg>>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -12286,6 +12219,8 @@
                   "<SRM>"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -12302,6 +12237,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-data-streams/src/client.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -12323,6 +12260,8 @@
         "label": "BaseSearchRuntimeMappings",
         "description": [],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12338,6 +12277,8 @@
               "MappingRuntimeField"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/runtime.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12362,6 +12303,8 @@
           "<Mappings, FullMappings, SearchRuntimeMappings>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -12373,6 +12316,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12387,6 +12332,8 @@
               "SearchRuntimeMappings | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12405,6 +12352,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12416,6 +12365,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -12444,6 +12395,8 @@
               " | undefined; composedOf?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/definition.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12458,6 +12411,8 @@
         "label": "DataStreamsSetup",
         "description": [],
         "path": "src/core/packages/data-streams/server/src/contracts.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23386,6 +23341,8 @@
               "<...>) => void"
             ],
             "path": "src/core/packages/data-streams/server/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -23407,6 +23364,8 @@
                   "<MappingsInDefinition, FullDocumentType, SRM>"
                 ],
                 "path": "src/core/packages/data-streams/server/src/contracts.ts",
+                "lineNumber": 31,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -23425,6 +23384,8 @@
         "label": "DataStreamsStart",
         "description": [],
         "path": "src/core/packages/data-streams/server/src/contracts.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36585,6 +36546,8 @@
               " = never>(dataStreamName: string) => Promise<...>"
             ],
             "path": "src/core/packages/data-streams/server/src/contracts.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -36599,6 +36562,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/data-streams/server/src/contracts.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -36629,6 +36594,8 @@
           "<MappingsInDefinition, FullDocumentType, SRM>"
         ],
         "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36646,6 +36613,8 @@
               "<SRM>"
             ],
             "path": "src/platform/packages/private/kbn-data-streams/src/types/client.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

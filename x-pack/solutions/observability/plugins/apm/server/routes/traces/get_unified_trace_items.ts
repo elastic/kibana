@@ -8,21 +8,25 @@
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import type { EventOutcome, StatusCode } from '@kbn/apm-types';
+import type { EventOutcome, StatusCode, Transaction } from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { Transaction } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
   AT_TIMESTAMP,
   DURATION,
   EVENT_OUTCOME,
+  FAAS_COLDSTART,
   KIND,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
   SPAN_DURATION,
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
@@ -37,9 +41,16 @@ import {
   TRANSACTION_ID,
   TRANSACTION_MARKS_AGENT,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import type {
+  CompressionStrategy,
+  TraceItem,
+  TraceItemComposite,
+} from '../../../common/waterfall/unified_trace_item';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
@@ -58,6 +69,7 @@ const optionalFields = asMutableArray([
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TRANSACTION_RESULT,
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
@@ -71,19 +83,37 @@ const optionalFields = asMutableArray([
   OTEL_SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
   AGENT_NAME,
+  FAAS_COLDSTART,
+  SPAN_COMPOSITE_COUNT,
+  SPAN_COMPOSITE_SUM,
+  SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SERVICE_ENVIRONMENT,
+  ATTRIBUTE_HTTP_SCHEME,
+  ATTRIBUTE_HTTP_STATUS_CODE,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
-  const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
+  const groupedErrorsByDocId: Record<
+    string,
+    Array<{ errorDocId: string; errorDocIndex?: string }>
+  > = {};
 
   unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
+      const errorDocIndex = errorDoc.index;
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+        errorDocId: errorDoc.id,
+        ...(errorDocIndex ? { errorDocIndex } : {}),
+      });
     }
   });
   unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) => {
     if (errorDoc.span?.id) {
-      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({ errorDocId: errorDoc.id });
+      const errorDocIndex = errorDoc.index;
+      (groupedErrorsByDocId[errorDoc.span.id] ??= []).push({
+        errorDocId: errorDoc.id,
+        ...(errorDocIndex ? { errorDocIndex } : {}),
+      });
     }
   });
 
@@ -191,7 +221,8 @@ export async function getUnifiedTraceItems({
   const agentMarks: Record<string, number> = {};
   const traceItems = compactMap(unifiedTraceItems.hits.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
-    if (event[PROCESSOR_EVENT] === ProcessorEvent.transaction) {
+    const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
+    if (isTransactionDocument) {
       const source = hit._source as {
         transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
       };
@@ -215,10 +246,14 @@ export async function getUnifiedTraceItems({
       timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
       traceId: event[TRACE_ID],
       duration: resolveDuration(apmDuration, event[DURATION]),
+      result: isTransactionDocument
+        ? event[TRANSACTION_RESULT]
+        : resolveOtelResult(event[ATTRIBUTE_HTTP_SCHEME], event[ATTRIBUTE_HTTP_STATUS_CODE]),
       status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
       errors: errorsByDocId[id] ?? [],
       parentId: event[PARENT_ID],
       serviceName: event[SERVICE_NAME],
+      serviceEnvironment: event[SERVICE_ENVIRONMENT],
       type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
       sync: event[SPAN_SYNC],
       agentName: event[AGENT_NAME],
@@ -231,7 +266,15 @@ export async function getUnifiedTraceItems({
         spanType: event[SPAN_TYPE],
         agentName: event[AGENT_NAME],
         processorEvent: event[PROCESSOR_EVENT],
+        kind: event[KIND],
       }),
+      coldstart: event[FAAS_COLDSTART],
+      composite: resolveComposite(
+        event[SPAN_COMPOSITE_COUNT],
+        event[SPAN_COMPOSITE_SUM],
+        event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
+      ),
+      docType: event[PROCESSOR_EVENT] === ProcessorEvent.transaction ? 'transaction' : 'span',
     } satisfies TraceItem;
   });
 
@@ -246,16 +289,18 @@ export function getTraceItemIcon({
   spanType,
   agentName,
   processorEvent,
+  kind,
 }: {
   spanType?: string;
   agentName?: string;
   processorEvent?: ProcessorEvent;
+  kind?: string;
 }) {
   if (spanType?.startsWith('db')) {
     return 'database';
   }
 
-  if (processorEvent !== ProcessorEvent.transaction) {
+  if (processorEvent !== ProcessorEvent.transaction && kind !== 'Server') {
     return undefined;
   }
 
@@ -270,6 +315,15 @@ const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string)
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
 
+const resolveOtelResult = (
+  attributesHttpScheme?: string,
+  attributesHttpStatusCode?: string
+): string | undefined => {
+  return attributesHttpScheme && attributesHttpStatusCode
+    ? `${attributesHttpScheme.toUpperCase()} ${attributesHttpStatusCode}`
+    : undefined;
+};
+
 type EventStatus =
   | { fieldName: 'event.outcome'; value: EventOutcome }
   | { fieldName: 'status.code'; value: StatusCode }
@@ -283,4 +337,19 @@ const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): Ev
   if (statusCode) {
     return { fieldName: STATUS_CODE, value: statusCode };
   }
+};
+
+const isCompressionStrategy = (value?: string): value is CompressionStrategy =>
+  value === 'exact_match' || value === 'same_kind';
+
+const resolveComposite = (
+  count?: number,
+  sum?: number,
+  compressionStrategy?: string
+): TraceItemComposite | undefined => {
+  if (!count || !sum || !isCompressionStrategy(compressionStrategy)) {
+    return undefined;
+  }
+
+  return { count, sum, compressionStrategy };
 };

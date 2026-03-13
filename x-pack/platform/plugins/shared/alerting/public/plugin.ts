@@ -10,7 +10,7 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type { MaintenanceWindowsServerStart } from '@kbn/maintenance-windows-plugin/server';
@@ -70,7 +70,7 @@ export interface AlertingPluginSetup {
 export interface AlertingPluginStart {
   licensing: LicensingPluginStart;
   spaces: SpacesPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   data: DataPublicPluginStart;
   serverless?: ServerlessPluginStart;
 }

@@ -33,6 +33,10 @@ jest.mock('../utils/table_tab_items', () => ({
   ]),
 }));
 
+jest.mock('../components/cell_actions', () => ({
+  CellActions: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock('../components/table_field_value_cell', () => ({
   TableFieldValueCell: ({ values }: { values: string[] | null | undefined }) => (
     <span>{Array.isArray(values) ? values.join(', ') : values}</span>

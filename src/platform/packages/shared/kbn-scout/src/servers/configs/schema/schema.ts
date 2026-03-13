@@ -70,6 +70,8 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        // Only applicable for serverless CPS configs (cross-project search)
+        linkedElasticsearch: urlPartsSchema(),
         fleetserver: urlPartsSchema(),
       })
       .default(),
@@ -88,6 +90,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 
@@ -96,6 +99,7 @@ export const schema = Joi.object()
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
+        cps: Joi.boolean().default(false),
       })
       .default(),
 
