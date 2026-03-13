@@ -385,6 +385,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Integration name"
           />
         ),
+        width: '22%',
         render: (title: string, item: CreatedIntegrationRow) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -414,7 +415,7 @@ export const ManageIntegrationsTable: React.FC<{
             {item.successfulDataStreamCount}/{item.totalDataStreamCount}
           </EuiBadge>
         ),
-        width: '80px',
+        width: '12%',
       },
       {
         field: 'version',
@@ -424,6 +425,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Version"
           />
         ),
+        width: '10%',
         render: (version: string | undefined) => version ?? '-',
       },
       {
@@ -434,6 +436,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Created by"
           />
         ),
+        width: '16%',
         render: (_createdBy: string, item: CreatedIntegrationRow) => {
           const profile = item.createdByProfileUid
             ? userProfiles.get(item.createdByProfileUid)
@@ -494,10 +497,11 @@ export const ManageIntegrationsTable: React.FC<{
             </EuiBadge>
           );
         },
-        width: '124px',
+        width: '14%',
       },
       {
         name: '',
+        width: '18%',
         render: (item: CreatedIntegrationRow) => {
           if (item.status === 'approved') {
             return (
@@ -575,7 +579,6 @@ export const ManageIntegrationsTable: React.FC<{
 
           return null;
         },
-        width: '140px',
       },
       {
         name: (
@@ -584,7 +587,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Actions"
           />
         ),
-        width: '48px',
+        width: '8%',
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
@@ -827,7 +830,7 @@ export const ManageIntegrationsTable: React.FC<{
         pagination
         sorting
         data-test-subj="manageIntegrationsTable"
-        tableLayout="auto"
+        tableLayout="fixed"
       />
     </>
   );
