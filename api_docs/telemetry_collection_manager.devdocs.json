@@ -1570,7 +1570,7 @@
               "label": "optInStatus",
               "description": [],
               "path": "src/platform/plugins/shared/telemetry_collection_manager/server/plugin.ts",
-              "lineNumber": 189,
+              "lineNumber": 191,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false
@@ -1586,7 +1586,7 @@
                 "UnencryptedStatsGetterConfig"
               ],
               "path": "src/platform/plugins/shared/telemetry_collection_manager/server/plugin.ts",
-              "lineNumber": 190,
+              "lineNumber": 192,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false
@@ -1635,7 +1635,7 @@
                 "UnencryptedStatsGetterConfig"
               ],
               "path": "src/platform/plugins/shared/telemetry_collection_manager/server/plugin.ts",
-              "lineNumber": 258,
+              "lineNumber": 260,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false
