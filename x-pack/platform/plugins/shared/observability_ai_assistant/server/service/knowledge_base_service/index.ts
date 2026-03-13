@@ -248,6 +248,14 @@ export class KnowledgeBaseService {
       `documentsFromIntegrations: ${JSON.stringify(documentsFromIntegrations.slice(0, 5), null, 2)}`
     );
 
+    this.dependencies.logger.info(`documentsFromKb: ${JSON.stringify(documentsFromKb, null, 2)}`);
+    this.dependencies.logger.info(
+      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors, null, 2)}`
+    );
+    this.dependencies.logger.info(
+      `documentsFromIntegrations: ${JSON.stringify(documentsFromIntegrations, null, 2)}`
+    );
+
     const sortedEntries = orderBy(
       [...documentsFromKb, ...documentsFromConnectors, ...documentsFromIntegrations],
       'esScore',
@@ -255,6 +263,9 @@ export class KnowledgeBaseService {
     ).slice(0, limit.size ?? 20);
 
     const maxTokens = limit.tokens ?? 4_000;
+
+    this.dependencies.logger.info(`maxTokens: ${maxTokens}`);
+    this.dependencies.logger.info(`sortedEntries: ${JSON.stringify(sortedEntries, null, 2)}`);
 
     let tokenCount = 0;
 
@@ -267,6 +278,8 @@ export class KnowledgeBaseService {
         break;
       }
     }
+
+    this.dependencies.logger.info(`returnedEntries: ${JSON.stringify(returnedEntries, null, 2)}`);
 
     const droppedEntries = sortedEntries.length - returnedEntries.length;
     if (droppedEntries > 0) {
