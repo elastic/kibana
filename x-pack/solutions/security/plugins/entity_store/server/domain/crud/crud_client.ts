@@ -19,6 +19,7 @@ import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from '../errors';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { hashEuid, validateAndTransformDocForUpsert } from './utils';
+import { runWithSpan } from '../../telemetry/traces';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -54,6 +55,73 @@ export class CRUDClient {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.namespace = deps.namespace;
+    this.initWithTracing();
+  }
+
+  private initWithTracing(): void {
+    const namespace = this.namespace;
+
+    const baseUpsertEntity = this.upsertEntity.bind(this);
+    const tracedUpsertEntity = (
+      entityType: EntityType,
+      doc: Entity,
+      force: boolean
+    ): Promise<void> =>
+      runWithSpan({
+        name: 'entityStore.crud.upsert_entity',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'upsert_entity',
+          'entity_store.entity.type': entityType,
+          'entity_store.force': force,
+        },
+        cb: () => baseUpsertEntity(entityType, doc, force),
+      });
+
+    Object.defineProperty(this, 'upsertEntity', {
+      value: tracedUpsertEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseUpsertEntitiesBulk = this.upsertEntitiesBulk.bind(this);
+    const tracedUpsertEntitiesBulk = (
+      params: UpsertEntitiesBulkParams
+    ): Promise<BulkObjectResponse[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.upsert_entities_bulk',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'upsert_entities_bulk',
+          'entity_store.objects.count': params.objects.length,
+          'entity_store.force': params.force ?? false,
+        },
+        cb: () => baseUpsertEntitiesBulk(params),
+      });
+
+    Object.defineProperty(this, 'upsertEntitiesBulk', {
+      value: tracedUpsertEntitiesBulk,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseDeleteEntity = this.deleteEntity.bind(this);
+    const tracedDeleteEntity = (id: string): Promise<void> =>
+      runWithSpan({
+        name: 'entityStore.crud.delete_entity',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'delete_entity',
+          'entity_store.entity.id': id,
+        },
+        cb: () => baseDeleteEntity(id),
+      });
+
+    Object.defineProperty(this, 'deleteEntity', {
+      value: tracedDeleteEntity,
+      configurable: true,
+      writable: true,
+    });
   }
 
   // upsertEntity takes a single entity and tries to either create or update
