@@ -10,7 +10,7 @@ Page objects wrap UI interactions (navigation, clicking, filling forms) so tests
 Keep page objects focused on **UI interactions**. Don’t hide API setup/teardown inside page objects—use [API services](./api-services.md) or [fixtures](./fixtures.md) instead.
 ::::::
 
-For practical tips, see [best practices](./best-practices.md#page-object-tips).
+For practical tips, see the page object guidelines in [UI test best practices](./best-practices.md#use-existing-page-objects-to-interact-with-the-kibana-ui).
 
 ## Usage [scout-page-objects-usage]
 
