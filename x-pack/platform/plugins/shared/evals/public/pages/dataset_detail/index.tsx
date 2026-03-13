@@ -33,12 +33,13 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPageTemplate,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -99,6 +100,7 @@ const truncatedCellStyles = css`
 export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
   const {
@@ -519,33 +521,32 @@ export const DatasetDetailPage: React.FC = () => {
   );
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.getPageTitle(dataset?.name ?? datasetId)}
-        breadcrumbs={[
-          { text: i18n.BREADCRUMB_EVALUATIONS, onClick: () => history.push('/') },
-          { text: i18n.BREADCRUMB_DATASETS, onClick: () => history.push('/datasets') },
-          { text: dataset?.name ?? datasetId },
-        ]}
-        rightSideItems={
-          dataset
-            ? [
-                <EuiButton
-                  key="add-example"
-                  iconType="plusInCircle"
-                  onClick={openCreateExampleFlyout}
-                  fill
-                >
+    <>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {dataset ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
                   {i18n.ADD_EXAMPLE_BUTTON}
-                </EuiButton>,
-                <EuiButtonEmpty key="edit-metadata" iconType="pencil" onClick={openMetadataModal}>
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
                   {i18n.EDIT_METADATA_BUTTON}
-                </EuiButtonEmpty>,
-              ]
-            : []
-        }
-      />
-      <EuiPageTemplate.Section>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         {datasetError ? (
           <EuiText color="danger" size="s">
             <p>{String(datasetError)}</p>
@@ -626,7 +627,7 @@ export const DatasetDetailPage: React.FC = () => {
             />
           </>
         ) : null}
-      </EuiPageTemplate.Section>
+      </EuiPageSection>
 
       {/* Example detail flyout (read-only / edit mode) */}
       {selectedExample ? (
@@ -967,6 +968,6 @@ export const DatasetDetailPage: React.FC = () => {
           </EuiFlyoutBody>
         </EuiFlyoutResizable>
       ) : null}
-    </EuiPageTemplate>
+    </>
   );
 };
