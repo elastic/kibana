@@ -31,7 +31,7 @@ interface InventoryViewAttributes {
   region: string;
   sort: InventoryViewSort;
   view: InventoryViewViewType;
-  autoReload: boolean;
+  autoReload?: boolean;
   filterQuery: InventoryViewFilter;
   legend?: InventoryViewLegend;
   source?: string;

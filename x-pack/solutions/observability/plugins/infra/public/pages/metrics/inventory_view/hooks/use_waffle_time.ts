@@ -5,49 +5,65 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useEffect, useMemo } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
-import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import type { Moment } from 'moment';
+import type { TimeRange } from '@kbn/es-query';
 import type { InventoryView } from '../../../../../common/inventory_views';
-import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useInventoryViewsContext } from './use_inventory_views';
+
+const DEFAULT_FROM = 'now-15m';
+const DEFAULT_TO = 'now';
+
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
-  currentTime: Date.now(),
-  isAutoReloading: false,
+  from: DEFAULT_FROM,
+  to: DEFAULT_TO,
 };
 
-function mapInventoryViewToState(savedView: InventoryView, defaultTime?: Moment): WaffleTimeState {
-  const { time, autoReload } = savedView.attributes;
+const DEFAULT_DATE_RANGE: TimeRange = { from: DEFAULT_FROM, to: DEFAULT_TO };
 
-  return {
-    currentTime: time ?? defaultTime?.toDate().getTime() ?? Date.now(),
-    isAutoReloading: autoReload,
-  };
+function mapInventoryViewToState(savedView: InventoryView): WaffleTimeState {
+  const { time, dateRange } = savedView.attributes;
+
+  if (dateRange) {
+    return { from: dateRange.from, to: dateRange.to };
+  }
+
+  if (time != null) {
+    return {
+      from: new Date(time - 15 * 60 * 1000).toISOString(),
+      to: new Date(time).toISOString(),
+    };
+  }
+
+  return DEFAULT_WAFFLE_TIME_STATE;
 }
 
 export const useWaffleTime = () => {
-  // INFO: We currently only use the "to" time, but in the future we may do more.
   const { currentView } = useInventoryViewsContext();
-  const [getTime] = useKibanaTimefilterTime({ from: 'now', to: 'now' });
-  const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
-    defaultState: currentView
-      ? mapInventoryViewToState(currentView, kibanaTime)
-      : {
-          ...DEFAULT_WAFFLE_TIME_STATE,
-          currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
-        },
+    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_TIME_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleTime',
     writeDefaultState: true,
   });
+
+  const dateRange: TimeRange = { from: urlState.from, to: urlState.to };
+
+  const setDateRange = useCallback(
+    (range: TimeRange) => {
+      setUrlState({ from: range.from, to: range.to });
+    },
+    [setUrlState]
+  );
+
+  useSyncKibanaTimeFilterTime(DEFAULT_DATE_RANGE, dateRange, setDateRange);
 
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
@@ -57,49 +73,39 @@ export const useWaffleTime = () => {
     }
   }, [currentView, setUrlState]);
 
-  const startAutoReload = useCallback(() => {
-    setUrlState((previous) => ({ ...previous, isAutoReloading: true, currentTime: Date.now() }));
-  }, [setUrlState]);
-
-  const stopAutoReload = useCallback(() => {
-    setUrlState((previous) => ({ ...previous, isAutoReloading: false }));
-  }, [setUrlState]);
-
-  const jumpToTime = useCallback(
-    (time: number) => {
-      setUrlState((previous) => ({ ...previous, currentTime: time }));
-    },
-    [setUrlState]
-  );
-
-  const currentTimeRange = useMemo(
-    () => ({
-      from: urlState.currentTime - 1000 * 60 * 5,
-      interval: '1m',
-      to: urlState.currentTime,
-    }),
-    [urlState.currentTime]
-  );
-
   return {
-    ...urlState,
-    currentTimeRange,
-    startAutoReload,
-    stopAutoReload,
-    jumpToTime,
+    dateRange,
+    setDateRange,
     setWaffleTimeState: setUrlState,
   };
 };
 
 export const WaffleTimeStateRT = rt.type({
+  from: rt.string,
+  to: rt.string,
+});
+
+const legacyWaffleTimeStateRT = rt.type({
   currentTime: rt.number,
   isAutoReloading: rt.boolean,
 });
 
 export type WaffleTimeState = rt.TypeOf<typeof WaffleTimeStateRT>;
 const encodeUrlState = WaffleTimeStateRT.encode;
-const decodeUrlState = (value: unknown) =>
-  pipe(WaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
+const decodeUrlState = (value: unknown): WaffleTimeState | undefined => {
+  const decoded = pipe(WaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
+  if (decoded) {
+    return decoded;
+  }
+  const legacy = pipe(legacyWaffleTimeStateRT.decode(value), fold(constant(undefined), identity));
+  if (legacy) {
+    return {
+      from: new Date(legacy.currentTime - 15 * 60 * 1000).toISOString(),
+      to: new Date(legacy.currentTime).toISOString(),
+    };
+  }
+  return undefined;
+};
 
 export const WaffleTime = createContainer(useWaffleTime);
 export const [WaffleTimeProvider, useWaffleTimeContext] = WaffleTime;

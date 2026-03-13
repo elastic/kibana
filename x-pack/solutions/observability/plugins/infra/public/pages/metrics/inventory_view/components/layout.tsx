@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import useInterval from 'react-use/lib/useInterval';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from '@emotion/styled';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import DateMath from '@kbn/datemath';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -63,14 +63,18 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     changeAutoBounds,
     changeLegend,
   } = useWaffleOptionsContext();
-  const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
+  const { dateRange } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
   const legendRules = legend?.rules ?? DEFAULT_LEGEND.rules;
   const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
   const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
   const legendType = legend?.type ?? 'gradient';
-  const AUTO_REFRESH_INTERVAL = 5 * 1000;
+
+  const currentTime = useMemo(
+    () => DateMath.parse(dateRange.to, { roundUp: true })?.valueOf() ?? Date.now(),
+    [dateRange.to]
+  );
 
   const { hasEcsSchema, hasSemconvSchema, hasEcsK8sIntegration, hasSemconvK8sIntegration } =
     useKubernetesDashboardPromotion(nodeType);
@@ -91,15 +95,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
     sort,
     groupBy,
   };
-
-  useInterval(
-    () => {
-      if (!loading) {
-        jumpToTime(Date.now());
-      }
-    },
-    isAutoReloading ? AUTO_REFRESH_INTERVAL : null
-  );
 
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
@@ -122,12 +117,12 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   );
 
   useEffect(() => {
-    if (loading && !isAutoReloading) {
+    if (loading) {
       setShowLoading(true);
-    } else if (!loading) {
+    } else {
       setShowLoading(false);
     }
-  }, [loading, isAutoReloading]);
+  }, [loading]);
 
   const handleLegendControlChange = useCallback(
     (opts: LegendControlOptions) => {
@@ -226,8 +221,6 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
                   boundsOverride={boundsOverride}
                   formatter={formatter}
                   bottomMargin={height}
-                  isAutoReloading={isAutoReloading}
-                  refreshInterval={AUTO_REFRESH_INTERVAL}
                 />
               )}
             </AutoSizer>

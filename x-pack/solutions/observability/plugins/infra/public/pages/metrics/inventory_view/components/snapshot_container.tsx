@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import DateMath from '@kbn/datemath';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
@@ -19,7 +20,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
     useWaffleOptionsContext();
-  const { currentTime } = useWaffleTimeContext();
+  const { dateRange } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
 
   const { inventoryPrefill } = useAlertPrefillContext();
@@ -27,6 +28,12 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
   useEffect(() => {
     return () => inventoryPrefill.reset();
   }, [inventoryPrefill]);
+
+  const parsedDateRange = useMemo(() => {
+    const from = DateMath.parse(dateRange.from)?.valueOf() ?? Date.now() - 15 * 60 * 1000;
+    const to = DateMath.parse(dateRange.to, { roundUp: true })?.valueOf() ?? Date.now();
+    return { from, to };
+  }, [dateRange.from, dateRange.to]);
 
   const {
     loading,
@@ -39,7 +46,8 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
       groupBy,
       nodeType,
       sourceId,
-      currentTime,
+      from: parsedDateRange.from,
+      to: parsedDateRange.to,
       accountId,
       region,
       schema: preferredSchema,
@@ -50,7 +58,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
 
   return (
     <>
-      <FilterBar interval={interval} />
+      <FilterBar />
       <LayoutView loading={loading} nodes={nodes} interval={interval} />
     </>
   );

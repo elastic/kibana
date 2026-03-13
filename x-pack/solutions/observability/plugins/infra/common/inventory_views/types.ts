@@ -106,10 +106,13 @@ export const inventoryViewAttributesRT = rt.intersection([
   inventoryViewBasicAttributesRT,
   inventoryViewFlagsRT,
   rt.type({
-    autoReload: rt.boolean,
     filterQuery: inventoryViewAttributesFilterStateRT,
   }),
-  rt.partial({ time: rt.number }),
+  rt.partial({
+    autoReload: rt.boolean,
+    time: rt.number,
+    dateRange: rt.type({ from: rt.string, to: rt.string }),
+  }),
 ]);
 
 const singleInventoryViewAttributesRT = rt.exact(

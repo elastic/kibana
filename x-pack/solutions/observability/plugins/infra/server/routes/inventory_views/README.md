@@ -98,7 +98,6 @@ Status code: 200
       "autoBounds": true,
       "accountId": "",
       "region": "",
-      "autoReload": false,
       "filterQuery": {
         "expression": "",
         "kind": "kuery"
@@ -170,7 +169,6 @@ Creates a new inventory view.
       "autoBounds": true,
       "accountId": "",
       "region": "",
-      "autoReload": false,
       "filterQuery": {
           "expression": "",
           "kind": "kuery"
@@ -222,7 +220,6 @@ Status code: 201
       "autoBounds": true,
       "accountId": "",
       "region": "",
-      "autoReload": false,
       "filterQuery": {
         "expression": "",
         "kind": "kuery"
@@ -317,7 +314,6 @@ Status code: 200
       "autoBounds": true,
       "accountId": "",
       "region": "",
-      "autoReload": false,
       "filterQuery": {
         "expression": "",
         "kind": "kuery"

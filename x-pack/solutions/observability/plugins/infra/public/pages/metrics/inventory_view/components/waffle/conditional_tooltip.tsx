@@ -54,7 +54,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     groupBy: [],
     nodeType,
     sourceId,
-    currentTime: requestCurrentTime.current,
+    to: requestCurrentTime.current,
     accountId: '',
     region: '',
     schema: preferredSchema,

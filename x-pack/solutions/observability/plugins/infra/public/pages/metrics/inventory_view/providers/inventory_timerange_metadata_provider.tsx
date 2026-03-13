@@ -6,21 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
+import DateMath from '@kbn/datemath';
 import { TimeRangeMetadataProvider } from '../../../../hooks/use_time_range_metadata';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+
 export const InventoryTimeRangeMetadataProvider = ({ children }: { children: React.ReactNode }) => {
   const { nodeType } = useWaffleOptionsContext();
   const { filterQuery } = useWaffleFiltersContext();
-  const { currentTimeRange } = useWaffleTimeContext();
+  const { dateRange } = useWaffleTimeContext();
 
   const { start, end } = useMemo(() => {
+    const from = DateMath.parse(dateRange.from);
+    const to = DateMath.parse(dateRange.to, { roundUp: true });
     return {
-      start: new Date(currentTimeRange.from).toISOString(),
-      end: new Date(currentTimeRange.to).toISOString(),
+      start: from ? from.toISOString() : new Date().toISOString(),
+      end: to ? to.toISOString() : new Date().toISOString(),
     };
-  }, [currentTimeRange.from, currentTimeRange.to]);
+  }, [dateRange.from, dateRange.to]);
 
   if (nodeType !== 'host' && nodeType !== 'pod') {
     return <>{children}</>;

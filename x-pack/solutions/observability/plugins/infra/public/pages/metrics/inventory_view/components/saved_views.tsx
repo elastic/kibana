@@ -44,7 +44,7 @@ export const SavedViews = () => {
     timelineOpen,
     preferredSchema,
   } = useWaffleOptionsContext();
-  const { currentTime, isAutoReloading } = useWaffleTimeContext();
+  const { dateRange } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
 
   return (
@@ -75,9 +75,7 @@ export const SavedViews = () => {
         legend,
         sort,
         timelineOpen,
-        time: currentTime,
-        autoReload: isAutoReloading,
-        // retrocompatibility with saved views
+        dateRange: { from: dateRange.from, to: dateRange.to },
         filterQuery: {
           expression: filterQuery.query,
           kind: filterQuery.language,

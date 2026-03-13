@@ -18,10 +18,15 @@ export interface InventoryLocatorParams extends SerializableRecord {
     expression: string;
     kind: string;
   };
-  waffleTime?: {
-    currentTime: number;
-    isAutoReloading: boolean;
-  };
+  waffleTime?:
+    | {
+        from: string;
+        to: string;
+      }
+    | {
+        currentTime: number;
+        isAutoReloading: boolean;
+      };
   waffleOptions?: {
     accountId: string;
     autoBounds: boolean;
@@ -62,8 +67,8 @@ export class InventoryLocatorDefinition implements LocatorDefinition<InventoryLo
       waffleFilter: rison.encodeUnknown(params.waffleFilter ?? { kind: 'kuery', expression: '' }),
       waffleTime: rison.encodeUnknown(
         params.waffleTime ?? {
-          currentTime: new Date().getTime(),
-          isAutoReloading: false,
+          from: 'now-15m',
+          to: 'now',
         }
       ),
       waffleOptions: rison.encodeUnknown(

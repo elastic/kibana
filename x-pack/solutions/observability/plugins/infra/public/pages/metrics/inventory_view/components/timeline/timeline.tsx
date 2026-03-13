@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
+import DateMath from '@kbn/datemath';
 import { first, last } from 'lodash';
 import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton, useEuiTheme } from '@elastic/eui';
 import type {
@@ -56,17 +57,22 @@ interface Props {
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region, preferredSchema } = useWaffleOptionsContext();
-  const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
+  const { dateRange, setDateRange } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
   const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
+
+  const parsedTo = useMemo(
+    () => DateMath.parse(dateRange.to, { roundUp: true })?.valueOf() ?? Date.now(),
+    [dateRange.to]
+  );
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline({
     kuery: filterQuery.query,
     metrics: [metric],
     nodeType,
     sourceId,
-    currentTime,
+    to: parsedTo,
     accountId,
     region,
     interval,
@@ -157,15 +163,15 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const onClickPoint: ElementClickListener = useCallback(
     ([elementEvent]) => {
-      // casting to GeometryValue as we are using cartesian charts
       const [geometryValue] = elementEvent as XYChartElementEvent;
       if (geometryValue && !Array.isArray(geometryValue)) {
         const { x: timestamp } = geometryValue;
-        jumpToTime(timestamp);
-        stopAutoReload();
+        const clickedTo = new Date(timestamp).toISOString();
+        const clickedFrom = new Date(timestamp - 15 * 60 * 1000).toISOString();
+        setDateRange({ from: clickedFrom, to: clickedTo });
       }
     },
-    [jumpToTime, stopAutoReload]
+    [setDateRange]
   );
 
   if (loading) {

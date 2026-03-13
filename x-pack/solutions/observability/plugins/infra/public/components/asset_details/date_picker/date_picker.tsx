@@ -14,57 +14,48 @@ import {
   type OnRefreshProps,
   type EuiSuperDatePickerProps,
 } from '@elastic/eui';
-import type {
-  OnRefreshChangeProps,
-  DurationRange,
-} from '@elastic/eui/src/components/date_picker/types';
-import { i18n } from '@kbn/i18n';
+import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import React, { useCallback, useMemo } from 'react';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { Popover } from '../tabs/common/popover';
-
-const COMMONLY_USED_RANGES: DurationRange[] = [
-  {
-    start: 'now-15m',
-    end: 'now',
-    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last15Minutes', {
-      defaultMessage: 'Last 15 minutes',
-    }),
-  },
-  {
-    start: 'now-1h',
-    end: 'now',
-    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last1Hour', {
-      defaultMessage: 'Last 1 hour',
-    }),
-  },
-  {
-    start: 'now-3h',
-    end: 'now',
-    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last3Hours', {
-      defaultMessage: 'Last 3 hours',
-    }),
-  },
-  {
-    start: 'now-24h',
-    end: 'now',
-    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last24Hours', {
-      defaultMessage: 'Last 24 hours',
-    }),
-  },
-  {
-    start: 'now-7d',
-    end: 'now',
-    label: i18n.translate('xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days', {
-      defaultMessage: 'Last 7 days',
-    }),
-  },
-];
 
 export const DatePicker = () => {
   const { dateRange, autoRefresh, setDateRange, setAutoRefresh, onRefresh } =
     useDatePickerContext();
+  const {
+    services: {
+      uiSettings,
+      data: {
+        query: {
+          timefilter: { history: timeHistory },
+        },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      uiSettings
+        ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+        ?.map(({ from, to, display }: { from: string; to: string; display: string }) => ({
+          start: from,
+          end: to,
+          label: display,
+        })) ?? [],
+    [uiSettings]
+  );
+
+  const recentlyUsedRanges = useMemo(
+    () =>
+      timeHistory?.get()?.map(({ from, to }: { from: string; to: string }) => ({
+        start: from,
+        end: to,
+      })) ?? [],
+    [timeHistory]
+  );
 
   const handleRefresh = useCallback(
     ({ start, end }: OnRefreshProps) => {
@@ -89,8 +80,6 @@ export const DatePicker = () => {
       });
 
       if (!isPaused) {
-        // when auto refresh is enabled, we need to force the end range to `now` in order for it to work automatically
-        // otherwise,  users have to manually set `now` in the date picker
         setDateRange({ from: dateRange.from, to: 'now' });
       }
     },
@@ -101,7 +90,8 @@ export const DatePicker = () => {
     <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
       <EuiFlexItem grow={false}>
         <MemoEuiSuperDatePicker
-          commonlyUsedRanges={COMMONLY_USED_RANGES}
+          commonlyUsedRanges={commonlyUsedRanges}
+          recentlyUsedRanges={recentlyUsedRanges}
           start={dateRange.from}
           end={dateRange.to}
           isPaused={autoRefresh?.isPaused}
@@ -147,7 +137,6 @@ const AutoRefreshTroubleshootMessage = () => (
   </EuiFlexGroup>
 );
 
-// Memo EuiSuperDatePicker to prevent re-renders from resetting the auto-refresh cycle
 const MemoEuiSuperDatePicker = React.memo((props: EuiSuperDatePickerProps) => (
   <EuiSuperDatePicker
     {...props}

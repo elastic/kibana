@@ -58,7 +58,6 @@ export const UnifiedSearchBar = ({
       allowSavingQueries
       showDatePicker={showDatePicker}
       showFilterBar={showFilterBar}
-      showQueryInput
       showQueryMenu={showQueryMenu}
       useDefaultBehaviors={useDefaultBehaviors}
       query={query}
