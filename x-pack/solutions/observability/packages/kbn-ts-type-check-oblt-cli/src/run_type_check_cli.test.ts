@@ -87,7 +87,13 @@ const { isCiEnvironment, resolveCurrentCommitSha } = jest.requireMock('./cache/u
 const { restoreTSBuildArtifacts, resolveRestoreStrategy, writeArtifactsState } = jest.requireMock(
   './cache/restore_ts_build_artifacts'
 ) as {
-  restoreTSBuildArtifacts: jest.MockedFunction<(log: SomeDevLog, sha?: string) => Promise<void>>;
+  restoreTSBuildArtifacts: jest.MockedFunction<
+    (
+      log: SomeDevLog,
+      sha?: string,
+      options?: { skipExistingArtifactsCheck?: boolean }
+    ) => Promise<void>
+  >;
   resolveRestoreStrategy: jest.MockedFunction<
     (
       log: SomeDevLog,
@@ -154,7 +160,9 @@ describe('type_check orchestration', () => {
 
       await runCallback({ log, flagsReader, procRunner });
 
-      expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log);
+      expect(restoreTSBuildArtifacts).toHaveBeenCalledWith(log, undefined, {
+        skipExistingArtifactsCheck: true,
+      });
       expect(runTsc).not.toHaveBeenCalled();
       expect(runTscFastPass).not.toHaveBeenCalled();
     });
@@ -214,6 +222,12 @@ describe('type_check orchestration', () => {
       await runCallback({ log, flagsReader, procRunner });
 
       expect(restoreTSBuildArtifacts).not.toHaveBeenCalled();
+      expect(createTypeCheckConfigs).toHaveBeenCalledWith(
+        log,
+        expect.any(Array),
+        expect.any(Array),
+        { preserveTimestampOnWrite: false }
+      );
     });
 
     it('skips resolveRestoreStrategy when --project filter is set', async () => {

@@ -35,7 +35,7 @@ run(
     const useProgressBar = !isCiEnvironment() && !isVerbose;
 
     if (shouldRestoreOnly) {
-      await restoreTSBuildArtifacts(log);
+      await restoreTSBuildArtifacts(log, undefined, { skipExistingArtifactsCheck: true });
       return;
     }
 

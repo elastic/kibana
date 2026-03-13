@@ -313,8 +313,15 @@ export function computeEffectiveRebuildSet(
  * @param specificSha When provided (local smart restore path), skips discovery
  *   and extracts the archive for that exact SHA directly. When omitted (CI path
  *   or --restore-artifacts), runs a full candidate search to find the best match.
+ * @param options.skipExistingArtifactsCheck When true, do not short-circuit on
+ *   existing target/types (use for explicit --restore-artifacts so a partially
+ *   warm cache does not turn the restore into a no-op).
  */
-export async function restoreTSBuildArtifacts(log: SomeDevLog, specificSha?: string) {
+export async function restoreTSBuildArtifacts(
+  log: SomeDevLog,
+  specificSha?: string,
+  options: { skipExistingArtifactsCheck?: boolean } = {}
+) {
   try {
     if (specificSha) {
       // Direct restore — SHA already determined by resolveRestoreStrategy.
@@ -335,9 +342,10 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog, specificSha?: str
     // Full discovery path: used by --restore-artifacts and CI.
     log.info('Restoring TypeScript build artifacts');
 
-    // Skip if artifacts already exist locally (only relevant for --restore-artifacts;
-    // the smart restore path never reaches here with artifacts already on disk).
-    if (!isCiEnvironment()) {
+    // Skip if artifacts already exist locally (only when not explicitly
+    // pre-populating: --restore-artifacts passes skipExistingArtifactsCheck so
+    // a single prior --project run does not turn restore into a no-op).
+    if (!isCiEnvironment() && !options.skipExistingArtifactsCheck) {
       const hasExistingArtifacts = await checkForExistingBuildArtifacts();
       if (hasExistingArtifacts) {
         log.info(
