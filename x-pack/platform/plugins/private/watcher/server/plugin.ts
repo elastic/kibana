@@ -38,7 +38,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { features }: SetupDependencies) {
+  setup({ http, getStartServices }: CoreSetup, { features }: SetupDependencies) {
     this.license.setup({
       pluginName: PLUGIN.getI18nName(i18n),
       logger: this.logger,
@@ -54,6 +54,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
         handleEsError,
       },
       kibanaVersion,
+      getStartServices,
     };
 
     features.registerElasticsearchFeature({

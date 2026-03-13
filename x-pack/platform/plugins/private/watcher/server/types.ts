@@ -6,7 +6,7 @@
  */
 
 import type { SemVer } from 'semver';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -35,4 +35,5 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   kibanaVersion: SemVer;
+  getStartServices: StartServicesAccessor<StartDependencies, unknown>;
 }
