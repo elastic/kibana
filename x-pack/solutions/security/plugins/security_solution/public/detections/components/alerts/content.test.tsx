@@ -65,43 +65,4 @@ describe('AlertsPageContent', () => {
       expect(screen.getByTestId('chartPanels')).toBeInTheDocument();
     });
   });
-
-  describe('when the user does not have rules read privileges', () => {
-    beforeEach(() => {
-      mockUseUserPrivileges.mockReturnValue(
-        getUserPrivilegesMockDefaultValue({
-          rulesPrivileges: {
-            rules: {
-              read: false,
-              edit: false,
-            },
-            exceptions: {
-              read: false,
-              edit: false,
-            },
-          },
-        })
-      );
-    });
-
-    it('should not render the Manage Rules button', async () => {
-      render(
-        <TestProviders>
-          <AlertsPageContent
-            dataView={dataView}
-            oldSourcererDataViewSpec={dataViewSpec}
-            runtimeMappings={runtimeMappings}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId(SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID)).toBeInTheDocument();
-        expect(screen.getByTestId('header-page-title')).toHaveTextContent('Alerts');
-        expect(screen.getByTestId(FILTER_BY_ASSIGNEES_BUTTON)).toBeInTheDocument();
-        expect(screen.queryByTestId(GO_TO_RULES_BUTTON_TEST_ID)).not.toBeInTheDocument();
-        expect(screen.getByTestId('chartPanels')).toBeInTheDocument();
-      });
-    });
-  });
 });

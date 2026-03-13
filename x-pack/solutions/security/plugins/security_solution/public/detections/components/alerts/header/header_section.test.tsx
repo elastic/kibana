@@ -14,10 +14,14 @@ import { useSuggestUsers } from '../../../../common/components/user_profiles/use
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 const currentUser: UserProfileWithAvatar = {
   uid: 'uid1',
@@ -43,12 +47,19 @@ const user: UserProfileWithAvatar = {
 describe('HeaderSection', () => {
   beforeEach(() => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
+    mockUseUserPrivileges.mockReturnValue({
+      rulesPrivileges: {
+        rules: {
+          read: true,
+        },
+      },
+    });
   });
 
   it('should render correctly with manage rules button', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={true} />
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
       </TestProviders>
     );
 
@@ -57,9 +68,16 @@ describe('HeaderSection', () => {
   });
 
   it('should not render manage rules button when showManageRulesButton is false', () => {
+    mockUseUserPrivileges.mockReturnValueOnce({
+      rulesPrivileges: {
+        rules: {
+          read: false,
+        },
+      },
+    });
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={jest.fn()} showManageRulesButton={false} />
+        <HeaderSection assignees={[]} setAssignees={jest.fn()} />
       </TestProviders>
     );
 
@@ -80,7 +98,7 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection assignees={[]} setAssignees={setAssignees} showManageRulesButton={true} />
+        <HeaderSection assignees={[]} setAssignees={setAssignees} />
       </TestProviders>
     );
 
@@ -110,11 +128,7 @@ describe('HeaderSection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <HeaderSection
-          assignees={[user.uid]}
-          setAssignees={setAssignees}
-          showManageRulesButton={true}
-        />
+        <HeaderSection assignees={[user.uid]} setAssignees={setAssignees} />
       </TestProviders>
     );
 
