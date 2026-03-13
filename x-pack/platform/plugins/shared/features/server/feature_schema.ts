@@ -101,6 +101,7 @@ const casesSchemaObject = schema.maybe(
     createComment: schema.maybe(casesSchema),
     reopenCase: schema.maybe(casesSchema),
     assign: schema.maybe(casesSchema),
+    manageTemplates: schema.maybe(casesSchema),
   })
 );
 
