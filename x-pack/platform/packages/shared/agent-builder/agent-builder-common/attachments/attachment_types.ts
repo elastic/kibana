@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   visualization = 'visualization',
+  mermaid = 'mermaid',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
+  [AttachmentType.mermaid]: MermaidAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -143,6 +145,21 @@ export interface VisualizationOriginData {
   saved_object_id: string;
   title?: string;
   description?: string;
+}
+
+export const mermaidAttachmentDataSchema = z.object({
+  content: z.string(),
+  title: z.string().optional(),
+});
+
+/**
+ * Data for a mermaid diagram attachment.
+ */
+export interface MermaidAttachmentData {
+  /** Mermaid diagram source code */
+  content: string;
+  /** Optional title for the diagram */
+  title?: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

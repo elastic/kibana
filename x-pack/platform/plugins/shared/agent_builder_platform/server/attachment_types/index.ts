@@ -11,6 +11,7 @@ import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
 import { createVisualizationAttachmentType } from './visualization';
+import { createMermaidAttachmentType } from './mermaid';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -31,6 +32,7 @@ export const registerAttachmentTypes = ({
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
     createVisualizationAttachmentType(),
+    createMermaidAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {
