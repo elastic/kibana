@@ -24,6 +24,9 @@ interface Props {
   saveError?: React.ReactNode;
   clearSaveError: () => void;
   onSave: (repository: Repository | EmptyRepository) => void;
+  isDefaultRepository?: boolean;
+  isFirstRepository?: boolean;
+  onToggleDefault?: (value: boolean) => void;
 }
 
 export const RepositoryForm: React.FunctionComponent<Props> = ({
@@ -34,6 +37,9 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   saveError,
   clearSaveError,
   onSave,
+  isDefaultRepository,
+  isFirstRepository,
+  onToggleDefault,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2>(isEditing ? 2 : 1);
 
@@ -114,6 +120,9 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       validation={validation}
       saveError={saveError}
       onBack={() => goToPreviousStep()}
+      isDefaultRepository={isDefaultRepository}
+      isFirstRepository={isFirstRepository}
+      onToggleDefault={onToggleDefault}
     />
   );
 

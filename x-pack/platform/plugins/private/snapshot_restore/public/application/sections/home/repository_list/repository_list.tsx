@@ -19,6 +19,7 @@ import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';
+import { useDefaultRepository } from '../../../services/use_default_repository';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
 import { RepositoryDetails } from './repository_details';
@@ -46,6 +47,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
+  const { defaultRepository, setDefaultRepository } = useDefaultRepository();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -144,6 +146,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           reload={reload}
           openRepositoryDetailsUrl={openRepositoryDetailsUrl}
           onRepositoryDeleted={onRepositoryDeleted}
+          defaultRepository={defaultRepository}
+          onSetDefaultRepository={setDefaultRepository}
         />
       </section>
     );
@@ -156,6 +160,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           repositoryName={repositoryName}
           onClose={closeRepositoryDetails}
           onRepositoryDeleted={onRepositoryDeleted}
+          isDefaultRepository={repositoryName === defaultRepository}
         />
       ) : null}
       {content}

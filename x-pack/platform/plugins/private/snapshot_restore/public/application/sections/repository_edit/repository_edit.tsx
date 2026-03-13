@@ -20,6 +20,7 @@ import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepository } from '../../services/http';
+import { useDefaultRepository } from '../../services/use_default_repository';
 import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
@@ -32,6 +33,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const { i18n } = useServices();
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;
+  const { defaultRepository, setDefaultRepository } = useDefaultRepository();
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -60,6 +62,11 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     }
   }, [repositoryData]);
 
+  // Default repository state — initialized lazily once defaultRepository is known
+  const [isDefaultRepository, setIsDefaultRepository] = useState<boolean>(
+    () => defaultRepository === name
+  );
+
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -73,6 +80,10 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     if (error) {
       setSaveError(error);
     } else {
+      if (isDefaultRepository) {
+        setDefaultRepository(name);
+      }
+
       history.push(
         encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
       );
@@ -189,6 +200,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         saveError={renderSaveError()}
         clearSaveError={clearSaveError}
         onSave={onSave}
+        isDefaultRepository={isDefaultRepository}
+        isFirstRepository={false}
+        onToggleDefault={setIsDefaultRepository}
       />
     </EuiPageSection>
   );

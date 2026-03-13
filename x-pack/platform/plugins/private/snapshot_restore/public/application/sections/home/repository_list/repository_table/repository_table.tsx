@@ -8,10 +8,14 @@
 import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiInMemoryTable,
   EuiLink,
+  EuiPopover,
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
@@ -29,6 +33,8 @@ import { linkToEditRepository, linkToAddRepository } from '../../../../services/
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
+  defaultRepository?: string;
+  onSetDefaultRepository: (name: string) => void;
   reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
@@ -37,12 +43,17 @@ interface Props {
 export const RepositoryTable: React.FunctionComponent<Props> = ({
   repositories,
   managedRepository,
+  defaultRepository,
+  onSetDefaultRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
 }) => {
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
+  const [openActionsRowName, setOpenActionsRowName] = useState<string | undefined>(undefined);
+
+  const closeActionsMenu = () => setOpenActionsRowName(undefined);
 
   const columns = [
     {
@@ -63,6 +74,14 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             >
               {name}
             </EuiLink>
+            {name === defaultRepository ? (
+              <EuiBadge style={{ marginLeft: '8px' }}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.table.defaultRepositoryBadgeLabel"
+                  defaultMessage="Default"
+                />
+              </EuiBadge>
+            ) : null}
             &nbsp;&nbsp;
             {managedRepository === name ? (
               <EuiIconTip
@@ -127,38 +146,105 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         },
         {
           render: ({ name }: Repository) => {
+            const isDefault = name === defaultRepository;
+            const isManaged = name === managedRepository;
+
+            const actionsButton = (
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.snapshotRestore.repositoryList.table.actionMoreAriaLabel',
+                  {
+                    defaultMessage: 'More actions for repository `{name}`',
+                    values: { name },
+                  }
+                )}
+                iconType="boxesHorizontal"
+                color="primary"
+                onClick={() =>
+                  setOpenActionsRowName(openActionsRowName === name ? undefined : name)
+                }
+                data-test-subj="repositoryActionsMenuButton"
+              />
+            );
+
             return (
               <RepositoryDeleteProvider>
                 {(deleteRepositoryPrompt) => {
-                  const label =
-                    name !== managedRepository
-                      ? i18n.translate(
-                          'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
-                          { defaultMessage: 'Remove' }
-                        )
-                      : i18n.translate(
-                          'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
-                          {
-                            defaultMessage: 'You cannot delete a managed repository.',
-                          }
-                        );
-                  return (
-                    <EuiToolTip content={label}>
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel',
-                          {
-                            defaultMessage: 'Remove repository `{name}`',
-                            values: { name },
-                          }
-                        )}
-                        iconType="trash"
-                        color="danger"
-                        data-test-subj="deleteRepositoryButton"
-                        onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
-                        isDisabled={Boolean(name === managedRepository)}
+                  const setAsDefaultItem = (
+                    <EuiContextMenuItem
+                      key="setDefault"
+                      icon="flag"
+                      disabled={isDefault}
+                      toolTipContent={
+                        isDefault
+                          ? i18n.translate(
+                              'xpack.snapshotRestore.repositoryList.table.actionSetDefaultAlreadyDefaultTooltip',
+                              { defaultMessage: 'This repository is already the default.' }
+                            )
+                          : undefined
+                      }
+                      onClick={
+                        !isDefault
+                          ? () => {
+                              closeActionsMenu();
+                              onSetDefaultRepository(name);
+                            }
+                          : undefined
+                      }
+                      data-test-subj="setDefaultRepositoryButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.repositoryList.table.actionSetDefaultLabel"
+                        defaultMessage="Set as default"
                       />
-                    </EuiToolTip>
+                    </EuiContextMenuItem>
+                  );
+
+                  const removeTooltipContent = isDefault
+                    ? i18n.translate(
+                        'xpack.snapshotRestore.repositoryList.table.actionRemoveDefaultRepositoryTooltip',
+                        { defaultMessage: 'The default repository cannot be removed.' }
+                      )
+                    : isManaged
+                    ? i18n.translate(
+                        'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
+                        { defaultMessage: 'You cannot delete a managed repository.' }
+                      )
+                    : undefined;
+
+                  const removeItem = (
+                    <EuiContextMenuItem
+                      key="remove"
+                      icon="trash"
+                      disabled={isDefault || isManaged}
+                      toolTipContent={removeTooltipContent}
+                      onClick={
+                        !isDefault && !isManaged
+                          ? () => {
+                              closeActionsMenu();
+                              deleteRepositoryPrompt([name], onRepositoryDeleted);
+                            }
+                          : undefined
+                      }
+                      data-test-subj="deleteRepositoryButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.repositoryList.table.actionRemoveLabel"
+                        defaultMessage="Remove"
+                      />
+                    </EuiContextMenuItem>
+                  );
+
+                  return (
+                    <EuiPopover
+                      button={actionsButton}
+                      isOpen={openActionsRowName === name}
+                      closePopover={closeActionsMenu}
+                      panelPaddingSize="none"
+                      anchorPosition="downRight"
+                    >
+                      <EuiContextMenuPanel items={[setAsDefaultItem, removeItem]} />
+                    </EuiPopover>
                   );
                 }}
               </RepositoryDeleteProvider>

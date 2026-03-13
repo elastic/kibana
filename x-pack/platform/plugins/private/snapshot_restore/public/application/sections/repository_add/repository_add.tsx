@@ -19,7 +19,8 @@ import { RepositoryForm } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { addRepository } from '../../services/http';
+import { addRepository, useLoadRepositories } from '../../services/http';
+import { useDefaultRepository } from '../../services/use_default_repository';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -28,6 +29,12 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const [isDefaultRepository, setIsDefaultRepository] = useState<boolean>(false);
+
+  const { data: repositoriesData } = useLoadRepositories();
+  const { setDefaultRepository } = useDefaultRepository();
+
+  const isFirstRepository = !repositoriesData?.repositories?.length;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -44,6 +51,10 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
+      if (isFirstRepository || isDefaultRepository) {
+        setDefaultRepository(name);
+      }
+
       const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(
@@ -100,6 +111,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         saveError={renderSaveError()}
         clearSaveError={clearSaveError}
         onSave={onSave}
+        isDefaultRepository={isDefaultRepository}
+        isFirstRepository={isFirstRepository}
+        onToggleDefault={setIsDefaultRepository}
       />
     </EuiPageSection>
   );

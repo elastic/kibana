@@ -13,7 +13,9 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -35,6 +37,9 @@ interface Props {
   validation: RepositoryValidation;
   saveError?: React.ReactNode;
   onBack: () => void;
+  isDefaultRepository?: boolean;
+  isFirstRepository?: boolean;
+  onToggleDefault?: (value: boolean) => void;
 }
 
 export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
@@ -47,6 +52,9 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   validation,
   saveError,
   onBack,
+  isDefaultRepository,
+  isFirstRepository,
+  onToggleDefault,
 }) => {
   const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
@@ -105,6 +113,43 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       />
     </Fragment>
   );
+
+  const renderDefaultSetting = () => {
+    if (isFirstRepository) {
+      return null;
+    }
+    return (
+      <Fragment>
+        <EuiSpacer size="l" />
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryLabel"
+              defaultMessage="Default repository"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryHelpText"
+              defaultMessage="When set, other data lifecycle features will use this repository by default."
+            />
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositorySwitchLabel"
+                defaultMessage="Set as default repository"
+              />
+            }
+            checked={isDefaultRepository ?? false}
+            onChange={(e) => onToggleDefault?.(e.target.checked)}
+            data-test-subj="setDefaultRepositorySwitch"
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  };
 
   const renderActions = () => {
     const saveLabel = isEditing ? (
@@ -196,6 +241,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   return (
     <div data-test-subj="stepTwo">
       {renderSettings()}
+      {renderDefaultSetting()}
       {renderFormValidationError()}
       {renderSaveError()}
       {renderActions()}
