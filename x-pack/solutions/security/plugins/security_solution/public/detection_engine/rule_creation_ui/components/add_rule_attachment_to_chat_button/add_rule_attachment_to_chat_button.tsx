@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -24,6 +24,7 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { activateFormSync } from '../../../common/ai_rule_creation_store';
 
 interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
@@ -105,9 +106,14 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
+  const handleClick = useCallback(() => {
+    activateFormSync();
+    openAgentBuilderFlyout();
+  }, [openAgentBuilderFlyout]);
+
   return (
     <NewAgentBuilderAttachment
-      onClick={openAgentBuilderFlyout}
+      onClick={handleClick}
       telemetry={{
         pathway,
         attachments: ['rule'],

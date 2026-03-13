@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -27,7 +27,12 @@ import {
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../../common/constants';
-import { aiCreatedRule$, clearAiCreatedRule } from '../../../../common/ai_rule_creation_store';
+import {
+  aiCreatedRule$,
+  clearAiCreatedRule,
+  activateFormSync,
+  formSyncActive$,
+} from '../../../../common/ai_rule_creation_store';
 import { formatRule } from '../helpers';
 
 const SYNC_DEBOUNCE_MS = 500;
@@ -63,7 +68,13 @@ export const useAgentBuilderRuleCreation = ({
   const { agentBuilder } = services;
   const { addSuccess } = useAppToasts();
   const isAiRuleUpdateRef = useRef(false);
+  const [isSyncActive, setIsSyncActive] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    const subscription = formSyncActive$.subscribe(setIsSyncActive);
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string) => {
@@ -83,11 +94,12 @@ export const useAgentBuilderRuleCreation = ({
     [agentBuilder]
   );
 
-  const updateFormFromRule = useCallback(
+  const updateFormFromChat = useCallback(
     (rule: RuleResponse) => {
       const stepsData = getStepsData({ rule });
 
       isAiRuleUpdateRef.current = true;
+      activateFormSync();
       defineStepForm.updateFieldValues(stepsData.defineRuleData);
       aboutStepForm.updateFieldValues(stepsData.aboutRuleData);
       scheduleStepForm.updateFieldValues(stepsData.scheduleRuleData);
@@ -110,16 +122,17 @@ export const useAgentBuilderRuleCreation = ({
   useEffect(() => {
     const subscription = aiCreatedRule$.subscribe((rule) => {
       if (rule) {
-        updateFormFromRule(rule);
+        updateFormFromChat(rule);
         addRuleAttachment(rule, rule.name);
         clearAiCreatedRule();
       }
     });
     return () => subscription.unsubscribe();
-  }, [updateFormFromRule, addRuleAttachment]);
+  }, [updateFormFromChat, addRuleAttachment]);
 
   useEffect(() => {
     if (
+      !isSyncActive ||
       !agentBuilder?.addAttachment ||
       !defineStepData ||
       !aboutStepData ||
@@ -155,6 +168,7 @@ export const useAgentBuilderRuleCreation = ({
       }
     };
   }, [
+    isSyncActive,
     agentBuilder,
     defineStepData,
     aboutStepData,

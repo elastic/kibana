@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 
 const aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
@@ -13,3 +13,8 @@ const aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
 export const setAiCreatedRule = (rule: RuleResponse) => aiRuleSubject.next(rule);
 export const clearAiCreatedRule = () => aiRuleSubject.next(null);
 export const aiCreatedRule$ = aiRuleSubject.asObservable();
+
+const formSyncSubject = new BehaviorSubject<boolean>(false);
+
+export const activateFormSync = () => formSyncSubject.next(true);
+export const formSyncActive$ = formSyncSubject.pipe(distinctUntilChanged());
