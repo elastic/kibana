@@ -21,9 +21,7 @@ export const TabTitleAndDescription = ({ metricItem, description }: OverviewTabP
     <>
       <EuiSpacer />
       <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutMetricName">
-        <strong>
-          <strong>{metricItem.metricName}</strong>
-        </strong>
+        <strong>{metricItem.metricName}</strong>
       </EuiTitle>
 
       {description && (

@@ -10,8 +10,6 @@
 /**
  * Returns the "primary" (first/single) value for display or chart use.
  * - If value is an array: returns the first element that is not null/undefined, or undefined.
- * - If value is a single value: returns it as-is (or undefined if null/undefined).
- * Use this instead of scattering `[0]` when consuming MetricField array properties.
  */
 
 export function firstNonNullable<T>(values: T[]): T extends NonNullable<T> ? T : T | undefined {
