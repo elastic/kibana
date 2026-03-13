@@ -41,21 +41,21 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('listProjects action', () => {
-    it('should list projects', async () => {
-      const mockResponse = {
-        data: {
-          projects: [
-            {
-              projectId: 'my-project',
-              name: 'My Project',
-              lifecycleState: 'ACTIVE',
-              createTime: '2024-01-01T00:00:00.000Z',
-            },
-          ],
-          nextPageToken: undefined,
-        },
+    it('should return raw API response', async () => {
+      const mockResponseData = {
+        projects: [
+          {
+            projectId: 'my-project',
+            name: 'My Project',
+            lifecycleState: 'ACTIVE',
+            createTime: '2024-01-01T00:00:00.000Z',
+            projectNumber: '123456',
+            parent: { type: 'organization', id: '999' },
+          },
+        ],
+        nextPageToken: undefined,
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.get.mockResolvedValue({ data: mockResponseData });
 
       const result = await GoogleCloudStorageConnector.actions.listProjects.handler(
         mockContext,
@@ -66,17 +66,7 @@ describe('GoogleCloudStorageConnector', () => {
         'https://cloudresourcemanager.googleapis.com/v1/projects',
         { params: { pageSize: 100 } }
       );
-      expect(result).toEqual({
-        projects: [
-          {
-            projectId: 'my-project',
-            name: 'My Project',
-            lifecycleState: 'ACTIVE',
-            createTime: '2024-01-01T00:00:00.000Z',
-          },
-        ],
-        nextPageToken: undefined,
-      });
+      expect(result).toEqual(mockResponseData);
     });
 
     it('should include filter when provided', async () => {
@@ -106,23 +96,25 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('listBuckets action', () => {
-    it('should list buckets for a project', async () => {
-      const mockResponse = {
-        data: {
-          items: [
-            {
-              id: 'my-project/my-bucket',
-              name: 'my-bucket',
-              location: 'US',
-              storageClass: 'STANDARD',
-              timeCreated: '2024-01-01T00:00:00.000Z',
-              updated: '2024-06-01T00:00:00.000Z',
-            },
-          ],
-          nextPageToken: undefined,
-        },
+    it('should return raw API response', async () => {
+      const mockResponseData = {
+        kind: 'storage#buckets',
+        items: [
+          {
+            kind: 'storage#bucket',
+            id: 'my-project/my-bucket',
+            name: 'my-bucket',
+            location: 'US',
+            storageClass: 'STANDARD',
+            timeCreated: '2024-01-01T00:00:00.000Z',
+            updated: '2024-06-01T00:00:00.000Z',
+            selfLink: 'https://storage.googleapis.com/storage/v1/b/my-bucket',
+            projectNumber: '123456',
+          },
+        ],
+        nextPageToken: undefined,
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.get.mockResolvedValue({ data: mockResponseData });
 
       const result = await GoogleCloudStorageConnector.actions.listBuckets.handler(mockContext, {
         project: 'my-project',
@@ -131,19 +123,7 @@ describe('GoogleCloudStorageConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://storage.googleapis.com/storage/v1/b', {
         params: { project: 'my-project', maxResults: 100 },
       });
-      expect(result).toEqual({
-        buckets: [
-          {
-            id: 'my-project/my-bucket',
-            name: 'my-bucket',
-            location: 'US',
-            storageClass: 'STANDARD',
-            timeCreated: '2024-01-01T00:00:00.000Z',
-            updated: '2024-06-01T00:00:00.000Z',
-          },
-        ],
-        nextPageToken: undefined,
-      });
+      expect(result).toEqual(mockResponseData);
     });
 
     it('should include prefix filter when provided', async () => {
@@ -208,28 +188,30 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('listObjects action', () => {
-    it('should list objects in a bucket', async () => {
-      const mockResponse = {
-        data: {
-          items: [
-            {
-              id: 'my-bucket/reports/jan.pdf/1234',
-              name: 'reports/jan.pdf',
-              bucket: 'my-bucket',
-              size: '2048',
-              contentType: 'application/pdf',
-              timeCreated: '2024-01-01T00:00:00.000Z',
-              updated: '2024-01-01T00:00:00.000Z',
-              md5Hash: 'abc123',
-              selfLink: 'https://storage.googleapis.com/...',
-              mediaLink: 'https://storage.googleapis.com/download/...',
-            },
-          ],
-          prefixes: ['reports/'],
-          nextPageToken: undefined,
-        },
+    it('should return raw API response', async () => {
+      const mockResponseData = {
+        kind: 'storage#objects',
+        items: [
+          {
+            kind: 'storage#object',
+            id: 'my-bucket/reports/jan.pdf/1234',
+            name: 'reports/jan.pdf',
+            bucket: 'my-bucket',
+            size: '2048',
+            contentType: 'application/pdf',
+            timeCreated: '2024-01-01T00:00:00.000Z',
+            updated: '2024-01-01T00:00:00.000Z',
+            md5Hash: 'abc123',
+            selfLink: 'https://storage.googleapis.com/...',
+            mediaLink: 'https://storage.googleapis.com/download/...',
+            generation: '1234',
+            metageneration: '1',
+          },
+        ],
+        prefixes: ['reports/'],
+        nextPageToken: undefined,
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      mockClient.get.mockResolvedValue({ data: mockResponseData });
 
       const result = await GoogleCloudStorageConnector.actions.listObjects.handler(mockContext, {
         bucket: 'my-bucket',
@@ -239,21 +221,7 @@ describe('GoogleCloudStorageConnector', () => {
         'https://storage.googleapis.com/storage/v1/b/my-bucket/o',
         { params: { maxResults: 100 } }
       );
-      expect(result).toEqual({
-        objects: [
-          {
-            name: 'reports/jan.pdf',
-            bucket: 'my-bucket',
-            size: '2048',
-            contentType: 'application/pdf',
-            timeCreated: '2024-01-01T00:00:00.000Z',
-            updated: '2024-01-01T00:00:00.000Z',
-            md5Hash: 'abc123',
-          },
-        ],
-        prefixes: ['reports/'],
-        nextPageToken: undefined,
-      });
+      expect(result).toEqual(mockResponseData);
     });
 
     it('should include prefix and delimiter', async () => {
@@ -332,18 +300,7 @@ describe('GoogleCloudStorageConnector', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://storage.googleapis.com/storage/v1/b/my-bucket/o/report.pdf'
       );
-      // Only the relevant fields are returned, not the full GCS object resource
-      expect(result).toEqual({
-        name: 'report.pdf',
-        bucket: 'my-bucket',
-        contentType: 'application/pdf',
-        storageClass: 'STANDARD',
-        size: '4096',
-        md5Hash: 'abc123',
-        timeCreated: '2024-01-01T00:00:00.000Z',
-        updated: '2024-06-01T00:00:00.000Z',
-        metadata: { department: 'finance' },
-      });
+      expect(result).toEqual(rawMeta);
     });
 
     it('should URL-encode object names with slashes and spaces', async () => {

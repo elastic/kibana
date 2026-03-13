@@ -30,3 +30,17 @@ steps:
       maxResults: ${{inputs.maxResults}}
       pageToken: "${{inputs.pageToken}}"
       prefix: "${{inputs.prefix}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_buckets.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        buckets:
+          $map: { items: "${{ item.items }}", item: "b" }
+          id: "${{ b.id }}"
+          name: "${{ b.name }}"
+          location: "${{ b.location }}"
+          storageClass: "${{ b.storageClass }}"
+          timeCreated: "${{ b.timeCreated }}"
+          updated: "${{ b.updated }}"
