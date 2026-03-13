@@ -157,15 +157,14 @@ export function RuleComponent({
     capabilities.logs?.show,
   ].some(Boolean);
 
-  const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
-    ? {
-        appId: 'observability',
-        getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
-      }
-    : undefined;
-
   const renderRuleAlertList = useCallback(() => {
     if (ruleType.hasAlertsMappings) {
+      const alertDetailsNavigation: AlertDetailsNavigation | undefined = hasObservabilityAccess
+        ? {
+            appId: 'observability',
+            getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+          }
+        : undefined;
       return (
         <AlertsTable
           id="rule-detail-alerts-table"
@@ -196,12 +195,12 @@ export function RuleComponent({
       );
     }
   }, [
-    alertDetailsNavigation,
     application,
     cases,
     data,
     fieldFormats,
     getAlertFormatter,
+    hasObservabilityAccess,
     http,
     alertsTableQuery,
     lastReloadRequestTime,
