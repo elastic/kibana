@@ -17,6 +17,7 @@ import { parseDuration } from '../../../../utils';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
 import { EnterWorkflowTimeoutZoneNodeImpl } from '../enter_workflow_timeout_zone_node_impl';
 
 const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
@@ -25,6 +26,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
   let node: EnterTimeoutZoneNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let stepExecutionRuntimeFactoryMock: StepExecutionRuntimeFactory;
+  let workflowLoggerMock: IWorkflowEventLogger;
   let impl: EnterWorkflowTimeoutZoneNodeImpl;
 
   const originalDateCtor = global.Date;
@@ -66,10 +68,18 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       createStepExecutionRuntime: jest.fn(),
     } as unknown as StepExecutionRuntimeFactory;
 
+    workflowLoggerMock = {
+      logError: jest.fn(),
+      logInfo: jest.fn(),
+      logDebug: jest.fn(),
+      logWarn: jest.fn(),
+    } as unknown as IWorkflowEventLogger;
+
     impl = new EnterWorkflowTimeoutZoneNodeImpl(
       node,
       wfExecutionRuntimeManagerMock,
-      stepExecutionRuntimeFactoryMock
+      stepExecutionRuntimeFactoryMock,
+      workflowLoggerMock
     );
 
     mockDateNow = new Date('2025-09-25T10:15:30.000Z');
@@ -90,6 +100,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     beforeEach(() => {
       monitoredStepExecutionRuntimeMock = {
         stepExecutionId: 'monitored-step-123',
+        node: { id: 'current-node-id', stepId: 'current-step-id' },
         abortController: {
           abort: jest.fn(),
         },
@@ -121,6 +132,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       const startTime = new Date().getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
       mockParseDuration.mockReturnValue(60000); // 60 seconds
       wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'wf-exec-1',
         startedAt: new Date(startTime).toISOString(),
       });
 
@@ -130,8 +142,47 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
-      expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(expect.any(Error));
+      expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('Failed due to workflow timeout'),
+        })
+      );
+      expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('configured timeout of 60s'),
+        })
+      );
+      expect(monitoredStepExecutionRuntimeMock.failStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining("step 'current-step-id'"),
+        })
+      );
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
+    });
+
+    it('should log the timeout error with workflow details', async () => {
+      const startTime = new Date().getTime() - 90000;
+      mockParseDuration.mockReturnValue(60000);
+      wfExecutionRuntimeManagerMock.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'wf-exec-1',
+        startedAt: new Date(startTime).toISOString(),
+      });
+
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+
+      impl.monitor(monitoredStepExecutionRuntimeMock);
+
+      expect(workflowLoggerMock.logError).toHaveBeenCalledWith(
+        expect.stringContaining('Workflow timed out after'),
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'workflow-timeout' }),
+          workflow: expect.objectContaining({
+            execution_id: 'wf-exec-1',
+            current_step: 'current-step-id',
+            timeout_configured: '60s',
+          }),
+        })
+      );
     });
 
     it('should fail all nested scope steps when timeout exceeded', async () => {
