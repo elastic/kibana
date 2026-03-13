@@ -43,6 +43,7 @@ describe('<ContentEditorFlyoutContent />', () => {
     const defaultProps: ContentEditorFlyoutContentProps = {
       item: savedObjectItem,
       entityName: 'foo',
+      flyoutTitleId: 'test-flyout-title-id',
       services: mockedServices,
     };
 

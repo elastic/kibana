@@ -23,6 +23,7 @@ type CommonProps = Pick<
   | 'entityName'
   | 'customValidators'
   | 'appendRows'
+  | 'flyoutTitleId'
 >;
 
 export type Props = CommonProps;

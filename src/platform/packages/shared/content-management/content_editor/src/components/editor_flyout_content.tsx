@@ -39,6 +39,7 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 export interface Props {
   item: Item;
   entityName: string;
+  flyoutTitleId: string;
   isReadonly?: boolean;
   readonlyReason?: string;
   services: Pick<Services, 'TagSelector' | 'TagList' | 'notifyError'>;
@@ -57,6 +58,7 @@ const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.s
 export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
+  flyoutTitleId,
   isReadonly = true,
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
@@ -126,14 +128,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       },
     })
   );
-
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
-          <h2>
-            <span>{title}</span>
-          </h2>
+          <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
