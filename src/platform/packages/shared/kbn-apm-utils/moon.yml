@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-utils'
+  title: '@kbn/apm-utils'
   description: Moon project for @kbn/apm-utils
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-apm-utils
+  sourceRoot: src/platform/packages/shared/kbn-apm-utils
 tags:
   - shared-common
   - package
@@ -30,14 +29,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
