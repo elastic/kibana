@@ -564,8 +564,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
   });
 
-  // TODO: Re-enable the isDisabled assertion once DateRangePicker supports the isDisabled prop
-  it('Should render date picker if on text based languages mode and no timeFieldName', async () => {
+  it('Should render date picker with tooltip if on text based languages mode and no timeFieldName', async () => {
     const dataView = {
       ...stubIndexPattern,
       timeFieldName: undefined,
@@ -608,6 +607,56 @@ describe('QueryBarTopRowTopRow', () => {
 
     await waitFor(() => {
       expect(getByTestId('dataViewPickerOverride')).toBeInTheDocument();
+    });
+  });
+
+  it('Should forward dataTestSubj to DateRangePicker', async () => {
+    render(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        showDatePicker: true,
+        timeHistory: mockTimeHistory,
+        dataTestSubj: 'myCustomDatePicker',
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('myCustomDatePicker')).toBeInTheDocument();
+    });
+  });
+
+  it('Should disable the DateRangePicker when isDisabled is true', async () => {
+    render(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        showDatePicker: true,
+        timeHistory: mockTimeHistory,
+        isDisabled: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+    });
+  });
+
+  it('Should render DateRangePicker in collapsed mode when showDatePickerAsBadge is true', async () => {
+    render(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        showDatePicker: true,
+        showDatePickerAsBadge: true,
+        showQueryInput: false,
+        timeHistory: mockTimeHistory,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
+      // In collapsed mode the picker renders as a badge (no expanded text input visible)
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     });
   });
 
