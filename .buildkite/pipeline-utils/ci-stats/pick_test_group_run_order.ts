@@ -26,9 +26,11 @@ import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
 import { getAffectedPackages, filterFilesByAffectedPackages } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+import { NO_SELECTIVE_TESTS_LABEL } from '#pipeline-utils/affected-packages/const';
+
+const NO_SELECTIVE_TESTS = process.env.GITHUB_LABELS?.includes(NO_SELECTIVE_TESTS_LABEL);
 
 const SHARD_ANNOTATION_SEP = '||shard=';
-
 /**
  * Expands configs that appear in the shard map into N shard-annotated entries.
  * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
@@ -228,14 +230,17 @@ export async function pickTestGroupRunOrder() {
     includeDownstream: true,
     logging: false,
   });
-  const filteredJestUnitConfigs = filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages);
+  const filteredJestUnitConfigs =
+    !NO_SELECTIVE_TESTS && affectedPackages
+      ? filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages)
+      : jestUnitConfigs;
   console.warn(
     `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
   );
-  const filteredJestIntegrationConfigs = filterFilesByAffectedPackages(
-    jestIntegrationConfigs,
-    affectedPackages
-  );
+  const filteredJestIntegrationConfigs =
+    !NO_SELECTIVE_TESTS && affectedPackages
+      ? filterFilesByAffectedPackages(jestIntegrationConfigs, affectedPackages)
+      : jestIntegrationConfigs;
   console.warn(
     `Filtering Jest integration tests for affected packages: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
   );
