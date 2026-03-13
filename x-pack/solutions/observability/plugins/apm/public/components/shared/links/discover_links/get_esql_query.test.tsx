@@ -110,7 +110,8 @@ describe('getESQLQuery', () => {
         ],
       });
 
-      expect(result).toBe('FROM shared-index-*');
+      expect(result).toContain('FROM shared-index-*');
+      expect(result).toContain('SORT @timestamp DESC');
     });
 
     it('should use defaultValue when savedValue is not set', () => {
@@ -380,14 +381,15 @@ describe('getESQLQuery', () => {
       expect(result).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
     });
 
-    it('should return only FROM clause when no params are provided', () => {
+    it('should return FROM clause with default SORT @timestamp DESC when no params are provided', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: {},
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).toBe(`FROM ${MOCK_TRACES_INDEX}`);
+      expect(result).toContain(`FROM ${MOCK_TRACES_INDEX}`);
+      expect(result).toContain('SORT @timestamp DESC');
     });
   });
 
@@ -413,14 +415,14 @@ describe('getESQLQuery', () => {
       expect(result).toContain('SORT @timestamp DESC');
     });
 
-    it('should not add SORT when sortDirection is not provided', () => {
+    it('should default to SORT @timestamp DESC when sortDirection is not provided', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: { traceId: 'trace-789' },
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).not.toContain('SORT');
+      expect(result).toContain('SORT @timestamp DESC');
     });
 
     it('should place SORT after all WHERE clauses and KQL', () => {

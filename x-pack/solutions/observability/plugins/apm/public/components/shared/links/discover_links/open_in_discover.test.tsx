@@ -447,7 +447,7 @@ describe('OpenInDiscover', () => {
 
         const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
         expect(esqlArg).not.toContain('trace.id');
-        expect(esqlArg).not.toContain('SORT');
+        expect(esqlArg).toContain('SORT @timestamp DESC');
       });
     });
 
