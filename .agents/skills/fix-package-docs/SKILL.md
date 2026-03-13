@@ -59,11 +59,13 @@ The file has this shape:
 ```json
 {
   "counts": {
+    "apiCount": 145,
     "missingComments": 28,
     "missingReturns": 10,
     "paramDocMismatches": 5,
     "missingComplexTypeInfo": 8,
     "isAnyType": 3,
+    "noReferences": 144,
     "missingExports": 11,
     "unnamedExports": 2
   },
@@ -74,8 +76,9 @@ The file has this shape:
   "paramDocMismatches": [...],
   "missingComplexTypeInfo": [...],
   "isAnyType": [...],
+  "noReferences": [...],
   "missingExports": [{ "source": "...", "references": [...] }],
-  "unnamedExports": [{ "path": "src/.../foo.ts", "lineNumber": 12, "textSnippet": "/** Orphaned comment. */" }]
+  "unnamedExports": [{ "pluginId": "dashboard", "scope": "public", "path": "src/.../index.ts", "lineNumber": 12, "textSnippet": "export default { ... }" }]
 }
 ```
 
@@ -87,8 +90,9 @@ Group all issues by `path` so you edit each file once. Prioritize:
 3. `paramDocMismatches` — add missing `@param` tags so all params are documented
 4. `missingComplexTypeInfo` — add JSDoc to undocumented interface, object, and union type declarations
 5. `isAnyType` — replace `any` with specific types (careful: may require reading more context)
-6. `unnamedExports` — give anonymous exports an identifiable name
+6. `unnamedExports` — skip; flag for human review (requires restructuring exports, which changes the public API surface)
 7. `missingExports` — skip; flag for human review
+8. `noReferences` — informational only; not a validation failure, no action required
 
 ### 4. Fix issues file by file
 
@@ -238,37 +242,11 @@ export type FilterSpec = {
 
 Inline property docs (e.g., `/** ... */` on each field) are a separate concern covered under `missingComments` for interface members.
 
-#### unnamedExports — give anonymous exports a name
+#### unnamedExports — flag for human review
 
-This flags an exported declaration that has no identifiable name — meaning `ts-morph` cannot call `getName()` on the node. The most common cause is an anonymous `export default` expression. Each entry in `stats.json` includes `path`, `lineNumber`, and `textSnippet` (first 100 chars of the declaration) to locate it.
+This flags an exported declaration that has no identifiable name — meaning `ts-morph` cannot call `getName()` on the node. The most common cause is an anonymous `export default` expression (e.g., `export default { ... }` or `export default function() { ... }`).
 
-The fix is to give the export a name:
-
-```typescript
-// Bad — anonymous default export; the object literal has no name
-export default {
-  key: 'value',
-};
-
-// Fixed — assign a name, then export
-export const myConfig = {
-  key: 'value',
-};
-export default myConfig;
-// or, avoid export default entirely:
-export const myConfig = { key: 'value' };
-```
-
-Anonymous function and class defaults follow the same pattern:
-
-```typescript
-// Bad
-export default function() { /* ... */ }
-
-// Fixed
-export function myHelper() { /* ... */ }
-// or: const myHelper = () => { /* ... */ }; export default myHelper;
-```
+**Do not attempt to fix these.** Naming an anonymous default export or removing `export default` changes the module's public API surface, which is a runtime behavior change outside the scope of documentation fixes. Report them in the PR for a developer to handle.
 
 #### isAnyType — replace `any` with specific types
 
@@ -313,7 +291,7 @@ node scripts/check_changes.ts
 
 In the PR description, include:
 - Before/after issue counts from `stats.json`
-- Any `missingExports` skipped and why
+- Any `missingExports` or `unnamedExports` skipped (always skipped — flag for a developer)
 - Any `isAnyType` items skipped because the correct type was ambiguous
 
 ## Example: full run on the dashboard plugin

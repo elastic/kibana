@@ -24,7 +24,7 @@ export interface FlatStatEntry {
   id: string;
   label: string;
   path: string;
-  type: string;
+  type: ApiDeclaration['type'];
   lineNumber?: number;
   columnNumber?: number;
   link: string;
@@ -80,19 +80,17 @@ export const buildFlatStatsForPlugin = (
   pluginStats: AllPluginStats[string],
   missingApiItems: MissingApiItemMap
 ): FlatStats => {
-  const missingExportsCount = missingApiItems[pluginId]
-    ? Object.keys(missingApiItems[pluginId]).length
-    : 0;
-  const missingExportsList = missingApiItems[pluginId]
-    ? Object.keys(missingApiItems[pluginId]).map((source) => ({
-        source,
-        references: missingApiItems[pluginId][source],
-      }))
-    : [];
+  const pluginMissing = missingApiItems[pluginId] ?? {};
+  const missingExportsSources = Object.keys(pluginMissing);
+  const missingExportsCount = missingExportsSources.length;
+  const missingExportsList = missingExportsSources.map((source) => ({
+    source,
+    references: pluginMissing[source],
+  }));
 
   const unnamedExportsList: FlatUnnamedExportEntry[] = (pluginStats.unnamedExports ?? []).map(
-    ({ pluginId, scope, path, lineNumber, textSnippet }) => ({
-      pluginId,
+    ({ pluginId: itemPluginId, scope, path, lineNumber, textSnippet }) => ({
+      pluginId: itemPluginId,
       scope,
       path,
       lineNumber,
