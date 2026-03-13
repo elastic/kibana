@@ -1,0 +1,130 @@
+#!/usr/bin/env node
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * CLI script to list affected packages
+ *
+ * Precedence for each setting: CLI flag > environment variable > default
+ *
+ * Usage:
+ *   .buildkite/pipeline-utils/affected-packages/list_affected [options]
+ *
+ * Options:
+ *   --deep         Include downstream dependencies
+ *   --json         Output as JSON array
+ *   --merge-base   Git commit to compare against
+ *   --strategy     Strategy to use: git or moon
+ *   --help, -h     Show help
+ *
+ * Environment variables:
+ *   AFFECTED_STRATEGY    - 'git' | 'moon' | 'disabled' (default: 'moon')
+ *   AFFECTED_DOWNSTREAM  - 'true' | 'false' (default: 'false')
+ *   GITHUB_PR_MERGE_BASE - merge base commit (default: 'origin/main')
+ *
+ * Examples:
+ *   .buildkite/pipeline-utils/affected-packages/list_affected
+ *   .buildkite/pipeline-utils/affected-packages/list_affected --deep
+ *   .buildkite/pipeline-utils/affected-packages/list_affected --deep --json
+ *   .buildkite/pipeline-utils/affected-packages/list_affected --merge-base HEAD~5
+ *   .buildkite/pipeline-utils/affected-packages/list_affected --strategy git --deep
+ */
+
+const path = require('path');
+
+require('ts-node').register({
+  transpileOnly: true,
+  compilerOptions: {
+    module: 'commonjs',
+  },
+  project: path.join(__dirname, '../../tsconfig.json'),
+});
+
+const { getAffectedPackages } = require(path.join(__dirname, './index'));
+
+const HELP_TEXT = `
+Usage: .buildkite/pipeline-utils/affected-packages/list_affected [options]
+
+Precedence: CLI flags > environment variables > defaults
+
+Options:
+  --deep                Include downstream dependencies
+  --json                Output as JSON array (default: one per line)
+  --merge-base <commit> Git commit to compare against
+  --strategy <git|moon> Strategy to use
+  --help, -h            Show this help message
+
+Environment variables:
+  AFFECTED_STRATEGY      Strategy (default: moon)
+  AFFECTED_DOWNSTREAM    Include downstream: true | false (default: false)
+  GITHUB_PR_MERGE_BASE   Merge base commit (default: origin/main)
+
+Examples:
+  list_affected
+  list_affected --deep
+  list_affected --deep --json
+  list_affected --merge-base HEAD~5
+  list_affected --strategy git --deep
+  AFFECTED_STRATEGY=git list_affected
+`.trim();
+
+function getArgValue(args, flag) {
+  const idx = args.indexOf(flag);
+  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(HELP_TEXT);
+    process.exit(0);
+  }
+
+  // Resolve strategy: flag > env > default
+  const flagStrategy = getArgValue(args, '--strategy');
+  if (flagStrategy && flagStrategy !== 'git' && flagStrategy !== 'moon') {
+    console.error(`Invalid strategy: ${flagStrategy}. Must be 'git' or 'moon'.`);
+    process.exit(1);
+  }
+  const strategy = flagStrategy || process.env.AFFECTED_STRATEGY || 'moon';
+
+  // Resolve downstream: flag > env > default
+  const includeDownstream = args.includes('--deep')
+    ? true
+    : process.env.AFFECTED_DOWNSTREAM === 'true';
+
+  // Resolve merge base: flag > env > default
+  const mergeBase =
+    getArgValue(args, '--merge-base') || process.env.GITHUB_PR_MERGE_BASE || 'origin/main';
+
+  try {
+    const affectedPackages = await getAffectedPackages(mergeBase, {
+      strategy,
+      includeDownstream,
+      logging: false,
+    });
+
+    const packageList = Array.from(affectedPackages || []).sort();
+
+    if (args.includes('--json')) {
+      console.log(JSON.stringify(packageList, null, 2));
+    } else {
+      packageList.forEach((pkg) => console.log(pkg));
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error getting affected packages:', error.message);
+    process.exit(1);
+  }
+}
+
+main();

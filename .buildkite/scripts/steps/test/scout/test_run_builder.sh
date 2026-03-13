@@ -53,9 +53,24 @@ else
   else
     SCOUT_DISCOVERY_TARGET="local-stateful-only"
   fi
+
+  AFFECTED_MODULES_FLAG=""
+  if [[ "${SCOUT_SELECTIVE_TESTING_ENABLED:-}" == "true" && -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
+    echo '--- Detecting affected modules for selective testing'
+    mkdir -p .scout
+    AFFECTED_MODULES_FILE=".scout/affected_modules.json"
+    .buildkite/pipeline-utils/affected-packages/list_affected \
+      --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
+      > "$AFFECTED_MODULES_FILE"
+    # TODO: remove this temp exclusion after selective testing is validated
+    node -e "const f='$AFFECTED_MODULES_FILE'; const d=JSON.parse(require('fs').readFileSync(f,'utf8')); require('fs').writeFileSync(f, JSON.stringify(d.filter(id => !id.startsWith('@kbn/scout'))))"
+    AFFECTED_MODULES_FLAG="--affected-modules $AFFECTED_MODULES_FILE"
+  fi
+
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
     --target "$SCOUT_DISCOVERY_TARGET" \
+    $AFFECTED_MODULES_FLAG \
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
