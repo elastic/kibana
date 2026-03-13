@@ -18,7 +18,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getCoreStart } from './services';
 
 // @ts-ignore
-const DefaultEditor = lazy(() => import('./default_editor'));
+const DefaultEditor = lazy(() => import('./default_editor.js'));
 
 class DefaultEditorController implements IEditorController {
   constructor(
