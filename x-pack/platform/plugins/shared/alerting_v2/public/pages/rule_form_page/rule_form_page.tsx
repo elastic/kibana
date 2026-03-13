@@ -19,6 +19,7 @@ import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
@@ -116,6 +117,8 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const queryClient = useQueryClient();
+
+  useBreadcrumbs(isEditing ? 'edit' : 'create');
 
   const ruleFormServices = useMemo(
     () => ({

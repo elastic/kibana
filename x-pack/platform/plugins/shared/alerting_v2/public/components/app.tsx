@@ -11,6 +11,7 @@ import { RuleFormPage } from '../pages/rule_form_page/rule_form_page';
 import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { ListNotificationPoliciesPage } from '../pages/list_notification_policies_page/list_notification_policies_page';
 import { NotificationPolicyFormPage } from '../pages/notification_policy_form_page/notification_policy_form_page';
+import { RuleDetailsRoute } from '../routes/rule_details_route';
 
 export const App = () => {
   return (
@@ -30,7 +31,10 @@ export const App = () => {
       <Route path="/notification_policies">
         <ListNotificationPoliciesPage />
       </Route>
-      <Route path="/">
+      <Route exact path="/:ruleId">
+        <RuleDetailsRoute />
+      </Route>
+      <Route exact path="/">
         <RulesListPage />
       </Route>
     </Routes>
