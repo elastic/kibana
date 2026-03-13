@@ -335,9 +335,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               },
             ]}
             value={objectFit}
-            onChange={(e) =>
-              setObjectFit(e.target.value as ImageConfig['object_fit'])
-            }
+            onChange={(e) => setObjectFit(e.target.value as ImageConfig['object_fit'])}
           />
         </EuiFormRow>
         <EuiFormRow
