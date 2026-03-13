@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-attack-discovery'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-generative-ai'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/evals-suite-attack-discovery'
+  title: '@kbn/evals-suite-attack-discovery'
   description: Moon project for @kbn/evals-suite-attack-discovery
   channel: ''
   owner: '@elastic/security-generative-ai'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
+  sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
 dependsOn:
   - '@kbn/evals'
   - '@kbn/scout'
