@@ -209,6 +209,22 @@ export const EventSchema = schema.maybe(
                         total_run_duration_ms: ecsStringOrNumber(),
                         total_enrichment_duration_ms: ecsStringOrNumber(),
                         update_alerts_duration_ms: ecsStringOrNumber(),
+                        events_found_count: ecsStringOrNumber(),
+                        candidate_alerts_count: ecsStringOrNumber(),
+                        unaccounted_events: ecsStringOrNumber(),
+                        suppressed_alerts: ecsStringOrNumber(),
+                      }, { unknowns: 'allow' })
+                    ),
+                    errors: schema.maybe(
+                      schema.object({
+                        '@timestamp': ecsDate(),
+                        message: ecsString(),
+                      })
+                    ),
+                    warnings: schema.maybe(
+                      schema.object({
+                        '@timestamp': ecsDate(),
+                        message: ecsString(),
                       })
                     ),
                   })

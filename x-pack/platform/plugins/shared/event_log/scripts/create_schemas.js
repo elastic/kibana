@@ -203,7 +203,8 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   }
   lineWriter.dedent();
 
-  lineWriter.addLine('})');
+  // Allow custom unmapped metrics
+  lineWriter.addLine(prop === 'metrics' ? "}, { unknowns: 'allow' })" : '})');
   if (mappings.type === 'nested') {
     lineWriter.dedent();
     lineWriter.addLine(')');
