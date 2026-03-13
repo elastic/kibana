@@ -8,17 +8,6 @@
 import type { EngineStatus } from './saved_objects';
 import type { EntityStoreStatus } from './types';
 
-export {
-  ENTITY_LATEST,
-  ENTITY_UPDATES,
-  ENTITY_HISTORY,
-  ENTITY_BASE_PREFIX,
-  ENTITY_SCHEMA_VERSION_V2,
-  getEntityIndexPattern,
-  getEntitiesAliasPattern,
-  getLatestEntitiesIndexName,
-} from '../../common/domain/entity_index';
-
 export const ECS_MAPPINGS_COMPONENT_TEMPLATE = 'ecs@mappings';
 
 export const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];

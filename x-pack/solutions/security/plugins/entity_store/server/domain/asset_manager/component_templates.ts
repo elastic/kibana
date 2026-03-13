@@ -10,7 +10,7 @@ import type {
   EntityDefinition,
   EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
+import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../../../common/domain/entity_index';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 const BASE_ENTITY_INDEX_MAPPING = {
