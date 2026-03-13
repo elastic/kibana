@@ -15,7 +15,7 @@ import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 const SEARCH_ENDPOINT = `${MARKDOWN_API_PATH}/search`;
 const TOTAL_MARKDOWNS = 100;
 const MANY_MARKDOWNS_KBN_ARCHIVE_PATH =
-  'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-markdowns.json';
+  'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many_markdowns.json';
 
 apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
@@ -58,7 +58,6 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(1);
-    console.log(response.body.markdowns);
     expect(response.body.markdowns).toHaveLength(1);
   });
 
