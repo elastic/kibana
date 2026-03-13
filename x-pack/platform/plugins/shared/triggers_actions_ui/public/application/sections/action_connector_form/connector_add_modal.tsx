@@ -169,7 +169,7 @@ const ConnectorAddModal = ({
        */
 
       const { actionTypeId, name, config, secrets, id } = data;
-      const validConnector = { actionTypeId, name: name ?? '', config, secrets, id };
+      const validConnector = { actionTypeId, name: name ?? '', config, secrets, id: id ?? '' };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
