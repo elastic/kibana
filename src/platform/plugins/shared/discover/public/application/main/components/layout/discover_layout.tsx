@@ -461,6 +461,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
+      data-test-subj="dscPage"
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
