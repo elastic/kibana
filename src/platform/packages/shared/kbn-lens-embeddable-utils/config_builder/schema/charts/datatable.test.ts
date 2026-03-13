@@ -678,7 +678,7 @@ describe('Datatable Schema', () => {
             operation: 'median',
             field: 'bytes',
             alignment: 'left',
-            apply_color_to: 'background',
+            apply_color_to: 'badge',
             visible: true,
             width: 200,
             summary: { type: 'avg', label: 'Average bytes' },

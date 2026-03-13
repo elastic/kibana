@@ -28,7 +28,12 @@ function buildColorProps(
     | NonNullable<DatatableState['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
-  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+  let colorMode: ColumnState['colorMode'] = 'cell';
+  if (config.apply_color_to === 'value') {
+    colorMode = 'text';
+  } else if (config.apply_color_to === 'badge') {
+    colorMode = 'badge';
+  }
 
   if (isColorMappingColor(config.color)) {
     const color = fromColorMappingAPIToLensState(config.color);
