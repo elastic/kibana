@@ -122,7 +122,10 @@ describe('google drive workflows (real ES)', () => {
 
       const normalizeSteps = getStepExecutions('normalize_result');
       for (const step of normalizeSteps) {
-        const vars = (step as unknown as Record<string, unknown>).variables as Record<string, unknown>;
+        const vars = (step as unknown as Record<string, unknown>).variables as Record<
+          string,
+          unknown
+        >;
         const normalized = vars?.normalized as Record<string, unknown> | undefined;
         if (normalized) {
           expect(normalized.filename).toMatch(/\.pdf$/);

@@ -112,11 +112,7 @@ export async function loadWorkflowsThroughProductionPath(
 
   const workflowManagement = {
     management: {
-      createWorkflow: async (
-        { yaml }: { yaml: string },
-        _spaceId: string,
-        _request: unknown
-      ) => {
+      createWorkflow: async ({ yaml }: { yaml: string }, _spaceId: string, _request: unknown) => {
         const validation = validateWorkflowYaml(yaml, WORKFLOW_ZOD_SCHEMA);
         const liquidErrors = validation.diagnostics
           .filter((d) => d.source === 'liquid')
