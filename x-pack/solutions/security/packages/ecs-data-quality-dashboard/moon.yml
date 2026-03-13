@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ecs-data-quality-dashboard'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting-investigations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ecs-data-quality-dashboard'
+  title: '@kbn/ecs-data-quality-dashboard'
   description: Moon project for @kbn/ecs-data-quality-dashboard
   channel: ''
   owner: '@elastic/security-threat-hunting-investigations'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/ecs-data-quality-dashboard
+  sourceRoot: x-pack/solutions/security/packages/ecs-data-quality-dashboard
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -46,14 +45,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

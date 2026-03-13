@@ -28,11 +28,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-
-jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
-
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -81,6 +77,7 @@ describe('VisualizationsSection', () => {
   const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
   const openSystemFlyout = jest.fn();
+  const renderCellActions = jest.fn();
   const store = createStore(() => ({}));
   const history = createMemoryHistory();
 
@@ -89,7 +86,7 @@ describe('VisualizationsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <VisualizationsSection hit={mockHit} />
+            <VisualizationsSection hit={mockHit} renderCellActions={renderCellActions} />
           </Router>
         </Provider>
       </IntlProvider>
@@ -102,6 +99,10 @@ describe('VisualizationsSection', () => {
         overlays: {
           openSystemFlyout,
         },
+        uiSettings: {
+          get: jest.fn().mockReturnValue(true),
+        },
+        serverless: undefined,
       },
     } as unknown as ReturnType<typeof useKibana>);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
