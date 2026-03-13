@@ -10,26 +10,33 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { getAllSpacesWithCases } from '../../utils';
-import { createCasesAnalyticsIndexesForSpaceId, scheduleCasesAnalyticsSyncTasks } from '../..';
+import { getSpacesWithAnalyticsEnabled } from '../../utils';
+import {
+  createCasesAnalyticsIndexesForOwnerAndSpace,
+  scheduleCasesAnalyticsSyncTasksForOwner,
+} from '../..';
 import { SchedulerTaskRunner } from './scheduler_task_runner';
 
 jest.mock('../../utils');
-const getAllSpacesWithCasesMock = getAllSpacesWithCases as jest.Mock;
+const getSpacesWithAnalyticsEnabledMock = getSpacesWithAnalyticsEnabled as jest.Mock;
 
 jest.mock('../..');
-const createCasesAnalyticsIndexesForSpaceIdMock =
-  createCasesAnalyticsIndexesForSpaceId as jest.Mock;
-const scheduleCasesAnalyticsSyncTasksMock = scheduleCasesAnalyticsSyncTasks as jest.Mock;
+const createCasesAnalyticsIndexesForOwnerAndSpaceMock =
+  createCasesAnalyticsIndexesForOwnerAndSpace as jest.Mock;
+const scheduleCasesAnalyticsSyncTasksForOwnerMock =
+  scheduleCasesAnalyticsSyncTasksForOwner as jest.Mock;
 
 describe('SchedulerTaskRunner', () => {
-  const initialSpaces = ['default', 'another-one'];
+  const initialPairs = [
+    { spaceId: 'default', owner: 'securitySolution' },
+    { spaceId: 'another-one', owner: 'securitySolution' },
+  ];
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const getESClient = jest.fn().mockResolvedValue(esClient);
   const getTaskManager = jest.fn().mockResolvedValue(taskManagerMock.createSetup());
   const getUnsecureSavedObjectsClient = jest.fn().mockResolvedValue(savedObjectsClientMock);
-  getAllSpacesWithCasesMock.mockResolvedValue(initialSpaces);
+  getSpacesWithAnalyticsEnabledMock.mockResolvedValue(initialPairs);
 
   const analyticsConfig = {
     index: {
@@ -45,7 +52,7 @@ describe('SchedulerTaskRunner', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    createCasesAnalyticsIndexesForSpaceIdMock.mockResolvedValue(undefined);
+    createCasesAnalyticsIndexesForOwnerAndSpaceMock.mockResolvedValue(undefined);
 
     esClient.indices.exists.mockResolvedValue(true);
   });
@@ -61,10 +68,12 @@ describe('SchedulerTaskRunner', () => {
 
     await taskRunner.run();
 
-    expect(getAllSpacesWithCases).not.toHaveBeenCalled();
+    expect(getSpacesWithAnalyticsEnabled).not.toHaveBeenCalled();
   });
 
-  it('should schedule sync tasks for all spaces with cases', async () => {
+  it('should schedule sync tasks for all owner+space pairs with analytics enabled', async () => {
+    getSpacesWithAnalyticsEnabledMock.mockResolvedValue(initialPairs);
+
     const taskRunner = new SchedulerTaskRunner({
       getUnsecureSavedObjectsClient,
       logger,
@@ -75,23 +84,26 @@ describe('SchedulerTaskRunner', () => {
 
     await taskRunner.run();
 
-    expect(scheduleCasesAnalyticsSyncTasksMock).toHaveBeenCalledTimes(2);
-    expect(scheduleCasesAnalyticsSyncTasksMock).toHaveBeenNthCalledWith(
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenCalledTimes(2);
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        spaceId: initialSpaces[0],
+        spaceId: initialPairs[0].spaceId,
+        owner: initialPairs[0].owner,
       })
     );
-    expect(scheduleCasesAnalyticsSyncTasksMock).toHaveBeenNthCalledWith(
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        spaceId: initialSpaces[1],
+        spaceId: initialPairs[1].spaceId,
+        owner: initialPairs[1].owner,
       })
     );
   });
 
-  it('should create analytics indexes for spaces if they do not exist yet', async () => {
-    // only the first space should trigger index creation
+  it('should create analytics indexes for owner+space pairs if they do not exist yet', async () => {
+    getSpacesWithAnalyticsEnabledMock.mockResolvedValue(initialPairs);
+    // only the first pair should trigger index creation
     esClient.indices.exists.mockResolvedValueOnce(false);
 
     const taskRunner = new SchedulerTaskRunner({
@@ -104,18 +116,65 @@ describe('SchedulerTaskRunner', () => {
 
     await taskRunner.run();
 
-    expect(createCasesAnalyticsIndexesForSpaceIdMock).toHaveBeenCalledTimes(1);
-    expect(createCasesAnalyticsIndexesForSpaceIdMock).toHaveBeenNthCalledWith(
+    expect(createCasesAnalyticsIndexesForOwnerAndSpaceMock).toHaveBeenCalledTimes(1);
+    expect(createCasesAnalyticsIndexesForOwnerAndSpaceMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        spaceId: initialSpaces[0],
+        spaceId: initialPairs[0].spaceId,
+        owner: initialPairs[0].owner,
       })
     );
-    expect(scheduleCasesAnalyticsSyncTasksMock).toHaveBeenNthCalledWith(
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        spaceId: initialSpaces[1],
+        spaceId: initialPairs[1].spaceId,
+        owner: initialPairs[1].owner,
       })
+    );
+  });
+
+  it('should not create indexes for a pair when indices already exist', async () => {
+    getSpacesWithAnalyticsEnabledMock.mockResolvedValue([initialPairs[0]]);
+    esClient.indices.exists.mockResolvedValue(true);
+
+    const taskRunner = new SchedulerTaskRunner({
+      getUnsecureSavedObjectsClient,
+      logger,
+      analyticsConfig,
+      getTaskManager,
+      getESClient,
+    });
+
+    await taskRunner.run();
+
+    expect(createCasesAnalyticsIndexesForOwnerAndSpaceMock).not.toHaveBeenCalled();
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle multiple owners in the same space', async () => {
+    const multiOwnerPairs = [
+      { spaceId: 'default', owner: 'securitySolution' },
+      { spaceId: 'default', owner: 'observability' },
+    ];
+    getSpacesWithAnalyticsEnabledMock.mockResolvedValue(multiOwnerPairs);
+    esClient.indices.exists.mockResolvedValue(true);
+
+    const taskRunner = new SchedulerTaskRunner({
+      getUnsecureSavedObjectsClient,
+      logger,
+      analyticsConfig,
+      getTaskManager,
+      getESClient,
+    });
+
+    await taskRunner.run();
+
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenCalledTimes(2);
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'default', owner: 'securitySolution' })
+    );
+    expect(scheduleCasesAnalyticsSyncTasksForOwnerMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'default', owner: 'observability' })
     );
   });
 });

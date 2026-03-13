@@ -150,6 +150,18 @@ export const ConfigurationActivityFieldsRt = rt.strict({
 export const ConfigurationAttributesRt = rt.intersection([
   CasesConfigureBasicRt,
   ConfigurationActivityFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * Whether analytics indexing is enabled for cases in this space/owner
+       */
+      analytics_enabled: rt.boolean,
+      /**
+       * ISO timestamp of the last successful analytics sync for this space/owner
+       */
+      analytics_last_sync_at: rt.string,
+    })
+  ),
 ]);
 
 export const ConfigurationRt = rt.intersection([

@@ -9,11 +9,11 @@ import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
 import type { ConfigType } from '../../../config';
-import { getAllSpacesWithCases } from '../../utils';
+import { getSpacesWithAnalyticsEnabled } from '../../utils';
 import {
-  createCasesAnalyticsIndexesForSpaceId,
-  getIndicesForSpaceId,
-  scheduleCasesAnalyticsSyncTasks,
+  createCasesAnalyticsIndexesForOwnerAndSpace,
+  getIndicesForOwnerAndSpace,
+  scheduleCasesAnalyticsSyncTasksForOwner,
 } from '../..';
 
 interface SchedulerTaskRunnerFactoryConstructorParams {
@@ -52,27 +52,31 @@ export class SchedulerTaskRunner implements CancellableTask {
     }
     try {
       const unsecureSavedObjectsClient = await this.getUnsecureSavedObjectsClient();
-      const spaces = await getAllSpacesWithCases(unsecureSavedObjectsClient);
+      const spaces = await getSpacesWithAnalyticsEnabled(unsecureSavedObjectsClient);
       const taskManager = await this.getTaskManager();
       const esClient = await this.getESClient();
 
-      for (const spaceId of spaces) {
-        const indices = getIndicesForSpaceId(spaceId);
+      for (const { spaceId, owner } of spaces) {
+        const indices = getIndicesForOwnerAndSpace(spaceId, owner);
         const destIndicesExist = await esClient.indices.exists({ index: indices });
         if (!destIndicesExist) {
           // Create the necessary analytics indexes without scheduling the sync tasks
-          createCasesAnalyticsIndexesForSpaceId({
+          createCasesAnalyticsIndexesForOwnerAndSpace({
             spaceId,
+            owner,
             esClient,
             logger: this.logger,
             isServerless: false,
             taskManager,
           }).catch(() => {
-            this.logger.error(`Failed to create analytics indexes for space ${spaceId}`);
+            this.logger.error(
+              `Failed to create analytics indexes for owner ${owner} in space ${spaceId}`
+            );
           });
         } else {
-          scheduleCasesAnalyticsSyncTasks({
+          scheduleCasesAnalyticsSyncTasksForOwner({
             spaceId,
+            owner,
             taskManager,
             logger: this.logger,
           });

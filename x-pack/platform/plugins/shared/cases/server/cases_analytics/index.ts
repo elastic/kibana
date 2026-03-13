@@ -15,24 +15,25 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { OWNERS } from '../../common/constants';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Owner } from '../../common/constants/types';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
 import {
   registerCAISynchronizationTask,
   scheduleCAISynchronizationTask,
 } from './tasks/synchronization_task';
-import { createAttachmentsAnalyticsIndex } from './attachments_index';
-import { createCasesAnalyticsIndex } from './cases_index';
-import { createCommentsAnalyticsIndex } from './comments_index';
+import { createContentAnalyticsIndex } from './content_index';
 import { createActivityAnalyticsIndex } from './activity_index';
+import { createLifecycleAnalyticsTransform } from './lifecycle_index';
 import type { ConfigType } from '../config';
-import { getAllSpacesWithCases } from './utils';
+import { getSpacesWithAnalyticsEnabled } from './utils';
 import { registerCAISchedulerTask } from './tasks/scheduler_task';
 import { getActivityDestinationIndexName } from './activity_index/constants';
-import { getAttachmentsDestinationIndexName } from './attachments_index/constants';
-import { getCasesDestinationIndexName } from './cases_index/constants';
-import { getCommentsDestinationIndexName } from './comments_index/constants';
+import { getContentDestinationIndexName } from './content_index/constants';
+import { getLifecycleDestinationIndexName } from './lifecycle_index/constants';
+import { createAnalyticsDataViews } from './data_views';
+import { provisionAnalyticsDashboard } from './dashboard';
 
 export const createCasesAnalyticsIndexes = async ({
   esClient,
@@ -40,85 +41,96 @@ export const createCasesAnalyticsIndexes = async ({
   isServerless,
   taskManager,
   savedObjectsClient,
+  dataViewsService,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
+  dataViewsService?: DataViewsService;
 }) => {
-  const spaces: string[] = await getAllSpacesWithCases(savedObjectsClient);
-  for (const spaceId of spaces) {
+  const pairs = await getSpacesWithAnalyticsEnabled(savedObjectsClient);
+  const spacesProcessed = new Set<string>();
+  for (const { spaceId, owner } of pairs) {
     try {
-      await createCasesAnalyticsIndexesForSpaceId({
+      await createCasesAnalyticsIndexesForOwnerAndSpace({
         spaceId,
+        owner,
         esClient,
         logger,
         isServerless,
         taskManager,
       });
-      logger.info(`Successfully created cases analytics indexes for space ${spaceId}`);
+      logger.info(
+        `Successfully created cases analytics indexes for owner ${owner} in space ${spaceId}`
+      );
+      if (!spacesProcessed.has(spaceId)) {
+        spacesProcessed.add(spaceId);
+        if (dataViewsService) {
+          createAnalyticsDataViews(dataViewsService, logger, spaceId).catch((err) => {
+            logger.warn(
+              `Failed to create analytics data views in space ${spaceId}: ${err.message}`
+            );
+          });
+        }
+        provisionAnalyticsDashboard(savedObjectsClient, logger, spaceId).catch((err) => {
+          logger.warn(
+            `Failed to provision analytics dashboard in space ${spaceId}: ${err.message}`
+          );
+        });
+      }
     } catch (error) {
-      logger.error(`Error creating cases analytics indexes for space ${spaceId}: ${error}`);
+      logger.error(
+        `Error creating cases analytics indexes for owner ${owner} in space ${spaceId}: ${error}`
+      );
     }
   }
 };
 
-export async function createCasesAnalyticsIndexesForSpaceId({
+export async function createCasesAnalyticsIndexesForOwnerAndSpace({
   esClient,
   logger,
   isServerless,
   taskManager,
   spaceId,
+  owner,
 }: {
   spaceId: string;
+  owner: Owner;
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
 }) {
-  return Promise.all(
-    OWNERS.reduce<Promise<unknown>[]>((operations, owner) => {
-      const casesIndex = createCasesAnalyticsIndex({
-        logger,
-        esClient,
-        isServerless,
-        taskManager,
-        spaceId,
-        owner,
-      });
-      const casesCommentsIndex = createCommentsAnalyticsIndex({
-        logger,
-        esClient,
-        isServerless,
-        taskManager,
-        spaceId,
-        owner,
-      });
-      const casesAttachmentsIndex = createAttachmentsAnalyticsIndex({
-        logger,
-        esClient,
-        isServerless,
-        taskManager,
-        spaceId,
-        owner,
-      });
-      const casesActivityIndex = createActivityAnalyticsIndex({
-        logger,
-        esClient,
-        isServerless,
-        taskManager,
-        spaceId,
-        owner,
-      });
-      return operations.concat([
-        casesIndex.upsertIndex(),
-        casesCommentsIndex.upsertIndex(),
-        casesAttachmentsIndex.upsertIndex(),
-        casesActivityIndex.upsertIndex(),
-      ]);
-    }, [])
-  );
+  const contentIndex = createContentAnalyticsIndex({
+    logger,
+    esClient,
+    isServerless,
+    taskManager,
+    spaceId,
+    owner,
+  });
+  const activityIndex = createActivityAnalyticsIndex({
+    logger,
+    esClient,
+    isServerless,
+    taskManager,
+    spaceId,
+    owner,
+  });
+  await Promise.all([contentIndex.upsertIndex(), activityIndex.upsertIndex()]);
+
+  // The lifecycle transform reads from the activity index, so it must be
+  // created after the activity index is ready.
+  const lifecycleTransform = createLifecycleAnalyticsTransform({
+    esClient,
+    logger,
+    isServerless,
+    spaceId,
+    owner,
+  });
+  await lifecycleTransform.upsert();
 }
 
 export const registerCasesAnalyticsIndexesTasks = ({
@@ -126,38 +138,37 @@ export const registerCasesAnalyticsIndexesTasks = ({
   logger,
   core,
   analyticsConfig,
+  isServerless,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
   analyticsConfig: ConfigType['analytics'];
+  isServerless: boolean;
 }) => {
   registerCAIBackfillTask({ taskManager, logger, core, analyticsConfig });
-  registerCAISchedulerTask({ taskManager, logger, core, analyticsConfig });
+  registerCAISchedulerTask({ taskManager, logger, core, analyticsConfig, isServerless });
   registerCAISynchronizationTask({ taskManager, logger, core, analyticsConfig });
 };
 
-export const scheduleCasesAnalyticsSyncTasks = ({
+export const scheduleCasesAnalyticsSyncTasksForOwner = ({
   taskManager,
   logger,
   spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   spaceId: string;
+  owner: Owner;
 }) => {
-  for (const owner of OWNERS) {
-    void scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
-  }
+  void scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
 };
 
-export const getIndicesForSpaceId = (spaceId: string) => {
-  return OWNERS.reduce<string[]>((curr, owner) => {
-    return curr.concat([
-      getActivityDestinationIndexName(spaceId, owner),
-      getAttachmentsDestinationIndexName(spaceId, owner),
-      getCasesDestinationIndexName(spaceId, owner),
-      getCommentsDestinationIndexName(spaceId, owner),
-    ]);
-  }, []);
+export const getIndicesForOwnerAndSpace = (spaceId: string, owner: Owner): string[] => {
+  return [
+    getActivityDestinationIndexName(spaceId, owner),
+    getContentDestinationIndexName(spaceId, owner),
+    getLifecycleDestinationIndexName(spaceId, owner),
+  ];
 };

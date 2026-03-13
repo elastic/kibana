@@ -13,12 +13,19 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPageBody,
   EuiPageSection,
+  EuiPanel,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -60,6 +67,9 @@ import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import { getCaseAnalyticsDataViewId } from '../../../common/constants';
+import { PreferenceFormattedDate } from '../formatted_date';
+import { useTriggerAnalyticsSync } from '../../containers/configure/use_trigger_analytics_sync';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -116,13 +126,17 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
-  const { triggersActionsUi, docLinks } = useKibana().services;
+  const { triggersActionsUi, docLinks, http, spaces } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
+  const [currentSpaceId, setCurrentSpaceId] = useState<string>('default');
+  useEffect(() => {
+    spaces?.getActiveSpace().then((space) => setCurrentSpaceId(space.id));
+  }, [spaces]);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
-  const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const { isObservablesFeatureEnabled, isAnalyticsAuthorized } = useCasesFeatures();
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
   const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
@@ -149,6 +163,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    analyticsEnabled,
+    analyticsLastSyncAt,
+    owner,
   } = currentConfiguration;
 
   const {
@@ -156,6 +173,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
     mutateAsync: persistCaseConfigureAsync,
     isLoading: isPersistingConfiguration,
   } = usePersistConfiguration();
+
+  const { mutate: triggerSync, isLoading: isSyncing } = useTriggerAnalyticsSync();
 
   const isLoadingCaseConfiguration = loadingCaseConfigure || isPersistingConfiguration;
   const {
@@ -279,6 +298,41 @@ export const ConfigureCases: React.FC = React.memo(() => {
       persistCaseConfigure,
     ]
   );
+
+  const onChangeAnalyticsEnabled = useCallback(
+    async (enabled: boolean) => {
+      await persistCaseConfigureAsync({
+        connector,
+        customFields,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+        analyticsEnabled: enabled,
+      });
+      // Trigger an immediate re-index when enabling analytics
+      if (enabled && owner) {
+        triggerSync(owner);
+      }
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      owner,
+      templates,
+      persistCaseConfigureAsync,
+      triggerSync,
+    ]
+  );
+
+  const onClickSyncData = useCallback(() => {
+    if (owner) {
+      triggerSync(owner);
+    }
+  }, [owner, triggerSync]);
 
   useEffect(() => {
     if (
@@ -732,6 +786,105 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     handleEditObservableType={onEditObservableType}
                   />
                 </EuiFlexItem>
+              </div>
+            </>
+          )}
+
+          {isAnalyticsAuthorized && (
+            <>
+              <EuiSpacer size="xl" />
+              <div css={sectionWrapperCss}>
+                <EuiPanel hasBorder>
+                  <EuiFlexGroup alignItems="center" gutterSize="m">
+                    <EuiFlexItem grow>
+                      <EuiTitle size="xs">
+                        <h3>{i18n.ANALYTICS_TITLE}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiSwitch
+                            data-test-subj="configure-cases-analytics-switch"
+                            label={i18n.ANALYTICS_ENABLE_LABEL}
+                            showLabel={false}
+                            checked={analyticsEnabled ?? false}
+                            onChange={(e) => onChangeAnalyticsEnabled(e.target.checked)}
+                            disabled={
+                              isLoadingCaseConfiguration || isSyncing || !permissions.settings
+                            }
+                          />
+                        </EuiFlexItem>
+                        {analyticsEnabled && (
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              data-test-subj="configure-cases-analytics-sync-button"
+                              iconType="refresh"
+                              aria-label={i18n.ANALYTICS_SYNC_BUTTON_LABEL}
+                              onClick={onClickSyncData}
+                              isLoading={isSyncing}
+                              isDisabled={
+                                isSyncing || isLoadingCaseConfiguration || !permissions.settings
+                              }
+                            />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  {analyticsEnabled && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiFlexGroup alignItems="baseline" gutterSize="m">
+                        <EuiFlexItem grow>
+                          <EuiText size="s" color="subdued">
+                            <p>{i18n.ANALYTICS_DESC}</p>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued" textAlign="right">
+                            <p>{i18n.ANALYTICS_AUTO_SYNC_INFO}</p>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="s" />
+                      <EuiFlexGroup
+                        alignItems="baseline"
+                        justifyContent="spaceBetween"
+                        gutterSize="m"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            iconType="discoverApp"
+                            iconSide="left"
+                            flush="left"
+                            size="s"
+                            href={http.basePath.prepend(
+                              `/app/discover#/?_a=(index:'${getCaseAnalyticsDataViewId(
+                                currentSpaceId
+                              )}')`
+                            )}
+                            data-test-subj="configure-cases-analytics-discover-link"
+                          >
+                            {i18n.ANALYTICS_EXPLORE_IN_DISCOVER}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        {analyticsLastSyncAt && (
+                          <EuiFlexItem grow={false}>
+                            <EuiText
+                              size="xs"
+                              color="subdued"
+                              data-test-subj="configure-cases-analytics-last-sync"
+                            >
+                              {`${i18n.ANALYTICS_LAST_SYNC_LABEL} `}
+                              <PreferenceFormattedDate value={new Date(analyticsLastSyncAt)} />
+                            </EuiText>
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </>
+                  )}
+                </EuiPanel>
               </div>
             </>
           )}

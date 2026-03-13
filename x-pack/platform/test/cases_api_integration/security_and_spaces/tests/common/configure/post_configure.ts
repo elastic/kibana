@@ -755,5 +755,22 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
     });
+
+    describe('analytics_enabled', () => {
+      it('should create a configuration with analytics_enabled set to true', async () => {
+        const configuration = await createConfiguration(
+          supertest,
+          getConfigurationRequest({ overrides: { analytics_enabled: true } })
+        );
+
+        expect(configuration.analytics_enabled).to.be(true);
+      });
+
+      it('should create a configuration without analytics_enabled (defaults to undefined)', async () => {
+        const configuration = await createConfiguration(supertest);
+
+        expect(configuration.analytics_enabled).to.be(undefined);
+      });
+    });
   });
 };

@@ -12,3 +12,10 @@ export * from '../translations';
 export const SUCCESS_CONFIGURE = i18n.translate('xpack.cases.configure.successSaveToast', {
   defaultMessage: 'Settings successfully updated',
 });
+
+export const ANALYTICS_SYNC_ERROR_TITLE = i18n.translate(
+  'xpack.cases.configure.analytics.syncErrorTitle',
+  {
+    defaultMessage: 'Failed to trigger analytics sync',
+  }
+);

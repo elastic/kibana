@@ -115,6 +115,16 @@ export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bu
 export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
 export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
 
+export const INTERNAL_ANALYTICS_SYNC_URL = `${CASES_INTERNAL_URL}/analytics/_sync` as const;
+
+/**
+ * Analytics data view IDs
+ */
+export const getCaseAnalyticsDataViewId = (spaceId: string) => `cases-analytics-${spaceId}`;
+export const getCaseActivityDataViewId = (spaceId: string) => `cases-analytics-activity-${spaceId}`;
+export const getCaseLifecycleDataViewId = (spaceId: string) =>
+  `cases-analytics-lifecycle-${spaceId}`;
+
 /**
  * Action routes
  */
