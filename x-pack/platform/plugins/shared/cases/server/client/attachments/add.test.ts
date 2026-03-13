@@ -20,6 +20,7 @@ import { createCasesClientMockArgs } from '../mocks';
 import { commentAttachmentType } from '../../attachment_framework/attachments';
 import { addComment } from './add';
 import { getCaseOwner } from './utils';
+import type { CasesEventBus } from '../../events';
 
 jest.mock('./utils', () => ({
   getCaseOwner: jest.fn(),
@@ -115,6 +116,42 @@ describe('addComment', () => {
         entities: expect.arrayContaining([
           expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
         ]),
+      })
+    );
+  });
+
+  it('emits commentAdded event after creating a comment', async () => {
+    const emitCommentAdded = jest.fn();
+    clientArgs.casesEventBus = { emitCommentAdded } as unknown as CasesEventBus;
+    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
+      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    }
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
+
+    await addComment(
+      { comment: { type: 'comment', data: { content: 'unified text' } }, caseId },
+      clientArgs
+    );
+
+    expect(emitCommentAdded).toHaveBeenCalledWith(
+      clientArgs.casesEventMetadata,
+      expect.objectContaining({
+        commentType: 'comment',
+        case: expect.objectContaining({ id: caseId }),
       })
     );
   });

@@ -64,7 +64,6 @@ import { CasesPatchRequestRt } from '../../../common/types/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
-
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -567,7 +566,22 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return decodeOrThrow(CasesRt)(returnUpdatedCase);
+    const updatedCasesResponse = decodeOrThrow(CasesRt)(returnUpdatedCase);
+
+    updatedCasesResponse.forEach((updatedCase) => {
+      const matchingUpdate = query.cases.find((theCase) => theCase.id === updatedCase.id);
+      const updatedFields =
+        matchingUpdate != null
+          ? Object.keys(matchingUpdate).filter((key) => key !== 'id' && key !== 'version')
+          : undefined;
+
+      clientArgs.casesEventBus?.emitCaseUpdated(clientArgs.casesEventMetadata, {
+        case: updatedCase as unknown as Record<string, unknown>,
+        ...(updatedFields != null && updatedFields.length > 0 ? { updatedFields } : {}),
+      });
+    });
+
+    return updatedCasesResponse;
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

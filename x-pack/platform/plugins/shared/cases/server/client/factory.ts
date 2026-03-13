@@ -36,6 +36,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { KIBANA_SYSTEM_USERNAME } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -58,6 +59,7 @@ import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
+import type { CasesEventSource } from '../events';
 import { getSavedObjectsTypes } from '../../common';
 
 interface CasesClientFactoryArgs {
@@ -78,6 +80,8 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  casesEventBus?: import('../events').CasesEventBus;
 }
 
 /**
@@ -110,15 +114,18 @@ export class CasesClientFactory {
   /**
    * Creates a cases client for the current request. This request will be used to authorize the operations done through
    * the client.
+   * @param source - Event source for workflow trigger recursion prevention. Defaults to 'api'.
    */
   public async create({
     request,
     scopedClusterClient,
     savedObjectsService,
+    source = 'api',
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    source?: CasesEventSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -154,7 +161,14 @@ export class CasesClientFactory {
 
     const userInfo = await this.getUserInfo(request);
 
+    const spaceId =
+      this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
+    const casesEventMetadata = {
+      request,
+      spaceId,
+      source,
+    };
 
     return createCasesClient({
       services,
@@ -169,12 +183,13 @@ export class CasesClientFactory {
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId:
-        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      spaceId,
       savedObjectsSerializer,
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
+      casesEventBus: this.options.casesEventBus,
+      casesEventMetadata,
     });
   }
 
