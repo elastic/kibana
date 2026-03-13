@@ -1194,6 +1194,7 @@ x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-team
@@ -2372,12 +2373,14 @@ src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
