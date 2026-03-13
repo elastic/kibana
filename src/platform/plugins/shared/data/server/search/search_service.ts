@@ -586,6 +586,10 @@ export class SearchService {
     request: KibanaRequest;
     opts?: AsScopedOptions;
   }) => {
+    if (!opts?.projectRouting) {
+      return client.asScoped(request);
+    }
+
     switch (opts?.projectRouting) {
       case 'space-npre':
         return client.asScoped(request, { projectRouting: 'space-npre' });
@@ -596,7 +600,7 @@ export class SearchService {
       case 'request-header':
         return client.asScoped(request, { projectRouting: 'request-header' });
       default:
-        return client.asScoped(request);
+        throw new KbnServerError(`Invalid project routing: ${opts?.projectRouting}`, 400);
     }
   };
 }
