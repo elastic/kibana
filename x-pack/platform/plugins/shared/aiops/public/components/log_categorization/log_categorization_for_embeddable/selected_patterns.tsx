@@ -53,14 +53,14 @@ export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openI
         items={[
           <EuiContextMenuItem
             key="in"
-            icon="plusInCircle"
+            icon="plusCircle"
             onClick={() => openFunction(QUERY_MODE.INCLUDE, false)}
           >
             {labels.multiSelect.in}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="out"
-            icon="minusInCircle"
+            icon="minusCircle"
             onClick={() => openFunction(QUERY_MODE.EXCLUDE, false)}
           >
             {labels.multiSelect.out}

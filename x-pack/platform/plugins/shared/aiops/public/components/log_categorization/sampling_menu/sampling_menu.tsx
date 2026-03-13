@@ -40,7 +40,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
           color="text"
           iconSide="right"
           isSelected={showSamplingOptionsPopover}
-          iconType={showSamplingOptionsPopover ? 'arrowUp' : 'arrowDown'}
+          iconType={showSamplingOptionsPopover ? 'chevronSingleUp' : 'chevronSingleDown'}
         >
           {buttonText}
         </EuiButton>

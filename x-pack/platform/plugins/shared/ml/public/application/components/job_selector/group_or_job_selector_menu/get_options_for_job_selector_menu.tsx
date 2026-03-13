@@ -59,7 +59,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       }
     ),
     disabled: page === ML_PAGES.ANOMALY_EXPLORER && isSingleMetricViewerDisabled,
-    icon: 'visLine',
+    icon: 'chartLine',
     onClick: async () => {
       const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
       if (!mlLocator) {
@@ -117,7 +117,7 @@ export const getOptionsForJobSelectorMenuItems = ({
               },
             }),
             disabled: removeJobIdDisabled,
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             onClick: () => {
               if (onRemoveJobId) {
                 onRemoveJobId([jobId]);
@@ -138,7 +138,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts', {
         defaultMessage: 'View datafeed counts',
       }),
-      icon: 'visAreaStacked',
+      icon: 'chartAreaStack',
       onClick: () => {
         setActiveJobId(jobId);
         setActiveFlyout(FlyoutType.DATAFEED_CHART);

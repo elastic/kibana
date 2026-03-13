@@ -161,7 +161,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                     defaultMessage: 'Collapse details for all fields',
                   })
             }
-            iconType={expandAll ? 'arrowDown' : 'arrowRight'}
+            iconType={expandAll ? 'chevronSingleDown' : 'chevronSingleRight'}
           />
         ) : null,
       align: RIGHT_ALIGNMENT,
@@ -170,7 +170,9 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
       render: (item: DataVisualizerTableItem) => {
         const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
-        const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowDown' : 'arrowRight';
+        const direction = expandedRowItemIds.includes(item.fieldName)
+          ? 'chevronSingleDown'
+          : 'chevronSingleRight';
         return (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
@@ -287,7 +289,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         name: (
           <div className={'columnHeader__title'}>
             {dimensions.showIcon ? (
-              <EuiIcon type={'visBarVertical'} className={'columnHeader__icon'} />
+              <EuiIcon type={'chartBarVertical'} className={'columnHeader__icon'} />
             ) : null}
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
@@ -308,7 +310,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                 <EuiButtonIcon
                   style={{ marginLeft: 4 }}
                   size={'s'}
-                  iconType={!showDistributions ? 'eye' : 'eyeClosed'}
+                  iconType={!showDistributions ? 'eye' : 'eyeSlash'}
                   onClick={() => toggleShowDistribution()}
                   aria-label={
                     !showDistributions

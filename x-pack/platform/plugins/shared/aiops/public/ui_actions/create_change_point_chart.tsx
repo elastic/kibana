@@ -45,7 +45,7 @@ export function createAddChangePointChartAction(
       },
     ],
     order: 10,
-    getIconType: () => 'changePointDetection',
+    getIconType: () => 'chartChangePoint',
     getDisplayName: () =>
       i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
         defaultMessage: 'Change point detection',

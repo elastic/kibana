@@ -57,7 +57,7 @@ export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onCha
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={setIsOpen.bind(null, (prev) => !prev)}
       isSelected={isOpen}

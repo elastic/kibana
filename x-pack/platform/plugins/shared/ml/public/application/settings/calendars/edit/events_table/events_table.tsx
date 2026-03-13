@@ -171,7 +171,7 @@ export const EventsTable: FC<Props> = ({
         key="ml_new_event"
         data-test-subj="mlCalendarNewEventButton"
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={showNewEventModal}
       >
         <FormattedMessage
@@ -184,7 +184,7 @@ export const EventsTable: FC<Props> = ({
         key="ml_import_event"
         data-test-subj="mlCalendarImportEventsButton"
         size="s"
-        iconType="importAction"
+        iconType="download"
         onClick={showImportModal}
       >
         <FormattedMessage
