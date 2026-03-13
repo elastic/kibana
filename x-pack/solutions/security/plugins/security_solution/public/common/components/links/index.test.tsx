@@ -280,7 +280,7 @@ describe('Custom Links', () => {
             </ExternalLink>
           </TestProviders>
         );
-        expect(container.querySelector('span [data-euiicon-type="popout"]')).toBeInTheDocument();
+        expect(container.querySelector('span [data-euiicon-type="external"]')).toBeInTheDocument();
       });
 
       test('it renders correct url', () => {
@@ -625,7 +625,7 @@ describe('Custom Links', () => {
             <ReputationLink domain={'192.0.2.0'} />
           </TestProviders>
         );
-        expect(container.querySelectorAll('span [data-euiicon-type="popout"]')).toHaveLength(5);
+        expect(container.querySelectorAll('span [data-euiicon-type="external"]')).toHaveLength(5);
       });
 
       test('it renders correct number of external icons', () => {
@@ -634,7 +634,7 @@ describe('Custom Links', () => {
             <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
           </TestProviders>
         );
-        expect(container.querySelectorAll('span [data-euiicon-type="popout"]')).toHaveLength(1);
+        expect(container.querySelectorAll('span [data-euiicon-type="external"]')).toHaveLength(1);
       });
     });
   });
