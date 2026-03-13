@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.google_cloud_storage.download'
-description: Download objects from Google Cloud Storage and extract their text content. Works with PDFs, Office docs, text files, and other supported formats. Optionally reranks results by relevance. Files exceeding the size limit are skipped and returned with metadata only.
+description: "Download objects from Google Cloud Storage and extract their readable text content. Use this to read what a file contains. Works with PDFs, Office docs, text files, and other supported formats. Use get_object_metadata instead if you only need file properties (size, type, dates). Files exceeding the size limit are skipped and returned with metadata only. Use rerank when downloading multiple files to surface the most relevant ones."
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

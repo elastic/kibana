@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.google_cloud_storage.list_objects'
-description: List objects in a Google Cloud Storage bucket. Supports prefix-based filtering to navigate folder-like hierarchies.
+description: "List objects in a Google Cloud Storage bucket. This is the only way to find files — there is no search tool. Use prefix to filter by path and delimiter='/' to browse folder-by-folder, or omit delimiter to list all objects recursively under a prefix."
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
