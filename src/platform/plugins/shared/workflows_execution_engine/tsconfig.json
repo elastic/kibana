@@ -31,6 +31,7 @@
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
+    "@kbn/crypto",
     "@kbn/es-errors"
   ],
   "exclude": ["target/**/*"]
