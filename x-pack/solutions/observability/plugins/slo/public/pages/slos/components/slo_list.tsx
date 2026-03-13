@@ -18,6 +18,7 @@ import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { GroupView } from './grouped_slos/group_view';
 import { ToggleSLOView } from './toggle_slo_view';
 import { UngroupedView } from './ungrouped_slos/ungrouped_view';
+import { SloHierarchyView } from './hierarchy_view';
 
 export function SloList() {
   const { observabilityAIAssistant } = useKibana().services;
@@ -103,23 +104,29 @@ export function SloList() {
           loading={isLoading || isDeletingSlo}
         />
       </EuiFlexItem>
-      {groupBy === 'ungrouped' && (
-        <UngroupedView
-          sloList={sloList}
-          loading={isLoading || isRefetching}
-          error={isError}
-          view={view}
-        />
-      )}
-      {groupBy !== 'ungrouped' && (
-        <GroupView
-          view={view}
-          groupBy={groupBy}
-          kqlQuery={kqlQuery}
-          sort={state.sort.by}
-          direction={state.sort.direction}
-          filters={filters}
-        />
+      {view === 'hierarchyView' ? (
+        <SloHierarchyView onSwitchToStandardView={() => onStateChange({ view: 'cardView' })} />
+      ) : (
+        <>
+          {groupBy === 'ungrouped' && (
+            <UngroupedView
+              sloList={sloList}
+              loading={isLoading || isRefetching}
+              error={isError}
+              view={view}
+            />
+          )}
+          {groupBy !== 'ungrouped' && (
+            <GroupView
+              view={view}
+              groupBy={groupBy}
+              kqlQuery={kqlQuery}
+              sort={state.sort.by}
+              direction={state.sort.direction}
+              filters={filters}
+            />
+          )}
+        </>
       )}
     </EuiFlexGroup>
   );
