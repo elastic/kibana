@@ -19,6 +19,10 @@ export class ExecutionError extends Error {
     this.details = params.details;
   }
 
+  public get stack(): string | undefined {
+    return this.details?.stack as string | undefined;
+  }
+
   /**
    * Creates an instance of ExecutionError from a standard Error.
    * @param error The standard Error to convert.
@@ -32,6 +36,7 @@ export class ExecutionError extends Error {
     return new ExecutionError({
       type: error.name || 'Error',
       message: error.message,
+      details: error.stack ? { stack: error.stack } : undefined,
     });
   }
 

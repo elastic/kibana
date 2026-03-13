@@ -88,6 +88,17 @@ const workflowExecutionFailedErrorSchema = z
         defaultMessage: 'The step name where the failure occurred.',
       })
     ),
+    stepExecutionId: z
+      .string()
+      .optional()
+      .describe(
+        i18n.translate(
+          'workflowsExtensions.triggers.workflowExecutionFailed.schema.error.stepExecutionId',
+          {
+            defaultMessage: 'ID of the step execution where the failure occurred.',
+          }
+        )
+      ),
     stackTrace: z
       .string()
       .optional()

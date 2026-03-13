@@ -170,6 +170,16 @@ export class StepExecutionRuntime {
     // if not, create a new step execution with fail
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
+    const stepName =
+      (this.node as { configuration?: { name?: string } }).configuration?.name ?? this.node.stepId;
+
+    this.workflowExecutionState.setLastFailedStepContext({
+      stepId: this.node.stepId,
+      stepName,
+      stepExecutionId: this.stepExecutionId,
+      stack: executionError.stack,
+    });
+
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
