@@ -806,26 +806,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     setVisibleColumns((prev) => (isEqual(prev, capped) ? prev : capped));
   }, [allResultsData?.columns, ecsMappingColumns, hasUserSetColumns]);
 
-  // Strip "osquery." prefix from column headers to match the legacy table behavior.
-  // We override both `displayAsText` and `display` because when `showColumnTokens`
-  // is enabled, UDT renders a custom header component via the `display` prop that
-  // bakes in the original column name. Setting `display` to undefined forces UDT
-  // to fall back to plain `displayAsText`.
-  const customGridColumnsConfiguration = useMemo(() => {
-    const config: Record<string, (props: { column: EuiDataGridColumn }) => EuiDataGridColumn> = {};
-
+  // Strip "osquery." prefix from column headers via settings.columns[col].display.
+  // UDT reads this before building the header element, so the field-type token is
+  // still derived from the actual column name while the short name is displayed.
+  const osqueryColumnDisplaySettings = useMemo(() => {
+    const columns: Record<string, { display: string }> = {};
     for (const col of visibleColumns) {
       if (col.startsWith('osquery.')) {
-        const shortName = col.split('.')[1];
-        config[col] = ({ column }) => ({
-          ...column,
-          displayAsText: shortName,
-          display: undefined,
-        });
+        columns[col] = { display: col.split('.')[1] };
       }
     }
-
-    return config;
+    return columns;
   }, [visibleColumns]);
 
   // Server-side pagination
@@ -1029,10 +1020,9 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   onSort={handleSort}
                   onSetColumns={handleSetColumns}
                   onResize={handleResize}
-                  settings={gridSettings}
+                  settings={{ ...gridSettings, columns: { ...osqueryColumnDisplaySettings, ...gridSettings.columns } }}
                   showTimeCol={false}
                   showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
-                  showColumnTokens
                   canDragAndDropColumns
                   isSortEnabled
                   isPaginationEnabled={false}
@@ -1045,10 +1035,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   services={unifiedDataTableServices}
                   consumer="osquery"
                   enableComparisonMode
+                  showColumnTokens
                   controlColumnIds={CONTROL_COLUMN_IDS}
                   onFilter={handleFilterForGrid}
                   gridStyleOverride={gridStyleOverride}
-                  customGridColumnsConfiguration={customGridColumnsConfiguration}
                 />
               </CellActionsProvider>
             </div>
