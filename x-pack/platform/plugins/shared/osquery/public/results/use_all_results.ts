@@ -70,7 +70,6 @@ export const useAllResults = ({
                 sortOrder: sort[0].direction,
               }),
               ...(kuery && { kuery }),
-              ...(startDate && { startDate }),
             },
           }
         );
