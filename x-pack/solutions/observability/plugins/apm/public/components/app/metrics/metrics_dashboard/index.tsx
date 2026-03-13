@@ -25,7 +25,7 @@ import {
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import type { PanelDefinition } from './panels/jvm_panels';
+import type { PanelDefinition } from './types';
 
 interface CodeBasedMetricsDashboardProps {
   panels: PanelDefinition[];

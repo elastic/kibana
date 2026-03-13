@@ -6,10 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
@@ -19,41 +16,32 @@ import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { CodeBasedMetricsDashboard } from './metrics_dashboard';
-import { getOtelOtherJavaPanels } from './metrics_dashboard/panels/jvm_panels';
+import { resolvePanelBuilder } from './dynamic_dashboard';
 
 export function Metrics() {
-  const location = useLocation();
-  const useCodeBasedDashboard = new URLSearchParams(location.search).get('metricsView') === 'code';
-
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
 
-  const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
-
   const indexPattern = apmIndices?.metric ?? dataView?.getIndexPattern() ?? '';
-  const codeBasedPanels = useMemo(() => getOtelOtherJavaPanels(indexPattern), [indexPattern]);
+
+  const panelBuilder = resolvePanelBuilder({
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+  });
+
+  const codeBasedPanels = useMemo(() => panelBuilder?.(indexPattern), [panelBuilder, indexPattern]);
+
+  const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
 
-  if (useCodeBasedDashboard && dataView) {
+  if (codeBasedPanels && dataView) {
     return <CodeBasedMetricsDashboard panels={codeBasedPanels} dataView={dataView} />;
-  }
-
-  if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.apm.metrics.emptyState.title', {
-          defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
-        })}
-        iconType="info"
-        data-test-subj="apmMetricsNoDashboardFound"
-      />
-    );
   }
 
   if (hasDashboardFile && dataView) {

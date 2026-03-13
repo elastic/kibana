@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { XYState, DatatableStateESQL } from '@kbn/lens-embeddable-utils/config_builder/schema';
-
-export interface PanelDefinition {
-  id: string;
-  title: string;
-  config: LensApiState;
-  gridConfig: { x: number; y: number; w: number; h: number };
-  requiredMetrics?: string[];
-}
+import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { PanelDefinition } from '../types';
 
 const CPU_HEAP_COLOR_STEPS = [
   { color: '#209280', lt: 0.5 },
