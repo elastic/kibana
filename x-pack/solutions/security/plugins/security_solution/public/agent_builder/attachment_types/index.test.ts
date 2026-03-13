@@ -8,6 +8,7 @@
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { registerAttachmentUiDefinitions } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
@@ -18,6 +19,7 @@ describe('registerAttachmentUiDefinitions', () => {
   const mockApplication = {
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart;
+  const aiRuleCreation = new AiRuleCreationService();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,6 +29,7 @@ describe('registerAttachmentUiDefinitions', () => {
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       application: mockApplication,
+      aiRuleCreation,
     });
 
     expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
@@ -40,6 +43,7 @@ describe('registerAttachmentUiDefinitions', () => {
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       application: mockApplication,
+      aiRuleCreation,
     });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -56,6 +60,7 @@ describe('registerAttachmentUiDefinitions', () => {
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       application: mockApplication,
+      aiRuleCreation,
     });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -75,6 +80,7 @@ describe('registerAttachmentUiDefinitions', () => {
     registerAttachmentUiDefinitions({
       attachments: mockAttachments,
       application: mockApplication,
+      aiRuleCreation,
     });
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(

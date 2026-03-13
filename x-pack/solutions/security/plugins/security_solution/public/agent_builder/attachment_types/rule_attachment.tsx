@@ -27,7 +27,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
-import { setAiCreatedRule } from '../../detection_engine/common/ai_rule_creation_store';
+import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { RULES_PATH } from '../../../common/constants';
 import { hasCapabilities } from '../../common/lib/capabilities';
 
@@ -266,8 +266,10 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
 
 export const createRuleAttachmentDefinition = ({
   application,
+  aiRuleCreation,
 }: {
   application: ApplicationStart;
+  aiRuleCreation: AiRuleCreationService;
 }): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) =>
     getRuleName(attachment) ??
@@ -297,7 +299,7 @@ export const createRuleAttachmentDefinition = ({
         icon: 'plus',
         type: ActionButtonType.PRIMARY,
         handler: () => {
-          setAiCreatedRule(rule);
+          aiRuleCreation.setAiCreatedRule(rule);
           if (!onRuleForm) {
             application.navigateToApp('securitySolutionUI', {
               path: '/rules/create',

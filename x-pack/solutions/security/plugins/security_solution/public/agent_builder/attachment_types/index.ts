@@ -8,17 +8,20 @@
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import { createRuleAttachmentDefinition } from './rule_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
   application,
+  aiRuleCreation,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
+  aiRuleCreation: AiRuleCreationService;
 }) => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.rule,
-    createRuleAttachmentDefinition({ application })
+    createRuleAttachmentDefinition({ application, aiRuleCreation })
   );
 };

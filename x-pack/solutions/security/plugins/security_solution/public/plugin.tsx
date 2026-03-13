@@ -284,6 +284,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerAttachmentUiDefinitions({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
+        aiRuleCreation: this.services.aiRuleCreation,
       });
     }
 

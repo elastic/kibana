@@ -24,7 +24,7 @@ import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
-import { activateFormSync } from '../../../common/ai_rule_creation_store';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
@@ -55,6 +55,8 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   pathway,
   ...props
 }) => {
+  const { services } = useKibana();
+  const { aiRuleCreation } = services;
   const {
     defineStepData,
     aboutStepData,
@@ -107,9 +109,9 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
   const handleClick = useCallback(() => {
-    activateFormSync();
+    aiRuleCreation.activateFormSync();
     openAgentBuilderFlyout();
-  }, [openAgentBuilderFlyout]);
+  }, [aiRuleCreation, openAgentBuilderFlyout]);
 
   return (
     <NewAgentBuilderAttachment
