@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-api-key-management'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-security'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-api-key-management'
+  title: '@kbn/security-api-key-management'
   description: Moon project for @kbn/security-api-key-management
   channel: ''
   owner: '@elastic/kibana-security'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/security/api_key_management
+  sourceRoot: x-pack/platform/packages/shared/security/api_key_management
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
@@ -42,14 +41,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -8,27 +8,20 @@
  */
 
 import type { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, shareReplay } from 'rxjs';
+import { distinctUntilChanged, shareReplay } from 'rxjs';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { createState, type State } from './state_helpers';
 
 export interface ChromeStyleState {
-  chromeStyle: State<ChromeStyle | undefined>;
+  chromeStyle: State<ChromeStyle>;
   chromeStyle$: Observable<ChromeStyle>;
   setChromeStyle: (style: ChromeStyle) => void;
 }
 
 export const createChromeStyleState = (): ChromeStyleState => {
-  // ChromeStyle is set to undefined by default, which means that no header will be rendered until
-  // setChromeStyle(). This is to avoid a flickering between the "classic" and "project" header meanwhile
-  // we load the user profile to check if the user opted out of the new solution navigation.
-  const chromeStyle = createState<ChromeStyle | undefined>(undefined);
+  const chromeStyle = createState<ChromeStyle>('classic');
 
-  const chromeStyle$ = chromeStyle.$.pipe(
-    filter((style): style is ChromeStyle => style !== undefined),
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
+  const chromeStyle$ = chromeStyle.$.pipe(distinctUntilChanged(), shareReplay(1));
 
   const setChromeStyle = (style: ChromeStyle) => {
     if (style === chromeStyle.get()) return;
