@@ -36,6 +36,7 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV7,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1184,6 +1185,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1415,6 +1423,26 @@ export const getSavedObjectTypes = (
               },
               { unknowns: 'ignore' }
             ),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
           },
         },
       },

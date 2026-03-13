@@ -427,6 +427,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",

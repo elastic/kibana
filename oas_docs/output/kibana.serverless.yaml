@@ -39729,6 +39729,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
