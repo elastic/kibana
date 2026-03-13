@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
@@ -16,9 +17,12 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
+import { SessionPreviewContainer } from './session_preview_container';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../analyzer/analyzer_graph';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
+import { useSessionViewConfig } from '../hooks/use_session_view_config';
+import { SessionView } from '../../session_view/session_view';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -52,6 +56,7 @@ export const VisualizationsSection = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
+    const sessionViewConfig = useSessionViewConfig(hit);
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -59,22 +64,58 @@ export const VisualizationsSection = memo(
       defaultValue: false,
     });
 
-    const onShowAnalyzer = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <AnalyzerGraph hit={hit} renderCellActions={renderCellActions} />,
-        }),
-        {
-          ownFocus: false,
-          resizable: true,
-          size: 'm',
-          type: 'overlay',
-        }
-      );
-    }, [history, hit, overlays, renderCellActions, services, store]);
+    const onShowAnalyzer = useCallback(
+      () =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: <AnalyzerGraph hit={hit} renderCellActions={renderCellActions} />,
+          }),
+          {
+            ownFocus: false,
+            resizable: true,
+            size: 'm',
+            type: 'overlay',
+          }
+        ),
+      [history, hit, overlays, renderCellActions, services, store]
+    );
+    const onShowSessionView = useCallback(
+      () =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <SessionView
+                hit={hit}
+                jumpToCursor={sessionViewConfig?.jumpToCursor}
+                jumpToEntityId={sessionViewConfig?.jumpToEntityId}
+                renderCellActions={renderCellActions}
+              />
+            ),
+          }),
+          {
+            ownFocus: false,
+            resizable: true,
+            size: 'm',
+            type: 'overlay',
+          }
+        ),
+      [
+        history,
+        hit,
+        overlays,
+        renderCellActions,
+        services,
+        sessionViewConfig?.jumpToCursor,
+        sessionViewConfig?.jumpToEntityId,
+        store,
+      ]
+    );
 
     return (
       <ExpandableSection
@@ -85,12 +126,19 @@ export const VisualizationsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}
       >
+        <SessionPreviewContainer
+          disableNavigation={false}
+          hit={hit}
+          onShowSessionView={onShowSessionView}
+          showIcon={false}
+        />
+        <EuiSpacer />
         <AnalyzerPreviewContainer
+          disableNavigation={false}
           hit={hit}
           onShowAnalyzer={onShowAnalyzer}
           shouldUseAncestor={false}
           showIcon={false}
-          disableNavigation={false}
         />
       </ExpandableSection>
     );
