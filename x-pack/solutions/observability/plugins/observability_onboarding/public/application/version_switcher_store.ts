@@ -23,7 +23,9 @@ const getOrCreateStore = (): VersionStore => {
     return w.__ingestHubVersionStore as VersionStore;
   }
   const listeners = new Set<Listener>();
-  let version: IngestHubVersion = 'blockUx';
+  const STORAGE_KEY = 'ingestHub:activeVersion';
+  const stored = sessionStorage.getItem(STORAGE_KEY) as IngestHubVersion | null;
+  let version: IngestHubVersion = stored === 'skipUx' || stored === 'blockUx' ? stored : 'blockUx';
   const store: VersionStore = {
     _listeners: listeners,
     _version: version,
@@ -31,6 +33,7 @@ const getOrCreateStore = (): VersionStore => {
     setVersion: (v: IngestHubVersion) => {
       version = v;
       store._version = v;
+      sessionStorage.setItem(STORAGE_KEY, v);
       listeners.forEach((l) => l());
     },
     subscribe: (fn: Listener) => {
