@@ -21,6 +21,7 @@ export {
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
+  getScrollTestWorkflowYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,

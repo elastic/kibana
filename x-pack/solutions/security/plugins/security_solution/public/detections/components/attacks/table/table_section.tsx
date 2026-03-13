@@ -304,6 +304,8 @@ export const TableSection = React.memo(
       [sort, setSort]
     );
 
+    const dslFilter = useMemo(() => dsl.isNotAttack(), []);
+
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
         <GroupedAlertsTable
@@ -327,7 +329,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
-          unitsCountFilter={dsl.isNotAttack()}
+          unitsCountFilter={dslFilter}
         />
       </div>
     );
