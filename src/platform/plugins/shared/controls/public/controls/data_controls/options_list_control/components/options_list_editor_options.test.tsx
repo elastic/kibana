@@ -17,7 +17,7 @@ import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../../types';
 import { OptionsListEditorOptions } from './options_list_editor_options';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
+import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 
 describe('Options list sorting button', () => {

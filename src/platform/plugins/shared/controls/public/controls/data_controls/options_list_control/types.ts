@@ -31,7 +31,7 @@ export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState
     hasSelections$: PublishingSubject<boolean | undefined>;
   };
 
-interface PublishesOptions {
+export interface PublishesOptions {
   availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
@@ -59,7 +59,7 @@ type PublishesOptionsListComponentState = SubjectsOf<
 type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
   SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
-export type OptionsListComponentApi = PublishesField &
+export type DSLOptionsListComponentApi = PublishesField &
   PublishesOptions &
   PublishesOptionsListComponentState &
   DataControlApi &

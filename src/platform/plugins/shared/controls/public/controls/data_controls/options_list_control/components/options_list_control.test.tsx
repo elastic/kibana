@@ -9,13 +9,13 @@
 
 import React from 'react';
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
-
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
+
+import type { OptionsListComponentApi } from '../../../types';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
-import type { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';
 
 describe('Options list control', () => {

@@ -10,26 +10,18 @@
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import {
-  DEFAULT_DSL_OPTIONS_LIST_STATE,
-  DEFAULT_ESQL_OPTIONS_LIST_STATE,
-  ESQL_CONTROL,
-} from '@kbn/controls-constants';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import {
-  apiHasPinnedPanels,
-  initializeStateManager,
-  initializeUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import { apiHasPinnedPanels, initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
-import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
+import type { DSLOptionsListComponentApi } from '../data_controls/options_list_control/types';
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
-import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
+import type { ESQLControlApi, ESQLOptionsListComponentApi } from './types';
 import { VariableControlsStrings } from './constants';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 
@@ -126,25 +118,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         serializeState,
       });
 
-      const componentStaticState = {
-        ...DEFAULT_DSL_OPTIONS_LIST_STATE, // this is spread just to satisfy types
-        ...DEFAULT_ESQL_OPTIONS_LIST_STATE,
-        requestSize: 0,
-        invalidSelections: new Set<OptionsListSelection>(),
-        field_name: state.variable_name,
-        data_view_id: '',
-        blockingError: undefined,
-        filtersLoading: false,
-        appliedFilters: undefined,
-        dataViews: undefined,
-      };
-      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
-      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
-        componentStaticState,
-        componentStaticState
-      );
-
-      const componentApi: Omit<OptionsListComponentApi, 'availableOptions$'> = {
+      const componentApi: ESQLOptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
         ...labelManager.api,
@@ -154,7 +128,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         isPinnable: true,
         uuid,
         setDataLoading,
-        ...componentStaticStateManager.api,
 
         makeSelection(key?: string) {
           const singleSelect = selections.api.singleSelect$.value ?? true;
@@ -198,7 +171,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
-        dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
+        dataViews$: new BehaviorSubject(undefined) as DSLOptionsListComponentApi['dataViews$'],
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
@@ -212,7 +185,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
               labelManager.cleanup();
             };
           }, []);
-
+          1;
           return (
             <OptionsListControlContext.Provider
               value={{

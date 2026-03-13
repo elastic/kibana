@@ -50,7 +50,7 @@ import { OptionsListControlContext } from './options_list_context_provider';
 import { OptionsListStrings } from './options_list_strings';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { buildFilter } from './utils/filter_utils';
 import {
   clearSelections,
@@ -304,7 +304,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
-      const componentApi: OptionsListComponentApi = {
+      const componentApi: DSLOptionsListComponentApi = {
         ...api,
         ...dataControlManager.api,
         ...editorStateManager.api,

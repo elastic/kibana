@@ -12,15 +12,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiHighlight, EuiSelectable, useEuiTheme } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { BehaviorSubject } from 'rxjs';
 import type { OptionsListSuggestions } from '../../../../../common/options_list/types';
+import { isDSLOptionsListApi } from '../../../utils';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
+import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
 
@@ -39,30 +42,44 @@ export const OptionsListPopoverSuggestions = ({
   const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(optionListPopoverSuggestionsStyles);
 
+  const conditionalApiSubjects: [
+    PublishingSubject<boolean>,
+    DSLOptionsListComponentApi['sort$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['searchString$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject(false),
+      isDSLControl ? componentApi.sort$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.searchString$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.invalidSelections$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
+
   const [
+    availableOptions,
+    loading,
+    selectedOptions,
+    totalCardinality,
+    label,
+    existsSelected,
     sort,
     searchString,
-    existsSelected,
     searchTechnique,
-    selectedOptions,
-    fieldName,
     invalidSelections,
-    availableOptions,
-    totalCardinality,
-    loading,
     fieldFormatter,
   ] = useBatchedPublishingSubjects(
-    componentApi.sort$,
-    componentApi.searchString$,
-    componentApi.existsSelected$,
-    componentApi.searchTechnique$,
-    componentApi.selectedOptions$,
-    componentApi.fieldName$,
-    componentApi.invalidSelections$,
     componentApi.availableOptions$,
-    componentApi.totalCardinality$,
     componentApi.dataLoading$,
-    componentApi.fieldFormatter
+    componentApi.selectedOptions$,
+    componentApi.totalCardinality$,
+    componentApi.label$,
+    ...conditionalApiSubjects
   );
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -103,11 +120,11 @@ export const OptionsListPopoverSuggestions = ({
 
       return {
         key: String(suggestion.value),
-        label: String(fieldFormatter(suggestion.value) ?? suggestion.value),
-        checked: (selectedOptions ?? []).includes(suggestion.value) ? 'on' : undefined,
+        label: String(fieldFormatter?.(suggestion.value) ?? suggestion.value),
+        checked: (selectedOptions ?? []).includes(suggestion.value as string) ? 'on' : undefined,
         'data-test-subj': `optionsList-control-selection-${suggestion.value}`,
         className:
-          showOnlySelected && invalidSelections.has(suggestion.value)
+          showOnlySelected && invalidSelections?.has(suggestion.value)
             ? 'optionsList__selectionInvalid'
             : 'optionsList__validSuggestion',
         append:
@@ -147,6 +164,8 @@ export const OptionsListPopoverSuggestions = ({
   ]);
 
   const loadMoreOptions = useCallback(() => {
+    if (!isDSLOptionsListApi(componentApi)) return; // only DSL controls have "load more" behaviour
+
     const listbox = listRef.current?.querySelector('.euiSelectableList__list');
     if (!listbox) return;
 
@@ -160,11 +179,11 @@ export const OptionsListPopoverSuggestions = ({
   }, [componentApi, euiTheme.size.xxl, totalCardinality]);
 
   const renderOption = useCallback(
-    (option: EuiSelectableOption, searchStringValue: string) => {
+    (option: EuiSelectableOption, searchStringValue?: string) => {
       if (searchTechnique === 'exact') return option.label;
 
       return (
-        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
+        <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue ?? ''}>
           {option.label}
         </EuiHighlight>
       );
@@ -196,7 +215,7 @@ export const OptionsListPopoverSuggestions = ({
           renderOption={(option) => renderOption(option, searchString)}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
-            fieldName,
+            label,
             selectableOptions.length
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}

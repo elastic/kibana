@@ -14,7 +14,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { OptionsListDisplaySettings, OptionsListSortingType } from '@kbn/controls-schemas';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { initializeSelectionsManager } from '../options_list_control/selections_manager';
-import type { OptionsListComponentApi } from '../options_list_control/types';
+import type { DSLOptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
 import { initializeLabelManager } from '../../control_labels';
@@ -51,7 +51,7 @@ export const getOptionsListContextMock = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
-    } as unknown as Required<OptionsListComponentApi>,
+    } as unknown as Required<DSLOptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
     testOnlyMethods: {
       setField: (next: DataViewField | undefined) => {

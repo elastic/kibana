@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiButtonGroup,
@@ -21,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -41,7 +43,7 @@ export const OptionsListPopoverFooter = () => {
   const { componentApi } = useOptionsListContext();
 
   const [exclude, loading] = useBatchedPublishingSubjects(
-    componentApi.exclude$,
+    isDSLOptionsListApi(componentApi) ? componentApi.exclude$ : new BehaviorSubject(false),
     componentApi.dataLoading$
   );
 
@@ -77,9 +79,10 @@ export const OptionsListPopoverFooter = () => {
               legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
               idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) =>
-                componentApi.setExclude(optionId === 'optionsList__excludeResults')
-              }
+              onChange={(optionId) => {
+                if (!isDSLOptionsListApi(componentApi)) return;
+                componentApi.setExclude?.(optionId === 'optionsList__excludeResults');
+              }}
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />

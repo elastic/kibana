@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
+
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
+import type { DSLOptionsListComponentApi } from '../types';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
@@ -31,11 +35,21 @@ export const OptionsListPopover = ({
 }) => {
   const { componentApi, displaySettings } = useOptionsListContext();
 
-  const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
-    componentApi.field$,
+  const conditionalApiSubjects: [
+    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.invalidSelections$ : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
+
+  const [loading, availableOptions, field, invalidSelections] = useBatchedPublishingSubjects(
+    componentApi.dataLoading$,
     componentApi.availableOptions$,
-    componentApi.invalidSelections$,
-    componentApi.dataLoading$
+    ...conditionalApiSubjects
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 

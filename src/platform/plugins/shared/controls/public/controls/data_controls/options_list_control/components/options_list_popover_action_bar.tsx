@@ -23,17 +23,20 @@ import {
 import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { BehaviorSubject, lastValueFrom, take } from 'rxjs';
 import type { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
-import { useOptionsListContext } from '../options_list_context_provider';
-import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { OptionsListStrings } from '../options_list_strings';
+import { isDSLOptionsListApi } from '../../../utils';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
+import { useOptionsListContext } from '../options_list_context_provider';
+import { OptionsListStrings } from '../options_list_strings';
+import type { DSLOptionsListComponentApi } from '../types';
+import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -78,28 +81,42 @@ export const OptionsListPopoverActionBar = ({
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
-  const searchString = useStateFromPublishingSubject(componentApi.searchString$);
+  const searchString = useStateFromPublishingSubject(
+    isDSLOptionsListApi(componentApi) ? componentApi.searchString$ : new BehaviorSubject(undefined)
+  );
+
+  const conditionalApiSubjects: [
+    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['searchStringValid$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['singleSelect$'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.searchStringValid$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.singleSelect$ : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
 
   const [
-    searchTechnique,
-    searchStringValid,
     selectedOptions = [],
     totalCardinality,
-    field,
     fieldName,
     availableOptions = [],
     dataLoading,
+    field,
+    searchTechnique,
+    searchStringValid,
     singleSelect,
   ] = useBatchedPublishingSubjects(
-    componentApi.searchTechnique$,
-    componentApi.searchStringValid$,
     componentApi.selectedOptions$,
     componentApi.totalCardinality$,
-    componentApi.field$,
-    componentApi.fieldName$,
+    componentApi.label$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
-    componentApi.singleSelect$
+    ...conditionalApiSubjects
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -113,6 +130,7 @@ export const OptionsListPopoverActionBar = ({
   );
 
   const loadMoreOptions = useCallback(async (): Promise<OptionsListSuggestions | undefined> => {
+    if (!isDSLOptionsListApi(componentApi)) return;
     componentApi.setRequestSize(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
     componentApi.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
     return lastValueFrom(componentApi.availableOptions$.pipe(take(2)));
@@ -134,7 +152,11 @@ export const OptionsListPopoverActionBar = ({
 
   const handleBulkAction = useCallback(
     async (bulkAction: (keys: string[]) => void) => {
-      bulkAction(availableOptions.map(({ value }) => value as string));
+      bulkAction(
+        availableOptions.map((option) =>
+          typeof option === 'object' ? (option.value as string) : option
+        )
+      );
 
       if (totalCardinality > availableOptions.length) {
         const newAvailableOptions = (await loadMoreOptions()) ?? [];
@@ -145,7 +167,12 @@ export const OptionsListPopoverActionBar = ({
   );
 
   useEffect(() => {
-    if (availableOptions.some(({ value }) => !selectedOptions.includes(value as string))) {
+    if (
+      availableOptions.some(
+        (option) =>
+          !selectedOptions.includes(typeof option === 'object' ? (option.value as string) : option)
+      )
+    ) {
       if (areAllSelected) {
         setAllSelected(false);
       }
@@ -207,6 +234,7 @@ export const OptionsListPopoverActionBar = ({
                   disabled={isBulkSelectDisabled}
                   data-test-subj="optionsList-control-selectAll"
                   onChange={() => {
+                    if (!isDSLOptionsListApi(componentApi)) return;
                     if (areAllSelected) {
                       handleBulkAction(componentApi.deselectAll);
                       setAllSelected(false);
