@@ -231,7 +231,7 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
 
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
-    const yColumnsConverted = layer.y.map(fromMetricAPItoLensState);
+    const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
     const yColumnsWithIds = processMetricColumnsWithReferences(
       yColumnsConverted,
       (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),

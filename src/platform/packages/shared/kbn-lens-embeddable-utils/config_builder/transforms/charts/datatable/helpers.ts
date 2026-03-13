@@ -11,8 +11,11 @@ import type {
   ColumnState,
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
+  DataType,
 } from '@kbn/lens-common';
 import { ACCESSOR } from './constants';
+import type { ColorByValueType, ColorMappingType } from '../../../schema/color';
+import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 
 /**
  * Checks if the column is a metric column in a formBased layer
@@ -53,4 +56,23 @@ export function getAccessorName(
     return `${ACCESSOR}_${type}`;
   }
   return `${ACCESSOR}_${type}_${index}`;
+}
+
+/**
+ * Infers the datatype from the color configuration.
+ * - colorMapping → 'string'
+ * - colorByValue → 'number'
+ * - No color → uses the provided default
+ */
+export function inferDatatypeFromColor(
+  color: ColorByValueType | ColorMappingType | undefined,
+  defaultType: Extract<DataType, 'number' | 'string'>
+): Extract<DataType, 'number' | 'string'> {
+  if (isColorByValueColor(color)) {
+    return 'number';
+  }
+  if (isColorMappingColor(color)) {
+    return 'string';
+  }
+  return defaultType;
 }
