@@ -1289,11 +1289,13 @@ class AgentPolicyService {
 
     let highestMinVersion: string | undefined;
     for (const { version_condition: condition } of conditions) {
-      const parsed = minVersion(condition);
-      if (parsed) {
-        if (!highestMinVersion || gt(parsed.version, highestMinVersion)) {
+      try {
+        const parsed = minVersion(condition);
+        if (parsed && (!highestMinVersion || gt(parsed.version, highestMinVersion))) {
           highestMinVersion = parsed.version;
         }
+      } catch {
+        // skip invalid version condition
       }
     }
 

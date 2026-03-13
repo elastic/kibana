@@ -41,6 +41,7 @@ import {
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
+  NewPackagePolicySchema,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -348,7 +349,7 @@ export const getSavedObjectTypes = (
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
-          package_agent_version_conditions: { type: 'flattened', index: false },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       migrations: {
@@ -456,7 +457,7 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 min_agent_version: { type: 'keyword' },
-                package_agent_version_conditions: { type: 'flattened', index: false },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
               },
             },
           ],
@@ -516,7 +517,7 @@ export const getSavedObjectTypes = (
           required_versions: { type: 'flattened', index: false },
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
-          package_agent_version_conditions: { type: 'flattened', index: false },
+          package_agent_version_conditions: { dynamic: false, properties: {} },
         },
       },
       modelVersions: {
@@ -558,7 +559,7 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 min_agent_version: { type: 'keyword' },
-                package_agent_version_conditions: { type: 'flattened', index: false },
+                package_agent_version_conditions: { dynamic: false, properties: {} },
               },
             },
           ],
@@ -1075,6 +1076,10 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
+            create: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
+          },
         },
       },
       migrations: {
@@ -1224,6 +1229,10 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+          schemas: {
+            forwardCompatibility: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
+            create: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
+          },
         },
       },
     },
