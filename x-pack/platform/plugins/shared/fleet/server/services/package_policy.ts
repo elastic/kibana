@@ -154,7 +154,7 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate, getMetaVariables } from './epm/agent/agent';
+import { compileTemplate, getMetaVariables, mergeCompiledTemplates } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
@@ -3540,6 +3540,27 @@ function _compilePackagePolicyInput(
       `Input template not found, unable to find input type ${input.type}`
     );
   }
+
+  const templateVars = Object.assign({}, vars, input.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, undefined, agentVersion);
+
+  if (packageInput.template_paths?.length) {
+    let compiled: Record<string, any> = {};
+    for (const templatePath of packageInput.template_paths) {
+      const [pkgInputTemplate] = getAssetsDataFromAssetsMap(pkgInfo, assetsMap, (path: string) =>
+        path.endsWith(`/agent/input/${templatePath}`)
+      );
+      if (!pkgInputTemplate || !pkgInputTemplate.buffer) {
+        throw new InputNotFoundError(
+          `Unable to load input template at /agent/input/${templatePath}`
+        );
+      }
+      const result = compileTemplate(templateVars, metaVars, pkgInputTemplate.buffer.toString());
+      compiled = mergeCompiledTemplates(compiled, result);
+    }
+    return compiled;
+  }
+
   if (!packageInput.template_path) {
     return undefined;
   }
@@ -3556,8 +3577,8 @@ function _compilePackagePolicyInput(
 
   return compileTemplate(
     // Populate template variables from package- and input-level vars
-    Object.assign({}, vars, input.vars),
-    getMetaVariables(pkgInfo, input, undefined, agentVersion),
+    templateVars,
+    metaVars,
     pkgInputTemplate.buffer.toString()
   );
 }
@@ -3697,13 +3718,36 @@ function _compilePackageStream(
     );
   }
 
+  const datasetPath = packageDataStream.path;
+  const templateVars = Object.assign({}, vars, input.vars, stream.vars);
+  const metaVars = getMetaVariables(pkgInfo, input, streamIn, agentVersion);
+
+  if (streamFromPkg.template_paths?.length) {
+    let compiled: Record<string, any> = {};
+    for (const templatePath of streamFromPkg.template_paths) {
+      const pkgStreamTemplate = _getAssetForTemplatePath(
+        pkgInfo,
+        assetsMap,
+        datasetPath,
+        templatePath
+      );
+      if (!pkgStreamTemplate || !pkgStreamTemplate.buffer) {
+        throw new StreamNotFoundError(
+          `Unable to load stream template ${templatePath} for dataset ${stream.data_stream.dataset}`
+        );
+      }
+      const result = compileTemplate(templateVars, metaVars, pkgStreamTemplate.buffer.toString());
+      compiled = mergeCompiledTemplates(compiled, result);
+    }
+    stream.compiled_stream = compiled;
+    return { ...stream };
+  }
+
   if (!streamFromPkg.template_path) {
     throw new StreamNotFoundError(
       `Stream template path not found for dataset ${stream.data_stream.dataset}`
     );
   }
-
-  const datasetPath = packageDataStream.path;
 
   const pkgStreamTemplate = _getAssetForTemplatePath(
     pkgInfo,
@@ -3720,8 +3764,8 @@ function _compilePackageStream(
 
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
-    Object.assign({}, vars, input.vars, stream.vars),
-    getMetaVariables(pkgInfo, input, streamIn, agentVersion),
+    templateVars,
+    metaVars,
     pkgStreamTemplate.buffer.toString()
   );
 
