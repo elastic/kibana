@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/controls-renderer'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/controls-renderer'
+  title: '@kbn/controls-renderer'
   description: Moon project for @kbn/controls-renderer
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-controls-renderer
+  sourceRoot: src/platform/packages/private/kbn-controls-renderer
 dependsOn:
   - '@kbn/presentation-panel-plugin'
   - '@kbn/kibana-react-plugin'
@@ -41,14 +40,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
