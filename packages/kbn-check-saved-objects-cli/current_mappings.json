@@ -301,9 +301,37 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "createdAt": {
         "type": "date"
       },
@@ -319,6 +347,17 @@
         },
         "type": "text"
       },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -328,38 +367,13 @@
         },
         "type": "text"
       },
+      "rule_labels": {
+        "type": "keyword"
+      },
       "updatedAt": {
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "destinations": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "keyword"
-          },
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
-      "auth": {
-        "type": "object",
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        }
-      },
-      "rule_labels": {
         "type": "keyword"
       }
     }
