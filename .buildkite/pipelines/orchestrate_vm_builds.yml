@@ -11,7 +11,7 @@ steps:
       - text: 'KIBANA_BRANCH'
         key: 'KIBANA_BRANCH'
         hint: 'Branch in elastic/kibana to run build image cache build on'
-        default: 'main'
+        default: '${BUILDKITE_BRANCH}'
         required: true
 
   - name: 'Upload trigger steps'
