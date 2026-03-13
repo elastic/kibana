@@ -21,7 +21,9 @@ export interface ScoutTestOptions extends PlaywrightTestOptions {
   serversConfigDir: string;
   configName: ScoutConfigName;
   [VALID_CONFIG_MARKER]: boolean;
+  deleteSpaceAfterTests?: boolean;
   runGlobalSetup?: boolean;
+
 }
 
 export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
