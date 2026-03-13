@@ -18,6 +18,7 @@ import { SloResetConfirmationModal } from '../components/slo/reset_confirmation_
 import { useCloneSlo } from '../hooks/use_clone_slo';
 import type { Action } from './types';
 
+// Scout selective testing check
 interface ActionModalContextValue {
   triggerAction: (action: Action) => void;
 }
