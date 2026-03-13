@@ -24,11 +24,13 @@ import type {
   ScheduleStepRule,
 } from '../../../common/types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const mockOpenAgentBuilderFlyout = jest.fn();
 const mockUseAgentBuilderAttachment = jest.fn();
 const mockFormatRule = jest.fn();
 const mockNewAgentBuilderAttachment = jest.fn();
+const mockActivateFormSync = jest.fn();
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [
@@ -43,6 +45,13 @@ const aboutStepDataMock = {} as AboutStepRule;
 const scheduleStepDataMock = {} as ScheduleStepRule;
 const actionsStepDataMock = {} as ActionsStepRule;
 const actionTypeRegistryMock = {} as ActionTypeRegistryContract;
+
+jest.mock('../../../../common/lib/kibana');
+(useKibana as jest.Mock).mockReturnValue({
+  services: {
+    aiRuleCreation: { activateFormSync: mockActivateFormSync },
+  },
+});
 
 jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
   useAgentBuilderAttachment: (attachment: unknown) => {
