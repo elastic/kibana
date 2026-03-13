@@ -91,6 +91,7 @@ export namespace WiredStream {
   }
 
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'wired';
     ingest: WiredIngest;
   }
 
@@ -117,6 +118,7 @@ export namespace WiredStream {
 
 const WiredStreamSchema = {
   Definition: z.object({
+    type: z.literal('wired'),
     ingest: WiredIngest.right,
   }),
   Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),

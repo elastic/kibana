@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { ModelValidation } from './validation/model_validation';
 import { joinValidation } from './validation/model_validation';
 import { BaseStream } from './base';
@@ -39,3 +40,21 @@ Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.ClassicStream = nClassicStream;
 Streams.QueryStream = nQueryStream;
+
+/**
+ * Flat Zod union of all three stream definition schemas, discriminated by the
+ * `type` literal field.  Intended for OAS component registration — register
+ * this schema with a `discriminator` extension so code generators can produce
+ * properly typed structs:
+ *
+ * ```ts
+ * registerZodV4Component(streamDefinitionSchema, 'StreamDefinition', {
+ *   discriminator: { propertyName: 'type' },
+ * });
+ * ```
+ */
+export const streamDefinitionSchema = z.union([
+  nWiredStream.Definition.right,
+  nClassicStream.Definition.right,
+  nQueryStream.Definition.right,
+]);

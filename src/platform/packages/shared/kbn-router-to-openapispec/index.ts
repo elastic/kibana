@@ -12,4 +12,4 @@ export {
   type GenerateOpenApiDocumentOptionsFilters,
 } from './src/generate_oas';
 
-export { registerZodV4Component } from './src/oas_converter/zod/lib';
+export { registerZodV4Component, type ZodV4ComponentExtensions } from './src/oas_converter/zod/lib';
