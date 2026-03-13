@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFormRow, EuiLink, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useQuery } from '@kbn/react-query';
+import React from 'react';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
+// TODO - add return type
 export const useEnrichPolicies = () => {
   const {
     dependencies: {
@@ -18,7 +19,7 @@ export const useEnrichPolicies = () => {
     },
   } = useKibana();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isFetched } = useQuery({
     queryKey: ['enrichPolicies'],
     queryFn: async () => {
       const response = await indexManagement.apiService.getAllEnrichPolicies();
@@ -26,12 +27,37 @@ export const useEnrichPolicies = () => {
     },
   });
 
-  return { policies: data ?? [], isLoading, error };
+  return { policies: data ?? [], isLoading, isFetched, error };
 };
 
 // TODO - handle errors and prompt to create a policy if no policies are found
 export const EnrichPolicySelector = () => {
-  const { policies, isLoading, error } = useEnrichPolicies();
+  const { policies, isLoading, isFetched, error } = useEnrichPolicies();
+  const { core } = useKibana();
+  const createEnrichPolicyUrl = core.application.getUrlForApp('management', {
+    path: '/data/index_management/enrich_policies/create',
+  });
+
+  if (isFetched && policies.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.enrichPolicySelector.h2.noEnrichPoliciesFoundLabel', {
+              defaultMessage: 'No enrich policies found',
+            })}
+          </h2>
+        }
+        actions={
+          <EuiLink href={createEnrichPolicyUrl} target="_blank">
+            {i18n.translate('xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel', {
+              defaultMessage: 'Create enrich policy',
+            })}
+          </EuiLink>
+        }
+      />
+    );
+  }
 
   return (
     <EuiFormRow
