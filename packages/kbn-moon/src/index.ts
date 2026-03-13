@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { regenerateMoonProjects } from './src/cli/regenerate_moon_projects';
+import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
 
 export { regenerateMoonProjects };
-export { runListAffected } from './src/cli/run_list_affected';
+export { runListAffected } from './cli/run_list_affected';
 export {
   getAffectedPackages,
   filterFilesByAffectedPackages,
@@ -18,5 +18,5 @@ export {
   getPackageLookup,
   getAffectedPackagesGit,
   getAffectedPackagesMoon,
-} from './src/affected';
-export type { AffectedPackagesConfig, AffectedPackagesLog } from './src/affected';
+} from './affected';
+export type { AffectedPackagesConfig, AffectedPackagesLog } from './affected';
