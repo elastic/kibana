@@ -165,9 +165,15 @@ export class GcsFileSystem extends AbstractFileSystem {
 
       const { meter, stop: stopBar } = createDownloadProgressBar(contentLength);
 
-      await pipeline(Readable.fromWeb(response.body as any), meter, tarExtract({ cwd: REPO_ROOT }));
-
-      stopBar();
+      try {
+        await pipeline(
+          Readable.fromWeb(response.body as any),
+          meter,
+          tarExtract({ cwd: REPO_ROOT })
+        );
+      } finally {
+        stopBar();
+      }
 
       const elapsed = Date.now() - start;
       const totalSize = contentLength ?? 0;
