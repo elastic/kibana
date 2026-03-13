@@ -20,6 +20,7 @@ import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import { CRUDClient } from '../../domain/crud';
+import { wrapTaskRun } from '../../telemetry/traces';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -122,16 +123,27 @@ export function registerEntityMaintainerTask({
                 esClient,
                 namespace: maintainerStatus.metadata.namespace,
               });
+              const taskLogger = logger.get(taskInstance.id);
 
-              return await runEntityMaintainerTask({
-                currentStatus: maintainerStatus,
-                fakeRequest,
-                logger: logger.get(taskInstance.id),
-                setup,
-                run,
-                abortController,
-                esClient,
-                crudClient,
+              return await wrapTaskRun({
+                spanName: 'entityStore.task.entity_maintainer.run',
+                namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace || '',
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': type,
+                  'entity_store.entity_maintainer.id': id,
+                },
+                run: () =>
+                  runEntityMaintainerTask({
+                    currentStatus: maintainerStatus,
+                    fakeRequest,
+                    logger: taskLogger,
+                    setup,
+                    run,
+                    abortController,
+                    esClient,
+                    crudClient,
+                  }),
               });
             },
           }),
