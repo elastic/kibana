@@ -22,10 +22,12 @@ const getStatusToast = ({
   status,
   cases,
   closedAlertsCount,
+  totalAlertsCount,
 }: {
   status: CaseStatuses;
   cases: CasesUI;
   closedAlertsCount?: number;
+  totalAlertsCount?: number;
 }): { title: string; text?: string } => {
   const totalCases = cases.length;
   const caseTitle = totalCases === 1 ? cases[0].title : '';
@@ -37,7 +39,10 @@ const getStatusToast = ({
   } else if (status === CaseStatuses.closed) {
     return {
       title: i18n.CLOSED_CASES({ totalCases, caseTitle }),
-      text: closedAlertsCount == null ? undefined : i18n.CLOSED_CASES_SUMMARY(closedAlertsCount),
+      text:
+        closedAlertsCount == null || totalAlertsCount == null
+          ? undefined
+          : i18n.CLOSED_CASES_SUMMARY(closedAlertsCount, totalAlertsCount),
     };
   }
 
@@ -78,6 +83,10 @@ export const useStatusAction = ({
                   ? patchCaseStats?.reduce((total, stats) => {
                       return total + (stats?.numberOfAlertsSyncedWithCloseReason ?? 0);
                     }, 0) ?? 0
+                  : undefined,
+              totalAlertsCount:
+                closeReason != null && status === CaseStatuses.closed
+                  ? selectedCases.reduce((total, currentCase) => total + currentCase.totalAlerts, 0)
                   : undefined,
             }),
         },

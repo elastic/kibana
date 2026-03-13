@@ -143,13 +143,17 @@ describe('useStatusAction', () => {
     );
 
     act(() => {
-      result.current.handleUpdateCaseStatus([basicCase], CaseStatuses.closed, 'false_positive');
+      result.current.handleUpdateCaseStatus(
+        [{ ...basicCase, totalAlerts: 4 }],
+        CaseStatuses.closed,
+        'false_positive'
+      );
     });
 
     await waitFor(() =>
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Closed "Another horrible breach!!"',
-        text: 'Closed 3 attached alerts.',
+        text: 'Closed 3/4 attached alerts.',
         className: 'eui-textBreakWord',
       })
     );
