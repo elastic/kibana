@@ -28,7 +28,7 @@ const SAMPLE_SIZE = 1000;
  * Extracts all field paths from a nested object.
  * e.g., { a: { b: 1, c: 2 } } -> ['a.b', 'a.c']
  */
-function extractFieldPaths(obj: Record<string, unknown>, prefix = ''): string[] {
+export function extractFieldPaths(obj: Record<string, unknown>, prefix = ''): string[] {
   return Object.entries(obj).flatMap(([key, value]) => {
     const path = prefix ? `${prefix}.${key}` : key;
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {

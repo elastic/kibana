@@ -13,6 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -46,7 +47,7 @@ export interface CreatedIntegrationRow {
   status: TaskStatus;
 }
 
-const canReviewApproveIntegration = (item: CreatedIntegrationRow): boolean =>
+const isIntegrationPackageReady = (item: CreatedIntegrationRow): boolean =>
   item.totalDataStreamCount > 0 &&
   item.successfulDataStreamCount === item.totalDataStreamCount &&
   (item.status === 'completed' || item.status === 'approved');
@@ -179,6 +180,42 @@ export const ManageIntegrationsTable: React.FC<{
     [http]
   );
 
+  const downloadZipPackage = useCallback(
+    async (integrationId: string) => {
+      try {
+        const response = await http.get(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          {
+            version: '1',
+            headers: { Accept: 'application/zip' },
+            asResponse: true,
+          }
+        );
+        const contentDisposition = response.response?.headers?.get('content-disposition') ?? '';
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        const filename = filenameMatch?.[1] ?? `${integrationId}.zip`;
+
+        const blob = response.body as unknown as Blob;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.downloadZipErrorTitle',
+            { defaultMessage: 'Failed to download .zip package' }
+          ),
+        });
+      }
+    },
+    [http, notifications]
+  );
+
   const approveAndDeployIntegration = useCallback(
     async (integrationId: string, version: string) => {
       try {
@@ -212,6 +249,43 @@ export const ManageIntegrationsTable: React.FC<{
       }
     },
     [http, notifications, onRefetch]
+  );
+
+  const installToCluster = useCallback(
+    async (integrationId: string) => {
+      try {
+        const zipBlob = await http.get(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
+          {
+            version: '1',
+            headers: { Accept: 'application/zip' },
+          }
+        );
+
+        await http.post('/api/fleet/epm/packages', {
+          headers: {
+            'Elastic-Api-Version': '2023-10-31',
+            'Content-Type': 'application/zip',
+          },
+          body: zipBlob as unknown as BodyInit,
+        });
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.installSuccessTitle',
+            { defaultMessage: 'Integration installed to cluster successfully' }
+          ),
+        });
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.installErrorTitle',
+            { defaultMessage: 'Failed to install integration to cluster' }
+          ),
+        });
+      }
+    },
+    [http, notifications]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
@@ -326,11 +400,34 @@ export const ManageIntegrationsTable: React.FC<{
       {
         name: '',
         render: (item: CreatedIntegrationRow) => {
-          if (canReviewApproveIntegration(item)) {
+          if (item.status === 'approved') {
+            return (
+              <EuiBadge color="hollow" style={{ color: euiTheme.colors.textSubdued }}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon
+                      type="checkInCircleFilled"
+                      color="success"
+                      size="m"
+                      aria-hidden={true}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.status.approved"
+                      defaultMessage="Approved"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiBadge>
+            );
+          }
+
+          if (isIntegrationPackageReady(item)) {
             return (
               <ManageIntegrationActions
                 integration={item}
-                canReviewApprove={true}
+                isPackageReady={true}
                 inlineActionType="reviewApprove"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -340,6 +437,8 @@ export const ManageIntegrationsTable: React.FC<{
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
+                onInstallToCluster={installToCluster}
               />
             );
           }
@@ -348,7 +447,7 @@ export const ManageIntegrationsTable: React.FC<{
             return (
               <ManageIntegrationActions
                 integration={item}
-                canReviewApprove={false}
+                isPackageReady={false}
                 inlineActionType="editIntegration"
                 showMenuButton={false}
                 onEdit={goToEditIntegration}
@@ -358,6 +457,8 @@ export const ManageIntegrationsTable: React.FC<{
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
+                onInstallToCluster={installToCluster}
               />
             );
           }
@@ -376,7 +477,7 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
-            canReviewApprove={canReviewApproveIntegration(item)}
+            isPackageReady={isIntegrationPackageReady(item)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={
@@ -384,6 +485,8 @@ export const ManageIntegrationsTable: React.FC<{
             }
             onFetchReviewDetails={fetchIntegrationReviewDetails}
             onApproveAndDeploy={approveAndDeployIntegration}
+            onDownloadZip={downloadZipPackage}
+            onInstallToCluster={installToCluster}
           />
         ),
       },
@@ -394,8 +497,11 @@ export const ManageIntegrationsTable: React.FC<{
       deleteIntegration,
       fetchIntegrationReviewDetails,
       approveAndDeployIntegration,
+      downloadZipPackage,
+      installToCluster,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
+      euiTheme.colors.textSubdued,
       userProfiles,
     ]
   );

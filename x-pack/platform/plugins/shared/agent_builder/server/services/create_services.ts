@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
   InternalStartServices,
@@ -22,6 +23,7 @@ import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import { createMeteringService, type MeteringService } from './metering';
+import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -29,6 +31,7 @@ interface ServiceInstances {
   attachments: AttachmentService;
   hooks: HooksService;
   skills: SkillService;
+  plugins: PluginsService;
   metering: MeteringService;
 }
 
@@ -36,6 +39,11 @@ export class ServiceManager {
   private services?: ServiceInstances;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
+  private readonly config: AgentBuilderConfig;
+
+  constructor(config: AgentBuilderConfig) {
+    this.config = config;
+  }
 
   setupServices({
     logger,
@@ -49,6 +57,7 @@ export class ServiceManager {
       attachments: createAttachmentService(),
       hooks: new HooksService(),
       skills: createSkillService(),
+      plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
     };
 
@@ -58,6 +67,7 @@ export class ServiceManager {
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: this.services.skills.setup(),
+      plugins: this.services.plugins.setup(),
       metering: this.services.metering,
     };
 
@@ -183,6 +193,13 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
+    const plugins = this.services.plugins.start({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+      config: this.config,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -198,6 +215,7 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
+      plugins,
     };
 
     return this.internalStart;

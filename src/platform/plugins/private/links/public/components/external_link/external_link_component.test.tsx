@@ -45,10 +45,10 @@ describe('external link component', () => {
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
 
-  test('renders external icon even when `openInNewTab` setting is `false`', async () => {
+  test('renders external icon even when `open_in_new_tab` setting is `false`', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
     const link = await screen.findByTestId('externalLink--foo');
@@ -59,7 +59,7 @@ describe('external link component', () => {
   test('modified click does not trigger event.preventDefault', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
@@ -71,10 +71,10 @@ describe('external link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('uses navigateToUrl when openInNewTab is false', async () => {
+  test('uses navigateToUrl when open_in_new_tab is false', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
