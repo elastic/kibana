@@ -36,7 +36,6 @@ import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
 import type { ImageConfig } from '../../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
@@ -72,11 +71,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       ? props.initialImageConfig.src.file_id
       : undefined
   );
-  const [fileImageMeta, setFileImageMeta] = useState<undefined | FileImageMetadata>(() =>
-    props.initialImageConfig?.src?.type === 'file'
-      ? props.initialImageConfig.src.file_image_meta
-      : undefined
-  );
   const [srcType, setSrcType] = useState<ImageConfig['src']['type']>(
     () => props.initialImageConfig?.src?.type ?? 'file'
   );
@@ -105,7 +99,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             type: 'url',
             url: srcUrl,
           }
-        : { type: 'file', file_id: fileId, file_image_meta: fileImageMeta },
+        : { type: 'file', file_id: fileId },
     alt_text: altText,
     background_color: colorErrors ? undefined : color,
     sizing: {
@@ -166,7 +160,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 onChange={() => setIsFilePickerOpen(true)}
                 onClear={() => {
                   setFileId(undefined);
-                  setFileImageMeta(undefined);
                 }}
                 containerCSS={css`
                   border: ${euiTheme.border.thin};
@@ -439,7 +432,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           }}
           onDone={([file]) => {
             setFileId(file.id);
-            setFileImageMeta(file.meta as FileImageMetadata);
             setIsFilePickerOpen(false);
           }}
         />

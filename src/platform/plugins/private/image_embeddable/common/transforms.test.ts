@@ -47,11 +47,6 @@ describe('Image embeddable transformOut', () => {
         src: {
           type: 'file',
           file_id: 'abc123',
-          file_image_meta: {
-            blur_hash: 'LEHV6nWB2yk8',
-            width: 800,
-            height: 600,
-          },
         },
         alt_text: 'A photo',
         sizing: {
@@ -96,11 +91,6 @@ describe('Image embeddable transformOut', () => {
         src: {
           type: 'file',
           file_id: 'abc123',
-          file_image_meta: {
-            blur_hash: 'LEHV6nWB2yk8',
-            width: 800,
-            height: 600,
-          },
         },
         alt_text: 'A photo',
         sizing: {

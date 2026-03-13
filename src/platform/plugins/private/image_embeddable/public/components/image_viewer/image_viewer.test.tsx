@@ -66,7 +66,7 @@ test('should display an image by file id', () => {
   const { getByAltText } = render(
     <DefaultImageViewer
       imageConfig={{
-        src: { type: 'file', file_id: 'imageId', file_image_meta: { width: 300, height: 300 } },
+        src: { type: 'file', file_id: 'imageId' },
         sizing: { object_fit: 'fill' },
         alt_text: 'alt text',
       }}

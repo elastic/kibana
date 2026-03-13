@@ -16,17 +16,6 @@ import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 const imageFileSrcSchema = schema.object({
   type: schema.literal('file'),
   file_id: schema.string(),
-  file_image_meta: schema.maybe(
-    schema.object({
-      blur_hash: schema.maybe(schema.string()),
-      width: schema.number({
-        meta: { description: 'Width of the image in pixels' },
-      }),
-      height: schema.number({
-        meta: { description: 'Height of the image in pixels' },
-      }),
-    })
-  ),
 });
 
 const imageUrlSrcSchema = schema.object({
