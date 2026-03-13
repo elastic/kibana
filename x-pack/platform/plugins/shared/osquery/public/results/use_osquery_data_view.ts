@@ -37,8 +37,11 @@ export const useOsqueryDataView = (
         if (existingDataViews.length) {
           dataView = existingDataViews[0];
         }
-      } catch {
-        // Fallback to creating an ad-hoc DataView
+      } catch (err) {
+        // Ignore not-found / permission errors and fall through to create
+        if (err?.statusCode !== 403 && err?.statusCode !== 404) {
+          throw err;
+        }
       }
 
       if (!dataView && dataViews.getCanSaveSync()) {
@@ -47,20 +50,20 @@ export const useOsqueryDataView = (
             title: OSQUERY_RESULTS_DATA_VIEW_TITLE,
             timeFieldName: '@timestamp',
           });
-        } catch {
-          // Fallback to creating an ad-hoc DataView
+        } catch (err) {
+          // Ignore conflict (already exists) or permission errors; fall through to ad-hoc
+          if (err?.statusCode !== 403 && err?.statusCode !== 409) {
+            throw err;
+          }
         }
       }
 
       if (!dataView) {
-        try {
-          dataView = await dataViews.create({
-            title: OSQUERY_RESULTS_DATA_VIEW_TITLE,
-            timeFieldName: '@timestamp',
-          });
-        } catch {
-          // DataView creation failed
-        }
+        // Ad-hoc (unsaved) data view — works regardless of permissions
+        dataView = await dataViews.create({
+          title: OSQUERY_RESULTS_DATA_VIEW_TITLE,
+          timeFieldName: '@timestamp',
+        });
       }
 
       return dataView;

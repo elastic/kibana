@@ -8,7 +8,8 @@
 import React from 'react';
 import { isArray, isObject } from 'lodash/fp';
 import { EuiLink } from '@elastic/eui';
-import type { CustomCellRenderer } from '@kbn/unified-data-table';
+import type { CustomCellRenderer, DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getNestedOrFlat } from './transform_results';
 
 export const formatValue = (value: unknown): string => {
@@ -28,7 +29,7 @@ export const formatValue = (value: unknown): string => {
 };
 
 interface AgentNameRendererProps {
-  row: { raw: { _source?: Record<string, unknown> }; flattened: Record<string, unknown> };
+  row: DataTableRecord;
   getFleetAppUrl: (agentId: string) => string;
 }
 
@@ -45,7 +46,7 @@ export const AgentNameRenderer: React.FC<AgentNameRendererProps> = ({ row, getFl
 };
 
 interface EcsMappingRendererProps {
-  row: { raw: { _source?: Record<string, unknown> }; flattened: Record<string, unknown> };
+  row: DataTableRecord;
   columnId: string;
 }
 
@@ -66,13 +67,15 @@ export const getOsqueryCellRenderers = ({
   getFleetAppUrl,
 }: GetOsqueryCellRenderersOptions): CustomCellRenderer => {
   const renderers: CustomCellRenderer = {
-    'agent.name': (props) => (
-      <AgentNameRenderer row={props.row as any} getFleetAppUrl={getFleetAppUrl} />
+    'agent.name': (props: DataGridCellValueElementProps) => (
+      <AgentNameRenderer row={props.row} getFleetAppUrl={getFleetAppUrl} />
     ),
   };
 
   for (const col of ecsMappingColumns) {
-    renderers[col] = (props) => <EcsMappingRenderer row={props.row as any} columnId={col} />;
+    renderers[col] = (props: DataGridCellValueElementProps) => (
+      <EcsMappingRenderer row={props.row} columnId={col} />
+    );
   }
 
   return renderers;

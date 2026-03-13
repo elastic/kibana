@@ -36,6 +36,7 @@ describe('cell_renderers', () => {
 
     it('renders agent name as a Fleet link', () => {
       const row = {
+        id: 'row-1',
         raw: { _source: {} },
         flattened: { 'agent.name': 'my-agent', 'agent.id': 'agent-123' },
       };
@@ -46,6 +47,7 @@ describe('cell_renderers', () => {
 
     it('renders agent name without link when no agent id', () => {
       const row = {
+        id: 'row-2',
         raw: { _source: {} },
         flattened: { 'agent.name': 'orphan-agent' },
       };
@@ -56,6 +58,7 @@ describe('cell_renderers', () => {
 
     it('renders "-" when agent name is missing', () => {
       const row = {
+        id: 'row-3',
         raw: { _source: {} },
         flattened: {},
       };
@@ -67,6 +70,7 @@ describe('cell_renderers', () => {
   describe('EcsMappingRenderer', () => {
     it('resolves nested ECS field from _source', () => {
       const row = {
+        id: 'row-4',
         raw: { _source: { destination: { ip: '10.0.0.1' } } },
         flattened: {},
       };
@@ -76,6 +80,7 @@ describe('cell_renderers', () => {
 
     it('renders "-" when field is missing from _source', () => {
       const row = {
+        id: 'row-5',
         raw: { _source: {} },
         flattened: {},
       };
@@ -85,6 +90,7 @@ describe('cell_renderers', () => {
 
     it('stringifies array values from _source', () => {
       const row = {
+        id: 'row-6',
         raw: { _source: { 'host.ip': ['10.0.0.1', '10.0.0.2'] } },
         flattened: {},
       };
