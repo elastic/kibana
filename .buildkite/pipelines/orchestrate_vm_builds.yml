@@ -8,10 +8,16 @@ steps:
         key: 'VM_IMAGES_BRANCH'
         hint: 'Branch in elastic/ci-agent-images to run'
         required: true
+      - text: 'KIBANA_BRANCH'
+        key: 'KIBANA_BRANCH'
+        hint: 'Branch in elastic/kibana to run build image cache build on'
+        default: 'main'
+        required: true
 
   - name: 'Upload trigger steps'
     command: |
       VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
+      KIBANA_BRANCH="$$(buildkite-agent meta-data get "KIBANA_BRANCH")"
 
       buildkite-agent pipeline upload << PIPELINE
       steps:
@@ -42,4 +48,5 @@ steps:
             env:
               IMAGES_CONFIG: kibana/image_cache.tpl.yml
               BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+              KIBANA_BRANCH: '$${KIBANA_BRANCH}'
       PIPELINE
