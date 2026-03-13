@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MutableRefObject } from 'react';
 import { useMemo } from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type {
@@ -41,6 +42,31 @@ function getRawResponse(data: unknown): unknown {
   return data;
 }
 
+function isReactFlowResponse(value: unknown): value is ReactFlowServiceMapResponse {
+  return (
+    value != null &&
+    typeof value === 'object' &&
+    'nodes' in value &&
+    Array.isArray((value as ReactFlowServiceMapResponse).nodes) &&
+    'edges' in value &&
+    Array.isArray((value as ReactFlowServiceMapResponse).edges)
+  );
+}
+
+function buildCacheKey(params: {
+  start: string;
+  end: string;
+  environment: Environment;
+  serviceGroupId?: string;
+  kuery: string;
+  serviceName?: string;
+}): string {
+  const { start, end, environment, serviceGroupId, kuery, serviceName } = params;
+  return [start, end, environment, serviceGroupId ?? '', kuery, serviceName ?? ''].join('|');
+}
+
+export type ServiceMapCache = MutableRefObject<Map<string, ReactFlowServiceMapResponse>>;
+
 export const useServiceMap = ({
   start,
   end,
@@ -48,6 +74,7 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  cacheRef,
 }: {
   environment: Environment;
   kuery: string;
@@ -55,14 +82,29 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  /** When provided, responses are cached by (start,end,env,serviceGroup,kuery,serviceName). Reusing a kuery returns cached data without refetch. */
+  cacheRef?: ServiceMapCache;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
+  const cacheKey = buildCacheKey({
+    start,
+    end,
+    environment,
+    serviceGroupId,
+    kuery,
+    serviceName,
+  });
 
   const fetcherResult = useFetcher(
     (callApmApi) => {
       if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
         return;
+      }
+
+      const cached = cacheRef?.current.get(cacheKey);
+      if (cached) {
+        return Promise.resolve(cached);
       }
 
       return callApmApi('GET /internal/apm/service-map', {
@@ -76,6 +118,18 @@ export const useServiceMap = ({
             kuery,
           },
         },
+      }).then((rawResponse) => {
+        const raw = getRawResponse(rawResponse);
+        if (raw && typeof raw === 'object' && 'spans' in raw) {
+          try {
+            const transformed = transformToReactFlow(raw as ServiceMapResponse);
+            cacheRef?.current.set(cacheKey, transformed);
+            return transformed;
+          } catch (err) {
+            throw err;
+          }
+        }
+        return rawResponse;
       });
     },
     [
@@ -87,6 +141,8 @@ export const useServiceMap = ({
       serviceGroupId,
       kuery,
       config.serviceMapEnabled,
+      cacheKey,
+      cacheRef,
     ],
     { preservePreviousData: false }
   );
@@ -104,6 +160,10 @@ export const useServiceMap = ({
         status: FETCH_STATUS.FAILURE,
         error,
       };
+    }
+
+    if (isReactFlowResponse(data)) {
+      return { data, status: FETCH_STATUS.SUCCESS };
     }
 
     const raw = getRawResponse(data);
