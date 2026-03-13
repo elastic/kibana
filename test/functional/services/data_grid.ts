@@ -29,6 +29,7 @@ export class DataGridService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
     const table = await this.find.byCssSelector('.euiDataGrid');
@@ -594,15 +595,40 @@ export class DataGridService extends FtrService {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
-    await this.testSubjects.click(cellSelector);
-    await this.retry.waitFor('grid cell actions to appear', async () => {
-      return this.testSubjects.exists(`${actionName}-${fieldName}`);
+    await this.retry.try(async () => {
+      await this.toasts.dismissIfExists();
+      await this.testSubjects.moveMouseTo(cellSelector);
+
+      try {
+        await this.testSubjects.click(cellSelector);
+      } catch {
+        // Fallback for transient overlays intercepting pointer clicks.
+        await this.toasts.dismissIfExists();
+        const cell = await this.testSubjects.find(cellSelector);
+        await cell.pressKeys(Key.ENTER);
+      }
+
+      const actionVisible = await this.testSubjects.exists(`${actionName}-${fieldName}`);
+      if (!actionVisible) {
+        const cell = await this.testSubjects.find(cellSelector);
+        await cell.pressKeys(Key.ENTER);
+      }
+
+      if (!(await this.testSubjects.exists(`${actionName}-${fieldName}`))) {
+        throw new Error(`Unable to show flyout action ${actionName} for ${fieldName}`);
+      }
     });
   }
 
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     await this.showFieldCellActionInFlyout(fieldName, actionName);
-    await this.testSubjects.click(`${actionName}-${fieldName}`);
+
+    const actionSelector = `${actionName}-${fieldName}`;
+    await this.retry.try(async () => {
+      await this.toasts.dismissIfExists();
+      await this.testSubjects.moveMouseTo(actionSelector);
+      await this.testSubjects.click(actionSelector);
+    });
   }
 
   public async isFieldPinnedInFlyout(fieldName: string): Promise<boolean> {
