@@ -17,4 +17,13 @@ function buildColumnsMetaLookupInner(table: Datatable) {
   }, {});
 }
 
+export function resolveLink(table: Datatable, linkPattern: string, rowIndex: number) {
+  let link = linkPattern;
+  for (let column of table.columns) {
+    const value = table?.rows[rowIndex]?.[column.id];
+    link = link.replaceAll(`{{${column.name}}}`, String(value));
+  }
+  return link;
+}
+
 export const buildColumnsMetaLookup = memoizeOne(buildColumnsMetaLookupInner);
