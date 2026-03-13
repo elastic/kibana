@@ -49,6 +49,28 @@ import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
 type EsStdoutLogLevel = NonNullable<EsClusterExecOptions['esStdoutLogLevel']>;
 
+const ASSERTION_OPTION_PREFIXES = [
+  '-ea',
+  '-enableassertions',
+  '-da',
+  '-disableassertions',
+  '-esa',
+  '-enablesystemassertions',
+  '-dsa',
+  '-disablesystemassertions',
+] as const;
+
+const hasAssertionOption = (javaOpts: string): boolean => {
+  return javaOpts
+    .split(/\s+/)
+    .filter(Boolean)
+    .some((option) =>
+      ASSERTION_OPTION_PREFIXES.some(
+        (prefix) => option === prefix || option.startsWith(`${prefix}:`)
+      )
+    );
+};
+
 // ES logs include more granular levels than our CLI threshold; use numeric ranks to compare severity.
 function shouldForwardEsStdoutLine(esLevel: string | undefined, threshold: EsStdoutLogLevel) {
   if (threshold === 'silent') return false;
@@ -614,6 +636,11 @@ export class Cluster {
       // 1536m === 1.5g
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
+    // Enable JVM assertions by default, while still allowing suite-specific overrides.
+    if (!hasAssertionOption(esJavaOpts)) {
+      esJavaOpts += ' -ea';
+    }
+
     return esJavaOpts.trim();
   }
 
