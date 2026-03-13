@@ -22,7 +22,6 @@ export function buildWorkflowExecutionFailedPayload(
   const stepId = failedStepContext?.stepId;
   const stepName = failedStepContext?.stepName || stepId;
   const stepExecutionId = failedStepContext?.stepExecutionId;
-  const stackTrace = failedStepContext?.stack;
 
   const payload: WorkflowExecutionFailedEvent = {
     workflow: {
@@ -41,7 +40,6 @@ export function buildWorkflowExecutionFailedPayload(
       ...(stepId && { stepId }),
       ...(stepName && { stepName }),
       ...(stepExecutionId && { stepExecutionId }),
-      ...(stackTrace && { stackTrace }),
     },
   };
   return payload;

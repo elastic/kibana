@@ -19,7 +19,6 @@ export interface FailedStepContext {
   stepId: string;
   stepName: string;
   stepExecutionId: string;
-  stack?: string;
 }
 
 export class WorkflowExecutionState {

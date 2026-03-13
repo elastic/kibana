@@ -45,7 +45,6 @@ describe('buildWorkflowExecutionFailedPayload', () => {
       stepId: 'step_1',
       stepName: 'Send HTTP request',
       stepExecutionId: 'step-exec-abc',
-      stack: 'Error: General error\n  at ...',
     };
     const payload = buildWorkflowExecutionFailedPayload(baseExecution, failedStepContext);
 
@@ -65,7 +64,6 @@ describe('buildWorkflowExecutionFailedPayload', () => {
       stepId: 'step_1',
       stepName: 'Send HTTP request',
       stepExecutionId: 'step-exec-abc',
-      stackTrace: 'Error: General error\n  at ...',
     });
   });
 
@@ -90,7 +88,6 @@ describe('buildWorkflowExecutionFailedPayload', () => {
     expect(payload.error).not.toHaveProperty('stepId');
     expect(payload.error).not.toHaveProperty('stepName');
     expect(payload.error).not.toHaveProperty('stepExecutionId');
-    expect(payload.error).not.toHaveProperty('stackTrace');
   });
 
   it('uses stepId as stepName when failedStepContext has no stepName', () => {
