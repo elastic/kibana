@@ -15,7 +15,14 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
+import { spaceTest, testData } from '../../fixtures/metrics_experience';
+
+// Narrow range centred on the test documents (00:30–00:39) so that the
+// 25 %–75 % brush gesture always captures data and avoids "no results".
+const BRUSH_TIME_RANGE = {
+  from: '2025-01-01T00:00:00.000Z',
+  to: '2025-01-01T01:00:00.000Z',
+};
 
 spaceTest.describe(
   'Metrics in Discover - Brush to Zoom',
@@ -24,7 +31,7 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
+      await scoutSpace.uiSettings.setDefaultTime(BRUSH_TIME_RANGE);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -65,6 +72,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('grid should still be visible after zoom', async () => {
+          await pageObjects.discover.waitUntilSearchingHasFinished();
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
         });
