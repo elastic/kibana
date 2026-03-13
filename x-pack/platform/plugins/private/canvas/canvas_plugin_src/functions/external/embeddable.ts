@@ -21,16 +21,15 @@ import { getFunctionHelp } from '../../../i18n';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
 import type { InitializeArguments } from '.';
+import type { SerializedTimeRange } from '@kbn/presentation-publishing';
 
 export interface Arguments {
   config: string;
   type: string;
 }
 
-const baseEmbeddableInput = {
-  timeRange: DEFAULT_TIME_RANGE,
-  disableTriggers: true,
-  renderMode: 'noInteractivity',
+const baseEmbeddableInput: SerializedTimeRange = {
+  time_range: DEFAULT_TIME_RANGE,
 };
 
 type EmbeddableFunction = ExpressionFunctionDefinition<
