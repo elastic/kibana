@@ -471,13 +471,19 @@ export const QueryBarTopRow = React.memo(
     const onDateRangeChange = useCallback(
       ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
-        onSubmit({
-          query: queryRef.current,
-          dateRange: { from: start, to: end },
-        });
+        if (!isInvalid) {
+          onSubmit({
+            query: queryRef.current,
+            dateRange: { from: start, to: end },
+          });
+        }
       },
       [onSubmit]
     );
+
+    const onDateRangeInputChange = useCallback(() => {
+      setIsDateRangeInvalid(false);
+    }, []);
 
     const onInputSubmit = useCallback(
       (query: Query) => {
@@ -532,7 +538,7 @@ export const QueryBarTopRow = React.memo(
 
     // TODO: Move this pretty-formatting logic into DateRangePicker itself,
     // which already receives `presets` and can resolve labels internally.
-    const dateRangeDefaultValue = usePrettyDuration({
+    const dateRangeValue = usePrettyDuration({
       timeFrom: props.dateRangeFrom ?? 'now-15m',
       timeTo: props.dateRangeTo ?? 'now',
       quickRanges: commonlyUsedRanges,
@@ -581,21 +587,23 @@ export const QueryBarTopRow = React.memo(
 
       /**
        * TODO: DateRangePicker does not yet support the following SuperDatePicker props:
-       * - General (coming soon): isDisabled, locale, className, width (fullWidth?),
-       *   timeZoneDisplayProps
+       * - General (coming soon): locale, className, timeZoneDisplayProps
        * - Auto-refresh (coming soonish): isPaused, refreshInterval, refreshMinInterval,
        *   onRefresh, onRefreshChange, isAutoRefreshOnly
-       *
-       * TODO: make `DateRangePicker` controlled — `key` forces a remount when
-       * the time range changes externally (a workaround until the `value` prop is added)
        */
       const datePicker = (
         <DateRangePicker
-          key={`${props.dateRangeFrom}-${props.dateRangeTo}`}
-          defaultValue={dateRangeDefaultValue}
+          data-test-subj={props.dataTestSubj}
+          value={dateRangeValue}
           onChange={onDateRangeChange}
+          onInputChange={onDateRangeInputChange}
+          isInvalid={isDateRangeInvalid}
+          isLoading={props.isLoading}
+          disabled={props.isDisabled}
+          width="restricted"
           dateFormat={uiSettings.get('dateFormat')}
           compressed
+          collapsed={shouldShowDatePickerAsBadge()}
           showTimeWindowButtons
           presets={commonlyUsedRanges}
           recent={recentlyUsedRanges}
