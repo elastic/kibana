@@ -63,8 +63,8 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
             />
           ),
           description: `${dataFormatter.convert(
-            inputProps.timeRange!.from
-          )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+            inputProps.time_range!.from
+          )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
         },
       ];
 

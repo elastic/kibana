@@ -92,6 +92,7 @@
       "{index}/_search"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search",
     "availability": {
       "stack": true,
       "serverless": true

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 
 import {
   canOverrideHoverActions,
@@ -31,7 +31,9 @@ const customActionsStyles = css({
   },
 });
 
-export const PresentationPanelHoverActionsWrapper = (props: PresentationPanelHoverActionsProps) => {
+export const PresentationPanelHoverActionsWrapper = (
+  props: PropsWithChildren<PresentationPanelHoverActionsProps>
+) => {
   const [defaultTitle, title, hasLockedHoverActions, overrideHoverActions] =
     useBatchedOptionalPublishingSubjects(
       props.api?.defaultTitle$,
@@ -60,16 +62,13 @@ export const PresentationPanelHoverActionsWrapper = (props: PresentationPanelHov
       )}`}
       css={containerStyles}
     >
-      {OverriddenHoverActionsComponent ? (
-        <>
-          <div className="embPanel__hoverActions" css={customActionsStyles}>
-            <OverriddenHoverActionsComponent />
-          </div>
-          {props.children}
-        </>
-      ) : (
-        <PresentationPanelHoverActions {...props} />
+      {OverriddenHoverActionsComponent && (
+        <div className="embPanel__hoverActions" css={customActionsStyles}>
+          <OverriddenHoverActionsComponent />
+        </div>
       )}
+      {props.children}
+      {!OverriddenHoverActionsComponent && <PresentationPanelHoverActions {...props} />}
     </div>
   );
 };

@@ -56,7 +56,7 @@
         "label": "ImageEmbeddableState",
         "description": [],
         "signature": [
-          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly drilldowns?: ",
+          "{ readonly description?: string | undefined; readonly title?: string | undefined; readonly hide_title?: boolean | undefined; readonly hide_border?: boolean | undefined; readonly drilldowns?: ",
           {
             "pluginId": "embeddable",
             "scope": "server",

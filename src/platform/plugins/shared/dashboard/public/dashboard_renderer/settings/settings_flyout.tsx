@@ -274,6 +274,22 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
             />
           </EuiFormRow>
 
+          <EuiFormRow>
+            <EuiSwitch
+              label={i18n.translate(
+                'dashboard.embeddableApi.showSettings.flyout.form.hideAllPanelBordersSwitchLabel',
+                {
+                  defaultMessage: 'Show panel borders',
+                }
+              )}
+              checked={!localSettings.hide_panel_borders}
+              onChange={(event) =>
+                updateDashboardSetting({ hide_panel_borders: !event.target.checked })
+              }
+              data-test-subj="dashboardPanelBordersCheckbox"
+            />
+          </EuiFormRow>
+
           <EuiFormRow
             label={i18n.translate('dashboard.embeddableApi.flyout.formRow.controls', {
               defaultMessage: 'Control panels',

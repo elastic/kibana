@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowTriggerTab } from '../../../../../../features/run_workflow/ui/types';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export enum WorkflowExecutionEventTypes {
@@ -32,13 +33,6 @@ export enum WorkflowExecutionEventTypes {
   WorkflowRunCancelled = 'workflows_workflow_run_cancelled',
 }
 
-export type WorkflowTriggerType = 'manual' | 'alert' | 'scheduled';
-
-/**
- * Trigger tab types available in the Test Workflow modal
- */
-export type WorkflowTriggerTab = 'manual' | 'alert' | 'index';
-
 /**
  * Parameters for workflow test run initiation telemetry.
  */
@@ -61,7 +55,7 @@ export interface ReportWorkflowTestRunInitiatedActionParams extends BaseResultAc
    */
   editorType?: WorkflowEditorType;
   /**
-   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'
+   * The trigger tab selected in the Test Workflow modal
    */
   triggerTab?: WorkflowTriggerTab;
 }

@@ -55,7 +55,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `in:<channel_name>` to the query.',
+            'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).',
         }
       )
     ),
@@ -67,7 +67,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `from:<@UserID>` or `from:username` to the query.',
+            'Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query.',
         }
       )
     ),
@@ -79,7 +79,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `after:<date>` to the query (e.g. 2026-02-10).',
+            'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).',
         }
       )
     ),
@@ -91,7 +91,7 @@ const SlackSearchMessagesInputSchema = z.object({
         'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
         {
           defaultMessage:
-            'Optional Slack search constraint. Adds `before:<date>` to the query (e.g. 2026-02-10).',
+            'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).',
         }
       )
     ),

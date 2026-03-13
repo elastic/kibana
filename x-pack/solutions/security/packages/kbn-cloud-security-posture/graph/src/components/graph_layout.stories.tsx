@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
 import type { Writable } from '@kbn/utility-types';
 import type { EdgeColor } from '@kbn/cloud-security-posture-common/types/graph/latest';
@@ -26,17 +26,15 @@ type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
 const meta = {
   render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <Graph
-          css={css`
-            height: 100%;
-            width: 100%;
-          `}
-          nodes={nodes ?? []}
-          edges={edges ?? []}
-          interactive={interactive ?? false}
-        />
-      </ThemeProvider>
+      <Graph
+        css={css`
+          height: 100%;
+          width: 100%;
+        `}
+        nodes={nodes ?? []}
+        edges={edges ?? []}
+        interactive={interactive ?? false}
+      />
     );
   },
   title: 'Components/Graph Components/Graph Layout',

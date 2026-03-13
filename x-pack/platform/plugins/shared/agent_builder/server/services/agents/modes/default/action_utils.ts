@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { isToolMessage } from '@langchain/core/messages';
 import { extractTextContent, extractToolCalls } from '@kbn/agent-builder-genai-utils/langchain';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
+import type { Logger } from '@kbn/logging';
 import type {
   ToolCallAction,
   HandoverAction,
@@ -53,32 +54,58 @@ export const processResearchResponse = (
 };
 
 /**
- * Create execute tool action based on the tool node result.
+ * Create execute tool action(s) based on the tool node result.
+ *
+ * When parallel tool calls are used and one tool triggers a HITL interrupt:
+ * - Completed tools are returned as an `ExecuteToolAction`
+ * - The first interrupted tool is returned as a `ToolPromptAction`
+ *
+ * NOTE: If multiple tools trigger HITL in the same batch, only the first
+ * interrupt is handled. The others are discarded. This is an accepted
+ * limitation for the first iteration of parallel tool call support.
  */
 export const processToolNodeResponse = (
-  toolNodeResult: BaseMessage[]
-): ExecuteToolAction | ToolPromptAction => {
+  toolNodeResult: BaseMessage[],
+  { logger }: { logger?: Logger } = {}
+): (ExecuteToolAction | ToolPromptAction)[] => {
   const toolMessages = toolNodeResult.filter(isToolMessage);
 
-  const interruptMessage = toolMessages.find((message) => {
-    const result: ToolHandlerReturn | undefined = message.artifact;
-    return result && isToolHandlerInterruptReturn(result);
-  });
+  const completedMessages: ToolMessage[] = [];
+  const interruptMessages: ToolMessage[] = [];
 
-  if (interruptMessage) {
-    const toolResult: ToolHandlerPromptReturn = interruptMessage.artifact;
-    return toolPromptAction(interruptMessage.tool_call_id, toolResult.prompt);
+  for (const msg of toolMessages) {
+    const result: ToolHandlerReturn | undefined = msg.artifact;
+    if (result && isToolHandlerInterruptReturn(result)) {
+      interruptMessages.push(msg);
+    } else {
+      completedMessages.push(msg);
+    }
   }
 
-  return executeToolAction(
-    toolMessages.map((msg) => {
-      return {
-        toolCallId: msg.tool_call_id,
-        content: extractTextContent(msg),
-        artifact: msg.artifact,
-      };
-    })
-  );
+  const actions: (ExecuteToolAction | ToolPromptAction)[] = [];
+
+  if (completedMessages.length > 0) {
+    actions.push(
+      executeToolAction(
+        completedMessages.map((msg) => ({
+          toolCallId: msg.tool_call_id,
+          content: extractTextContent(msg),
+          artifact: msg.artifact,
+        }))
+      )
+    );
+  }
+
+  if (interruptMessages.length > 0) {
+    const firstInterrupt = interruptMessages[0];
+    const toolResult: ToolHandlerPromptReturn = firstInterrupt.artifact;
+    actions.push(toolPromptAction(firstInterrupt.tool_call_id, toolResult.prompt));
+    if (interruptMessages.length > 1) {
+      logger?.warn(`[agent] Tool execution: Found multiple tool interrupts in the same batch.`);
+    }
+  }
+
+  return actions;
 };
 
 export const processAnswerResponse = (message: AIMessageChunk): AnswerAction | AgentErrorAction => {

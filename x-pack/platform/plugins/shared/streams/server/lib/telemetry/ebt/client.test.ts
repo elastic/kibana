@@ -10,7 +10,6 @@ import { EbtTelemetryClient } from './client';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
   STREAMS_STATE_ERROR_EVENT,
-  STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
   STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
   STREAMS_INSIGHTS_GENERATED_EVENT_TYPE,
@@ -85,29 +84,6 @@ describe('EbtTelemetryClient', () => {
     });
   });
 
-  describe('trackSystemsIdentified', () => {
-    it('tracks systems identified events', () => {
-      client.trackSystemsIdentified({
-        count: 3,
-        input_tokens_used: 100,
-        output_tokens_used: 50,
-        stream_name: 'test-stream',
-        stream_type: 'wired',
-      });
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        STREAMS_SYSTEM_IDENTIFICATION_IDENTIFIED_EVENT_TYPE,
-        {
-          count: 3,
-          input_tokens_used: 100,
-          output_tokens_used: 50,
-          stream_name: 'test-stream',
-          stream_type: 'wired',
-        }
-      );
-    });
-  });
-
   describe('trackDescriptionGenerated', () => {
     it('tracks description generated events', () => {
       client.trackDescriptionGenerated({
@@ -133,7 +109,6 @@ describe('EbtTelemetryClient', () => {
     it('tracks significant events queries generated events', () => {
       client.trackSignificantEventsQueriesGenerated({
         count: 5,
-        systems_count: 2,
         input_tokens_used: 300,
         output_tokens_used: 150,
         stream_name: 'test-stream',
@@ -156,7 +131,6 @@ describe('EbtTelemetryClient', () => {
         STREAMS_SIGNIFICANT_EVENTS_QUERIES_GENERATED_EVENT_TYPE,
         {
           count: 5,
-          systems_count: 2,
           input_tokens_used: 300,
           output_tokens_used: 150,
           stream_name: 'test-stream',

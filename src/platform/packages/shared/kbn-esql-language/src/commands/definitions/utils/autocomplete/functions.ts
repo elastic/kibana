@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isFunctionExpression } from '../../../../ast/is';
+import { isAssignment, isFunctionExpression } from '@elastic/esql';
 
-import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../../types';
-import type { FunctionParameterType } from '../../types';
+import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { FunctionDefinitionTypes } from '../../types';
 import { getFunctionDefinition } from '../functions';
 
@@ -58,18 +57,4 @@ export function getFunctionsToIgnoreForStats(command: ESQLAstAllCommands, argInd
   }
   const arg = command.args[argIndex];
   return isFunctionExpression(arg) ? getFnContent(arg) : [];
-}
-
-export function ensureKeywordAndText(types: FunctionParameterType[]) {
-  const result = [...types];
-
-  if (result.includes('keyword') && !result.includes('text')) {
-    result.push('text');
-  }
-
-  if (result.includes('text') && !result.includes('keyword')) {
-    result.push('keyword');
-  }
-
-  return result;
 }

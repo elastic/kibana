@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider, css } from '@emotion/react';
 import { EuiText, EuiPanel } from '@elastic/eui';
+import type { Meta, StoryObj } from '@storybook/react';
+import { css } from '@emotion/react';
 import { Graph } from './graph/graph';
 import type { NodeViewModel, EdgeViewModel } from './types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
@@ -22,7 +22,7 @@ const meta: Meta<GraphCenteringStoryProps> = {
   title: 'Components/Graph Components/Graph Centering',
   render: ({ title, description, nodes, edges, interactive, isLocked, ...props }) => {
     return (
-      <ThemeProvider theme={{ darkMode: false }}>
+      <>
         <EuiPanel paddingSize="m">
           {title && (
             <EuiText>
@@ -47,7 +47,7 @@ const meta: Meta<GraphCenteringStoryProps> = {
           isLocked={isLocked ?? false}
           {...props}
         />
-      </ThemeProvider>
+      </>
     );
   },
   argTypes: {

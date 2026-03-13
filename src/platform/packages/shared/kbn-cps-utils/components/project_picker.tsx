@@ -17,13 +17,16 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiPopoverTitle,
+  EuiTitle,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { ProjectsData } from '../types';
-import { PROJECT_ROUTING } from '../constants';
+import type { UseFetchProjectsResult } from './use_fetch_projects';
 import { ProjectPickerContent } from './project_picker_content';
-import { useFetchProjects } from './use_fetch_projects';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import { CPSIconDisabled } from './cps_icon';
@@ -31,7 +34,8 @@ import { CPSIconDisabled } from './cps_icon';
 export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  fetchProjects: () => Promise<ProjectsData | null>;
+  projects: UseFetchProjectsResult;
+  totalProjectCount: number;
   isReadonly?: boolean;
   settingsComponent?: React.ReactNode;
 }
@@ -39,7 +43,8 @@ export interface ProjectPickerProps {
 export const ProjectPicker = ({
   projectRouting,
   onProjectRoutingChange,
-  fetchProjects,
+  projects,
+  totalProjectCount,
   isReadonly = false,
   settingsComponent,
 }: ProjectPickerProps) => {
@@ -47,20 +52,19 @@ export const ProjectPicker = ({
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
-  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
+  const { originProject, linkedProjects, isLoading, error } = projects;
 
-  // do not render the component if there aren't linked projects
-  if (!originProject || linkedProjects.length === 0) {
+  if (totalProjectCount <= 1 || (!isLoading && !originProject && !error)) {
     return null;
   }
 
-  const totalProjects = linkedProjects.length + 1;
-  const activeProjectsCount = projectRouting === PROJECT_ROUTING.ALL ? totalProjects : 1;
+  const activeProjectsCount =
+    isLoading || error || !originProject ? totalProjectCount : linkedProjects.length + 1;
 
   const button = (
     <EuiToolTip
       delay="long"
-      content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjects)}
+      content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjectCount)}
       disableScreenReaderOutput
     >
       <EuiButtonEmpty
@@ -71,9 +75,9 @@ export const ProjectPicker = ({
         onClick={() => setShowPopover(!showPopover)}
         color="text"
       >
-        {activeProjectsCount === totalProjects
+        {activeProjectsCount === totalProjectCount
           ? strings.allButtonLabel()
-          : `${activeProjectsCount}/${totalProjects}`}
+          : `${activeProjectsCount}/${totalProjectCount}`}
       </EuiButtonEmpty>
     </EuiToolTip>
   );
@@ -116,37 +120,46 @@ export const ProjectPicker = ({
         panelProps={{ css: styles.popover }}
         hasArrow
       >
+        <EuiPopoverTitle paddingSize="s">
+          <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {settingsComponent && <EuiFlexItem grow={false}>{settingsComponent}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+        {isReadonly && (
+          <EuiCallOut
+            size="s"
+            css={styles.callout}
+            title={strings.getProjectPickerReadonlyCallout()}
+            iconType="info"
+          />
+        )}
         <ProjectPickerContent
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
-          fetchProjects={fetchProjects}
+          projects={projects}
           isReadonly={isReadonly}
-          settingsComponent={settingsComponent}
         />
       </EuiPopover>
     </EuiTourStep>
   );
 };
 
-export const DisabledProjectPicker = ({
-  fetchProjects,
-}: {
-  fetchProjects: () => Promise<ProjectsData | null>;
-}) => {
+export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount: number }) => {
   const styles = useMemoCss(projectPickerStyles);
-  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
-
-  // do not render the component if there aren't linked projects
-  if (!originProject || linkedProjects.length === 0) {
+  if (totalProjectCount <= 1) {
     return null;
   }
-
   return (
     <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
       <EuiButtonIcon
         css={styles.disabledButton}
         aria-label={strings.getProjectPickerButtonAriaLabel()}
-        data-test-subj="project-picker-button"
+        data-test-subj="project-picker-button-disabled"
         size="xs"
         isDisabled
         display="fill"
@@ -164,5 +177,9 @@ const projectPickerStyles = {
   disabledButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: euiTheme.size.s,
+    }),
+  callout: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.m,
     }),
 };

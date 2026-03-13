@@ -57,12 +57,24 @@ jest.mock('@kbn/code-editor', () => ({
 
 const renderAddFieldFlyout = (
   streamType: 'wired' | 'classic',
-  existingFieldNames: string[] = []
+  existingFieldNames: string[] = [],
+  streamName?: string
 ) => {
-  const definition =
+  const baseDefinition =
     streamType === 'wired'
       ? createMockWiredStreamDefinition()
       : createMockClassicStreamDefinition();
+
+  const definition =
+    streamName && streamType === 'wired'
+      ? {
+          ...baseDefinition,
+          stream: {
+            ...baseDefinition.stream,
+            name: streamName,
+          },
+        }
+      : baseDefinition;
 
   const fields = existingFieldNames.map((name) => ({
     name,
@@ -242,6 +254,18 @@ describe('AddFieldFlyout', () => {
         expect(error).toBeNull();
       });
     });
+
+    it('allows arbitrary custom field names for ECS streams (logs.ecs.*)', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('wired', [], 'logs.ecs.windows');
+
+      await typeFieldName(user, 'abc');
+
+      await waitFor(() => {
+        const error = getFieldNameError();
+        expect(error).toBeNull();
+      });
+    });
   });
 
   describe('Field name validation for classic streams', () => {
@@ -309,12 +333,27 @@ describe('AddFieldFlyout', () => {
       });
     });
 
-    it('disables the Add field button when field name is valid but type is not selected', async () => {
+    it('enables the Add field button when field name is valid but type is not selected (wired streams allow description-only fields)', async () => {
       const user = userEvent.setup();
       renderAddFieldFlyout('wired');
 
       await typeFieldName(user, 'attributes.custom_field');
 
+      // Wired streams allow description-only field overrides without a type,
+      // so the button should be enabled with just a valid field name
+      await waitFor(() => {
+        const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
+        expect(addFieldButton).not.toBeDisabled();
+      });
+    });
+
+    it('disables the Add field button when field name is valid but type is not selected (classic streams require type)', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('classic');
+
+      await typeFieldName(user, 'custom_field');
+
+      // Classic streams require a type to be selected
       await waitFor(() => {
         const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
         expect(addFieldButton).toBeDisabled();
