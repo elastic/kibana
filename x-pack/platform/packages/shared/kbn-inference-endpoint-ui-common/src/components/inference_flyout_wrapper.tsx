@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -31,38 +30,30 @@ import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mu
 const MIN_ALLOCATIONS = 0;
 const DEFAULT_NUM_THREADS = 1;
 
-const ADAPTIVE_ALLOCATIONS_FLAT_KEYS = [
-  'adaptive_allocations.max_number_of_allocations',
-  'adaptive_allocations.enabled',
-  'adaptive_allocations.min_number_of_allocations',
-];
-
 const formDeserializer = (data: InferenceEndpoint) => {
-  const maxAllocations =
-    data.config?.providerConfig?.adaptive_allocations?.max_number_of_allocations ||
-    data.config?.providerConfig?.['adaptive_allocations.max_number_of_allocations'];
+  const { providerConfig, headers, taskTypeConfig, ...restConfig } = data.config || {};
 
-  if (maxAllocations || data.config?.headers) {
-    const { headers, ...restConfig } = data.config;
-    const restProviderConfig = omit(
-      data.config.providerConfig || {},
-      ADAPTIVE_ALLOCATIONS_FLAT_KEYS
-    );
+  const {
+    'adaptive_allocations.max_number_of_allocations': maxAllocations,
+    'adaptive_allocations.enabled': adaptiveAllocationsEnabled,
+    'adaptive_allocations.min_number_of_allocations': minAllocations,
+    max_tokens,
+    ...restProviderConfig
+  } = providerConfig || {};
 
+  if (restProviderConfig) {
     return {
       ...data,
       config: {
         ...restConfig,
         providerConfig: {
           ...restProviderConfig,
+          ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+        },
+        taskTypeConfig: {
+          ...(taskTypeConfig ?? {}),
           ...(headers ? { headers } : {}),
-          ...(maxAllocations
-            ? // remove the adaptive_allocations from the data config as form does not expect it
-              {
-                max_number_of_allocations: maxAllocations as number,
-                adaptive_allocations: undefined,
-              }
-            : {}),
+          ...(max_tokens ? { max_tokens } : {}),
         },
       },
     };
@@ -72,14 +63,13 @@ const formDeserializer = (data: InferenceEndpoint) => {
 };
 
 // This serializer is used to transform the form data before sending it to the server
+// Form overrides handle correct location for 'max_tokens' and 'headers' so we only handle adaptive_allocations.
 export const formSerializer = (formData: InferenceEndpoint) => {
-  const providerConfig = formData.config?.providerConfig as
-    | InferenceEndpoint['config']['providerConfig']
-    | undefined;
+  const { providerConfig, ...restConfig } = formData.config || {};
+
   if (formData && providerConfig) {
     const {
       max_number_of_allocations: maxAllocations,
-      headers,
       num_allocations: numAllocations,
       ...restProviderConfig
     } = providerConfig || {};
@@ -87,7 +77,7 @@ export const formSerializer = (formData: InferenceEndpoint) => {
     return {
       ...formData,
       config: {
-        ...formData.config,
+        ...restConfig,
         providerConfig: {
           ...restProviderConfig,
           ...(maxAllocations
@@ -95,14 +85,13 @@ export const formSerializer = (formData: InferenceEndpoint) => {
                 adaptive_allocations: {
                   enabled: true,
                   min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+                  max_number_of_allocations: maxAllocations,
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
               }
             : { ...(numAllocations != null && { num_allocations: numAllocations }) }),
         },
-        ...(headers ? { headers } : {}),
       },
     };
   }
@@ -151,6 +140,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
+        taskTypeConfig: inferenceEndpoint?.config.taskTypeConfig,
         contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
         headers: inferenceEndpoint?.config?.headers,
         temperature: inferenceEndpoint?.config.temperature ?? undefined,
