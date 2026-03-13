@@ -340,9 +340,7 @@ describe('useTopNavLinks', () => {
             save: true,
             storeSearchSession: true,
           },
-          alertingVTwo: {
-            uiEnabled: alertingV2Enabled,
-          },
+          ...(alertingV2Enabled ? { alertingVTwo: {} } : {}),
           management: {
             ...baseMock.capabilities.management,
             insightsAndAlerting: {
