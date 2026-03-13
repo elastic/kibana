@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFilterButton,
@@ -25,7 +26,12 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn, EuiSearchBarProps, EuiSelectableOption } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  EuiSearchBarProps,
+  EuiSelectableOption,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
@@ -88,6 +94,9 @@ export const ManageIntegrationsTable: React.FC<{
   const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
   const [selectedActions, setSelectedActions] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<CreatedIntegrationRow[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [isBulkInstalling, setIsBulkInstalling] = useState(false);
   const { euiTheme } = useEuiTheme();
   const {
     application,
@@ -336,6 +345,35 @@ export const ManageIntegrationsTable: React.FC<{
     },
     [http, notifications]
   );
+
+  const selection: EuiTableSelectionType<CreatedIntegrationRow> = useMemo(
+    () => ({
+      onSelectionChange: (items: CreatedIntegrationRow[]) => setSelectedItems(items),
+    }),
+    []
+  );
+
+  const handleBulkDelete = useCallback(async () => {
+    setIsBulkDeleting(true);
+    try {
+      await Promise.all(selectedItems.map((item) => deleteIntegration(item.integrationId)));
+      setSelectedItems([]);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  }, [selectedItems, deleteIntegration]);
+
+  const handleBulkInstall = useCallback(async () => {
+    setIsBulkInstalling(true);
+    try {
+      await Promise.all(selectedItems.map((item) => installToCluster(item.integrationId)));
+      setSelectedItems([]);
+    } finally {
+      setIsBulkInstalling(false);
+    }
+  }, [selectedItems, installToCluster]);
+
+  const hasApprovedSelected = selectedItems.some((item) => item.status === 'approved');
 
   const columns = useMemo<Array<EuiBasicTableColumn<CreatedIntegrationRow>>>(
     () => [
@@ -700,13 +738,56 @@ export const ManageIntegrationsTable: React.FC<{
 
   const countText = (
     <>
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.fleet.epmList.manageIntegrations.showingCount"
-          defaultMessage="Showing {count} integrations"
-          values={{ count: filteredIntegrations.length }}
-        />
-      </EuiText>
+      {selectedItems.length > 0 ? (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.selectedCount"
+                defaultMessage="{count} selected"
+                values={{ count: selectedItems.length }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              color="danger"
+              iconType="trash"
+              isLoading={isBulkDeleting}
+              onClick={handleBulkDelete}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.bulkDelete"
+                defaultMessage="Delete"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {hasApprovedSelected && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="exportAction"
+                isLoading={isBulkInstalling}
+                onClick={handleBulkInstall}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.bulkInstall"
+                  defaultMessage="Install"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.showingCount"
+            defaultMessage="Showing {count} integrations"
+            values={{ count: filteredIntegrations.length }}
+          />
+        </EuiText>
+      )}
       <EuiSpacer size="m" />
     </>
   );
@@ -735,9 +816,11 @@ export const ManageIntegrationsTable: React.FC<{
     <>
       <EuiInMemoryTable
         items={filteredIntegrations}
+        itemId="integrationId"
         columns={columns}
         search={search}
         childrenBetween={countText}
+        selection={selection}
         tableCaption={i18n.translate('xpack.fleet.epmList.manageIntegrations.tableCaption', {
           defaultMessage: 'Manage created integrations',
         })}
