@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
+import { exportSingleWorkflow } from '../../../common/lib/export_workflows';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -367,7 +368,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             },
           },
           {
-            enabled: () => false,
+            enabled: (item) => item.definition !== null,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', {
@@ -378,6 +379,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             description: i18n.translate('workflows.workflowList.export', {
               defaultMessage: 'Export workflow',
             }),
+            onClick: (item: WorkflowListItemDto) => {
+              exportSingleWorkflow(item);
+            },
           },
           {
             enabled: () => !!canDeleteWorkflow,

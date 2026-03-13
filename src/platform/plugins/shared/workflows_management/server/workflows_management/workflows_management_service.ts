@@ -182,6 +182,63 @@ export class WorkflowsService {
   }
 
   /**
+   * Fetches multiple workflows by their IDs in a single Elasticsearch request.
+   * Returns only the workflows that were found (missing IDs are silently omitted).
+   */
+  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+    if (!this.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits.map((hit) =>
+      this.transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+    );
+  }
+
+  /**
+   * Checks which of the given workflow IDs already exist in the specified space.
+   * Returns an array of `{ id, name }` for each existing workflow, suitable for
+   * conflict detection during import.
+   */
+  public async checkWorkflowConflicts(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    if (!this.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const response = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: ids } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      _source: ['name'],
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits.map((hit) => {
+      const source: Record<string, unknown> = (hit._source ?? {}) as Record<string, unknown>;
+      const name = typeof source.name === 'string' ? source.name : hit._id;
+      return { id: hit._id, name };
+    });
+  }
+
+  /**
    * Parses and validates a workflow YAML, returning the prepared document and metadata.
    * Shared by createWorkflow and bulkCreateWorkflows.
    * When triggerDefinitions is provided, custom trigger on.condition values are validated

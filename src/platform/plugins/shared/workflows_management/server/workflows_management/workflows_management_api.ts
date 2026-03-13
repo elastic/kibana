@@ -138,6 +138,17 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
 
+  public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+    return this.workflowsService.getWorkflowsByIds(ids, spaceId);
+  }
+
+  public async checkWorkflowConflicts(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; name: string }>> {
+    return this.workflowsService.checkWorkflowConflicts(ids, spaceId);
+  }
+
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,

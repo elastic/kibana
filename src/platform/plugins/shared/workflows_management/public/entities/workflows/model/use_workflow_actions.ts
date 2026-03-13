@@ -16,6 +16,8 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
+import type { WorkflowPreview } from '../../../../common/lib/export';
+import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -32,6 +34,26 @@ export interface UpdateWorkflowParams {
    * Useful for bulk operations where the caller handles a single refetch at the end.
    */
   skipRefetch?: boolean;
+}
+
+export interface PreflightImportResult {
+  format: 'zip' | 'yaml';
+  totalWorkflows: number;
+  conflicts: Array<{ id: string; existingName: string }>;
+  parseErrors: string[];
+  workflows: WorkflowPreview[];
+}
+
+export interface ImportWorkflowsResult {
+  created: WorkflowDetailDto[];
+  failed: Array<{ index: number; error: string }>;
+  parseErrors: string[];
+}
+
+export interface ImportWorkflowsParams {
+  file: File;
+  overwrite?: boolean;
+  generateNewIds?: boolean;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -318,11 +340,61 @@ export function useWorkflowActions() {
     },
   });
 
+  const preflightImportWorkflows = useMutation<PreflightImportResult, HttpError, { file: File }>({
+    mutationKey: ['POST', 'workflows', '_import', 'preflight'],
+    mutationFn: async ({ file }) => {
+      const clientResult = await parseImportFile(file);
+
+      let conflicts: PreflightImportResult['conflicts'] = [];
+      if (clientResult.workflowIds.length > 0) {
+        const conflictResponse = await http.post<{
+          conflicts: Array<{ id: string; existingName: string }>;
+        }>('/api/workflows/_check-conflicts', {
+          body: JSON.stringify({ ids: clientResult.workflowIds }),
+        });
+        conflicts = conflictResponse.conflicts;
+      }
+
+      return {
+        format: clientResult.format,
+        totalWorkflows: clientResult.totalWorkflows,
+        conflicts,
+        parseErrors: clientResult.parseErrors,
+        workflows: clientResult.workflows,
+      };
+    },
+  });
+
+  const importWorkflows = useMutation<ImportWorkflowsResult, HttpError, ImportWorkflowsParams>({
+    mutationKey: ['POST', 'workflows', '_import'],
+    mutationFn: ({ file, overwrite, generateNewIds }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const query: Record<string, boolean> = {};
+      if (overwrite) {
+        query.overwrite = true;
+      }
+      if (generateNewIds) {
+        query.generateNewIds = true;
+      }
+      return http.post<ImportWorkflowsResult>('/api/workflows/_import', {
+        body: formData,
+        headers: { 'Content-Type': undefined },
+        query,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+    },
+  });
+
   return {
     updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
+    preflightImportWorkflows,
+    importWorkflows,
   };
 }

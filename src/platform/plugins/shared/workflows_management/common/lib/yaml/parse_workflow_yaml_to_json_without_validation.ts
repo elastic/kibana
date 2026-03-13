@@ -42,9 +42,10 @@ export function parseYamlToJSONWithoutValidation(
 */
 
   // mapAsMap: true prevents console warning about collection values being stringified
+  // maxAliasCount caps alias expansion to mitigate billion-laughs DoS
   // TypeScript types don't include this option, but it exists at runtime
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const doc = parseDocument(yamlString, { mapAsMap: true } as any);
+  const doc = parseDocument(yamlString, { mapAsMap: true, maxAliasCount: 100 } as any);
 
   try {
     return {
