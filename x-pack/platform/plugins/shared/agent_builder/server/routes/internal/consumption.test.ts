@@ -10,7 +10,9 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
-import { HIGH_INPUT_TOKEN_THRESHOLD, registerInternalConsumptionRoutes } from './consumption';
+import { registerInternalConsumptionRoutes } from './consumption';
+import { HIGH_INPUT_TOKEN_THRESHOLD } from '../../services/metering/utils';
+import { AGENTS_WRITE_SECURITY } from '../route_security';
 
 const ROUTE_PATH = `${internalApiPath}/agents/{agent_id}/consumption`;
 
@@ -47,8 +49,8 @@ const createEsHit = ({
 
 describe('Consumption route', () => {
   let routeHandler: RequestHandler<any, any, any, any>;
+  let routeConfig: Record<string, any>;
   let mockEsSearch: jest.Mock;
-  let mockHasPrivileges: jest.Mock;
   let mockGetStartServices: jest.Mock;
 
   const createMockContext = () => ({
@@ -78,11 +80,7 @@ describe('Consumption route', () => {
     jest.clearAllMocks();
 
     mockEsSearch = jest.fn();
-    mockHasPrivileges = jest.fn();
 
-    // Default: admin user
-    mockHasPrivileges.mockResolvedValue({ has_all_requested: true });
-    // Default: one conversation, no agg results
     mockEsSearch.mockResolvedValue({
       hits: {
         total: { value: 1 },
@@ -98,9 +96,6 @@ describe('Consumption route', () => {
         elasticsearch: {
           client: {
             asScoped: () => ({
-              asCurrentUser: {
-                security: { hasPrivileges: mockHasPrivileges },
-              },
               asInternalUser: {
                 search: mockEsSearch,
               },
@@ -111,8 +106,10 @@ describe('Consumption route', () => {
     ]);
 
     const routeHandlers: Record<string, RequestHandler<any, any, any, any>> = {};
+    const routeConfigs: Record<string, any> = {};
     const mockRouter = {
       get: jest.fn().mockImplementation((config: any, handler: any) => {
+        routeConfigs[`GET:${config.path}`] = config;
         routeHandlers[`GET:${config.path}`] = handler;
       }),
     } as unknown as jest.Mocked<IRouter>;
@@ -124,6 +121,7 @@ describe('Consumption route', () => {
     } as unknown as RouteDependencies);
 
     routeHandler = routeHandlers[`GET:${ROUTE_PATH}`];
+    routeConfig = routeConfigs[`GET:${ROUTE_PATH}`];
   });
 
   it('registers the route handler', () => {
@@ -131,27 +129,8 @@ describe('Consumption route', () => {
   });
 
   describe('authorization', () => {
-    it('returns 403 when user is not a superuser', async () => {
-      mockHasPrivileges.mockResolvedValue({ has_all_requested: false });
-
-      const response = await routeHandler(
-        createMockContext() as any,
-        createRequest(),
-        kibanaResponseFactory
-      );
-
-      expect(response.status).toBe(403);
-      expect(mockEsSearch).not.toHaveBeenCalled();
-    });
-
-    it('returns 200 when user is a superuser', async () => {
-      const response = await routeHandler(
-        createMockContext() as any,
-        createRequest(),
-        kibanaResponseFactory
-      );
-
-      expect(response.status).toBe(200);
+    it('requires the manageAgents privilege via route-level security', () => {
+      expect(routeConfig.security).toEqual(AGENTS_WRITE_SECURITY);
     });
   });
 
