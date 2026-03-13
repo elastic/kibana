@@ -22,7 +22,6 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   },
   title: '',
   tags: [],
-  pinned_panels: [],
 };
 
 export function getLastSavedState(readResult?: DashboardReadResponseBody) {

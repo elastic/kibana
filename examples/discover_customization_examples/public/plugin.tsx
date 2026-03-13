@@ -29,7 +29,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import image from './discover_customization_examples.png';
@@ -243,7 +242,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
-                      ...DEFAULT_DSL_OPTIONS_LIST_STATE,
                       data_view_id: dataView?.id!,
                       title: fieldToFilterOn.name.split('.')[0],
                       field_name: fieldToFilterOn.name,

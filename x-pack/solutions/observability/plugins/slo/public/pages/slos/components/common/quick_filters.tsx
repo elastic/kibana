@@ -76,7 +76,6 @@ export function QuickFilters({
           builder.addOptionsListControl(
             initialState,
             {
-              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               data_view_id: dataView.id!,
               field_name: 'status',
               width: 'small',
@@ -92,7 +91,6 @@ export function QuickFilters({
           builder.addOptionsListControl(
             initialState,
             {
-              ...DEFAULT_DSL_OPTIONS_LIST_STATE,
               data_view_id: dataView.id!,
               title: TAGS_LABEL,
               field_name: 'slo.tags',

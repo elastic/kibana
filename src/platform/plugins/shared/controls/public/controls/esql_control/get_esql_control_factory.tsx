@@ -164,9 +164,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         deselectAll: () => {
           // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
         },
-        // loadMoreSubject: new BehaviorSubject<void>(undefined),
-        // fieldFormatter: new BehaviorSubject((v: string) => v),
-        // dataViews$: new BehaviorSubject(undefined) as DSLOptionsListComponentApi['dataViews$'],
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
