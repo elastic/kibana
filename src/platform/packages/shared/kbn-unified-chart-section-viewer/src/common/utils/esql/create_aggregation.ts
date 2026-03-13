@@ -17,7 +17,7 @@ import { isLegacyHistogram } from '../legacy_histogram';
 type Params = Record<string, string | number | boolean | null>;
 interface AggegationTemplateParams {
   type: ES_FIELD_TYPES;
-  instrument?: MappingTimeSeriesMetricType;
+  instrument: MappingTimeSeriesMetricType;
   placeholderName: string;
   customFunction?: string;
 }
@@ -129,7 +129,7 @@ export function createMetricAggregation({
   customFunction,
 }: {
   type: ES_FIELD_TYPES;
-  instrument?: MappingTimeSeriesMetricType;
+  instrument: MappingTimeSeriesMetricType;
   metricName?: string;
   placeholderName?: string;
   customFunction?: string;
