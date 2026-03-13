@@ -116,7 +116,7 @@ export interface PreventableEvent {
 }
 
 export interface LensByValueBase {
-  savedObjectId?: string; // really should be never but creates type issues
+  ref_id?: string; // really should be never but creates type issues
   attributes?: LensSavedObjectAttributes;
 }
 
@@ -140,7 +140,7 @@ export interface LensOverrides {
  * Lens embeddable props broken down by type
  */
 interface LensByReferenceBase {
-  savedObjectId?: string;
+  ref_id?: string;
   attributes?: never;
 }
 
@@ -168,7 +168,7 @@ export interface IntegrationCallbacks extends LensApiProps {
   getSavedVis: () => Readonly<LensSavedObjectAttributes | undefined>;
   getFullAttributes: () => LensDocument | undefined;
   updateAttributes: (newAttributes: LensRuntimeState['attributes']) => void;
-  updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) => void;
+  updateRefId: (newRefId: LensRuntimeState['ref_id']) => void;
   updateOverrides: (newOverrides: LensOverrides['overrides']) => void;
   getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<Action[]>;
 }

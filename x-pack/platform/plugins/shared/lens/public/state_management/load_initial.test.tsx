@@ -39,7 +39,7 @@ const preloadedState = {
 
 const defaultProps: InitialAppState = {
   redirectCallback: jest.fn(),
-  initialInput: { savedObjectId: defaultSavedObjectId },
+  initialInput: { ref_id: defaultSavedObjectId },
   history,
 };
 
@@ -266,7 +266,7 @@ describe('Initializing the store', () => {
 
       await loadInitialAppState(store, {
         ...defaultProps,
-        initialInput: { savedObjectId: '5678' },
+        initialInput: { ref_id: '5678' },
       });
 
       expect(deps.lensServices.attributeService.loadFromLibrary).toHaveBeenCalledTimes(2);

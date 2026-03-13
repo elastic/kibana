@@ -30,14 +30,15 @@ export const getTransformIn = (
     const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
     if (isByRefLensConfig(storedConfig)) {
-      const { savedObjectId: id, ...rest } = storedConfig;
+      const { ref_id, ...rest } = storedConfig;
       return {
+        // ref_id is extracted to references, so the stored state doesn't include it
         state: rest,
         references: [
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
-            id: id!,
+            id: ref_id!,
           },
           ...drilldownReferences,
         ],

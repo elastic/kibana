@@ -230,7 +230,7 @@ const EditLensConfiguration: FC<
   if (savedObjectId) {
     initialInput = {
       id,
-      savedObjectId,
+      ref_id: savedObjectId,
       // @ts-ignore: intentionally include attributes here to avoid triggering loadFromLibrary
       attributes: currentAttributes,
     } satisfies LensByRefSerializedState;
