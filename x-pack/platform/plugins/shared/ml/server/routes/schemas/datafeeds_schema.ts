@@ -22,7 +22,8 @@ export const indicesOptionsSchema = schema.object({
         schema.literal('closed'),
         schema.literal('hidden'),
         schema.literal('none'),
-      ])
+      ]),
+      { maxSize: 10000 }
     )
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),
@@ -45,8 +46,8 @@ export const datafeedConfigSchema = schema.object({
     })
   ),
   frequency: schema.maybe(schema.string()),
-  indices: schema.maybe(schema.arrayOf(schema.string())),
-  indexes: schema.maybe(schema.arrayOf(schema.string())),
+  indices: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+  indexes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
   job_id: schema.maybe(schema.string()),
   query: schema.maybe(schema.any()),
   max_empty_searches: schema.maybe(schema.number()),

@@ -45,7 +45,7 @@ export const indexAnnotationSchema = schema.object({
 });
 
 export const getAnnotationsSchema = schema.object({
-  jobIds: schema.arrayOf(schema.string()),
+  jobIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   earliestMs: schema.nullable(schema.number()),
   latestMs: schema.nullable(schema.number()),
   maxAnnotations: schema.number(),
@@ -55,7 +55,8 @@ export const getAnnotationsSchema = schema.object({
       schema.object({
         field: schema.string(),
         missing: schema.maybe(schema.string()),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
   detectorIndex: schema.maybe(schema.number()),
@@ -65,7 +66,8 @@ export const getAnnotationsSchema = schema.object({
         fieldType: schema.maybe(schema.string()),
         fieldName: schema.maybe(schema.string()),
         fieldValue: schema.maybe(schema.string()),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
 });
@@ -75,7 +77,7 @@ export const annotationsResponseSchema = () => {
     success: schema.boolean(),
     annotations: schema.recordOf<JobId, Annotations>(
       schema.string(),
-      schema.arrayOf(indexAnnotationSchema)
+      schema.arrayOf(indexAnnotationSchema, { maxSize: 10000 })
     ),
     totalCount: schema.number(),
   });
