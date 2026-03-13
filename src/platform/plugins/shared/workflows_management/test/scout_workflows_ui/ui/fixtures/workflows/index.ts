@@ -30,6 +30,10 @@ export {
   getTriggerAlertWorkflowYaml,
 } from './alert_workflows';
 export {
+  getDataMapWithItemAndIndex,
+  getDataMapWithInvalidVariable,
+} from './data_map_validation_workflows';
+export {
   getAssignAfterUseSameLine,
   getAssignBeforeUseSameLine,
   getCaptureAfterUseSameLine,

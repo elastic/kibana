@@ -9,10 +9,9 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { inferZodType } from '../../../../common/lib/zod';
+import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { VARIABLE_REGEX } from '../../../../common/lib/regex';
-import { InvalidForeachParameterError } from './errors';
-import { getForeachItemSchema } from './get_foreach_state_schema';
+import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod';
 
 interface DataMapContextSchemaEntries {
   item: z.ZodType;
@@ -22,34 +21,45 @@ interface DataMapContextSchemaEntries {
 /**
  * Derives `item` and `index` schemas for a `data.map` step.
  *
- * The `items` config behaves like `foreach` — it can be a literal array or a
- * variable reference — so we reuse `getForeachItemSchema` for type derivation.
+ * Unlike `foreach`, `data.map` only accepts literal arrays or `${{ }}`
+ * template variable references — no JSON strings or complex expressions.
  */
 export function getDataMapContextSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   items: unknown
 ): DataMapContextSchemaEntries {
-  let itemSchema: z.ZodType = z.unknown();
-
-  try {
-    if (Array.isArray(items)) {
-      if (items.length > 0) {
-        itemSchema = inferZodType(items[0]);
-      }
-    } else if (typeof items === 'string') {
-      const cleanedParam = items.match(VARIABLE_REGEX)?.groups?.key ?? items;
-      itemSchema = getForeachItemSchema(stepContextSchema, cleanedParam);
-    }
-  } catch (error) {
-    if (error instanceof InvalidForeachParameterError) {
-      itemSchema = z.unknown().describe(error.message);
-    } else {
-      throw error;
-    }
-  }
-
   return {
-    item: itemSchema,
+    item: getDataMapItemSchema(stepContextSchema, items),
     index: z.number(),
   };
+}
+
+function getDataMapItemSchema(
+  stepContextSchema: typeof DynamicStepContextSchema,
+  items: unknown
+): z.ZodType {
+  if (Array.isArray(items) && items.length > 0) {
+    return inferZodType(items[0]);
+  }
+
+  if (typeof items !== 'string') {
+    return z.unknown();
+  }
+
+  const variableKey = items.match(VARIABLE_REGEX)?.groups?.key;
+  if (!variableKey) {
+    return z.unknown();
+  }
+
+  const parsedPath = parseVariablePath(variableKey);
+  if (!parsedPath || parsedPath.errors || !parsedPath.propertyPath) {
+    return z.unknown();
+  }
+
+  const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, parsedPath.propertyPath);
+  if (iterableSchema instanceof z.ZodArray) {
+    return iterableSchema.element as z.ZodType;
+  }
+
+  return z.unknown();
 }
