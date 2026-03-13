@@ -108,8 +108,13 @@ function install(options = undefined) {
   // dynamic import() calls. At runtime, babel transpiles these to require()
   // calls, but the .js files don't exist (only .ts/.tsx source files do).
   // This hook remaps .js resolution to .ts/.tsx when the .js file isn't found.
-  const originalResolveFilename = Module._resolveFilename;
-  Module._resolveFilename = function (request, parent, isMain, resolveOptions) {
+  const originalResolveFilename = /** @type {any} */ (Module)._resolveFilename;
+  /** @type {any} */ (Module)._resolveFilename = function (
+    /** @type {string} */ request,
+    /** @type {any} */ parent,
+    /** @type {boolean} */ isMain,
+    /** @type {any} */ resolveOptions
+  ) {
     try {
       return originalResolveFilename.call(this, request, parent, isMain, resolveOptions);
     } catch (err) {
