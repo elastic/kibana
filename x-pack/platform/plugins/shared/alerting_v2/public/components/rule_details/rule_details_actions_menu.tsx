@@ -11,8 +11,8 @@ import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elasti
 import { css } from '@emotion/react';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useCloneRule } from '../../hooks/use_clone_rule';
-import { useDisableRule } from '../../hooks/use_disable_rule';
-import { useEnableRule } from '../../hooks/use_enable_rule';
+
+import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 
 export interface RuleDetailsActionsMenuProps {
   rule: RuleApiResponse;
@@ -26,8 +26,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
   const { mutate: cloneRule } = useCloneRule();
-  const { mutate: disableRule } = useDisableRule();
-  const { mutate: enableRule } = useEnableRule();
+  const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
   const deleteButtonStyles = css`
     .ruleDetailsActionsMenu__deleteButton {
@@ -35,14 +34,12 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
     }
   `;
 
-  const handleDisable = () => {
+  const handleToggleEnable = () => {
     setIsPopoverOpen(false);
-    disableRule({ id: rule.id });
-  };
-
-  const handleEnable = () => {
-    setIsPopoverOpen(false);
-    enableRule({ id: rule.id });
+    toggleRuleEnabled({
+      id: rule.id,
+      enabled: !rule.enabled,
+    });
   };
 
   const handleClone = () => {
@@ -63,7 +60,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
           ? [
               {
                 'data-test-subj': 'ruleDetailsDisableButton',
-                onClick: handleDisable,
+                onClick: handleToggleEnable,
                 name: i18n.translate('xpack.alertingV2.ruleDetails.disableRuleButtonLabel', {
                   defaultMessage: 'Disable rule',
                 }),
@@ -72,7 +69,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
           : [
               {
                 'data-test-subj': 'ruleDetailsEnableButton',
-                onClick: handleEnable,
+                onClick: handleToggleEnable,
                 name: i18n.translate('xpack.alertingV2.ruleDetails.enableRuleButtonLabel', {
                   defaultMessage: 'Enable rule',
                 }),
