@@ -60,7 +60,8 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           if (request.query.createdBy) {
             const users = request.query.createdBy.split(',');
             const userFilters = users.map(
-              (u) => `${savedQuerySavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
+              (u) =>
+                `${savedQuerySavedObjectType}.attributes.created_by: "${escapeQuotes(u.trim())}"`
             );
             filters.push(`(${userFilters.join(' OR ')})`);
           }
