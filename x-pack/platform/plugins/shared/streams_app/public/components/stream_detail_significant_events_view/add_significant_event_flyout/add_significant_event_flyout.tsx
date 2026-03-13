@@ -78,7 +78,6 @@ export function AddSignificantEventFlyout({
 
   const { scheduleOnboardingTask, getOnboardingTaskStatus, cancelOnboardingTask } =
     useOnboardingApi({
-      connectorId: aiFeatures?.genAiConnectors.selectedConnector,
       saveQueries: false,
     });
 
@@ -192,13 +191,8 @@ export function AddSignificantEventFlyout({
   }, [selectedFlow]);
 
   const generateQueries = () => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
-      return;
-    }
-
     setSelectedFlow('ai');
     setGeneratedQueries([]);
-
     scheduleTask();
   };
 
@@ -258,7 +252,6 @@ export function AddSignificantEventFlyout({
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
-                  aiFeatures={aiFeatures}
                 />
               </EuiPanel>
             </EuiFlexItem>
