@@ -20,12 +20,12 @@
   ],
   "10.2.0": [
     {
-      "name": "test-pack-2",
-      "description": "A test pack with profile uid",
+      "name": "test-pack-1",
+      "description": "A test pack",
       "queries": {
         "query1": {
           "id": "query1",
-          "query": "select * from users;",
+          "query": "select * from processes;",
           "interval": 3600,
           "timeout": 300
         }
@@ -33,10 +33,8 @@
       "enabled": true,
       "created_at": "2024-01-01T00:00:00.000Z",
       "created_by": "elastic",
-      "created_by_profile_uid": "u_test-profile-uid_0",
       "updated_at": "2024-01-01T00:00:00.000Z",
-      "updated_by": "elastic",
-      "updated_by_profile_uid": "u_test-profile-uid_0"
+      "updated_by": "elastic"
     }
   ]
 }
