@@ -811,7 +811,7 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'enrich') {
-      const { policy_name, field, to, ignore_failure, ignore_missing } = formState;
+      const { policy_name, field, to, ignore_failure, ignore_missing, override } = formState;
       return {
         processorDefinition: {
           action: 'enrich',
@@ -820,6 +820,7 @@ export const convertFormStateToProcessor = (
           to,
           ignore_failure,
           ignore_missing,
+          override,
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as EnrichProcessor,
