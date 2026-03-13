@@ -10,8 +10,8 @@
 import { X509Certificate } from 'crypto';
 import { constants } from 'fs';
 import fs from 'fs/promises';
-import yaml from 'js-yaml';
 import path from 'path';
+import { parse, stringify } from 'yaml';
 
 import type { Logger } from '@kbn/core/server';
 import { getFlattenedObject } from '@kbn/std';
@@ -118,16 +118,14 @@ export class KibanaConfigWriter {
       );
 
       const existingCommentedConfig = KibanaConfigWriter.commentOutKibanaConfig(existingConfig.raw);
-      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${yaml.dump(
-        { ...existingConfig.parsed, ...config },
-        { flowLevel: 1 }
+      configToWrite = `${existingCommentedConfig}\n\n# This section was automatically generated during setup.\n${stringify(
+        { ...existingConfig.parsed, ...config }
+        // { flowLevel: 1 } flowLevel is a formatting option only. the yaml pacakge does not appear to support this.
       )}\n`;
     } else {
       configToWrite = `${
         existingConfig.raw
-      }\n\n# This section was automatically generated during setup.\n${yaml.dump(config, {
-        flowLevel: 1,
-      })}\n`;
+      }\n\n# This section was automatically generated during setup.\n${stringify(config)}\n`;
     }
 
     if (params.caCert) {
@@ -172,7 +170,7 @@ export class KibanaConfigWriter {
 
     let parsedConfig: Record<string, unknown>;
     try {
-      parsedConfig = getFlattenedObject(yaml.load(rawConfig) ?? {});
+      parsedConfig = getFlattenedObject(parse(rawConfig) ?? {});
     } catch (err) {
       this.logger.error(`Failed to parse configuration file: ${getDetailedErrorMessage(err)}.`);
       throw err;
