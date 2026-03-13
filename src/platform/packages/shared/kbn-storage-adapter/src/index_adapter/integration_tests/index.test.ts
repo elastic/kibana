@@ -315,6 +315,206 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('when updating documents', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    describe('updating an existing document', () => {
+      beforeAll(async () => {
+        await client.index({
+          id: 'doc1',
+          document: { foo: 'bar' },
+        });
+      });
+
+      it('updates the document successfully', async () => {
+        const updateResponse = await client.update({
+          id: 'doc1',
+          doc: { foo: 'baz' },
+        });
+
+        expect(updateResponse).toMatchObject({
+          _id: 'doc1',
+          result: 'updated',
+        });
+      });
+
+      it('returns the updated document when searching', async () => {
+        const searchResponse = await client.search({
+          track_total_hits: true,
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    foo: 'baz',
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(searchResponse).toMatchObject({
+          hits: {
+            hits: [
+              {
+                _id: 'doc1',
+                _source: {
+                  foo: 'baz',
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    describe('updating a non-existent document without upsert', () => {
+      it('throws a 404 error', async () => {
+        await expect(
+          client.update({
+            id: 'non-existent',
+            doc: { foo: 'bar' },
+          })
+        ).rejects.toThrow('resource_not_found_exception');
+      });
+    });
+
+    describe('updating with doc_as_upsert', () => {
+      it('creates the document if it does not exist', async () => {
+        const updateResponse = await client.update({
+          id: 'doc2',
+          doc: { foo: 'upserted' },
+          doc_as_upsert: true,
+        });
+
+        expect(updateResponse).toMatchObject({
+          _id: 'doc2',
+          result: 'created',
+        });
+      });
+
+      it('returns the created document when searching', async () => {
+        const searchResponse = await client.search({
+          track_total_hits: true,
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    foo: 'upserted',
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(searchResponse).toMatchObject({
+          hits: {
+            hits: [
+              {
+                _id: 'doc2',
+                _source: {
+                  foo: 'upserted',
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      it('updates the document if it already exists', async () => {
+        const updateResponse = await client.update({
+          id: 'doc2',
+          doc: { foo: 'upserted-updated' },
+          doc_as_upsert: true,
+        });
+
+        expect(updateResponse).toMatchObject({
+          _id: 'doc2',
+          result: 'updated',
+        });
+
+        const getResponse = await client.get({ id: 'doc2' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'upserted-updated',
+        });
+      });
+    });
+
+    describe('updating with explicit upsert', () => {
+      it('creates the document with upsert if it does not exist', async () => {
+        const updateResponse = await client.update({
+          id: 'doc3',
+          doc: { foo: 'partial' },
+          upsert: { foo: 'full-upsert' },
+        });
+
+        expect(updateResponse).toMatchObject({
+          _id: 'doc3',
+          result: 'created',
+        });
+      });
+
+      it('returns the upserted document when searching', async () => {
+        const getResponse = await client.get({ id: 'doc3' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'full-upsert',
+        });
+      });
+    });
+
+    describe('updating in a clean instance with upsert', () => {
+      let cleanAdapter: SimpleStorageIndexAdapter<typeof storageSettings>;
+      let cleanClient: SimpleIStorageClient<typeof storageSettings>;
+
+      beforeAll(async () => {
+        const cleanStorageSettings = {
+          name: `${TEST_INDEX_NAME}_clean_update`,
+          schema: {
+            properties: {
+              foo: {
+                type: 'keyword',
+              },
+            },
+          },
+        } satisfies StorageSettings;
+
+        cleanAdapter = createStorageIndexAdapter(cleanStorageSettings);
+        cleanClient = cleanAdapter.getClient();
+      });
+
+      afterAll(async () => {
+        await cleanClient?.clean();
+      });
+
+      it('creates the index and template when upserting', async () => {
+        const updateResponse = await cleanClient.update({
+          id: 'doc1',
+          doc: { foo: 'first' },
+          doc_as_upsert: true,
+        });
+
+        expect(updateResponse).toMatchObject({
+          _id: 'doc1',
+          result: 'created',
+        });
+
+        // Verify the index was created
+        const getIndexResponse = await esClient.indices.get({
+          index: `${TEST_INDEX_NAME}_clean_update`,
+        });
+
+        expect(Object.keys(getIndexResponse).length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   describe('when writing/bootstrapping with an legacy index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
