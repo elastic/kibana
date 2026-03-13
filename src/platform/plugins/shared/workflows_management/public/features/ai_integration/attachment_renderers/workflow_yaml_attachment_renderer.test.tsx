@@ -188,7 +188,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       const { container } = render(
         <>
-          {definition.renderCanvasContent(
+          {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
             { registerActionButtons: jest.fn(), updateOrigin: jest.fn() }
           )}
@@ -206,7 +206,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       render(
         <>
-          {definition.renderCanvasContent(
+          {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
             { registerActionButtons, updateOrigin: jest.fn() }
           )}
@@ -226,7 +226,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       render(
         <>
-          {definition.renderCanvasContent(
+          {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
             { registerActionButtons, updateOrigin: jest.fn() }
           )}
@@ -246,7 +246,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       render(
         <>
-          {definition.renderCanvasContent(
+          {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
             { registerActionButtons, updateOrigin: jest.fn() }
           )}
@@ -265,7 +265,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       render(
         <>
-          {definition.renderCanvasContent(
+          {definition.renderCanvasContent!(
             { attachment, isSidebar: true },
             { registerActionButtons, updateOrigin: jest.fn() }
           )}

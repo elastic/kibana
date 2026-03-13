@@ -241,8 +241,10 @@ const DiffAttachmentStory: React.FC<DiffAttachmentStoryProps> = ({
           <strong>{label}</strong>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={false} paddingSize="none">
-          {workflowYamlDiffAttachmentUiDefinition.renderInlineContent({
+          {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Storybook */}
+          {workflowYamlDiffAttachmentUiDefinition.renderInlineContent!({
             attachment,
+            isSidebar: false,
           })}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
