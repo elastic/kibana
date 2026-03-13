@@ -90,6 +90,7 @@
     "**/cheerio": "1.0.0-rc.12",
     "**/chokidar": "3.5.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
+    "**/express-rate-limit": "8.3.0",
     "**/fast-xml-parser": "5.3.6",
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
