@@ -22,3 +22,8 @@ export const READ_ONLY_BADGE_TEXT = i18n.translate('xpack.cases.badge.readOnly.t
 export const READ_ONLY_BADGE_TOOLTIP = i18n.translate('xpack.cases.badge.readOnly.tooltip', {
   defaultMessage: 'Unable to create or edit cases',
 });
+
+export const MANAGE_TEMPLATES_PAGE_NAME = i18n.translate(
+  'xpack.cases.routes.manageTemplatesPageName',
+  { defaultMessage: 'Manage templates' }
+);
