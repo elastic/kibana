@@ -47,6 +47,7 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
 
 export type ResolvedLink = Link & {
+  id: string;
   title: string;
   label?: string;
   description?: string;
