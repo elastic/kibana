@@ -3,7 +3,7 @@ id: kibHelloWorldApp
 slug: /kibana-dev-docs/getting-started/hello-world-app
 title: Hello World
 description: Build a very basic plugin that registers an application that says "Hello World!".
-date: 2021-08-03
+date: 2025-08-21
 tags: ['kibana', 'dev', 'contributor', 'tutorials']
 ---
 
@@ -13,7 +13,7 @@ You can view the tested example plugin at [examples/hello_world](https://github.
 
 ## 1. Set up your development environment
 
-Read through <DocLink id="kibDevTutorialSetupDevEnv" text="these instructions"/> to get your development environment set up.
+Read through [these instructions](setting_up_a_development_env.mdx) to get your development environment set up.
 
 ## 2. Option 1 - Write it manually
 
@@ -27,7 +27,7 @@ mkdir hello_world
 cd hello_world
 ```
 
-2. Create the <DocLink id="kibDevAnatomyOfAPlugin" section="kibanajson" text="kibana.jsonc manifest file"/>.
+2. Create the [kibana.jsonc manifest file](../migrated_docs/anatomy_of_a_plugin.md#kibanajson).
 
 ```sh
 touch kibana.jsonc
@@ -50,7 +50,7 @@ and add the following:
 }
 ```
 
-3. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="tsconfigjson" text="tsconfig.json file" />.
+3. Create a [tsconfig.json file](../migrated_docs/anatomy_of_a_plugin.md#tsconfigjson).
 
 ```sh
 touch tsconfig.json
@@ -77,7 +77,7 @@ And add the following to it:
 }
 ```
 
-4. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicindexts" text="`public/plugin.tsx` file "/>.
+4. Create a [`public/plugin.tsx` file](../migrated_docs/anatomy_of_a_plugin.md#publicindexts).
 
 ```sh
 mkdir public
@@ -123,7 +123,7 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
 }
 ```
 
-5. Create a <DocLink id="kibDevAnatomyOfAPlugin" section="publicplugints" text="`public/index.ts` file "/>.
+5. Create a [`public/index.ts` file](../migrated_docs/anatomy_of_a_plugin.md#publicplugints).
 
 ```
 touch index.ts
