@@ -86,7 +86,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   esqlQuery,
   ruleSource,
 }) => {
-  const { data } = useKibana().services;
+  const { data, notifications } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
   const isEsqlRuleValue = useMemo(() => isEsqlRule(ruleType), [ruleType]);
@@ -116,13 +116,20 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   useEffect(() => {
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
-        setIndexPattern(dv);
+        try {
+          const dv = await data.dataViews.get(dataViewId);
+          setIndexPattern(dv);
+        } catch (error) {
+          notifications.toasts.addDanger({
+            title: 'Error retrieving data view',
+            text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+          });
+        }
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, indexIndexPattern, setIndexPattern]);
+  }, [data.dataViews, dataViewId, indexIndexPattern, setIndexPattern, notifications]);
 
   const { getFields } = form;
 

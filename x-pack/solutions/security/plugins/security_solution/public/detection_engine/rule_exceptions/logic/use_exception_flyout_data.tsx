@@ -110,15 +110,20 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       // throw an error here.
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
-        const dv = await data.dataViews.get(memoDataViewId);
-        setDataViewLoading(false);
-        setDataViewIndexPatterns(dv);
-        setDataViewSpec(dv.toSpec());
+        try {
+          const dv = await data.dataViews.get(memoDataViewId);
+          setDataViewIndexPatterns(dv);
+          setDataViewSpec(dv.toSpec());
+        } catch (error) {
+          addWarning(error, { title: 'Failed to load data view for exceptions flyout' });
+        } finally {
+          setDataViewLoading(false);
+        }
       }
     };
 
     fetchSingleDataView();
-  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
+  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId, addWarning]);
 
   // Fetch extended fields information
   const getExtendedFields = useCallback(
