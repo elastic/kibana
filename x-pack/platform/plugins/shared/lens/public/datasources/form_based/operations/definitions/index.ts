@@ -82,6 +82,12 @@ export interface ESQLExpressionWithParams {
   params?: Record<string, string | number>;
 }
 
+/** Result from filters toESQL: FORK step + EVAL mapping _fork to filter labels. */
+export interface ESQLFiltersForkResult extends ESQLExpressionWithParams {
+  forkCommand: string;
+  forkLabelEval: string;
+}
+
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
 // the column type to the `GenericIndexPatternColumn` union type below.
