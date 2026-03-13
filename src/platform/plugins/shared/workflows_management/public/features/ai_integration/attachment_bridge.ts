@@ -11,19 +11,20 @@ import { diffLines } from 'diff';
 import type { Observable, Subscription } from 'rxjs';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
-import { getAllProposalRecords, setProposalRecord } from './proposal_status_bridge';
+import type { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager, ProposedChange } from './proposed_changes';
 import type { AgentBuilderChatEvent } from '../../types';
 
 const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
 const WORKFLOW_YAML_DIFF_TYPE = 'workflow.yaml.diff';
 
-interface WorkflowYamlChangedPayload {
+export interface WorkflowYamlChangedPayload {
   proposalId: string;
   beforeYaml: string;
   afterYaml: string;
   workflowId?: string;
   name?: string;
+  attachmentVersion?: number;
 }
 
 export const changeFingerprint = (change: ProposedChange): string =>
@@ -150,6 +151,7 @@ export const computeChanges = (
 export class AttachmentBridge {
   private subscription: Subscription | null = null;
   private proposalManager: ProposalManager | null = null;
+  private tracker: ProposalTracker | null = null;
   private editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> | null =
     null;
   private processedProposals = new Set<string>();
@@ -157,14 +159,21 @@ export class AttachmentBridge {
   start(
     chat$: Observable<AgentBuilderChatEvent>,
     proposalManager: ProposalManager,
-    editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>
+    editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
+    tracker: ProposalTracker
   ): void {
     this.proposalManager = proposalManager;
     this.editorRef = editorRef;
+    this.tracker = tracker;
 
     this.subscription = chat$.subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
-        this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
+        try {
+          this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('[AttachmentBridge] Error handling yaml_changed event:', err);
+        }
       }
     });
   }
@@ -173,6 +182,7 @@ export class AttachmentBridge {
     this.subscription?.unsubscribe();
     this.subscription = null;
     this.proposalManager = null;
+    this.tracker = null;
     this.editorRef = null;
     this.processedProposals.clear();
   }
@@ -180,25 +190,26 @@ export class AttachmentBridge {
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
     const manager = this.proposalManager;
     const editor = this.editorRef?.current;
-    if (!manager || !editor) return;
+    if (!manager || !editor || !this.tracker) return;
 
     const model = editor.getModel();
     if (!model) return;
 
-    const { proposalId, beforeYaml, afterYaml } = payload;
+    const { proposalId, beforeYaml, afterYaml, attachmentVersion } = payload;
 
     if (this.processedProposals.has(proposalId)) return;
     this.processedProposals.add(proposalId);
 
-    setProposalRecord({
+    this.tracker.setRecord({
       proposalId,
       status: 'pending',
       beforeYaml,
       afterYaml,
       toolId: WORKFLOW_YAML_DIFF_TYPE,
+      attachmentVersion: attachmentVersion ?? 0,
     });
 
-    const declined = this.getDeclinedFingerprints();
+    const declined = this.tracker.getDeclinedFingerprints();
     const currentContent = model.getValue();
     const changes = computeChanges(currentContent, afterYaml, proposalId);
 
@@ -214,18 +225,5 @@ export class AttachmentBridge {
         manager.proposeChange(hunkChange);
       }
     }
-  }
-
-  private getDeclinedFingerprints(): Set<string> {
-    const fps = new Set<string>();
-    for (const record of getAllProposalRecords()) {
-      if (record.status === 'declined') {
-        const hunks = computeChanges(record.beforeYaml, record.afterYaml, 'declined');
-        for (const hunk of hunks) {
-          fps.add(changeFingerprint(hunk));
-        }
-      }
-    }
-    return fps;
   }
 }

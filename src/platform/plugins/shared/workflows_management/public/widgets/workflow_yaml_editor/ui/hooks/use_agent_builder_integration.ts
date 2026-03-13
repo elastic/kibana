@@ -13,9 +13,8 @@ import {
   AttachmentBridge,
   baseProposalId,
   ProposalManager,
-  setProposalActionHandlers,
-  updateProposalStatus,
 } from '../../../../features/ai_integration';
+import { ProposalTracker } from '../../../../features/ai_integration/proposal_tracker';
 import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
@@ -65,6 +64,7 @@ export const useAgentBuilderIntegration = ({
   const agentBuilder = workflowsManagement?.agentBuilder;
   const proposalManagerRef = useRef<ProposalManager | null>(null);
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
+  const trackerRef = useRef<ProposalTracker | null>(null);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
 
@@ -72,54 +72,52 @@ export const useAgentBuilderIntegration = ({
     const editor = editorRef.current;
     if (!isEditorMounted || !editor || !agentBuilder) return;
 
+    const tracker = new ProposalTracker();
+    trackerRef.current = tracker;
+
     const manager = new ProposalManager();
     manager.initialize(editor, {
       onAccept: (hunkId) => {
-        updateProposalStatus(baseProposalId(hunkId), 'accepted');
+        tracker.updateStatus(baseProposalId(hunkId), 'accepted');
       },
       onReject: (hunkId) => {
-        updateProposalStatus(baseProposalId(hunkId), 'declined');
+        const cascaded = tracker.cascadeDecline(baseProposalId(hunkId));
+        for (const cascadedBaseId of cascaded) {
+          const pending = manager.getPendingProposals();
+          const matches = pending.filter((p) => baseProposalId(p.proposalId) === cascadedBaseId);
+          for (const match of matches) {
+            manager.rejectProposal(match.proposalId);
+          }
+        }
       },
     });
 
     proposalManagerRef.current = manager;
 
-    setProposalActionHandlers({
-      acceptProposal: (proposalId) => {
-        const m = proposalManagerRef.current;
-        if (!m) return false;
-        const pending = m.getPendingProposals();
-        const matches = pending.filter(
-          (p) => p.proposalId === proposalId || baseProposalId(p.proposalId) === proposalId
-        );
-        if (matches.length === 0) return false;
-        for (const match of matches) {
-          m.acceptProposal(match.proposalId);
-        }
-        return true;
-      },
-      declineProposal: (proposalId) => {
-        const m = proposalManagerRef.current;
-        if (!m) return false;
-        const pending = m.getPendingProposals();
-        const matches = pending.filter(
-          (p) => p.proposalId === proposalId || baseProposalId(p.proposalId) === proposalId
-        );
-        if (matches.length === 0) return false;
-        for (const match of matches) {
-          m.rejectProposal(match.proposalId);
-        }
-        return true;
-      },
-    });
-
     const bridge = new AttachmentBridge();
-    bridge.start(agentBuilder.events.chat$, manager, editorRef);
+    bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker);
     attachmentBridgeRef.current = bridge;
+
+    const attachmentId = workflowId ?? 'new-workflow';
+
+    const unsubAllResolved = tracker.onAllResolved(() => {
+      const yaml = editorRef.current?.getModel()?.getValue();
+      if (yaml) {
+        agentBuilder.addAttachment({
+          id: attachmentId,
+          type: 'workflow.yaml',
+          data: {
+            yaml,
+            workflowId,
+            name: workflowName,
+            clientDiagnostics: serializeClientDiagnostics(validationErrorsRef.current),
+          },
+        });
+      }
+    });
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let modelListener: monaco.IDisposable | null = null;
-    const attachmentId = workflowId ?? 'new-workflow';
     const model = editor.getModel();
     if (model) {
       modelListener = model.onDidChangeContent(() => {
@@ -147,7 +145,9 @@ export const useAgentBuilderIntegration = ({
       attachmentBridgeRef.current = null;
       manager.dispose();
       proposalManagerRef.current = null;
-      setProposalActionHandlers(null);
+      unsubAllResolved();
+      tracker.clearAll();
+      trackerRef.current = null;
     };
   }, [isEditorMounted, editorRef, agentBuilder, workflowId, workflowName]);
 

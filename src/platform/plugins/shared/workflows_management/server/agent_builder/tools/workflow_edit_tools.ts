@@ -105,14 +105,13 @@ const emitDiffAndUpdateYaml = async (
       beforeYaml,
       afterYaml,
       proposalId,
-      status: 'pending',
       workflowId,
       name: workflowName,
     },
     description: description ?? 'Proposed workflow change',
   });
 
-  await context.attachments.update(attachmentId, {
+  const updatedAttachment = await context.attachments.update(attachmentId, {
     data: { yaml: afterYaml, workflowId, name: workflowName },
   });
 
@@ -122,6 +121,7 @@ const emitDiffAndUpdateYaml = async (
     afterYaml,
     workflowId,
     name: workflowName,
+    attachmentVersion: updatedAttachment?.current_version,
   });
 
   return diffAttachment.id;
