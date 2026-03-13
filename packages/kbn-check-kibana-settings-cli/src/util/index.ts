@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { startElasticsearch, setupKibana, stopElasticsearch, stopKibana } from './servers';
+export { setupKibana, stopKibana } from './servers';

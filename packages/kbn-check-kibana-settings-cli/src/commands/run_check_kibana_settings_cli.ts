@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import type { Root } from '@kbn/core-root-server-internal';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaSettings } from './tasks';
-import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
+import { setupKibana, stopKibana } from '../util';
 
 interface TaskContext {
   esServer?: TestElasticsearchUtils;
@@ -26,15 +26,11 @@ export function runCheckKibanaSettingsCli() {
   const context: TaskContext = {};
 
   run(
-    async ({ log, flagsReader }) => {
+    async ({ log }) => {
       let exitCode = 0;
 
       globalTask = new Listr(
         [
-          {
-            title: 'Start ES',
-            task: async (ctx) => (ctx.esServer = await startElasticsearch()),
-          },
           {
             title: 'Setup Kibana',
             task: async (ctx) => {
@@ -77,11 +73,6 @@ export function runCheckKibanaSettingsCli() {
               task: async (ctx) => await stopKibana(ctx.kibanaServer!),
               enabled: (ctx) => Boolean(ctx.kibanaServer),
             },
-            {
-              title: 'Stop ES',
-              task: async (ctx) => await stopElasticsearch(ctx.esServer!),
-              enabled: (ctx) => Boolean(ctx.esServer),
-            },
           ],
           { fallbackRenderer: 'simple', exitOnError: false }
         ).run(context);
@@ -92,7 +83,7 @@ export function runCheckKibanaSettingsCli() {
       description: `
       Determine what Kibana settings exist, and which ones are not explicitly defined in the allowed/denied settings in Cloud.
 
-      Usage: node scripts/check_kibana_settings
+      Usage: node scripts/list_settings
     `,
     }
   );

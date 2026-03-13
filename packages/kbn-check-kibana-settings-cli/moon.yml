@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/check-kibana-settings-cli'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/check-kibana-settings-cli'
+  title: '@kbn/check-kibana-settings-cli'
   description: Moon project for @kbn/check-kibana-settings-cli
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: packages/kbn-check-kibana-settings-cli
+  sourceRoot: packages/kbn-check-kibana-settings-cli
 dependsOn:
   - '@kbn/core-root-server-internal'
   - '@kbn/dev-cli-runner'
@@ -24,7 +23,7 @@ dependsOn:
   - '@kbn/core-plugins-server-internal'
   - '@kbn/tooling-log'
 tags:
-  - shared-common
+  - test-helper
   - package
   - dev
   - group-platform
@@ -36,14 +35,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

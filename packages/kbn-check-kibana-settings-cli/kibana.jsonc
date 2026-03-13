@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "test-helper",
   "id": "@kbn/check-kibana-settings-cli",
   "owner": "@elastic/kibana-core",
   "group": "platform",

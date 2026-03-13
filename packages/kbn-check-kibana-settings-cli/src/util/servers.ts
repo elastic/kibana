@@ -10,26 +10,10 @@
 import * as os from 'os';
 import { resolve } from 'path';
 
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
-import { ToolingLog } from '@kbn/tooling-log';
 import { setTimeout as timer } from 'timers/promises';
 import type { Root } from '@kbn/core-root-server-internal';
-
-export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
-  const { startES } = createTestServers({
-    adjustTimeout: () => {},
-    settings: {
-      es: {
-        // Silent logging
-        log: new ToolingLog({ level: 'silent', writeTo: { write: (s: string) => {} } }),
-      },
-    },
-  });
-
-  return await startES();
-}
 
 export async function setupKibana(): Promise<Root> {
   const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
@@ -74,11 +58,6 @@ export async function stopKibana(kibanaServer: Root) {
     kibanaServer.shutdown.bind(kibanaServer),
     'Timeout waiting for Kibana to stop'
   );
-}
-
-export async function stopElasticsearch(esServer: TestElasticsearchUtils) {
-  await timer(2_000);
-  await runWithTimeout(esServer.stop.bind(esServer), 'Timeout waiting for ES to stop');
 }
 
 async function runWithTimeout(
