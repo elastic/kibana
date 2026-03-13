@@ -160,10 +160,7 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
               isLoading={isSaving}
               data-test-subj="add-tags-flyout-save"
             >
-              <FormattedMessage
-                id="xpack.osquery.addTagsFlyout.saveButton"
-                defaultMessage="Save"
-              />
+              <FormattedMessage id="xpack.osquery.addTagsFlyout.saveButton" defaultMessage="Save" />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
