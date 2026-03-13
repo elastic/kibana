@@ -18,4 +18,10 @@ module.exports = {
     '<rootDir>/src/platform/plugins/shared/unified_search/public/**/*.{ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
+  moduleNameMapper: {
+    // react-day-picker uses ESM-only syntax incompatible with Jest's CJS transform;
+    // use the same mock that kbn-date-range-picker's own test suite uses.
+    '^react-day-picker$':
+      '<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx',
+  },
 };
