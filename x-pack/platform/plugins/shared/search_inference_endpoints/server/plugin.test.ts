@@ -51,7 +51,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         id: PLUGIN_ID,
         name: PLUGIN_NAME,
         minimumLicense: 'enterprise',
-        category: DEFAULT_APP_CATEGORIES.kibana,
+        category: DEFAULT_APP_CATEGORIES.management,
         management: {
           ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
         },

@@ -70,7 +70,7 @@ export class SearchInferenceEndpointsPlugin
       minimumLicense: 'enterprise',
       name: PLUGIN_NAME,
       order: 4000,
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [],
       catalogue: [],
       management: {
