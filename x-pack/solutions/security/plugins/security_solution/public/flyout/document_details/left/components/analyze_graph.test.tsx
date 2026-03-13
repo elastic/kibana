@@ -6,14 +6,23 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
-import { AnalyzeGraph, DATA_VIEW_ERROR_TEST_ID, DATA_VIEW_LOADING_TEST_ID } from './analyze_graph';
-import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import {
+  AnalyzeGraph,
+  DATA_VIEW_ERROR_TEST_ID,
+  DATA_VIEW_LOADING_TEST_ID,
+  resetAnalyzerColdFrozenTierCalloutDismissedStateForTests,
+} from './analyze_graph';
+import {
+  ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
+  ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
+  ANALYZER_GRAPH_TEST_ID,
+} from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
@@ -38,8 +47,30 @@ jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../../../sourcerer/containers');
 
+const mockUiSettingsGet = jest.fn();
+let mockServerless: unknown;
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+        serverless: mockServerless,
+      },
+    }),
+  };
+});
+
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
 const FLYOUT_KEY = 'securitySolution';
+const mockExperimentalFeatureFlags = (flags: Record<string, boolean>) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (flag: string) => flags[flag] ?? false
+  );
+};
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -83,10 +114,15 @@ const renderAnalyzer = (
 describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
+    mockServerless = undefined;
+    mockUiSettingsGet.mockReturnValue(true);
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    mockExperimentalFeatureFlags({
+      newDataViewPickerEnabled: true,
+      newFlyoutSystemEnabled: false,
+    });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({
@@ -107,6 +143,74 @@ describe('<AnalyzeGraph />', () => {
       const wrapper = renderAnalyzer();
 
       expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render excluded cold/frozen tiers callout when setting is enabled', () => {
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+        'Some data excluded'
+      );
+      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+        'Cold and frozen tiers are excluded to improve performance.'
+      );
+    });
+
+    it('should render included cold/frozen tiers callout when setting is disabled', () => {
+      mockUiSettingsGet.mockReturnValue(false);
+
+      const { getByTestId } = renderAnalyzer();
+
+      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+        'Performance optimization'
+      );
+      expect(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).toHaveTextContent(
+        'This view loads more slowly because cold and frozen tiers are included.'
+      );
+    });
+
+    it('should hide cold/frozen tiers callout in serverless', () => {
+      mockServerless = {};
+
+      const { queryByTestId } = renderAnalyzer();
+
+      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should keep callout hidden in same tab session after dismissing and opening another alert flyout', () => {
+      const { getByTestId, queryByTestId, unmount } = renderAnalyzer();
+
+      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+      unmount();
+
+      const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = renderAnalyzer({
+        eventId: 'eventId-2',
+        scopeId: TableId.test,
+        searchHit: {
+          ...searchHit,
+          _id: 'eventId-2',
+        } as unknown as DocumentDetailsContext['searchHit'],
+      } as unknown as DocumentDetailsContext);
+
+      expect(
+        queryByTestIdAfterOpeningAnotherFlyout(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show callout again after page refresh', () => {
+      const { getByTestId, queryByTestId } = renderAnalyzer();
+
+      fireEvent.click(getByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID));
+      expect(queryByTestId(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)).not.toBeInTheDocument();
+
+      resetAnalyzerColdFrozenTierCalloutDismissedStateForTests();
+      const { getByTestId: getByTestIdAfterRefresh } = renderAnalyzer();
+
+      expect(
+        getByTestIdAfterRefresh(ANALYZER_COLD_FROZEN_TIER_CALLOUT_TEST_ID)
+      ).toBeInTheDocument();
     });
 
     it('should render no data message when analyzer is not enabled', () => {
@@ -190,7 +294,10 @@ describe('<AnalyzeGraph />', () => {
     beforeEach(() => {
       jest.clearAllMocks();
 
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      mockExperimentalFeatureFlags({
+        newDataViewPickerEnabled: false,
+        newFlyoutSystemEnabled: false,
+      });
     });
 
     it('should show loading spinner while sourcerer data view is loading', () => {

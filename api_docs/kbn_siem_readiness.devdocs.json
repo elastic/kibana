@@ -87,7 +87,7 @@
         "label": "useDetectionRulesByIntegration",
         "description": [],
         "signature": [
-          "(integrationPackages: string | string[]) => { ruleIntegrationCoverage: ",
+          "(integrationPackages?: string | string[] | undefined) => { ruleIntegrationCoverage: ",
           {
             "pluginId": "@kbn/siem-readiness",
             "scope": "public",
@@ -111,14 +111,14 @@
             "label": "integrationPackages",
             "description": [],
             "signature": [
-              "string | string[]"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/solutions/security/packages/siem-readiness/src/use_get_detection_rules_by_integration.ts",
             "lineNumber": 69,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],

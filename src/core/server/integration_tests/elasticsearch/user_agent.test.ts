@@ -78,7 +78,10 @@ describe('ES Client - custom user-agent', () => {
       logger,
       kibanaVersion,
       agentFactoryProvider,
-      onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
+      onRequest: getRequestHandlerFactory(false)({
+        projectRouting: 'origin-only',
+        logger,
+      }),
     });
 
     await esClient.ping();
