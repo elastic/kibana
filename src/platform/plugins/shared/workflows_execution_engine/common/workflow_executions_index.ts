@@ -16,8 +16,6 @@ export const WORKFLOWS_EXECUTIONS_INDEX_PREFIX = '.workflows-executions';
 /** Alias used for reads (fans out to all backing indexes) and new writes (routes to write index). */
 export const WORKFLOWS_EXECUTIONS_INDEX = WORKFLOWS_EXECUTIONS_INDEX_PREFIX;
 
-export const WORKFLOWS_EXECUTIONS_ILM_POLICY = '.workflows-executions-ilm-policy';
-
 export const WORKFLOWS_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-*`;
 
 export const WORKFLOWS_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-000001`;

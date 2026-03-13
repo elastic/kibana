@@ -878,6 +878,7 @@ export class WorkflowsExecutionEnginePlugin
       this.initializePromise = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
         rolloverMaxAge: this.config.rolloverMaxAge,
+        rolloverMaxDocs: this.config.rolloverMaxDocs,
         logger: this.logger,
       });
     }

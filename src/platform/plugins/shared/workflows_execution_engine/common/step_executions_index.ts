@@ -13,8 +13,6 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX = '.workflows-step-execution
 /** Alias used for reads (fans out to all backing indexes) and new writes (routes to write index). */
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX;
 
-export const WORKFLOWS_STEP_EXECUTIONS_ILM_POLICY = '.workflows-step-executions-ilm-policy';
-
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-*`;
 
 export const WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_STEP_EXECUTIONS_INDEX_PREFIX}-000001`;

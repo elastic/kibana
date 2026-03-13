@@ -41,6 +41,15 @@ const configSchema = schema.object({
         'Changes take effect on next Kibana restart.',
     },
   }),
+  rolloverMaxDocs: schema.number({
+    defaultValue: 100000,
+    meta: {
+      description:
+        'ILM rollover max_docs for workflow execution indices. ' +
+        'Triggers a rollover when the document count reaches this threshold. ' +
+        'Changes take effect on next Kibana restart.',
+    },
+  }),
 });
 
 export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;

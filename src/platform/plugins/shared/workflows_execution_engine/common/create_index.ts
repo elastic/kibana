@@ -25,6 +25,7 @@ interface SetupRolloverIndexOptions {
   ilmPolicyName: string;
   mappings: MappingTypeMapping;
   rolloverMaxAge: string;
+  rolloverMaxDocs?: number;
   logger?: Logger;
 }
 
@@ -122,9 +123,10 @@ export const setupRolloverIndex = async ({
   ilmPolicyName,
   mappings,
   rolloverMaxAge,
+  rolloverMaxDocs,
   logger,
 }: SetupRolloverIndexOptions): Promise<void> => {
-  await ensureIlmPolicy({ esClient, ilmPolicyName, rolloverMaxAge, logger });
+  await ensureIlmPolicy({ esClient, ilmPolicyName, rolloverMaxAge, rolloverMaxDocs, logger });
   await ensureIndexTemplate({
     esClient,
     aliasName,
@@ -140,11 +142,13 @@ const ensureIlmPolicy = async ({
   esClient,
   ilmPolicyName,
   rolloverMaxAge,
+  rolloverMaxDocs,
   logger,
 }: {
   esClient: ElasticsearchClient;
   ilmPolicyName: string;
   rolloverMaxAge: string;
+  rolloverMaxDocs?: number;
   logger?: Logger;
 }): Promise<void> => {
   try {
@@ -156,13 +160,16 @@ const ensureIlmPolicy = async ({
             actions: {
               rollover: {
                 max_age: rolloverMaxAge,
+                ...(rolloverMaxDocs != null ? { max_docs: rolloverMaxDocs } : {}),
               },
             },
           },
         },
       },
     });
-    logger?.debug(`ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge})`);
+    logger?.debug(
+      `ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge}${rolloverMaxDocs != null ? `, max_docs: ${rolloverMaxDocs}` : ''})`
+    );
   } catch (error) {
     logger?.error(`Failed to create ILM policy ${ilmPolicyName}: ${error}`);
     throw error;
