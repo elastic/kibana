@@ -73,6 +73,14 @@ export function runFtrCli() {
         process.env.TEST_BROWSER_HEADLESS = '1';
       }
 
+      // FlagsReader.string() converts "" to undefined, but `--browser-coverage` is valid without a value.
+      // Use arrayOfStrings() so we can distinguish "not passed" (undefined) from "passed without value" ([]).
+      const browserCoverageValues = flagsReader.arrayOfStrings('browser-coverage');
+      if (browserCoverageValues !== undefined) {
+        // 'auto' is default when flag is present without value, 'manual' for explicit manual mode
+        process.env.TEST_BROWSER_COVERAGE = browserCoverageValues.at(-1) || 'auto';
+      }
+
       let teardownRun = false;
       const teardown = async (err?: Error) => {
         if (teardownRun) return;
@@ -134,6 +142,7 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
           'es-version',
+          'browser-coverage',
         ],
         boolean: [
           'bail',
@@ -170,6 +179,9 @@ export function runFtrCli() {
           --kibana-install-dir  directory where the Kibana install being tested resides
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
+          --browser-coverage[=mode]  enable browser coverage collection
+                               modes: auto (default) - capture per test
+                                      manual - only capture via service.capture()
           --dry-run          report tests without executing them
           --pauseOnError     pause test runner on error
         `,

@@ -71,6 +71,11 @@ export async function setupMocha({
     await lifecycle.beforeEachTest.trigger(this.currentTest!);
   });
 
+  // global afterEach hook in root suite triggers after all others
+  mocha.suite.afterEach('global after each', async function (this: Suite) {
+    await lifecycle.afterEachTest.trigger(this.currentTest!);
+  });
+
   loadTests({
     mocha,
     log,

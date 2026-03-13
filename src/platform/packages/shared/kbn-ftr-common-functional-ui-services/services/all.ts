@@ -13,6 +13,7 @@ import { FindProvider } from './find';
 import { TestSubjects } from './test_subjects';
 import { BrowserProvider } from './browser';
 import { ToastsService } from './toasts';
+import { BrowserCoverageCollectorProvider } from './browser_coverage_collector';
 
 export const services = {
   retryOnStale: RetryOnStaleProvider,
@@ -21,4 +22,5 @@ export const services = {
   testSubjects: TestSubjects,
   browser: BrowserProvider,
   toasts: ToastsService,
+  browserCoverageCollector: BrowserCoverageCollectorProvider,
 };

@@ -19,7 +19,14 @@ import { EsVersion } from '../../functional_test_runner';
 export type RunTestsOptions = ReturnType<typeof parseFlags>;
 
 export const FLAG_OPTIONS: FlagOptions = {
-  boolean: ['bail', 'logToFile', 'dry-run', 'updateBaselines', 'updateSnapshots', 'updateAll'],
+  boolean: [
+    'bail',
+    'logToFile',
+    'dry-run',
+    'updateBaselines',
+    'updateSnapshots',
+    'updateAll',
+  ],
   string: [
     'config',
     'journey',
@@ -32,6 +39,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'include',
     'exclude',
     'writeLogsToPath',
+    'browser-coverage',
   ],
   alias: {
     updateAll: 'u',
@@ -54,6 +62,9 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
+    --browser-coverage[=mode]  Enable browser coverage collection
+                         modes: auto (default) - capture per test
+                                manual - only capture via service.capture()
   `,
   examples: `
 Run the latest verified, kibana-compatible ES Serverless image:
@@ -102,5 +113,12 @@ export function parseFlags(flags: FlagsReader) {
       include: flags.arrayOfPaths('include') ?? [],
       exclude: flags.arrayOfPaths('exclude') ?? [],
     },
+    // FlagsReader.string() converts "" to undefined, but `--browser-coverage` is valid without a value.
+    // Use arrayOfStrings() so we can distinguish "not passed" (undefined) from "passed without value" ([]).
+    browserCoverage: (() => {
+      const values = flags.arrayOfStrings('browser-coverage');
+      if (values === undefined) return undefined;
+      return values.at(-1) || 'auto';
+    })(),
   };
 }
