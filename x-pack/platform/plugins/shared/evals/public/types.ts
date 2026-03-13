@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -13,6 +14,8 @@ export interface EvalsPublicStart {
   TraceWaterfall: ComponentType<{ traceId: string }>;
 }
 
-export type EvalsSetupDependencies = Record<string, never>;
+export interface EvalsSetupDependencies {
+  management?: ManagementSetup;
+}
 
 export type EvalsStartDependencies = Record<string, never>;
