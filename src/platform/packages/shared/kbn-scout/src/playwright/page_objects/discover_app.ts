@@ -22,7 +22,11 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
-    await this.waitForDataViewSwitch();
+    await this.waitForDiscoverPage();
+  }
+
+  private async waitForDiscoverPage() {
+    await expect(this.page.testSubj.locator('dscPage')).toBeVisible();
   }
 
   private async getVisibleDataViewSwitch() {
@@ -43,10 +47,6 @@ export class DiscoverApp {
     }
 
     return discoverVisible ? discoverSwitch : fallbackSwitch;
-  }
-
-  private async waitForDataViewSwitch() {
-    await this.getVisibleDataViewSwitch();
   }
 
   async selectDataView(name: string) {
