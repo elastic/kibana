@@ -21,15 +21,18 @@ export interface EsqlResponse {
  */
 export const executeEsql = async ({
   query,
+  params,
   esClient,
 }: {
   query: string;
+  params?: Array<Record<string, FieldValue>>;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const response = await esClient.esql.query({
     query,
     drop_null_columns: true,
     allow_partial_results: true,
+    ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
   });
   return {
     columns: response.columns,

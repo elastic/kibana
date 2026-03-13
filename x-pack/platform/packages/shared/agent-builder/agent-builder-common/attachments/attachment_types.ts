@@ -58,7 +58,7 @@ export const screenContextTimeRangeSchema = z.object({
   to: z.string(),
 });
 
-export interface ScreenContextTimeRange {
+export interface TimeRange {
   from: string;
   to: string;
 }
@@ -94,7 +94,7 @@ export interface ScreenContextAttachmentData {
   /** app description */
   description?: string;
   /** the currently active time range */
-  time_range?: ScreenContextTimeRange;
+  time_range?: TimeRange;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
 }

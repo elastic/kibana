@@ -101,7 +101,7 @@ export function createVisualizationRenderer({
       );
     }
 
-    const { columns, query } = toolResult.data;
+    const { columns, query, time_range: resultTimeRange } = toolResult.data;
 
     if (!query) {
       return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
@@ -115,6 +115,7 @@ export function createVisualizationRenderer({
         esqlQuery={query}
         esqlColumns={columns}
         preferredChartType={chartType}
+        timeRange={resultTimeRange}
       />
     );
   };
