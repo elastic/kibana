@@ -16,6 +16,7 @@ import {
   hasTransformationalCommand,
   getCategorizeField,
   convertTimeseriesCommandToFrom,
+  hasTimeseriesInfoCommand,
 } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
@@ -260,6 +261,14 @@ export class LensVisService {
               type: UnifiedHistogramSuggestionType.lensSuggestion,
             });
           }
+        } else if (hasTimeseriesInfoCommand(queryParams.query.esql)) {
+          // skip chart suggestions for info commands
+          return {
+            currentSuggestionContext: {
+              type: UnifiedHistogramSuggestionType.unsupported,
+              suggestion: undefined,
+            },
+          };
         } else {
           // appends an ES|QL histogram if available
           const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({

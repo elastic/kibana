@@ -12,24 +12,24 @@ type DeepPartial<T> = {
 };
 
 export type MoonProjectConfig = DeepPartial<{
-  type: string;
+  layer: string;
   language: string;
   owners: {
     defaultOwner: string;
   };
-  toolchain:
+  toolchains:
     | string
     | {
-        default: string;
+        default: string | null;
+        [key: string]: unknown;
       };
   project: {
-    name: string;
+    title: string;
     description: string;
     channel: string;
     owner: string | string[] | undefined;
-    metadata: {
-      sourceRoot: string;
-    };
+    sourceRoot: string;
+    [key: string]: unknown;
   };
   tags: string[];
   fileGroups: Record<string, string[]>;
@@ -46,7 +46,7 @@ export interface MoonTaskConfig {
   deps?: (string | { target: string; optional?: boolean })[];
   inputs?: string[];
   outputs?: string[];
-  options?: object & {
+  options?: Record<string, unknown> & {
     env?: Record<string, string>;
     cache?: boolean | 'local' | 'remote';
     internal?: boolean;

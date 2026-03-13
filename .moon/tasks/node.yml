@@ -1,5 +1,8 @@
 $schema: https://moonrepo.dev/schemas/tasks.json
 
+inheritedBy:
+  toolchain: node
+
 fileGroups:
   sharedGlobals: [ ]
   default:
