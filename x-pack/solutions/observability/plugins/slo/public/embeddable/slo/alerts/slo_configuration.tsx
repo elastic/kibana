@@ -25,11 +25,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloSelector } from './slo_selector';
-import type { EmbeddableSloProps, SloItem } from './types';
+import type { AlertsCustomState, SloItem } from './types';
 
 interface SloConfigurationProps {
-  initialInput?: EmbeddableSloProps;
-  onCreate: (props: EmbeddableSloProps) => void;
+  initialInput?: AlertsCustomState;
+  onCreate: (props: AlertsCustomState) => void;
   onCancel: () => void;
 }
 

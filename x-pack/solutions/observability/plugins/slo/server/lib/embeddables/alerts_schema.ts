@@ -50,5 +50,6 @@ export const getAlertsEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSche
   );
 };
 
+export type SloItem = TypeOf<typeof sloItemSchema>;
 export type AlertsCustomState = TypeOf<typeof AlertsCustomSchema>;
 export type AlertsEmbeddableState = TypeOf<ReturnType<typeof getAlertsEmbeddableSchema>>;

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertsEmbeddableState } from '../../../../server/lib/embeddables/alerts_schema';
+import type {
+  AlertsEmbeddableState,
+  SloItem,
+} from '../../../../server/lib/embeddables/alerts_schema';
 
 export interface LegacyAlertsSloItem {
   id: string;
@@ -14,15 +17,8 @@ export interface LegacyAlertsSloItem {
   name: string;
 }
 
-interface SloItemOut {
-  slo_id: string;
-  slo_instance_id: string;
-  name: string;
-  group_by: string[];
-}
-
 /** Maps legacy camelCase slo item to current snake_case schema. */
-function mapLegacySloItem(slo: Record<string, unknown>): SloItemOut {
+function mapLegacySloItem(slo: Record<string, unknown>): SloItem {
   const rawGroupBy = (slo.group_by ?? slo.groupBy) as string[] | undefined;
   return {
     slo_id: (slo.slo_id as string) ?? (slo.id as string) ?? '',
@@ -47,7 +43,7 @@ export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEm
   const slos =
     state.slos?.map((slo) => {
       const hasLegacy = 'id' in slo || 'instanceId' in slo || 'groupBy' in slo;
-      return hasLegacy ? mapLegacySloItem(slo) : (slo as SloItemOut);
+      return hasLegacy ? mapLegacySloItem(slo) : (slo as SloItem);
     }) ?? [];
   const showAllGroupByInstances =
     state.show_all_group_by_instances ?? state.showAllGroupByInstances ?? false;

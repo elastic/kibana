@@ -14,7 +14,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
-  SerializedTitles,
   PublishesWritableTitle,
   PublishesTitle,
   HasEditCapabilities,
@@ -24,22 +23,21 @@ import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public'
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type {
+  AlertsCustomState,
+  AlertsEmbeddableState,
+} from '../../../../common/embeddables/alerts/types';
 
-export interface SloItem {
-  slo_id: string;
-  slo_instance_id: string;
-  name: string;
-  group_by: string[];
-}
+/** Re-exported from common (derived from server schema) */
+export type {
+  AlertsCustomState,
+  AlertsEmbeddableState,
+  SloItem,
+} from '../../../../common/embeddables/alerts/types';
 
-export interface EmbeddableSloProps {
-  slos: SloItem[];
-  show_all_group_by_instances?: boolean;
-}
+export type SloAlertsEmbeddableState = AlertsEmbeddableState;
 
-export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
-
-export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
+export type SloAlertsApi = DefaultEmbeddableApi<AlertsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasDrilldowns &
@@ -48,8 +46,8 @@ export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
   HasEditCapabilities;
 
 export interface HasSloAlertsConfig {
-  getSloAlertsConfig: () => EmbeddableSloProps;
-  updateSloAlertsConfig: (next: EmbeddableSloProps) => void;
+  getSloAlertsConfig: () => AlertsCustomState;
+  updateSloAlertsConfig: (next: AlertsCustomState) => void;
 }
 
 export interface SloEmbeddableDeps {

@@ -30,7 +30,7 @@ import {
   SLO_ALERTS_SUPPORTED_TRIGGERS,
 } from '../../../../common/embeddables/alerts/constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
-import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
 const queryClient = new QueryClient();
 
@@ -76,7 +76,7 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(initialState, {
+      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(initialState, {
         slos: [],
         show_all_group_by_instances: false,
       });
