@@ -50,6 +50,7 @@ import {
 
 import { versionStore } from './application/version_switcher_store';
 import type { IngestHubVersion } from './application/version_switcher_store';
+import { DiscoverTour } from './application/discover_tour';
 
 const VERSION_OPTIONS = [
   {
@@ -107,6 +108,8 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
         idSelected={active}
         onChange={(id) => {
           versionStore.setVersion(id as IngestHubVersion);
+          sessionStorage.removeItem('ingestHub:showDiscoverTour');
+          sessionStorage.removeItem('ingestHub:dataAdded');
           const path = id === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
           navigateToApp?.(PLUGIN_ID, { path });
         }}
@@ -115,6 +118,7 @@ const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, opti
         isFullWidth={false}
       />
     </EuiCard>
+    <DiscoverTour />
     </>,
     portalContainer
   );

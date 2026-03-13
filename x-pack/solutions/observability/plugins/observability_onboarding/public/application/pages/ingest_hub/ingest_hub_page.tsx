@@ -882,7 +882,8 @@ export const IngestHubPage: React.FC = () => {
   );
 
   const isStopVersion = activeVersion === 'skipUx';
-  const isStopFillVersion = activeVersion === 'blockUx';
+  const hasAddedData = sessionStorage.getItem('ingestHub:dataAdded') === 'true';
+  const isStopFillVersion = activeVersion === 'blockUx' && !hasAddedData;
   const [leavingForDiscover, setLeavingForDiscover] = useState(false);
   const [isGetStartedFlyoutOpen, setIsGetStartedFlyoutOpen] = useState(
     !routeSection || routeSection === 'get-started'
@@ -897,7 +898,7 @@ export const IngestHubPage: React.FC = () => {
   }, [activeVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (activeVersion !== 'blockUx' || leavingForDiscover) return;
+    if (!isStopFillVersion || leavingForDiscover) return;
     const appEl = document.querySelector('.kbnChromeLayoutApplication');
     const gridRoot = appEl?.parentElement;
     if (!gridRoot) return;
@@ -921,7 +922,7 @@ export const IngestHubPage: React.FC = () => {
       if (originalMarginRight) (appEl as HTMLElement).style.marginRight = originalMarginRight;
       if (originalWidth) (appEl as HTMLElement).style.width = originalWidth;
     };
-  }, [activeVersion, leavingForDiscover]);
+  }, [isStopFillVersion, leavingForDiscover]);
 
   useEffect(() => {
     if (activeVersion === 'skipUx') {
@@ -1575,7 +1576,7 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">Requires data</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -1654,7 +1655,7 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">Requires data</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -1732,7 +1733,7 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">Requires data</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -1810,7 +1811,7 @@ export const IngestHubPage: React.FC = () => {
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="warning">Requires data</EuiBadge>
+                  <EuiBadge color={hasAddedData ? 'success' : 'warning'}>{hasAddedData ? 'Available' : 'Requires data'}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -2152,6 +2153,10 @@ export const IngestHubPage: React.FC = () => {
       (appEl as HTMLElement).style.removeProperty('margin-right');
       (appEl as HTMLElement).style.removeProperty('width');
     }
+
+    sessionStorage.setItem('ingestHub:showDiscoverTour', 'true');
+    sessionStorage.setItem('ingestHub:dataAdded', 'true');
+    window.dispatchEvent(new Event('ingestHub:startDiscoverTour'));
 
     const discoverPath = dataViewId
       ? `#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView))`
