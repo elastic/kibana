@@ -373,10 +373,11 @@ const ESQLEditorInternal = function ESQLEditor({
     const qs = editorRef.current?.getValue();
     if (qs) {
       const editor = editorRef.current;
+      const layoutInfo = editor?.getLayoutInfo();
+      const widthForWrap = layoutInfo?.contentWidth ?? measuredEditorWidth;
       const charWidth =
         editor?.getOption(monaco.editor.EditorOption.fontInfo).typicalHalfwidthCharacterWidth ?? 8;
-      const lineWidthChars =
-        measuredEditorWidth > 0 ? Math.floor(measuredEditorWidth / charWidth) : undefined;
+      const lineWidthChars = widthForWrap > 0 ? Math.floor(widthForWrap / charWidth) : undefined;
       const prettyCode = prettifyQuery(qs, lineWidthChars);
       if (qs !== prettyCode) {
         onQueryUpdate(prettyCode);

@@ -232,7 +232,8 @@ describe('esql query helpers', () => {
     });
 
     it('should respect custom lineWidth when provided', function () {
-      const query = 'FROM index1 | KEEP field1, field2 | SORT field1';
+      const query =
+        'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
       const codeWithNarrowWidth = prettifyQuery(query, 40);
       const codeWithWideWidth = prettifyQuery(query, 120);
       const maxLineLength = (code: string) =>
