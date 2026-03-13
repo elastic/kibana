@@ -32,6 +32,7 @@ import { useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -45,7 +46,6 @@ import {
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
-import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
@@ -100,7 +100,7 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
-    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
+    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow } = useWorkflowsCapabilities();
 
     const { activeTab, setActiveTab } = useWorkflowUrlState();
 
@@ -139,15 +139,16 @@ export const WorkflowDetailHeader = React.memo(
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
-    const isValid = isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
     const runWorkflowTooltipContent = useMemo(() => {
       return getTestRunTooltipContent({
         isExecutionsTab,
-        isValid,
+        isValid: isSyntaxValid,
         canRunWorkflow: canExecuteWorkflow,
       });
-    }, [isValid, canExecuteWorkflow, isExecutionsTab]);
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -268,7 +269,7 @@ export const WorkflowDetailHeader = React.memo(
                       ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
                           defaultMessage: 'Save changes to enable/disable workflow',
                         })
-                      : !isValid
+                      : !isSchemaValid
                       ? i18n.translate('workflows.workflowDetailHeader.invalid', {
                           defaultMessage: 'Fix validation errors to enable workflow',
                         })
@@ -280,7 +281,7 @@ export const WorkflowDetailHeader = React.memo(
                       !workflowId ||
                       isLoading ||
                       !canUpdateWorkflow ||
-                      !isValid ||
+                      !isSchemaValid ||
                       hasUnsavedChanges
                     }
                     checked={isEnabled}
@@ -298,7 +299,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isValid}
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />

@@ -1,0 +1,104 @@
+{
+  "id": "@kbn/core-chrome-sidebar-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-sidebar-mocks",
+        "id": "def-common.sidebarServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "sidebarServiceMock",
+        "description": [],
+        "path": "src/core/packages/chrome/sidebar/sidebar-mocks/index.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-mocks",
+            "id": "def-common.sidebarServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "SidebarSetup",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-mocks/index.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-mocks",
+            "id": "def-common.sidebarServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "SidebarStart",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-mocks/index.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-sidebar-mocks",
+            "id": "def-common.sidebarServiceMock.createAppMock",
+            "type": "Function",
+            "tags": [],
+            "label": "createAppMock",
+            "description": [],
+            "signature": [
+              "<TState = undefined, TActions = undefined>() => jest.Mocked<",
+              "SidebarApp",
+              "<TState, TActions>>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar-mocks/index.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

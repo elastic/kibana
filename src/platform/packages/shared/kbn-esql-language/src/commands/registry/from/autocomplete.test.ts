@@ -9,11 +9,14 @@
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
-import { getRecommendedQueriesTemplates } from '../options/recommended_queries';
+import {
+  getRecommendedQueriesTemplates,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '../../../parser';
+import { Parser } from '@elastic/esql';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -70,7 +73,7 @@ describe('FROM Autocomplete', () => {
     );
   });
   describe('... <sources> ...', () => {
-    test('suggests Browse indices in empty source slots when enabled', async () => {
+    test('suggests Browse data sources in empty source slots when enabled', async () => {
       mockCallbacks = {
         ...mockCallbacks,
         canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
@@ -87,10 +90,10 @@ describe('FROM Autocomplete', () => {
       };
 
       const initialSlotLabels = (await suggest('FROM /')).map((s) => s.label);
-      expect(initialSlotLabels).toContain('Browse indices');
+      expect(initialSlotLabels).toContain('Browse data sources');
 
       const afterCommaLabels = (await suggest('FROM index, /')).map((s) => s.label);
-      expect(afterCommaLabels).toContain('Browse indices');
+      expect(afterCommaLabels).toContain('Browse data sources');
     });
 
     test('suggests visible indices on space', async () => {
@@ -320,6 +323,77 @@ describe('FROM Autocomplete', () => {
         contextWithSubquery,
         offset
       );
+    });
+  });
+
+  describe('standalone (isStandalone) queries', () => {
+    const standaloneExtensions = {
+      recommendedQueries: [
+        {
+          name: 'Search all metrics',
+          query: 'TS metrics-*',
+          description: 'Searches all available metrics',
+          isStandalone: true,
+        },
+        {
+          name: 'Logs Count by Host',
+          query: 'from logs* | STATS count(*) by host',
+        },
+      ],
+      recommendedFields: [],
+    };
+
+    const contextWithStandalone = {
+      ...mockContext,
+      editorExtensions: standaloneExtensions,
+    };
+
+    const extensionSuggestions = getRecommendedQueriesTemplatesFromExtensions(
+      standaloneExtensions.recommendedQueries
+    );
+
+    test('standalone suggestion appears after space alongside other suggestions', async () => {
+      const recommendedQueries = getRecommendedQueriesTemplates({
+        fromCommand: '',
+        timeField: '@timestamp',
+        categorizationField: 'keywordField',
+      });
+      const expected = [
+        'METADATA ',
+        ',',
+        '| ',
+        ...recommendedQueries.map((query) => query.queryString),
+        ...extensionSuggestions.map((s) => s.text),
+      ].sort();
+
+      await fromExpectSuggestions('from index ', expected, mockCallbacks, contextWithStandalone);
+    });
+
+    test('standalone suggestion has empty text, no rangeToReplace, and a command with queryText', async () => {
+      const standaloneSuggestion = extensionSuggestions.find(
+        (s) => s.label === 'Search all metrics'
+      );
+
+      expect(standaloneSuggestion).toBeDefined();
+      expect(standaloneSuggestion!.text).toBe('');
+      expect(standaloneSuggestion!.rangeToReplace).toBeUndefined();
+      expect(standaloneSuggestion!.command).toEqual({
+        id: 'esql.recommendedQuery.accept',
+        title: 'Accept recommended query',
+        arguments: [
+          {
+            queryLabel: 'Search all metrics',
+            queryText: 'TS metrics-*',
+          },
+        ],
+      });
+    });
+
+    test('non-standalone extension suggestions have non-empty text', async () => {
+      const regularSuggestion = extensionSuggestions.find((s) => s.label === 'Logs Count by Host');
+
+      expect(regularSuggestion).toBeDefined();
+      expect(regularSuggestion!.text).not.toBe('');
     });
   });
 });

@@ -509,7 +509,6 @@ describe('utils', () => {
           FieldCapsResponse,
           unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
@@ -551,7 +550,6 @@ describe('utils', () => {
           FieldCapsResponse,
           unknown
         >,
-        inputIndices: ['myfa*'],
         ruleExecutionLogger,
       });
 
@@ -560,69 +558,6 @@ describe('utils', () => {
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
           'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"]',
-      });
-    });
-
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'Endpoint Security',
-      });
-
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          FieldCapsResponse,
-          unknown
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.',
-      });
-    });
-
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
-      const timestampField = '@timestamp';
-      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
-        body: {
-          indices: [],
-          fields: {},
-        },
-      };
-
-      // SUT uses rule execution logger's context to check the rule name
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'NOT Endpoint Security',
-      });
-
-      const { foundNoIndices } = await hasTimestampFields({
-        timestampField,
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          FieldCapsResponse,
-          unknown
-        >,
-        inputIndices: ['logs-endpoint.alerts-*'],
-        ruleExecutionLogger,
-      });
-
-      expect(foundNoIndices).toBeTruthy();
-      expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
-        newStatus: RuleExecutionStatusEnum['partial failure'],
-        message:
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
     });
   });
@@ -1054,6 +989,7 @@ describe('utils', () => {
         warning: false,
         warningMessages: [],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });
@@ -1109,6 +1045,7 @@ describe('utils', () => {
         warning: true,
         warningMessages: ['warning1', 'warning2'],
         suppressedAlertsCount: 0,
+        totalEventsFound: 0,
       };
       expect(merged).toEqual(expected);
     });

@@ -8,56 +8,92 @@
  */
 
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { combineLatest, distinctUntilChanged, map, type Observable, shareReplay } from 'rxjs';
-import deepEqual from 'react-fast-compare';
 import type {
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
 } from '@kbn/core-chrome-browser';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
-import { HeaderBreadcrumbsBadges } from '../ui/header/header_breadcrumbs_badges';
-import { createArrayState, type ArrayState } from './state_helpers';
+import { HeaderBreadcrumbsBadges } from '@kbn/core-chrome-browser-components';
+import { createState, createArrayState, type State, type ArrayState } from './state_helpers';
 
-interface BreadcrumbsState {
+export interface BreadcrumbsState {
   breadcrumbs: ArrayState<ChromeBreadcrumb>;
   breadcrumbsAppendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
   breadcrumbsBadges: ArrayState<ChromeBreadcrumbsBadge>;
+  legacyBadge: State<ChromeBadge | undefined>;
   breadcrumbsAppendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
 }
+
+const chromeBadgeToBreadcrumbsBadge = (badge: ChromeBadge): ChromeBreadcrumbsBadge => ({
+  badgeText: badge.text,
+  renderCustomBadge: ({ badgeText }) => (
+    <EuiBetaBadge
+      alignment="middle"
+      label={badgeText}
+      tooltipContent={badge.tooltip}
+      iconType={badge.iconType}
+      data-test-subj="headerBadge"
+      data-test-badge-label={badge.text}
+    />
+  ),
+});
 
 export const createBreadcrumbsState = (): BreadcrumbsState => {
   const breadcrumbs = createArrayState<ChromeBreadcrumb>();
   const breadcrumbsAppendExtensions = createArrayState<ChromeBreadcrumbsAppendExtension>();
   const breadcrumbsBadges = createArrayState<ChromeBreadcrumbsBadge>();
+  const legacyBadge = createState<ChromeBadge | undefined>(undefined);
+
+  const convertedLegacyBadge$ = legacyBadge.$.pipe(
+    map((legacy) => (legacy ? chromeBadgeToBreadcrumbsBadge(legacy) : undefined)),
+    distinctUntilChanged(),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  const allBadges$ = combineLatest([breadcrumbsBadges.$, convertedLegacyBadge$]).pipe(
+    map(([badges, converted]) => (converted ? [converted, ...badges] : badges)),
+    distinctUntilChanged(
+      (prev, next) => prev.length === next.length && prev.every((b, i) => b === next[i])
+    ),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  const badgesExtension$ = combineLatest([breadcrumbsAppendExtensions.$, allBadges$]).pipe(
+    map(([extensions, allBadges]): [boolean, ChromeBreadcrumbsBadge[]] => [
+      extensions.length === 0,
+      allBadges,
+    ]),
+    distinctUntilChanged(
+      ([prevIsFirst, prevBadges], [nextIsFirst, nextBadges]) =>
+        prevIsFirst === nextIsFirst && prevBadges === nextBadges
+    ),
+    map(([isFirst, allBadges]): ChromeBreadcrumbsAppendExtension | undefined => {
+      if (allBadges.length === 0) {
+        return undefined;
+      }
+      return {
+        content: <HeaderBreadcrumbsBadges badges={allBadges} isFirst={isFirst} />,
+      };
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
 
   const breadcrumbsAppendExtensionsWithBadges$ = combineLatest([
     breadcrumbsAppendExtensions.$,
-    breadcrumbsBadges.$,
+    badgesExtension$,
   ]).pipe(
-    distinctUntilChanged(([prevExtensions, prevBadges], [nextExtensions, nextBadges]) => {
-      return deepEqual(prevExtensions, nextExtensions) && deepEqual(prevBadges, nextBadges);
-    }),
-    map(([extensions, badges]) => {
-      if (badges.length === 0) {
-        return extensions;
-      }
-      return [
-        ...extensions,
-        {
-          content: mountReactNode(
-            <HeaderBreadcrumbsBadges badges={badges} isFirst={extensions.length === 0} />
-          ),
-        },
-      ];
-    }),
-    shareReplay(1)
+    map(([extensions, badgesExt]) => (badgesExt ? [...extensions, badgesExt] : extensions)),
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   return {
     breadcrumbs,
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
+    legacyBadge,
     breadcrumbsAppendExtensionsWithBadges$,
   };
 };

@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('group by', () => {
         it('defaults to group by models', async () => {
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
-            'Models'
+            'Model Author'
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
@@ -63,6 +63,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'None'
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectTabularViewToBeLoaded();
+        });
+
+        it('can switch to group by service', async () => {
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
+            'service'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
+            'Service'
+          );
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
+          await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
+            'elasticsearch'
+          );
         });
 
         it('can collapse group accordions', async () => {
@@ -88,7 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('group by None', () => {
         beforeEach(async () => {
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupBySelection(
-            'Models'
+            'Model Author'
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.selectGroupByOption(
             'none'

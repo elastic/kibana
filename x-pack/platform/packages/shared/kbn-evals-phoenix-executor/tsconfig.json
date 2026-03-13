@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node", "@kbn/ambient-common-types"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/inference-common",
+    "@kbn/inference-tracing",
+    "@kbn/some-dev-log",
+    "@kbn/apm-config-loader",
+    "@kbn/repo-info",
+    "@kbn/std",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/some-dev-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/scout"
+  ]
+}

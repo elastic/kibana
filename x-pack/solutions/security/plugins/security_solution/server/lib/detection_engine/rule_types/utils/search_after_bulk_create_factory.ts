@@ -87,6 +87,7 @@ export const searchAfterAndBulkCreateFactory = async ({
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
     let searchingIteration = 0;
+    let totalEventsFound = 0;
     const loggedRequests: RulePreviewLoggedRequest[] = [];
 
     // sortId tells us where to start our next consecutive search_after query
@@ -157,6 +158,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           );
           break;
         } else {
+          totalEventsFound += searchResult.hits.hits.length;
           ruleExecutionLogger.trace(
             `${cycleNum}: Results found\nFound ${
               searchResult.hits.hits.length
@@ -231,6 +233,8 @@ export const searchAfterAndBulkCreateFactory = async ({
       }
     }
     ruleExecutionLogger.debug(`Alerts created: ${toReturn.createdSignalsCount}`);
+
+    toReturn.totalEventsFound = totalEventsFound;
 
     if (isLoggedRequestsEnabled) {
       toReturn.loggedRequests = loggedRequests;

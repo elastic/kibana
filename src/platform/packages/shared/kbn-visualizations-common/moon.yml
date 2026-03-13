@@ -4,24 +4,23 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/visualizations-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/visualizations-common'
+  title: '@kbn/visualizations-common'
   description: Moon project for @kbn/visualizations-common
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-visualizations-common
+  sourceRoot: src/platform/packages/shared/kbn-visualizations-common
 dependsOn:
-  - '@kbn/expressions-plugin'
-  - '@kbn/chart-expressions-common'
-  - '@kbn/css-utils'
   - '@kbn/i18n'
+  - '@kbn/expressions-plugin'
+  - '@kbn/css-utils'
+  - '@kbn/chart-expressions-common'
   - '@kbn/core'
   - '@kbn/safer-lodash-set'
 tags:
@@ -35,18 +34,27 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
-    - '**/*.js'
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

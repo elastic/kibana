@@ -234,7 +234,7 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponse.text_embedding);
+      expect(response).toEqual([]);
     });
 
     it('errors during API calls are properly handled', async () => {

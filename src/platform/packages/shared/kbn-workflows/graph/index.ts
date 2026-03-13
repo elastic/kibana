@@ -10,6 +10,7 @@
 export {
   convertToWorkflowGraph,
   convertToSerializableGraph,
+  visitWaitForInputStep,
 } from './build_execution_graph/build_execution_graph';
 export { WorkflowGraph } from './workflow_graph/workflow_graph';
 
@@ -22,6 +23,10 @@ export type {
   EnterForeachNodeConfiguration,
   EnterForeachNodeConfigurationSchema,
   EnterForeachNode,
+  EnterWhileNodeConfiguration,
+  EnterWhileNodeConfigurationSchema,
+  EnterWhileNode,
+  ExitWhileNode,
   EnterIfNode,
   EnterRetryNode,
   ExitConditionBranchNode,
@@ -33,8 +38,8 @@ export type {
   ExitContinueNode,
   WaitGraphNodeSchema,
   WaitGraphNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
+  WaitForInputGraphNode,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,
@@ -44,6 +49,10 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './types';
 
 export {
@@ -51,14 +60,16 @@ export {
   isDataSet,
   isElasticsearch,
   isKibana,
-  isHttp,
   isWait,
+  isWaitForInput,
   isEnterForeach,
+  isEnterWhile,
   isEnterIf,
   isEnterRetry,
   isEnterTryBlock,
   isEnterNormalPath,
   isExitForeach,
+  isExitWhile,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
@@ -69,4 +80,5 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  shouldSuggestInnerSteps,
 } from './types';

@@ -8,8 +8,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-language';
-import { Parser, walk } from '@kbn/esql-language';
+import type { ESQLColumn } from '@elastic/esql/types';
+import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
@@ -32,6 +32,7 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1093,6 +1094,28 @@ describe('esql query helpers', () => {
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe(false);
+    });
+  });
+
+  describe('hasInfoCommand', () => {
+    it('should return true when query contains METRICS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO')).toBe(true);
+    });
+
+    it('should return true when query contains TS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO')).toBe(true);
+    });
+
+    it('should return true when METRICS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return true when TS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
+      expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
     });
   });
 });

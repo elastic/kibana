@@ -14,23 +14,25 @@ import type {
   DataSetStep,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
+  LoopStepProps,
+  MaxIterations,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
   TimeoutProp,
+  WaitForInputStep,
   WaitStep,
+  WhileStep,
+  WorkflowExecuteAsyncStep,
+  WorkflowExecuteStep,
   WorkflowOnFailure,
   WorkflowRetry,
   WorkflowSettings,
   WorkflowYaml,
 } from '../../spec/schema';
 import type {
-  AtomicGraphNode,
-  DataSetGraphNode,
-  ElasticsearchGraphNode,
   EnterConditionBranchNode,
   EnterContinueNode,
   EnterFallbackPathNode,
@@ -40,6 +42,7 @@ import type {
   EnterRetryNode,
   EnterTimeoutZoneNode,
   EnterTryBlockNode,
+  EnterWhileNode,
   ExitConditionBranchNode,
   ExitContinueNode,
   ExitFallbackPathNode,
@@ -49,15 +52,14 @@ import type {
   ExitRetryNode,
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
+  ExitWhileNode,
   GraphNodeUnion,
-  HttpGraphNode,
-  KibanaGraphNode,
-  WaitGraphNode,
+  WaitForInputGraphNode,
   WorkflowGraphType,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach']);
+const flowControlStepTypes = new Set(['if', 'foreach', 'while']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -111,16 +113,8 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
 
-  if ((currentStep as IfStep).type === 'if') {
+  if (currentStep.type === 'if') {
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
-  }
-
-  if ((currentStep as ForEachStep).type === 'foreach') {
-    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
-  }
-
-  if ((currentStep as StepWithForeach).foreach) {
-    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -134,45 +128,98 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     );
   }
 
-  if ((currentStep as WaitStep).type === 'wait') {
+  if (currentStep.type === 'foreach') {
+    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
+  }
+
+  if (currentStep.type === 'while') {
+    return createWhileGraph(getStepId(currentStep, context), currentStep as WhileStep, context);
+  }
+
+  if ((currentStep as StepWithForeach).foreach) {
+    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
+  }
+
+  if (currentStep.type === 'wait') {
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
-  if ((currentStep as DataSetStep).type === 'data.set') {
+  if (currentStep.type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
+  if (currentStep.type === 'data.set') {
     return visitDataSetStep(currentStep as DataSetStep, context);
   }
 
-  if ((currentStep as HttpStep).type === 'http') {
-    return visitHttpStep(currentStep as HttpStep, context);
-  }
-
-  if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
+  if (currentStep.type?.startsWith('elasticsearch.')) {
     return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
   }
 
-  if ((currentStep as KibanaStep).type?.startsWith('kibana.')) {
+  if (currentStep.type?.startsWith('kibana.')) {
     return visitKibanaStep(currentStep as KibanaStep, context);
   }
 
+  if (currentStep.type === 'workflow.execute') {
+    return visitWorkflowExecuteStep(currentStep as WorkflowExecuteStep, context);
+  }
+
+  if (currentStep.type === 'workflow.executeAsync') {
+    return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
+  }
+
   return visitAtomicStep(currentStep, context);
+}
+
+type LeafNodeType =
+  | 'atomic'
+  | 'wait'
+  | 'data.set'
+  | 'workflow.execute'
+  | 'workflow.executeAsync'
+  | `elasticsearch.${string}`
+  | `kibana.${string}`;
+
+function createLeafStepGraph(
+  currentStep: BaseStep,
+  context: GraphBuildContext,
+  nodeType: LeafNodeType
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  graph.setNode(stepId, {
+    id: stepId,
+    type: nodeType,
+    stepId,
+    stepType: currentStep.type,
+    configuration: { ...currentStep },
+  });
+  return graph;
 }
 
 export function visitWaitStep(
   currentStep: WaitStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'wait');
+}
+
+export function visitWaitForInputStep(
+  currentStep: WaitForInputStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
-  const waitNode: WaitGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'wait',
+  const waitForInputNode: WaitForInputGraphNode = {
+    id: stepId,
+    type: 'waitForInput',
     stepId,
     stepType: currentStep.type,
     configuration: {
       ...currentStep,
     },
   };
-  graph.setNode(waitNode.id, waitNode);
+  graph.setNode(waitForInputNode.id, waitForInputNode);
 
   return graph;
 }
@@ -181,98 +228,56 @@ export function visitDataSetStep(
   currentStep: DataSetStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const dataSetNode: DataSetGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'data.set',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(dataSetNode.id, dataSetNode);
-
-  return graph;
+  return createLeafStepGraph(currentStep, context, 'data.set');
 }
 
-export function visitHttpStep(
-  currentStep: HttpStep,
-  context: GraphBuildContext
-): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const httpNode: HttpGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'http',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(httpNode.id, httpNode);
+function assertElasticsearchType(type: string): asserts type is `elasticsearch.${string}` {
+  if (!type.startsWith('elasticsearch.')) {
+    throw new Error(`Expected elasticsearch step type, got: ${type}`);
+  }
+}
 
-  return graph;
+function assertKibanaType(type: string): asserts type is `kibana.${string}` {
+  if (!type.startsWith('kibana.')) {
+    throw new Error(`Expected kibana step type, got: ${type}`);
+  }
 }
 
 export function visitElasticsearchStep(
   currentStep: ElasticsearchStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const graph = createTypedGraph({ directed: true });
-  const elasticsearchNode: ElasticsearchGraphNode = {
-    id: getStepId(currentStep, context),
-    stepId: getStepId(currentStep, context),
-    stepType: currentStep.type,
-    type: currentStep.type, // e.g., 'elasticsearch.search.query'
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(elasticsearchNode.id, elasticsearchNode);
-
-  return graph;
+  assertElasticsearchType(currentStep.type);
+  return createLeafStepGraph(currentStep, context, currentStep.type);
 }
 
 export function visitKibanaStep(
   currentStep: KibanaStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const graph = createTypedGraph({ directed: true });
-  const kibanaNode: KibanaGraphNode = {
-    id: getStepId(currentStep, context),
-    stepId: getStepId(currentStep, context),
-    stepType: currentStep.type,
-    type: currentStep.type, // e.g., 'kibana.cases.create'
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(kibanaNode.id, kibanaNode);
+  assertKibanaType(currentStep.type);
+  return createLeafStepGraph(currentStep, context, currentStep.type);
+}
 
-  return graph;
+export function visitWorkflowExecuteStep(
+  currentStep: WorkflowExecuteStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'workflow.execute');
+}
+
+export function visitWorkflowExecuteAsyncStep(
+  currentStep: WorkflowExecuteAsyncStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  return createLeafStepGraph(currentStep, context, 'workflow.executeAsync');
 }
 
 export function visitAtomicStep(
   currentStep: BaseStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const atomicNode: AtomicGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'atomic',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(atomicNode.id, atomicNode);
-
-  return graph;
+  return createLeafStepGraph(currentStep, context, 'atomic');
 }
 
 function createIfGraph(
@@ -372,31 +377,15 @@ function createIfGraphForIfStepLevel(
   return createIfGraph(generatedStepId, ifStep, context);
 }
 
-function visitOnFailure(
-  currentStep: BaseStep,
+function applyOnFailure(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const onFailureGraphNode: GraphNodeUnion = {
-    id: `onFailure_${stepId}`,
-    type: 'on-failure',
-    stepId,
-    stepType: 'on-failure',
-  };
+  let graph = innerGraph;
 
-  context.stack.push(onFailureGraphNode);
-  let graph = createStepsSequence(
-    [
-      {
-        ...currentStep,
-        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
-      } as BaseStep,
-    ],
-    context
-  );
-
-  if (onFailureConfiguration?.retry) {
+  if (onFailureConfiguration.retry) {
     graph = createRetry(stepId, graph, onFailureConfiguration.retry);
   }
 
@@ -413,9 +402,64 @@ function visitOnFailure(
     graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
-  context.stack.pop();
+  return graph;
+}
+
+function applyIterationGuardrails(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
+  loopStep: LoopStepProps,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  let graph = innerGraph;
+
+  const iterationTimeout = loopStep['iteration-timeout'];
+  if (iterationTimeout) {
+    graph = handleTimeout(
+      `iteration_${stepId}`,
+      'step_level_timeout',
+      iterationTimeout,
+      graph,
+      context
+    );
+  }
+
+  const iterationOnFailure = loopStep['iteration-on-failure'];
+  if (iterationOnFailure) {
+    graph = applyOnFailure(`iteration_${stepId}`, graph, iterationOnFailure, context);
+  }
 
   return graph;
+}
+
+function visitOnFailure(
+  currentStep: BaseStep,
+  onFailureConfiguration: WorkflowOnFailure,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const onFailureGraphNode: GraphNodeUnion = {
+    id: `onFailure_${stepId}`,
+    type: 'on-failure',
+    stepId,
+    stepType: 'on-failure',
+  };
+
+  context.stack.push(onFailureGraphNode);
+  const graph = createStepsSequence(
+    [
+      {
+        ...currentStep,
+        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
+      } as BaseStep,
+    ],
+    context
+  );
+
+  const result = applyOnFailure(stepId, graph, onFailureConfiguration, context);
+  context.stack.pop();
+
+  return result;
 }
 
 function handleTimeout(
@@ -740,6 +784,15 @@ function insertGraphBetweenNodes(
   });
 }
 
+function normalizeMaxIterations(raw?: MaxIterations): {
+  maxIterations?: number;
+  onLimit?: 'continue' | 'fail';
+} {
+  if (raw == null) return {};
+  if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
+}
+
 function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
@@ -760,15 +813,19 @@ function createForeachGraph(
   };
   context.stack.push(enterForeachNode);
   graph.setNode(enterForeachNodeId, enterForeachNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(foreachStep['max-iterations']);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
+    maxIterations,
+    onLimit,
   };
   graph.setNode(exitNodeId, exitForeachNode);
-  const innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  let innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, foreachStep, context);
 
   insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
   context.stack.pop();
@@ -788,6 +845,46 @@ function createForeachGraphForStepWithForeach(
     steps: [omit(stepWithForeach, ['foreach'])],
   } as ForEachStep;
   return createForeachGraph(generatedStepId, foreachStep, context);
+}
+
+function createWhileGraph(
+  stepId: string,
+  whileStep: WhileStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const graph = createTypedGraph({ directed: true });
+  const enterWhileNodeId = `enterWhile_${stepId}`;
+  const exitNodeId = `exitWhile_${stepId}`;
+  const enterWhileNode: EnterWhileNode = {
+    id: enterWhileNodeId,
+    type: 'enter-while',
+    stepId,
+    stepType: whileStep.type,
+    exitNodeId,
+    configuration: {
+      ...omit(whileStep, ['steps']),
+    },
+  };
+  context.stack.push(enterWhileNode);
+  graph.setNode(enterWhileNodeId, enterWhileNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(whileStep['max-iterations']);
+  const exitWhileNode: ExitWhileNode = {
+    type: 'exit-while',
+    id: exitNodeId,
+    stepType: whileStep.type,
+    stepId,
+    startNodeId: enterWhileNodeId,
+    condition: whileStep.condition,
+    maxIterations,
+    onLimit,
+  };
+  graph.setNode(exitNodeId, exitWhileNode);
+  let innerGraph = createStepsSequence(whileStep.steps || [], context);
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, whileStep, context);
+
+  insertGraphBetweenNodes(graph, innerGraph, enterWhileNodeId, exitNodeId);
+  context.stack.pop();
+  return graph;
 }
 
 export function convertToWorkflowGraph(
@@ -832,7 +929,7 @@ function resolveWorklfowSettings(
     ...workflowSettings,
     timeout: workflowSettings.timeout ?? defaultSettings.timeout,
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
-    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+    timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
 }
 

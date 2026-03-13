@@ -1,0 +1,2202 @@
+{
+  "id": "@kbn/synthetics-forge",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.SyntheticsApiClient",
+        "type": "Class",
+        "tags": [],
+        "label": "SyntheticsApiClient",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthetics-forge",
+                    "scope": "common",
+                    "docId": "kibKbnSyntheticsForgePluginApi",
+                    "section": "def-common.ApiClientConfig",
+                    "text": "ApiClientConfig"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 24,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 24,
+                "columnNumber": 40,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.setupFleet",
+            "type": "Function",
+            "tags": [],
+            "label": "setupFleet",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.enableSynthetics",
+            "type": "Function",
+            "tags": [],
+            "label": "enableSynthetics",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "createSpace",
+            "description": [],
+            "signature": [
+              "(spaceId: string, name: string) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 104,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createSpace.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 104,
+                "columnNumber": 38,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createAgentPolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "createAgentPolicy",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.AgentPolicy",
+                "text": "AgentPolicy"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createAgentPolicy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 126,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getPrivateLocations",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivateLocations",
+            "description": [],
+            "signature": [
+              "(spaceId?: string | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getPrivateLocations.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 150,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getPrivateLocationById",
+            "type": "Function",
+            "tags": [],
+            "label": "getPrivateLocationById",
+            "description": [],
+            "signature": [
+              "(locationId: string, spaceId?: string | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getPrivateLocationById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "locationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 159,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getPrivateLocationById.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 159,
+                "columnNumber": 52,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createPrivateLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "createPrivateLocation",
+            "description": [],
+            "signature": [
+              "(label: string, agentPolicyId: string, spaceId?: string | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createPrivateLocation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 169,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createPrivateLocation.$2",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 170,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createPrivateLocation.$3",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 171,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createHttpMonitor",
+            "type": "Function",
+            "tags": [],
+            "label": "createHttpMonitor",
+            "description": [],
+            "signature": [
+              "(name: string, url: string, privateLocation: ",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ", spaceId?: string | undefined, tags?: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Monitor",
+                "text": "Monitor"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createHttpMonitor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 213,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createHttpMonitor.$2",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 214,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createHttpMonitor.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "privateLocation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthetics-forge",
+                    "scope": "common",
+                    "docId": "kibKbnSyntheticsForgePluginApi",
+                    "section": "def-common.PrivateLocation",
+                    "text": "PrivateLocation"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 215,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createHttpMonitor.$4",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 216,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createHttpMonitor.$5",
+                "type": "Array",
+                "tags": [],
+                "label": "tags",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 217,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createTcpMonitor",
+            "type": "Function",
+            "tags": [],
+            "label": "createTcpMonitor",
+            "description": [],
+            "signature": [
+              "(name: string, host: string, privateLocation: ",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ", spaceId?: string | undefined, tags?: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Monitor",
+                "text": "Monitor"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createTcpMonitor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 241,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createTcpMonitor.$2",
+                "type": "string",
+                "tags": [],
+                "label": "host",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 242,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createTcpMonitor.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "privateLocation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthetics-forge",
+                    "scope": "common",
+                    "docId": "kibKbnSyntheticsForgePluginApi",
+                    "section": "def-common.PrivateLocation",
+                    "text": "PrivateLocation"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 243,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createTcpMonitor.$4",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 244,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createTcpMonitor.$5",
+                "type": "Array",
+                "tags": [],
+                "label": "tags",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 245,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createIcmpMonitor",
+            "type": "Function",
+            "tags": [],
+            "label": "createIcmpMonitor",
+            "description": [],
+            "signature": [
+              "(name: string, host: string, privateLocation: ",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ", spaceId?: string | undefined, tags?: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Monitor",
+                "text": "Monitor"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createIcmpMonitor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 269,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createIcmpMonitor.$2",
+                "type": "string",
+                "tags": [],
+                "label": "host",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 270,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createIcmpMonitor.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "privateLocation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthetics-forge",
+                    "scope": "common",
+                    "docId": "kibKbnSyntheticsForgePluginApi",
+                    "section": "def-common.PrivateLocation",
+                    "text": "PrivateLocation"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 271,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createIcmpMonitor.$4",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createIcmpMonitor.$5",
+                "type": "Array",
+                "tags": [],
+                "label": "tags",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 273,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.createBrowserMonitor",
+            "type": "Function",
+            "tags": [],
+            "label": "createBrowserMonitor",
+            "description": [],
+            "signature": [
+              "(name: string, script: string, privateLocation: ",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.PrivateLocation",
+                "text": "PrivateLocation"
+              },
+              ", spaceId?: string | undefined, tags?: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Monitor",
+                "text": "Monitor"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 297,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createBrowserMonitor.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 298,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createBrowserMonitor.$2",
+                "type": "string",
+                "tags": [],
+                "label": "script",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 299,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createBrowserMonitor.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "privateLocation",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthetics-forge",
+                    "scope": "common",
+                    "docId": "kibKbnSyntheticsForgePluginApi",
+                    "section": "def-common.PrivateLocation",
+                    "text": "PrivateLocation"
+                  }
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 300,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createBrowserMonitor.$4",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 301,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.createBrowserMonitor.$5",
+                "type": "Array",
+                "tags": [],
+                "label": "tags",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 302,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getMonitors",
+            "type": "Function",
+            "tags": [],
+            "label": "getMonitors",
+            "description": [],
+            "signature": [
+              "(spaceId?: string | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.Monitor",
+                "text": "Monitor"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 328,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getMonitors.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 328,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.deleteMonitors",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteMonitors",
+            "description": [],
+            "signature": [
+              "(monitorIds: string[], spaceId?: string | undefined) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 354,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deleteMonitors.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "monitorIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 354,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deleteMonitors.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 354,
+                "columnNumber": 46,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.deletePrivateLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "deletePrivateLocation",
+            "description": [],
+            "signature": [
+              "(locationId: string, spaceId?: string | undefined) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 367,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deletePrivateLocation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "locationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 367,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deletePrivateLocation.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 367,
+                "columnNumber": 51,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.deleteAgentPolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteAgentPolicy",
+            "description": [],
+            "signature": [
+              "(policyId: string, force?: boolean) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 377,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deleteAgentPolicy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "policyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 377,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deleteAgentPolicy.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "force",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 377,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getAgentsForPolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentsForPolicy",
+            "description": [],
+            "signature": [
+              "(agentPolicyId: string) => Promise<{ id: string; status: string; }[]>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 387,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getAgentsForPolicy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 387,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.bulkUnenrollAgents",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUnenrollAgents",
+            "description": [],
+            "signature": [
+              "(agentPolicyId: string) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 397,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.bulkUnenrollAgents.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 397,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getAgentPolicies",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentPolicies",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.AgentPolicy",
+                "text": "AgentPolicy"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 412,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getEnrollmentToken",
+            "type": "Function",
+            "tags": [],
+            "label": "getEnrollmentToken",
+            "description": [],
+            "signature": [
+              "(agentPolicyId: string) => Promise<string>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 420,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.getEnrollmentToken.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 420,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.getKibanaVersion",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaVersion",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 435,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.SyntheticsApiClient.deletePackagePoliciesForMonitors",
+            "type": "Function",
+            "tags": [],
+            "label": "deletePackagePoliciesForMonitors",
+            "description": [],
+            "signature": [
+              "(monitors: { config_id?: string | undefined; id: string; locations?: { id: string; isServiceManaged: boolean; }[] | undefined; }[], spaceId: string) => Promise<{ deleted: number; failed: number; }>"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+            "lineNumber": 443,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deletePackagePoliciesForMonitors.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "monitors",
+                "description": [],
+                "signature": [
+                  "{ config_id?: string | undefined; id: string; locations?: { id: string; isServiceManaged: boolean; }[] | undefined; }[]"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 444,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/synthetics-forge",
+                "id": "def-common.SyntheticsApiClient.deletePackagePoliciesForMonitors.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/api_client.ts",
+                "lineNumber": 449,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.cleanup",
+        "type": "Function",
+        "tags": [],
+        "label": "cleanup",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/synthetics-forge",
+            "scope": "common",
+            "docId": "kibKbnSyntheticsForgePluginApi",
+            "section": "def-common.ForgeConfig",
+            "text": "ForgeConfig"
+          },
+          ", log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<",
+          "CleanupResult",
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.cleanup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.ForgeConfig",
+                "text": "ForgeConfig"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+            "lineNumber": 55,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.cleanup.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+            "lineNumber": 55,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.cli",
+        "type": "Function",
+        "tags": [],
+        "label": "cli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/cli.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.run",
+        "type": "Function",
+        "tags": [],
+        "label": "run",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/synthetics-forge",
+            "scope": "common",
+            "docId": "kibKbnSyntheticsForgePluginApi",
+            "section": "def-common.ForgeConfig",
+            "text": "ForgeConfig"
+          },
+          ", log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/synthetics-forge",
+            "scope": "common",
+            "docId": "kibKbnSyntheticsForgePluginApi",
+            "section": "def-common.ForgeOutput",
+            "text": "ForgeOutput"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.run.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.ForgeConfig",
+                "text": "ForgeConfig"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+            "lineNumber": 171,
+            "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.run.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/run.ts",
+            "lineNumber": 171,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.AgentPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentPolicy",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.AgentPolicy.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.AgentPolicy.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.ApiClientConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiClientConfig",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ApiClientConfig.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ApiClientConfig.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ApiClientConfig.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.ForgeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ForgeConfig",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.monitorCounts",
+            "type": "Object",
+            "tags": [],
+            "label": "monitorCounts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/synthetics-forge",
+                "scope": "common",
+                "docId": "kibKbnSyntheticsForgePluginApi",
+                "section": "def-common.MonitorCounts",
+                "text": "MonitorCounts"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.concurrency",
+            "type": "number",
+            "tags": [],
+            "label": "concurrency",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.resourcePrefix",
+            "type": "string",
+            "tags": [],
+            "label": "resourcePrefix",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeConfig.privateLocationId",
+            "type": "string",
+            "tags": [],
+            "label": "privateLocationId",
+            "description": [
+              "Optional: Use existing private location instead of creating new one"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.ForgeOutput",
+        "type": "Interface",
+        "tags": [],
+        "label": "ForgeOutput",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.agentPolicyId",
+            "type": "string",
+            "tags": [],
+            "label": "agentPolicyId",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.agentPolicyName",
+            "type": "string",
+            "tags": [],
+            "label": "agentPolicyName",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.privateLocationId",
+            "type": "string",
+            "tags": [],
+            "label": "privateLocationId",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.privateLocationLabel",
+            "type": "string",
+            "tags": [],
+            "label": "privateLocationLabel",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.enrollmentToken",
+            "type": "string",
+            "tags": [],
+            "label": "enrollmentToken",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.monitorIds",
+            "type": "Array",
+            "tags": [],
+            "label": "monitorIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.monitorCount",
+            "type": "number",
+            "tags": [],
+            "label": "monitorCount",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.ForgeOutput.kibanaUrl",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaUrl",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.Monitor",
+        "type": "Interface",
+        "tags": [],
+        "label": "Monitor",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.config_id",
+            "type": "string",
+            "tags": [],
+            "label": "config_id",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Monitor.locations",
+            "type": "Array",
+            "tags": [],
+            "label": "locations",
+            "description": [],
+            "signature": [
+              "MonitorLocation",
+              "[] | undefined"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.MonitorCounts",
+        "type": "Interface",
+        "tags": [],
+        "label": "MonitorCounts",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.MonitorCounts.http",
+            "type": "number",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.MonitorCounts.tcp",
+            "type": "number",
+            "tags": [],
+            "label": "tcp",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.MonitorCounts.icmp",
+            "type": "number",
+            "tags": [],
+            "label": "icmp",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.MonitorCounts.browser",
+            "type": "number",
+            "tags": [],
+            "label": "browser",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.PrivateLocation",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivateLocation",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.PrivateLocation.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.PrivateLocation.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.PrivateLocation.agentPolicyId",
+            "type": "string",
+            "tags": [],
+            "label": "agentPolicyId",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.PrivateLocation.geo",
+            "type": "Object",
+            "tags": [],
+            "label": "geo",
+            "description": [],
+            "signature": [
+              "{ lat: number; lon: number; }"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthetics-forge",
+        "id": "def-common.Space",
+        "type": "Interface",
+        "tags": [],
+        "label": "Space",
+        "description": [],
+        "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Space.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthetics-forge",
+            "id": "def-common.Space.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/observability/packages/kbn-synthetics-forge/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

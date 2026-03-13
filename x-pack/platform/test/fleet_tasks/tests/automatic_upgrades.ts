@@ -34,9 +34,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL));
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/248310
-  // Failing: See https://github.com/elastic/kibana/issues/245377
-  describe.skip('Automatic agent upgrades', () => {
+  describe('Automatic agent upgrades', () => {
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
       const { body: agentPolicyResponse } = await supertest
@@ -74,6 +72,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await cleanupAgentDocs(providerContext);
       await es.deleteByQuery({
         index: '.fleet-actions',
+        ignore_unavailable: true,
         query: {
           match_all: {},
         },
@@ -116,22 +115,27 @@ export default function (providerContext: FtrProviderContextWithServices) {
       expect(res.body.item.upgrade_started_at).to.be(undefined);
       expect(res.body.item.upgrade_attempts).to.be(undefined);
 
-      await es.indices.refresh({ index: '.fleet-actions' });
-      const actionRes = await es.search({
-        index: '.fleet-actions',
-        query: {
-          term: {
-            agents: 'agent1',
+      await retry.tryForTime(60000, async () => {
+        await es.indices.refresh({ index: '.fleet-actions', ignore_unavailable: true });
+        const actionRes = await es.search({
+          index: '.fleet-actions',
+          ignore_unavailable: true,
+          query: {
+            term: {
+              agents: 'agent1',
+            },
           },
-        },
+        });
+        if (!actionRes.hits.hits.length) {
+          throw new Error('.fleet-actions document for agent1 not found yet');
+        }
+        // verify that the expiration is set to 1 month
+        const expirationDate = new Date((actionRes.hits.hits[0]._source as any).expiration);
+        const expectedExpiration = moment(new Date())
+          .add(EXPIRATION_DURATION_SECONDS, 'seconds')
+          .toDate();
+        expect(expirationDate < expectedExpiration).to.be(true);
       });
-      // verify that the expiration is set to 1 month
-      expect(actionRes.hits.hits.length).to.be.greaterThan(0);
-      const expirationDate = new Date((actionRes.hits.hits[0]._source as any).expiration);
-      const expectedExpiration = moment(new Date())
-        .add(EXPIRATION_DURATION_SECONDS, 'seconds')
-        .toDate();
-      expect(expirationDate < expectedExpiration).to.be(true);
     });
 
     it('should take agents on target version into account', async () => {

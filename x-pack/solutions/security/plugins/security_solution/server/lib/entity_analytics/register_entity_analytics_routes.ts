@@ -13,6 +13,7 @@ import { registerEntityStoreRoutes } from './entity_store/routes';
 import { registerPrivilegeMonitoringRoutes } from './privilege_monitoring/routes/register_privilege_monitoring_routes';
 import { registerMigrationsRoutes } from './migrations/routes';
 import { registerEntityDetailsRoutes } from './entity_details/routes';
+import { registerWatchlistRoutes } from './watchlists/register_watchlist_routes';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
@@ -26,5 +27,9 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
 
   if (routeDeps.config.experimentalFeatures.entityDetailsHighlightsEnabled) {
     registerEntityDetailsRoutes(routeDeps);
+  }
+
+  if (routeDeps.config.experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+    registerWatchlistRoutes(routeDeps);
   }
 };

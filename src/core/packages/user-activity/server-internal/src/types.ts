@@ -28,8 +28,8 @@ export interface SpaceContext {
 export interface UserContext {
   /** User profile id. */
   id?: string;
-  /** Username. */
-  username?: string;
+  /** Username / login name. */
+  name?: string;
   /** User email address. */
   email?: string;
   /** User roles. */

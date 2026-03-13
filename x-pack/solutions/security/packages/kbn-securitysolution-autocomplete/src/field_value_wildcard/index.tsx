@@ -9,15 +9,11 @@ import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/kql/public';
 
 import { uniq } from 'lodash';
 
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
-// TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../../../../src/plugins/kql/public';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AutocompleteStart = any;
 
 import * as i18n from '../translations';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
@@ -136,7 +132,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           newOptions.length > 0 && searchQuery && searchQuery !== newOptions[0].label;
 
         handleError(undefined);
-        setShowSpacesWarning(false);
         setSearchQuery('');
 
         if (isCustomSearchQuery) {
@@ -158,10 +153,26 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           handleError(err);
           handleWarning(warning);
           if (!err) handleSpacesWarning(searchVal);
-          setSearchQuery(searchVal);
         }
+
+        if (searchVal) {
+          // Clear selected option when user types to allow user to modify value without {backspace}
+          onChange('');
+        }
+
+        // Update search query unconditionally to show correct suggestions even when input is cleared
+        setSearchQuery(searchVal);
       },
-      [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
+      [
+        handleError,
+        handleSpacesWarning,
+        isRequired,
+        onChange,
+        selectedField,
+        touched,
+        warning,
+        handleWarning,
+      ]
     );
 
     const handleCreateOption = useCallback(

@@ -50,7 +50,10 @@ export function getTriggerTypeSuggestions(
       : allTriggerTypes;
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type);
+    const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
+    const snippetText = generateTriggerSnippet(triggerType.type, {
+      defaultCondition: triggerDef?.snippets?.condition,
+    });
 
     // Extended range for multi-line insertion
     const extendedRange = {

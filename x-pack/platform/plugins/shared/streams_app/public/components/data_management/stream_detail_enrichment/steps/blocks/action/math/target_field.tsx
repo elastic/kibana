@@ -26,7 +26,7 @@ export const MathTargetFieldSelector = () => {
   return (
     <EuiFormRow
       label={i18n.translate('xpack.streams.math.processorTargetFieldLabel', {
-        defaultMessage: 'Target field',
+        defaultMessage: 'Output field',
       })}
       isInvalid={Boolean(errors.to)}
       error={errors.to?.message}

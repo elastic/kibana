@@ -5,49 +5,20 @@
  * 2.0.
  */
 
-import type {
-  DefaultEmbeddableApi,
-  HasDrilldowns,
-  SerializedDrilldowns,
-} from '@kbn/embeddable-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
   HasEditCapabilities,
   PublishesTitle,
   PublishesWritableTitle,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-export type OverviewMode = 'single' | 'groups';
-export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
-export interface GroupFilters {
-  groupBy: GroupBy;
-  groups?: string[];
-  filters?: Filter[];
-  kqlQuery?: string;
-}
+import type {
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+} from '../../../../common/embeddables/overview/types';
 
-export interface SloConfigurationProps {
-  overviewMode?: OverviewMode;
-}
-
-export type SingleSloCustomInput = SloConfigurationProps & {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
-  remoteName?: string;
-  showAllGroupByInstances?: boolean;
-};
-
-export type GroupSloCustomInput = SloConfigurationProps & {
-  groupFilters: GroupFilters | undefined;
-};
-
-export type SloOverviewState = Partial<GroupSloCustomInput> & Partial<SingleSloCustomInput>;
-
-export type SloOverviewEmbeddableState = SerializedTitles & SerializedDrilldowns & SloOverviewState;
-
-export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
+export type SloOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasDrilldowns &
@@ -56,8 +27,8 @@ export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   HasSupportedTriggers;
 
 export interface HasSloGroupOverviewConfig {
-  getSloGroupOverviewConfig: () => GroupSloCustomInput;
-  updateSloGroupOverviewConfig: (next: GroupSloCustomInput) => void;
+  getSloGroupOverviewConfig: () => GroupOverviewCustomState;
+  updateSloGroupOverviewConfig: (next: GroupOverviewCustomState) => void;
 }
 
 export const apiHasSloGroupOverviewConfig = (

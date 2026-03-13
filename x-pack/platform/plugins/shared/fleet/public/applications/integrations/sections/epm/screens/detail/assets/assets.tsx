@@ -36,10 +36,15 @@ import {
 } from '../../../../../hooks';
 import { sendGetBulkAssets } from '../../../../../hooks';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { ALERTING_ASSET_TYPES } from '../alerting';
 
 import { DeferredAssetsSection } from './deferred_assets_section';
 import { AssetsAccordion } from './assets_accordion';
 import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
+
+const filteredDisplayedAssetTypes = displayedAssetTypes.filter(
+  (t) => !(ALERTING_ASSET_TYPES as string[]).includes(t)
+);
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -95,7 +100,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgAssetsByType = useMemo(
     () =>
       pkgAssets.reduce((acc, asset) => {
-        if (displayedAssetTypes.includes(asset.type)) {
+        if (filteredDisplayedAssetTypes.includes(asset.type)) {
           if (!acc[asset.type]) {
             acc[asset.type] = [];
           }
@@ -271,7 +276,7 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
       ) : null,
 
       // List all assets by order of `displayedAssetTypes`
-      ...displayedAssetTypes.map((assetType) => {
+      ...filteredDisplayedAssetTypes.map((assetType) => {
         if (config?.hideDashboards && assetType === 'dashboard') {
           // If hideDashboards is set, filter out dashboards from displayed assets
           return null;
