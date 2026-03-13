@@ -87,23 +87,28 @@ const SquareOuter = ({
   children,
   isSmall,
   ...props
-}: NodeProps & { color: string; isSmall?: boolean }) => (
-  <div
-    css={css`
-      position: absolute;
-      top: ${isSmall ? 0 : '4px'};
-      left: ${isSmall ? 0 : '4px'};
-      bottom: ${isSmall ? 0 : '4px'};
-      right: ${isSmall ? 0 : '4px'};
-      background-color: ${darken(0.1, props.color)};
-      border-radius: 3px;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    `}
-    {...props}
-  >
-    {children}
-  </div>
-);
+}: NodeProps & { color: string; isSmall?: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+  const inset = isSmall ? 0 : euiTheme.size.xs;
+
+  return (
+    <div
+      css={css`
+        position: absolute;
+        top: ${inset};
+        left: ${inset};
+        bottom: ${inset};
+        right: ${inset};
+        background-color: ${darken(0.1, props.color)};
+        border-radius: 3px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+      `}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 const SquareInner = ({ children, ...props }: NodeProps & { color: string }) => (
   <div
     css={css`
