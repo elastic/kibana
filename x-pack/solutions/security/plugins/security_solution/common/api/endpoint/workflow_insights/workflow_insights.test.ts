@@ -411,13 +411,13 @@ describe('Workflow Insights', () => {
         ).toThrow();
       });
 
-      it('should not accept more than 2000 entries in an exception list item', () => {
+      it('should not accept more than 250 entries in an exception list item', () => {
         expect(() =>
           validateRequest({
             ...baseRequest,
             body: {
               remediation: {
-                exception_list_items: [{ list_id: 'list-id', entries: Array(2001).fill({}) }],
+                exception_list_items: [{ list_id: 'list-id', entries: Array(251).fill({}) }],
               },
             },
           })

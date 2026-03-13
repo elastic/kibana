@@ -106,7 +106,7 @@ const WindowsSignerEntrySchema = schema.object({
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
     }),
-    { minSize: 1, maxSize: 2000 }
+    { minSize: 1, maxSize: 250 }
   ),
 });
 
@@ -155,7 +155,7 @@ const hashEntriesValidation = (entries: BlocklistConditionEntry[]) => {
 // Validate there is only one entry when signer or path and the allowed entries for hashes
 const entriesSchemaOptions = {
   minSize: 1,
-  maxSize: 2000,
+  maxSize: 250,
   validate(entries: BlocklistConditionEntry[]) {
     if (allowedHashes.includes(entries[0].field)) {
       return hashEntriesValidation(entries);

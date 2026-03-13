@@ -64,7 +64,7 @@ const TrustedDeviceEntrySchema = schema.object({
 
 const TrustedDeviceEntriesSchema = schema.arrayOf(TrustedDeviceEntrySchema, {
   minSize: 1,
-  maxSize: 2000,
+  maxSize: 250,
   validate(
     entries: Array<{ field: string; type: string; operator: string; value: string | string[] }>
   ) {

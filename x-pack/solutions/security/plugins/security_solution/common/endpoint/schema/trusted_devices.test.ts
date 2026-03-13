@@ -162,11 +162,11 @@ describe('When invoking Trusted Devices Schema', () => {
       expect(() => body.validate(createNewTrustedDevice({ entries: [] }))).toThrow();
     });
 
-    it('should not accept more than 2000 entries', () => {
+    it('should not accept more than 250 entries', () => {
       expect(() =>
         body.validate(
           createNewTrustedDevice({
-            entries: Array(2001).fill(
+            entries: Array(251).fill(
               createConditionEntry({ field: TrustedDeviceConditionEntryField.DEVICE_ID })
             ),
           })

@@ -93,7 +93,7 @@ const MacEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
-  maxSize: 2000,
+  maxSize: 250,
   validate(entries: TrustedAppConditionEntry[]) {
     return (
       getDuplicateFields(entries)
