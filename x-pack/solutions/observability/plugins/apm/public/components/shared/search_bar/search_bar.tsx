@@ -92,7 +92,6 @@ export function SearchBar({
               <EuiFlexItem grow={false}>
                 <ApmEnvironmentFilter
                   compressed
-                  hideLabel={!isMedium}
                   fullWidth={isMedium}
                   cssOverride={
                     isMedium

@@ -32,10 +32,12 @@ const NO_SELECTION_OPTION = i18n.translate(
 
 export function TransactionTypeSelect({
   compressed,
+  hideLabel,
   fullWidth,
   cssOverride,
 }: {
   compressed?: boolean;
+  hideLabel?: boolean;
   fullWidth?: boolean;
   cssOverride?: CSSObject;
 }) {
@@ -61,6 +63,13 @@ export function TransactionTypeSelect({
       css={cssOverride}
       compressed={compressed !== false}
       fullWidth={fullWidth ?? isSmall}
+      prepend={
+        hideLabel
+          ? undefined
+          : i18n.translate('xpack.apm.transactionTypeSelect.label', {
+              defaultMessage: 'Type',
+            })
+      }
       aria-label={i18n.translate(
         'xpack.apm.serviceOverview.filterByTransactionTypeSelect.ariaLabel',
         { defaultMessage: 'Filter by transaction type select' }
