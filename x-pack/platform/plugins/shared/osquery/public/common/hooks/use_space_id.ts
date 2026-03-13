@@ -8,16 +8,18 @@
 import { useState, useEffect } from 'react';
 import { useKibana } from '../lib/kibana';
 
+const DEFAULT_SPACE_ID = 'default';
+
 export const useSpaceId = (): string | undefined => {
   const { spaces } = useKibana().services;
-  const [spaceId, setSpaceId] = useState<string>();
+  const [spaceId, setSpaceId] = useState<string | undefined>(spaces ? undefined : DEFAULT_SPACE_ID);
 
   useEffect(() => {
     if (spaces) {
       spaces
         .getActiveSpace()
         .then((space) => setSpaceId(space.id))
-        .catch(() => {});
+        .catch(() => setSpaceId(DEFAULT_SPACE_ID));
     }
   }, [spaces]);
 
