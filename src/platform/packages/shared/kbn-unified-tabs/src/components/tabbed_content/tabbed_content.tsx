@@ -235,7 +235,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           return prevState;
         }
 
-        const nextSelectedItem = restoredItems[0] ?? prevState.selectedItem;
+        const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
         if (nextSelectedItem) {
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
         }
@@ -250,7 +250,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
         return {
           items: [...prevState.items, ...restoredItems],
-          selectedItem: nextSelectedItem ?? null,
+          selectedItem: nextSelectedItem,
         };
       });
     },
