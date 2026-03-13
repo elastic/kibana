@@ -135,7 +135,6 @@ export const getLiveQueryResultsRoute = (
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
                 spaceId,
               },
@@ -171,6 +170,7 @@ export const getLiveQueryResultsRoute = (
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,

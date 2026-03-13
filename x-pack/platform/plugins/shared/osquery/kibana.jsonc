@@ -23,7 +23,10 @@
       "taskManager",
       "triggersActionsUi",
       "ruleRegistry",
-      "security"
+      "security",
+      "unifiedDocViewer",
+      "uiActions",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "fleet",
