@@ -19,6 +19,7 @@ import type { NoResultsSuggestionWhenFiltersProps } from './no_results_suggestio
 import { NoResultsSuggestionWhenFilters } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
+import { NoResultsSuggestionWhenUnmapped } from './no_results_suggestion_when_unmapped';
 import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
@@ -117,6 +118,11 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
         {hasFilters && (
           <li>
             <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
+          </li>
+        )}
+        {(hasQuery || hasFilters) && (
+          <li>
+            <NoResultsSuggestionWhenUnmapped />
           </li>
         )}
       </ul>
