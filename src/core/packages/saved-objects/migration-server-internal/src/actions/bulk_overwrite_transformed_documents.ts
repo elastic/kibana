@@ -16,9 +16,18 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { isWriteBlockException, isIndexNotFoundException } from './es_errors';
+import {
+  isWriteBlockException,
+  isIndexNotFoundException,
+  isUnavailableShardsException,
+} from './es_errors';
 import { WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE } from './constants';
-import type { TargetIndexHadWriteBlock, RequestEntityTooLargeException, IndexNotFound } from '.';
+import type {
+  TargetIndexHadWriteBlock,
+  RequestEntityTooLargeException,
+  IndexNotFound,
+  UnavailableShardsException,
+} from '.';
 import type { BulkOperation } from '../model/create_batches';
 
 /** @internal */
@@ -50,7 +59,8 @@ export const bulkOverwriteTransformedDocuments =
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
     | IndexNotFound
-    | RequestEntityTooLargeException,
+    | RequestEntityTooLargeException
+    | UnavailableShardsException,
     'bulk_index_succeeded'
   > =>
   () => {
@@ -91,6 +101,12 @@ export const bulkOverwriteTransformedDocuments =
             return Either.left({
               type: 'index_not_found_exception' as const,
               index,
+            });
+          }
+          if (errors.every(isUnavailableShardsException)) {
+            return Either.left({
+              type: 'unavailable_shards_exception' as const,
+              message: `Not enough active copies to meet shard count for index [${index}]. Will retry.`,
             });
           }
           throw new Error(JSON.stringify(errors));
