@@ -21,12 +21,12 @@ import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/pu
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { contentManagementService, coreServices } from '../../services/kibana_services';
-import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 import { SavedSearchType } from '@kbn/saved-search-plugin/public';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
+import { getCanvasNotifyService } from '../../services/canvas_notify_service';
+import { contentManagementService, coreServices } from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>
@@ -39,7 +39,12 @@ const strings = {
     }),
 };
 
-const CANVAS_LIBRARY_TYPES = [SavedSearchType, VISUALIZE_SAVED_OBJECT_TYPE, LENS_CONTENT_TYPE, MAP_SAVED_OBJECT_TYPE];
+const CANVAS_LIBRARY_TYPES = [
+  SavedSearchType,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+  LENS_CONTENT_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+];
 
 export interface Props {
   onClose: () => void;

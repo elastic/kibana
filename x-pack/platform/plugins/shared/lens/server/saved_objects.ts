@@ -11,11 +11,11 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { lensItemAttributesSchemaV0 } from './content_management/v0';
-import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 /**
  * Extending V0 Lens attributes schema to match existing. Adds loose `version` property.
