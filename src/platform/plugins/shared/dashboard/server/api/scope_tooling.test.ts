@@ -180,6 +180,7 @@ describe('stripUnmappedKeys', () => {
           uid: 'panel1',
         },
         {
+          collapsed: false,
           grid: { y: 0 },
           panels: [
             {
@@ -223,6 +224,7 @@ describe('stripUnmappedKeys', () => {
               "uid": "panel1",
             },
             Object {
+              "collapsed": false,
               "grid": Object {
                 "y": 0,
               },
