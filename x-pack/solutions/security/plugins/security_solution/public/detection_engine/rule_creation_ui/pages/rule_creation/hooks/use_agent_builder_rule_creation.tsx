@@ -29,6 +29,7 @@ import {
 } from '../../../../../../common/constants';
 import { aiCreatedRule$, clearAiCreatedRule } from '../../../../common/ai_rule_creation_store';
 import { formatRule } from '../helpers';
+
 const SYNC_DEBOUNCE_MS = 500;
 
 interface UseAgentBuilderRuleCreationParams {

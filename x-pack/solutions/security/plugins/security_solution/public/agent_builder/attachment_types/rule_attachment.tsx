@@ -57,15 +57,7 @@ const getRuleName = (attachment: RuleAttachment): string | undefined => {
   if (attachment?.data?.attachmentLabel) {
     return attachment.data.attachmentLabel;
   }
-  try {
-    const parsed = JSON.parse(attachment?.data?.text);
-    if (parsed?.name) {
-      return parsed.name;
-    }
-  } catch {
-    // ignore
-  }
-  return undefined;
+  return parseRuleFromAttachment(attachment)?.name;
 };
 
 const EmptyRuleContent: React.FC = () => (
