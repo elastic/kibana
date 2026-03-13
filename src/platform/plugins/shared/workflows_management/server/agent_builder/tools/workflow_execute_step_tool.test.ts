@@ -41,6 +41,48 @@ steps:
     type: elasticsearch.indices.delete
     with:
       index: temp-index
+  - name: check_alerts
+    type: if
+    condition: "steps.search_step.output.hits.total.value > 0"
+    steps:
+      - name: nested_slack
+        type: slack
+        connector-id: nested-connector
+        with:
+          message: "alert found"
+      - name: nested_log
+        type: console
+        with:
+          message: "nested hello"
+    else:
+      - name: nested_else_log
+        type: console
+        with:
+          message: "no alerts"
+  - name: safe_if
+    type: if
+    condition: "true"
+    steps:
+      - name: safe_child_log
+        type: console
+        with:
+          message: "safe child"
+      - name: safe_child_search
+        type: elasticsearch.search
+        with:
+          index: my-index
+  - name: outer_foreach
+    type: foreach
+    foreach: "items"
+    steps:
+      - name: inner_if
+        type: if
+        condition: "true"
+        steps:
+          - name: deep_http
+            type: http
+            with:
+              url: "https://example.com"
 `;
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -217,6 +259,51 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.error).toEqual({ message: 'Step failed' });
     });
 
+    it('executes a nested safe step (inside if.steps)', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-nested');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'nested_log', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 80,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'nested_log' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(data.status).toBe(ExecutionStatus.COMPLETED);
+      expect(mockApi.testStep).toHaveBeenCalledWith(
+        VALID_WORKFLOW_YAML,
+        'nested_log',
+        {},
+        'default',
+        context.request
+      );
+    });
+
+    it('executes a nested safe step (inside if.else)', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-else');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'nested_else_log', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 60,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'nested_else_log' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(data.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
     it('returns error when testStep throws', async () => {
       jest.useRealTimers();
 
@@ -232,11 +319,8 @@ describe('registerWorkflowExecuteStepTool', () => {
   });
 
   describe('unsafe step blocking', () => {
-    it('blocks a slack connector step with preview', async () => {
-      mockApi.validateWorkflow.mockResolvedValue({
-        valid: true,
-        diagnostics: [],
-      });
+    it('blocks a step whose own type is unsafe', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 
       const context = createMockContext(VALID_WORKFLOW_YAML);
       const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
@@ -244,13 +328,14 @@ describe('registerWorkflowExecuteStepTool', () => {
 
       expect(data.blocked).toBe(true);
       expect(data.stepType).toBe('slack');
-      expect(data.stepConfig).toBeDefined();
+      expect(data.unsafeStepType).toBe('slack');
+      expect(data.unsafeChildStepId).toBeUndefined();
       expect(data.validation).toEqual({ valid: true });
       expect(data.hint).toContain('Run step');
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
-    it('blocks elasticsearch.indices.delete with preview', async () => {
+    it('blocks elasticsearch.indices.delete with validation errors', async () => {
       mockApi.validateWorkflow.mockResolvedValue({
         valid: false,
         diagnostics: [{ severity: 'error', source: 'schema', message: 'Invalid index name' }],
@@ -269,17 +354,67 @@ describe('registerWorkflowExecuteStepTool', () => {
       });
     });
 
-    it('includes step config in blocked preview', async () => {
+    it('blocks a nested unsafe step referenced directly', async () => {
       mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
 
       const context = createMockContext(VALID_WORKFLOW_YAML);
-      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+      const result = await invokeHandler(registeredTool, { stepName: 'nested_slack' }, context);
       const data = result.results[0].data as Record<string, unknown>;
-      const config = data.stepConfig as Record<string, unknown>;
 
-      expect(config.name).toBe('send_slack');
-      expect(config.type).toBe('slack');
-      expect(config['connector-id']).toBe('my-slack');
+      expect(data.blocked).toBe(true);
+      expect(data.stepType).toBe('slack');
+      expect(data.unsafeStepType).toBe('slack');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('blocks an if step that contains an unsafe child', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'check_alerts' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.blocked).toBe(true);
+      expect(data.stepType).toBe('if');
+      expect(data.unsafeStepType).toBe('slack');
+      expect(data.unsafeChildStepId).toBe('nested_slack');
+      expect(data.reason).toContain('contains child step "nested_slack"');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('blocks a foreach with a deeply nested unsafe step', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'outer_foreach' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.blocked).toBe(true);
+      expect(data.stepType).toBe('foreach');
+      expect(data.unsafeStepType).toBe('http');
+      expect(data.unsafeChildStepId).toBe('deep_http');
+      expect(data.reason).toContain('contains child step "deep_http"');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('allows an if step where all children are safe', async () => {
+      jest.useRealTimers();
+
+      mockApi.testStep.mockResolvedValue('exec-safe-if');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'safe_if', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 90,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML);
+      const result = await invokeHandler(registeredTool, { stepName: 'safe_if' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(data.blocked).toBeUndefined();
+      expect(mockApi.testStep).toHaveBeenCalled();
     });
   });
 });

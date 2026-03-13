@@ -33,3 +33,11 @@ export {
 } from './stringify_workflow_definition';
 export { updateYamlField } from './update_yaml_field';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';
+export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from './build_workflow_lookup';

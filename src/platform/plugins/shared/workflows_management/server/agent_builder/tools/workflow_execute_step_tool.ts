@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LineCounter, parseDocument } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
+import type { StepInfo, WorkflowLookup } from '../../../common/lib/yaml';
+import { buildWorkflowLookup } from '../../../common/lib/yaml';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
@@ -67,28 +69,44 @@ const findWorkflowYamlAttachment = (
   return { yaml: data.yaml, workflowId: data.workflowId };
 };
 
-interface StepInfo {
-  name: string;
-  type: string;
-  config: Record<string, unknown>;
-}
+const buildLookup = (yaml: string): WorkflowLookup => {
+  const lineCounter = new LineCounter();
+  const doc = parseDocument(yaml, { lineCounter });
+  return buildWorkflowLookup(doc, lineCounter);
+};
 
-const findStepByName = (yaml: string, stepName: string): StepInfo | null => {
-  const parsed = parseYamlToJSONWithoutValidation(yaml);
-  if (!parsed.success) return null;
-
-  const steps = parsed.json?.steps;
-  if (!Array.isArray(steps)) return null;
-
-  for (const step of steps) {
-    if (step && typeof step === 'object' && step.name === stepName) {
-      return {
-        name: step.name as string,
-        type: (step.type as string) ?? 'unknown',
-        config: step as Record<string, unknown>,
-      };
+/**
+ * Collects all descendant step IDs of a given step using parentStepId links.
+ */
+const getDescendantStepIds = (stepId: string, allSteps: Record<string, StepInfo>): string[] => {
+  const descendants: string[] = [];
+  for (const [id, info] of Object.entries(allSteps)) {
+    if (info.parentStepId === stepId) {
+      descendants.push(id);
+      descendants.push(...getDescendantStepIds(id, allSteps));
     }
   }
+  return descendants;
+};
+
+/**
+ * A step is safe only if its own type and every descendant's type are in SAFE_STEP_TYPES.
+ * Returns the first unsafe step found (self or descendant), or null if fully safe.
+ */
+const findUnsafeStep = (stepId: string, allSteps: Record<string, StepInfo>): StepInfo | null => {
+  const step = allSteps[stepId];
+  if (!step) return null;
+
+  if (!SAFE_STEP_TYPES.has(step.stepType)) return step;
+
+  const descendantIds = getDescendantStepIds(stepId, allSteps);
+  for (const id of descendantIds) {
+    const descendant = allSteps[id];
+    if (descendant && !SAFE_STEP_TYPES.has(descendant.stepType)) {
+      return descendant;
+    }
+  }
+
   return null;
 };
 
@@ -185,7 +203,8 @@ Provide contextOverride with mock data when the step references outputs from pre
 
       const { yaml } = attachment;
 
-      const stepInfo = findStepByName(yaml, stepName);
+      const lookup = buildLookup(yaml);
+      const stepInfo = lookup.steps[stepName];
       if (!stepInfo) {
         return {
           results: [
@@ -200,9 +219,9 @@ Provide contextOverride with mock data when the step references outputs from pre
         };
       }
 
-      const isSafe = SAFE_STEP_TYPES.has(stepInfo.type);
+      const unsafeStep = findUnsafeStep(stepName, lookup.steps);
 
-      if (!isSafe) {
+      if (unsafeStep) {
         let validation: { valid: boolean; errors?: string[] } | undefined;
         try {
           const result = await api.validateWorkflow(yaml, context.spaceId, context.request);
@@ -218,17 +237,23 @@ Provide contextOverride with mock data when the step references outputs from pre
           // validation unavailable
         }
 
+        const isChildUnsafe = unsafeStep.stepId !== stepName;
+        const reason = isChildUnsafe
+          ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
+          : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
+
         return {
           results: [
             {
               type: 'other' as const,
               data: {
                 blocked: true,
-                reason: `Step type "${stepInfo.type}" has external side effects and cannot be auto-executed`,
-                stepType: stepInfo.type,
-                stepConfig: stepInfo.config,
+                reason,
+                stepType: stepInfo.stepType,
+                unsafeStepType: unsafeStep.stepType,
+                ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
                 ...(validation ? { validation } : {}),
-                hint: 'The step configuration is shown above. Ask the user to test it manually using the "Run step" button in the editor.',
+                hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
               },
             },
           ],
