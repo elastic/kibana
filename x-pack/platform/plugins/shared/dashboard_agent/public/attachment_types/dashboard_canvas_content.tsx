@@ -16,7 +16,7 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
-import { useRegisterActionButtons } from './use_register_action_buttons';
+import { useRegisterActionButtons, SavedObjectStatus } from './use_register_action_buttons';
 
 const dashboardCanvasContentStyles = {
   root: css({
@@ -69,36 +69,26 @@ export const DashboardCanvasContent = ({
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
-  const [linkedSavedDashboardExists, setLinkedSavedDashboardExists] = useState(false);
-  const [isLinkedSavedDashboardExistsLoading, setIsLinkedSavedDashboardExistsLoading] =
-    useState(false);
+  const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
+    status: 'idle',
+  });
 
   useEffect(
-    function checkLinkedSavedDashboardExists() {
-      let canceled = false;
-
+    function checkSavedObjectExists() {
       if (!linkedSavedObjectId) {
-        setLinkedSavedDashboardExists(false);
-        setIsLinkedSavedDashboardExistsLoading(false);
+        setSavedObjectStatus({ status: 'resolved', exists: false });
         return;
       }
 
-      setIsLinkedSavedDashboardExistsLoading(true);
+      let canceled = false;
+      setSavedObjectStatus({ status: 'loading' });
+
       doesSavedDashboardExist(linkedSavedObjectId)
         .then((exists) => {
-          if (!canceled) {
-            setLinkedSavedDashboardExists(exists);
-          }
+          if (!canceled) { setSavedObjectStatus({ status: 'resolved', exists }) }
         })
         .catch(() => {
-          if (!canceled) {
-            setLinkedSavedDashboardExists(false);
-          }
-        })
-        .finally(() => {
-          if (!canceled) {
-            setIsLinkedSavedDashboardExistsLoading(false);
-          }
+          if (!canceled) { setSavedObjectStatus({ status: 'resolved', exists: false }); }
         });
 
       return () => {
@@ -129,8 +119,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     linkedSavedObjectId,
-    linkedSavedDashboardExists,
-    isLinkedSavedDashboardExistsLoading,
+    doesSavedDashboardExist,
   });
 
   return (
@@ -165,9 +154,7 @@ export const DashboardCanvasContent = ({
           showPlainSpinner
           locator={dashboardLocator}
           savedObjectId={
-            !isLinkedSavedDashboardExistsLoading && linkedSavedDashboardExists
-              ? linkedSavedObjectId
-              : undefined
+           savedObjectStatus.status === 'resolved' && savedObjectStatus.exists ? linkedSavedObjectId : undefined
           }
           onApiAvailable={(api) => {
             api.setViewMode('view');
