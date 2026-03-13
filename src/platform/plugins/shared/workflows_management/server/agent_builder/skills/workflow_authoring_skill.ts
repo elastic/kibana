@@ -185,6 +185,26 @@ When the user asks you to fix a validation error:
 5. If the step type does NOT exist: tell the user and list similar alternatives
 6. NEVER guess or replace a step type with something unrelated
 
+### Using Browser Tools (When Available)
+
+When browser tools are available (in the workflow YAML editor context), you MUST use them to propose changes.
+Browser tools apply changes directly in the editor with an accept/reject UX. NEVER just describe changes
+in text when browser tools are available — always call the appropriate tool.
+
+Available browser tools (when the user is in the workflow editor):
+- **workflow_insert_step**: Insert a new step (provide structured JSON, NOT YAML)
+- **workflow_modify_step**: Replace an existing step entirely
+- **workflow_modify_step_property**: Change a single property within a step (e.g., \`with.message\`)
+- **workflow_modify_property**: Change a root-level workflow property (name, description, etc.)
+- **workflow_delete_step**: Remove a step by name
+- **workflow_replace_yaml**: Replace the entire YAML (use sparingly, prefer surgical edits)
+
+When using browser tools:
+1. Provide step definitions as structured JSON objects, NOT as YAML strings
+2. Always include a \`proposalId\` to link the change with the chat diff attachment
+3. Validate the workflow AFTER the user accepts the proposed change
+4. For multi-step changes, call multiple browser tools — each will create a separate proposal
+
 ### Best Practices
 
 1. Always search examples first before writing step YAML

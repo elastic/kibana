@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -32,6 +33,28 @@ export interface WorkflowsPublicPluginSetupDependencies {
 
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
+/**
+ * Lightweight interface for the Agent Builder plugin's public start contract.
+ * Defined here instead of importing from the plugin directly to avoid circular
+ * dependencies (workflowsManagement uses runtimePluginDependencies).
+ */
+export interface AgentBuilderPluginStartContract {
+  openConversationFlyout: (options?: {
+    sessionTag?: string;
+    agentId?: string;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+    attachments?: Array<{ type: string; data: Record<string, unknown> }>;
+    browserApiTools?: Array<{
+      id: string;
+      description: string;
+      schema: unknown;
+      handler: (params: unknown) => void | Promise<void>;
+    }>;
+  }) => { flyoutRef: { close: () => void } };
+  attachments: AttachmentServiceStartContract;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginStart {}
 
@@ -52,6 +75,7 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
+    agentBuilder?: AgentBuilderPluginStartContract;
   };
 }
 

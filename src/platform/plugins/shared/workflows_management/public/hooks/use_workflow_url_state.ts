@@ -18,6 +18,7 @@ export interface WorkflowUrlState {
   executionId?: string;
   stepExecutionId?: string;
   stepId?: string;
+  conversationId?: string;
 }
 
 export function useWorkflowUrlState() {
@@ -31,6 +32,7 @@ export function useWorkflowUrlState() {
       executionId: params.executionId as string | undefined,
       stepExecutionId: params.stepExecutionId as string | undefined,
       stepId: params.stepId as string | undefined,
+      conversationId: params.conversationId as string | undefined,
     };
   }, [location.search]);
 
@@ -113,6 +115,7 @@ export function useWorkflowUrlState() {
     selectedExecutionId: urlState.executionId,
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
+    conversationId: urlState.conversationId,
 
     // State setters
     setActiveTab,
