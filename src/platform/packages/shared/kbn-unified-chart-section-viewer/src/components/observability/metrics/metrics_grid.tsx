@@ -340,7 +340,7 @@ const ChartItem = React.memo(
               <div css={css({ marginBottom: euiTheme.size.xs })}>
                 <EuiBadge color="hollow">
                   {i18n.translate('metricsExperience.m4Comparison.standardLabel', {
-                    defaultMessage: 'Standard · AVG · {count} data points',
+                    defaultMessage: 'Standard (AVG) · up to {count} data points',
                     values: { count: AVG_TARGET_BUCKETS.toLocaleString() },
                   })}
                 </EuiBadge>
@@ -359,7 +359,7 @@ const ChartItem = React.memo(
               <div css={css({ marginBottom: euiTheme.size.xs })}>
                 <EuiBadge color="accent">
                   {i18n.translate('metricsExperience.m4Comparison.m4Label', {
-                    defaultMessage: 'M4 Downsampled · AVG → M4 · {count} data points',
+                    defaultMessage: 'M4 Downsampled · ~{count} data points',
                     values: { count: (M4_TARGET_BUCKETS * 4).toLocaleString() },
                   })}
                 </EuiBadge>
