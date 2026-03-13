@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
   const { reporting, common, discover, timePicker, exports } = getPageObjects([
