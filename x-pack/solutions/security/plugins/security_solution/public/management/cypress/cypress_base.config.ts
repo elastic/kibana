@@ -44,7 +44,8 @@ export const getCypressBaseConfig = (
       trashAssetsBeforeRuns: false,
       video: true,
       videoCompression: 15,
-      videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
+      videosFolder:
+        '../../../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 1200,
       viewportWidth: 1920,
       experimentalStudio: true,
