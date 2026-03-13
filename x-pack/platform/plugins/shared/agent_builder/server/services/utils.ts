@@ -45,34 +45,37 @@ export const getUserFromRequest = async ({
   return { username: authResponse.username };
 };
 
-const VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE = 'agent_builder:visibility_access_override'; // intentionally unregistered privilege
+const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege
 
 /**
  * Returns `true` only for users with wildcard Elasticsearch privileges (for example `superuser`).
  *
  * We intentionally check an application privilege name that is not registered by Kibana
- * (`agent_builder:visibility_access_override`). Because this privilege is unregistered, normal
- * roles fail this check, while wildcard roles (for example application/cluster `*`/`all`) pass.
+ * (`agent_builder:admin`). Because this privilege is unregistered, normal roles fail this check,
+ * while wildcard roles (for example application/cluster `*`/`all`) pass.
  *
- * This is used as an internal visibility-access override, independent of feature/sub-feature
- * grants.
+ * This is used as an internal admin check, independent of feature/sub-feature grants.
  */
-export const hasVisibilityAccessOverrideFromRequest = async ({
+export const isAdminFromRequest = async ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
 }): Promise<boolean> => {
-  const { has_all_requested: hasVisibilityAccessOverride } = await esClient.security.hasPrivileges({
-    application: [
-      {
-        application: KIBANA_APPLICATION,
-        resources: ['*'],
-        privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
-      },
-    ],
-  });
+  try {
+    const { has_all_requested: isAdmin } = await esClient.security.hasPrivileges({
+      application: [
+        {
+          application: KIBANA_APPLICATION,
+          resources: ['*'],
+          privileges: [ADMIN_PRIVILEGE],
+        },
+      ],
+    });
 
-  return hasVisibilityAccessOverride;
+    return isAdmin;
+  } catch {
+    return false;
+  }
 };
 
 export const getAgentApiAccessFromRequest = async ({

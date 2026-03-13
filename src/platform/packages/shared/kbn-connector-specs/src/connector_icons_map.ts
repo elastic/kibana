@@ -92,6 +92,7 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.confluence-cloud',
     lazy(
@@ -131,6 +132,12 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.1password',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
+    ),
+  ],
+  [
     '.tavily',
     lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
   ],
@@ -144,5 +151,9 @@ export const ConnectorIconsMap: Map<
   [
     '.aws_lambda',
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
+  ],
+  [
+    '.amazon_s3',
+    lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
 ]);

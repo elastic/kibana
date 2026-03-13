@@ -51,6 +51,22 @@ export const integrationSchemaV1 = schema.object({
   ),
 });
 
+export const changelogEntrySchema = schema.object({
+  version: schema.string(),
+  changes: schema.arrayOf(
+    schema.object({
+      description: schema.string(),
+      type: schema.oneOf([
+        schema.literal('enhancement'),
+        schema.literal('bugfix'),
+        schema.literal('breaking-change'),
+      ]),
+      link: schema.string(),
+    }),
+    { maxSize: 50 }
+  ),
+});
+
 export const integrationSchemaV2 = schema.object({
   integration_id: schema.string({ maxLength: MAX_ID_LENGTH, minLength: 1 }),
   created_by: schema.string({ minLength: 1 }),
@@ -82,4 +98,5 @@ export const integrationSchemaV2 = schema.object({
     },
     { unknowns: 'allow' }
   ),
+  changelog: schema.maybe(schema.arrayOf(changelogEntrySchema, { maxSize: 1000 })),
 });
