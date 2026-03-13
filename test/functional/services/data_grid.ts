@@ -597,20 +597,11 @@ export class DataGridService extends FtrService {
       : `tableDocViewRow-${fieldName}-name`;
     await this.retry.try(async () => {
       await this.toasts.dismissIfExists();
-      await this.testSubjects.moveMouseTo(cellSelector);
-
-      try {
-        await this.testSubjects.click(cellSelector);
-      } catch {
-        // Fallback for transient overlays intercepting pointer clicks.
-        await this.toasts.dismissIfExists();
-        const cell = await this.testSubjects.find(cellSelector);
-        await cell.pressKeys(Key.ENTER);
-      }
+      const cell = await this.testSubjects.find(cellSelector);
+      await cell.pressKeys(Key.ENTER);
 
       const actionVisible = await this.testSubjects.exists(`${actionName}-${fieldName}`);
       if (!actionVisible) {
-        const cell = await this.testSubjects.find(cellSelector);
         await cell.pressKeys(Key.ENTER);
       }
 
@@ -626,8 +617,8 @@ export class DataGridService extends FtrService {
     const actionSelector = `${actionName}-${fieldName}`;
     await this.retry.try(async () => {
       await this.toasts.dismissIfExists();
-      await this.testSubjects.moveMouseTo(actionSelector);
-      await this.testSubjects.click(actionSelector);
+      const action = await this.testSubjects.find(actionSelector);
+      await action.pressKeys(Key.ENTER);
     });
   }
 
