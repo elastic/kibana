@@ -169,9 +169,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       size="s"
       data-test-subj="aiAssistantHeaderButton"
     >
-      {i18n.translate('aiAssistantManagementSelection.headerButton.label', {
-        defaultMessage: 'AI Assistant',
-      })}
+    <FormattedMessage
+        id="aiAssistantManagementSelection.headerButton.label"
+        defaultMessage="AI Assistant"
+      />
     </AiButton>
   );
 
