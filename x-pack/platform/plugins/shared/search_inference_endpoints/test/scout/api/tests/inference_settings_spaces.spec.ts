@@ -25,8 +25,8 @@ apiTest.describe(
       const credentials = await samlAuth.asInteractiveUser('admin');
       authHeaders = { ...credentials.cookieHeader, ...COMMON_HEADERS };
 
-      await apiServices.spaces.create({ id: SPACE_A, name: 'Space A', disabledFeatures: [] });
-      await apiServices.spaces.create({ id: SPACE_B, name: 'Space B', disabledFeatures: [] });
+      await apiServices.spaces.create({ id: SPACE_A, name: 'Space A' });
+      await apiServices.spaces.create({ id: SPACE_B, name: 'Space B' });
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
