@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
@@ -34,7 +33,6 @@ export const AllRules = React.memo(() => {
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
         <RulesTableToolbar />
-        <EuiSpacer />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
       </>
     );
@@ -42,7 +40,6 @@ export const AllRules = React.memo(() => {
     return (
       <UpgradePrebuiltRulesTableContextProvider>
         <RulesTableToolbar />
-        <EuiSpacer />
         <UpgradePrebuiltRulesTable />
       </UpgradePrebuiltRulesTableContextProvider>
     );

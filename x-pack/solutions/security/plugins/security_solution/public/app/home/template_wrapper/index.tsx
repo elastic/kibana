@@ -40,6 +40,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
+
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
       transform: none;

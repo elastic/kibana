@@ -25,7 +25,7 @@ jest.mock('../rules_changelog_link', () => ({
   RulesChangelogLink: jest.fn(() => <></>),
 }));
 jest.mock('./add_prebuilt_rules_table_filters', () => ({
-  AddPrebuiltRulesTableFilters: jest.fn(() => <></>),
+  AddPrebuiltRulesTableSearchBar: jest.fn(() => <></>),
 }));
 
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => ({
