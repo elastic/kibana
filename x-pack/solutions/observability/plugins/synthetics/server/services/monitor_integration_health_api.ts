@@ -47,7 +47,7 @@ export class MonitorIntegrationHealthApi {
   constructor(
     private readonly server: SyntheticsServerSetup,
     private readonly savedObjectsClient: SavedObjectsClientContract,
-    private readonly monitorConfigRepository: MonitorConfigRepository,    
+    private readonly monitorConfigRepository: MonitorConfigRepository
   ) {}
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
@@ -97,7 +97,7 @@ export class MonitorIntegrationHealthApi {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const expectedPackagePolicyId = privateLocationAPI.getPolicyId(
           { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-          loc.id          
+          loc.id
         );
 
         if (!existingPrivateLocation) {
@@ -200,7 +200,7 @@ export class MonitorIntegrationHealthApi {
         ids.push(
           privateLocationAPI.getPolicyId(
             { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-            loc.id            
+            loc.id
           )
         );
       }
@@ -251,7 +251,7 @@ export class MonitorIntegrationHealthApi {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const expectedPolicyId = privateLocationAPI.getPolicyId(
           { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-          loc.id          
+          loc.id
         );
 
         return MonitorIntegrationHealthApi.buildLocationStatus(
