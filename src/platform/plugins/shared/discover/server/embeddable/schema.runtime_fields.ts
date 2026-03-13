@@ -9,16 +9,10 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-
-export const RUNTIME_FIELD_TYPES = [
-  'keyword',
-  'long',
-  'double',
-  'date',
-  'ip',
-  'boolean',
-  'geo_point',
-] as const;
+import {
+  PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+} from '@kbn/data-views-plugin/common';
 
 const MAX_NAME_LENGTH = 1000;
 
@@ -61,8 +55,8 @@ const commonFieldSchema = {
    * Example: 'keyword'
    */
   type: schema.oneOf(
-    RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
-      Type<(typeof RUNTIME_FIELD_TYPES)[number]>
+    PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => schema.literal(type)) as [
+      Type<(typeof PRIMITIVE_RUNTIME_FIELD_TYPES)[number]>
     ]
   ),
   /**
@@ -118,7 +112,7 @@ export const primitiveRuntimeFieldSchema = schema.object({
 });
 
 export const compositeRuntimeFieldSchema = schema.object({
-  type: schema.literal('composite'),
+  type: schema.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
   fields: schema.arrayOf(
     schema.object({
       /**

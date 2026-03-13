@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  PRIMITIVE_RUNTIME_FIELD_TYPES,
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+} from '@kbn/data-views-plugin/common';
 import type {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
 } from './schema.runtime_fields';
-import { RUNTIME_FIELD_TYPES, runtimeFieldsSchema } from './schema.runtime_fields';
+import { runtimeFieldsSchema } from './schema.runtime_fields';
 import type { TypeOf } from '@kbn/config-schema';
 
 const buildPrimitiveRuntimeField = (
@@ -24,7 +28,7 @@ const buildCompositeRuntimeField = (
   params: Partial<TypeOf<typeof compositeRuntimeFieldSchema>>
 ) => {
   return {
-    type: 'composite',
+    type: RUNTIME_FIELD_COMPOSITE_TYPE,
     name: 'my_runtime_field',
     script: 'some script',
     fields: [],
@@ -45,7 +49,7 @@ describe('schema.runtime_fields', () => {
     });
   });
 
-  describe.each(RUNTIME_FIELD_TYPES)('given a %s runtime field', (type) => {
+  describe.each(PRIMITIVE_RUNTIME_FIELD_TYPES)('given a %s runtime field', (type) => {
     it('should be a valid type', () => {
       // Given
       const runtimeField = {
@@ -62,7 +66,7 @@ describe('schema.runtime_fields', () => {
     it('should be a valid type', () => {
       // Given
       const runtimeField = {
-        type: 'composite',
+        type: RUNTIME_FIELD_COMPOSITE_TYPE,
         name: 'my_runtime_field',
         fields: [],
       };
@@ -75,7 +79,7 @@ describe('schema.runtime_fields', () => {
       it('should throw an error', () => {
         // Given
         const runtimeField = {
-          type: 'composite',
+          type: RUNTIME_FIELD_COMPOSITE_TYPE,
           name: 'my_runtime_field',
         };
 
@@ -229,13 +233,13 @@ describe('schema.runtime_fields', () => {
   });
 
   describe.each([
-    ...RUNTIME_FIELD_TYPES.map((type) => ({
+    ...PRIMITIVE_RUNTIME_FIELD_TYPES.map((type) => ({
       type,
       build: buildPrimitiveRuntimeField,
       buildWithFields: buildPrimitiveRuntimeField,
     })),
     {
-      type: 'composite',
+      type: RUNTIME_FIELD_COMPOSITE_TYPE,
       build: buildCompositeRuntimeField,
       buildWithFields: (
         field: Partial<TypeOf<typeof compositeRuntimeFieldSchema>['fields'][number]>
