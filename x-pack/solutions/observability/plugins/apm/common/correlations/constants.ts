@@ -79,3 +79,9 @@ export const ERROR_CORRELATION_THRESHOLD = 0.02;
 
 export const DEFAULT_PERCENTILE_THRESHOLD = 95;
 export const DEBOUNCE_INTERVAL = 100;
+
+/**
+ * Field used to identify exit spans (outgoing requests to dependencies).
+ * Exit spans are span documents where this field exists.
+ */
+export const SPAN_DESTINATION_SERVICE_RESOURCE = 'span.destination.service.resource';
