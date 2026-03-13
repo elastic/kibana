@@ -290,7 +290,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const formData = form.getFormData();
         if (!formData.name) {
           form.updateFieldValues({ name: formData.title });
-          await form.getFields().name.validate();
+          await form.getFields().name!.validate();
         }
         // Ensures timestamp field is validated against current set of options
         form.validateFields(['timestampField']);

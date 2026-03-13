@@ -58,7 +58,7 @@ const AiAssistantComponent: React.FC<AiAssistantProps> = ({
 
   const getPromptContext = useCallback(async () => {
     const queryField = getFields().queryBar;
-    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    const { query } = queryField.value.query;
 
     if (!query) {
       return '';
@@ -81,7 +81,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   const handleOnExportCodeBlock = useCallback(
     (codeBlock: string) => {
       const queryField = getFields().queryBar;
-      const queryBar = queryField.value as DefineStepRule['queryBar'];
+      const queryBar = queryField.value;
 
       // sometimes AI assistant include redundant backtick symbols in code block
       const newQuery = codeBlock.replaceAll('`', '');
@@ -96,7 +96,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   );
   const chatTitle = useMemo(() => {
     const queryField = getFields().queryBar;
-    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    const { query } = queryField.value;
     return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 

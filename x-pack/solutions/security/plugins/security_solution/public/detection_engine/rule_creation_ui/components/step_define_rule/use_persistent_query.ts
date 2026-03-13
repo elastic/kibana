@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { EqlOptions } from '../../../../../common/search_strategy';
-import { type FormHook, type FieldHook, useFormData } from '../../../../shared_imports';
+import { type FormHook, useFormData } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../common/types';
 import {
   isEqlRule,
@@ -111,8 +111,8 @@ export function usePersistentQuery({ form }: UsePersistentQueryParams): UsePersi
       return;
     }
 
-    const queryField = form.getFields().queryBar as FieldHook<FieldValueQueryBar>;
-    const eqlOptionsField = form.getFields().eqlOptions as FieldHook<EqlOptions>;
+    const queryField = form.getFields().queryBar;
+    const eqlOptionsField = form.getFields().eqlOptions;
 
     if (isEqlRule(ruleType)) {
       queryField.reset({
